@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Repository;
+
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query;
+
+class {{ repository_class_name }} extends EntityRepository
+{
+    /*
+    public function findBySomething($value)
+    {
+        return $this->createQueryBuilder('{{ entity_alias }}')
+            ->where('{{ entity_alias }}.something = :value')->setParameter('value', $value)
+            ->orderBy('{{ entity_alias }}.id', 'ASC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+    */
+}

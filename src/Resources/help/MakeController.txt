@@ -1,0 +1,5 @@
+The <info>%command.name%</info> command generates a new controller class.
+
+<info>php %command.full_name% CoolStuffController</info>
+
+If the argument is missing, the command will ask for the controller class name interactively.
