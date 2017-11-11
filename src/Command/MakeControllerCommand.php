@@ -13,11 +13,13 @@ namespace Symfony\Bundle\MakerBundle\Command;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Routing\RouterInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
 /**
@@ -27,6 +29,15 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 final class MakeControllerCommand extends AbstractCommand
 {
     protected static $defaultName = 'make:controller';
+
+    private $router;
+
+    public function __construct(Generator $generator, RouterInterface $router)
+    {
+        $this->router = $router;
+
+        parent::__construct($generator);
+    }
 
     public function configure()
     {
@@ -63,6 +74,11 @@ final class MakeControllerCommand extends AbstractCommand
 
     protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
     {
+        if (!count($this->router->getRouteCollection())) {
+            $io->text('<error> Warning! </> No routes configuration defined yet.');
+            $io->text('           You should probably uncomment the annotation routes in <comment>config/routes.yaml</>');
+            $io->newLine();
+        }
         $io->text('Next: Open your new controller class and add some pages!');
     }
 
