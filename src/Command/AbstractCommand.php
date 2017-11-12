@@ -111,11 +111,11 @@ abstract class AbstractCommand extends Command
         $params = $this->getParameters();
         $this->generator->generate($params, $this->getFiles($params));
 
-        $this->io->writeln('');
+        $this->io->newLine();
         $this->io->writeln(' <bg=green;fg=white>          </>');
         $this->io->writeln(' <bg=green;fg=white> Success! </>');
         $this->io->writeln(' <bg=green;fg=white>          </>');
-        $this->io->writeln('');
+        $this->io->newLine();
 
         $this->writeNextStepsMessage($params, $this->io);
     }
