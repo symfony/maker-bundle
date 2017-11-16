@@ -94,6 +94,6 @@ final class MakeControllerCommand extends AbstractCommand
 
     private function isTwigInstalled()
     {
-        return class_exists('Symfony\Bundle\TwigBundle\TwigBundle')
+        return class_exists('Symfony\Bundle\TwigBundle\TwigBundle');
     }
 }
