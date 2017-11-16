@@ -62,8 +62,10 @@ final class MakeControllerCommand extends AbstractCommand
 
     protected function getFiles(array $params): array
     {
+        $skeletonFile = $this->isTwigInstalled() ? 'ControllerWithTwig.php.txt' : 'Controller.php.txt';
+
         return [
-            __DIR__.'/../Resources/skeleton/controller/Controller.php.txt' => 'src/Controller/'.$params['controller_class_name'].'.php'
+            __DIR__.'/../Resources/skeleton/controller/'.$skeletonFile => 'src/Controller/'.$params['controller_class_name'].'.php'
         ];
     }
 
@@ -88,5 +90,10 @@ final class MakeControllerCommand extends AbstractCommand
             Route::class,
             'annotations'
         );
+    }
+
+    private function isTwigInstalled()
+    {
+        return class_exists('Symfony\Bundle\TwigBundle\TwigBundle')
     }
 }

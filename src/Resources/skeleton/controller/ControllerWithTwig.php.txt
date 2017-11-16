@@ -13,6 +13,7 @@ class {{ controller_class_name }} extends Controller
      */
     public function index()
     {
-        return new Response('Hello World');
+        // replace this line with your own code!
+        return $this->render('@Maker/demoPage.html.twig', [ 'path' => str_replace($this->getParameter('kernel.project_dir').'/', '', __FILE__) ]);
     }
 }
