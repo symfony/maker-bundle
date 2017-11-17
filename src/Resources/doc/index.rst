@@ -3,8 +3,8 @@ SymfonyMakerBundle
 
 Symfony Maker helps you creating empty commands, controllers, form classes,
 tests and more so you can forget about the required boilerplate code. This
-bundle replaces `SensioGeneratorBundle`_ in modern Symfony applications and
-requires using Symfony 3.4 or newer and `Symfony Flex`_.
+bundle is an alternative to `SensioGeneratorBundle`_ for modern Symfony
+applications and requires using Symfony 3.4 or newer and `Symfony Flex`_.
 
 Installation
 ------------
@@ -72,7 +72,7 @@ base command used by all ``make:`` commands:
         // ...
     }
 
-Finally, implement the methods requires by the ``AbstractCommand`` class::
+Finally, implement the methods required by the ``AbstractCommand`` class::
 
     // ...
     use Symfony\Bundle\MakerBundle\Command\AbstractCommand;
@@ -90,7 +90,7 @@ Finally, implement the methods requires by the ``AbstractCommand`` class::
         protected function getParameters(): array
         {
             return [
-                'filename' => date('YmdHis.txt'),
+                'filename' => sprintf('report-%s.txt', date('YmdHis')),
             ];
         }
 
@@ -106,7 +106,7 @@ Finally, implement the methods requires by the ``AbstractCommand`` class::
         // Optionally, display some message after the generation of code
         protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
         {
-            $io->text(sprintf('A new report was generated in %s file.', $params['filename']));
+            $io->text(sprintf('A new report was generated in the %s file.', $params['filename']));
         }
 
         // Optionally, define which classes must exist in the application to make
