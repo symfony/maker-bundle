@@ -13,6 +13,6 @@ class {{ controller_class_name }} extends Controller
      */
     public function index()
     {
-        return new Response('Hello World');
+        return new Response('Welcome to your new controller!');
     }
 }
