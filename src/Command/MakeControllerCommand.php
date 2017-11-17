@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Command;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -21,7 +22,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
