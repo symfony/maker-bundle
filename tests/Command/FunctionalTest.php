@@ -3,12 +3,14 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Command;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\MakerBundle\Command\AbstractCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeCommandCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeControllerCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeEntityCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeFormCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeFunctionalTestCommand;
+use Symfony\Bundle\MakerBundle\Command\MakeMigrationCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeSubscriberCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeTwigExtensionCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeUnitTestCommand;
@@ -17,6 +19,13 @@ use Symfony\Bundle\MakerBundle\Command\MakeVoterCommand;
 use Symfony\Bundle\MakerBundle\EventRegistry;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\HelperSet;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -65,6 +74,58 @@ class FunctionalTest extends TestCase
                 throw new \Exception(sprintf('File "%s" has a syntax error: %s', $file, $process->getOutput()));
             }
         }
+    }
+
+    public function testMakeMigrationCommand()
+    {
+        $inputDefinition = $this->createMock(InputDefinition::class);
+
+        $command = new MakeMigrationCommand($this->createGenerator());
+        $command->setCheckDependencies(false);
+        $command->setDefinition($inputDefinition);
+        $command->setGenerator($this->createGenerator());
+
+        $application = $this->createMock(Application::class);
+        $application->expects($this->any())
+            ->method('find')
+            ->willReturn(new Command());
+
+        $application->expects($this->once())
+            ->method('getHelperSet')
+            ->willReturn(new HelperSet());
+
+        $inputDefinition->expects($this->any())
+            ->method('hasArgument')
+            ->willReturn(false);
+
+
+        $inputDefinition->expects($this->once())
+            ->method('getOptions')
+            ->willReturn([new InputOption('empty')]);
+        $option = $this->createMock(InputOption::class);
+        $option->expects($this->any())
+            ->method('getDefault')
+            ->willReturn(false);
+
+        $inputDefinition->expects($this->any())
+            ->method('hasOption')
+            ->willReturn(true);
+
+        $inputDefinition->expects($this->any())
+            ->method('getOption')
+            ->willReturn($option);
+        $application->expects($this->any())
+            ->method('getDefinition')
+            ->willReturn($inputDefinition);
+
+        $command->setApplication($application);
+        $tester = new CommandTester($command);
+        $tester->setInputs(array());
+        $tester->execute(array());
+
+        $this->assertContains('Success', $tester->getDisplay());
+        $this->assertContains('Version', $tester->getDisplay());
+
     }
 
     public function getCommandTests()

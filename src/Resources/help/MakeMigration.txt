@@ -1,0 +1,5 @@
+The <info>%command.name%</info> command generates a new migration:
+
+<info>php %command.full_name% doctrine:migrations:migrate</info>
+
+If the argument is missing, the command will ask for the command name interactively.
