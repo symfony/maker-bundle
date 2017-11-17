@@ -17,8 +17,6 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
@@ -56,7 +54,7 @@ final class MakeControllerCommand extends AbstractCommand
         return [
             'controller_class_name' => $controllerClassName,
             'route_path' => Str::asRoutePath(str_replace('Controller', '', $controllerClassName)),
-            'route_name' => Str::asRouteNAme(str_replace('Controller', '', $controllerClassName))
+            'route_name' => Str::asRouteName(str_replace('Controller', '', $controllerClassName))
         ];
     }
 
