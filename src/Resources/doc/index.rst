@@ -52,7 +52,7 @@ empty command:
 .. code-block:: terminal
 
     $ cd your-project/
-    $ php bin/console make:command 'make:product'
+    $ php bin/console make:command 'make:report'
 
 Then, change the generated command to extend from
 :class:`Symfony\\Bundle\\MakerBundle\\Command\\AbstractCommand`, which is the
@@ -64,8 +64,8 @@ base command used by all ``make:`` commands:
     -use Symfony\Component\Console\Command\Command;
     +use Symfony\Bundle\MakerBundle\Command\AbstractCommand;
 
-    -class ProductCommand extends Command
-    +class ProductCommand extends AbstractCommand
+    -class MakeReportCommand extends Command
+    +class MakeReportCommand extends AbstractCommand
     {
         protected static $defaultName = 'make:report';
 
@@ -79,7 +79,7 @@ Finally, implement the methods required by the ``AbstractCommand`` class::
     use Symfony\Bundle\MakerBundle\ConsoleStyle;
     use Symfony\Bundle\MakerBundle\DependencyBuilder;
 
-    class ProductCommand extends AbstractCommand
+    class MakeReportCommand extends AbstractCommand
     {
         protected static $defaultName = 'make:report';
 
