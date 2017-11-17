@@ -34,5 +34,10 @@
     },
     "autoload-dev": {
         "psr-4": { "Symfony\\Bundle\\MakerBundle\\Tests\\": "tests/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
     }
 }
