@@ -54,7 +54,7 @@ final class MakeControllerCommand extends AbstractCommand
         return [
             'controller_class_name' => $controllerClassName,
             'route_path' => Str::asRoutePath(str_replace('Controller', '', $controllerClassName)),
-            'route_name' => Str::asRouteNAme(str_replace('Controller', '', $controllerClassName))
+            'route_name' => Str::asRouteName(str_replace('Controller', '', $controllerClassName))
         ];
     }
 
