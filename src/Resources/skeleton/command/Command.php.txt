@@ -22,6 +22,26 @@ class {{ command_class_name }} extends Command
         ;
     }
 
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        //Optional.
+        //If no initialization is required either leave this empty or remove it.
+
+        //This method is executed before the interact() and the execute() methods.
+        //Its main purpose is to initialize variables used in the rest of the command methods.
+    }
+
+    protected function interact(InputInterface $input, OutputInterface $output)
+    {
+        //Optional.
+        //If no interaction from the user is expected either leave this empty or remove it.
+
+        //This method is executed after initialize() and before execute().
+        //Its purpose is to check if some of the options/arguments are missing and interactively ask the user for those values.
+        //This is the last place where you can ask for missing options/arguments.
+        //After this command, missing options/arguments will result in an error.
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
