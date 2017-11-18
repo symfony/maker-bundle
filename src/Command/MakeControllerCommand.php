@@ -11,14 +11,15 @@
 
 namespace Symfony\Bundle\MakerBundle\Command;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Routing\RouterInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -60,8 +61,10 @@ final class MakeControllerCommand extends AbstractCommand
 
     protected function getFiles(array $params): array
     {
+        $skeletonFile = $this->isTwigInstalled() ? 'ControllerWithTwig.php.txt' : 'Controller.php.txt';
+
         return [
-            __DIR__.'/../Resources/skeleton/controller/Controller.php.txt' => 'src/Controller/'.$params['controller_class_name'].'.php'
+            __DIR__.'/../Resources/skeleton/controller/'.$skeletonFile => 'src/Controller/'.$params['controller_class_name'].'.php'
         ];
     }
 
@@ -86,5 +89,10 @@ final class MakeControllerCommand extends AbstractCommand
             Route::class,
             'annotations'
         );
+    }
+
+    private function isTwigInstalled()
+    {
+        return class_exists(TwigBundle::class);
     }
 }
