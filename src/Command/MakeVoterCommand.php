@@ -39,9 +39,14 @@ final class MakeVoterCommand extends AbstractCommand
     {
         $voterClassName = Str::asClassName($this->input->getArgument('name'), 'Voter');
         Validator::validateClassName($voterClassName);
+        $entityClassName = Str::removeSuffix($voterClassName, 'Voter');
+        $entityClass = 'App\\Entity\\'.$entityClassName;
 
         return [
             'voter_class_name' => $voterClassName,
+            'entity_class_name' => $entityClassName,
+            'entity_class_use_statement' => class_exists($entityClass) ? "use $entityClass;\n" : '',
+            'entity_supports_statement' => class_exists($entityClass) ? ' && $subject instanceof '.$entityClassName : '',
         ];
     }
 
