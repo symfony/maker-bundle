@@ -23,7 +23,7 @@ all executing this command:
 
 .. code-block:: terminal
 
-    $ php bin/console make:
+    $ php bin/console list make
 
      make:command            Creates a new console command class
      make:controller         Creates a new controller class
@@ -45,7 +45,7 @@ Creating your Own Makers
 ------------------------
 
 In case your applications need to generate custom boilerplate code, you can
-create your own ``make: ...`` command reusing the tools provided by this bundle.
+create your own ``make:...`` command reusing the tools provided by this bundle.
 Imagine that you need to create a ``make:report`` command. First, create an
 empty command:
 
