@@ -9,6 +9,7 @@ use Symfony\Bundle\MakerBundle\Command\MakeControllerCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeEntityCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeFormCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeFunctionalTestCommand;
+use Symfony\Bundle\MakerBundle\Command\MakeListenerCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeSubscriberCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeTwigExtensionCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeUnitTestCommand;
@@ -116,16 +117,16 @@ class FunctionalTest extends TestCase
             ]
         ];
 
-        $eventRegistry = $this->createMock(EventRegistry::class);
-        $eventRegistry->expects($this->any())
+        $subscriberEventRegistry = $this->createMock(EventRegistry::class);
+        $subscriberEventRegistry->expects($this->any())
             ->method('getAllActiveEvents')
             ->willReturn(['foo.bar']);
-        $eventRegistry->expects($this->once())
+        $subscriberEventRegistry->expects($this->once())
             ->method('getEventClassName')
             ->with('kernel.request')
             ->willReturn(GetResponseEvent::class);
         $commands['subscriber'] = [
-            new MakeSubscriberCommand($generator, $eventRegistry),
+            new MakeSubscriberCommand($generator, $subscriberEventRegistry),
             [
                 // subscriber name
                 'FooBar',
@@ -134,21 +135,56 @@ class FunctionalTest extends TestCase
             ],
         ];
 
-        $eventRegistry2 = $this->createMock(EventRegistry::class);
-        $eventRegistry2->expects($this->any())
+        $subscriberEventRegistry2 = $this->createMock(EventRegistry::class);
+        $subscriberEventRegistry2->expects($this->any())
             ->method('getAllActiveEvents')
             ->willReturn([]);
-        $eventRegistry2->expects($this->once())
+        $subscriberEventRegistry2->expects($this->once())
             ->method('getEventClassName')
             ->willReturn(null);
         $commands['subscriber_unknown_event_class'] = [
-            new MakeSubscriberCommand($generator, $eventRegistry2),
+            new MakeSubscriberCommand($generator, $subscriberEventRegistry2),
             [
                 // subscriber name
                 'FooBar',
                 // event name
                 'foo.unknown_event'
             ],
+        ];
+
+        $listenerEventRegistry = $this->createMock(EventRegistry::class);
+        $listenerEventRegistry->expects($this->any())
+          ->method('getAllActiveEvents')
+          ->willReturn(['foo.bar']);
+        $listenerEventRegistry->expects($this->once())
+          ->method('getEventClassName')
+          ->with('kernel.request')
+          ->willReturn(GetResponseEvent::class);
+        $commands['listener'] = [
+          new MakeListenerCommand($generator, $listenerEventRegistry),
+          [
+              // listener name
+            'FooBar',
+              // event name
+            'kernel.request'
+          ],
+        ];
+
+        $listenerEventRegistry2 = $this->createMock(EventRegistry::class);
+        $listenerEventRegistry2->expects($this->any())
+          ->method('getAllActiveEvents')
+          ->willReturn([]);
+        $listenerEventRegistry2->expects($this->once())
+          ->method('getEventClassName')
+          ->willReturn(null);
+        $commands['listener_unknown_event_class'] = [
+          new MakeListenerCommand($generator, $listenerEventRegistry2),
+          [
+              // listener name
+            'FooBar',
+              // event name
+            'foo.unknown_event'
+          ],
         ];
 
         $commands['twig_extension'] = [
