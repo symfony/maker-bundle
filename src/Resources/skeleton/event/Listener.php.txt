@@ -1,0 +1,12 @@
+<?php
+
+namespace App\EventListener;
+
+{{ eventUseStatement }}
+class {{ listener_class_name }}
+{
+    public function {{ methodName }}({{ eventArg }})
+    {
+        // ...
+    }
+}
