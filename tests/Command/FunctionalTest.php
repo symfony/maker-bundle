@@ -21,6 +21,8 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Routing\RouteCollection;
+use Symfony\Component\Routing\RouterInterface;
 
 class FunctionalTest extends TestCase
 {
@@ -67,18 +69,23 @@ class FunctionalTest extends TestCase
 
     public function getCommandTests()
     {
+        $generator = $this->createGenerator();
         $commands = [];
 
         $commands['command'] = [
-            new MakeCommandCommand($this->createGenerator()),
+            new MakeCommandCommand($generator),
             [
                 // command name
                 'app:foo'
             ]
         ];
 
+        $router = $this->createMock(RouterInterface::class);
+        $router->expects($this->once())
+            ->method('getRouteCollection')
+            ->willReturn(new RouteCollection());
         $commands['controller'] = [
-            new MakeControllerCommand($this->createGenerator()),
+            new MakeControllerCommand($generator, $router),
             [
                 // controller class name
                 'FooBar'
@@ -86,7 +93,7 @@ class FunctionalTest extends TestCase
         ];
 
         $commands['entity'] = [
-            new MakeEntityCommand($this->createGenerator()),
+            new MakeEntityCommand($generator),
             [
                 // entity class name
                 'FooBar'
@@ -94,7 +101,7 @@ class FunctionalTest extends TestCase
         ];
 
         $commands['form'] = [
-            new MakeFormCommand($this->createGenerator()),
+            new MakeFormCommand($generator),
             [
                 // form name
                 'FooBar'
@@ -102,7 +109,7 @@ class FunctionalTest extends TestCase
         ];
 
         $commands['functional'] = [
-            new MakeFunctionalTestCommand($this->createGenerator()),
+            new MakeFunctionalTestCommand($generator),
             [
                 // functional test class
                 'FooBar'
@@ -118,7 +125,7 @@ class FunctionalTest extends TestCase
             ->with('kernel.request')
             ->willReturn(GetResponseEvent::class);
         $commands['subscriber'] = [
-            new MakeSubscriberCommand($this->createGenerator(), $eventRegistry),
+            new MakeSubscriberCommand($generator, $eventRegistry),
             [
                 // subscriber name
                 'FooBar',
@@ -135,7 +142,7 @@ class FunctionalTest extends TestCase
             ->method('getEventClassName')
             ->willReturn(null);
         $commands['subscriber_unknown_event_class'] = [
-            new MakeSubscriberCommand($this->createGenerator(), $eventRegistry2),
+            new MakeSubscriberCommand($generator, $eventRegistry2),
             [
                 // subscriber name
                 'FooBar',
@@ -145,7 +152,7 @@ class FunctionalTest extends TestCase
         ];
 
         $commands['twig_extension'] = [
-            new MakeTwigExtensionCommand($this->createGenerator()),
+            new MakeTwigExtensionCommand($generator),
             [
                 // extension class name
                 'FooBar'
@@ -153,7 +160,7 @@ class FunctionalTest extends TestCase
         ];
 
         $commands['unit_test'] = [
-            new MakeUnitTestCommand($this->createGenerator()),
+            new MakeUnitTestCommand($generator),
             [
                 // class name
                 'FooBar'
@@ -161,7 +168,7 @@ class FunctionalTest extends TestCase
         ];
 
         $commands['validator'] = [
-            new MakeValidatorCommand($this->createGenerator()),
+            new MakeValidatorCommand($generator),
             [
                 // validator name
                 'FooBar'
@@ -169,7 +176,7 @@ class FunctionalTest extends TestCase
         ];
 
         $commands['voter'] = [
-            new MakeVoterCommand($this->createGenerator()),
+            new MakeVoterCommand($generator),
             [
                 // voter class name
                 'FooBar'
