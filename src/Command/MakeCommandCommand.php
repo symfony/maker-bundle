@@ -64,8 +64,6 @@ final class MakeCommandCommand extends AbstractCommand
 
     protected function configureDependencies(DependencyBuilder $dependencies)
     {
-        $dependencies->addClassDependency(Command::class, [
-            'console'
-        ]);
+        $dependencies->addClassDependency(Command::class, 'console');
     }
 }
