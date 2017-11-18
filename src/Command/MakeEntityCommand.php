@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Command;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Input\InputArgument;
@@ -37,7 +38,12 @@ final class MakeEntityCommand extends AbstractCommand
 
     protected function getParameters(): array
     {
-        $entityClassName = Str::asClassName($this->input->getArgument('entity-class'));
+        $entityName = $this->input->getArgument('entity-class');
+        if(empty($entityName)) {
+            throw new RuntimeCommandException("You must provide the name of the entity you want to create");
+        }
+
+        $entityClassName = Str::asClassName($entityName);
         Validator::validateClassName($entityClassName);
         $entityAlias = strtolower($entityClassName[0]);
         $repositoryClassName = Str::addSuffix($entityClassName, 'Repository');

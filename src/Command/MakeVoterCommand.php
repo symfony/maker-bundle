@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Command;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Input\InputArgument;
@@ -37,7 +38,12 @@ final class MakeVoterCommand extends AbstractCommand
 
     protected function getParameters(): array
     {
-        $voterClassName = Str::asClassName($this->input->getArgument('name'), 'Voter');
+        $name = $this->input->getArgument('name');
+        if(empty($name)) {
+            throw new RuntimeCommandException("You must provide the name of the voter you want to create");
+        }
+
+        $voterClassName = Str::asClassName($name, 'Voter');
         Validator::validateClassName($voterClassName);
 
         return [

@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Command;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\EventRegistry;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -69,9 +70,20 @@ final class MakeSubscriberCommand extends AbstractCommand
 
     protected function getParameters(): array
     {
-        $subscriberClassName = Str::asClassName($this->input->getArgument('name'), 'Subscriber');
+        $subscriberName = $this->input->getArgument('name');
+
+        if(empty($subscriberName)) {
+            throw new RuntimeCommandException("You must provide the name of the subscriber you want to create");
+        }
+
+        $subscriberClassName = Str::asClassName($subscriberName, 'Subscriber');
         Validator::validateClassName($subscriberClassName);
+
         $event = $this->input->getArgument('event');
+        if(empty($event)) {
+            throw new RuntimeCommandException("You must provide the name of the event you want to subscribe to");
+        }
+
         $eventClass = $this->eventRegistry->getEventClassName($event);
         $eventShortName = null;
         if ($eventClass) {

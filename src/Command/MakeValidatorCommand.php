@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Command;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Input\InputArgument;
@@ -37,7 +38,12 @@ final class MakeValidatorCommand extends AbstractCommand
 
     protected function getParameters(): array
     {
-        $validatorClassName = Str::asClassName($this->input->getArgument('name'), 'Validator');
+        $name = $this->input->getArgument('name');
+        if(empty($name)) {
+            throw new RuntimeCommandException("You must provide the name of the validator you want to create");
+        }
+
+        $validatorClassName = Str::asClassName($name, 'Validator');
         Validator::validateClassName($validatorClassName);
         $constraintClassName = Str::removeSuffix($validatorClassName, 'Validator');
 
