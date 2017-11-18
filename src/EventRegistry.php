@@ -49,10 +49,8 @@ class EventRegistry
 
     /**
      * Returns all known event names in the system.
-     *
-     * @return array
      */
-    public function getAllActiveEvents()
+    public function getAllActiveEvents(): array
     {
         $activeEvents = [];
         foreach (self::$eventsMap as $eventName => $eventClass) {
@@ -73,11 +71,8 @@ class EventRegistry
 
     /**
      * Attempts to get the event class for a given event.
-     *
-     * @param string $event
-     * @return null|string
      */
-    public function getEventClassName($event)
+    public function getEventClassName(string $event): ?string
     {
         if (isset(self::$eventsMap[$event])) {
             return self::$eventsMap[$event];
@@ -85,7 +80,7 @@ class EventRegistry
 
         $listeners = $this->eventDispatcher->getListeners($event);
         if (empty($listeners)) {
-            return;
+            return null;
         }
 
         foreach ($listeners as $listener) {

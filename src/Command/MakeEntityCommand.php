@@ -11,12 +11,12 @@
 
 namespace Symfony\Bundle\MakerBundle\Command;
 
+use Doctrine\ORM\Mapping\Column;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Input\InputArgument;
-use Doctrine\ORM\Mapping\Column;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>

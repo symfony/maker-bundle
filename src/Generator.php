@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
-use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
@@ -35,7 +34,7 @@ class Generator
         $this->fileManager->setIO($io);
     }
 
-    public function generate(array $parameters, array $files) : void
+    public function generate(array $parameters, array $files): void
     {
         // check if any of the files to be generated already exists
         foreach ($files as $target) {

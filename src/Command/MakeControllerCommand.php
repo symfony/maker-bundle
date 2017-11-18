@@ -55,7 +55,7 @@ final class MakeControllerCommand extends AbstractCommand
         return [
             'controller_class_name' => $controllerClassName,
             'route_path' => Str::asRoutePath(str_replace('Controller', '', $controllerClassName)),
-            'route_name' => Str::asRouteName(str_replace('Controller', '', $controllerClassName))
+            'route_name' => Str::asRouteName(str_replace('Controller', '', $controllerClassName)),
         ];
     }
 
@@ -64,7 +64,7 @@ final class MakeControllerCommand extends AbstractCommand
         $skeletonFile = $this->isTwigInstalled() ? 'ControllerWithTwig.php.txt' : 'Controller.php.txt';
 
         return [
-            __DIR__.'/../Resources/skeleton/controller/'.$skeletonFile => 'src/Controller/'.$params['controller_class_name'].'.php'
+            __DIR__.'/../Resources/skeleton/controller/'.$skeletonFile => 'src/Controller/'.$params['controller_class_name'].'.php',
         ];
     }
 

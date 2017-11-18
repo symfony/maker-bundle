@@ -44,12 +44,12 @@ abstract class AbstractCommand extends Command
      * Returns the parameters used to parse the file templates, to generate the
      * file names, etc.
      */
-    abstract protected function getParameters() : array;
+    abstract protected function getParameters(): array;
 
     /**
      * Returns the list of files to generate and the templates used to do that.
      */
-    abstract protected function getFiles(array $params) : array;
+    abstract protected function getFiles(array $params): array;
 
     /**
      * Override to add a final "next steps" message.
