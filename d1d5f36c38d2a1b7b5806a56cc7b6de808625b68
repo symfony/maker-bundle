@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2017-11-18T15:35:12Z
+
+Nice catch. Could we add PHP 7.1 typehints in addClassDependency instead of the current phpdoc?
+
+---------------------------------------------------------------------------
+
+by yceruto at 2017-11-18T15:54:36Z
+
+See https://github.com/symfony/maker-bundle/pull/24
