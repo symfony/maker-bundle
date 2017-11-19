@@ -63,6 +63,4 @@ final class MakeUnitTestCommand extends AbstractCommand
     {
         // TODO: Implement configureDependencies() method.
     }
-
-
 }

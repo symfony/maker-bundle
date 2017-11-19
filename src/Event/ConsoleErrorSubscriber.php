@@ -57,7 +57,7 @@ final class ConsoleErrorSubscriber implements EventSubscriberInterface
     {
         return [
             ConsoleEvents::ERROR => 'onConsoleError',
-            ConsoleEvents::TERMINATE => 'onConsoleTerminate'
+            ConsoleEvents::TERMINATE => 'onConsoleTerminate',
         ];
     }
 }

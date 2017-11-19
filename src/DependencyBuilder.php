@@ -12,20 +12,16 @@ final class DependencyBuilder
      * If the dependency is *optional*, then it will only be reported to
      * the user if other required dependencies are missing. An example
      * is the "validator" when trying to work with forms.
-     *
-     * @param string $class
-     * @param string $package
-     * @param bool $required
      */
-    public function addClassDependency($class, $package, $required = true)
+    public function addClassDependency(string $class, string $package, bool $required = true)
     {
         $this->dependencies[$class] = [
             'name' => $package,
-            'required' => $required
+            'required' => $required,
         ];
     }
 
-    public function getMissingDependencies()
+    public function getMissingDependencies(): array
     {
         $missingPackages = [];
         $missingOptionalPackages = [];

@@ -20,24 +20,23 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class FileManager
 {
-    /** @var Filesystem */
     private $fs;
+    private $rootDirectory;
     /** @var SymfonyStyle */
     private $io;
-    private $rootDirectory;
 
-    public function __construct(Filesystem $fs, $rootDirectory = null)
+    public function __construct(Filesystem $fs, string $rootDirectory = null)
     {
         $this->fs = $fs;
         $this->rootDirectory = $rootDirectory ?: getcwd();
     }
 
-    public function setIO(SymfonyStyle $io)
+    public function setIO(SymfonyStyle $io): void
     {
         $this->io = $io;
     }
 
-    public function parseTemplate(string $templatePath, array $parameters) : string
+    public function parseTemplate(string $templatePath, array $parameters): string
     {
         $keys = array_keys($parameters);
         $values = array_values($parameters);
@@ -48,18 +47,18 @@ class FileManager
         return str_replace($placeholders, $values, file_get_contents($templatePath));
     }
 
-    public function dumpFile(string $filename, string $content)
+    public function dumpFile(string $filename, string $content): void
     {
         $this->fs->dumpFile($this->absolutizePath($filename), $content);
         $this->io->comment(sprintf('<fg=green>created</>: %s', $this->relativizePath($filename)));
     }
 
-    public function fileExists($path)
+    public function fileExists($path): bool
     {
         return file_exists($this->absolutizePath($path));
     }
 
-    private function absolutizePath($path)
+    private function absolutizePath($path): string
     {
         if ('/' === substr($path, 0, 1)) {
             return $path;
@@ -68,7 +67,7 @@ class FileManager
         return sprintf('%s/%s', $this->rootDirectory, $path);
     }
 
-    private function relativizePath($absolutePath)
+    private function relativizePath($absolutePath): string
     {
         $relativePath = str_replace($this->rootDirectory, '.', $absolutePath);
 

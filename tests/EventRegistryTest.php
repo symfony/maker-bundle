@@ -4,7 +4,6 @@ namespace Symfony\Bundle\MakerBundle\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\EventRegistry;
-use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
