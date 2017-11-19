@@ -31,7 +31,7 @@ final class MakeSerializerEncoderCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setDescription('Creates a new custom encoder class')
+            ->setDescription('Creates a new serializer encoder class')
             ->addArgument('name', InputArgument::OPTIONAL, 'Choose a class name for your encoder (e.g. <fg=yellow>YamlEncoder</>).')
             ->addArgument('format', InputArgument::OPTIONAL, 'Pick your format name (e.g. <fg=yellow>yaml</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeSerializerEncoder.txt'))
@@ -60,7 +60,7 @@ final class MakeSerializerEncoderCommand extends AbstractCommand
     protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
     {
         $io->text([
-            'Next: Open your new encoder class and start customizing it.',
+            'Next: Open your new serializer encoder class and start customizing it.',
             'Find the documentation at <fg=yellow>http://symfony.com/doc/current/serializer/custom_encoders.html</>'
         ]);
     }
