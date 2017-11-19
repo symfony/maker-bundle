@@ -18,7 +18,7 @@ Run this command to install and enable this bundle in your application:
 Usage
 -----
 
-This bundle provides several commands under the ``maker:`` namespace. List them
+This bundle provides several commands under the ``make:`` namespace. List them
 all executing this command:
 
 .. code-block:: terminal
