@@ -15,7 +15,7 @@ class {{ encoder_class_name }} implements EncoderInterface, DecoderInterface
         return '';
     }
 
-    public function supportsEncoding($format)
+    public function supportsEncoding($format): bool
     {
         return self::FORMAT === $format;
     }
@@ -26,7 +26,7 @@ class {{ encoder_class_name }} implements EncoderInterface, DecoderInterface
         return '';
     }
 
-    public function supportsDecoding($format)
+    public function supportsDecoding($format): bool
     {
         return self::FORMAT === $format;
     }
