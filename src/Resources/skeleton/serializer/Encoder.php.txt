@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Serializer;
+
+use Symfony\Component\Serializer\Encoder\DecoderInterface;
+use Symfony\Component\Serializer\Encoder\EncoderInterface;
+
+class {{ encoder_class_name }} implements EncoderInterface, DecoderInterface
+{
+    public function encode($data, $format, array $context = array())
+    {
+        // TODO: return your encoded data
+        return '';
+    }
+
+    public function supportsEncoding($format)
+    {
+        return '{{ format }}' === $format;
+    }
+
+    public function decode($data, $format, array $context = array())
+    {
+        // TODO: return your decoded data
+        return '';
+    }
+
+    public function supportsDecoding($format)
+    {
+        return '{{ format }}' === $format;
+    }
+}
