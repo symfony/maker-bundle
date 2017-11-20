@@ -68,8 +68,8 @@ final class MakeSerializerEncoderCommand extends AbstractCommand
     protected function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
-          Serializer::class,
-          'serializer'
+            Serializer::class,
+            'serializer'
         );
     }
 }
