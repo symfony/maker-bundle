@@ -21,8 +21,7 @@
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^3.4|^4.0",
-        "symfony/process": "^3.4|^4.0",
-        "symfony/serializer": "^3.4|^4.0"
+        "symfony/process": "^3.4|^4.0"
     },
     "config": {
         "preferred-install": {
