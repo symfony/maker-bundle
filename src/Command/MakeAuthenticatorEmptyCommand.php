@@ -28,7 +28,7 @@ final class MakeAuthenticatorEmptyCommand extends AbstractCommand
     public function configure()
     {
         $this
-            ->setDescription('Creates a new Doctrine entity class')
+            ->setDescription('Creates an empty Guard authenticator')
             ->addArgument('authenticator-class', InputArgument::OPTIONAL, 'The class name of the authenticator to create (e.g. <fg=yellow>AppCustomAuthenticator</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeAuthEmpty.txt'))
         ;
@@ -54,8 +54,8 @@ final class MakeAuthenticatorEmptyCommand extends AbstractCommand
     protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
     {
         $io->text([
-            'Next: Custom your new, empty authenticator',
-            'Find the documentation at <fg=yellow>TODO</>'
+            'Next: Customize your new, empty authenticator.',
+            'Then, configure the "guard" key on your firewall to use it.'
         ]);
     }
 
