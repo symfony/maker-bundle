@@ -1,0 +1,6 @@
+The <info>%command.name%</info> command generates an empty
+Guard Authenticator class.
+
+<info>php %command.full_name% AppCustomAuthenticator</info>
+
+If the argument is missing, the command will ask for the class name interactively.

@@ -4,6 +4,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Command;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Command\AbstractCommand;
+use Symfony\Bundle\MakerBundle\Command\MakeAuthenticatorEmptyCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeCommandCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeControllerCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeEntityCommand;
@@ -180,6 +181,14 @@ class FunctionalTest extends TestCase
             [
                 // voter class name
                 'FooBar'
+            ]
+        ];
+
+        $commands['auth_empty'] = [
+            new MakeAuthenticatorEmptyCommand($generator),
+            [
+                // class name
+                'AppCustomVoter'
             ]
         ];
 
