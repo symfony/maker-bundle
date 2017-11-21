@@ -188,7 +188,7 @@ class FunctionalTest extends TestCase
             new MakeAuthenticatorEmptyCommand($generator),
             [
                 // class name
-                'AppCustomVoter'
+                'AppCustomAuthenticator'
             ]
         ];
 
