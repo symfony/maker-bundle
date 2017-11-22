@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Repository;
+
+use App\Entity\User;
+use Doctrine\ORM\EntityRepository;
+
+class UserRepository extends EntityRepository
+{
+    public function findOneByUsername(string $username): User
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.email = :username')
+            ->setParameter('username', mb_strtolower($username))
+            ->getQuery()
+            ->getSingleResult();
+    }
+
+    public function findOneByResourceOwnerId(string $resourceOwnerId, string $provider): User
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.'.$provider.'Id = :resourceOwnerId')
+            ->setParameter('resourceOwnerId', $resourceOwnerId)
+            ->getQuery()
+            ->getSingleResult();
+    }
+
+    public function updateResourceOwnerId(User $user, string $resourceOwnerId, string $provider)
+    {
+        $user->{'set'.ucfirst($provider).'Id'}($resourceOwnerId);
+
+        $this->add($user, true);
+    }
+}

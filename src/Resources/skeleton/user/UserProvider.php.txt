@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Security\User;
+
+use App\Entity\User;
+use App\Repository\UserRepository;
+use Doctrine\ORM\NoResultException;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
+
+class UserProvider implements UserProviderInterface
+{
+    protected $userRepository;
+
+    public function __construct(UserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function loadUserByUsername($username): User
+    {
+        try {
+            $user = $this->userRepository->findOneByUsername($username);
+        } catch (NoResultException $exception) {
+            throw new UsernameNotFoundException(sprintf('The user "%s" does not exist.', $username));
+        }
+
+        return $user;
+    }
+
+    /**
+     * @throws UsernameNotFoundException if the user is not found
+     */
+    public function loadUserByResourceOwner($resourceOwner, string $provider): UserInterface
+    {
+        try {
+            $user = $this->userRepository->findOneByResourceOwnerId($resourceOwner->getId(), $provider);
+        } catch (NoResultException $exception) {
+            return $this->updateUserWithResourceOwnerId($resourceOwner, $provider);
+        }
+
+        return $user;
+    }
+
+    /**
+     * @throws UnsupportedUserException
+     */
+    public function refreshUser(UserInterface $user)
+    {
+        throw new UnsupportedUserException();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function supportsClass($class): bool
+    {
+        return User::class === $class;
+    }
+
+    /**
+     * @throws UsernameNotFoundException
+     */
+    private function updateUserWithResourceOwnerId($resourceOwner, string $provider): UserInterface
+    {
+        try {
+            $user = $this->loadUserByUsername($resourceOwner->getEmail());
+        } catch (UsernameNotFoundException $exception) {
+            throw new UsernameNotFoundException(sprintf('The user "%s" does not exist.', $resourceOwner->getId()));
+        }
+
+        $this->userRepository->updateResourceOwnerId($user, $resourceOwner->getId(), $provider);
+
+        return $user;
+    }
+}
