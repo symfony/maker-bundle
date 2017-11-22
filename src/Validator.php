@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
@@ -22,7 +24,7 @@ class Validator
         if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $className)) {
             $errorMessage = $errorMessage ?: sprintf('"%s" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)', $className);
 
-            throw new \RuntimeException($errorMessage);
+            throw new RuntimeCommandException($errorMessage);
         }
     }
 }
