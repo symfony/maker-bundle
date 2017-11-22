@@ -17,6 +17,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -31,6 +32,8 @@ final class MakeEntityCommand extends AbstractCommand
         $this
             ->setDescription('Creates a new Doctrine entity class')
             ->addArgument('entity-class', InputArgument::OPTIONAL, sprintf('The class name of the entity to create (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
+            ->addArgument('namespace-class', InputArgument::OPTIONAL, sprintf('The namespace of the entity to create (e.g. <fg=yellow>%s</>)', 'App\Entity'),'App\Entity')
+            ->addOption('with-repository', 'repository', InputOption::VALUE_NONE, 'Do we want to generate a repository too?', true)
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
         ;
     }
@@ -41,16 +44,24 @@ final class MakeEntityCommand extends AbstractCommand
         Validator::validateClassName($entityClassName);
         $entityAlias = strtolower($entityClassName[0]);
         $repositoryClassName = Str::addSuffix($entityClassName, 'Repository');
+        $withRepository = $this->input->getOption('with-repository');
+        $namespace = $this->input->getArgument('namespace-class');
 
         return [
             'entity_class_name' => $entityClassName,
             'entity_alias' => $entityAlias,
             'repository_class_name' => $repositoryClassName,
+            'with-repository' => $withRepository,
+            'namespace' => $namespace,
         ];
     }
 
     protected function getFiles(array $params): array
     {
+        if (false === $params['with-repository']) {
+            return [__DIR__.'/../Resources/skeleton/doctrine/Entity.php.txt' => 'src/Entity/'.$params['entity_class_name'].'.php',];
+        }
+
         return [
             __DIR__.'/../Resources/skeleton/doctrine/Entity.php.txt' => 'src/Entity/'.$params['entity_class_name'].'.php',
             __DIR__.'/../Resources/skeleton/doctrine/Repository.php.txt' => 'src/Repository/'.$params['repository_class_name'].'.php',
