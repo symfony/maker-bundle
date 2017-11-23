@@ -41,32 +41,34 @@ abstract class AbstractCommand extends Command
     }
 
     /**
-     * Returns the parameters used to parse the file templates, to generate the
-     * file names, etc.
+     * Returns the values used to fill in the skeleton files of the generated
+     * code and the success/error messages as pairs of param_name => param_value.
+     * (e.g. ['user' => 'Jane', 'project_dir' => realpath(__DIR__.'/..')])
      */
     abstract protected function getParameters(): array;
 
     /**
-     * Returns the list of files to generate and the templates used to do that.
+     * Returns the list of files to generate as pairs of skeleton_filepath => generated_filepath
+     * Skeleton files must be absolute paths and generated paths are relative to the app.
+     * (e.g. [__DIR__.'/../Resources/skeleton/command/Command.php.txt' => 'src/Command/'.$params['command_class_name'].'.php'])
      */
     abstract protected function getFiles(array $params): array;
 
     /**
-     * Override to add a final "next steps" message.
-     *
-     * @param array $params
-     * @param ConsoleStyle $io
+     * Optional information displayed to the user after all files have been generated.
      */
     abstract protected function writeNextStepsMessage(array $params, ConsoleStyle $io);
 
+    /**
+     * Defines the optional or required dependencies of the maker command, which are
+     * checked before running the command and used to display actionable error messages.
+     */
     abstract protected function configureDependencies(DependencyBuilder $dependencies);
 
     /**
      * Call in configure() to disable the automatic interactive prompt for an arg.
-     *
-     * @param string $argumentName
      */
-    protected function setArgumentAsNonInteractive($argumentName)
+    protected function setArgumentAsNonInteractive(string $argumentName)
     {
         $this->nonInteractiveArguments[] = $argumentName;
     }
