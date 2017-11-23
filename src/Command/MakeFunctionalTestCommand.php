@@ -47,7 +47,7 @@ class MakeFunctionalTestCommand extends AbstractCommand
     protected function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/test/Functional.php.txt' => 'tests/'.$params['test_class_name'].'.php',
+            'test/Functional.php.txt' => 'tests/'.$params['test_class_name'].'.php',
         ];
     }
 

@@ -50,8 +50,8 @@ final class MakeValidatorCommand extends AbstractCommand
     protected function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/validator/Validator.php.txt' => 'src/Validator/Constraints/'.$params['validator_class_name'].'.php',
-            __DIR__.'/../Resources/skeleton/validator/Constraint.php.txt' => 'src/Validator/Constraints/'.$params['constraint_class_name'].'.php',
+            'validator/Validator.php.txt' => 'src/Validator/Constraints/'.$params['validator_class_name'].'.php',
+            'validator/Constraint.php.txt' => 'src/Validator/Constraints/'.$params['constraint_class_name'].'.php',
         ];
     }
 

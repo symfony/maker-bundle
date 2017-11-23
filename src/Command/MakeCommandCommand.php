@@ -50,7 +50,7 @@ final class MakeCommandCommand extends AbstractCommand
     protected function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/command/Command.php.txt' => 'src/Command/'.$params['command_class_name'].'.php',
+            'command/Command.php.txt' => 'src/Command/'.$params['command_class_name'].'.php',
         ];
     }
 

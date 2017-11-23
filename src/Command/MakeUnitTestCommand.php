@@ -47,7 +47,7 @@ final class MakeUnitTestCommand extends AbstractCommand
     protected function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/test/Unit.php.txt' => 'tests/'.$params['test_class_name'].'.php',
+            'test/Unit.php.txt' => 'tests/'.$params['test_class_name'].'.php',
         ];
     }
 

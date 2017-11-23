@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\DependencyInjection;
 
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
@@ -30,5 +31,7 @@ class MakerExtension extends Extension
     {
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
+
+        $container->getDefinition(FileManager::class)->replaceArgument(1, $container->getParameter('kernel.root_dir'));
     }
 }

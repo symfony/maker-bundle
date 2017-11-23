@@ -26,20 +26,19 @@ use Symfony\Component\Routing\RouterInterface;
 
 class FunctionalTest extends TestCase
 {
+    private $fs;
     private $targetDir;
 
     public function setUp()
     {
-        $tmpDir = sys_get_temp_dir().'/sf'.random_int(111111, 999999);
-        @mkdir($tmpDir, 0777, true);
-
-        $this->targetDir = $tmpDir;
+        $this->targetDir = sys_get_temp_dir().'/'.uniqid('sf_maker', true);
+        $this->fs = new Filesystem();
+        $this->fs->mkdir($this->targetDir);
     }
 
     public function tearDown()
     {
-        $fs = new Filesystem();
-        $fs->remove($this->targetDir);
+        $this->fs->remove($this->targetDir);
     }
 
     /**
@@ -47,7 +46,6 @@ class FunctionalTest extends TestCase
      */
     public function testCommands(AbstractCommand $command, array $inputs)
     {
-        /** @var AbstractCommand $command */
         $command->setCheckDependencies(false);
         $command->setGenerator($this->createGenerator());
 
@@ -69,7 +67,8 @@ class FunctionalTest extends TestCase
 
     public function getCommandTests()
     {
-        $generator = $this->createGenerator();
+        // fake generator, the real will be passed in testCommands()
+        $generator = $this->createMock(Generator::class);
         $commands = [];
 
         $commands['command'] = [
@@ -186,9 +185,37 @@ class FunctionalTest extends TestCase
         return $commands;
     }
 
+    public function testOverrideSkeleton()
+    {
+        $generator = new Generator(new FileManager(new Filesystem(), __DIR__.'/../Fixtures/src', $this->targetDir));
+
+        $router = $this->createMock(RouterInterface::class);
+        $router->expects($this->once())
+            ->method('getRouteCollection')
+            ->willReturn(new RouteCollection());
+
+        $command = new MakeControllerCommand($generator, $router);
+        $command->setCheckDependencies(false);
+
+        $tester = new CommandTester($command);
+        $tester->setInputs(['FooAction']);
+        $tester->execute([]);
+
+        $this->assertContains('Success', $tester->getDisplay());
+
+        $file = current($this->parsePHPFiles($tester->getDisplay()));
+        $process = new Process(sprintf('php -l %s', $file), $this->targetDir);
+        $process->run();
+        if (!$process->isSuccessful()) {
+            throw new \Exception(sprintf('File "%s" has a syntax error: %s', $file, $process->getOutput()));
+        }
+
+        $this->assertNotContains('AbstractController', file_get_contents($this->targetDir.'/'.$file));
+    }
+
     private function createGenerator()
     {
-        return new Generator(new FileManager(new Filesystem(), $this->targetDir));
+        return new Generator(new FileManager(new Filesystem(), $this->targetDir, $this->targetDir));
     }
 
     private function parsePHPFiles($output)
