@@ -1,0 +1,188 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-11-19T08:08:25Z
+
+This is a tricky one. I agree with the best practice, but I’m not sure if we should *yet* push people to AbstractController.
+
+But, if you’re generating a controller, then it’s new code. So maybe? We’ve decided on the docs to keep showing Controller for at least one version more.
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-11-19T10:36:01Z
+
+I'm personally :+1:: now that services are private by default, making them public does require typing configuration.
+But injecting services doesn't.
+Since we need to teach something to ppl in both cases, better teach them the 3 injection strategies possible for controllers (regular, action, and service subscriber.)
+
+---------------------------------------------------------------------------
+
+by dunglas at 2017-11-21T12:58:34Z
+
+`Controller.php.txt` doesn't need to extend anything. I would keep it a standalone class.
+
+For `ControllerWithTwig.php.txt`, I would inject Twig in a constructor or directly in `indexAction`. Coupling this class to the framework (bundle) just for the `render` method (that is a proxy method) is not worth it.
+
+Also, I would rename the `indexAction` method to `__invoke`. It's more explicit, more PHPish, and it allows to simplify the configuration. See symfony/symfony#24637 for instance.
+
+---------------------------------------------------------------------------
+
+by dunglas at 2017-11-21T13:00:02Z
+
+Also, `Sensio\Bundle\FrameworkExtraBundle\Configuration\Route` can be replaced by the one provided in the Routing component directly (one less dependency to a bundle).
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-11-21T13:15:35Z
+
+> Controller.php.txt doesn't need to extend anything. I would keep it a standalone class.
+
+I don't agree with this: the helpers provided by the base class are not "coupling" anymore, thanks to the dedicated service locator that is injected. Extending the AbstractController allows better self-discovery of the features provided by Symfony.
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-11-21T13:16:45Z
+
+> I would rename the indexAction method to __invoke
+
+I don't agree with this: this actively prevents putting more actions into one controller. I understand that one-controller-class-per-route is a common practice, yet I don't think it should be the default one.
+
+---------------------------------------------------------------------------
+
+by dunglas at 2017-11-21T13:33:54Z
+
+> I don't agree with this: this actively prevents putting more actions into one controller.
+
+It's not the case. You can have both an `__invoke` method (for the index), and an `item()` method for instance.
+
+> I understand that one-controller-class-per-route is a common practice, yet I don't think it should be the default one.
+
+I definitely prefer the one-controller-class-per-route approach. It should at least be used if the controller contains 1 action (as in the generated one).
+
+---------------------------------------------------------------------------
+
+by dunglas at 2017-11-21T13:35:04Z
+
+> the helpers provided by the base class are not "coupling" anymore
+
+You need `framework-bundle` to use this class.
+
+---------------------------------------------------------------------------
+
+by dunglas at 2017-11-21T13:37:44Z
+
+Anyway, it would be nice to let the user configuring the strategy he wants. What about a config flag to choose globally between `AbstractController` (we should at least use this one instead of `Controller`) + `fooAction` (beginner, enabled by default) and extend-nothing + `__invoke` (confirmed, enabled trough a config flag)? I can work on this.
+
+---------------------------------------------------------------------------
+
+by yceruto at 2017-11-21T13:37:56Z
+
+> I definitely prefer the one-controller-class-per-route approach. It should at least be used if the controller contains 1 action (as in the generated one).
+
+What about a new controller skeleton for ADR pattern?
+
+```
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+/**
+ * @Route("{{ route_path }}", name="{{ route_name }}")
+ */
+class {{ controller_class_name }}
+{
+    public function __invoke()
+    {
+        return new Response('Welcome to your new controller!');
+    }
+}
+```
+
+---------------------------------------------------------------------------
+
+by dunglas at 2017-11-21T13:39:07Z
+
+@yceruto same idea (but strictly speaking it's not the ADR pattern so it should no be called ADR-something - there is no Responder in my proposal).
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-11-21T13:39:33Z
+
+framework-bundle is a mandatory requirement of Flex anyway
+
+and extending *this* class is not what I would actually call coupling in this case, because the base class provides only simple helpers, vs a full chain reaction of dependencies when Controller is needed (the container)
+
+> What about a new controller skeleton for ADR pattern?
+
+let's keep things simple really
+
+---------------------------------------------------------------------------
+
+by dunglas at 2017-11-21T13:43:20Z
+
+> framework-bundle is a mandatory requirement of Flex anyway
+
+Yes, but it doesn't mean that the "controller" (action?) class has to be coupled with it too.
+
+> extending this class is not what I would actually call coupling
+
+It means that you need this specific lib and its dependencies to execute it.
+
+Anyway this PR is a step in the good direction. Let's merge it, we can discuss this elsewhere.
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-11-21T13:47:40Z
+
+> and its dependencies to execute it
+
+that's exactly where I stop agreeing :) the base class has no dependencies at all that you don't want/need.
+
+---------------------------------------------------------------------------
+
+by dunglas at 2017-11-21T14:19:26Z
+
+It depends, we reuse some API Platform controllers with Laravel (yes, it works). It will not be possible to do it without requiring `framework-bundle` (it will work, but it's not very friendly). Anyway it's just an example (not very relevant because it's a lib and not a private project).
+The real reason for me to not extend `AbstractController` is that it feels "magic" (while it's not anymore at all), on the other end using autowiring you inject only, and exactly what you need. It's more explicit.
+
+That being said, I agree that `AbstractController` allows to discover some features of the framework (IMO it can also be solved by the documentation).
+
+---------------------------------------------------------------------------
+
+by stof at 2017-11-22T10:00:53Z
+
+> Also, Sensio\Bundle\FrameworkExtraBundle\Configuration\Route can be replaced by the one provided in the Routing component directly (one less dependency to a bundle).
+
+That won't work fine. you cannot use routing annotations without FrameworkExtraBundle anyway (we plan to change this for a future 4.x release)
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-11-22T10:07:25Z
+
+> you cannot use routing annotations without FrameworkExtraBundle
+
+what do you have in mind? we made the routing annotation work with services, which was missing before. Is there anything else left?
+
+---------------------------------------------------------------------------
+
+by stof at 2017-11-22T10:16:49Z
+
+> what do you have in mind? we made the routing annotation work with services, which was missing before. Is there anything else left?
+
+The Routing component only provides an abstract AnnotationClassLoader which is a partial implementation. The concrete implementation still lives in the bundle.
+FrameworkBundle has its own concrete implementation, but with less features than the FrameworkExtraBundle (for instance, support for services is only in SFEB, not in FB AFAICT, but this is also the case for cleaner `__invoke`)
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-11-22T10:22:45Z
+
+@stof could you create an issue so we can work on that?
+
+@yceruto thinking a bit more about it, I have another argument for using the annotation from the bundle: it could ease discovering the other possible annotations ("what's in this namespace?"), so OK to revert that change on my side.
+
+---------------------------------------------------------------------------
+
+by stof at 2017-11-22T10:41:43Z
+
+@nicolas-grekas here it is: https://github.com/symfony/symfony/issues/25103
