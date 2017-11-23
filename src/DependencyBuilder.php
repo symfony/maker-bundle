@@ -13,7 +13,7 @@ final class DependencyBuilder
      * the user if other required dependencies are missing. An example
      * is the "validator" when trying to work with forms.
      */
-    public function addClassDependency(string $class, string $package, bool $required = true)
+    public function addClassDependency(string $class, string $package, bool $required = true): void
     {
         $this->dependencies[$class] = [
             'name' => $package,

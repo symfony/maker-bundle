@@ -117,10 +117,6 @@ final class Str
             'kangaroo',
         ];
 
-        return sprintf(
-            '%s %s',
-            $adjectives[array_rand($adjectives)],
-            $nouns[array_rand($nouns)]
-        );
+        return sprintf('%s %s', $adjectives[array_rand($adjectives)], $nouns[array_rand($nouns)]);
     }
 }

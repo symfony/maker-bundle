@@ -60,7 +60,7 @@ class FileManager
 
     private function absolutizePath($path): string
     {
-        if ('/' === substr($path, 0, 1)) {
+        if (0 === strpos($path, '/')) {
             return $path;
         }
 
