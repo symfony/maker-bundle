@@ -30,7 +30,7 @@ class FunctionalTest extends TestCase
 
     public function setUp()
     {
-        $tmpDir = sys_get_temp_dir().'/sf'.mt_rand(111111, 999999);
+        $tmpDir = sys_get_temp_dir().'/sf'.random_int(111111, 999999);
         @mkdir($tmpDir, 0777, true);
 
         $this->targetDir = $tmpDir;
@@ -53,7 +53,7 @@ class FunctionalTest extends TestCase
 
         $tester = new CommandTester($command);
         $tester->setInputs($inputs);
-        $tester->execute(array());
+        $tester->execute([]);
 
         $this->assertContains('Success', $tester->getDisplay());
 
@@ -199,7 +199,7 @@ class FunctionalTest extends TestCase
                 continue;
             }
 
-            list(, $filename) = explode(':', $line);
+            [, $filename] = explode(':', $line);
             $files[] = trim($filename);
         }
 

@@ -28,7 +28,7 @@ class Generator
         $this->fileManager = $fileManager;
     }
 
-    public function setIO(SymfonyStyle $io)
+    public function setIO(SymfonyStyle $io): void
     {
         $this->io = $io;
         $this->fileManager->setIO($io);

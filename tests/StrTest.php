@@ -100,4 +100,3 @@ class StrTest extends TestCase
         yield ['generate', 'generate'];
     }
 }
-

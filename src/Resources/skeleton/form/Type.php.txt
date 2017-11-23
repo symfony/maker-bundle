@@ -18,9 +18,9 @@ class {{ form_class_name }} extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             // uncomment if you want to bind to a class
             //'data_class' => {{ entity_class_name }}::class,
-        ));
+        ]);
     }
 }

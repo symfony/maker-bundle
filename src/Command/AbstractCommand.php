@@ -98,7 +98,7 @@ abstract class AbstractCommand extends Command
                 continue;
             }
 
-            if (in_array($argument->getName(), $this->nonInteractiveArguments)) {
+            if (in_array($argument->getName(), $this->nonInteractiveArguments, true)) {
                 continue;
             }
 
