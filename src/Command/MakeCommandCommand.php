@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Command;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -38,6 +39,10 @@ final class MakeCommandCommand extends AbstractCommand
     protected function getParameters(): array
     {
         $commandName = trim($this->input->getArgument('name'));
+        if(empty($commandName)) {
+            throw new RuntimeCommandException("You must provide the name of the command you want to create");
+        }
+
         $commandClassName = Str::asClassName($commandName, 'Command');
         Validator::validateClassName($commandClassName, sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, $commandClassName));
 

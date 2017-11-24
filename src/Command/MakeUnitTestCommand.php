@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Command;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Input\InputArgument;
@@ -36,7 +37,12 @@ final class MakeUnitTestCommand extends AbstractCommand
 
     protected function getParameters(): array
     {
-        $testClassName = Str::asClassName($this->input->getArgument('name'), 'Test');
+        $name = $this->input->getArgument('name');
+        if(empty($name)) {
+            throw new RuntimeCommandException("You must provide the name of the unit test you want to create");
+        }
+
+        $testClassName = Str::asClassName($name, 'Test');
         Validator::validateClassName($testClassName);
 
         return [

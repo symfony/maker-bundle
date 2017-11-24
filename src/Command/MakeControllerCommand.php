@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Command;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -49,7 +50,12 @@ final class MakeControllerCommand extends AbstractCommand
 
     protected function getParameters(): array
     {
-        $controllerClassName = Str::asClassName($this->input->getArgument('controller-class'), 'Controller');
+        $controllerName = $this->input->getArgument('controller-class');
+        if(empty($controllerName)) {
+            throw new RuntimeCommandException("You must provide the name of the controller you want to create");
+        }
+
+        $controllerClassName = Str::asClassName($controllerName, 'Controller');
         Validator::validateClassName($controllerClassName);
 
         return [

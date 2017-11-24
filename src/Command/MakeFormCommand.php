@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Command;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Input\InputArgument;
@@ -38,7 +39,12 @@ final class MakeFormCommand extends AbstractCommand
 
     protected function getParameters(): array
     {
-        $formClassName = Str::asClassName($this->input->getArgument('name'), 'Type');
+        $formName = $this->input->getArgument('name');
+        if(empty($formName)) {
+            throw new RuntimeCommandException("You must provide the name of the form you want to create");
+        }
+
+        $formClassName = Str::asClassName($formName, 'Type');
         Validator::validateClassName($formClassName);
         $entityClassName = Str::removeSuffix($formClassName, 'Type');
 
