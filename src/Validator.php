@@ -27,4 +27,13 @@ class Validator
             throw new RuntimeCommandException($errorMessage);
         }
     }
+
+    public static function notBlank(string $value = null): string
+    {
+        if (null === $value || '' === $value) {
+            throw new RuntimeCommandException('This value should not be blank');
+        }
+
+        return $value;
+    }
 }

@@ -62,6 +62,7 @@ final class MakeSubscriberCommand extends AbstractCommand
             $this->io->listing($events);
             $question = new Question(sprintf(' <fg=green>%s</>', $this->getDefinition()->getArgument('event')->getDescription()));
             $question->setAutocompleterValues($events);
+            $question->setValidator([Validator::class, 'notBlank']);
             $event = $this->io->askQuestion($question);
             $input->setArgument('event', $event);
         }
