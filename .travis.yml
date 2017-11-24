@@ -1,0 +1,26 @@
+language: php
+
+dist: trusty
+sudo: false
+
+git:
+    depth: 1
+
+php:
+  - 7.1
+  - 7.2
+
+cache:
+    directories:
+        - $HOME/.composer/cache/files
+        - .phpunit
+
+env:
+    global:
+        - SYMFONY_PHPUNIT_DIR=.phpunit
+
+install:
+    - composer --prefer-dist install
+    - ./vendor/bin/simple-phpunit install
+
+script: ./vendor/bin/simple-phpunit
