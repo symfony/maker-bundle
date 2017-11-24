@@ -107,12 +107,17 @@ abstract class AbstractCommand extends Command
             $input->setArgument($argument->getName(), $value);
         }
     }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function generateCode(OutputInterface $output)
     {
         $this->generator->setIO($this->io);
         $params = $this->getParameters();
         $this->generator->generate($params, $this->getFiles($params));
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $params = $this->getParameters();
+        $this->generateCode($output);
 
         $this->io->newLine();
         $this->io->writeln(' <bg=green;fg=white>          </>');
