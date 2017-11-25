@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\DependencyInjection;
 
+use Symfony\Bundle\MakerBundle\Command\MakeUnitTestCommand;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
@@ -30,5 +31,7 @@ class MakerExtension extends Extension
     {
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
+
+        $container->getDefinition(MakeUnitTestCommand::class)->setArgument('$projectDir', $container->getParameter('kernel.project_dir'));
     }
 }

@@ -160,10 +160,18 @@ class FunctionalTest extends TestCase
         ];
 
         $commands['unit_test'] = [
-            new MakeUnitTestCommand($generator),
+            new MakeUnitTestCommand($generator, __DIR__.'/../Fixtures'),
             [
                 // class name
                 'FooBar'
+            ]
+        ];
+
+        $commands['unit_test_filename'] = [
+            new MakeUnitTestCommand($generator, __DIR__.'/../Fixtures'),
+            [
+                // relative path to the file
+                'src/Security/Voter/FooVoter.php'
             ]
         ];
 
