@@ -64,7 +64,7 @@ final class MakeControllerCommand extends AbstractCommand
         $skeletonFile = $this->isTwigInstalled() ? 'ControllerWithTwig.php.txt' : 'Controller.php.txt';
 
         return [
-            __DIR__.'/../Resources/skeleton/controller/'.$skeletonFile => 'src/Controller/'.$params['controller_class_name'].'.php',
+            'controller/'.$skeletonFile => 'src/Controller/'.$params['controller_class_name'].'.php',
         ];
     }
 

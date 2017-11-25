@@ -51,7 +51,7 @@ final class MakeFormCommand extends AbstractCommand
     protected function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/form/Type.php.txt' => 'src/Form/'.$params['form_class_name'].'.php',
+            'form/Type.php.txt' => 'src/Form/'.$params['form_class_name'].'.php',
         ];
     }
 

@@ -52,8 +52,8 @@ final class MakeEntityCommand extends AbstractCommand
     protected function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/doctrine/Entity.php.txt' => 'src/Entity/'.$params['entity_class_name'].'.php',
-            __DIR__.'/../Resources/skeleton/doctrine/Repository.php.txt' => 'src/Repository/'.$params['repository_class_name'].'.php',
+            'doctrine/Entity.php.txt' => 'src/Entity/'.$params['entity_class_name'].'.php',
+            'doctrine/Repository.php.txt' => 'src/Repository/'.$params['repository_class_name'].'.php',
         ];
     }
 

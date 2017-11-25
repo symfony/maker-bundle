@@ -92,7 +92,7 @@ final class MakeSubscriberCommand extends AbstractCommand
     protected function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/event/Subscriber.php.txt' => 'src/EventSubscriber/'.$params['subscriber_class_name'].'.php',
+            'event/Subscriber.php.txt' => 'src/EventSubscriber/'.$params['subscriber_class_name'].'.php',
         ];
     }
 

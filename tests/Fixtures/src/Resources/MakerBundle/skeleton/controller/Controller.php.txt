@@ -1,0 +1,17 @@
+<?php
+
+namespace App\Controller;
+
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Response;
+
+/**
+ * @Route("{{ route_path }}", name="{{ route_name }}")
+ */
+class {{ controller_class_name }}
+{
+    public function __invoke()
+    {
+        return new Response('Welcome to your new controller!');
+    }
+}
