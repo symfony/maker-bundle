@@ -1,0 +1,20 @@
+---------------------------------------------------------------------------
+
+by piotrgradzinski at 2017-11-19T10:14:18Z
+
+@weaverryan - moved `symfony/serializer` to `required-dev` in `composer.json`
+@ogizanagi - changed format to const.
+
+---------------------------------------------------------------------------
+
+by piotrgradzinski at 2017-11-21T10:29:19Z
+
+@weaverryan - are you happy with the recent changes?
+
+---------------------------------------------------------------------------
+
+by piotrgradzinski at 2017-11-22T10:14:10Z
+
+Guys, I know that in the light of @javiereguiluz recent post about this bundle the approach is to discuss the potential new command over a ticket but I am wondering whether this PR can be merged? It's been discussed in #17 and I hope make:serializer:encode code is good enough to be merged.
+
+Thank you for your attention!
