@@ -15,14 +15,14 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 
 /**
- * Interface that all maker commands must implement
+ * Interface that all maker commands must implement.
  *
  * @author Ryan Weaver <ryan@knpuniversity.com>
  */
 interface MakerInterface
 {
     /**
-     * Return the command name for your maker (e.g. make:report)
+     * Return the command name for your maker (e.g. make:report).
      *
      * @return string
      */
@@ -34,7 +34,7 @@ interface MakerInterface
      * By default, all arguments will be asked interactively. If you want
      * to avoid that, use the $inputConfig->setArgumentAsNonInteractive() method.
      *
-     * @param Command $command
+     * @param Command            $command
      * @param InputConfiguration $inputConfig
      */
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void;
@@ -50,8 +50,8 @@ interface MakerInterface
      * If necessary, you can use this method to interactively ask the user for input.
      *
      * @param InputInterface $input
-     * @param ConsoleStyle $io
-     * @param Command $command
+     * @param ConsoleStyle   $io
+     * @param Command        $command
      */
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void;
 
@@ -60,6 +60,7 @@ interface MakerInterface
      * template files returned from getFiles().
      *
      * @param InputInterface $input
+     *
      * @return array
      */
     public function getParameters(InputInterface $input): array;
@@ -74,6 +75,7 @@ interface MakerInterface
      *    );
      *
      * @param array $params The parameters returned from getParameters()
+     *
      * @return array
      */
     public function getFiles(array $params): array;
@@ -81,7 +83,7 @@ interface MakerInterface
     /**
      * An opportunity to write a nice message after generation finishes.
      *
-     * @param array $params
+     * @param array        $params
      * @param ConsoleStyle $io
      */
     public function writeNextStepsMessage(array $params, ConsoleStyle $io): void;
