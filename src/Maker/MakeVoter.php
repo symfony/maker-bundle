@@ -9,63 +9,69 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bundle\MakerBundle\Command;
+namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class MakeVoterCommand extends AbstractCommand
+final class MakeVoter implements MakerInterface
 {
-    protected static $defaultName = 'make:voter';
-
-    public function configure()
+    public static function getCommandName(): string
     {
-        $this
+        return 'make:voter';
+    }
+
+    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    {
+        $command
             ->setDescription('Creates a new security voter class')
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the security voter class (e.g. <fg=yellow>BlogPostVoter</>).')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeVoter.txt'))
         ;
     }
 
-    protected function getParameters(): array
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        $voterClassName = Str::asClassName($this->input->getArgument('name'), 'Voter');
+    }
+
+    public function getParameters(InputInterface $input): array
+    {
+        $voterClassName = Str::asClassName($input->getArgument('name'), 'Voter');
         Validator::validateClassName($voterClassName);
 
-        return [
+        return array(
             'voter_class_name' => $voterClassName,
-        ];
+        );
     }
 
-    protected function getFiles(array $params): array
+    public function getFiles(array $params): array
     {
-        return [
+        return array(
             __DIR__.'/../Resources/skeleton/security/Voter.php.txt' => 'src/Security/Voter/'.$params['voter_class_name'].'.php',
-        ];
+        );
     }
 
-    protected function getResultMessage(array $params): string
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
-        return sprintf('<fg=blue>%s</> created successfully.', $params['voter_class_name']);
-    }
-
-    protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
-    {
-        $io->text([
+        $io->text(array(
             'Next: Open your voter and add your logic.',
-            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/security/voters.html</>'
-        ]);
+            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/security/voters.html</>',
+        ));
     }
 
-    protected function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Voter::class,

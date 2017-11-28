@@ -1,0 +1,60 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+        <services>
+            <defaults public="false" />
+
+            <service id="maker.maker.make_authenticator" class="Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator">
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_command" class="Symfony\Bundle\MakerBundle\Maker\MakeCommand">
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_controller" class="Symfony\Bundle\MakerBundle\Maker\MakeController">
+                <argument type="service" id="router" />
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_entity" class="Symfony\Bundle\MakerBundle\Maker\MakeEntity">
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_form" class="Symfony\Bundle\MakerBundle\Maker\MakeForm">
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_functional_test" class="Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest">
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_serializer_encoder" class="Symfony\Bundle\MakerBundle\Maker\MakeSerializerEncoder">
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_subscriber" class="Symfony\Bundle\MakerBundle\Maker\MakeSubscriber">
+                <tag name="maker.command" />
+                <argument type="service" id="maker.event_registry" />
+            </service>
+
+            <service id="maker.maker.make_twig_extension" class="Symfony\Bundle\MakerBundle\Maker\MakeTwigExtension">
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_unit_test" class="Symfony\Bundle\MakerBundle\Maker\MakeUnitTest">
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_validator" class="Symfony\Bundle\MakerBundle\Maker\MakeValidator">
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_voter" class="Symfony\Bundle\MakerBundle\Maker\MakeVoter">
+                <tag name="maker.command" />
+            </service>
+        </services>
+</container>

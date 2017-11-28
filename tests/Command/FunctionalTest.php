@@ -3,27 +3,37 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Command;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Bundle\MakerBundle\Command\AbstractCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeAuthenticatorCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeCommandCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeControllerCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeEntityCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeFormCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeFunctionalTestCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeSerializerEncoderCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeSubscriberCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeTwigExtensionCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeUnitTestCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeValidatorCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeVoterCommand;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
+use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Bundle\MakerBundle\Command\MakerCommand;
+use Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator;
+use Symfony\Bundle\MakerBundle\Maker\MakeCommand;
+use Symfony\Bundle\MakerBundle\Maker\MakeController;
+use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
+use Symfony\Bundle\MakerBundle\Maker\MakeForm;
+use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest;
+use Symfony\Bundle\MakerBundle\Maker\MakeSerializerEncoder;
+use Symfony\Bundle\MakerBundle\Maker\MakeSubscriber;
+use Symfony\Bundle\MakerBundle\Maker\MakeTwigExtension;
+use Symfony\Bundle\MakerBundle\Maker\MakeUnitTest;
+use Symfony\Bundle\MakerBundle\Maker\MakeValidator;
+use Symfony\Bundle\MakerBundle\Maker\MakeVoter;
 use Symfony\Bundle\MakerBundle\EventRegistry;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\MakerBundle;
+use Symfony\Bundle\MakerBundle\MakerInterface;
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\RouteCollection;
+use Symfony\Component\Routing\RouteCollectionBuilder;
 use Symfony\Component\Routing\RouterInterface;
 
 class FunctionalTest extends TestCase
@@ -47,15 +57,15 @@ class FunctionalTest extends TestCase
     /**
      * @dataProvider getCommandTests
      */
-    public function testCommands(AbstractCommand $command, array $inputs)
+    public function testCommands(MakerInterface $maker, array $inputs)
     {
-        /* @var AbstractCommand $command */
+        $command = new MakerCommand($maker, $this->createGenerator());
+
         $command->setCheckDependencies(false);
-        $command->setGenerator($this->createGenerator());
 
         $tester = new CommandTester($command);
         $tester->setInputs($inputs);
-        $tester->execute([]);
+        $tester->execute(array());
 
         $this->assertContains('Success', $tester->getDisplay());
 
@@ -71,11 +81,10 @@ class FunctionalTest extends TestCase
 
     public function getCommandTests()
     {
-        $generator = $this->createGenerator();
-        $commands = array();
+        $makers = array();
 
-        $commands['command'] = array(
-            new MakeCommandCommand($generator),
+        $makers['command'] = array(
+            new MakeCommand(),
             array(
                 // command name
                 'app:foo',
@@ -86,32 +95,32 @@ class FunctionalTest extends TestCase
         $router->expects($this->once())
             ->method('getRouteCollection')
             ->willReturn(new RouteCollection());
-        $commands['controller'] = array(
-            new MakeControllerCommand($generator, $router),
+        $makers['controller'] = array(
+            new MakeController($router),
             array(
                 // controller class name
                 'FooBar',
             ),
         );
 
-        $commands['entity'] = array(
-            new MakeEntityCommand($generator),
+        $makers['entity'] = array(
+            new MakeEntity(),
             array(
                 // entity class name
                 'FooBar',
             ),
         );
 
-        $commands['form'] = array(
-            new MakeFormCommand($generator),
+        $makers['form'] = array(
+            new MakeForm(),
             array(
                 // form name
                 'FooBar',
             ),
         );
 
-        $commands['functional'] = array(
-            new MakeFunctionalTestCommand($generator),
+        $makers['functional'] = array(
+            new MakeFunctionalTest(),
             array(
                 // functional test class
                 'FooBar',
@@ -126,8 +135,8 @@ class FunctionalTest extends TestCase
             ->method('getEventClassName')
             ->with('kernel.request')
             ->willReturn(GetResponseEvent::class);
-        $commands['subscriber'] = array(
-            new MakeSubscriberCommand($generator, $eventRegistry),
+        $makers['subscriber'] = array(
+            new MakeSubscriber($eventRegistry),
             array(
                 // subscriber name
                 'FooBar',
@@ -143,8 +152,8 @@ class FunctionalTest extends TestCase
         $eventRegistry2->expects($this->once())
             ->method('getEventClassName')
             ->willReturn(null);
-        $commands['subscriber_unknown_event_class'] = array(
-            new MakeSubscriberCommand($generator, $eventRegistry2),
+        $makers['subscriber_unknown_event_class'] = array(
+            new MakeSubscriber($eventRegistry2),
             array(
                 // subscriber name
                 'FooBar',
@@ -153,57 +162,80 @@ class FunctionalTest extends TestCase
             ),
         );
 
-        $commands['serializer_encoder'] = array(
-            new MakeSerializerEncoderCommand($generator),
-            [
+        $makers['serializer_encoder'] = array(
+            new MakeSerializerEncoder(),
+            array(
                 // encoder class name
                 'FooBarEncoder',
                 // encoder format
-                'foobar'
-            ]
+                'foobar',
+            ),
         );
 
-        $commands['twig_extension'] = array(
-            new MakeTwigExtensionCommand($generator),
+        $makers['twig_extension'] = array(
+            new MakeTwigExtension(),
             array(
                 // extension class name
                 'FooBar',
             ),
         );
 
-        $commands['unit_test'] = array(
-            new MakeUnitTestCommand($generator),
+        $makers['unit_test'] = array(
+            new MakeUnitTest(),
             array(
                 // class name
                 'FooBar',
             ),
         );
 
-        $commands['validator'] = array(
-            new MakeValidatorCommand($generator),
+        $makers['validator'] = array(
+            new MakeValidator(),
             array(
                 // validator name
                 'FooBar',
             ),
         );
 
-        $commands['voter'] = array(
-            new MakeVoterCommand($generator),
+        $makers['voter'] = array(
+            new MakeVoter(),
             array(
                 // voter class name
                 'FooBar',
             ),
         );
 
-        $commands['auth_empty'] = array(
-            new MakeAuthenticatorCommand($generator),
+        $makers['auth_empty'] = array(
+            new MakeAuthenticator(),
             array(
                 // class name
                 'AppCustomAuthenticator',
             ),
         );
 
-        return $commands;
+        return $makers;
+    }
+
+    /**
+     * Smoke test to make sure the DI autowiring works and all makers
+     * are registered and have the correct arguments.
+     */
+    public function testWiring()
+    {
+        $kernel = new FunctionalTestKernel('dev', true);
+
+        $finder = new Finder();
+        $finder->in(__DIR__.'/../../src/Maker');
+
+        $application = new Application($kernel);
+        foreach ($finder as $file) {
+            $class = 'Symfony\Bundle\MakerBundle\Maker\\'.substr($file->getFilename(), 0, strlen($file->getFilename()) - 4);
+
+            $commandName = $class::getCommandName();
+            // if the command does not exist, this will explode
+            $command = $application->find($commandName);
+            // just a smoke test assert
+            $this->assertInstanceOf(MakerCommand::class, $command);
+        }
     }
 
     private function createGenerator()
@@ -224,5 +256,38 @@ class FunctionalTest extends TestCase
         }
 
         return $files;
+    }
+}
+
+class FunctionalTestKernel extends Kernel
+{
+    use MicroKernelTrait;
+
+    private $cacheDir;
+
+    public function registerBundles()
+    {
+        return array(
+            new FrameworkBundle(),
+            new MakerBundle(),
+        );
+    }
+
+    protected function configureRoutes(RouteCollectionBuilder $routes)
+    {
+    }
+
+    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
+    {
+        $c->setParameter('kernel.secret', 123);
+    }
+
+    public function getCacheDir()
+    {
+        if (null === $this->cacheDir) {
+            $this->cacheDir = sys_get_temp_dir().'/'.rand(100, 999);
+        }
+
+        return $this->cacheDir;
     }
 }

@@ -28,10 +28,13 @@ use Symfony\Component\Security\Core\Event\AuthenticationFailureEvent;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 
+/**
+ * @internal
+ */
 class EventRegistry
 {
     // list of *known* events to always include (if they exist)
-    private static $eventsMap = [
+    private static $eventsMap = array(
         'console.command' => ConsoleCommandEvent::class,
         'console.terminate' => ConsoleTerminateEvent::class,
         'console.error' => ConsoleErrorEvent::class,
@@ -47,7 +50,7 @@ class EventRegistry
         'security.authentication.failure' => AuthenticationFailureEvent::class,
         'security.interactive_login' => InteractiveLoginEvent::class,
         'security.switch_user' => SwitchUserEvent::class,
-    ];
+    );
 
     private $eventDispatcher;
 
@@ -61,7 +64,7 @@ class EventRegistry
      */
     public function getAllActiveEvents(): array
     {
-        $activeEvents = [];
+        $activeEvents = array();
         foreach (self::$eventsMap as $eventName => $eventClass) {
             if (!class_exists($eventClass)) {
                 continue;

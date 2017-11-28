@@ -9,60 +9,70 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bundle\MakerBundle\Command;
+namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class MakeCommandCommand extends AbstractCommand
+final class MakeCommand implements MakerInterface
 {
-    protected static $defaultName = 'make:command';
-
-    public function configure()
+    public static function getCommandName(): string
     {
-        $this
+        return 'make:command';
+    }
+
+    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    {
+        $command
             ->setDescription('Creates a new console command class')
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCommand.txt'))
         ;
     }
 
-    protected function getParameters(): array
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        $commandName = trim($this->input->getArgument('name'));
+    }
+
+    public function getParameters(InputInterface $input): array
+    {
+        $commandName = trim($input->getArgument('name'));
         $commandClassName = Str::asClassName($commandName, 'Command');
         Validator::validateClassName($commandClassName, sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, $commandClassName));
 
-        return [
+        return array(
             'command_name' => $commandName,
             'command_class_name' => $commandClassName,
-        ];
+        );
     }
 
-    protected function getFiles(array $params): array
+    public function getFiles(array $params): array
     {
-        return [
+        return array(
             __DIR__.'/../Resources/skeleton/command/Command.php.txt' => 'src/Command/'.$params['command_class_name'].'.php',
-        ];
+        );
     }
 
-    protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
-        $io->text([
+        $io->text(array(
             'Next: open your new command class and customize it!',
-            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/console.html</>'
-        ]);
+            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/console.html</>',
+        ));
     }
 
-    protected function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Command::class,

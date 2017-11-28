@@ -9,70 +9,70 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bundle\MakerBundle\Command;
+namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\EventRegistry;
-use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class MakeSubscriberCommand extends AbstractCommand
+final class MakeSubscriber implements MakerInterface
 {
-    protected static $defaultName = 'make:subscriber';
-
     private $eventRegistry;
 
-    public function __construct(Generator $generator, EventRegistry $eventRegistry)
+    public function __construct(EventRegistry $eventRegistry)
     {
-        parent::__construct($generator);
-
         $this->eventRegistry = $eventRegistry;
     }
 
-    protected function configure()
+    public static function getCommandName(): string
     {
-        $this
+        return 'make:subscriber';
+    }
+
+    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    {
+        $command
             ->setDescription('Creates a new event subscriber class')
             ->addArgument('name', InputArgument::OPTIONAL, 'Choose a class name for your event subscriber (e.g. <fg=yellow>ExceptionSubscriber</>).')
             ->addArgument('event', InputArgument::OPTIONAL, 'What event do you want to subscribe to?')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeSubscriber.txt'))
         ;
 
-        $this->setArgumentAsNonInteractive('event');
+        $inputConf->setArgumentAsNonInteractive('event');
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        parent::interact($input, $output);
-
         if (!$input->getArgument('event')) {
             $events = $this->eventRegistry->getAllActiveEvents();
 
-            $this->io->writeln(' <fg=green>Suggested Events:</>');
-            $this->io->listing($events);
-            $question = new Question(sprintf(' <fg=green>%s</>', $this->getDefinition()->getArgument('event')->getDescription()));
+            $io->writeln(' <fg=green>Suggested Events:</>');
+            $io->listing($events);
+            $question = new Question(sprintf(' <fg=green>%s</>', $command->getDefinition()->getArgument('event')->getDescription()));
             $question->setAutocompleterValues($events);
-            $question->setValidator([Validator::class, 'notBlank']);
-            $event = $this->io->askQuestion($question);
+            $question->setValidator(array(Validator::class, 'notBlank'));
+            $event = $io->askQuestion($question);
             $input->setArgument('event', $event);
         }
     }
 
-    protected function getParameters(): array
+    public function getParameters(InputInterface $input): array
     {
-        $subscriberClassName = Str::asClassName($this->input->getArgument('name'), 'Subscriber');
+        $subscriberClassName = Str::asClassName($input->getArgument('name'), 'Subscriber');
         Validator::validateClassName($subscriberClassName);
-        $event = $this->input->getArgument('event');
+        $event = $input->getArgument('event');
         $eventClass = $this->eventRegistry->getEventClassName($event);
         $eventShortName = null;
         if ($eventClass) {
@@ -80,31 +80,31 @@ final class MakeSubscriberCommand extends AbstractCommand
             $eventShortName = end($pieces);
         }
 
-        return [
+        return array(
             'subscriber_class_name' => $subscriberClassName,
             'event' => $event,
             'eventArg' => $eventShortName ? sprintf('%s $event', $eventShortName) : '$event',
             'methodName' => Str::asEventMethod($event),
             'eventUseStatement' => $eventClass ? sprintf("use $eventClass;\n") : '',
-        ];
+        );
     }
 
-    protected function getFiles(array $params): array
+    public function getFiles(array $params): array
     {
-        return [
+        return array(
             __DIR__.'/../Resources/skeleton/event/Subscriber.php.txt' => 'src/EventSubscriber/'.$params['subscriber_class_name'].'.php',
-        ];
+        );
     }
 
-    protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
-        $io->text([
+        $io->text(array(
             'Next: Open your new subscriber class and start customizing it.',
-            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/event_dispatcher.html#creating-an-event-subscriber</>'
-        ]);
+            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/event_dispatcher.html#creating-an-event-subscriber</>',
+        ));
     }
 
-    protected function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
     }
 }

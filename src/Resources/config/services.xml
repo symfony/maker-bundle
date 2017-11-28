@@ -5,8 +5,19 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
         <services>
-            <defaults autowire="true" autoconfigure="true" public="false" />
-            <prototype namespace="Symfony\Bundle\MakerBundle\" resource="../../*" exclude="../../{Tests}" />
-        </services>
+            <defaults public="false" />
 
+            <service id="maker.file_manager" class="Symfony\Bundle\MakerBundle\FileManager">
+                <argument type="service" id="filesystem" />
+                <argument>%kernel.project_dir%</argument>
+            </service>
+
+            <service id="maker.generator" class="Symfony\Bundle\MakerBundle\Generator">
+                <argument type="service" id="maker.file_manager" />
+            </service>
+
+            <service id="maker.event_registry" class="Symfony\Bundle\MakerBundle\EventRegistry">
+                <argument type="service" id="event_dispatcher" />
+            </service>
+        </services>
 </container>
