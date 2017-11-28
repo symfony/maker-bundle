@@ -17,18 +17,20 @@ use Symfony\Component\Filesystem\Filesystem;
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
+ *
+ * @internal
  */
-class FileManager
+final class FileManager
 {
     private $fs;
     private $rootDirectory;
     /** @var SymfonyStyle */
     private $io;
 
-    public function __construct(Filesystem $fs, string $rootDirectory = null)
+    public function __construct(Filesystem $fs, string $rootDirectory)
     {
         $this->fs = $fs;
-        $this->rootDirectory = $rootDirectory ?: getcwd();
+        $this->rootDirectory = $rootDirectory;
     }
 
     public function setIO(SymfonyStyle $io): void

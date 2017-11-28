@@ -9,35 +9,46 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bundle\MakerBundle\Command;
+namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\ORM\Mapping\Column;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class MakeEntityCommand extends AbstractCommand
+final class MakeEntity implements MakerInterface
 {
-    protected static $defaultName = 'make:entity';
-
-    public function configure()
+    public static function getCommandName(): string
     {
-        $this
+        return 'make:entity';
+    }
+
+    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    {
+        $command
             ->setDescription('Creates a new Doctrine entity class')
             ->addArgument('entity-class', InputArgument::OPTIONAL, sprintf('The class name of the entity to create (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
         ;
     }
 
-    protected function getParameters(): array
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        $entityClassName = Str::asClassName($this->input->getArgument('entity-class'));
+    }
+
+    public function getParameters(InputInterface $input): array
+    {
+        $entityClassName = Str::asClassName($input->getArgument('entity-class'));
         Validator::validateClassName($entityClassName);
         $entityAlias = strtolower($entityClassName[0]);
         $repositoryClassName = Str::addSuffix($entityClassName, 'Repository');
@@ -49,7 +60,7 @@ final class MakeEntityCommand extends AbstractCommand
         ];
     }
 
-    protected function getFiles(array $params): array
+    public function getFiles(array $params): array
     {
         return [
             __DIR__.'/../Resources/skeleton/doctrine/Entity.php.txt' => 'src/Entity/'.$params['entity_class_name'].'.php',
@@ -57,20 +68,15 @@ final class MakeEntityCommand extends AbstractCommand
         ];
     }
 
-    protected function getResultMessage(array $params): string
-    {
-        return sprintf('<fg=blue>%s</> entity and <fg=blue>%s</> created successfully.', $params['entity_class_name'], $params['repository_class_name']);
-    }
-
-    protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
         $io->text([
             'Next: Add more fields to your entity and start using it.',
-            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/doctrine.html#creating-an-entity-class</>'
+            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/doctrine.html#creating-an-entity-class</>',
         ]);
     }
 
-    protected function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Column::class,

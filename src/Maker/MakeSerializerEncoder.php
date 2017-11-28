@@ -9,28 +9,32 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bundle\MakerBundle\Command;
+namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Serializer\Serializer;
 
 /**
  * @author Piotr Grabski-Gradzinski <piotr.gradzinski@gmail.com>
  */
-final class MakeSerializerEncoderCommand extends AbstractCommand
+final class MakeSerializerEncoder implements MakerInterface
 {
-    protected static $defaultName = 'make:serializer:encoder';
-
-    protected function configure()
+    public static function getCommandName(): string
     {
-        $this
+        return 'make:serializer:encoder';
+    }
+
+    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    {
+        $command
             ->setDescription('Creates a new serializer encoder class')
             ->addArgument('name', InputArgument::OPTIONAL, 'Choose a class name for your encoder (e.g. <fg=yellow>YamlEncoder</>).')
             ->addArgument('format', InputArgument::OPTIONAL, 'Pick your format name (e.g. <fg=yellow>yaml</>)')
@@ -38,11 +42,15 @@ final class MakeSerializerEncoderCommand extends AbstractCommand
         ;
     }
 
-    protected function getParameters(): array
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        $encoderClassName = Str::asClassName($this->input->getArgument('name'), 'Encoder');
+    }
+
+    public function getParameters(InputInterface $input): array
+    {
+        $encoderClassName = Str::asClassName($input->getArgument('name'), 'Encoder');
         Validator::validateClassName($encoderClassName);
-        $format = $this->input->getArgument('format');
+        $format = $input->getArgument('format');
 
         return [
             'encoder_class_name' => $encoderClassName,
@@ -50,22 +58,22 @@ final class MakeSerializerEncoderCommand extends AbstractCommand
         ];
     }
 
-    protected function getFiles(array $params): array
+    public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/serializer/Encoder.php.txt' => 'src/Serializer/'.$params['encoder_class_name'].'.php'
+            __DIR__.'/../Resources/skeleton/serializer/Encoder.php.txt' => 'src/Serializer/'.$params['encoder_class_name'].'.php',
         ];
     }
 
-    protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
         $io->text([
             'Next: Open your new serializer encoder class and start customizing it.',
-            'Find the documentation at <fg=yellow>http://symfony.com/doc/current/serializer/custom_encoders.html</>'
+            'Find the documentation at <fg=yellow>http://symfony.com/doc/current/serializer/custom_encoders.html</>',
         ]);
     }
 
-    protected function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Serializer::class,

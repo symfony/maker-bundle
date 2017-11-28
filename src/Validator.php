@@ -17,7 +17,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-class Validator
+final class Validator
 {
     public static function validateClassName(string $className, string $errorMessage = ''): void
     {

@@ -9,35 +9,46 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bundle\MakerBundle\Command;
+namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Validator\Validation;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class MakeValidatorCommand extends AbstractCommand
+final class MakeValidator implements MakerInterface
 {
-    protected static $defaultName = 'make:validator';
-
-    public function configure()
+    public static function getCommandName(): string
     {
-        $this
+        return 'make:validator';
+    }
+
+    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    {
+        $command
             ->setDescription('Creates a new validator and constraint class')
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the validator class (e.g. <fg=yellow>EnabledValidator</>).')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeValidator.txt'))
         ;
     }
 
-    protected function getParameters(): array
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        $validatorClassName = Str::asClassName($this->input->getArgument('name'), 'Validator');
+    }
+
+    public function getParameters(InputInterface $input): array
+    {
+        $validatorClassName = Str::asClassName($input->getArgument('name'), 'Validator');
         Validator::validateClassName($validatorClassName);
         $constraintClassName = Str::removeSuffix($validatorClassName, 'Validator');
 
@@ -47,7 +58,7 @@ final class MakeValidatorCommand extends AbstractCommand
         ];
     }
 
-    protected function getFiles(array $params): array
+    public function getFiles(array $params): array
     {
         return [
             __DIR__.'/../Resources/skeleton/validator/Validator.php.txt' => 'src/Validator/Constraints/'.$params['validator_class_name'].'.php',
@@ -55,15 +66,15 @@ final class MakeValidatorCommand extends AbstractCommand
         ];
     }
 
-    protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
         $io->text([
             'Next: Open your new constraint & validators and add your logic.',
-            'Find the documentation at <fg=yellow>http://symfony.com/doc/current/validation/custom_constraint.html</>'
+            'Find the documentation at <fg=yellow>http://symfony.com/doc/current/validation/custom_constraint.html</>',
         ]);
     }
 
-    protected function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Validation::class,

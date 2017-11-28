@@ -9,34 +9,45 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bundle\MakerBundle\Command;
+namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-class MakeFunctionalTestCommand extends AbstractCommand
+class MakeFunctionalTest implements MakerInterface
 {
-    protected static $defaultName = 'make:functional-test';
-
-    public function configure()
+    public static function getCommandName(): string
     {
-        $this
+        return 'make:functional-test';
+    }
+
+    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    {
+        $command
             ->setDescription('Creates a new functional test class')
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the functional test class (e.g. <fg=yellow>DefaultControllerTest</>).')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeFunctionalTest.txt'))
         ;
     }
 
-    protected function getParameters(): array
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        $testClassName = Str::asClassName($this->input->getArgument('name'), 'Test');
+    }
+
+    public function getParameters(InputInterface $input): array
+    {
+        $testClassName = Str::asClassName($input->getArgument('name'), 'Test');
         Validator::validateClassName($testClassName);
 
         return [
@@ -44,27 +55,22 @@ class MakeFunctionalTestCommand extends AbstractCommand
         ];
     }
 
-    protected function getFiles(array $params): array
+    public function getFiles(array $params): array
     {
         return [
             __DIR__.'/../Resources/skeleton/test/Functional.php.txt' => 'tests/'.$params['test_class_name'].'.php',
         ];
     }
 
-    protected function getResultMessage(array $params): string
-    {
-        return sprintf('<fg=blue>%s</> created successfully.', $params['test_class_name']);
-    }
-
-    protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
         $io->text([
             'Next: Open your new test class and start customizing it.',
-            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/testing.html#functional-tests</>'
+            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/testing.html#functional-tests</>',
         ]);
     }
 
-    protected function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
     }
 }

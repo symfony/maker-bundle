@@ -9,13 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bundle\MakerBundle\Command;
+namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Validator\Validation;
 
@@ -23,22 +27,29 @@ use Symfony\Component\Validator\Validation;
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class MakeFormCommand extends AbstractCommand
+final class MakeForm implements MakerInterface
 {
-    protected static $defaultName = 'make:form';
-
-    public function configure()
+    public static function getCommandName(): string
     {
-        $this
+        return 'make:form';
+    }
+
+    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    {
+        $command
             ->setDescription('Creates a new form class')
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('The name of the form class (e.g. <fg=yellow>%sType</>)', Str::asClassName(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeForm.txt'))
         ;
     }
 
-    protected function getParameters(): array
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        $formClassName = Str::asClassName($this->input->getArgument('name'), 'Type');
+    }
+
+    public function getParameters(InputInterface $input): array
+    {
+        $formClassName = Str::asClassName($input->getArgument('name'), 'Type');
         Validator::validateClassName($formClassName);
         $entityClassName = Str::removeSuffix($formClassName, 'Type');
 
@@ -48,27 +59,22 @@ final class MakeFormCommand extends AbstractCommand
         ];
     }
 
-    protected function getFiles(array $params): array
+    public function getFiles(array $params): array
     {
         return [
             __DIR__.'/../Resources/skeleton/form/Type.php.txt' => 'src/Form/'.$params['form_class_name'].'.php',
         ];
     }
 
-    protected function getResultMessage(array $params): string
-    {
-        return sprintf('<fg=blue>%s</> created successfully.', $params['form_class_name']);
-    }
-
-    protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
         $io->text([
             'Next: Add fields to your form and start using it.',
-            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/forms.html</>'
+            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/forms.html</>',
         ]);
     }
 
-    protected function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             AbstractType::class,

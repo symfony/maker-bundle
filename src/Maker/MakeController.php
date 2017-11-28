@@ -9,47 +9,55 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bundle\MakerBundle\Command;
+namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
-use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class MakeControllerCommand extends AbstractCommand
+final class MakeController implements MakerInterface
 {
-    protected static $defaultName = 'make:controller';
-
     private $router;
 
-    public function __construct(Generator $generator, RouterInterface $router)
+    public function __construct(RouterInterface $router)
     {
         $this->router = $router;
-
-        parent::__construct($generator);
     }
 
-    public function configure()
+    public static function getCommandName(): string
     {
-        $this
+        return 'make:controller';
+    }
+
+    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    {
+        $command
             ->setDescription('Creates a new controller class')
             ->addArgument('controller-class', InputArgument::OPTIONAL, sprintf('Choose a name for your controller class (e.g. <fg=yellow>%sController</>)', Str::asClassName(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeController.txt'))
         ;
     }
 
-    protected function getParameters(): array
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        $controllerClassName = Str::asClassName($this->input->getArgument('controller-class'), 'Controller');
+    }
+
+    public function getParameters(InputInterface $input): array
+    {
+        $controllerClassName = Str::asClassName($input->getArgument('controller-class'), 'Controller');
         Validator::validateClassName($controllerClassName);
 
         return [
@@ -59,7 +67,7 @@ final class MakeControllerCommand extends AbstractCommand
         ];
     }
 
-    protected function getFiles(array $params): array
+    public function getFiles(array $params): array
     {
         $skeletonFile = $this->isTwigInstalled() ? 'ControllerWithTwig.php.txt' : 'Controller.php.txt';
 
@@ -68,12 +76,7 @@ final class MakeControllerCommand extends AbstractCommand
         ];
     }
 
-    protected function getResultMessage(array $params): string
-    {
-        return sprintf('%s created!', $params['controller_class_name']);
-    }
-
-    protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
         if (!count($this->router->getRouteCollection())) {
             $io->text('<error> Warning! </> No routes configuration defined yet.');
@@ -83,7 +86,7 @@ final class MakeControllerCommand extends AbstractCommand
         $io->text('Next: Open your new controller class and add some pages!');
     }
 
-    protected function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Route::class,

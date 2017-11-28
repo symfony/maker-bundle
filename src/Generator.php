@@ -17,8 +17,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
+ *
+ * @internal
  */
-class Generator
+final class Generator
 {
     private $fileManager;
     private $io;

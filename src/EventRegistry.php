@@ -28,6 +28,9 @@ use Symfony\Component\Security\Core\Event\AuthenticationFailureEvent;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 
+/**
+ * @internal
+ */
 class EventRegistry
 {
     // list of *known* events to always include (if they exist)
