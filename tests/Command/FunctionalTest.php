@@ -4,7 +4,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Command;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Command\AbstractCommand;
-use Symfony\Bundle\MakerBundle\Command\MakeAuthenticatorEmptyCommand;
+use Symfony\Bundle\MakerBundle\Command\MakeAuthenticatorCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeCommandCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeControllerCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeEntityCommand;
@@ -185,7 +185,7 @@ class FunctionalTest extends TestCase
         ];
 
         $commands['auth_empty'] = [
-            new MakeAuthenticatorEmptyCommand($generator),
+            new MakeAuthenticatorCommand($generator),
             [
                 // class name
                 'AppCustomAuthenticator'

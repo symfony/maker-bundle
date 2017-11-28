@@ -21,16 +21,16 @@ use Symfony\Bundle\SecurityBundle\SecurityBundle;
 /**
  * @author Ryan Weaver <ryan@knpuniversity.com>
  */
-final class MakeAuthenticatorEmptyCommand extends AbstractCommand
+final class MakeAuthenticatorCommand extends AbstractCommand
 {
-    protected static $defaultName = 'make:auth:empty';
+    protected static $defaultName = 'make:auth';
 
     public function configure()
     {
         $this
             ->setDescription('Creates an empty Guard authenticator')
             ->addArgument('authenticator-class', InputArgument::OPTIONAL, 'The class name of the authenticator to create (e.g. <fg=yellow>AppCustomAuthenticator</>)')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeAuthEmpty.txt'))
+            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeAuth.txt'))
         ;
     }
 
@@ -54,7 +54,7 @@ final class MakeAuthenticatorEmptyCommand extends AbstractCommand
     protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
     {
         $io->text([
-            'Next: Customize your new, empty authenticator.',
+            'Next: Customize your new authenticator.',
             'Then, configure the "guard" key on your firewall to use it.'
         ]);
     }
