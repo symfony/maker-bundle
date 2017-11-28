@@ -60,20 +60,20 @@ final class MakeController implements MakerInterface
         $controllerClassName = Str::asClassName($input->getArgument('controller-class'), 'Controller');
         Validator::validateClassName($controllerClassName);
 
-        return array(
+        return [
             'controller_class_name' => $controllerClassName,
             'route_path' => Str::asRoutePath(str_replace('Controller', '', $controllerClassName)),
             'route_name' => Str::asRouteName(str_replace('Controller', '', $controllerClassName)),
-        );
+        ];
     }
 
     public function getFiles(array $params): array
     {
         $skeletonFile = $this->isTwigInstalled() ? 'ControllerWithTwig.php.txt' : 'Controller.php.txt';
 
-        return array(
+        return [
             __DIR__.'/../Resources/skeleton/controller/'.$skeletonFile => 'src/Controller/'.$params['controller_class_name'].'.php',
-        );
+        ];
     }
 
     public function writeNextStepsMessage(array $params, ConsoleStyle $io): void

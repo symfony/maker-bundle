@@ -53,27 +53,27 @@ final class MakeEntity implements MakerInterface
         $entityAlias = strtolower($entityClassName[0]);
         $repositoryClassName = Str::addSuffix($entityClassName, 'Repository');
 
-        return array(
+        return [
             'entity_class_name' => $entityClassName,
             'entity_alias' => $entityAlias,
             'repository_class_name' => $repositoryClassName,
-        );
+        ];
     }
 
     public function getFiles(array $params): array
     {
-        return array(
+        return [
             __DIR__.'/../Resources/skeleton/doctrine/Entity.php.txt' => 'src/Entity/'.$params['entity_class_name'].'.php',
             __DIR__.'/../Resources/skeleton/doctrine/Repository.php.txt' => 'src/Repository/'.$params['repository_class_name'].'.php',
-        );
+        ];
     }
 
     public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
-        $io->text(array(
+        $io->text([
             'Next: Add more fields to your entity and start using it.',
             'Find the documentation at <fg=yellow>https://symfony.com/doc/current/doctrine.html#creating-an-entity-class</>',
-        ));
+        ]);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void

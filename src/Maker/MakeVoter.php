@@ -51,24 +51,24 @@ final class MakeVoter implements MakerInterface
         $voterClassName = Str::asClassName($input->getArgument('name'), 'Voter');
         Validator::validateClassName($voterClassName);
 
-        return array(
+        return [
             'voter_class_name' => $voterClassName,
-        );
+        ];
     }
 
     public function getFiles(array $params): array
     {
-        return array(
+        return [
             __DIR__.'/../Resources/skeleton/security/Voter.php.txt' => 'src/Security/Voter/'.$params['voter_class_name'].'.php',
-        );
+        ];
     }
 
     public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
-        $io->text(array(
+        $io->text([
             'Next: Open your voter and add your logic.',
             'Find the documentation at <fg=yellow>https://symfony.com/doc/current/security/voters.html</>',
-        ));
+        ]);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void

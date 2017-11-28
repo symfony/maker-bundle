@@ -28,7 +28,7 @@ final class Str
     /**
      * Ensures that the given string ends with the given suffix. If the string
      * already contains the suffix, it's not added twice. It's case-insensitive
-     * (e.g. value: 'Foocommand' suffix: 'Command' -> result: 'FooCommand')
+     * (e.g. value: 'Foocommand' suffix: 'Command' -> result: 'FooCommand').
      */
     public static function addSuffix(string $value, string $suffix): string
     {
@@ -38,7 +38,7 @@ final class Str
     /**
      * Ensures that the given string doesn't end with the given suffix. If the
      * string contains the suffix multiple times, only the last one is removed.
-     * It's case-insensitive (e.g. value: 'Foocommand' suffix: 'Command' -> result: 'Foo'
+     * It's case-insensitive (e.g. value: 'Foocommand' suffix: 'Command' -> result: 'Foo'.
      */
     public static function removeSuffix(string $value, string $suffix): string
     {
@@ -64,7 +64,7 @@ final class Str
 
     /**
      * Transforms the given string into the format commonly used by Twig variables
-     * (e.g. `BlogPostType` -> `blog_post_type`)
+     * (e.g. `BlogPostType` -> `blog_post_type`).
      */
     public static function asTwigVariable(string $value): string
     {

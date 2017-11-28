@@ -50,24 +50,24 @@ final class MakeAuthenticator implements MakerInterface
         $className = Str::asClassName($input->getArgument('authenticator-class'));
         Validator::validateClassName($className);
 
-        return array(
+        return [
             'class_name' => $className,
-        );
+        ];
     }
 
     public function getFiles(array $params): array
     {
-        return array(
+        return [
             __DIR__.'/../Resources/skeleton/authenticator/Empty.php.txt' => 'src/Security/'.$params['class_name'].'.php',
-        );
+        ];
     }
 
     public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
-        $io->text(array(
+        $io->text([
             'Next: Customize your new authenticator.',
             'Then, configure the "guard" key on your firewall to use it.',
-        ));
+        ]);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void

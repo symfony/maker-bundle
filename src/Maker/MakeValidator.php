@@ -52,26 +52,26 @@ final class MakeValidator implements MakerInterface
         Validator::validateClassName($validatorClassName);
         $constraintClassName = Str::removeSuffix($validatorClassName, 'Validator');
 
-        return array(
+        return [
             'validator_class_name' => $validatorClassName,
             'constraint_class_name' => $constraintClassName,
-        );
+        ];
     }
 
     public function getFiles(array $params): array
     {
-        return array(
+        return [
             __DIR__.'/../Resources/skeleton/validator/Validator.php.txt' => 'src/Validator/Constraints/'.$params['validator_class_name'].'.php',
             __DIR__.'/../Resources/skeleton/validator/Constraint.php.txt' => 'src/Validator/Constraints/'.$params['constraint_class_name'].'.php',
-        );
+        ];
     }
 
     public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
-        $io->text(array(
+        $io->text([
             'Next: Open your new constraint & validators and add your logic.',
             'Find the documentation at <fg=yellow>http://symfony.com/doc/current/validation/custom_constraint.html</>',
-        ));
+        ]);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void

@@ -53,25 +53,25 @@ final class MakeForm implements MakerInterface
         Validator::validateClassName($formClassName);
         $entityClassName = Str::removeSuffix($formClassName, 'Type');
 
-        return array(
+        return [
             'form_class_name' => $formClassName,
             'entity_class_name' => $entityClassName,
-        );
+        ];
     }
 
     public function getFiles(array $params): array
     {
-        return array(
+        return [
             __DIR__.'/../Resources/skeleton/form/Type.php.txt' => 'src/Form/'.$params['form_class_name'].'.php',
-        );
+        ];
     }
 
     public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
-        $io->text(array(
+        $io->text([
             'Next: Add fields to your form and start using it.',
             'Find the documentation at <fg=yellow>https://symfony.com/doc/current/forms.html</>',
-        ));
+        ]);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void

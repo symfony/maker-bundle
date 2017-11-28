@@ -51,24 +51,24 @@ final class MakeTwigExtension implements MakerInterface
         $extensionClassName = Str::asClassName($input->getArgument('name'), 'Extension');
         Validator::validateClassName($extensionClassName);
 
-        return array(
+        return [
             'extension_class_name' => $extensionClassName,
-        );
+        ];
     }
 
     public function getFiles(array $params): array
     {
-        return array(
+        return [
             __DIR__.'/../Resources/skeleton/twig/Extension.php.txt' => 'src/Twig/'.$params['extension_class_name'].'.php',
-        );
+        ];
     }
 
     public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
-        $io->text(array(
+        $io->text([
             'Next: Open your new extension class and start customizing it.',
             'Find the documentation at <fg=yellow>http://symfony.com/doc/current/templating/twig_extension.html</>',
-        ));
+        ]);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void

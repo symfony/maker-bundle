@@ -52,25 +52,25 @@ final class MakeSerializerEncoder implements MakerInterface
         Validator::validateClassName($encoderClassName);
         $format = $input->getArgument('format');
 
-        return array(
+        return [
             'encoder_class_name' => $encoderClassName,
             'format' => $format,
-        );
+        ];
     }
 
     public function getFiles(array $params): array
     {
-        return array(
+        return [
             __DIR__.'/../Resources/skeleton/serializer/Encoder.php.txt' => 'src/Serializer/'.$params['encoder_class_name'].'.php',
-        );
+        ];
     }
 
     public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
-        $io->text(array(
+        $io->text([
             'Next: Open your new serializer encoder class and start customizing it.',
             'Find the documentation at <fg=yellow>http://symfony.com/doc/current/serializer/custom_encoders.html</>',
-        ));
+        ]);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void

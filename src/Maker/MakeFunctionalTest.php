@@ -50,24 +50,24 @@ class MakeFunctionalTest implements MakerInterface
         $testClassName = Str::asClassName($input->getArgument('name'), 'Test');
         Validator::validateClassName($testClassName);
 
-        return array(
+        return [
             'test_class_name' => $testClassName,
-        );
+        ];
     }
 
     public function getFiles(array $params): array
     {
-        return array(
+        return [
             __DIR__.'/../Resources/skeleton/test/Functional.php.txt' => 'tests/'.$params['test_class_name'].'.php',
-        );
+        ];
     }
 
     public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
-        $io->text(array(
+        $io->text([
             'Next: Open your new test class and start customizing it.',
             'Find the documentation at <fg=yellow>https://symfony.com/doc/current/testing.html#functional-tests</>',
-        ));
+        ]);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void

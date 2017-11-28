@@ -26,10 +26,10 @@ class MakeCommandRegistrationPass implements CompilerPassInterface
             $container->register(
                 sprintf('maker.auto_command.%s', Str::asTwigVariable($class::getCommandName())),
                 MakerCommand::class
-            )->setArguments(array(
+            )->setArguments([
                 new Reference($id),
                 new Reference('maker.generator'),
-            ))->addTag('console.command', array('command' => $class::getCommandName()));
+            ])->addTag('console.command', ['command' => $class::getCommandName()]);
         }
     }
 }

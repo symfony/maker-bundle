@@ -51,25 +51,25 @@ final class MakeCommand implements MakerInterface
         $commandClassName = Str::asClassName($commandName, 'Command');
         Validator::validateClassName($commandClassName, sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, $commandClassName));
 
-        return array(
+        return [
             'command_name' => $commandName,
             'command_class_name' => $commandClassName,
-        );
+        ];
     }
 
     public function getFiles(array $params): array
     {
-        return array(
+        return [
             __DIR__.'/../Resources/skeleton/command/Command.php.txt' => 'src/Command/'.$params['command_class_name'].'.php',
-        );
+        ];
     }
 
     public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
     {
-        $io->text(array(
+        $io->text([
             'Next: open your new command class and customize it!',
             'Find the documentation at <fg=yellow>https://symfony.com/doc/current/console.html</>',
-        ));
+        ]);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void
