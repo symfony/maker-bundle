@@ -48,7 +48,7 @@ class FunctionalTest extends TestCase
      */
     public function testCommands(AbstractCommand $command, array $inputs)
     {
-        /** @var AbstractCommand $command */
+        /* @var AbstractCommand $command */
         $command->setCheckDependencies(false);
         $command->setGenerator($this->createGenerator());
 
@@ -71,126 +71,126 @@ class FunctionalTest extends TestCase
     public function getCommandTests()
     {
         $generator = $this->createGenerator();
-        $commands = [];
+        $commands = array();
 
-        $commands['command'] = [
+        $commands['command'] = array(
             new MakeCommandCommand($generator),
-            [
+            array(
                 // command name
-                'app:foo'
-            ]
-        ];
+                'app:foo',
+            ),
+        );
 
         $router = $this->createMock(RouterInterface::class);
         $router->expects($this->once())
             ->method('getRouteCollection')
             ->willReturn(new RouteCollection());
-        $commands['controller'] = [
+        $commands['controller'] = array(
             new MakeControllerCommand($generator, $router),
-            [
+            array(
                 // controller class name
-                'FooBar'
-            ]
-        ];
+                'FooBar',
+            ),
+        );
 
-        $commands['entity'] = [
+        $commands['entity'] = array(
             new MakeEntityCommand($generator),
-            [
+            array(
                 // entity class name
-                'FooBar'
-            ]
-        ];
+                'FooBar',
+            ),
+        );
 
-        $commands['form'] = [
+        $commands['form'] = array(
             new MakeFormCommand($generator),
-            [
+            array(
                 // form name
-                'FooBar'
-            ]
-        ];
+                'FooBar',
+            ),
+        );
 
-        $commands['functional'] = [
+        $commands['functional'] = array(
             new MakeFunctionalTestCommand($generator),
-            [
+            array(
                 // functional test class
-                'FooBar'
-            ]
-        ];
+                'FooBar',
+            ),
+        );
 
         $eventRegistry = $this->createMock(EventRegistry::class);
         $eventRegistry->expects($this->any())
             ->method('getAllActiveEvents')
-            ->willReturn(['foo.bar']);
+            ->willReturn(array('foo.bar'));
         $eventRegistry->expects($this->once())
             ->method('getEventClassName')
             ->with('kernel.request')
             ->willReturn(GetResponseEvent::class);
-        $commands['subscriber'] = [
+        $commands['subscriber'] = array(
             new MakeSubscriberCommand($generator, $eventRegistry),
-            [
+            array(
                 // subscriber name
                 'FooBar',
                 // event name
-                'kernel.request'
-            ],
-        ];
+                'kernel.request',
+            ),
+        );
 
         $eventRegistry2 = $this->createMock(EventRegistry::class);
         $eventRegistry2->expects($this->any())
             ->method('getAllActiveEvents')
-            ->willReturn([]);
+            ->willReturn(array());
         $eventRegistry2->expects($this->once())
             ->method('getEventClassName')
             ->willReturn(null);
-        $commands['subscriber_unknown_event_class'] = [
+        $commands['subscriber_unknown_event_class'] = array(
             new MakeSubscriberCommand($generator, $eventRegistry2),
-            [
+            array(
                 // subscriber name
                 'FooBar',
                 // event name
-                'foo.unknown_event'
-            ],
-        ];
+                'foo.unknown_event',
+            ),
+        );
 
-        $commands['twig_extension'] = [
+        $commands['twig_extension'] = array(
             new MakeTwigExtensionCommand($generator),
-            [
+            array(
                 // extension class name
-                'FooBar'
-            ]
-        ];
+                'FooBar',
+            ),
+        );
 
-        $commands['unit_test'] = [
+        $commands['unit_test'] = array(
             new MakeUnitTestCommand($generator),
-            [
+            array(
                 // class name
-                'FooBar'
-            ]
-        ];
+                'FooBar',
+            ),
+        );
 
-        $commands['validator'] = [
+        $commands['validator'] = array(
             new MakeValidatorCommand($generator),
-            [
+            array(
                 // validator name
-                'FooBar'
-            ]
-        ];
+                'FooBar',
+            ),
+        );
 
-        $commands['voter'] = [
+        $commands['voter'] = array(
             new MakeVoterCommand($generator),
-            [
+            array(
                 // voter class name
-                'FooBar'
-            ]
-        ];
+                'FooBar',
+            ),
+        );
 
-        $commands['auth_empty'] = [
+        $commands['auth_empty'] = array(
             new MakeAuthenticatorCommand($generator),
-            [
+            array(
                 // class name
-                'AppCustomAuthenticator'
-            ]
-        ];
+                'AppCustomAuthenticator',
+            ),
+        );
 
         return $commands;
     }
@@ -202,7 +202,7 @@ class FunctionalTest extends TestCase
 
     private function parsePHPFiles($output)
     {
-        $files = [];
+        $files = array();
         foreach (explode("\n", $output) as $line) {
             if (false === strpos($line, 'created:')) {
                 continue;

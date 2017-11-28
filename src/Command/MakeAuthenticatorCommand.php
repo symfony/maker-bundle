@@ -39,24 +39,24 @@ final class MakeAuthenticatorCommand extends AbstractCommand
         $className = Str::asClassName($this->input->getArgument('authenticator-class'));
         Validator::validateClassName($className);
 
-        return [
+        return array(
             'class_name' => $className,
-        ];
+        );
     }
 
     protected function getFiles(array $params): array
     {
-        return [
+        return array(
             __DIR__.'/../Resources/skeleton/authenticator/Empty.php.txt' => 'src/Security/'.$params['class_name'].'.php',
-        ];
+        );
     }
 
     protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
     {
-        $io->text([
+        $io->text(array(
             'Next: Customize your new authenticator.',
-            'Then, configure the "guard" key on your firewall to use it.'
-        ]);
+            'Then, configure the "guard" key on your firewall to use it.',
+        ));
     }
 
     protected function configureDependencies(DependencyBuilder $dependencies)
