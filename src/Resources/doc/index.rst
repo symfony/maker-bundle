@@ -1,8 +1,8 @@
-SymfonyMakerBundle
-==================
+The Symfony MakerBundle
+=======================
 
-Symfony Maker helps you creating empty commands, controllers, form classes,
-tests and more so you can forget about the required boilerplate code. This
+Symfony Maker helps you create empty commands, controllers, form classes,
+tests and more so you can forget about writing boilerplate code. This
 bundle is an alternative to `SensioGeneratorBundle`_ for modern Symfony
 applications and requires using Symfony 3.4 or newer and `Symfony Flex`_.
 
@@ -46,76 +46,65 @@ Creating your Own Makers
 
 In case your applications need to generate custom boilerplate code, you can
 create your own ``make:...`` command reusing the tools provided by this bundle.
-Imagine that you need to create a ``make:report`` command. First, create an
-empty command:
+Imagine that you need to create a ``make:report`` command. First, create a
+class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`:
 
-.. code-block:: terminal
+    // src/Maker/ReportMaker.php
+    namespace App\Maker;
 
-    $ cd your-project/
-    $ php bin/console make:command 'make:report'
-
-Then, change the generated command to extend from
-:class:`Symfony\\Bundle\\MakerBundle\\Command\\AbstractCommand`, which is the
-base command used by all ``make:`` commands:
-
-.. code-block:: diff
-
-    // ...
-    -use Symfony\Component\Console\Command\Command;
-    +use Symfony\Bundle\MakerBundle\Command\AbstractCommand;
-
-    -class MakeReportCommand extends Command
-    +class MakeReportCommand extends AbstractCommand
-    {
-        protected static $defaultName = 'make:report';
-
-        // ...
-    }
-
-Finally, implement the methods required by the ``AbstractCommand`` class::
-
-    // ...
-    use Symfony\Bundle\MakerBundle\Command\AbstractCommand;
     use Symfony\Bundle\MakerBundle\ConsoleStyle;
     use Symfony\Bundle\MakerBundle\DependencyBuilder;
+    use Symfony\Bundle\MakerBundle\InputConfiguration;
+    use Symfony\Bundle\MakerBundle\MakerInterface;
+    use Symfony\Bundle\MakerBundle\Str;
+    use Symfony\Bundle\MakerBundle\Validator;
+    use Symfony\Component\Console\Command\Command;
+    use Symfony\Component\Console\Input\InputArgument;
+    use Symfony\Component\Console\Input\InputInterface;
 
-    class MakeReportCommand extends AbstractCommand
+    class ReportMaker implements MakerInterface
     {
-        protected static $defaultName = 'make:report';
-
-        // ...
-
-        // Returns pairs of name-value parameters used to fill in the
-        // skeleton files of the generated code and the success/error messages
-        protected function getParameters(): array
+        public static function getCommandName(): string
         {
-            return [
-                'filename' => sprintf('report-%s.txt', date('YmdHis')),
-            ];
+            return 'make:report';
         }
 
-        // Returns pairs of skeleton files (absolute paths) and their corresponding
-        // generated files (with paths relative to the app)
-        protected function getFiles(array $params): array
+        public function configureCommand(Command $command, InputConfiguration $inputConf): void
         {
-            return [
-                __DIR__.'/../Resources/skeleton/report.txt' => 'reports/'.$params['filename'];
-            ];
+            $command
+                ->setDescription('Creates a new console command class')
+                ->addArgument('name', InputArgument::OPTIONAL, sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
+            ;
         }
 
-        // Optionally, display some message after the generation of code
-        protected function writeNextStepsMessage(array $params, ConsoleStyle $io)
+        public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
         {
-            $io->text(sprintf('A new report was generated in the %s file.', $params['filename']));
         }
 
-        // Optionally, define which classes must exist in the application to make
-        // this command work (useful to ensure that needed dependencies are installed)
-        protected function configureDependencies(DependencyBuilder $dependencies)
+        public function getParameters(InputInterface $input): array
         {
-            $dependencies->addClassDependency(PdfGenerator::class, ['acme-pdf-generator'], true);
+            return array();
+        }
+
+        public function getFiles(array $params): array
+        {
+            return array();
+        }
+
+        public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
+        {
+        }
+
+        public function configureDependencies(DependencyBuilder $dependencies): void
+        {
         }
     }
+
+For examples of how to complete this class, see the `core maker commands`_.
+Make sure your class is registered as a service and tagged with ``maker.command``.
+If you're using the standard Symfony ``services.yaml`` configuration, this
+will be done automatically.
 
 .. _`SensioGeneratorBundle`: https://github.com/sensiolabs/SensioGeneratorBundle
 .. _`Symfony Flex`: https://symfony.com/doc/current/setup/flex.html
+.. _`core maker commands`: https://github.com/symfony/maker-bundle/tree/master/src/Maker

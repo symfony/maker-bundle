@@ -1,13 +1,29 @@
-SymfonyMakerBundle
-==================
+The Symfony MakerBundle
+=======================
 
-Symfony Maker helps you creating empty commands, controllers, form classes,
-tests and more so you can forget about the required boilerplate code. This
-bundle is an alternative to [SensioGeneratorBundle][1] for modern Symfony
-applications and requires using Symfony 3.4 or newer and [Symfony Flex][2].
+The MakerBundle is the fastest way to generate the most common code you'll
+need in a Symfony app: commands, controllers, form classes, event susbcribers
+and more! This bundle replaces [SensioGeneratorBundle][1] for modern Symfony
+applications and requires Symfony 3.4 or newer and [Symfony Flex][2].
 
-[Read the docs][3]
+[![Build Status](https://travis-ci.org/knpuniversity/oauth2-client-bundle.svg)](http://travis-ci.org/symfony/maker-bundle)
+
+[Read the documentation][3]
+
+Backwards Compatibility Promise
+-------------------------------
+
+This bundle shares the [backwards compatibility promise][4] from
+Symfony. But, with a few clarifications.
+
+A) The input arguments or options to a command *may* change between
+   minor releases. If you're using the commands in an automated,
+   scripted way, be aware of this.
+
+B) The generated code itself may change between minor releases. This
+   will allow us to continuously improve the generated code!
 
 [1]: https://github.com/sensiolabs/SensioGeneratorBundle
 [2]: https://symfony.com/doc/current/setup/flex.html
 [3]: src/Resources/doc/index.rst
+[4]: http://symfony.com/doc/current/contributing/code/bc.html
