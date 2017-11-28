@@ -58,7 +58,7 @@ final class MakeAuthenticator implements MakerInterface
     public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/authenticator/Empty.php.txt' => 'src/Security/'.$params['class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/authenticator/Empty.tpl.php' => 'src/Security/'.$params['class_name'].'.php',
         ];
     }
 

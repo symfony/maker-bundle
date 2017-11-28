@@ -61,7 +61,7 @@ final class MakeSerializerEncoder implements MakerInterface
     public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/serializer/Encoder.php.txt' => 'src/Serializer/'.$params['encoder_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/serializer/Encoder.tpl.php' => 'src/Serializer/'.$params['encoder_class_name'].'.php',
         ];
     }
 

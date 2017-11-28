@@ -59,7 +59,7 @@ final class MakeVoter implements MakerInterface
     public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/security/Voter.php.txt' => 'src/Security/Voter/'.$params['voter_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/security/Voter.tpl.php' => 'src/Security/Voter/'.$params['voter_class_name'].'.php',
         ];
     }
 

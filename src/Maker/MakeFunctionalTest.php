@@ -58,7 +58,7 @@ class MakeFunctionalTest implements MakerInterface
     public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/test/Functional.php.txt' => 'tests/'.$params['test_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/test/Functional.tpl.php' => 'tests/'.$params['test_class_name'].'.php',
         ];
     }
 
