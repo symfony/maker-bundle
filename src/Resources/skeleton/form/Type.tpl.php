@@ -1,13 +1,13 @@
-<?php
+//PHP_OPEN
 
 namespace App\Form;
 
-use App\Entity\{{ entity_class_name }};
+use App\Entity\<?php echo $entity_class_name; ?>;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class {{ form_class_name }} extends AbstractType
+class <?php echo $form_class_name; ?> extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -20,7 +20,7 @@ class {{ form_class_name }} extends AbstractType
     {
         $resolver->setDefaults([
             // uncomment if you want to bind to a class
-            //'data_class' => {{ entity_class_name }}::class,
+            //'data_class' => <?php echo $entity_class_name; ?>::class,
         ]);
     }
 }

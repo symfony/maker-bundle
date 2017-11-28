@@ -1,10 +1,10 @@
-<?php
+//PHP_OPEN
 
 namespace App\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class {{ test_class_name }} extends WebTestCase
+class <?php echo $test_class_name; ?> extends WebTestCase
 {
     public function testSomething()
     {

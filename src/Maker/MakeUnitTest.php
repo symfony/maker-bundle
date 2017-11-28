@@ -58,7 +58,7 @@ final class MakeUnitTest implements MakerInterface
     public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/test/Unit.php.txt' => 'tests/'.$params['test_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/test/Unit.tpl.php' => 'tests/'.$params['test_class_name'].'.php',
         ];
     }
 

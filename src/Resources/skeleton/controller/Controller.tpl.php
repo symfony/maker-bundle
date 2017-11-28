@@ -1,4 +1,4 @@
-<?php
+//PHP_OPEN
 
 namespace App\Controller;
 
@@ -6,10 +6,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
-class {{ controller_class_name }} extends AbstractController
+class <?php echo $controller_class_name; ?> extends AbstractController
 {
     /**
-     * @Route("{{ route_path }}", name="{{ route_name }}")
+     * @Route("<?php echo $route_path; ?>", name="<?php echo $route_name; ?>")
      */
     public function index()
     {

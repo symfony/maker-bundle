@@ -1,10 +1,10 @@
-<?php
+//PHP_OPEN
 
 namespace App\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-class {{ test_class_name }} extends TestCase
+class <?php echo $test_class_name; ?> extends TestCase
 {
     public function testSomething()
     {

@@ -1,4 +1,4 @@
-<?php
+//PHP_OPEN
 
 namespace App\Security;
 
@@ -9,7 +9,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticator;
 
-class {{ class_name }} extends GuardAuthenticator
+class <?php echo $class_name; ?> extends GuardAuthenticator
 {
     public function supports(Request $request)
     {

@@ -62,7 +62,7 @@ final class MakeForm implements MakerInterface
     public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/form/Type.php.txt' => 'src/Form/'.$params['form_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/form/Type.tpl.php' => 'src/Form/'.$params['form_class_name'].'.php',
         ];
     }
 
