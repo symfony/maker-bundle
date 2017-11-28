@@ -9,6 +9,7 @@ use Symfony\Bundle\MakerBundle\Command\MakeControllerCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeEntityCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeFormCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeFunctionalTestCommand;
+use Symfony\Bundle\MakerBundle\Command\MakeSerializerEncoderCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeSubscriberCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeTwigExtensionCommand;
 use Symfony\Bundle\MakerBundle\Command\MakeUnitTestCommand;
@@ -149,6 +150,16 @@ class FunctionalTest extends TestCase
                 // event name
                 'foo.unknown_event'
             ],
+        ];
+
+        $commands['serializer_encoder'] = [
+            new MakeSerializerEncoderCommand($generator),
+            [
+                // encoder class name
+                'FooBarEncoder',
+                // encoder format
+                'foobar'
+            ]
         ];
 
         $commands['twig_extension'] = [
