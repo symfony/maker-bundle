@@ -3,10 +3,8 @@ The Symfony MakerBundle
 
 The MakerBundle is the fastest way to generate the most common code you'll
 need in a Symfony app: commands, controllers, form classes, event susbcribers
-and more! This bundle replaces [SensioGeneratorBundle][1] for modern Symfony
-applications and requires Symfony 3.4 or newer and [Symfony Flex][2].
-
-[![Build Status](https://travis-ci.org/knpuniversity/oauth2-client-bundle.svg)](http://travis-ci.org/symfony/maker-bundle)
+and more! This bundle is an alternative to [SensioGeneratorBundle][1] for modern
+Symfony applications and requires Symfony 3.4 or newer and [Symfony Flex][2].
 
 [Read the documentation][3]
 
