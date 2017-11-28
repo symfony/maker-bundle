@@ -5,15 +5,14 @@ namespace App\Security\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
-
+{{ entity_class_use_statement }}
 class {{ voter_class_name }} extends Voter
 {
     protected function supports($attribute, $subject)
     {
         // replace with your own logic
         // https://symfony.com/doc/current/security/voters.html
-        return in_array($attribute, ['EDIT', 'VIEW'])
-            && $subject instanceof App\Entity\BlogPost;
+        return in_array($attribute, ['EDIT', 'VIEW']){{ entity_supports_statement }};
     }
 
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
