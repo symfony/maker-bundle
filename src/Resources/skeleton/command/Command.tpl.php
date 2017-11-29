@@ -1,4 +1,5 @@
-//PHP_OPEN
+<?= '<?php' ?>
+
 
 namespace App\Command;
 
@@ -9,9 +10,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class <?php echo $command_class_name; ?> extends Command
+class <?= $command_class_name ?> extends Command
 {
-    protected static $defaultName = '<?php echo $command_name; ?>';
+    protected static $defaultName = '<?= $command_name ?>';
 
     protected function configure()
     {

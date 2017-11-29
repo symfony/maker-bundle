@@ -1,13 +1,14 @@
-//PHP_OPEN
+<?= '<?php' ?>
+
 
 namespace App\Serializer;
 
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
-class <?php echo $encoder_class_name; ?> implements EncoderInterface, DecoderInterface
+class <?= $encoder_class_name ?> implements EncoderInterface, DecoderInterface
 {
-    public const FORMAT = '<?php echo $format; ?>';
+    public const FORMAT = '<?= $format ?>';
     
     public function encode($data, $format, array $context = [])
     {

@@ -1,4 +1,5 @@
-//PHP_OPEN
+<?= '<?php' ?>
+
 
 namespace App\Validator\Constraints;
 
@@ -7,7 +8,7 @@ use Symfony\Component\Validator\Constraint;
 /**
  * @Annotation
  */
-class <?php echo $constraint_class_name; ?> extends Constraint
+class <?= $constraint_class_name ?> extends Constraint
 {
     /*
      * Any public properties become valid options for the annotation.

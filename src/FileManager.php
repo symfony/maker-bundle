@@ -43,9 +43,8 @@ final class FileManager
         ob_start();
         extract($parameters);
         include $templatePath;
-        $contents = ob_get_clean();
 
-        return str_replace('//PHP_OPEN', '<?php', $contents);
+        return ob_get_clean();
     }
 
     public function dumpFile(string $filename, string $content): void
