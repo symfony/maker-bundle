@@ -13,41 +13,41 @@ class <?= $class_name ?> extends GuardAuthenticator
 {
     public function supports(Request $request)
     {
-
+        // todo
     }
 
     public function getCredentials(Request $request)
     {
-
+        // todo
     }
 
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
-
+        // todo
     }
 
     public function checkCredentials($credentials, UserInterface $user)
     {
-
+        // todo
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-
+        // todo
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
-
-    }
-
-    public function supportsRememberMe()
-    {
-
+        // todo
     }
 
     public function start(Request $request, AuthenticationException $authException = null)
     {
+        // todo
+    }
 
+    public function supportsRememberMe()
+    {
+        // todo
     }
 }

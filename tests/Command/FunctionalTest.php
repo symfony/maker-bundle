@@ -71,10 +71,10 @@ class FunctionalTest extends TestCase
 
         $files = $this->parsePHPFiles($tester->getDisplay());
         foreach ($files as $file) {
-            $process = new Process(sprintf('php -l %s', $file), $this->targetDir);
+            $process = new Process(sprintf('php vendor/bin/php-cs-fixer fix --dry-run --diff %s', $this->targetDir.'/'.$file), __DIR__.'/../../');
             $process->run();
             if (!$process->isSuccessful()) {
-                throw new \Exception(sprintf('File "%s" has a syntax error: %s', $file, $process->getOutput()));
+                throw new \Exception(sprintf('File "%s" has a php-cs problem: %s', $file, $process->getOutput()));
             }
         }
     }
