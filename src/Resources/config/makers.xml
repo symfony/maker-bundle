@@ -17,6 +17,7 @@
 
             <service id="maker.maker.make_controller" class="Symfony\Bundle\MakerBundle\Maker\MakeController">
                 <argument type="service" id="router" />
+                <argument>%kernel.project_dir%</argument>
                 <tag name="maker.command" />
             </service>
 
