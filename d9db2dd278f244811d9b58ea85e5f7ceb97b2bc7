@@ -1,0 +1,31 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-11-28T20:54:02Z
+
+This is rebased and ready. I'm still getting false fabbot failures on the `[]` array syntax...
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-11-28T21:06:13Z
+
+Changes made... except for the one change...
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-11-29T14:17:34Z
+
+Changes made! fabbot still dislikes me, but it's unrelated :)
+
+---------------------------------------------------------------------------
+
+by stof at 2017-11-29T14:28:53Z
+
+@fabpot any idea why fabbot would not use the config file in the repo ?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-11-29T15:11:52Z
+
+@stof nice catch! I've just added php-cs-fixer to the tests, so that we can verify the generated files follow coding standards (especially important because that empty line stuff is very easy to mess up).
+
+Thanks!
