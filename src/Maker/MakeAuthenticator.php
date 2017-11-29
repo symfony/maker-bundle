@@ -32,7 +32,7 @@ final class MakeAuthenticator implements MakerInterface
         return 'make:auth';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
+    public function configureCommand(Command $command, InputConfiguration $inputConfig)
     {
         $command
             ->setDescription('Creates an empty Guard authenticator')
@@ -41,7 +41,7 @@ final class MakeAuthenticator implements MakerInterface
         ;
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
     }
 
@@ -62,7 +62,7 @@ final class MakeAuthenticator implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
     {
         $io->text([
             'Next: Customize your new authenticator.',
@@ -70,7 +70,7 @@ final class MakeAuthenticator implements MakerInterface
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies): void
+    public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
             SecurityBundle::class,

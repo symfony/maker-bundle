@@ -30,13 +30,13 @@ final class Generator
         $this->fileManager = $fileManager;
     }
 
-    public function setIO(SymfonyStyle $io): void
+    public function setIO(SymfonyStyle $io)
     {
         $this->io = $io;
         $this->fileManager->setIO($io);
     }
 
-    public function generate(array $parameters, array $files): void
+    public function generate(array $parameters, array $files)
     {
         // check if any of the files to be generated already exists
         foreach ($files as $target) {

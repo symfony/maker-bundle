@@ -33,7 +33,7 @@ final class MakeValidator implements MakerInterface
         return 'make:validator';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
             ->setDescription('Creates a new validator and constraint class')
@@ -42,7 +42,7 @@ final class MakeValidator implements MakerInterface
         ;
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
     }
 
@@ -66,7 +66,7 @@ final class MakeValidator implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
     {
         $io->text([
             'Next: Open your new constraint & validators and add your logic.',
@@ -74,7 +74,7 @@ final class MakeValidator implements MakerInterface
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies): void
+    public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
             Validation::class,

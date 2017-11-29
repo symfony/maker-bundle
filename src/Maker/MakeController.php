@@ -42,7 +42,7 @@ final class MakeController implements MakerInterface
         return 'make:controller';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
             ->setDescription('Creates a new controller class')
@@ -51,7 +51,7 @@ final class MakeController implements MakerInterface
         ;
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
     }
 
@@ -76,7 +76,7 @@ final class MakeController implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
     {
         if (!count($this->router->getRouteCollection())) {
             $io->text('<error> Warning! </> No routes configuration defined yet.');
@@ -86,7 +86,7 @@ final class MakeController implements MakerInterface
         $io->text('Next: Open your new controller class and add some pages!');
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies): void
+    public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
             Route::class,

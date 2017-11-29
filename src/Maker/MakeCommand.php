@@ -32,7 +32,7 @@ final class MakeCommand implements MakerInterface
         return 'make:command';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
             ->setDescription('Creates a new console command class')
@@ -41,7 +41,7 @@ final class MakeCommand implements MakerInterface
         ;
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
     }
 
@@ -64,7 +64,7 @@ final class MakeCommand implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
     {
         $io->text([
             'Next: open your new command class and customize it!',
@@ -72,7 +72,7 @@ final class MakeCommand implements MakerInterface
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies): void
+    public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
             Command::class,

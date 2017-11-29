@@ -33,7 +33,7 @@ final class FileManager
         $this->rootDirectory = $rootDirectory;
     }
 
-    public function setIO(SymfonyStyle $io): void
+    public function setIO(SymfonyStyle $io)
     {
         $this->io = $io;
     }
@@ -47,7 +47,7 @@ final class FileManager
         return ob_get_clean();
     }
 
-    public function dumpFile(string $filename, string $content): void
+    public function dumpFile(string $filename, string $content)
     {
         $this->fs->dumpFile($this->absolutizePath($filename), $content);
         $this->io->comment(sprintf('<fg=green>created</>: %s', $this->relativizePath($filename)));

@@ -37,14 +37,14 @@ interface MakerInterface
      * @param Command            $command
      * @param InputConfiguration $inputConfig
      */
-    public function configureCommand(Command $command, InputConfiguration $inputConfig): void;
+    public function configureCommand(Command $command, InputConfiguration $inputConfig);
 
     /**
      * Configure any library dependencies that your maker requires.
      *
      * @param DependencyBuilder $dependencies
      */
-    public function configureDependencies(DependencyBuilder $dependencies): void;
+    public function configureDependencies(DependencyBuilder $dependencies);
 
     /**
      * If necessary, you can use this method to interactively ask the user for input.
@@ -53,7 +53,7 @@ interface MakerInterface
      * @param ConsoleStyle   $io
      * @param Command        $command
      */
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void;
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command);
 
     /**
      * Return an array of variables that will be made available to the
@@ -88,5 +88,5 @@ interface MakerInterface
      * @param array        $params
      * @param ConsoleStyle $io
      */
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void;
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io);
 }
