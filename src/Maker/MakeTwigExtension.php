@@ -59,7 +59,7 @@ final class MakeTwigExtension implements MakerInterface
     public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/twig/Extension.php.txt' => 'src/Twig/'.$params['extension_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/twig/Extension.tpl.php' => 'src/Twig/'.$params['extension_class_name'].'.php',
         ];
     }
 

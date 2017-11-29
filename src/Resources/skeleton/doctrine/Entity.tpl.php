@@ -1,13 +1,13 @@
-<?php
+<?= "<?php\n" ?>
 
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\{{ repository_class_name }}")
+ * @ORM\Entity(repositoryClass="App\Repository\<?= $repository_class_name ?>")
  */
-class {{ entity_class_name }}
+class <?= $entity_class_name."\n" ?>
 {
     /**
      * @ORM\Id

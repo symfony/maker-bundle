@@ -40,13 +40,11 @@ final class FileManager
 
     public function parseTemplate(string $templatePath, array $parameters): string
     {
-        $keys = array_keys($parameters);
-        $values = array_values($parameters);
-        $placeholders = array_map(function ($name) {
-            return "{{ $name }}";
-        }, $keys);
+        ob_start();
+        extract($parameters, EXTR_SKIP);
+        include $templatePath;
 
-        return str_replace($placeholders, $values, file_get_contents($templatePath));
+        return ob_get_clean();
     }
 
     public function dumpFile(string $filename, string $content): void
