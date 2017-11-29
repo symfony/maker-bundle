@@ -1,0 +1,43 @@
+---------------------------------------------------------------------------
+
+by fabpot at 2017-11-24T13:24:46Z
+
+👎 for this as it does not work when using a globally installed PHPUnit.
+
+---------------------------------------------------------------------------
+
+by yceruto at 2017-11-24T14:09:35Z
+
+Agree, I made it optional, but I expected some comment messages for those who don't use global installation. Wdyt?
+
+---------------------------------------------------------------------------
+
+by fabpot at 2017-11-24T14:15:19Z
+
+Even if this is optional, I don't want to make people think that this is what they need to do.
+
+---------------------------------------------------------------------------
+
+by jzawadzki at 2017-11-24T14:24:38Z
+
+on same note, I think we should add BrowserKit as dependency for functional test
+
+---------------------------------------------------------------------------
+
+by yceruto at 2017-11-24T14:25:45Z
+
+Agree again, but I'm placed in the broken side, I don't have phpunit globally installed, I've generated the unit test file and it does not work, what can I do ... :/ Shouldn't something like "You might require install phpunit through composer or globally" help people to solve the broken state? Not as a red comment but as a grey note comment. Wdyt?
+
+---------------------------------------------------------------------------
+
+by fabpot at 2017-11-24T14:28:05Z
+
+You can't hint at installing PHPUnit globally as you have no idea if that's the case or not. I don't want a warning each time I generate a unit test file if I have PHPUnit installed globally.
+
+---------------------------------------------------------------------------
+
+by yceruto at 2017-11-24T14:42:42Z
+
+@fabpot fair enough, thank you for all feedbacks.
+
+@jzawadzki thanks, that's true, I've changed the goal of the PR.
