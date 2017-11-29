@@ -20,6 +20,7 @@ use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\BrowserKit\Client;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -72,5 +73,9 @@ class MakeFunctionalTest implements MakerInterface
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
+        $dependencies->addClassDependency(
+            Client::class,
+            'browser-kit'
+        );
     }
 }
