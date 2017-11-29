@@ -41,7 +41,7 @@ final class FileManager
     public function parseTemplate(string $templatePath, array $parameters): string
     {
         ob_start();
-        extract($parameters);
+        extract($parameters, EXTR_SKIP);
         include $templatePath;
 
         return ob_get_clean();
