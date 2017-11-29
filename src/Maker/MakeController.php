@@ -69,7 +69,7 @@ final class MakeController implements MakerInterface
 
     public function getFiles(array $params): array
     {
-        $skeletonFile = $this->isTwigInstalled() ? 'ControllerWithTwig.php.txt' : 'Controller.php.txt';
+        $skeletonFile = $this->isTwigInstalled() ? 'ControllerWithTwig.tpl.php' : 'Controller.tpl.php';
 
         return [
             __DIR__.'/../Resources/skeleton/controller/'.$skeletonFile => 'src/Controller/'.$params['controller_class_name'].'.php',

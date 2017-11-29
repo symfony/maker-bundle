@@ -61,8 +61,8 @@ final class MakeValidator implements MakerInterface
     public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/validator/Validator.php.txt' => 'src/Validator/Constraints/'.$params['validator_class_name'].'.php',
-            __DIR__.'/../Resources/skeleton/validator/Constraint.php.txt' => 'src/Validator/Constraints/'.$params['constraint_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/validator/Validator.tpl.php' => 'src/Validator/Constraints/'.$params['validator_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/validator/Constraint.tpl.php' => 'src/Validator/Constraints/'.$params['constraint_class_name'].'.php',
         ];
     }
 
