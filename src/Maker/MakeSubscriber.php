@@ -41,7 +41,7 @@ final class MakeSubscriber implements MakerInterface
         return 'make:subscriber';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
             ->setDescription('Creates a new event subscriber class')
@@ -53,7 +53,7 @@ final class MakeSubscriber implements MakerInterface
         $inputConf->setArgumentAsNonInteractive('event');
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
         if (!$input->getArgument('event')) {
             $events = $this->eventRegistry->getAllActiveEvents();
@@ -96,7 +96,7 @@ final class MakeSubscriber implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
     {
         $io->text([
             'Next: Open your new subscriber class and start customizing it.',
@@ -104,7 +104,7 @@ final class MakeSubscriber implements MakerInterface
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies): void
+    public function configureDependencies(DependencyBuilder $dependencies)
     {
     }
 }

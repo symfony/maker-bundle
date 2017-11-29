@@ -33,7 +33,7 @@ final class MakeVoter implements MakerInterface
         return 'make:voter';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
             ->setDescription('Creates a new security voter class')
@@ -42,7 +42,7 @@ final class MakeVoter implements MakerInterface
         ;
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
     }
 
@@ -63,7 +63,7 @@ final class MakeVoter implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
     {
         $io->text([
             'Next: Open your voter and add your logic.',
@@ -71,7 +71,7 @@ final class MakeVoter implements MakerInterface
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies): void
+    public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
             Voter::class,

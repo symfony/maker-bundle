@@ -11,7 +11,7 @@
     ],
     "minimum-stability": "beta",
     "require": {
-        "php": "^7.1.3",
+        "php": "^7.0.8",
         "symfony/config": "^3.4|^4.0",
         "symfony/console": "^3.4|^4.0",
         "symfony/dependency-injection": "^3.4|^4.0",

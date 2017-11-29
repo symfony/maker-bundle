@@ -7,7 +7,7 @@ use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
 class <?= $encoder_class_name ?> implements EncoderInterface, DecoderInterface
 {
-    public const FORMAT = '<?= $format ?>';
+    const FORMAT = '<?= $format ?>';
 
     public function encode($data, $format, array $context = [])
     {

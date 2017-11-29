@@ -84,7 +84,7 @@ class EventRegistry
     /**
      * Attempts to get the event class for a given event.
      */
-    public function getEventClassName(string $event): ?string
+    public function getEventClassName(string $event)
     {
         if (isset(self::$eventsMap[$event])) {
             return self::$eventsMap[$event];

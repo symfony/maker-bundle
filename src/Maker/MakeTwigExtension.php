@@ -33,7 +33,7 @@ final class MakeTwigExtension implements MakerInterface
         return 'make:twig-extension';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf): void
+    public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
             ->setDescription('Creates a new Twig extension class')
@@ -42,7 +42,7 @@ final class MakeTwigExtension implements MakerInterface
         ;
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
     }
 
@@ -63,7 +63,7 @@ final class MakeTwigExtension implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
+    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
     {
         $io->text([
             'Next: Open your new extension class and start customizing it.',
@@ -71,7 +71,7 @@ final class MakeTwigExtension implements MakerInterface
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies): void
+    public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
             AbstractExtension::class,

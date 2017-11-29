@@ -19,7 +19,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
  */
 final class Validator
 {
-    public static function validateClassName(string $className, string $errorMessage = ''): void
+    public static function validateClassName(string $className, string $errorMessage = '')
     {
         if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $className)) {
             $errorMessage = $errorMessage ?: sprintf('"%s" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)', $className);
