@@ -47,7 +47,7 @@ Creating your Own Makers
 In case your applications need to generate custom boilerplate code, you can
 create your own ``make:...`` command reusing the tools provided by this bundle.
 Imagine that you need to create a ``make:report`` command. First, create a
-class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`:
+class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`::
 
     // src/Maker/ReportMaker.php
     namespace App\Maker;
@@ -72,8 +72,8 @@ class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`:
         public function configureCommand(Command $command, InputConfiguration $inputConf): void
         {
             $command
-                ->setDescription('Creates a new console command class')
-                ->addArgument('name', InputArgument::OPTIONAL, sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
+                ->setDescription('Creates a new report')
+                ->addArgument('name', InputArgument::OPTIONAL, 'Choose the report format', 'pdf')
             ;
         }
 
