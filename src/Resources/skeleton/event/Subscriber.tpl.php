@@ -1,10 +1,9 @@
-<?= '<?php' ?>
-
+<?= "<?php\n" ?>
 
 namespace App\EventSubscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-<?= $eventUseStatement ?>
+<?= $eventClass ? "use $eventClass;\n" : '' ?>
 
 class <?= $subscriber_class_name ?> implements EventSubscriberInterface
 {

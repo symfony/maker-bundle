@@ -1,5 +1,4 @@
-<?= '<?php' ?>
-
+<?= "<?php\n" ?>
 
 namespace App\Command;
 

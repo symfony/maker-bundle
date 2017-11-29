@@ -74,9 +74,7 @@ interface MakerInterface
      *        __DIR__.'/../Resources/skeleton/command/Command.tpl.php' => 'src/Command/'.$params['command_class_name'].'.php',
      *    );
      *
-     * These files are parsed as PHP. To avoid syntax errors, replace the
-     * <?php tag in your templates with `//PHP_OPEN`. After evaluating the
-     * file, this is replaced with `<?php`.
+     * These files are parsed as PHP.
      *
      * @param array $params The parameters returned from getParameters()
      *

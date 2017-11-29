@@ -85,7 +85,7 @@ final class MakeSubscriber implements MakerInterface
             'event' => $event,
             'eventArg' => $eventShortName ? sprintf('%s $event', $eventShortName) : '$event',
             'methodName' => Str::asEventMethod($event),
-            'eventUseStatement' => $eventClass ? sprintf("use $eventClass;\n") : '',
+            'eventClass' => $eventClass,
         ];
     }
 
