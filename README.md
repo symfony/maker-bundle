@@ -23,5 +23,5 @@ B) The generated code itself may change between minor releases. This
 
 [1]: https://github.com/sensiolabs/SensioGeneratorBundle
 [2]: https://symfony.com/doc/current/setup/flex.html
-[3]: src/Resources/doc/index.rst
-[4]: http://symfony.com/doc/current/contributing/code/bc.html
+[3]: https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html
+[4]: https://symfony.com/doc/current/contributing/code/bc.html
