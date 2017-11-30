@@ -7,6 +7,9 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
+use Symfony\Bundle\MakerBundle\EventRegistry;
+use Symfony\Bundle\MakerBundle\FileManager;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator;
 use Symfony\Bundle\MakerBundle\Maker\MakeCommand;
 use Symfony\Bundle\MakerBundle\Maker\MakeController;
@@ -19,9 +22,6 @@ use Symfony\Bundle\MakerBundle\Maker\MakeTwigExtension;
 use Symfony\Bundle\MakerBundle\Maker\MakeUnitTest;
 use Symfony\Bundle\MakerBundle\Maker\MakeValidator;
 use Symfony\Bundle\MakerBundle\Maker\MakeVoter;
-use Symfony\Bundle\MakerBundle\EventRegistry;
-use Symfony\Bundle\MakerBundle\FileManager;
-use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\MakerBundle;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -38,20 +38,19 @@ use Symfony\Component\Routing\RouterInterface;
 
 class FunctionalTest extends TestCase
 {
+    private $fs;
     private $targetDir;
 
     public function setUp()
     {
-        $tmpDir = sys_get_temp_dir().'/sf'.random_int(111111, 999999);
-        @mkdir($tmpDir, 0777, true);
-
-        $this->targetDir = $tmpDir;
+        $this->targetDir = sys_get_temp_dir().'/'.uniqid('sf_maker_', true);
+        $this->fs = new Filesystem();
+        $this->fs->mkdir($this->targetDir);
     }
 
     public function tearDown()
     {
-        $fs = new Filesystem();
-        $fs->remove($this->targetDir);
+        $this->fs->remove($this->targetDir);
     }
 
     /**
@@ -60,7 +59,6 @@ class FunctionalTest extends TestCase
     public function testCommands(MakerInterface $maker, array $inputs)
     {
         $command = new MakerCommand($maker, $this->createGenerator());
-
         $command->setCheckDependencies(false);
 
         $tester = new CommandTester($command);
@@ -81,9 +79,7 @@ class FunctionalTest extends TestCase
 
     public function getCommandTests()
     {
-        $makers = array();
-
-        $makers['command'] = array(
+        yield 'command' => array(
             new MakeCommand(),
             array(
                 // command name
@@ -95,7 +91,7 @@ class FunctionalTest extends TestCase
         $router->expects($this->once())
             ->method('getRouteCollection')
             ->willReturn(new RouteCollection());
-        $makers['controller'] = array(
+        yield 'controller' => array(
             new MakeController($router),
             array(
                 // controller class name
@@ -103,7 +99,7 @@ class FunctionalTest extends TestCase
             ),
         );
 
-        $makers['entity'] = array(
+        yield 'entity' => array(
             new MakeEntity(),
             array(
                 // entity class name
@@ -111,7 +107,7 @@ class FunctionalTest extends TestCase
             ),
         );
 
-        $makers['form'] = array(
+        yield 'form' => array(
             new MakeForm(),
             array(
                 // form name
@@ -119,7 +115,7 @@ class FunctionalTest extends TestCase
             ),
         );
 
-        $makers['functional'] = array(
+        yield 'functional' => array(
             new MakeFunctionalTest(),
             array(
                 // functional test class
@@ -135,7 +131,7 @@ class FunctionalTest extends TestCase
             ->method('getEventClassName')
             ->with('kernel.request')
             ->willReturn(GetResponseEvent::class);
-        $makers['subscriber'] = array(
+        yield 'subscriber' => array(
             new MakeSubscriber($eventRegistry),
             array(
                 // subscriber name
@@ -152,7 +148,7 @@ class FunctionalTest extends TestCase
         $eventRegistry2->expects($this->once())
             ->method('getEventClassName')
             ->willReturn(null);
-        $makers['subscriber_unknown_event_class'] = array(
+        yield 'subscriber_unknown_event_class' => array(
             new MakeSubscriber($eventRegistry2),
             array(
                 // subscriber name
@@ -162,7 +158,7 @@ class FunctionalTest extends TestCase
             ),
         );
 
-        $makers['serializer_encoder'] = array(
+        yield 'serializer_encoder' => array(
             new MakeSerializerEncoder(),
             array(
                 // encoder class name
@@ -172,7 +168,7 @@ class FunctionalTest extends TestCase
             ),
         );
 
-        $makers['twig_extension'] = array(
+        yield 'twig_extension' => array(
             new MakeTwigExtension(),
             array(
                 // extension class name
@@ -180,7 +176,7 @@ class FunctionalTest extends TestCase
             ),
         );
 
-        $makers['unit_test'] = array(
+        yield 'unit_test' => array(
             new MakeUnitTest(),
             array(
                 // class name
@@ -188,7 +184,7 @@ class FunctionalTest extends TestCase
             ),
         );
 
-        $makers['validator'] = array(
+        yield 'validator' => array(
             new MakeValidator(),
             array(
                 // validator name
@@ -196,7 +192,7 @@ class FunctionalTest extends TestCase
             ),
         );
 
-        $makers['voter'] = array(
+        yield 'voter' => array(
             new MakeVoter(),
             array(
                 // voter class name
@@ -204,15 +200,13 @@ class FunctionalTest extends TestCase
             ),
         );
 
-        $makers['auth_empty'] = array(
+        yield 'auth_empty' => array(
             new MakeAuthenticator(),
             array(
                 // class name
                 'AppCustomAuthenticator',
             ),
         );
-
-        return $makers;
     }
 
     /**
@@ -228,7 +222,7 @@ class FunctionalTest extends TestCase
 
         $application = new Application($kernel);
         foreach ($finder as $file) {
-            $class = 'Symfony\Bundle\MakerBundle\Maker\\'.substr($file->getFilename(), 0, strlen($file->getFilename()) - 4);
+            $class = 'Symfony\Bundle\MakerBundle\Maker\\'.$file->getBasename('.php');
 
             $commandName = $class::getCommandName();
             // if the command does not exist, this will explode
@@ -263,8 +257,6 @@ class FunctionalTestKernel extends Kernel
 {
     use MicroKernelTrait;
 
-    private $cacheDir;
-
     public function registerBundles()
     {
         return array(
@@ -282,12 +274,8 @@ class FunctionalTestKernel extends Kernel
         $c->setParameter('kernel.secret', 123);
     }
 
-    public function getCacheDir()
+    public function getRootDir()
     {
-        if (null === $this->cacheDir) {
-            $this->cacheDir = sys_get_temp_dir().'/'.rand(100, 999);
-        }
-
-        return $this->cacheDir;
+        return sys_get_temp_dir().'/'.uniqid('sf_maker_', true);
     }
 }
