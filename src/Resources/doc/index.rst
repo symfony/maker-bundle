@@ -73,7 +73,8 @@ class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`::
         {
             $command
                 ->setDescription('Creates a new report')
-                ->addArgument('name', InputArgument::OPTIONAL, 'Choose the report format', 'pdf')
+                ->addArgument('name', InputArgument::OPTIONAL, 'Choose a class name for your report (e.g. <fg=yellow>PdfReport</>).')
+                ->addArgument('format', InputArgument::OPTIONAL, 'Choose the report format', 'pdf')
             ;
         }
 
@@ -83,16 +84,28 @@ class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`::
 
         public function getParameters(InputInterface $input): array
         {
-            return [];
+            $reportClassName = Str::asClassName($input->getArgument('name'), 'Report');
+            Validator::validateClassName($reportClassName);
+            $format = $input->getArgument('format');
+            
+            return [
+                'report_class_name' => $reportClassName,
+                'format' => $format,
+            ];
         }
 
         public function getFiles(array $params): array
         {
-            return [];
+            return [
+                __DIR__.'/../Resources/skeleton/report/Report.tpl.php' => 'src/Report/'.$params['report_class_name'].'.php',
+            ];
         }
 
         public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
         {
+            $io->text([
+                'Next: Open your new report and start customizing it.',
+            ]);
         }
 
         public function configureDependencies(DependencyBuilder $dependencies): void
@@ -100,7 +113,19 @@ class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`::
         }
     }
 
-For examples of how to complete this class, see the `core maker commands`_.
+Second, create your template that will be filled with data from your command::
+
+    // src/Resources/skeleton/report/Report.tpl.php
+    <?= "<?php\n" ?>
+
+    namespace App\Report;
+    
+    class <?= $report_class_name ?>
+    {
+        public const FORMAT = '<?= $format ?>';
+    }
+
+For examples of how to complete your new maker command, see the `core maker commands`_.
 Make sure your class is registered as a service and tagged with ``maker.command``.
 If you're using the standard Symfony ``services.yaml`` configuration, this
 will be done automatically.
