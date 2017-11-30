@@ -83,12 +83,12 @@ class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`::
 
         public function getParameters(InputInterface $input): array
         {
-            return array();
+            return [];
         }
 
         public function getFiles(array $params): array
         {
-            return array();
+            return [];
         }
 
         public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
