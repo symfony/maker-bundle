@@ -12,8 +12,7 @@ class <?= $voter_class_name ?> extends Voter
     {
         // replace with your own logic
         // https://symfony.com/doc/current/security/voters.html
-        return in_array($attribute, ['EDIT', 'VIEW'])
-            && $subject instanceof App\Entity\BlogPost;
+        return in_array($attribute, ['EDIT', 'VIEW'])<?= $voter_entity_class ? ' && $subject instanceof '.$voter_entity_class : '' ?>;
     }
 
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)

@@ -50,9 +50,11 @@ final class MakeVoter implements MakerInterface
     {
         $voterClassName = Str::asClassName($input->getArgument('name'), 'Voter');
         Validator::validateClassName($voterClassName);
+        $entityClass = '\\App\\Entity\\'.Str::removeSuffix($voterClassName, 'Voter');
 
         return [
             'voter_class_name' => $voterClassName,
+            'voter_entity_class' => class_exists($entityClass) ? $entityClass : false,
         ];
     }
 
