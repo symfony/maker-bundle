@@ -11,11 +11,13 @@
 
 namespace Symfony\Bundle\MakerBundle\Exception;
 
+use Symfony\Component\Console\Exception\RuntimeException;
+
 /**
  * An exception whose output is displayed as a clean error.
  *
  * @author Ryan Weaver <ryan@knpuniversity.com>
  */
-final class RuntimeCommandException extends \Exception
+final class RuntimeCommandException extends RuntimeException
 {
 }
