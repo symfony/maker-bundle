@@ -69,7 +69,7 @@ class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`::
             return 'make:report';
         }
 
-        public function configureCommand(Command $command, InputConfiguration $inputConf): void
+        public function configureCommand(Command $command, InputConfiguration $inputConf)
         {
             $command
                 ->setDescription('Creates a new report')
@@ -78,7 +78,7 @@ class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`::
             ;
         }
 
-        public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
+        public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
         {
         }
 
@@ -101,14 +101,14 @@ class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`::
             ];
         }
 
-        public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
+        public function writeNextStepsMessage(array $params, ConsoleStyle $io)
         {
             $io->text([
                 'Next: Open your new report and start customizing it.',
             ]);
         }
 
-        public function configureDependencies(DependencyBuilder $dependencies): void
+        public function configureDependencies(DependencyBuilder $dependencies)
         {
         }
     }
