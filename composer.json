@@ -9,7 +9,6 @@
             "homepage": "https://symfony.com/contributors"
         }
     ],
-    "minimum-stability": "beta",
     "require": {
         "php": "^7.0.8",
         "symfony/config": "^3.4|^4.0",
