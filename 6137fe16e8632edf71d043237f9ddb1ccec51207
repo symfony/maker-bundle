@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------
+
+by stof at 2017-11-29T19:22:27Z
+
+I agree about this change, but not actually for the reason given in the tweet
+
+---------------------------------------------------------------------------
+
+by stof at 2017-11-29T19:23:17Z
+
+hmm, actually, as it requires Symfony 3.4+, such change has to wait until tomorrow (otherwise the CI cannot install dependencies when allowing only stable ones)
