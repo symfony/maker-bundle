@@ -32,6 +32,10 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_form_type_extension" class="Symfony\Bundle\MakerBundle\Maker\MakeFormTypeExtension">
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_functional_test" class="Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest">
                 <tag name="maker.command" />
             </service>
