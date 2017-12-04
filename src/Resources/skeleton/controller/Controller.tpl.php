@@ -11,7 +11,7 @@ class <?= $controller_class_name ?> extends Controller
     /**
      * @Route("<?= $route_path ?>", name="<?= $route_name ?>")
      */
-    public function index(): Response
+    public function index()
     {
         return new Response('Welcome to your new controller!');
     }
