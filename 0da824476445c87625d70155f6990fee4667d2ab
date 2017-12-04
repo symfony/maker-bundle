@@ -1,0 +1,31 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-12-04T01:26:59Z
+
+Also fixed in #82. Are the semi-colons needed? I would like to also update the other controller skeleton so that they are both consistent. You PR was first, so if you can update, we’ll merge your’s :)
+
+---------------------------------------------------------------------------
+
+by welcoMattic at 2017-12-04T09:02:22Z
+
+Hi @weaverryan,
+
+The PR is up to date ;)
+
+Semi-colons are required by fabbot.io which is not happy on my first push for coding style issues. So, I fixed it.
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2017-12-04T09:07:49Z
+
+I'd say we should ignore fabbot.io about semicolons. Not adding the semicolon is find in PHP and IMO it looks much better.
+
+About the Controller vs AbstractController debate, it's clear we have a problem. In theory, AbstractController is "better" and we want to promote it ... but in practice some users don't like it and it's been proposed to keep using Controller. My opinion: either we promote AbstractController for real ... or we should remove it.
+
+---------------------------------------------------------------------------
+
+by welcoMattic at 2017-12-04T09:20:56Z
+
+Hi @javiereguiluz, I removed semi-colons.
+
+For the debate about AbstractController vs Controller, let me know if I have to switch again. IMHO, we should promote AbstractController. And may be move `getParameter` in AbstractController if there is no side effects.
