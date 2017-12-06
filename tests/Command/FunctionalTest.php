@@ -177,10 +177,18 @@ class FunctionalTest extends TestCase
         );
 
         yield 'unit_test' => array(
-            new MakeUnitTest(),
+            new MakeUnitTest(__DIR__.'/../Fixtures'),
             array(
                 // class name
                 'FooBar',
+            ),
+        );
+
+        yield 'unit_test_from_file_path' => array(
+            new MakeUnitTest(__DIR__.'/../Fixtures'),
+            array(
+                // file path
+                'src/Security/Voter/FooVoter.php',
             ),
         );
 

@@ -27,6 +27,13 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 final class MakeUnitTest implements MakerInterface
 {
+    private $projectDir;
+
+    public function __construct(string $projectDir)
+    {
+        $this->projectDir = $projectDir;
+    }
+
     public static function getCommandName(): string
     {
         return 'make:unit-test';
@@ -47,18 +54,22 @@ final class MakeUnitTest implements MakerInterface
 
     public function getParameters(InputInterface $input): array
     {
-        $testClassName = Str::asClassName($input->getArgument('name'), 'Test');
+        list($testPath, $testNamespace, $testClassName) = $this->extractParameters($input->getArgument('name'));
+
+        $testClassName = Str::asClassName($testClassName, 'Test');
         Validator::validateClassName($testClassName);
 
         return [
             'test_class_name' => $testClassName,
+            'test_namespace' => $testNamespace,
+            'test_path' => $testPath,
         ];
     }
 
     public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/test/Unit.tpl.php' => 'tests/'.$params['test_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/test/Unit.tpl.php' => $params['test_path'].$params['test_class_name'].'.php',
         ];
     }
 
@@ -72,5 +83,23 @@ final class MakeUnitTest implements MakerInterface
 
     public function configureDependencies(DependencyBuilder $dependencies)
     {
+    }
+
+    private function extractParameters(string $name): array
+    {
+        $testPath = 'tests/';
+        $testClassName = $name;
+        $testNamespace = 'App\Tests';
+        if (file_exists($filePath = $this->projectDir.'/'.$name)) {
+            $file = new \SplFileInfo($filePath);
+            $testClassName = $file->getBasename('.php');
+            $path = substr($name, strpos($name, '/') + 1, -strlen($file->getBasename()));
+            if ('' !== $path) {
+                $testPath .= $path;
+                $testNamespace .= '\\'.str_replace('/', '\\', substr($path, 0, -1));
+            }
+        }
+
+        return [$testPath, $testNamespace, $testClassName];
     }
 }
