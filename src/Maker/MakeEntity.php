@@ -49,9 +49,13 @@ final class MakeEntity implements MakerInterface
    public function getParameters(InputInterface $input): array
     {
         $classname = $input->getArgument('entity-class');
+       
         $parts = explode('\\',$classname);
+       
         $short_classname = $parts[count($parts)-1] ;
+       
         $namespace = implode('\\',array_slice($parts,0,-1));
+       
         $classname = $short_classname ;
 
         $path = str_replace('\\','/',$namespace);
