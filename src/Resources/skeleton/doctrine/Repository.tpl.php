@@ -1,8 +1,8 @@
 <?= "<?php\n" ?>
 
-namespace App\Repository;
+namespace App\Repository<?= $entity_namespace ? '\\'.$entity_namespace : '' ?>;
 
-use App\Entity\<?= $entity_class_name ?>;
+use App\Entity\<?= $entity_namespace ? $entity_namespace.'\\' : '' ?><?= $entity_class_name ?>;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
