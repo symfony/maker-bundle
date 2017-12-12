@@ -48,9 +48,7 @@ final class MakeEntity implements MakerInterface
 
    public function getParameters(InputInterface $input): array
     {
-
         $classname = $input->getArgument('entity-class');
-
         $parts = explode('\\',$classname);
         $short_classname = $parts[count($parts)-1] ;
         $namespace = implode('\\',array_slice($parts,0,-1));
@@ -59,11 +57,8 @@ final class MakeEntity implements MakerInterface
         $path = str_replace('\\','/',$namespace);
 
         if ($namespace) {
-
             $path = $path.'/' ;
         }
-
-
 
         $entityClassName = Str::asClassName($classname);
         Validator::validateClassName($entityClassName);
