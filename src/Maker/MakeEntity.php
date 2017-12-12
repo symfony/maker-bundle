@@ -41,14 +41,33 @@ final class MakeEntity extends AbstractMaker
         ;
     }
 
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    {
+    }
+
     public function getParameters(InputInterface $input): array
     {
-        $entityClassName = Str::asClassName($input->getArgument('entity-class'));
+        $classname = $input->getArgument('entity-class');
+        
+        $parts = explode('\\',$classname);
+        $short_classname = $parts[count($parts)-1] ;
+        $namespace = implode('\\',array_slice($parts,0,-1));
+        $classname = $short_classname ;
+
+        $path = str_replace('\\','/',$namespace);
+
+        if ($namespace) {
+            $path = $path.'/' ;
+        }
+
+        $entityClassName = Str::asClassName($classname);
         Validator::validateClassName($entityClassName);
         $entityAlias = strtolower($entityClassName[0]);
         $repositoryClassName = Str::addSuffix($entityClassName, 'Repository');
 
         return [
+            'path' => $path,
+            'entity_namespace' => $namespace,
             'entity_class_name' => $entityClassName,
             'entity_alias' => $entityAlias,
             'repository_class_name' => $repositoryClassName,
@@ -58,8 +77,8 @@ final class MakeEntity extends AbstractMaker
     public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/doctrine/Entity.tpl.php' => 'src/Entity/'.$params['entity_class_name'].'.php',
-            __DIR__.'/../Resources/skeleton/doctrine/Repository.tpl.php' => 'src/Repository/'.$params['repository_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/doctrine/Entity.tpl.php' => 'src/Entity/'.$params['path'].$params['entity_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/doctrine/Repository.tpl.php' => 'src/Repository/'.$params['path'].$params['repository_class_name'].'.php',
         ];
     }
 
