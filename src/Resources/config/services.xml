@@ -23,5 +23,9 @@
             <service id="maker.console_error_listener" class="Symfony\Bundle\MakerBundle\Event\ConsoleErrorSubscriber">
                 <tag name="kernel.event_subscriber" />
             </service>
+
+            <service id="maker.command.entities" class="Symfony\Bundle\MakerBundle\Command\GenerateEntitiesCommand">
+                <tag name="console.command" command="make:doctrine:entities" />
+            </service>
         </services>
 </container>
