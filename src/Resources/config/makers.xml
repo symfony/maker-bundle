@@ -46,6 +46,7 @@
             </service>
 
             <service id="maker.maker.make_unit_test" class="Symfony\Bundle\MakerBundle\Maker\MakeUnitTest">
+                <argument>%kernel.project_dir%</argument>
                 <tag name="maker.command" />
             </service>
 
