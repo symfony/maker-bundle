@@ -21,7 +21,7 @@ class GenerateEntitiesCommand extends ContainerAwareCommand
             ->setDescription('Generates entity classes and method stubs from your mapping information for flex based project')
             ->addArgument('name', InputArgument::OPTIONAL, 'An entity name')
             ->addOption('path', null, InputOption::VALUE_REQUIRED, 'The path where to generate entities when it cannot be guessed')
-            ->addOption('no-backup', null, InputOption::VALUE_NONE, 'Do not backup existing entities files.')
+            ->addOption('backup', null, InputOption::VALUE_NONE, 'Backup existing entities files.')
         ;
     }
 
@@ -46,7 +46,7 @@ class GenerateEntitiesCommand extends ContainerAwareCommand
 
         $generator = $this->getEntityGenerator();
 
-        $backupExisting = !$input->getOption('no-backup');
+        $backupExisting = $input->getOption('backup');
         $generator->setBackupExisting($backupExisting);
 
         $repoGenerator = new EntityRepositoryGenerator();
