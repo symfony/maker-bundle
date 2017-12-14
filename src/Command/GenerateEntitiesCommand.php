@@ -22,6 +22,16 @@ class GenerateEntitiesCommand extends ContainerAwareCommand
             ->addArgument('name', InputArgument::OPTIONAL, 'An entity name')
             ->addOption('path', null, InputOption::VALUE_REQUIRED, 'The path where to generate entities when it cannot be guessed')
             ->addOption('backup', null, InputOption::VALUE_NONE, 'Backup existing entities files.')
+            ->setHelp(<<<EOT
+This command is port of "doctrine:generate:entities" for symfony flex based projects.
+There is some differences from original command:
+
+    * Without argument generate all entities.
+    * With argument generate one entity specified by argument.
+    * No backups by default. To do backups, use <info>--backup</info> option.
+
+EOT
+)
         ;
     }
 
