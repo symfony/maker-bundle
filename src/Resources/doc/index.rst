@@ -46,84 +46,9 @@ Creating your Own Makers
 
 In case your applications need to generate custom boilerplate code, you can
 create your own ``make:...`` command reusing the tools provided by this bundle.
-Imagine that you need to create a ``make:report`` command. First, create a
-class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`::
-
-    // src/Maker/ReportMaker.php
-    namespace App\Maker;
-
-    use Symfony\Bundle\MakerBundle\ConsoleStyle;
-    use Symfony\Bundle\MakerBundle\DependencyBuilder;
-    use Symfony\Bundle\MakerBundle\InputConfiguration;
-    use Symfony\Bundle\MakerBundle\MakerInterface;
-    use Symfony\Bundle\MakerBundle\Str;
-    use Symfony\Bundle\MakerBundle\Validator;
-    use Symfony\Component\Console\Command\Command;
-    use Symfony\Component\Console\Input\InputArgument;
-    use Symfony\Component\Console\Input\InputInterface;
-
-    class ReportMaker implements MakerInterface
-    {
-        public static function getCommandName(): string
-        {
-            return 'make:report';
-        }
-
-        public function configureCommand(Command $command, InputConfiguration $inputConf)
-        {
-            $command
-                ->setDescription('Creates a new report')
-                ->addArgument('name', InputArgument::OPTIONAL, 'Choose a class name for your report (e.g. <fg=yellow>PdfReport</>).')
-                ->addArgument('format', InputArgument::OPTIONAL, 'Choose the report format', 'pdf')
-            ;
-        }
-
-        public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
-        {
-        }
-
-        public function getParameters(InputInterface $input): array
-        {
-            $reportClassName = Str::asClassName($input->getArgument('name'), 'Report');
-            Validator::validateClassName($reportClassName);
-            $format = $input->getArgument('format');
-            
-            return [
-                'report_class_name' => $reportClassName,
-                'format' => $format,
-            ];
-        }
-
-        public function getFiles(array $params): array
-        {
-            return [
-                __DIR__.'/../Resources/skeleton/report/Report.tpl.php' => 'src/Report/'.$params['report_class_name'].'.php',
-            ];
-        }
-
-        public function writeNextStepsMessage(array $params, ConsoleStyle $io)
-        {
-            $io->text([
-                'Next: Open your new report and start customizing it.',
-            ]);
-        }
-
-        public function configureDependencies(DependencyBuilder $dependencies)
-        {
-        }
-    }
-
-Second, create your template that will be filled with data from your command::
-
-    // src/Resources/skeleton/report/Report.tpl.php
-    <?= "<?php\n" ?>
-
-    namespace App\Report;
-    
-    class <?= $report_class_name ?>
-    {
-        public const FORMAT = '<?= $format ?>';
-    }
+To do that, you should create a class that implements
+:class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`:: in your `src/Maker`
+directory. And this is really it!
 
 For examples of how to complete your new maker command, see the `core maker commands`_.
 Make sure your class is registered as a service and tagged with ``maker.command``.
