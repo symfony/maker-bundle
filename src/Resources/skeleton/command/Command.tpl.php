@@ -1,4 +1,4 @@
-<?= "<?php\n" ?>
+<?= "<?php\n"; ?>
 
 namespace App\Command;
 
@@ -9,9 +9,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class <?= $command_class_name ?> extends Command
+class <?= $command_class_name; ?> extends Command
 {
-    protected static $defaultName = '<?= $command_name ?>';
+    protected static $defaultName = '<?= $command_name; ?>';
 
     protected function configure()
     {
@@ -25,7 +25,11 @@ class <?= $command_class_name ?> extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-        $argument = $input->getArgument('arg1');
+        $arg1 = $input->getArgument('arg1');
+
+        if ($arg1) {
+            $io->note(sprintf('You passed an argument: %s', $arg1));
+        }
 
         if ($input->getOption('option1')) {
             // ...
