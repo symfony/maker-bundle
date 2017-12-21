@@ -88,5 +88,5 @@ interface MakerInterface
      * @param array        $params
      * @param ConsoleStyle $io
      */
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io);
+    public function writeSuccessMessage(array $params, ConsoleStyle $io);
 }

@@ -46,8 +46,8 @@ Creating your Own Makers
 
 In case your applications need to generate custom boilerplate code, you can
 create your own ``make:...`` command reusing the tools provided by this bundle.
-To do that, you should create a class that implements
-:class:`Symfony\\Bundle\\MakerBundle\\MakerInterface` in your ``src/Maker/``
+To do that, you should create a class that extends
+:class:`Symfony\\Bundle\\MakerBundle\\Maker\\AbstractMaker` in your ``src/Maker/``
 directory. And this is really it!
 
 For examples of how to complete your new maker command, see the `core maker commands`_.

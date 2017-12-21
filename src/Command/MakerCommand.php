@@ -11,13 +11,16 @@
 
 namespace Symfony\Bundle\MakerBundle\Command;
 
+use Symfony\Bundle\MakerBundle\ApplicationAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\ExtraGenerationMakerInterface;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -92,13 +95,24 @@ final class MakerCommand extends Command
         $params = $this->maker->getParameters($input);
         $this->generator->generate($params, $this->maker->getFiles($params));
 
-        $this->io->newLine();
-        $this->io->writeln(' <bg=green;fg=white>          </>');
-        $this->io->writeln(' <bg=green;fg=white> Success! </>');
-        $this->io->writeln(' <bg=green;fg=white>          </>');
-        $this->io->newLine();
+        if ($this->maker instanceof ExtraGenerationMakerInterface) {
+            $this->maker->afterGenerate($this->io, $params);
+        }
 
-        $this->maker->writeNextStepsMessage($params, $this->io);
+        $this->maker->writeSuccessMessage($params, $this->io);
+    }
+
+    public function setApplication(Application $application = null)
+    {
+        parent::setApplication($application);
+
+        if ($this->maker instanceof ApplicationAwareMakerInterface) {
+            if (null === $application) {
+                throw new \RuntimeException('Application cannot be null.');
+            }
+
+            $this->maker->setApplication($application);
+        }
     }
 
     /**

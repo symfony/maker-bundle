@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -25,7 +24,7 @@ use Symfony\Component\Console\Input\InputInterface;
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class MakeCommand implements MakerInterface
+final class MakeCommand extends AbstractMaker
 {
     public static function getCommandName(): string
     {
@@ -39,10 +38,6 @@ final class MakeCommand implements MakerInterface
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCommand.txt'))
         ;
-    }
-
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
-    {
     }
 
     public function getParameters(InputInterface $input): array
@@ -64,8 +59,10 @@ final class MakeCommand implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeSuccessMessage(array $params, ConsoleStyle $io)
     {
+        parent::writeSuccessMessage($params, $io);
+
         $io->text([
             'Next: open your new command class and customize it!',
             'Find the documentation at <fg=yellow>https://symfony.com/doc/current/console.html</>',
