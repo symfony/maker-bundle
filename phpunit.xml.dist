@@ -14,6 +14,8 @@
     <testsuites>
         <testsuite name="Project Test Suite">
             <directory>tests/</directory>
+            <exclude>tests/fixtures</exclude>
+            <exclude>tests/tmp</exclude>
         </testsuite>
     </testsuites>
 </phpunit>

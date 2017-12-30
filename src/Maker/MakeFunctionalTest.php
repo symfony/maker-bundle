@@ -17,10 +17,11 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Component\BrowserKit\Client;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\BrowserKit\Client;
+use Symfony\Component\CssSelector\CssSelectorConverter;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -76,6 +77,10 @@ class MakeFunctionalTest implements MakerInterface
         $dependencies->addClassDependency(
             Client::class,
             'browser-kit'
+        );
+        $dependencies->addClassDependency(
+            CssSelectorConverter::class,
+            'css-selector'
         );
     }
 }
