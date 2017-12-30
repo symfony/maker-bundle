@@ -1,0 +1,62 @@
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2017-12-03T21:02:09Z
+
+Even if your proposal is perfectly fine and correct ... I think we should remove all the code of this section and simply explain that you must implement some interface and look at the code of the existing makers to learn how to create them. We do't have resources to maintain all docs updated and all this could change a lot in the coming months. But let's see what do others think. Thanks!
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-12-03T23:46:29Z
+
+Yea, I think Javier’s idea makes sense. Creating a maker is more advanced: looking at examples and seeing a well-documented interface is more than enough.
+
++1 for removing the docs and avoiding maintenance in the future!
+
+---------------------------------------------------------------------------
+
+by piotrgradzinski at 2017-12-04T14:49:24Z
+
+@javiereguiluz, @weaverryan - for me the argument for not spend additional time on maintaining the documentation is valid. That's true that after every change within the interface/structure the documentation will have to be updated and it will take time and somebody's attention.
+
+On the other hand, one of the most valuable thing for me in Symfony documentation is the simplicity of creating custom/additional classes. For most of the cases when I had to create something custom the documentation was more than enough. I didn't have to dig into the source code to figure out how to do something. Simple copy/paste of code to certain file/folder and filling the gaps did the work (in more complicated scenarios checking the source code was the solution). Going into this direction within `Create you own Makers` section we will end up with something like "go and see how it's done in Maker Bundle". I wouldn't like that.
+
+So still, I think the direction we have now is a good one.
+
+On the other hand I volunteer to keep this part up to date :)
+
+---------------------------------------------------------------------------
+
+by piotrgradzinski at 2017-12-08T08:41:59Z
+
+Guys!
+I would like to ask you about the decision on this one. I think we should make a decision because the current doc we have may confuse developers a little bit so it would be better to either have example updated or removed.
+
+Thanks!
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2017-12-10T12:47:48Z
+
+I'm sorry but I'm still against adding this doc. I know it's a short doc and you have offered yourself to maintain it ... but our current infinite backlog of things related to Symfony Docs tells me we shouldn't add this. We won't change the current stressful situation unless we say "No" repeatedly. I'm sorry!
+
+---------------------------------------------------------------------------
+
+by piotrgradzinski at 2017-12-11T10:30:28Z
+
+@javiereguiluz - I do respect your POV.
+
+If so would like me to change this and remove the code example from that section and change this part of doc?
+
+---------------------------------------------------------------------------
+
+by piotrgradzinski at 2017-12-20T19:21:43Z
+
+@javiereguiluz - did some changes, removed example code.
+
+Followed the rule, add one remove two :) Are you happy with those changes?
+
+---------------------------------------------------------------------------
+
+by piotrgradzinski at 2017-12-29T10:48:08Z
+
+Guys, any thoughts on this one?
