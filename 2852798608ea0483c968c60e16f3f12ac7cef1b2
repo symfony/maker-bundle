@@ -1,0 +1,47 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-12-28T15:03:51Z
+
+Ok, this is ready! There are a few crazy things I get the test system working, so I would MUCH love technical r view before I merge this :).
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2017-12-28T16:20:40Z
+
+Thanks for this. It's not easy to review 😓  but I tried to run tests first and I found an issue. Is this working for you?
+
+```
+1) Symfony\Bundle\MakerBundle\Tests\Maker\FunctionalTest::testCommands with data set "functional" ('MakeFunctionalTest', 'Symfony\Bundle\MakerBundle\Ma...alTest')
+Exception: Running maker command failed: "
+ [ERROR] Missing package: to use the make:functional-test command, run:
+
+         composer require css-selector
+
+" "2017-12-28T17:06:16+01:00 [debug] Command "make:functional-test" exited with code "1"
+"
+
+src/Test/MakerTestCase.php:71
+tests/Maker/FunctionalTest.php:52
+```
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-12-28T18:39:54Z
+
+@javiereguiluz hmm, no, that shouldn't happy... obviously :D. The test *should* `composer require` all the libraries that are defined in the `configureDependencies()` method of the maker being tested. So, in this case, `MakeFunctionalTest::configureDependencies()`, which (thanks to this PR) now (does) require this library.
+
+So, it's possible that this command failed for some reason (though this should have been reported)! This is likely a legitimate bug with my setup. Could you help me debug? Could you look at your `tests/tmp/cache/MakeFunctionalTest/` directory (this is created automatically in the test) - does it's `composer.json` file have `symfony/css-selector` or `browser-kit` in it? If you, `rm -rf tests/tmp/*`, does it fail again?
+
+Thanks!
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-12-29T01:40:37Z
+
+I just pushed some changes. Unrelated to your issue, but pull down fresh before trying again :)
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-12-30T02:10:26Z
+
+Merging :). We can improve over time - this is all a test refactoring :)
