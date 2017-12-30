@@ -46,61 +46,11 @@ Creating your Own Makers
 
 In case your applications need to generate custom boilerplate code, you can
 create your own ``make:...`` command reusing the tools provided by this bundle.
-Imagine that you need to create a ``make:report`` command. First, create a
-class that implements :class:`Symfony\\Bundle\\MakerBundle\\MakerInterface`::
+To do that, you should create a class that implements
+:class:`Symfony\\Bundle\\MakerBundle\\MakerInterface` in your ``src/Maker/``
+directory. And this is really it!
 
-    // src/Maker/ReportMaker.php
-    namespace App\Maker;
-
-    use Symfony\Bundle\MakerBundle\ConsoleStyle;
-    use Symfony\Bundle\MakerBundle\DependencyBuilder;
-    use Symfony\Bundle\MakerBundle\InputConfiguration;
-    use Symfony\Bundle\MakerBundle\MakerInterface;
-    use Symfony\Bundle\MakerBundle\Str;
-    use Symfony\Bundle\MakerBundle\Validator;
-    use Symfony\Component\Console\Command\Command;
-    use Symfony\Component\Console\Input\InputArgument;
-    use Symfony\Component\Console\Input\InputInterface;
-
-    class ReportMaker implements MakerInterface
-    {
-        public static function getCommandName(): string
-        {
-            return 'make:report';
-        }
-
-        public function configureCommand(Command $command, InputConfiguration $inputConf): void
-        {
-            $command
-                ->setDescription('Creates a new report')
-                ->addArgument('name', InputArgument::OPTIONAL, 'Choose the report format', 'pdf')
-            ;
-        }
-
-        public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
-        {
-        }
-
-        public function getParameters(InputInterface $input): array
-        {
-            return [];
-        }
-
-        public function getFiles(array $params): array
-        {
-            return [];
-        }
-
-        public function writeNextStepsMessage(array $params, ConsoleStyle $io): void
-        {
-        }
-
-        public function configureDependencies(DependencyBuilder $dependencies): void
-        {
-        }
-    }
-
-For examples of how to complete this class, see the `core maker commands`_.
+For examples of how to complete your new maker command, see the `core maker commands`_.
 Make sure your class is registered as a service and tagged with ``maker.command``.
 If you're using the standard Symfony ``services.yaml`` configuration, this
 will be done automatically.
