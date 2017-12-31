@@ -1,0 +1,13 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-12-30T04:28:21Z
+
+This is ready to be reviewed :) - screenshots back in the original description. This also uses the new test system, which means there are real functional tests that actually run the commands and assert that the 2 outputs above occur.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2017-12-30T19:37:45Z
+
+Comment addressed (and a few other things). Tests are passing, ready for a final review :).
+
+And sorry for the noise in the diff: this command is a bit different, so we needed to expand the maker system a bit and also the tests, which affected some unrelated things.
