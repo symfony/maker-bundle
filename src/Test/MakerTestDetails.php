@@ -32,6 +32,8 @@ final class MakerTestDetails
 
     private $extraDependencies = [];
 
+    private $argumentsString = '';
+
     /**
      * @param MakerInterface $maker
      * @param array          $inputs
@@ -81,6 +83,43 @@ final class MakerTestDetails
         return $this;
     }
 
+    public function configureDatabase(bool $createSchema = true): self
+    {
+        // currently, we need to replace this in *both* files so we can also
+        // run bin/console commands
+        $this
+            ->addReplacement(
+                'phpunit.xml.dist',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                getenv('TEST_DATABASE_DSN')
+            )
+            ->addReplacement(
+                '.env',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                getenv('TEST_DATABASE_DSN')
+            )
+        ;
+
+        // this looks silly, but it's the only way to drop the database *for sure*,
+        // as doctrine:database:drop will error if there is no database
+        $this->addPreMakeCommand('php bin/console doctrine:database:create --env=test --if-not-exists');
+        $this->addPreMakeCommand('php bin/console doctrine:database:drop --env=test --force');
+
+        $this->addPreMakeCommand('php bin/console doctrine:database:create --env=test');
+        if ($createSchema) {
+            $this->addPreMakeCommand('php bin/console doctrine:schema:create --env=test');
+        }
+
+        return $this;
+    }
+
+    public function updateSchemaAfterCommand(): self
+    {
+        $this->addPostMakeCommand('php bin/console doctrine:schema:update --env=test --force');
+
+        return $this;
+    }
+
     /**
      * Pass a callable that will be called after the maker command has been run.
      *
@@ -103,6 +142,13 @@ final class MakerTestDetails
     public function addExtraDependencies(string $packageName): self
     {
         $this->extraDependencies[] = $packageName;
+
+        return $this;
+    }
+
+    public function setArgumentsString(string $argumentsString): self
+    {
+        $this->argumentsString = $argumentsString;
 
         return $this;
     }
@@ -164,5 +210,10 @@ final class MakerTestDetails
             $depBuilder->getAllRequiredDevDependencies(),
             $this->extraDependencies
         );
+    }
+
+    public function getArgumentsString(): string
+    {
+        return $this->argumentsString;
     }
 }

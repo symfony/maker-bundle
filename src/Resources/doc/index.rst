@@ -55,6 +55,17 @@ Make sure your class is registered as a service and tagged with ``maker.command`
 If you're using the standard Symfony ``services.yaml`` configuration, this
 will be done automatically.
 
+Overriding the Generated Code
+-----------------------------
+
+Generated code can never be perfect for everyone. The MakerBundle tries to balance
+adding "extension points" with keeping the library simple so that existing commands
+can be improved and new commands can be added.
+
+For that reason, in general, the generated code cannot be modified. In many cases,
+adding your *own* maker command is so easy, that we recommend that. However, if there
+is some extension point that you'd like, please open an issue do we can discuss!
+
 .. _`SensioGeneratorBundle`: https://github.com/sensiolabs/SensioGeneratorBundle
 .. _`Symfony Flex`: https://symfony.com/doc/current/setup/flex.html
 .. _`AbstractMaker`: https://github.com/symfony/maker-bundle/blob/master/src/Maker/AbstractMaker.php

@@ -4,7 +4,7 @@ namespace App\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Doctrine\ORM\EntityManager;
-use App\Entity\TastyFood;
+use App\Entity\User;
 
 class GeneratedEntityTest extends KernelTestCase
 {
@@ -19,16 +19,17 @@ class GeneratedEntityTest extends KernelTestCase
             ->get('doctrine')
             ->getManager();
 
-        $em->createQuery('DELETE FROM App\\Entity\\TastyFood f')
+        $em->createQuery('DELETE FROM App\\Entity\\User u')
             ->execute();
 
-        $food = new TastyFood();
-        $em->persist($food);
+        $user = new User();
+        $em->persist($user);
         $em->flush();
+        $em->refresh($user);
 
-        $actualFood = $em->getRepository(TastyFood::class)
+        $actualUser = $em->getRepository(User::class)
             ->findAll();
 
-        $this->assertcount(1, $actualFood);
+        $this->assertcount(1, $actualUser);
     }
 }

@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle;
 use Composer\Autoload\ClassLoader;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -52,8 +53,24 @@ class FileManager
 
     public function dumpFile(string $filename, string $content)
     {
-        $this->fs->dumpFile($this->absolutizePath($filename), $content);
-        $this->io->comment(sprintf('<fg=green>created</>: %s', $this->relativizePath($filename)));
+        $absolutePath = $this->absolutizePath($filename);
+        $newFile = !$this->fileExists($filename);
+        $existingContent = $newFile ? '' : file_get_contents($absolutePath);
+
+        $comment = $newFile ? 'created' : 'updated';
+        if ($existingContent === $content) {
+            $comment = 'no change';
+        }
+
+        $this->fs->dumpFile($absolutePath, $content);
+
+        if ($this->io) {
+            $this->io->comment(sprintf(
+                '<fg=green>%s</>: %s',
+                $comment,
+                $this->relativizePath($filename)
+            ));
+        }
     }
 
     public function fileExists($path): bool
@@ -141,6 +158,28 @@ class FileManager
         }
 
         return '';
+    }
+
+    public function getFileContents(string $path): string
+    {
+        if (!$this->fileExists($path)) {
+            throw new \InvalidArgumentException(sprintf('Cannot find file "%s"', $path));
+        }
+
+        return file_get_contents($this->absolutizePath($path));
+    }
+
+    public function createFinder(string $in)
+    {
+        $finder = new Finder();
+        $finder->in($this->absolutizePath($in));
+
+        return $finder;
+    }
+
+    public function isPathInVendor(string $path): bool
+    {
+        return 0 === strpos($path, $this->rootDirectory.'/vendor/');
     }
 
     private function getClassLoader(): ClassLoader

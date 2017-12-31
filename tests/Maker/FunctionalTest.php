@@ -135,26 +135,336 @@ class FunctionalTest extends MakerTestCase
             })
         ];
 
-        yield 'entity' => [MakerTestDetails::createTest(
+        yield 'entity_new' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),
             [
                 // entity class name
-                'TastyFood',
+                'User',
+                // add not additional fields
+                '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+        ];
+
+        yield 'entity_with_fields' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // add not additional fields
+                'name',
+                'string',
+                // nullable
+                'y',
+                'createdAt',
+                // use default datetime
+                '',
+                // nullable
+                'y',
+                // finish adding fields
+                ''
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+        ];
+
+        yield 'entity_updating' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // this field already exists
+                'firstName',
+                // add additional fields
+                'lastName',
+                'string',
+                // nullable
+                'y',
+                // finish adding fields
+                ''
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityUpdate')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+        ];
+
+        yield 'entity_many_to_one_simple' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'UserAvatarPhoto',
+                // field name
+                'user',
+                // add a relationship field
+                'relation',
+                // the target entity
+                'User',
+                // relation type
+                'ManyToOne',
+                // nullable
+                'n',
+                // field name on opposite side - use default 'userAvatarPhotos'
+                '',
+                // orphanRemoval (default to no)
+                '',
+                // finish adding fields
+                ''
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToOne')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+        ];
+
+        yield 'entity_one_to_many_simple' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // field name
+                'photos',
+                // add a relationship field
+                'relation',
+                // the target entity
+                'UserAvatarPhoto',
+                // relation type
+                'OneToMany',
+                // field name on opposite side - use default 'user'
+                '',
+                // nullable
+                'n',
+                // orphanRemoval
+                'y',
+                // finish adding fields
+                ''
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOneToMany')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+        ];
+
+        yield 'entity_many_to_many_simple' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'Course',
+                // field name
+                'students',
+                // add a relationship field
+                'relation',
+                // the target entity
+                'User',
+                // relation type
+                'ManyToMany',
+                // field name on opposite side - use default 'courses'
+                '',
+                // finish adding fields
+                ''
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToMany')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+        ];
+
+        yield 'entity_one_to_one_simple' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'UserProfile',
+                // field name
+                'user',
+                // add a relationship field
+                'relation',
+                // the target entity
+                'User',
+                // relation type
+                'OneToOne',
+                // nullable
+                'n',
+                // field name on opposite side - use default 'userProfile'
+                '',
+                // finish adding fields
+                ''
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOneToOne')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+        ];
+
+        yield 'entity_many_to_one_vendor_target' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // field name
+                'userGroup',
+                // add a relationship field
+                'ManyToOne',
+                // the target entity
+                'Some\Vendor\Group',
+                // nullable
+                'n',
+                /*
+                 * normally, we ask for the field on the *other* side, but we
+                 * do not here, since the other side won't be mapped.
+                 */
+                // orphanRemoval (default to no)
+                '',
+                // finish adding fields
+                ''
+            ])
+            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRelationVendorTarget')
+            ->configureDatabase()
+            ->addPreMakeCommand('composer dump-autoload')
             ->addReplacement(
-                'phpunit.xml.dist',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
-                'sqlite:///%kernel.project_dir%/var/app.db'
+                'composer.json',
+                '"App\\\Tests\\\": "tests/",',
+                '"App\\\Tests\\\": "tests/",' . "\n" . '            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
-            // currently, we need to replace this in *both* files so we can also
-            // run bin/console commands
+            ->assert(function (string $output, string $directory) {
+                $this->assertContains('inverse side of the relation was not mapped in "Some\Vendor\Group"', $output);
+                $this->assertContains('updated: src/Entity/User.php', $output);
+                $this->assertNotContains('updated: vendor/', $output);
+
+                // sanity checks on the generated code
+                $finder = new Finder();
+                $finder->in($directory . '/src/Entity');
+                $this->assertEquals(1, count($finder));
+
+                $this->assertNotContains('inversedBy', file_get_contents($directory . '/src/Entity/User.php'));
+            })
+        ];
+
+        yield 'entity_many_to_many_vendor_target' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // field name
+                'userGroups',
+                // add a relationship field
+                'ManyToMany',
+                // the target entity
+                'Some\Vendor\Group',
+                /*
+                 * normally, we ask for the field on the *other* side, but we
+                 * do not here, since the other side won't be mapped.
+                 */
+                // finish adding fields
+                ''
+            ])
+            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRelationVendorTarget')
+            ->configureDatabase()
+            ->addPreMakeCommand('composer dump-autoload')
             ->addReplacement(
-                '.env',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
-                'sqlite:///%kernel.project_dir%/var/app.db'
+                'composer.json',
+                '"App\\\Tests\\\": "tests/",',
+                '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
-            ->addPostMakeCommand('php bin/console doctrine:schema:create --env=test')
+            ->assert(function(string $output, string $directory) {
+                $this->assertContains('inverse side of the relation was not mapped in "Some\Vendor\Group"', $output);
+                $this->assertNotContains('updated: vendor/', $output);
+
+                $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
+            })
+        ];
+
+        yield 'entity_one_to_one_vendor_target' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // field name
+                'userGroup',
+                // add a relationship field
+                'OneToOne',
+                // the target entity
+                'Some\Vendor\Group',
+                // nullable,
+                '',
+                /*
+                 * normally, we ask for the field on the *other* side, but we
+                 * do not here, since the other side won't be mapped.
+                 */
+                // finish adding fields
+                ''
+            ])
+            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRelationVendorTarget')
+            ->configureDatabase()
+            ->addPreMakeCommand('composer dump-autoload')
+            ->addReplacement(
+                'composer.json',
+                '"App\\\Tests\\\": "tests/",',
+                '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
+            )
+            ->assert(function(string $output, string $directory) {
+                $this->assertContains('inverse side of the relation was not mapped in "Some\Vendor\Group"', $output);
+                $this->assertNotContains('updated: vendor/', $output);
+
+                $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
+            })
+        ];
+
+        yield 'entity_regenerate' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // namespace: use default App\Entity
+                '',
+            ])
+            ->setArgumentsString('--regenerate')
+            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRegenerate')
+            ->configureDatabase(false)
+        ];
+
+        yield 'entity_regenerate_overwrite' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // namespace: use default App\Entity
+                '',
+            ])
+            ->setArgumentsString('--regenerate --overwrite')
+            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRegenerateOverwrite')
+            ->configureDatabase(false)
+        ];
+
+        yield 'entity_regenerate_xml' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // namespace: use default App\Entity
+                '',
+            ])
+            ->setArgumentsString('--regenerate')
+            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRegenerateXml')
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                'type: annotation',
+                'type: xml'
+            )
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                "dir: '%kernel.project_dir%/src/Entity'",
+                "dir: '%kernel.project_dir%/config/doctrine'"
+            )
+            ->configureDatabase(false)
+        ];
+
+        yield 'entity_updating_overwrite' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // field name
+                'firstName',
+                'string',
+                // nullable
+                '',
+                // finish adding fields
+                ''
+            ])
+            ->setArgumentsString('--overwrite')
+            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityOverwrite')
         ];
 
         yield 'fixtures' => [MakerTestDetails::createTest(
@@ -258,11 +568,7 @@ class FunctionalTest extends MakerTestCase
             $this->getMakerInstance(MakeMigration::class),
             [/* no input */])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
-            ->addReplacement(
-                '.env',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
-                'sqlite:///%kernel.project_dir%/var/app.db'
-            )
+            ->configureDatabase(false)
             // doctrine-migrations-bundle only requires doctrine-bundle, which
             // only requires doctrine/dbal. But we're testing with the ORM,
             // so let's install it
@@ -286,14 +592,9 @@ class FunctionalTest extends MakerTestCase
             $this->getMakerInstance(MakeMigration::class),
             [/* no input */])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
-            ->addReplacement(
-                '.env',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
-                'sqlite:///%kernel.project_dir%/var/app.db'
-            )
-            ->addExtraDependencies('doctrine/orm')
+            ->configureDatabase()
             // sync the database, so no changes are needed
-            ->addPreMakeCommand('php bin/console doctrine:schema:create --env=test')
+            ->addExtraDependencies('doctrine/orm')
             ->assert(function(string $output, string $directory) {
                 $this->assertNotContains('Success', $output);
 

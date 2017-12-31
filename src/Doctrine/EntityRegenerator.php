@@ -1,0 +1,230 @@
+<?php
+
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Bundle\MakerBundle\Doctrine;
+
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Symfony\Bridge\Doctrine\ManagerRegistry;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\FileManager;
+use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+
+/**
+ * @internal
+ */
+final class EntityRegenerator
+{
+    private $doctrineRegistry;
+    private $fileManager;
+    private $generator;
+    private $projectDirectory;
+    private $overwrite;
+    private $metadataFactory;
+
+    public function __construct(ManagerRegistry $doctrineRegistry, FileManager $fileManager, Generator $generator, string $projectDirectory, bool $overwrite)
+    {
+        $this->doctrineRegistry = $doctrineRegistry;
+        $this->fileManager = $fileManager;
+        $this->generator = $generator;
+        $this->projectDirectory = $projectDirectory;
+        $this->overwrite = $overwrite;
+        $this->metadataFactory = new DoctrineMetadataFactory($this->doctrineRegistry);
+    }
+
+    public function regenerateEntities(string $classOrNamespace)
+    {
+        if (class_exists($classOrNamespace)) {
+            $metadata = $this->metadataFactory->getMetadataForClass($classOrNamespace);
+
+            if (null === $metadata) {
+                throw new RuntimeCommandException(sprintf('Could not find Doctrine metadata for "%s". Is it mapped as an entity?', $classOrNamespace));
+            }
+
+            $metadata = [$metadata];
+        } else {
+            $metadata = $this->metadataFactory->getMetadataForNamespace($classOrNamespace);
+
+            if (empty($metadata)) {
+                throw new RuntimeCommandException(sprintf('No entities were found in the "%s" namespace.', $classOrNamespace));
+            }
+        }
+
+        /** @var ClassSourceManipulator[] $operations */
+        $operations = [];
+        foreach ($metadata as $classMetadata) {
+            if (!class_exists($classMetadata->name)) {
+                // the class needs to be generated for the first time!
+                $classPath = $this->generateClass($classMetadata);
+            } else {
+                $classPath = $this->getPathOfClass($classMetadata->name);
+            }
+
+            if ($classMetadata->customRepositoryClassName) {
+                $this->generateRepository($classMetadata);
+            }
+
+            $manipulator = $this->createClassManipulator($classPath);
+            $operations[$classPath] = $manipulator;
+
+            foreach ($classMetadata->fieldMappings as $fieldName => $mapping) {
+                $manipulator->addEntityField($fieldName, $mapping);
+            }
+
+            foreach ($classMetadata->associationMappings as $fieldName => $mapping) {
+                switch ($mapping['type']) {
+                    case ClassMetadata::MANY_TO_ONE:
+                        $relation = (new RelationManyToOne())
+                            ->setPropertyName($mapping['fieldName'])
+                            ->setIsNullable($mapping['joinColumns'][0]['nullable'])
+                            ->setTargetClassName($mapping['targetEntity'])
+                            ->setTargetPropertyName($mapping['inversedBy'])
+                            ->setMapInverseRelation(null !== $mapping['inversedBy'])
+                        ;
+
+                        $manipulator->addManyToOneRelation($relation);
+
+                        break;
+                    case ClassMetadata::ONE_TO_MANY:
+                        $relation = (new RelationOneToMany())
+                            ->setPropertyName($mapping['fieldName'])
+                            ->setTargetClassName($mapping['targetEntity'])
+                            ->setTargetPropertyName($mapping['mappedBy'])
+                            ->setOrphanRemoval($mapping['orphanRemoval'])
+                        ;
+
+                        $manipulator->addOneToManyRelation($relation);
+
+                        break;
+                    case ClassMetadata::MANY_TO_MANY:
+                        $relation = (new RelationManyToMany())
+                            ->setPropertyName($mapping['fieldName'])
+                            ->setTargetClassName($mapping['targetEntity'])
+                            ->setTargetPropertyName($mapping['mappedBy'])
+                            ->setIsOwning($mapping['isOwningSide'])
+                            ->setMapInverseRelation($mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true)
+                        ;
+
+                        $manipulator->addManyToManyRelation($relation);
+
+                        break;
+                    case ClassMetadata::ONE_TO_ONE:
+                        $relation = (new RelationOneToOne())
+                            ->setPropertyName($mapping['fieldName'])
+                            ->setTargetClassName($mapping['targetEntity'])
+                            ->setTargetPropertyName($mapping['isOwningSide'] ? $mapping['inversedBy'] : $mapping['mappedBy'])
+                            ->setIsOwning($mapping['isOwningSide'])
+                            ->setMapInverseRelation($mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true)
+                            ->setIsNullable(isset($mapping['joinColumns'][0]) ? $mapping['joinColumns'][0]['nullable'] : true)
+                        ;
+
+                        $manipulator->addOneToOneRelation($relation);
+
+                        break;
+                    default:
+                        throw new \Exception('Unknown association type.');
+                }
+            }
+        }
+
+        foreach ($operations as $filename => $manipulator) {
+            $this->fileManager->dumpFile(
+                $filename,
+                $manipulator->getSourceCode()
+            );
+        }
+    }
+
+    private function generateClass(ClassMetadata $metadata): string
+    {
+        $path = $this->getPathForFutureClass($metadata->name);
+
+        if (null === $path) {
+            throw new RuntimeCommandException(sprintf('Cannot determine where to generate the class "%s". This could be a bug in the library - please open an issue with your setup details.', $metadata->name));
+        }
+
+        // Get namespace by removing the last component of the FQCN
+        $this->generator->generate([
+            'class_namespace' => $metadata->namespace,
+            'class_name' => Str::getShortClassName($metadata->name),
+        ], [
+            __DIR__.'/../Resources/skeleton/Class.tpl.php' => $path,
+        ]);
+
+        return $path;
+    }
+
+    private function createClassManipulator(string $classPath): ClassSourceManipulator
+    {
+        return new ClassSourceManipulator(
+            $this->fileManager->getFileContents($classPath),
+            $this->overwrite,
+            // use annotations
+            // if properties need to be generated then, by definition,
+            // some non-annotation config is being used, and so, the
+            // properties should not have annotations added to them
+            false
+        );
+    }
+
+    private function getPathOfClass(string $class): string
+    {
+        return (new \ReflectionClass($class))->getFileName();
+    }
+
+    private function generateRepository(ClassMetadata $metadata)
+    {
+        if (!$metadata->customRepositoryClassName) {
+            return;
+        }
+
+        if (class_exists($metadata->customRepositoryClassName)) {
+            // repository already exists
+            return;
+        }
+
+        // duplication in MakeEntity
+        $entityClassName = Str::getShortClassName($metadata->name);
+        $entityAlias = strtolower($entityClassName[0]);
+        $repositoryClassName = Str::getShortClassName($metadata->customRepositoryClassName);
+        $repositoryNamespace = Str::getNamespace($metadata->customRepositoryClassName);
+        $path = $this->getPathForFutureClass($metadata->customRepositoryClassName);
+
+        $this->generator->generate([
+            'repository_namespace' => $repositoryNamespace,
+            'entity_class_name' => $entityClassName,
+            'repository_class_name' => $repositoryClassName,
+            'entity_alias' => $entityAlias,
+        ], [
+            __DIR__.'/../Resources/skeleton/doctrine/Repository.tpl.php' => $path,
+        ]);
+    }
+
+    private function getPathForFutureClass(string $className): ?string
+    {
+        $autoloadPath = $this->projectDirectory.'/vendor/autoload.php';
+        if (!file_exists($autoloadPath)) {
+            throw new \Exception(sprintf('Could not find the autoload file: "%s"', $autoloadPath));
+        }
+
+        /** @var \Composer\Autoload\ClassLoader $loader */
+        $loader = require $autoloadPath;
+        $path = null;
+        foreach ($loader->getPrefixesPsr4() as $prefix => $paths) {
+            if (0 === strpos($className, $prefix)) {
+                return $paths[0].'/'.str_replace('\\', '/', str_replace($prefix, '', $className)).'.php';
+            }
+        }
+
+        return null;
+    }
+}
