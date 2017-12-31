@@ -103,7 +103,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
                 'No database changes were detected.',
             ]);
             $io->text([
-                'The database schema was compared with your mapping information and they are already in sync: no migration was generated.',
+                'The database schema and the application mapping information are already in sync.',
                 '',
             ]);
 
