@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -26,7 +25,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class MakeVoter implements MakerInterface
+final class MakeVoter extends AbstractMaker
 {
     public static function getCommandName(): string
     {
@@ -40,10 +39,6 @@ final class MakeVoter implements MakerInterface
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the security voter class (e.g. <fg=yellow>BlogPostVoter</>).')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeVoter.txt'))
         ;
-    }
-
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
-    {
     }
 
     public function getParameters(InputInterface $input): array
@@ -63,8 +58,10 @@ final class MakeVoter implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeSuccessMessage(array $params, ConsoleStyle $io)
     {
+        parent::writeSuccessMessage($params, $io);
+
         $io->text([
             'Next: Open your voter and add your logic.',
             'Find the documentation at <fg=yellow>https://symfony.com/doc/current/security/voters.html</>',

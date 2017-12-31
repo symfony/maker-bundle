@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Test;
 
+use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 
 final class MakerTestDetails
@@ -23,11 +24,18 @@ final class MakerTestDetails
 
     private $replacements = [];
 
+    private $preMakeCommands = [];
+
     private $postMakeCommands = [];
+
+    private $assert;
+
+    private $extraDependencies = [];
 
     /**
      * @param MakerInterface $maker
      * @param array          $inputs
+     *
      * @return static
      */
     public static function createTest(MakerInterface $maker, array $inputs)
@@ -44,6 +52,13 @@ final class MakerTestDetails
     public function setFixtureFilesPath(string $fixtureFilesPath): self
     {
         $this->fixtureFilesPath = $fixtureFilesPath;
+
+        return $this;
+    }
+
+    public function addPreMakeCommand(string $preMakeCommand): self
+    {
+        $this->preMakeCommands[] = $preMakeCommand;
 
         return $this;
     }
@@ -66,6 +81,32 @@ final class MakerTestDetails
         return $this;
     }
 
+    /**
+     * Pass a callable that will be called after the maker command has been run.
+     *
+     *      $test->assert(function(string $output, string $directory) {
+     *          // $output is the command output text
+     *          // $directory is the directory where the project lives
+     *      })
+     *
+     * @param callable $assert
+     *
+     * @return MakerTestDetails
+     */
+    public function assert($assert): self
+    {
+        $this->assert = $assert;
+
+        return $this;
+    }
+
+    public function addExtraDependencies(string $packageName): self
+    {
+        $this->extraDependencies[] = $packageName;
+
+        return $this;
+    }
+
     public function getInputs(): array
     {
         return $this->inputs;
@@ -80,7 +121,12 @@ final class MakerTestDetails
     {
         // create a unique directory name for this project
         // but one that will be the same each time the tests are run
-        return (new \ReflectionObject($this->maker))->getShortName().'_'.($this->fixtureFilesPath ? basename($this->fixtureFilesPath) : 'default');
+        return (new \ReflectionObject($this->maker))->getShortName().'_'.($this->fixtureFilesPath ? basename($this->fixtureFilesPath) : 'default').'_'.md5(serialize($this->extraDependencies));
+    }
+
+    public function getPreMakeCommands(): array
+    {
+        return $this->preMakeCommands;
     }
 
     public function getPostMakeCommands(): array
@@ -96,5 +142,21 @@ final class MakerTestDetails
     public function getMaker(): MakerInterface
     {
         return $this->maker;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getAssert()
+    {
+        return $this->assert;
+    }
+
+    public function getDependencies()
+    {
+        $depBuilder = new DependencyBuilder();
+        $this->maker->configureDependencies($depBuilder);
+
+        return array_merge($depBuilder->getMissingDependencies(), $this->extraDependencies);
     }
 }

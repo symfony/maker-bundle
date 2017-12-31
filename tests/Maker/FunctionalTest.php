@@ -7,12 +7,14 @@ use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
 use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\MakeCommandRegistrationPass;
+use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator;
 use Symfony\Bundle\MakerBundle\Maker\MakeCommand;
 use Symfony\Bundle\MakerBundle\Maker\MakeController;
 use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Maker\MakeForm;
 use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest;
+use Symfony\Bundle\MakerBundle\Maker\MakeMigration;
 use Symfony\Bundle\MakerBundle\Maker\MakeSerializerEncoder;
 use Symfony\Bundle\MakerBundle\Maker\MakeSubscriber;
 use Symfony\Bundle\MakerBundle\Maker\MakeTwigExtension;
@@ -102,6 +104,7 @@ class FunctionalTest extends MakerTestCase
                 // functional test class name
                 'FooBar',
             ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
         ];
 
         yield 'subscriber' => [MakerTestDetails::createTest(
@@ -173,6 +176,53 @@ class FunctionalTest extends MakerTestCase
                 'AppCustomAuthenticator',
             ])
         ];
+
+        yield 'migration_with_changes' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeMigration::class),
+            [/* no input */])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
+            ->addReplacement(
+                '.env',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                'sqlite:///%kernel.project_dir%/var/app.db'
+            )
+            // doctrine-migrations-bundle only requires doctrine-bundle, which
+            // only requires doctrine/dbal. But we're testing with the ORM,
+            // so let's install it
+            ->addExtraDependencies('doctrine/orm')
+            ->assert(function(string $output, string $directory) {
+                $this->assertContains('Success', $output);
+
+                $finder = new Finder();
+                $finder->in($directory.'/src/Migrations')
+                    ->name('*.php');
+                $this->assertCount(1, $finder);
+
+                // see that the exact filename is in the output
+                $iterator = $finder->getIterator();
+                $iterator->rewind();
+                $this->assertContains(sprintf('"src/Migrations/%s"', $iterator->current()->getFilename()), $output);
+            })
+        ];
+
+        yield 'migration_no_changes' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeMigration::class),
+            [/* no input */])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
+            ->addReplacement(
+                '.env',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                'sqlite:///%kernel.project_dir%/var/app.db'
+            )
+            ->addExtraDependencies('doctrine/orm')
+            // sync the database, so no changes are needed
+            ->addPreMakeCommand('./bin/console doctrine:schema:create --env=test')
+            ->assert(function(string $output, string $directory) {
+                $this->assertNotContains('Success', $output);
+
+                $this->assertContains('No database changes were detected', $output);
+            })
+        ];
     }
 
     /**
@@ -189,6 +239,10 @@ class FunctionalTest extends MakerTestCase
         $application = new Application($kernel);
         foreach ($finder as $file) {
             $class = 'Symfony\Bundle\MakerBundle\Maker\\'.$file->getBasename('.php');
+
+            if (AbstractMaker::class === $class) {
+                continue;
+            }
 
             $commandName = $class::getCommandName();
             // if the command does not exist, this will explode

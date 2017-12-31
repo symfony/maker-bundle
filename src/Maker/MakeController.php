@@ -15,7 +15,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -28,7 +27,7 @@ use Symfony\Component\Routing\RouterInterface;
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class MakeController implements MakerInterface
+final class MakeController extends AbstractMaker
 {
     private $router;
 
@@ -49,10 +48,6 @@ final class MakeController implements MakerInterface
             ->addArgument('controller-class', InputArgument::OPTIONAL, sprintf('Choose a name for your controller class (e.g. <fg=yellow>%sController</>)', Str::asClassName(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeController.txt'))
         ;
-    }
-
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
-    {
     }
 
     public function getParameters(InputInterface $input): array
@@ -76,8 +71,10 @@ final class MakeController implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeSuccessMessage(array $params, ConsoleStyle $io)
     {
+        parent::writeSuccessMessage($params, $io);
+
         if (!count($this->router->getRouteCollection())) {
             $io->text('<error> Warning! </> No routes configuration defined yet.');
             $io->text('           You should probably uncomment the annotation routes in <comment>config/routes.yaml</>');

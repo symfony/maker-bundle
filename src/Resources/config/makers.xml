@@ -56,5 +56,10 @@
             <service id="maker.maker.make_voter" class="Symfony\Bundle\MakerBundle\Maker\MakeVoter">
                 <tag name="maker.command" />
             </service>
+
+            <service id="maker.maker.make_migration" class="Symfony\Bundle\MakerBundle\Maker\MakeMigration">
+                <argument>%kernel.project_dir%</argument>
+                <tag name="maker.command" />
+            </service>
         </services>
 </container>

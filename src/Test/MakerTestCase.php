@@ -12,9 +12,9 @@
 namespace Symfony\Bundle\MakerBundle\Test;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
@@ -42,43 +42,51 @@ class MakerTestCase extends TestCase
         // puts the project into self::$currentRootDir
         $this->prepareProjectDirectory($testDetails);
 
+        foreach ($testDetails->getPreMakeCommands() as $preCommand) {
+            $process = $this->createProcess($preCommand, self::$currentRootDir);
+            $process->run();
+            if (!$process->isSuccessful()) {
+                throw new \Exception(sprintf('Error with pre command: "%s": "%s" "%s"', $preCommand, $process->getOutput(), $process->getErrorOutput()));
+            }
+        }
+
         $executableFinder = new PhpExecutableFinder();
         $phpPath = $executableFinder->find(false);
-        $process = $this->createProcess(
+        $makerProcess = $this->createProcess(
             sprintf('%s bin/console %s', $phpPath, ($testDetails->getMaker())::getCommandName()),
             self::$currentRootDir
         );
-        $process->setTimeout(10);
+        $makerProcess->setTimeout(10);
 
         // tells the command we are in interactive mode
-        $process->setEnv([
+        $makerProcess->setEnv([
             'SHELL_INTERACTIVE' => '1',
         ]);
-        $inputStream = new InputStream();
-        $userInputs = $testDetails->getInputs();
-        // start the command with some input
-        if (!empty($userInputs)) {
+
+        if ($userInputs = $testDetails->getInputs()) {
+            $inputStream = new InputStream();
+
+            // start the command with some input
             $inputStream->write(current($userInputs)."\n");
+
+            $inputStream->onEmpty(function () use ($inputStream, &$userInputs) {
+                $nextInput = next($userInputs);
+                if (false === $nextInput) {
+                    $inputStream->close();
+                } else {
+                    $inputStream->write($nextInput."\n");
+                }
+            });
+            $makerProcess->setInput($inputStream);
         }
 
-        $inputStream->onEmpty(function () use ($inputStream, &$userInputs) {
-            $nextInput = next($userInputs);
-            if (false === $nextInput) {
-                $inputStream->close();
-            } else {
-                $inputStream->write($nextInput."\n");
-            }
-        });
-        $process->setInput($inputStream);
+        $makerProcess->run();
 
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            throw new \Exception(sprintf('Running maker command failed: "%s" "%s"', $process->getOutput(), $process->getErrorOutput()));
+        if (!$makerProcess->isSuccessful()) {
+            throw new \Exception(sprintf('Running maker command failed: "%s" "%s"', $makerProcess->getOutput(), $makerProcess->getErrorOutput()));
         }
 
-        $this->assertContains('Success', $process->getOutput(), $process->getErrorOutput());
-        $files = $this->getGeneratedPhpFilesFromOutputText($process->getOutput());
+        $files = $this->getGeneratedPhpFilesFromOutputText($makerProcess->getOutput());
         foreach ($files as $file) {
             $process = $this->createProcess(sprintf('php vendor/bin/php-cs-fixer fix --dry-run --diff %s', self::$currentRootDir.'/'.$file), __DIR__.'/../../');
             $process->run();
@@ -93,8 +101,9 @@ class MakerTestCase extends TestCase
             }
         }
 
-        // if there is a fixtures directory, assume it contains tests
-        if ($testDetails->getFixtureFilesPath()) {
+        $finder = new Finder();
+        $finder->in(self::$currentRootDir.'/tests')->files();
+        if ($finder->count() > 0) {
             // execute the tests that were moved into the project!
             $process = $this->createProcess(
                 // using OUR simple-phpunit for speed (to avoid downloading more deps)
@@ -103,6 +112,13 @@ class MakerTestCase extends TestCase
             );
             $process->run();
             $this->assertTrue($process->isSuccessful(), "Error while running the PHPUnit tests *in* the project: \n\n".$process->getOutput());
+        }
+
+        if (null === $testDetails->getAssert()) {
+            // a generic assert
+            $this->assertContains('Success', $makerProcess->getOutput(), $makerProcess->getErrorOutput());
+        } else {
+            ($testDetails->getAssert())($makerProcess->getOutput(), self::$currentRootDir);
         }
     }
 
@@ -121,7 +137,7 @@ class MakerTestCase extends TestCase
             [
                 'filename' => 'composer.json',
                 'find' => '"App\\\Tests\\\": "tests/"',
-                'replace' => sprintf('"App\\\Tests\\\": "tests/",'."\n".'            "Symfony\\\Bundle\\\MakerBundle\\\": "%s/src/"', __DIR__.'../../../')
+                'replace' => sprintf('"App\\\Tests\\\": "tests/",'."\n".'            "Symfony\\\Bundle\\\MakerBundle\\\": "%s/src/"', __DIR__.'../../../'),
             ],
         ];
         $this->processReplacements($replacements, self::$flexProjectPath);
@@ -179,15 +195,18 @@ class MakerTestCase extends TestCase
         // and put it in a cache file so any re-runs are much faster
         $fixturesCacheDir = self::$fixturesCachePath.'/'.$makerTestDetails->getUniqueCacheDirectoryName();
         if (!file_exists($fixturesCacheDir)) {
-            self::$fs->mirror(self::$flexProjectPath, $fixturesCacheDir);
+            try {
+                self::$fs->mirror(self::$flexProjectPath, $fixturesCacheDir);
 
-            // install any missing dependencies
-            $depBuilder = new DependencyBuilder();
-            $makerTestDetails->getMaker()->configureDependencies($depBuilder);
+                // install any missing dependencies
+                if ($dependencies = $makerTestDetails->getDependencies()) {
+                    $process = $this->createProcess(sprintf('composer require %s', implode(' ', $dependencies)), $fixturesCacheDir);
+                    $this->runProcess($process);
+                }
+            } catch (ProcessFailedException $e) {
+                self::$fs->remove($fixturesCacheDir);
 
-            if ($depBuilder->getMissingDependencies()) {
-                $process = $this->createProcess(sprintf('composer require %s', implode(' ', $depBuilder->getMissingDependencies())), $fixturesCacheDir);
-                $this->runProcess($process);
+                throw $e;
             }
         }
 
@@ -210,7 +229,7 @@ class MakerTestCase extends TestCase
                     continue;
                 }
 
-                self::$fs->copy($file->getPathname(), self::$currentRootDir . '/' . $file->getRelativePathname(), true);
+                self::$fs->copy($file->getPathname(), self::$currentRootDir.'/'.$file->getRelativePathname(), true);
             }
         }
 

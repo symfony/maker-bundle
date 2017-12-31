@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -27,7 +26,7 @@ use Symfony\Component\Validator\Validation;
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class MakeForm implements MakerInterface
+final class MakeForm extends AbstractMaker
 {
     public static function getCommandName(): string
     {
@@ -41,10 +40,6 @@ final class MakeForm implements MakerInterface
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('The name of the form class (e.g. <fg=yellow>%sType</>)', Str::asClassName(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeForm.txt'))
         ;
-    }
-
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
-    {
     }
 
     public function getParameters(InputInterface $input): array
@@ -66,8 +61,10 @@ final class MakeForm implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeSuccessMessage(array $params, ConsoleStyle $io)
     {
+        parent::writeSuccessMessage($params, $io);
+
         $io->text([
             'Next: Add fields to your form and start using it.',
             'Find the documentation at <fg=yellow>https://symfony.com/doc/current/forms.html</>',

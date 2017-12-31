@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -25,7 +24,7 @@ use Symfony\Component\Console\Input\InputInterface;
 /**
  * @author Ryan Weaver <ryan@knpuniversity.com>
  */
-final class MakeAuthenticator implements MakerInterface
+final class MakeAuthenticator extends AbstractMaker
 {
     public static function getCommandName(): string
     {
@@ -39,10 +38,6 @@ final class MakeAuthenticator implements MakerInterface
             ->addArgument('authenticator-class', InputArgument::OPTIONAL, 'The class name of the authenticator to create (e.g. <fg=yellow>AppCustomAuthenticator</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeAuth.txt'))
         ;
-    }
-
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
-    {
     }
 
     public function getParameters(InputInterface $input): array
@@ -62,8 +57,10 @@ final class MakeAuthenticator implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeSuccessMessage(array $params, ConsoleStyle $io)
     {
+        parent::writeSuccessMessage($params, $io);
+
         $io->text([
             'Next: Customize your new authenticator.',
             'Then, configure the "guard" key on your firewall to use it.',
