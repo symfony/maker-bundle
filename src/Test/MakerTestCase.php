@@ -53,7 +53,7 @@ class MakerTestCase extends TestCase
         $executableFinder = new PhpExecutableFinder();
         $phpPath = $executableFinder->find(false);
         $makerProcess = $this->createProcess(
-            sprintf('%s bin/console %s', $phpPath, ($testDetails->getMaker())::getCommandName()),
+            sprintf('%s bin/console %s', $phpPath, call_user_func([$testDetails->getMakerClass(), 'getCommandName'])),
             self::$currentRootDir
         );
         $makerProcess->setTimeout(10);

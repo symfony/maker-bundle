@@ -67,7 +67,7 @@ final class MakeUnitTest extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public static function configureDependencies(DependencyBuilder $dependencies)
     {
     }
 }

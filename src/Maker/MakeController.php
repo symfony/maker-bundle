@@ -83,7 +83,7 @@ final class MakeController extends AbstractMaker
         $io->text('Next: Open your new controller class and add some pages!');
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public static function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
             Route::class,

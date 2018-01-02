@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Command;
 
+use Psr\Container\ContainerInterface;
 use Symfony\Bundle\MakerBundle\ApplicationAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -33,16 +34,18 @@ use Symfony\Flex\Recipe;
  */
 final class MakerCommand extends Command
 {
-    private $maker;
+    private $makerLocator;
+    private $makerClass;
     private $generator;
     private $inputConfig;
     /** @var ConsoleStyle */
     private $io;
     private $checkDependencies = true;
 
-    public function __construct(MakerInterface $maker, Generator $generator)
+    public function __construct(ContainerInterface $makerLocator, string $makerClass, Generator $generator)
     {
-        $this->maker = $maker;
+        $this->makerLocator = $makerLocator;
+        $this->makerClass = $makerClass;
         $this->generator = $generator;
         $this->inputConfig = new InputConfiguration();
 
@@ -51,24 +54,25 @@ final class MakerCommand extends Command
 
     protected function configure()
     {
-        $this->maker->configureCommand($this, $this->inputConfig);
-    }
-
-    protected function initialize(InputInterface $input, OutputInterface $output)
-    {
-        $this->io = new ConsoleStyle($input, $output);
-
+        // check dependencies as early as possible, before fetching the Maker
         if ($this->checkDependencies) {
             if (!class_exists(Recipe::class)) {
                 throw new RuntimeCommandException(sprintf('The generator commands require your app to use Symfony Flex & a Flex directory structure. See https://symfony.com/doc/current/setup/flex.html'));
             }
 
             $dependencies = new DependencyBuilder();
-            $this->maker->configureDependencies($dependencies);
+            call_user_func([$this->makerClass, 'configureDependencies'], $dependencies);
             if ($missingPackages = $dependencies->getMissingDependencies()) {
                 throw new RuntimeCommandException(sprintf("Missing package%s: to use the %s command, run: \n\ncomposer require %s", 1 === count($missingPackages) ? '' : 's', $this->getName(), implode(' ', $missingPackages)));
             }
         }
+
+        $this->getMaker()->configureCommand($this, $this->inputConfig);
+    }
+
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        $this->io = new ConsoleStyle($input, $output);
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
@@ -86,32 +90,33 @@ final class MakerCommand extends Command
             $input->setArgument($argument->getName(), $value);
         }
 
-        $this->maker->interact($input, $this->io, $this);
+        $this->getMaker()->interact($input, $this->io, $this);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $maker = $this->getMaker();
         $this->generator->setIO($this->io);
-        $params = $this->maker->getParameters($input);
-        $this->generator->generate($params, $this->maker->getFiles($params));
+        $params = $maker->getParameters($input);
+        $this->generator->generate($params, $maker->getFiles($params));
 
-        if ($this->maker instanceof ExtraGenerationMakerInterface) {
-            $this->maker->afterGenerate($this->io, $params);
+        if ($maker instanceof ExtraGenerationMakerInterface) {
+            $maker->afterGenerate($this->io, $params);
         }
 
-        $this->maker->writeSuccessMessage($params, $this->io);
+        $maker->writeSuccessMessage($params, $this->io);
     }
 
     public function setApplication(Application $application = null)
     {
         parent::setApplication($application);
 
-        if ($this->maker instanceof ApplicationAwareMakerInterface) {
+        if ($this->getMaker() instanceof ApplicationAwareMakerInterface) {
             if (null === $application) {
                 throw new \RuntimeException('Application cannot be null.');
             }
 
-            $this->maker->setApplication($application);
+            $this->getMaker()->setApplication($application);
         }
     }
 
@@ -121,5 +126,13 @@ final class MakerCommand extends Command
     public function setCheckDependencies(bool $checkDeps)
     {
         $this->checkDependencies = $checkDeps;
+    }
+
+    /**
+     * @return MakerInterface
+     */
+    private function getMaker()
+    {
+        return $this->makerLocator->get('maker');
     }
 }

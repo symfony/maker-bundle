@@ -51,7 +51,7 @@ class FunctionalTest extends MakerTestCase
     public function getCommandTests()
     {
         yield 'command' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeCommand::class),
+            MakeCommand::class,
             [
                 // command name
                 'app:foo',
@@ -60,7 +60,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'controller' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeController::class),
+            MakeController::class,
             [
                 // controller class name
                 'FooBar',
@@ -69,7 +69,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'entity' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
+            MakeEntity::class,
             [
                 // entity class name
                 'TastyFood',
@@ -91,7 +91,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'form' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeForm::class),
+            MakeForm::class,
             [
                 // form name
                 'FooBar',
@@ -99,7 +99,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'functional' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeFunctionalTest::class),
+            MakeFunctionalTest::class,
             [
                 // functional test class name
                 'FooBar',
@@ -108,7 +108,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'subscriber' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeSubscriber::class),
+            MakeSubscriber::class,
             [
                 // subscriber name
                 'FooBar',
@@ -118,7 +118,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'subscriber_unknown_event_class' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeSubscriber::class),
+            MakeSubscriber::class,
             [
                 // subscriber name
                 'FooBar',
@@ -128,7 +128,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'serializer_encoder' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeSerializerEncoder::class),
+            MakeSerializerEncoder::class,
             [
                 // encoder class name
                 'FooBarEncoder',
@@ -138,7 +138,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'twig_extension' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeTwigExtension::class),
+            MakeTwigExtension::class,
             [
                 // extension class name
                 'FooBar',
@@ -146,7 +146,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'unit_test' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeUnitTest::class),
+            MakeUnitTest::class,
             [
                 // class name
                 'FooBar',
@@ -154,7 +154,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'validator' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeValidator::class),
+            MakeValidator::class,
             [
                 // validator name
                 'FooBar',
@@ -162,7 +162,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'voter' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeVoter::class),
+            MakeVoter::class,
             [
                 // voter class name
                 'FooBar',
@@ -170,7 +170,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'auth_empty' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeAuthenticator::class),
+            MakeAuthenticator::class,
             [
                 // class name
                 'AppCustomAuthenticator',
@@ -178,7 +178,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'migration_with_changes' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeMigration::class),
+            MakeMigration::class,
             [/* no input */])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
             ->addReplacement(
@@ -206,7 +206,7 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'migration_no_changes' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeMigration::class),
+            MakeMigration::class,
             [/* no input */])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
             ->addReplacement(
@@ -251,22 +251,9 @@ class FunctionalTest extends MakerTestCase
             $this->assertInstanceOf(MakerCommand::class, $command);
         }
     }
-
-    private function getMakerInstance(string $makerClass): MakerInterface
-    {
-        if (null === $this->kernel) {
-            $this->kernel = new FunctionalTestKernel('dev', true);
-            $this->kernel->boot();
-        }
-
-        // a cheap way to guess the service id
-        $serviceId = $serviceId ?? sprintf('maker.maker.%s', Str::asRouteName((new \ReflectionClass($makerClass))->getShortName()));
-
-        return $this->kernel->getContainer()->get($serviceId);
-    }
 }
 
-class FunctionalTestKernel extends Kernel implements CompilerPassInterface
+class FunctionalTestKernel extends Kernel
 {
     use MicroKernelTrait;
 
@@ -290,14 +277,5 @@ class FunctionalTestKernel extends Kernel implements CompilerPassInterface
     public function getRootDir()
     {
         return sys_get_temp_dir().'/'.uniqid('sf_maker_', true);
-    }
-
-    public function process(ContainerBuilder $container)
-    {
-        // makes all makers public to help the tests
-        foreach ($container->findTaggedServiceIds(MakeCommandRegistrationPass::MAKER_TAG) as $id => $tags) {
-            $defn = $container->getDefinition($id);
-            $defn->setPublic(true);
-        }
     }
 }

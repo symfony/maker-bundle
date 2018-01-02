@@ -6,6 +6,7 @@ use Symfony\Bundle\MakerBundle\Command\MakerCommand;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Reference;
@@ -27,7 +28,10 @@ class MakeCommandRegistrationPass implements CompilerPassInterface
                 sprintf('maker.auto_command.%s', Str::asTwigVariable($class::getCommandName())),
                 MakerCommand::class
             )->setArguments([
-                new Reference($id),
+                ServiceLocatorTagPass::register($container, [
+                    'maker' => new Reference($id),
+                ]),
+                $class,
                 new Reference('maker.generator'),
             ])->addTag('console.command', ['command' => $class::getCommandName()]);
         }

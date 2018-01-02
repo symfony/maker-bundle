@@ -44,7 +44,7 @@ interface MakerInterface
      *
      * @param DependencyBuilder $dependencies
      */
-    public function configureDependencies(DependencyBuilder $dependencies);
+    public static function configureDependencies(DependencyBuilder $dependencies);
 
     /**
      * If necessary, you can use this method to interactively ask the user for input.

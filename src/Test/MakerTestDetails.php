@@ -12,11 +12,10 @@
 namespace Symfony\Bundle\MakerBundle\Test;
 
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
-use Symfony\Bundle\MakerBundle\MakerInterface;
 
 final class MakerTestDetails
 {
-    private $maker;
+    private $makerClass;
 
     private $inputs;
 
@@ -33,20 +32,20 @@ final class MakerTestDetails
     private $extraDependencies = [];
 
     /**
-     * @param MakerInterface $maker
-     * @param array          $inputs
+     * @param string $makerClass
+     * @param array  $inputs
      *
      * @return static
      */
-    public static function createTest(MakerInterface $maker, array $inputs)
+    public static function createTest(string $makerClass, array $inputs)
     {
-        return new static($maker, $inputs);
+        return new static($makerClass, $inputs);
     }
 
-    private function __construct(MakerInterface $maker, array $inputs)
+    private function __construct(string $makerClass, array $inputs)
     {
         $this->inputs = $inputs;
-        $this->maker = $maker;
+        $this->makerClass = $makerClass;
     }
 
     public function setFixtureFilesPath(string $fixtureFilesPath): self
@@ -121,7 +120,7 @@ final class MakerTestDetails
     {
         // create a unique directory name for this project
         // but one that will be the same each time the tests are run
-        return (new \ReflectionObject($this->maker))->getShortName().'_'.($this->fixtureFilesPath ? basename($this->fixtureFilesPath) : 'default').'_'.md5(serialize($this->extraDependencies));
+        return (new \ReflectionClass($this->makerClass))->getShortName().'_'.($this->fixtureFilesPath ? basename($this->fixtureFilesPath) : 'default').'_'.md5(serialize($this->extraDependencies));
     }
 
     public function getPreMakeCommands(): array
@@ -139,9 +138,9 @@ final class MakerTestDetails
         return $this->replacements;
     }
 
-    public function getMaker(): MakerInterface
+    public function getMakerClass(): string
     {
-        return $this->maker;
+        return $this->makerClass;
     }
 
     /**
@@ -155,7 +154,7 @@ final class MakerTestDetails
     public function getDependencies()
     {
         $depBuilder = new DependencyBuilder();
-        $this->maker->configureDependencies($depBuilder);
+        call_user_func([$this->makerClass, 'configureDependencies'], $depBuilder);
 
         return array_merge($depBuilder->getMissingDependencies(), $this->extraDependencies);
     }

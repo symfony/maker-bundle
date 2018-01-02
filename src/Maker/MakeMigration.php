@@ -121,7 +121,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public static function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
             DoctrineCommand::class,

@@ -105,7 +105,7 @@ final class MakeSubscriber extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public static function configureDependencies(DependencyBuilder $dependencies)
     {
     }
 }
