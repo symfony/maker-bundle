@@ -70,7 +70,7 @@ final class MakeSerializerEncoder extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public static function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
             Serializer::class,

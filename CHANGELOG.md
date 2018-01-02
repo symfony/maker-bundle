@@ -6,3 +6,6 @@
   `AbstractMaker` instead of implementing the interface directly,
   and use `parent::writeSuccessMessage()` to get the normal success
   message after the command.
+
+* [BC BREAK] The MakerInterface changed: `configureDependencies()`
+  was changed to be static.

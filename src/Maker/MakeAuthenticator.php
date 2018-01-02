@@ -67,7 +67,7 @@ final class MakeAuthenticator extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public static function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
             SecurityBundle::class,

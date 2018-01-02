@@ -71,7 +71,7 @@ final class MakeForm extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public static function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
             AbstractType::class,
