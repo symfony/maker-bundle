@@ -29,6 +29,6 @@ class GeneratedEntityTest extends KernelTestCase
         $actualFood = $em->getRepository(TastyFood::class)
             ->findAll();
 
-        $this->assertcount(1, $actualFood);
+        $this->assertCount(1, $actualFood);
     }
 }

@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -25,7 +24,7 @@ use Symfony\Component\Form\AbstractTypeExtension;
 /**
  * @author Yonel Ceruto <yonelceruto@gmail.com>
  */
-final class MakeFormTypeExtension implements MakerInterface
+final class MakeFormTypeExtension extends AbstractMaker
 {
     public static function getCommandName(): string
     {
@@ -62,8 +61,10 @@ final class MakeFormTypeExtension implements MakerInterface
         ];
     }
 
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function writeSuccessMessage(array $params, ConsoleStyle $io)
     {
+        parent::writeSuccessMessage($params, $io);
+
         $io->text([
             'Next: Make Symfony aware of your form type extension by registering it as a service.',
             'Find the documentation at <fg=yellow>https://symfony.com/doc/current/form/create_form_type_extension.html</>',
