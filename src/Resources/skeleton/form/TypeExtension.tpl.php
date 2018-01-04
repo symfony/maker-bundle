@@ -18,6 +18,6 @@ class <?= $type_extension_class_name ?> extends AbstractTypeExtension
     public function getExtendedType()
     {
         // returns the FQCN of the type being extended.
-        return FormType::class;
+        return <?= $extended_type_class_name ?>;
     }
 }

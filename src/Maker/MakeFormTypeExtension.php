@@ -36,6 +36,7 @@ final class MakeFormTypeExtension extends AbstractMaker
         $command
             ->setDescription('Creates a new form type extension class')
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('The name of the form type extension class (e.g. <fg=yellow>%sTypeExtension</>)', Str::asClassName(Str::getRandomTerm())))
+            ->addArgument('extended_type', InputArgument::OPTIONAL, 'The name of the extended type class (e.g. <fg=yellow>FormType</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeFormTypeExtension.txt'))
         ;
     }
@@ -48,9 +49,12 @@ final class MakeFormTypeExtension extends AbstractMaker
     {
         $typeExtensionClassName = Str::asClassName($input->getArgument('name'), 'TypeExtension');
         Validator::validateClassName($typeExtensionClassName);
+        $extendedTypeClassName = $input->getArgument('extended_type');
+        Validator::validateClassName($extendedTypeClassName);
 
         return [
             'type_extension_class_name' => $typeExtensionClassName,
+            'extended_type_class_name' => $extendedTypeClassName,
         ];
     }
 

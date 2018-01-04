@@ -173,6 +173,8 @@ class FunctionalTest extends MakerTestCase
             [
                 // form name
                 'FooBar',
+                // extended type
+                'FormType'
             ])
         ];
 
