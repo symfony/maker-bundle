@@ -3,8 +3,8 @@
 namespace App\Form\Extension;
 
 use Symfony\Component\Form\AbstractTypeExtension;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use <?= $extended_type_class ?>;
 
 class <?= $type_extension_class_name ?> extends AbstractTypeExtension
 {
@@ -17,7 +17,6 @@ class <?= $type_extension_class_name ?> extends AbstractTypeExtension
 
     public function getExtendedType()
     {
-        // returns the FQCN of the type being extended.
-        return <?= $extended_type_class_name ?>;
+        return <?= $extended_type_class_name ?>::class;
     }
 }

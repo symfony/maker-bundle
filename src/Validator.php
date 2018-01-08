@@ -46,4 +46,13 @@ final class Validator
 
         return $value;
     }
+
+    public static function validateClassExists(string $class): string
+    {
+        if (!class_exists($class)) {
+            throw new RuntimeCommandException(sprintf('Could not find class "%s"', $class));
+        }
+
+        return $class;
+    }
 }

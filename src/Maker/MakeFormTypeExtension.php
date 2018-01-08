@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Form\AbstractTypeExtension;
 
 /**
@@ -26,6 +27,13 @@ use Symfony\Component\Form\AbstractTypeExtension;
  */
 final class MakeFormTypeExtension extends AbstractMaker
 {
+    private $types;
+
+    public function __construct(array $types = [])
+    {
+        $this->types = $types;
+    }
+
     public static function getCommandName(): string
     {
         return 'make:form:type-extension';
@@ -39,22 +47,46 @@ final class MakeFormTypeExtension extends AbstractMaker
             ->addArgument('extended_type', InputArgument::OPTIONAL, 'The name of the extended type class (e.g. <fg=yellow>FormType</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeFormTypeExtension.txt'))
         ;
+
+        $inputConf->setArgumentAsNonInteractive('extended_type');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
+        if (!$input->getArgument('extended_type')) {
+            $question = new Question(sprintf(' <fg=green>%s</>', $command->getDefinition()->getArgument('extended_type')->getDescription()));
+            $question->setAutocompleterValues(array_keys($this->types));
+            $question->setValidator(function ($extendedType) {
+                Validator::notBlank($extendedType);
+                if (!isset($this->types[$extendedType])) {
+                    Validator::validateClassExists($extendedType);
+                }
+
+                return $extendedType;
+            });
+            $extendedType = $io->askQuestion($question);
+            if (!class_exists($extendedType)) {
+                if (\is_array($this->types[$extendedType])) {
+                    $extendedType = $io->choice(sprintf("The type \"%s\" is ambiguous.\n\nSelect one of the following form types:", $extendedType), $this->types[$extendedType], $this->types[$extendedType][0]);
+                } else {
+                    $extendedType = $this->types[$extendedType];
+                }
+            }
+            $input->setArgument('extended_type', $extendedType);
+        }
     }
 
     public function getParameters(InputInterface $input): array
     {
         $typeExtensionClassName = Str::asClassName($input->getArgument('name'), 'TypeExtension');
         Validator::validateClassName($typeExtensionClassName);
-        $extendedTypeClassName = $input->getArgument('extended_type');
-        Validator::validateClassName($extendedTypeClassName);
+        $extendedTypeClass = $input->getArgument('extended_type');
+        Validator::validateClassExists($extendedTypeClass);
 
         return [
             'type_extension_class_name' => $typeExtensionClassName,
-            'extended_type_class_name' => $extendedTypeClassName,
+            'extended_type_class' => $extendedTypeClass,
+            'extended_type_class_name' => \array_slice(explode('\\', $extendedTypeClass), -1)[0],
         ];
     }
 
