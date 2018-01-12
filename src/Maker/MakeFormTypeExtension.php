@@ -43,8 +43,8 @@ final class MakeFormTypeExtension extends AbstractMaker
     {
         $command
             ->setDescription('Creates a new form type extension class')
-            ->addArgument('name', InputArgument::OPTIONAL, sprintf('The name of the form type extension class (e.g. <fg=yellow>%sTypeExtension</>)', Str::asClassName(Str::getRandomTerm())))
-            ->addArgument('extended_type', InputArgument::OPTIONAL, 'The name of the extended type class (e.g. <fg=yellow>FormType</>)')
+            ->addArgument('name', InputArgument::OPTIONAL, sprintf('The class name of the form type extension (e.g. <fg=yellow>%sTypeExtension</>)', Str::asClassName(Str::getRandomTerm())))
+            ->addArgument('extended_type', InputArgument::OPTIONAL, 'The class name of the extended form type (e.g. <fg=yellow>DateType</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeFormTypeExtension.txt'))
         ;
 
@@ -67,7 +67,7 @@ final class MakeFormTypeExtension extends AbstractMaker
             $extendedType = $io->askQuestion($question);
             if (!class_exists($extendedType)) {
                 if (\is_array($this->types[$extendedType])) {
-                    $extendedType = $io->choice(sprintf("The type \"%s\" is ambiguous.\n\nSelect one of the following form types:", $extendedType), $this->types[$extendedType], $this->types[$extendedType][0]);
+                    $extendedType = $io->choice(sprintf("The class name \"%s\" is ambiguous.\n\nSelect one of the following form types:", $extendedType), $this->types[$extendedType], $this->types[$extendedType][0]);
                 } else {
                     $extendedType = $this->types[$extendedType];
                 }
