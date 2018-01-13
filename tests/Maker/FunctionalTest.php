@@ -12,6 +12,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator;
 use Symfony\Bundle\MakerBundle\Maker\MakeCommand;
 use Symfony\Bundle\MakerBundle\Maker\MakeController;
 use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
+use Symfony\Bundle\MakerBundle\Maker\MakeFixture;
 use Symfony\Bundle\MakerBundle\Maker\MakeForm;
 use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest;
 use Symfony\Bundle\MakerBundle\Maker\MakeMigration;
@@ -88,6 +89,13 @@ class FunctionalTest extends MakerTestCase
                 'sqlite:///%kernel.project_dir%/var/app.db'
             )
             ->addPostMakeCommand('./bin/console doctrine:schema:create --env=test')
+        ];
+
+        yield 'fixture' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeFixture::class),
+            [
+                // this maker defines no arguments
+            ])
         ];
 
         yield 'form' => [MakerTestDetails::createTest(
