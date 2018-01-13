@@ -36,7 +36,7 @@ final class MakeFixture extends AbstractMaker
     {
         $command
             ->setDescription('Creates a new class to load Doctrine fixtures')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeSubscriber.txt'))
+            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeFixture.txt'))
         ;
     }
 
