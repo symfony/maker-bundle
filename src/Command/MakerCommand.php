@@ -24,7 +24,6 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Flex\Recipe;
 
 /**
  * Used as the Command class for the makers.
@@ -59,10 +58,6 @@ final class MakerCommand extends Command
         $this->io = new ConsoleStyle($input, $output);
 
         if ($this->checkDependencies) {
-            if (!class_exists(Recipe::class)) {
-                throw new RuntimeCommandException(sprintf('The generator commands require your app to use Symfony Flex & a Flex directory structure. See https://symfony.com/doc/current/setup/flex.html'));
-            }
-
             $dependencies = new DependencyBuilder();
             $this->maker->configureDependencies($dependencies);
             if ($missingPackages = $dependencies->getMissingDependencies()) {
