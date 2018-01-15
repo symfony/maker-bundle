@@ -34,19 +34,25 @@ final class MakeFixture extends AbstractMaker
     {
         $command
             ->setDescription('Creates a new class to load Doctrine fixtures')
+            ->addArgument('fixtures-class', InputArgument::OPTIONAL, sprintf('The class name of the fixtures to create'), 'AppFixture')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeFixture.txt'))
         ;
     }
 
     public function getParameters(InputInterface $input): array
     {
-        return [];
+        $fixturesClassName = Str::asClassName($input->getArgument('fixtures-class'), 'Fixtures');
+        Validator::validateClassName($fixturesClassName);
+
+        return [
+            'fixtures_class_name' => $fixtureClassName,
+        ];
     }
 
     public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/doctrine/Fixture.tpl.php' => 'src/DataFixtures/AppFixtures.php',
+            __DIR__.'/../Resources/skeleton/doctrine/Fixture.tpl.php' => 'src/DataFixtures/'.$params['fixtures_class_name'].'.php',
         ];
     }
 
