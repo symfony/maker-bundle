@@ -25,8 +25,6 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 final class MakeFixture extends AbstractMaker
 {
-    private $eventRegistry;
-
     public static function getCommandName(): string
     {
         return 'make:fixture';
@@ -66,7 +64,7 @@ final class MakeFixture extends AbstractMaker
     {
         $dependencies->addClassDependency(
             Column::class,
-            'orm-pack'
+            'doctrine'
         );
         $dependencies->addClassDependency(
             Fixture::class,
