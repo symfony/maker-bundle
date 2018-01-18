@@ -47,7 +47,7 @@ Creating your Own Makers
 In case your applications need to generate custom boilerplate code, you can
 create your own ``make:...`` command reusing the tools provided by this bundle.
 To do that, you should create a class that extends
-:class:`Symfony\\Bundle\\MakerBundle\\Maker\\AbstractMaker` in your ``src/Maker/``
+`AbstractMaker`_ in your ``src/Maker/``
 directory. And this is really it!
 
 For examples of how to complete your new maker command, see the `core maker commands`_.
@@ -57,4 +57,5 @@ will be done automatically.
 
 .. _`SensioGeneratorBundle`: https://github.com/sensiolabs/SensioGeneratorBundle
 .. _`Symfony Flex`: https://symfony.com/doc/current/setup/flex.html
+.. _`AbstractMaker`: https://github.com/symfony/maker-bundle/blob/master/src/Maker/AbstractMaker.php
 .. _`core maker commands`: https://github.com/symfony/maker-bundle/tree/master/src/Maker
