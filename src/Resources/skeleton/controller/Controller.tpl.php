@@ -2,11 +2,11 @@
 
 namespace App\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
-class <?= $controller_class_name ?> extends Controller
+class <?= $controller_class_name ?> extends AbstractController
 {
     /**
      * @Route("<?= $route_path ?>", name="<?= $route_name ?>")
