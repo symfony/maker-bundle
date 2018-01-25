@@ -90,7 +90,7 @@ final class MakeCrud extends AbstractMaker
 
         $metadata = $this->entityManager->getClassMetadata('App\\Entity\\'.$entityClassName);
 
-        return [
+        return array(
             'controller_class_name' => $controllerClassName,
             'entity_var_plural' => lcfirst(Inflector::pluralize($entityClassName)),
             'entity_var_singular' => lcfirst(Inflector::singularize($entityClassName)),
@@ -100,7 +100,7 @@ final class MakeCrud extends AbstractMaker
             'form_class_name' => $formClassName,
             'route_path' => Str::asRoutePath(str_replace('Controller', '', $controllerClassName)),
             'route_name' => Str::asRouteName(str_replace('Controller', '', $controllerClassName)),
-        ];
+        );
     }
 
     /**
@@ -108,14 +108,14 @@ final class MakeCrud extends AbstractMaker
      */
     public function getFiles(array $params): array
     {
-        return [
+        return array(
             __DIR__.'/../Resources/skeleton/crud/controller/ControllerWithTwig.tpl.php' => 'src/Controller/'.$params['controller_class_name'].'.php',
             __DIR__.'/../Resources/skeleton/crud/form/Type.tpl.php' => 'src/Form/'.$params['form_class_name'].'.php',
             __DIR__.'/../Resources/skeleton/crud/templates/index.tpl.php' => 'templates/'.$params['route_name'].'/index.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/show.tpl.php' => 'templates/'.$params['route_name'].'/show.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/new.tpl.php' => 'templates/'.$params['route_name'].'/new.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/edit.tpl.php' => 'templates/'.$params['route_name'].'/edit.html.twig',
-        ];
+        );
     }
 
     /**
