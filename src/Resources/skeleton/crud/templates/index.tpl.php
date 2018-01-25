@@ -8,9 +8,9 @@
             <?php endforeach; ?>
             <th>actions</th>
         </tr>
-        {% for <?= $entity_var_singular ?> in <?= $entity_var_plural ?> %}
+        {% for <?= $entity_var_singular; ?> in <?= $entity_var_plural; ?> %}
             <tr>
-                <?php foreach ($entity_fields as $field): ?><td>{{ <?= $entity_var_singular ?>.<?= $field['fieldName']; ?> }}</td>
+                <?php foreach ($entity_fields as $field): ?><td>{{ <?= $entity_var_singular; ?>.<?= $field['fieldName']; ?> }}</td>
                 <?php endforeach; ?>
                 <td>
                     <a href="{{ path('<?= $route_name; ?>_show', {'<?= $entity_identifier; ?>':<?= $entity_var_singular; ?>.<?= $entity_identifier; ?>}) }}">show</a>

@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * @Route("<?= $route_path; ?>", name="<?= $route_name; ?>_")
  */
-class <?= $controller_class_name ?> extends Controller
+class <?= $controller_class_name; ?> extends Controller
 {
     /**
      * @Route("/", name="index")
