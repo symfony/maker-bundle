@@ -51,30 +51,30 @@ class FunctionalTest extends MakerTestCase
 
     public function getCommandTests()
     {
-        yield 'command' => [MakerTestDetails::createTest(
+        yield 'command' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeCommand::class),
-            [
+            array(
                 // command name
                 'app:foo',
-            ])
+            ))
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommand')
-        ];
+        );
 
-        yield 'controller' => [MakerTestDetails::createTest(
+        yield 'controller' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeController::class),
-            [
+            array(
                 // controller class name
                 'FooBar',
-            ])
+            ))
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController')
-        ];
+        );
 
-        yield 'entity' => [MakerTestDetails::createTest(
+        yield 'entity' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),
-            [
+            array(
                 // entity class name
                 'TastyFood',
-            ])
+            ))
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
             ->addReplacement(
                 'phpunit.xml.dist',
@@ -89,98 +89,98 @@ class FunctionalTest extends MakerTestCase
                 'sqlite:///%kernel.project_dir%/var/app.db'
             )
             ->addPostMakeCommand('./bin/console doctrine:schema:create --env=test')
-        ];
+        );
 
-        yield 'form' => [MakerTestDetails::createTest(
+        yield 'form' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeForm::class),
-            [
+            array(
                 // form name
                 'FooBar',
-            ])
-        ];
+            ))
+        );
 
-        yield 'functional' => [MakerTestDetails::createTest(
+        yield 'functional' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeFunctionalTest::class),
-            [
+            array(
                 // functional test class name
                 'FooBar',
-            ])
+            ))
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
-        ];
+        );
 
-        yield 'subscriber' => [MakerTestDetails::createTest(
+        yield 'subscriber' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeSubscriber::class),
-            [
+            array(
                 // subscriber name
                 'FooBar',
                 // event name
                 'kernel.request',
-            ])
-        ];
+            ))
+        );
 
-        yield 'subscriber_unknown_event_class' => [MakerTestDetails::createTest(
+        yield 'subscriber_unknown_event_class' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeSubscriber::class),
-            [
+            array(
                 // subscriber name
                 'FooBar',
                 // event name
                 'foo.unknown_event',
-            ])
-        ];
+            ))
+        );
 
-        yield 'serializer_encoder' => [MakerTestDetails::createTest(
+        yield 'serializer_encoder' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeSerializerEncoder::class),
-            [
+            array(
                 // encoder class name
                 'FooBarEncoder',
                 // encoder format
                 'foobar',
-            ])
-        ];
+            ))
+        );
 
-        yield 'twig_extension' => [MakerTestDetails::createTest(
+        yield 'twig_extension' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeTwigExtension::class),
-            [
+            array(
                 // extension class name
                 'FooBar',
-            ])
-        ];
+            ))
+        );
 
-        yield 'unit_test' => [MakerTestDetails::createTest(
+        yield 'unit_test' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeUnitTest::class),
-            [
+            array(
                 // class name
                 'FooBar',
-            ])
-        ];
+            ))
+        );
 
-        yield 'validator' => [MakerTestDetails::createTest(
+        yield 'validator' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeValidator::class),
-            [
+            array(
                 // validator name
                 'FooBar',
-            ])
-        ];
+            ))
+        );
 
-        yield 'voter' => [MakerTestDetails::createTest(
+        yield 'voter' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeVoter::class),
-            [
+            array(
                 // voter class name
                 'FooBar',
-            ])
-        ];
+            ))
+        );
 
-        yield 'auth_empty' => [MakerTestDetails::createTest(
+        yield 'auth_empty' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeAuthenticator::class),
-            [
+            array(
                 // class name
                 'AppCustomAuthenticator',
-            ])
-        ];
+            ))
+        );
 
-        yield 'migration_with_changes' => [MakerTestDetails::createTest(
+        yield 'migration_with_changes' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeMigration::class),
-            [/* no input */])
+            array(/* no input */))
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
             ->addReplacement(
                 '.env',
@@ -204,11 +204,11 @@ class FunctionalTest extends MakerTestCase
                 $iterator->rewind();
                 $this->assertContains(sprintf('"src/Migrations/%s"', $iterator->current()->getFilename()), $output);
             })
-        ];
+        );
 
-        yield 'migration_no_changes' => [MakerTestDetails::createTest(
+        yield 'migration_no_changes' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeMigration::class),
-            [/* no input */])
+            array(/* no input */))
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
             ->addReplacement(
                 '.env',
@@ -223,14 +223,14 @@ class FunctionalTest extends MakerTestCase
 
                 $this->assertContains('No database changes were detected', $output);
             })
-        ];
+        );
 
-        yield 'crud' => [MakerTestDetails::createTest(
+        yield 'crud' => array(MakerTestDetails::createTest(
             $this->getMakerInstance(MakeCrud::class),
-            [
+            array(
                 // entity class name
                 'SweetFood',
-            ])
+            ))
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
             ->addReplacement(
                 '.env',
@@ -241,7 +241,7 @@ class FunctionalTest extends MakerTestCase
             ->assert(function(string $output, string $directory) {
                 $this->assertContains('Success', $output);
             })
-        ];
+        );
     }
 
     /**
