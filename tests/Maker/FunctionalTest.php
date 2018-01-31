@@ -237,7 +237,7 @@ class FunctionalTest extends MakerTestCase
                 'mysql://db_user:db_password@127.0.0.1:3306/db_name',
                 'sqlite:///%kernel.project_dir%/var/app.db'
             )
-            ->addExtraDependencies('doctrine/orm')
+            ->addExtraDependencies('symfony/orm-pack')
             ->assert(function(string $output, string $directory) {
                 $this->assertContains('Success', $output);
             })
