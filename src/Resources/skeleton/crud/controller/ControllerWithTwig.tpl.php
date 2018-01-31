@@ -43,7 +43,6 @@ class <?= $controller_class_name; ?> extends Controller
 
         return $this->render('<?= $route_name; ?>/show.html.twig', [
             '<?= $entity_var_singular; ?>' => $<?= $entity_var_singular; ?>,
-            'delete_form' => $deleteForm->createView(),
         ]);
     }
 
@@ -100,7 +99,6 @@ class <?= $controller_class_name; ?> extends Controller
         return $this->render('<?= $route_name; ?>/edit.html.twig', [
             '<?= $entity_var_singular; ?>' => $<?= $entity_var_singular; ?>,
             'form' => $form->createView(),
-            'delete_form' => $deleteForm->createView(),
         ]);
     }
 
@@ -115,31 +113,14 @@ class <?= $controller_class_name; ?> extends Controller
      */
     public function delete(Request $request, <?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
     {
-        $form = $this->createDeleteForm($<?= $entity_var_singular; ?>);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($<?= $entity_var_singular; ?>);
-            $em->flush();
+        if (!$this->isCsrfTokenValid('delete'.$<?= $entity_var_singular; ?>->get<?= ucfirst($entity_identifier); ?>(), $request->request->get('token'))) {
+            return $this->redirectToRoute('<?= $route_name; ?>_index');
         }
 
-        return $this->redirectToRoute('<?= $route_name; ?>_index');
-    }
+        $em = $this->getDoctrine()->getManager();
+        $em->remove($<?= $entity_var_singular; ?>);
+        $em->flush();
 
-    /**
-     * Creates a form to delete a <?= $entity_class_name; ?> entity.
-     *
-     * @param <?= $entity_class_name; ?> $<?= $entity_var_singular; ?> The <?= $entity_class_name; ?> entity
-     *
-     * @return \Symfony\Component\Form\FormInterface The form
-     */
-    private function createDeleteForm(<?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('<?= $route_name; ?>_delete', ['<?= $entity_identifier; ?>' => $<?= $entity_var_singular; ?>->get<?= ucfirst($entity_identifier); ?>()]))
-            ->setMethod('DELETE')
-            ->getForm()
-        ;
+        return $this->redirectToRoute('<?= $route_name; ?>_index');
     }
 }

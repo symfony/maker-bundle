@@ -3,20 +3,10 @@
 {% block body %}
     <h1>Edit <?= $entity_class_name; ?></h1>
 
-    {{ form_start(form) }}
-        {{ form_widget(form) }}
-        <input type="submit" value="Edit">
-    {{ form_end(form) }}
+    {% include '<?= $route_name?>/_form.html.twig' with {'form': form, 'button_label': 'Edit'} only %}
 
-<ul>
-    <li>
-        <a href="{{ path('<?= $route_name; ?>_index') }}">back to list</a>
-    </li>
-    <li>
-        {{ form_start(delete_form) }}
-        <input type="submit" value="Delete">
-        {{ form_end(delete_form) }}
-    </li>
-</ul>
+    <a href="{{ path('<?= $route_name; ?>_index') }}">back to list</a>
+
+    {% include '<?= $route_name?>/_delete_form.html.twig' with {'identifier': <?= $entity_var_singular; ?>.<?= $entity_identifier; ?>} only %}
 
 {% endblock %}

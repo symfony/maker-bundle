@@ -2,8 +2,7 @@
 
 {% block body %}
     <h1>Create new <?= $entity_class_name; ?></h1>
-    {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <input type="submit" value="Save">
-    {{ form_end(form) }}
+
+    {% include '<?= $route_name?>/_form.html.twig' with {'form': form} only %}
+
 {% endblock %}
