@@ -3,7 +3,7 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Common\Inflector\Inflector;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityManager;
 use Psr\Container\ContainerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -65,7 +65,7 @@ final class MakeCrud extends AbstractMaker
         );
 
         $dependencies->addClassDependency(
-            EntityManagerInterface::class,
+            EntityManager::class,
             'orm-pack'
         );
     }
