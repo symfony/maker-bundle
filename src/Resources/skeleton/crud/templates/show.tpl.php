@@ -16,6 +16,6 @@
 
     <a href="{{ path('<?= $route_name; ?>_edit', {'<?= $entity_identifier; ?>':<?= $entity_var_singular; ?>.<?= $entity_identifier; ?>}) }}">edit</a>
 
-    {% include '<?= $route_name?>/_delete_form.html.twig' with {'identifier': <?= $entity_var_singular; ?>.<?= $entity_identifier; ?>} only %}
+    {% include '<?= $route_name; ?>/_delete_form.html.twig' with {'identifier': <?= $entity_var_singular; ?>.<?= $entity_identifier; ?>} only %}
 
 {% endblock %}

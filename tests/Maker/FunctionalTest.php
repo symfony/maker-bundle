@@ -57,7 +57,7 @@ class FunctionalTest extends MakerTestCase
                 // command name
                 'app:foo',
             ))
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommand')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommand'),
         );
 
         yield 'controller' => array(MakerTestDetails::createTest(
@@ -66,7 +66,7 @@ class FunctionalTest extends MakerTestCase
                 // controller class name
                 'FooBar',
             ))
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController'),
         );
 
         yield 'entity' => array(MakerTestDetails::createTest(
@@ -88,7 +88,7 @@ class FunctionalTest extends MakerTestCase
                 'mysql://db_user:db_password@127.0.0.1:3306/db_name',
                 'sqlite:///%kernel.project_dir%/var/app.db'
             )
-            ->addPostMakeCommand('./bin/console doctrine:schema:create --env=test')
+            ->addPostMakeCommand('./bin/console doctrine:schema:create --env=test'),
         );
 
         yield 'form' => array(MakerTestDetails::createTest(
@@ -96,7 +96,7 @@ class FunctionalTest extends MakerTestCase
             array(
                 // form name
                 'FooBar',
-            ))
+            )),
         );
 
         yield 'functional' => array(MakerTestDetails::createTest(
@@ -105,7 +105,7 @@ class FunctionalTest extends MakerTestCase
                 // functional test class name
                 'FooBar',
             ))
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional'),
         );
 
         yield 'subscriber' => array(MakerTestDetails::createTest(
@@ -115,7 +115,7 @@ class FunctionalTest extends MakerTestCase
                 'FooBar',
                 // event name
                 'kernel.request',
-            ))
+            )),
         );
 
         yield 'subscriber_unknown_event_class' => array(MakerTestDetails::createTest(
@@ -125,7 +125,7 @@ class FunctionalTest extends MakerTestCase
                 'FooBar',
                 // event name
                 'foo.unknown_event',
-            ))
+            )),
         );
 
         yield 'serializer_encoder' => array(MakerTestDetails::createTest(
@@ -135,7 +135,7 @@ class FunctionalTest extends MakerTestCase
                 'FooBarEncoder',
                 // encoder format
                 'foobar',
-            ))
+            )),
         );
 
         yield 'twig_extension' => array(MakerTestDetails::createTest(
@@ -143,7 +143,7 @@ class FunctionalTest extends MakerTestCase
             array(
                 // extension class name
                 'FooBar',
-            ))
+            )),
         );
 
         yield 'unit_test' => array(MakerTestDetails::createTest(
@@ -151,7 +151,7 @@ class FunctionalTest extends MakerTestCase
             array(
                 // class name
                 'FooBar',
-            ))
+            )),
         );
 
         yield 'validator' => array(MakerTestDetails::createTest(
@@ -159,7 +159,7 @@ class FunctionalTest extends MakerTestCase
             array(
                 // validator name
                 'FooBar',
-            ))
+            )),
         );
 
         yield 'voter' => array(MakerTestDetails::createTest(
@@ -167,7 +167,7 @@ class FunctionalTest extends MakerTestCase
             array(
                 // voter class name
                 'FooBar',
-            ))
+            )),
         );
 
         yield 'auth_empty' => array(MakerTestDetails::createTest(
@@ -175,7 +175,7 @@ class FunctionalTest extends MakerTestCase
             array(
                 // class name
                 'AppCustomAuthenticator',
-            ))
+            )),
         );
 
         yield 'migration_with_changes' => array(MakerTestDetails::createTest(
@@ -203,7 +203,7 @@ class FunctionalTest extends MakerTestCase
                 $iterator = $finder->getIterator();
                 $iterator->rewind();
                 $this->assertContains(sprintf('"src/Migrations/%s"', $iterator->current()->getFilename()), $output);
-            })
+            }),
         );
 
         yield 'migration_no_changes' => array(MakerTestDetails::createTest(
@@ -222,7 +222,7 @@ class FunctionalTest extends MakerTestCase
                 $this->assertNotContains('Success', $output);
 
                 $this->assertContains('No database changes were detected', $output);
-            })
+            }),
         );
 
         yield 'crud' => array(MakerTestDetails::createTest(
@@ -240,7 +240,7 @@ class FunctionalTest extends MakerTestCase
             ->addExtraDependencies('symfony/orm-pack')
             ->assert(function(string $output, string $directory) {
                 $this->assertContains('Success', $output);
-            })
+            }),
         );
     }
 
