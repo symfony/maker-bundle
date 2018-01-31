@@ -4,6 +4,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Container\ContainerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -23,12 +24,12 @@ final class MakeCrud extends AbstractMaker
 {
     private $router;
 
-    private $entityManager;
+    private $locator;
 
-    public function __construct(RouterInterface $router, EntityManagerInterface $entityManager)
+    public function __construct(RouterInterface $router, ContainerInterface $serviceLocator)
     {
         $this->router = $router;
-        $this->entityManager = $entityManager;
+        $this->locator = $serviceLocator;
     }
 
     public static function getCommandName(): string
@@ -88,7 +89,7 @@ final class MakeCrud extends AbstractMaker
         $formClassName = Str::asClassName($entityClassName, 'Type');
         Validator::validateClassName($formClassName);
 
-        $metadata = $this->entityManager->getClassMetadata('App\\Entity\\'.$entityClassName);
+        $metadata = $this->locator->get('doctrine')->getManager()->getClassMetadata('App\\Entity\\'.$entityClassName);
 
         return array(
             'controller_class_name' => $controllerClassName,
@@ -111,6 +112,8 @@ final class MakeCrud extends AbstractMaker
         return array(
             __DIR__.'/../Resources/skeleton/crud/controller/ControllerWithTwig.tpl.php' => 'src/Controller/'.$params['controller_class_name'].'.php',
             __DIR__.'/../Resources/skeleton/crud/form/Type.tpl.php' => 'src/Form/'.$params['form_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/crud/templates/_delete_form.tpl.php' => 'templates/'.$params['route_name'].'/_delete_form.html.twig',
+            __DIR__.'/../Resources/skeleton/crud/templates/_form.tpl.php' => 'templates/'.$params['route_name'].'/_form.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/index.tpl.php' => 'templates/'.$params['route_name'].'/index.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/show.tpl.php' => 'templates/'.$params['route_name'].'/show.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/new.tpl.php' => 'templates/'.$params['route_name'].'/new.html.twig',

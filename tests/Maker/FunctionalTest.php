@@ -11,6 +11,7 @@ use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator;
 use Symfony\Bundle\MakerBundle\Maker\MakeCommand;
 use Symfony\Bundle\MakerBundle\Maker\MakeController;
+use Symfony\Bundle\MakerBundle\Maker\MakeCrud;
 use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Maker\MakeForm;
 use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest;
@@ -221,6 +222,24 @@ class FunctionalTest extends MakerTestCase
                 $this->assertNotContains('Success', $output);
 
                 $this->assertContains('No database changes were detected', $output);
+            })
+        ];
+
+        yield 'crud' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeCrud::class),
+            [
+                // entity class name
+                'SweetFood',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
+            ->addReplacement(
+                '.env',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                'sqlite:///%kernel.project_dir%/var/app.db'
+            )
+            ->addExtraDependencies('doctrine/orm')
+            ->assert(function(string $output, string $directory) {
+                $this->assertContains('Success', $output);
             })
         ];
     }
