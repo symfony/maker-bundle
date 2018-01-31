@@ -191,7 +191,7 @@ class FunctionalTest extends MakerTestCase
             // only requires doctrine/dbal. But we're testing with the ORM,
             // so let's install it
             ->addExtraDependencies('doctrine/orm')
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertContains('Success', $output);
 
                 $finder = new Finder();
@@ -218,7 +218,7 @@ class FunctionalTest extends MakerTestCase
             ->addExtraDependencies('doctrine/orm')
             // sync the database, so no changes are needed
             ->addPreMakeCommand('./bin/console doctrine:schema:create --env=test')
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertNotContains('Success', $output);
 
                 $this->assertContains('No database changes were detected', $output);
@@ -238,7 +238,7 @@ class FunctionalTest extends MakerTestCase
                 'sqlite:///%kernel.project_dir%/var/app.db'
             )
             ->addExtraDependencies('symfony/orm-pack')
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertContains('Success', $output);
             }),
         );
