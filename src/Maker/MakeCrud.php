@@ -8,6 +8,7 @@ use Psr\Container\ContainerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -89,7 +90,7 @@ final class MakeCrud extends AbstractMaker
         $formClassName = Str::asClassName($entityClassName, 'Type');
         Validator::validateClassName($formClassName);
 
-        $metadata = $this->locator->get('doctrine')->getManager()->getClassMetadata('App\\Entity\\'.$entityClassName);
+        $metadata = $this->getEntityMetadata($entityClassName);
 
         return array(
             'controller_class_name' => $controllerClassName,
@@ -132,5 +133,14 @@ final class MakeCrud extends AbstractMaker
             $io->newLine();
         }
         $io->text('Next: Check your new crud!');
+    }
+
+    private function getEntityMetadata($entityClassName)
+    {
+        try {
+            return $this->locator->get('doctrine')->getManager()->getClassMetadata('App\\Entity\\'.$entityClassName);
+        } catch (\Doctrine\Common\Persistence\Mapping\MappingException $exception) {
+            throw new RuntimeCommandException(sprintf('Entity "%s" doesn\'t exists in your project. May be you would like to create it with "make:entity" command?', $entityClassName));
+        }
     }
 }
