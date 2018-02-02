@@ -17,8 +17,6 @@ class <?= $controller_class_name; ?> extends Controller
 {
     /**
      * @Route("/", name="index")
-     *
-     * @return Response
      */
     public function index()
     {
@@ -32,10 +30,6 @@ class <?= $controller_class_name; ?> extends Controller
     /**
      * @Route("/{<?= $entity_identifier; ?>}", name="show")
      * @Method("GET")
-     *
-     * @param <?= $entity_class_name; ?> $<?= $entity_var_singular; ?> The <?= $entity_class_name; ?> entity
-     *
-     * @return Response
      */
     public function show(<?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
     {
@@ -49,10 +43,6 @@ class <?= $controller_class_name; ?> extends Controller
     /**
      * @Route("/new", name="new")
      * @Method({"GET", "POST"})
-     *
-     * @param Request $request
-     *
-     * @return Response
      */
     public function new(Request $request)
     {
@@ -77,11 +67,6 @@ class <?= $controller_class_name; ?> extends Controller
     /**
      * @Route("/{<?= $entity_identifier; ?>}/edit", name="edit")
      * @Method({"GET", "POST"})
-     *
-     * @param Request $request
-     * @param <?= $entity_class_name; ?>  $<?= $entity_var_singular; ?>  The <?= $entity_class_name; ?> entity
-     *
-     * @return Response
      */
     public function edit(Request $request, <?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
     {
@@ -105,11 +90,6 @@ class <?= $controller_class_name; ?> extends Controller
     /**
      * @Route("/{<?= $entity_identifier; ?>}", name="delete")
      * @Method("DELETE")
-     *
-     * @param Request $request
-     * @param <?= $entity_class_name; ?>  $<?= $entity_var_singular; ?>  The <?= $entity_class_name; ?> entity
-     *
-     * @return Response
      */
     public function delete(Request $request, <?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
     {
