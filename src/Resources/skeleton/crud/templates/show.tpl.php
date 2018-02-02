@@ -7,7 +7,7 @@
     <?php foreach ($entity_fields as $field): ?>
         <tr>
             <th><?= ucfirst($field['fieldName']); ?></th>
-            <td>{{ <?= $entity_var_singular; ?>.<?= $field['fieldName'].(false === strpos($field['type'], 'date') ?'':'|date(\'Y-m-d\TH:i:sP\')'); ?> }}</td>
+            <td>{{ <?= $entity_var_singular; ?>.<?= $field['fieldName'].(false === strpos($field['type'], 'date') ? '' : '|date(\'Y-m-d\TH:i:sP\')'); ?> }}</td>
         </tr>
     <?php endforeach; ?>
     </table>
