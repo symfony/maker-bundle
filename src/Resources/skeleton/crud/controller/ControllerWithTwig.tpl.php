@@ -17,6 +17,8 @@ class <?= $controller_class_name; ?> extends Controller
 {
     /**
      * @Route("/", name="index")
+     *
+     * @return Response
      */
     public function index()
     {
