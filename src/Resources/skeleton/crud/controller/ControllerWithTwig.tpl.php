@@ -30,19 +30,6 @@ class <?= $controller_class_name; ?> extends Controller
     }
 
     /**
-     * @Route("/{<?= $entity_identifier; ?>}", name="show")
-     * @Method("GET")
-     */
-    public function show(<?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
-    {
-        $deleteForm = $this->createDeleteForm($<?= $entity_var_singular; ?>);
-
-        return $this->render('<?= $route_name; ?>/show.html.twig', [
-            '<?= $entity_var_singular; ?>' => $<?= $entity_var_singular; ?>,
-        ]);
-    }
-
-    /**
      * @Route("/new", name="new")
      * @Method({"GET", "POST"})
      */
@@ -63,6 +50,19 @@ class <?= $controller_class_name; ?> extends Controller
         return $this->render('<?= $route_name; ?>/new.html.twig', [
             '<?= $entity_var_singular; ?>' => $<?= $entity_var_singular; ?>,
             'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/{<?= $entity_identifier; ?>}", name="show")
+     * @Method("GET")
+     */
+    public function show(<?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
+    {
+        $deleteForm = $this->createDeleteForm($<?= $entity_var_singular; ?>);
+
+        return $this->render('<?= $route_name; ?>/show.html.twig', [
+            '<?= $entity_var_singular; ?>' => $<?= $entity_var_singular; ?>,
         ]);
     }
 
@@ -95,7 +95,7 @@ class <?= $controller_class_name; ?> extends Controller
      */
     public function delete(Request $request, <?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
     {
-        if (!$this->isCsrfTokenValid('delete'.$<?= $entity_var_singular; ?>->get<?= ucfirst($entity_identifier); ?>(), $request->request->get('token'))) {
+        if (!$this->isCsrfTokenValid('delete'.$<?= $entity_var_singular; ?>->get<?= ucfirst($entity_identifier); ?>(), $request->request->get('_token'))) {
             return $this->redirectToRoute('<?= $route_name; ?>_index');
         }
 
