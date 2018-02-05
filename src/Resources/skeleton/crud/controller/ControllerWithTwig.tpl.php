@@ -95,7 +95,7 @@ class <?= $controller_class_name; ?> extends Controller
      */
     public function delete(Request $request, <?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
     {
-        if (!$this->isCsrfTokenValid('delete'.$<?= $entity_var_singular; ?>->get<?= ucfirst($entity_identifier); ?>(), $request->request->get('token'))) {
+        if (!$this->isCsrfTokenValid('delete'.$<?= $entity_var_singular; ?>->get<?= ucfirst($entity_identifier); ?>(), $request->request->get('_token'))) {
             return $this->redirectToRoute('<?= $route_name; ?>_index');
         }
 
