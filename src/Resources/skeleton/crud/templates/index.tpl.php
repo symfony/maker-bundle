@@ -13,7 +13,7 @@
         <tbody>
         {% for <?= $entity_var_singular; ?> in <?= $entity_var_plural; ?> %}
             <tr>
-                <?php foreach ($entity_fields as $field): ?><td>{{ <?= $entity_var_singular; ?>.<?= $field['fieldName'].(false === strpos($field['type'], 'date') ? '' : '|date(\'Y-m-d\TH:i:sP\')'); ?> }}</td>
+                <?php foreach ($entity_fields as $field): ?><td>{{ <?= $entity_var_singular; ?>.<?= $field['fieldName'].(false === strpos($field['type'], 'date') ? '' : '|date()'); ?> }}</td>
                 <?php endforeach; ?>
                 <td>
                     <a href="{{ path('<?= $route_name; ?>_show', {'<?= $entity_identifier; ?>':<?= $entity_var_singular; ?>.<?= $entity_identifier; ?>}) }}">show</a>
