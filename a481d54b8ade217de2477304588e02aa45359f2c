@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-01-24T18:08:14Z
+
+I think I’d like to delay this until 4.1, where getParameter() will work correctly. In other words, wait until 4.1 is released before merging this.
+
+---------------------------------------------------------------------------
+
+by stof at 2018-01-24T18:40:29Z
+
+The Route annotation change could be done separately though
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2018-01-28T11:37:11Z
+
+I've reverted the abstract controller changes and left only the core Route annotation change. Thanks!
