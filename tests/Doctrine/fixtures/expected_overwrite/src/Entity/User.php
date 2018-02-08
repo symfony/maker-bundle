@@ -44,6 +44,22 @@ class User
         return $this->id;
     }
 
+    public function customMethod()
+    {
+        return '';
+    }
+
+    public function setUserProfile(?UserProfile $userProfile)
+    {
+        $this->userProfile = $userProfile;
+
+        // set (or unset) the owning side of the relation if necessary
+        $newUser = $userProfile === null ? null : $this;
+        if ($newUser !== $userProfile->getUser()) {
+            $userProfile->setUser($newUser);
+        }
+    }
+
     /**
      * @return Collection|UserAvatar[]
      */
@@ -78,17 +94,6 @@ class User
     public function getUserProfile(): ?UserProfile
     {
         return $this->userProfile;
-    }
-
-    public function setUserProfile(?UserProfile $userProfile)
-    {
-        $this->userProfile = $userProfile;
-
-        // set (or unset) the owning side of the relation if necessary
-        $newUser = $userProfile === null ? null : $this;
-        if ($newUser !== $userProfile->getUser()) {
-            $userProfile->setUser($newUser);
-        }
     }
 
     /**

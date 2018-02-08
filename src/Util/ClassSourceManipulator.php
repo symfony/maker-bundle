@@ -722,6 +722,7 @@ final class ClassSourceManipulator
     {
         $classNode = $this->getClassNode();
         $methodName = $methodNode->name;
+        $existingIndex = null;
         if ($this->methodExists($methodName)) {
             if (!$this->overwrite) {
                 $this->writeNote(sprintf(
@@ -733,17 +734,33 @@ final class ClassSourceManipulator
                 return;
             }
 
-            // we are overwriting - remove the existing method
-            unset($classNode->stmts[$this->getMethodIndex($methodName)]);
-            $classNode->stmts = array_values($classNode->stmts);
+            // record, so we can overwrite in the same place
+            $existingIndex = $this->getMethodIndex($methodName);
         }
+
+
+        $newStatements = [];
 
         // put new method always at the bottom
         if (!empty($classNode->stmts)) {
-            $classNode->stmts[] = $this->createBlankLineNode(self::CONTEXT_CLASS);
+            $newStatements[] = $this->createBlankLineNode(self::CONTEXT_CLASS);
         }
 
-        $classNode->stmts[] = $methodNode;
+        $newStatements[] = $methodNode;
+
+        if (null === $existingIndex) {
+            // just them on the end!
+
+            $classNode->stmts = array_merge($classNode->stmts, $newStatements);
+        } else {
+            array_splice(
+                $classNode->stmts,
+                $existingIndex,
+                1,
+                $newStatements
+            );
+        }
+
         $this->updateSourceCodeFromNewStmts();
     }
 

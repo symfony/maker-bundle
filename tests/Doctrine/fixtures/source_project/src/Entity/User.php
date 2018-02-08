@@ -43,6 +43,11 @@ class User
         return $this->id;
     }
 
+    public function customMethod()
+    {
+        return '';
+    }
+
     public function setUserProfile(?UserProfile $userProfile)
     {
         $this->userProfile = $userProfile;
