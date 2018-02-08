@@ -11,7 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
-use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\Common\Annotations\Annotation;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
@@ -86,7 +86,9 @@ final class MakeController extends AbstractMaker
     public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
-            Route::class,
+            // we only need doctrine/annotations, which contains
+            // the recipe that loads annotation routes
+            Annotation::class,
             'annotations'
         );
     }

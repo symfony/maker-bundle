@@ -53,4 +53,21 @@ final class DependencyBuilder
 
         return array_merge($missingPackages, $missingOptionalPackages);
     }
+
+    /**
+     * @internal
+     */
+    public function getAllRequiredDependencies(): array
+    {
+        $dependencies = [];
+        foreach ($this->dependencies as $class => $package) {
+            if (!$package['required']) {
+                continue;
+            }
+
+            $dependencies[] = $package['name'];
+        }
+
+        return $dependencies;
+    }
 }
