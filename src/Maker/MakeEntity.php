@@ -235,12 +235,6 @@ final class MakeEntity extends AbstractMaker
                 // save the inverse side if it's being mapped
                 if ($newField->getMapInverseRelation()) {
                     $fileManagerOperations[$otherManipulatorFilename] = $otherManipulator;
-                } else {
-                    // print message about it not being saved
-                    $fileManagerOperations[] = sprintf(
-                        'The inverse side of the relation was not mapped in "%s" because it lives in the vendor/ directory.',
-                        $newField->getInverseClass()
-                    );
                 }
                 $currentFields[] = $newFieldName;
             } else {
@@ -554,8 +548,30 @@ final class MakeEntity extends AbstractMaker
             return $io->confirm(sprintf('Do you want to automatically delete orphaned <comment>%s</comment> objects (orphanRemoval)?', $owningClass), false);
         };
 
-        $setMapInverseSide = function (EntityRelation $relation) {
-            $relation->setMapInverseRelation(!$this->isClassInVendor($relation->getInverseClass()));
+        $askInverseSide = function (EntityRelation $relation) use ($io) {
+            if ($this->isClassInVendor($relation->getInverseClass())) {
+                $relation->setMapInverseRelation(false);
+            }
+
+            // recommend an inverse side, except for OneToOne, where it's inefficient
+            $recommendMappingInverse = EntityRelation::ONE_TO_ONE === $relation->getType() ? false : true;
+
+            $getterMethodName = 'get'.Str::asCamelCase(Str::getShortClassName($relation->getOwningClass()));
+            if (EntityRelation::ONE_TO_ONE !== $relation->getType()) {
+                // pluralize!
+                $getterMethodName = Str::singularCamelCaseToPluralCamelCase($getterMethodName);
+            }
+            $mapInverse = $io->confirm(
+                sprintf(
+                    'Do you want to add a new property to <comment>%s</comment> so that you can access/update <comment>%s</comment> objects from it - e.g. <comment>$%s->%s()</comment>?',
+                    Str::getShortClassName($relation->getInverseClass()),
+                    Str::getShortClassName($relation->getOwningClass()),
+                    Str::asLowerCamelCase(Str::getShortClassName($relation->getInverseClass())),
+                    $getterMethodName
+                ),
+                $recommendMappingInverse
+            );
+            $relation->setMapInverseRelation($mapInverse);
         };
 
         switch ($type) {
@@ -572,7 +588,7 @@ final class MakeEntity extends AbstractMaker
                     $relation->getOwningClass()
                 ));
 
-                $setMapInverseSide($relation);
+                $askInverseSide($relation);
                 if ($relation->getMapInverseRelation()) {
                     $io->comment(sprintf(
                         'A new property will also be added to the <comment>%s</comment> class so that you can access the related <comment>%s</comment> objects from it.',
@@ -583,13 +599,14 @@ final class MakeEntity extends AbstractMaker
                         $relation->getInverseClass(),
                         Str::singularCamelCaseToPluralCamelCase(Str::getShortClassName($relation->getOwningClass()))
                     ));
-                }
 
-                if (!$relation->isNullable()) {
-                    $relation->setOrphanRemoval($askOrphanRemoval(
-                        $relation->getOwningClass(),
-                        $relation->getInverseClass()
-                    ));
+                    // orphan removal only applies of the inverse relation is set
+                    if (!$relation->isNullable()) {
+                        $relation->setOrphanRemoval($askOrphanRemoval(
+                            $relation->getOwningClass(),
+                            $relation->getInverseClass()
+                        ));
+                    }
                 }
 
                 break;
@@ -633,7 +650,7 @@ final class MakeEntity extends AbstractMaker
                 );
                 $relation->setOwningProperty($newFieldName);
 
-                $setMapInverseSide($relation);
+                $askInverseSide($relation);
                 if ($relation->getMapInverseRelation()) {
                     $io->comment(sprintf(
                         'A new property will also be added to the <comment>%s</comment> class so that you can access the related <comment>%s</comment> objects from it.',
@@ -660,7 +677,7 @@ final class MakeEntity extends AbstractMaker
                     $relation->getOwningClass()
                 ));
 
-                $setMapInverseSide($relation);
+                $askInverseSide($relation);
                 if ($relation->getMapInverseRelation()) {
                     $io->comment(sprintf(
                         'A new property will also be added to the <comment>%s</comment> class so that you can access the related <comment>%s</comment> object from it.',

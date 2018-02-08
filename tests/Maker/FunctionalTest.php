@@ -206,6 +206,8 @@ class FunctionalTest extends MakerTestCase
                 'ManyToOne',
                 // nullable
                 'n',
+                // do you want to generate an inverse relation? (default to yes)
+                '',
                 // field name on opposite side - use default 'userAvatarPhotos'
                 '',
                 // orphanRemoval (default to no)
@@ -214,6 +216,31 @@ class FunctionalTest extends MakerTestCase
                 ''
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToOne')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+        ];
+
+        yield 'entity_many_to_one_simple_no_inverse' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'UserAvatarPhoto',
+                // field name
+                'user',
+                // add a relationship field
+                'relation',
+                // the target entity
+                'User',
+                // relation type
+                'ManyToOne',
+                // nullable
+                'n',
+                // do you want to generate an inverse relation? (default to yes)
+                'n',
+                // finish adding fields
+                ''
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToOneNoInverse')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
         ];
@@ -231,6 +258,8 @@ class FunctionalTest extends MakerTestCase
                 'UserAvatarPhoto',
                 // relation type
                 'OneToMany',
+                // inverse side?
+                'y',
                 // field name on opposite side - use default 'user'
                 '',
                 // nullable
@@ -258,6 +287,8 @@ class FunctionalTest extends MakerTestCase
                 'User',
                 // relation type
                 'ManyToMany',
+                // inverse side?
+                'y',
                 // field name on opposite side - use default 'courses'
                 '',
                 // finish adding fields
@@ -283,6 +314,8 @@ class FunctionalTest extends MakerTestCase
                 'OneToOne',
                 // nullable
                 'n',
+                // inverse side?
+                'y',
                 // field name on opposite side - use default 'userProfile'
                 '',
                 // finish adding fields
@@ -310,8 +343,6 @@ class FunctionalTest extends MakerTestCase
                  * normally, we ask for the field on the *other* side, but we
                  * do not here, since the other side won't be mapped.
                  */
-                // orphanRemoval (default to no)
-                '',
                 // finish adding fields
                 ''
             ])
