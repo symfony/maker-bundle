@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by enleur at 2018-02-07T18:51:10Z
+
+Should I fix code style?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-02-07T19:14:08Z
+
+Yes please :). Unless it’s recommending to use array() instead of [] - that is currently a false recommendation (we use the short syntax)
+
+---------------------------------------------------------------------------
+
+by enleur at 2018-02-07T19:47:59Z
+
+Done
