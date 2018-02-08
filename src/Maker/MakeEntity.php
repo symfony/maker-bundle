@@ -167,8 +167,10 @@ final class MakeEntity extends AbstractMaker
 
         $manipulator = $this->createClassManipulator($entityPath, $io, $overwrite);
 
+        $isFirstField = true;
         while (true) {
-            $newField = $this->askForNextField($io, $currentFields, $entityClassDetails->getFullName());
+            $newField = $this->askForNextField($io, $currentFields, $entityClassDetails->getFullName(), $isFirstField);
+            $isFirstField = false;
 
             if (null === $newField) {
                 break;
@@ -276,10 +278,17 @@ final class MakeEntity extends AbstractMaker
         );
     }
 
-    private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass)
+    private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField)
     {
         $io->writeln('');
-        $fieldName = $io->ask('New property name (press <return> to stop adding fields)', null, function ($name) use ($fields) {
+
+        if ($isFirstField) {
+            $questionText = 'New property name (press <return> to stop adding fields)';
+        } else {
+            $questionText = 'Add another property? Enter the property name (or press <return> to stop adding fields)';
+        }
+
+        $fieldName = $io->ask($questionText, null, function ($name) use ($fields) {
             // allow it to be empty
             if (!$name) {
                 return $name;
