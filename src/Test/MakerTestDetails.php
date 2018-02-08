@@ -90,7 +90,9 @@ final class MakerTestDetails
         $this
             ->addReplacement(
                 'phpunit.xml.dist',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                //'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                // temporary fix - see https://github.com/symfony/recipes/pull/363
+                "'mysql://db_user:db_password@127.0.0.1:3306/db_name'",
                 getenv('TEST_DATABASE_DSN')
             )
             ->addReplacement(
