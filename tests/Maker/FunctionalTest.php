@@ -324,18 +324,6 @@ class FunctionalTest extends MakerTestCase
                 '"App\\\Tests\\\": "tests/",' . "\n" . '            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
             ->assert(function (string $output, string $directory) {
-                var_dump(file_get_contents($directory.'/composer.json'));
-                var_dump(file_get_contents($directory.'/vendor/composer/autoload_psr4.php'));
-                $process = new \Symfony\Component\Process\Process('ls -la vendor', $directory);
-                $process->run();
-                var_dump($process->getOutput());
-                $process = new \Symfony\Component\Process\Process('ls -la vendor/some-vendor', $directory);
-                $process->run();
-                var_dump($process->getOutput());
-                $process = new \Symfony\Component\Process\Process('ls -la vendor/some-vendor/src', $directory);
-                $process->run();
-                var_dump($process->getOutput());
-
                 $this->assertContains('inverse side of the relation was not mapped in "Some\Vendor\Group"', $output);
                 $this->assertContains('updated: src/Entity/User.php', $output);
                 $this->assertNotContains('updated: vendor/', $output);
