@@ -41,6 +41,11 @@ class MakerTestCase extends TestCase
     protected function executeMakerCommand(MakerTestDetails $testDetails)
     {
         self::$fs = new Filesystem();
+
+        if (!file_exists(self::$fixturesCachePath)) {
+            self::$fs->mkdir(self::$fixturesCachePath);
+        }
+
         if (!file_exists(self::$flexProjectPath)) {
             $this->buildFlexProject();
         }
