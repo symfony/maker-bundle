@@ -415,7 +415,7 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setArgumentsString('--regenerate')
             ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRegenerate')
-            ->configureDatabase(false)
+            ->configureDatabase(true)
         ];
 
         yield 'entity_regenerate_overwrite' => [MakerTestDetails::createTest(
