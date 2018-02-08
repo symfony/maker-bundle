@@ -7,9 +7,19 @@ return PhpCsFixer\Config::create()
     ->setRules(array(
         '@Symfony' => true,
         '@Symfony:risky' => true,
-        'array_syntax' => array('syntax' => 'short'),
+        'array_syntax' => ['syntax' => 'short'],
         'protected_to_private' => false,
         'semicolon_after_instruction' => false,
+        'header_comment' => [
+            'header' => <<<EOF
+This file is part of the Symfony MakerBundle package.
+
+(c) Fabien Potencier <fabien@symfony.com>
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+EOF
+        ]
     ))
     ->setRiskyAllowed(true)
     ->setFinder(

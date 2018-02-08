@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Symfony package.
+ * This file is part of the Symfony MakerBundle package.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
  *
@@ -88,7 +88,14 @@ class MakerTestCase extends TestCase
 
         $files = $this->getGeneratedPhpFilesFromOutputText($makerProcess->getOutput());
         foreach ($files as $file) {
-            $process = $this->createProcess(sprintf('php vendor/bin/php-cs-fixer fix --dry-run --diff %s', self::$currentRootDir.'/'.$file), __DIR__.'/../../');
+            $process = $this->createProcess(
+                sprintf(
+                    'php vendor/bin/php-cs-fixer --config=%s fix --dry-run --diff %s',
+                    __DIR__.'/../Resources/test/.php_cs.test',
+                    self::$currentRootDir.'/'.$file
+                ),
+                __DIR__.'/../../'
+            );
             $process->run();
             $this->assertTrue($process->isSuccessful(), sprintf('File "%s" has a php-cs problem: %s', $file, $process->getOutput()));
         }
