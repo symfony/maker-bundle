@@ -87,7 +87,7 @@ final class Str
 
     public static function asCamelCase(string $str): string
     {
-        return strtr(ucwords(strtr($str, ['_' => ' ', '.' => '_ ', '\\' => '_ '])), [' ' => '']);
+        return strtr(ucwords(strtr($str, ['_' => ' ', '.' => ' ', '\\' => ' '])), [' ' => '']);
     }
 
     public static function asRoutePath(string $value): string
@@ -100,7 +100,7 @@ final class Str
         return self::asTwigVariable($value);
     }
 
-    public static function snakeCase(string $value): string
+    public static function asSnakeCase(string $value): string
     {
         return self::asTwigVariable($value);
     }
@@ -145,7 +145,7 @@ final class Str
 
     public static function singularCamelCaseToPluralCamelCase(string $camelCase): string
     {
-        $snake = self::snakeCase($camelCase);
+        $snake = self::asSnakeCase($camelCase);
         $words = explode('_', $snake);
         $words[count($words) - 1] = Inflector::pluralize($words[count($words) - 1]);
         $reSnaked = implode('_', $words);
@@ -155,7 +155,7 @@ final class Str
 
     public static function pluralCamelCaseToSingular(string $camelCase): string
     {
-        $snake = self::snakeCase($camelCase);
+        $snake = self::asSnakeCase($camelCase);
         $words = explode('_', $snake);
         $words[count($words) - 1] = Inflector::singularize($words[count($words) - 1]);
         $reSnaked = implode('_', $words);

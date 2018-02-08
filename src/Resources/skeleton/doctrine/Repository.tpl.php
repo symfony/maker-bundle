@@ -31,13 +31,13 @@ class <?= $class_name; ?> extends ServiceEntityRepository
             ->orderBy('<?= $entity_alias; ?>.id', 'ASC')
             ->setMaxResults(10)
             ->getQuery()
-            ->execute()
+            ->getResult()
         ;
     }
     */
 
     /*
-    public function findOneBySomeField($value): <?= $entity_class_name."\n" ?>
+    public function findOneBySomeField($value): ?<?= $entity_class_name."\n" ?>
     {
         return $this->createQueryBuilder('<?= $entity_alias ?>')
             ->andWhere('<?= $entity_alias ?>.exampleField = :val')

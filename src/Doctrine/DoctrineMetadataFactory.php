@@ -19,6 +19,7 @@ use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
  * Simpler version of DoctrineBundle's DisconnectedMetadataFactory, to
  * avoid PSR-4 issues.
  *
+ * @internal
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Ryan Weaver <ryan@knpuniversity.com>
  */

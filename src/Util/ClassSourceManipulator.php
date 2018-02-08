@@ -199,31 +199,42 @@ final class ClassSourceManipulator
     private function buildAnnotationLine(string $annotationClass, array $options)
     {
         $formattedOptions = array_map(function ($option, $value) {
-            $quoteValue = !(is_bool($value) || is_int($value) || is_array($value));
-
-            if (is_bool($value)) {
-                $value = $value ? 'true' : 'false';
-            }
-
             if (is_array($value)) {
                 if (!isset($value[0])) {
                     // associative array: we'll add this if/when we need it
                     throw new \Exception('Not currently supported');
                 }
 
-                $value = sprintf('{%s}', implode(', ', array_map(function ($val) {
-                    return sprintf('"%s"', $val);
+                return sprintf('%s={%s}', $option, implode(', ', array_map(function ($val) {
+                    return $this->quoteAnnotationValue($val);
                 }, $value)));
             }
 
-            if ($quoteValue) {
-                return sprintf('%s="%s"', $option, $value);
-            }
-
-            return sprintf('%s=%s', $option, $value);
+            return sprintf('%s=%s', $option, $this->quoteAnnotationValue($value));
         }, array_keys($options), array_values($options));
 
         return sprintf('%s(%s)', $annotationClass, implode(', ', $formattedOptions));
+    }
+
+    private function quoteAnnotationValue($value)
+    {
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        if (null === $value) {
+            return 'null';
+        }
+
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_array($value)) {
+            throw new \Exception('Invalid value: loop before quoting.');
+        }
+
+        return sprintf('"%s"', $value);
     }
 
     private function addSingularRelation(BaseRelation $relation)
@@ -774,8 +785,6 @@ final class ClassSourceManipulator
 
             case 'array':
             case 'simple_array':
-            case 'json_array':
-            case 'json':
                 return 'array';
 
             case 'boolean':
@@ -804,6 +813,8 @@ final class ClassSourceManipulator
             case 'dateinterval':
                 return '\DateInterval';
 
+            case 'json_array':
+            case 'json':
             case 'object':
             case 'decimal':
             case 'binary':

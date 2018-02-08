@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\Mapping\Column;
 use Psr\Container\ContainerInterface;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -262,8 +263,15 @@ final class MakeEntity extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies)
     {
+        // guarantee DoctrineBundle
         $dependencies->addClassDependency(
             DoctrineBundle::class,
+            'orm'
+        );
+
+        // guarantee ORM
+        $dependencies->addClassDependency(
+            Column::class,
             'orm'
         );
     }
@@ -290,15 +298,15 @@ final class MakeEntity extends AbstractMaker
 
         $defaultType = 'string';
         // try to guess the type by the field name prefix/suffix
-        // convert to camel case for simplicity
-        $camelCasedField = Str::snakeCase($fieldName);
-        if ('_at' == substr($camelCasedField, -3)) {
+        // convert to snake case for simplicity
+        $snakeCasedField = Str::asSnakeCase($fieldName);
+        if ('_at' == substr($snakeCasedField, -3)) {
             $defaultType = 'datetime';
-        } elseif ('_id' == substr($camelCasedField, -3)) {
+        } elseif ('_id' == substr($snakeCasedField, -3)) {
             $defaultType = 'integer';
-        } elseif ('is_' == substr($camelCasedField, 0, 3)) {
+        } elseif ('is_' == substr($snakeCasedField, 0, 3)) {
             $defaultType = 'boolean';
-        } elseif ('has_' == substr($camelCasedField, 0, 4)) {
+        } elseif ('has_' == substr($snakeCasedField, 0, 4)) {
             $defaultType = 'boolean';
         }
 
@@ -514,20 +522,21 @@ final class MakeEntity extends AbstractMaker
 
         $askOrphanRemoval = function (string $owningClass, string $inverseClass) use ($io) {
             $io->text([
+                'Do you want to activate <comment>orphanRemoval</comment> on your relationship?',
                 sprintf(
-                    'A <comment>%s</comment> becomes "orphaned" if it is removed from its related <comment>%s</comment>.',
+                    'A <comment>%s</comment> is "orphaned" when it is removed from its related <comment>%s</comment>.',
                     Str::getShortClassName($owningClass),
                     Str::getShortClassName($inverseClass)
                 ),
                 sprintf(
-                    'For example: <comment>$%s->remove%s($%s)</comment>',
+                    'e.g. <comment>$%s->remove%s($%s)</comment>',
                     Str::asLowerCamelCase(Str::getShortClassName($inverseClass)),
                     Str::asCamelCase(Str::getShortClassName($owningClass)),
                     Str::asLowerCamelCase(Str::getShortClassName($owningClass))
                 ),
                 '',
                 sprintf(
-                    'NOTE: If a <comment>%s</comment> should be allowed to *change* from one <comment>%s</comment> to another, answer "no".',
+                    'NOTE: If a <comment>%s</comment> may *change* from one <comment>%s</comment> to another, answer "no".',
                     Str::getShortClassName($owningClass),
                     Str::getShortClassName($inverseClass)
                 ),

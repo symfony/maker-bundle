@@ -146,4 +146,19 @@ class StrTest extends TestCase
         yield ['App\\Entity\\Foo', 'App\\Entity'];
         yield ['DateTime', ''];
     }
+
+    /**
+     * @dataProvider getAsCamelCaseTests
+     */
+    public function testAsCamelCase(string $original, string $expected)
+    {
+        $this->assertSame($expected, Str::asCamelCase($original));
+    }
+
+    public function getAsCamelCaseTests()
+    {
+        yield ['foo', 'Foo'];
+
+        yield ['foo_bar.baz\\pizza', 'FooBarBazPizza'];
+    }
 }

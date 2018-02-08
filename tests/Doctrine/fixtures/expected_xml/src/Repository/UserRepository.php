@@ -25,13 +25,13 @@ class UserRepository extends ServiceEntityRepository
             ->orderBy('u.id', 'ASC')
             ->setMaxResults(10)
             ->getQuery()
-            ->execute()
+            ->getResult()
         ;
     }
     */
 
     /*
-    public function findOneBySomeField($value): User
+    public function findOneBySomeField($value): ?User
     {
         return $this->createQueryBuilder('u')
             ->andWhere('u.exampleField = :val')
