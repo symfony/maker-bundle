@@ -25,6 +25,10 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_fixtures" class="Symfony\Bundle\MakerBundle\Maker\MakeFixtures">
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_form" class="Symfony\Bundle\MakerBundle\Maker\MakeForm">
                 <tag name="maker.command" />
             </service>
