@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Symfony package.
+ * This file is part of the Symfony MakerBundle package.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
  *
@@ -52,5 +52,22 @@ final class DependencyBuilder
         }
 
         return array_merge($missingPackages, $missingOptionalPackages);
+    }
+
+    /**
+     * @internal
+     */
+    public function getAllRequiredDependencies(): array
+    {
+        $dependencies = [];
+        foreach ($this->dependencies as $class => $package) {
+            if (!$package['required']) {
+                continue;
+            }
+
+            $dependencies[] = $package['name'];
+        }
+
+        return $dependencies;
     }
 }

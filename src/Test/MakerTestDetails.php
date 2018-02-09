@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Symfony package.
+ * This file is part of the Symfony MakerBundle package.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
  *
@@ -157,6 +157,6 @@ final class MakerTestDetails
         $depBuilder = new DependencyBuilder();
         $this->maker->configureDependencies($depBuilder);
 
-        return array_merge($depBuilder->getMissingDependencies(), $this->extraDependencies);
+        return array_merge($depBuilder->getAllRequiredDependencies(), $this->extraDependencies);
     }
 }
