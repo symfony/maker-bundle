@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
+use Symfony\Component\DependencyInjection\Container;
+
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
@@ -95,6 +97,14 @@ final class Str
     public static function asEventMethod(string $eventName): string
     {
         return sprintf('on%s', self::asClassName($eventName));
+    }
+
+    public static function asFilePath(string $value): string
+    {
+        $value = Container::underscore(trim($value));
+        $value = str_replace('\\', '/', $value);
+
+        return $value;
     }
 
     public static function getRandomTerm(): string

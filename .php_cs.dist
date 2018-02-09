@@ -25,5 +25,7 @@ EOF
     ->setFinder(
         PhpCsFixer\Finder::create()
             ->in(__DIR__.'/src')
+            // the PHP template files are a bit special
+            ->notName('*.tpl.php')
     )
 ;

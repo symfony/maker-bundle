@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Response;
 
 class <?= $controller_class_name ?> extends Controller
 {
@@ -13,6 +12,15 @@ class <?= $controller_class_name ?> extends Controller
      */
     public function index()
     {
-        return new Response('Welcome to your new controller!');
+<?php if ($twig_installed) { ?>
+        return $this->render('<?= $twig_file ?>', [
+            'controller_name' => '<?= $controller_class_name ?>',
+        ]);
+<?php } else { ?>
+        return $this->json([
+            'message' => 'Welcome to your new controller!',
+            'path' => '<?= $relative_path; ?>',
+        ]);
+<?php } ?>
     }
 }
