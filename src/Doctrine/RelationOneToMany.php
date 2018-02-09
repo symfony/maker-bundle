@@ -13,7 +13,10 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Symfony\Bundle\MakerBundle\Str;
 
-class RelationOneToMany extends BaseCollectionRelation
+/**
+ * @internal
+ */
+final class RelationOneToMany extends BaseCollectionRelation
 {
     private $orphanRemoval;
 

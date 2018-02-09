@@ -13,7 +13,10 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Symfony\Bundle\MakerBundle\Str;
 
-class RelationOneToOne extends BaseSingleRelation
+/**
+ * @internal
+ */
+final class RelationOneToOne extends BaseSingleRelation
 {
     private $isOwning;
 

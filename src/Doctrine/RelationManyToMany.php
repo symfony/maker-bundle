@@ -13,7 +13,10 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Symfony\Bundle\MakerBundle\Str;
 
-class RelationManyToMany extends BaseCollectionRelation
+/**
+ * @internal
+ */
+final class RelationManyToMany extends BaseCollectionRelation
 {
     private $isOwning;
 

@@ -152,7 +152,6 @@ final class EntityRegenerator
             throw new RuntimeCommandException(sprintf('Cannot determine where to generate the class "%s". This could be a bug in the library - please open an issue with your setup details.', $metadata->name));
         }
 
-        // Get namespace by removing the last component of the FQCN
         $this->generator->generate([
             'class_namespace' => $metadata->namespace,
             'class_name' => Str::getShortClassName($metadata->name),
