@@ -1,0 +1,5 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-01-14T19:45:39Z
+
+Oh, one more thing: I think it *should* have a `class-name` argument. Let's default it to `AppFixture` (actually default it - in most cases, we don't give the user a default value, just a "suggestion" - we should actually default here). I think it makes the command make more sense: I am asked a class name (but given an easy suggestion) and then that class was created.
