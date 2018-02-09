@@ -47,7 +47,7 @@ final class Generator
 
         foreach ($files as $fileTemplatePath => $targetPath) {
             $templateParameters = array_merge($parameters, [
-                'relative_path' => $this->fileManager->relativizePath($targetPath)
+                'relative_path' => $this->fileManager->relativizePath($targetPath),
             ]);
 
             $fileContents = $this->fileManager->parseTemplate($fileTemplatePath, $templateParameters);
