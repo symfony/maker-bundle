@@ -28,7 +28,6 @@ class MakeCommandRegistrationPass implements CompilerPassInterface
         foreach ($container->findTaggedServiceIds(self::MAKER_TAG) as $id => $tags) {
             $def = $container->getDefinition($id);
             $class = $container->getParameterBag()->resolveValue($def->getClass());
-
             if (!is_subclass_of($class, MakerInterface::class)) {
                 throw new InvalidArgumentException(sprintf('Service "%s" must implement interface "%s".', $id, MakerInterface::class));
             }
