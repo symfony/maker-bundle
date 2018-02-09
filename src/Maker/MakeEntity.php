@@ -41,15 +41,15 @@ final class MakeEntity extends AbstractMaker
 {
     private $fileManager;
     private $generator;
-    private $serviceLocator;
+    private $registry;
     private $projectDirectory;
 
-    public function __construct(FileManager $fileManager, Generator $generator, ContainerInterface $serviceLocator, string $projectDirectory)
+    public function __construct(FileManager $fileManager, Generator $generator, string $projectDirectory, ?ManagerRegistry $registry)
     {
         $this->fileManager = $fileManager;
         $this->generator = $generator;
-        $this->serviceLocator = $serviceLocator;
         $this->projectDirectory = $projectDirectory;
+        $this->registry = $registry;
     }
 
     public static function getCommandName(): string
@@ -445,7 +445,11 @@ final class MakeEntity extends AbstractMaker
      */
     private function getRegistry()
     {
-        return $this->serviceLocator->get('doctrine');
+        // this should never happen: we will have checked for the
+        // DoctrineBundle dependency before calling this
+        if (null === $this->registry) {
+            throw new \Exception('Somehow the doctrine service is missing. Is DoctrineBundle installed?');
+        }
     }
 
     private function createEntityClassQuestion(string $questionText): Question
