@@ -68,6 +68,27 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController')
         ];
 
+        yield 'controller_with_template' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeController::class),
+            [
+                // controller class name
+                'FooTwig',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeControllerTwig')
+            ->addExtraDependencies('twig')
+        ];
+
+        yield 'controller_with_template_no_base' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeController::class),
+            [
+                // controller class name
+                'FooTwig',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeControllerTwig')
+            ->addExtraDependencies('twig')
+            ->addPreMakeCommand('rm templates/base.html.twig')
+        ];
+
         yield 'entity' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),
             [

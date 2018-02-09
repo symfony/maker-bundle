@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Common\Annotations\Annotation;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -30,12 +31,12 @@ use Symfony\Component\Routing\RouterInterface;
 final class MakeController extends AbstractMaker
 {
     private $router;
-    private $projectDir;
+    private $fileManager;
 
-    public function __construct(RouterInterface $router, string $projectDir)
+    public function __construct(RouterInterface $router, FileManager $fileManager)
     {
         $this->router = $router;
-        $this->projectDir = $projectDir;
+        $this->fileManager = $fileManager;
     }
 
     public static function getCommandName(): string
@@ -56,12 +57,7 @@ final class MakeController extends AbstractMaker
     {
         $controllerClassName = Str::asClassName($input->getArgument('controller-class'), 'Controller');
         Validator::validateClassName($controllerClassName);
-
-        if (file_exists($this->projectDir.'/templates/base.html.twig')) {
-            $twigFirstLine = "{% extends 'base.html.twig' %}\n\n{% block title %}Hello {{ controller_name }}!{% endblock %}\n";
-        } else {
-            $twigFirstLine = "<!DOCTYPE html>\n\n<title>Hello {{ controller_name }}!</title>\n";
-        }
+        $baseLayoutExists = $this->fileManager->fileExists('templates/base.html.twig');
 
         return [
             'controller_class_name' => $controllerClassName,
@@ -69,19 +65,19 @@ final class MakeController extends AbstractMaker
             'route_path' => Str::asRoutePath(str_replace('Controller', '', $controllerClassName)),
             'route_name' => Str::asRouteName(str_replace('Controller', '', $controllerClassName)),
             'twig_file' => Str::asFilePath(str_replace('Controller', '', $controllerClassName)).'.html.twig',
-            'twig_first_line' => $twigFirstLine,
+            'base_layout_exists' => $baseLayoutExists,
             'twig_installed' => $this->isTwigInstalled(),
         ];
     }
 
     public function getFiles(array $params): array
     {
-        $dir = __DIR__.'/../Resources/skeleton/controller/';
+        $dir = __DIR__.'/../Resources/skeleton/controller';
 
-        $paths = [$dir.'Controller.tpl.php' => $params['controller_class_file']];
+        $paths = [$dir.'/Controller.tpl.php' => $params['controller_class_file']];
 
         if ($params['twig_installed']) {
-            $paths[$dir.'Controller.twig.php'] = 'templates/'.$params['twig_file'];
+            $paths[$dir.'/twig_template.tpl.php'] = 'templates/'.$params['twig_file'];
         }
 
         return $paths;

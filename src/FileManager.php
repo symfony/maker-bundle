@@ -58,6 +58,13 @@ final class FileManager
         return file_exists($this->absolutizePath($path));
     }
 
+    public function relativizePath($absolutePath): string
+    {
+        $relativePath = str_replace($this->rootDirectory, '.', $absolutePath);
+
+        return is_dir($absolutePath) ? rtrim($relativePath, '/').'/' : $relativePath;
+    }
+
     private function absolutizePath($path): string
     {
         if (0 === strpos($path, '/')) {
@@ -65,12 +72,5 @@ final class FileManager
         }
 
         return sprintf('%s/%s', $this->rootDirectory, $path);
-    }
-
-    private function relativizePath($absolutePath): string
-    {
-        $relativePath = str_replace($this->rootDirectory, '.', $absolutePath);
-
-        return is_dir($absolutePath) ? rtrim($relativePath, '/').'/' : $relativePath;
     }
 }
