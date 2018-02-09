@@ -258,8 +258,6 @@ class FunctionalTest extends MakerTestCase
                 'UserAvatarPhoto',
                 // relation type
                 'OneToMany',
-                // inverse side?
-                'y',
                 // field name on opposite side - use default 'user'
                 '',
                 // nullable
@@ -337,8 +335,6 @@ class FunctionalTest extends MakerTestCase
                 'ManyToOne',
                 // the target entity
                 'Some\Vendor\Group',
-                // nullable
-                'n',
                 /*
                  * normally, we ask for the field on the *other* side, but we
                  * do not here, since the other side won't be mapped.

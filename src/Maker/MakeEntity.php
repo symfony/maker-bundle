@@ -551,6 +551,8 @@ final class MakeEntity extends AbstractMaker
         $askInverseSide = function (EntityRelation $relation) use ($io) {
             if ($this->isClassInVendor($relation->getInverseClass())) {
                 $relation->setMapInverseRelation(false);
+
+                return;
             }
 
             // recommend an inverse side, except for OneToOne, where it's inefficient
