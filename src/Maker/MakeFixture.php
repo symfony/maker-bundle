@@ -16,6 +16,8 @@ use Doctrine\ORM\Mapping\Column;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -35,18 +37,18 @@ final class MakeFixture extends AbstractMaker
     {
         $command
             ->setDescription('Creates a new class to load Doctrine fixtures')
-            ->addArgument('fixtures-class', InputArgument::OPTIONAL, sprintf('The class name of the fixtures to create'), 'AppFixture')
+            ->addArgument('fixtures-class', InputArgument::OPTIONAL, 'The class name of the fixtures to create (e.g. <fg=yellow>AppFixtures</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeFixture.txt'))
         ;
     }
 
     public function getParameters(InputInterface $input): array
     {
-        $fixturesClassName = Str::asClassName($input->getArgument('fixtures-class'), 'Fixtures');
+        $fixturesClassName = Str::asClassName($input->getArgument('fixtures-class'));
         Validator::validateClassName($fixturesClassName);
 
         return [
-            'fixtures_class_name' => $fixtureClassName,
+            'fixtures_class_name' => $fixturesClassName,
         ];
     }
 
@@ -63,7 +65,8 @@ final class MakeFixture extends AbstractMaker
 
         $io->text([
             'Next: Open your new fixtures class and start customizing it.',
-            'See <fg=yellow>https://symfony.com/doc/master/bundles/DoctrineFixturesBundle/index.html</>',
+            sprintf('Load your fixtures by running: <comment>php %s doctrine:fixtures:load</comment>', $_SERVER['PHP_SELF']),
+            'Docs: <fg=yellow>https://symfony.com/doc/master/bundles/DoctrineFixturesBundle/index.html</>',
         ]);
     }
 

@@ -94,8 +94,11 @@ class FunctionalTest extends MakerTestCase
         yield 'fixture' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeFixture::class),
             [
-                // this maker defines no arguments
+                'AppFixtures'
             ])
+            ->assert(function(string $output, string $directory) {
+                $this->assertContains('created: src/DataFixtures/AppFixtures.php', $output);
+            })
         ];
 
         yield 'form' => [MakerTestDetails::createTest(
