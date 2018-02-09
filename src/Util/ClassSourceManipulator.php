@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Symfony package.
+ * This file is part of the Symfony MakerBundle package.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
  *
@@ -748,7 +748,6 @@ final class ClassSourceManipulator
             // record, so we can overwrite in the same place
             $existingIndex = $this->getMethodIndex($methodName);
         }
-
 
         $newStatements = [];
 

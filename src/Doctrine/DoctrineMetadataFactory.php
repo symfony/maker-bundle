@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Symfony package.
+ * This file is part of the Symfony MakerBundle package.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
  *
@@ -20,6 +20,7 @@ use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
  * avoid PSR-4 issues.
  *
  * @internal
+ *
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Ryan Weaver <ryan@knpuniversity.com>
  */
