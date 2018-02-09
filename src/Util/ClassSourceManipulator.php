@@ -287,6 +287,8 @@ final class ClassSourceManipulator
             $typeHint,
             // make the type-hint nullable always for ManyToOne to allow the owning
             // side to be set to null, which is needed for orphanRemoval
+            // (specifically: when you set the inverse side, the generated
+            // code will *also* set the owning side to null - so it needs to be allowed)
             // e.g. $userAvatarPhoto->setUser(null);
             $relation instanceof RelationOneToOne ? $relation->isNullable() : true
         );
