@@ -1,0 +1,66 @@
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2017-11-29T19:35:04Z
+
+I'm 👎 for some reasons:
+
+1) Maybe we haven't explained well the purpose/target of this bundle. It's NOT for newcomers, it's for Symfony professionals (newcomers and experts). We have the Symfony Demo app for newcomers and to show the great Symfony features.
+
+2) The SymfonyMaker must strive to be useful for everybody. Specifically, this means that we must minimize the number of changes between the generated code and the code which is useful for you. Otherwise, we'll repeat the same errors of the AcmeDemoBundle. This is key because this is the difference between Maker being useful and saving me time ... or Maker being a pain and making me work more.
+
+3) Generating only the controller class (and pointing the `render()` method to an internal template of the bundle) it's great because you just need to change the `render()` value. Maybe you change the template name, maybe you delete that line entirely. But that's all.
+
+4) If we generate the controller class and the Twig template, users will need to make more changes. Maybe the Twig template is not called as they want, maybe it's not in the directory where they want, maybe they are not using a Twig template for this controller (think JSON responses), etc.
+
+5) We can't extend from the `base.html.twig` template because there's no guarantee that the template exists. Then we'd need to create a stand-alone Twig template adding some HTML code, etc.
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-11-29T22:07:05Z
+
+1. If something is useful to newcomers, it IS useful to advanced ones. This has been proven so many times. I don't understand the purpose of the bundle then. "For pros" means absolutely nothing to me.
+2. I agree. We're talking about one file, which replaces a demo that serves not technical purpose. Why do we generate a doctrine repository following your logic?
+3. Why does the generated controller call render() then?
+4. That's easy to resolve.
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2017-11-30T07:49:31Z
+
+I disagree with this:
+
+> If something is useful to newcomers, it IS useful to advanced ones.
+
+For example, adding long help notes in the source code of the Symfony Demo app is great for newcomers, but awful for experts.
+
+Again, the confusion may come for not having explained well enough the target/purpose of this bundle. This is not the AcmeDemoBundle or the Symfony Demo app. This is a tool that every Symfony developer should use. It's not to demo/showcase things, it's to generate fully useful code.
+
+In my opinion, the Doctrine repository class example is not the same. That repository class is generated with the right file name, at the right location, with the right contents and all non-trivial apps will use it.
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-11-30T08:42:29Z
+
+> If something is useful to newcomers, it IS useful to advanced ones.
+> Symfony Demo app is great for newcomers, but awful for experts.
+
+I was talking about *features* of course, not doc. Accessibility for example, autowiring also at the beginning, etc. Many great technological features that are for "new comers" *are* useful to the "expert" majority. That's what I meant.
+
+> This is not the AcmeDemoBundle or the Symfony Demo app
+
+Of course, I got that since the beginning, that's plain clear to me!
+I was talking about demoing yourself, or someone teaching Symfony to someone (like live demos we did with Fabien): if, in a very few commands, we're able to very quickly make a working app, this is WOW. And the maker-bundle is exactly about this to me: get fast to something working (and the demo-effect is then just a nice consequence.)
+
+So yes: in my opinion, generating this twig file IS like doctrine repos: if you have twig, we can estimate you're going to use "render()", and we can generate a twig file for you. The fact that is eases a lot demoing Symfony to new comers *is* the proof to it IMHO.
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-12-06T08:48:42Z
+
+@yceruto comments addressed, thanks.
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2017-12-20T18:37:18Z
+
+Generated controllers now extend AbstractController, fixes #88
