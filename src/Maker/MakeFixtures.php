@@ -26,11 +26,11 @@ use Symfony\Component\Console\Input\InputInterface;
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class MakeFixture extends AbstractMaker
+final class MakeFixtures extends AbstractMaker
 {
     public static function getCommandName(): string
     {
-        return 'make:fixture';
+        return 'make:fixtures';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConf)
@@ -55,7 +55,7 @@ final class MakeFixture extends AbstractMaker
     public function getFiles(array $params): array
     {
         return [
-            __DIR__.'/../Resources/skeleton/doctrine/Fixture.tpl.php' => 'src/DataFixtures/'.$params['fixtures_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/doctrine/Fixtures.tpl.php' => 'src/DataFixtures/'.$params['fixtures_class_name'].'.php',
         ];
     }
 

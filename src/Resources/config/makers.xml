@@ -24,7 +24,7 @@
                 <tag name="maker.command" />
             </service>
 
-            <service id="maker.maker.make_fixture" class="Symfony\Bundle\MakerBundle\Maker\MakeFixture">
+            <service id="maker.maker.make_fixtures" class="Symfony\Bundle\MakerBundle\Maker\MakeFixtures">
                 <tag name="maker.command" />
             </service>
 
