@@ -349,10 +349,10 @@ final class MakeEntity extends AbstractMaker
             $data['length'] = 255;
         } elseif ('decimal' === $type) {
             // 10 is the default value given in \Doctrine\DBAL\Schema\Column::$_precision
-            $data['precision'] = $io->ask('Precision', 10, [Validator::class, 'validatePrecision']);
+            $data['precision'] = $io->ask('Precision (total number of digits stored: 100.00 would be 5)', 10, [Validator::class, 'validatePrecision']);
 
             // 0 is the default value given in \Doctrine\DBAL\Schema\Column::$_scale
-            $data['precision'] = $io->ask('Scale', 0, [Validator::class, 'validateScale']);
+            $data['precision'] = $io->ask('Scale (number of decimals to store: 100.00 would be 2)', 0, [Validator::class, 'validateScale']);
         }
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {
