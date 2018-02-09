@@ -335,6 +335,8 @@ class FunctionalTest extends MakerTestCase
                 'ManyToOne',
                 // the target entity
                 'Some\Vendor\Group',
+                // nullable
+                '',
                 /*
                  * normally, we ask for the field on the *other* side, but we
                  * do not here, since the other side won't be mapped.
@@ -351,7 +353,6 @@ class FunctionalTest extends MakerTestCase
                 '"App\\\Tests\\\": "tests/",' . "\n" . '            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
             ->assert(function (string $output, string $directory) {
-                $this->assertContains('inverse side of the relation was not mapped in "Some\Vendor\Group"', $output);
                 $this->assertContains('updated: src/Entity/User.php', $output);
                 $this->assertNotContains('updated: vendor/', $output);
 
@@ -391,7 +392,6 @@ class FunctionalTest extends MakerTestCase
                 '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
             ->assert(function(string $output, string $directory) {
-                $this->assertContains('inverse side of the relation was not mapped in "Some\Vendor\Group"', $output);
                 $this->assertNotContains('updated: vendor/', $output);
 
                 $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
@@ -427,7 +427,6 @@ class FunctionalTest extends MakerTestCase
                 '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
             ->assert(function(string $output, string $directory) {
-                $this->assertContains('inverse side of the relation was not mapped in "Some\Vendor\Group"', $output);
                 $this->assertNotContains('updated: vendor/', $output);
 
                 $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));

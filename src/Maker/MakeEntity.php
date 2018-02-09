@@ -602,7 +602,7 @@ final class MakeEntity extends AbstractMaker
                         Str::singularCamelCaseToPluralCamelCase(Str::getShortClassName($relation->getOwningClass()))
                     ));
 
-                    // orphan removal only applies of the inverse relation is set
+                    // orphan removal only applies if the inverse relation is set
                     if (!$relation->isNullable()) {
                         $relation->setOrphanRemoval($askOrphanRemoval(
                             $relation->getOwningClass(),
