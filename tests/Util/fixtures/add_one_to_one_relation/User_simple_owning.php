@@ -34,12 +34,6 @@ class User
     public function setUserProfile(?UserProfile $userProfile)
     {
         $this->userProfile = $userProfile;
-
-        // set (or unset) the inverse side of the relation if necessary
-        $newUser = $userProfile === null ? null : $this;
-        if ($newUser !== $userProfile->getUser()) {
-            $userProfile->setUser($newUser);
-        }
     }
 
     // add your own fields

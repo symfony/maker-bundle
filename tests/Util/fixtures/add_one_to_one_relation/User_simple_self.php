@@ -34,12 +34,6 @@ class User
     public function setEmbeddedUser(?self $embeddedUser)
     {
         $this->embeddedUser = $embeddedUser;
-
-        // set (or unset) the inverse side of the relation if necessary
-        $newUser = $embeddedUser === null ? null : $this;
-        if ($newUser !== $embeddedUser->getUser()) {
-            $embeddedUser->setUser($newUser);
-        }
     }
 
     // add your own fields

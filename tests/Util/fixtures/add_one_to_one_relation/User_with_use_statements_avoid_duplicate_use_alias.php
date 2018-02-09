@@ -37,12 +37,6 @@ class User
     public function setCategory(?\App\OtherEntity\Category $category)
     {
         $this->category = $category;
-
-        // set (or unset) the inverse side of the relation if necessary
-        $newUser = $category === null ? null : $this;
-        if ($newUser !== $category->getUser()) {
-            $category->setUser($newUser);
-        }
     }
 
     // add your own fields

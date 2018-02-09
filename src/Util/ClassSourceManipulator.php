@@ -293,17 +293,13 @@ final class ClassSourceManipulator
             $relation instanceof RelationOneToOne ? $relation->isNullable() : true
         );
 
-        // set the inverse side of the relation for OneToOne
-        // we don't do this for ManyToOne, because setting the inverse collection
-        // side could be dangerous, as it could cause many records to hydrate
-        if ($relation instanceof RelationOneToOne) {
-            // only set if this is the inverse side (i.e. we're setting the owning)
-            // of if the inverse side *is* being mapped
-            if (!$relation->isOwning() || $relation->getMapInverseRelation()) {
-                $setterNodeBuilder->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD));
+        // set the *owning* side of the relation
+        // OneToOne is the only "singular" relation type that
+        // may be the inverse side
+        if ($relation instanceof RelationOneToOne && !$relation->isOwning()) {
+            $setterNodeBuilder->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD));
 
-                $this->addNodesToSetOtherSideOfOneToOne($relation, $setterNodeBuilder);
-            }
+            $this->addNodesToSetOtherSideOfOneToOne($relation, $setterNodeBuilder);
         }
 
         $this->addMethod($setterNodeBuilder->getNode());
@@ -894,10 +890,7 @@ final class ClassSourceManipulator
     {
         if (!$relation->isNullable()) {
             $setterNodeBuilder->addStmt($this->createSingleLineCommentNode(
-                sprintf(
-                    'set the %s side of the relation if necessary',
-                    $relation->isOwning() ? 'inverse' : 'owning'
-                ),
+                'set the owning side of the relation if necessary',
                 self::CONTEXT_CLASS_METHOD
             ));
 
@@ -925,10 +918,7 @@ final class ClassSourceManipulator
 
         // at this point, we know the relation is nullable
         $setterNodeBuilder->addStmt($this->createSingleLineCommentNode(
-            sprintf(
-                'set (or unset) the %s side of the relation if necessary',
-                $relation->isOwning() ? 'inverse' : 'owning'
-            ),
+            'set (or unset) the owning side of the relation if necessary',
             self::CONTEXT_CLASS_METHOD
         ));
 
