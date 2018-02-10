@@ -51,7 +51,7 @@ final class MakeEntity extends AbstractMaker
         );
 
         $repositoryClassDetails = $generator->createClassNameDetails(
-            $entityClassDetails->getOriginalName(),
+            $entityClassDetails->getRelativeName(),
             'Repository\\',
             'Repository'
         );

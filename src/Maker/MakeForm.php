@@ -61,8 +61,9 @@ final class MakeForm extends AbstractMaker
             $formClassNameDetails->getFullName(),
             'form/Type.tpl.php',
             [
+                'entity_class_exists' => class_exists($entityClassNameDetails->getFullName()),
                 'entity_full_class_name' => $entityClassNameDetails->getFullName(),
-                'entity_class_name' => $entityClassNameDetails->getFullName(),
+                'entity_class_name' => $entityClassNameDetails->getShortName(),
             ]
         );
 
