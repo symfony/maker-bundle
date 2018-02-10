@@ -255,14 +255,14 @@ class FunctionalTest extends MakerTestCase
 
                 $this->assertContains('No database changes were detected', $output);
             }),
-        );
+        ];
 
-        yield 'crud' => array(MakerTestDetails::createTest(
+        yield 'crud' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeCrud::class),
-            array(
+            [
                 // entity class name
                 'SweetFood',
-            ))
+            ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
             ->addReplacement(
                 '.env',
@@ -273,7 +273,7 @@ class FunctionalTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertContains('Success', $output);
             }),
-        );
+        ];
     }
 
     /**
