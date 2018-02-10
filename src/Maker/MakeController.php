@@ -18,13 +18,10 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
-use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -61,7 +58,7 @@ final class MakeController extends AbstractMaker
             'Controller'
         );
 
-        $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()) . '/index.html.twig';
+        $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()).'/index.html.twig';
         $controllerPath = $generator->generateClass(
             $controllerClassNameDetails->getFullName(),
             'controller/Controller.tpl.php',
@@ -75,11 +72,11 @@ final class MakeController extends AbstractMaker
 
         if ($this->isTwigInstalled()) {
             $generator->generateFile(
-                'templates/' . $templateName,
+                'templates/'.$templateName,
                 'controller/twig_template.tpl.php',
                 [
                     'base_layout_exists' => $this->fileManager->fileExists('templates/base.html.twig'),
-                    'controller_path' => $controllerPath
+                    'controller_path' => $controllerPath,
                 ]
             );
         }

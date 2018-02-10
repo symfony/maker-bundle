@@ -59,8 +59,8 @@ interface MakerInterface
      * Called after normal code generation: allows you to do anything.
      *
      * @param InputInterface $input
-     * @param ConsoleStyle $io
-     * @param Generator $generator
+     * @param ConsoleStyle   $io
+     * @param Generator      $generator
      */
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator);
 }

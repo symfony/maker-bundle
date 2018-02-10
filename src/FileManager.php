@@ -78,6 +78,7 @@ class FileManager
         if (0 === strpos($relativePath, './')) {
             $relativePath = substr($relativePath, 2);
         }
+
         return is_dir($absolutePath) ? rtrim($relativePath, '/').'/' : $relativePath;
     }
 
@@ -86,7 +87,7 @@ class FileManager
         // lookup is obviously modeled off of Composer's autoload logic
         foreach ($this->getClassLoader()->getPrefixesPsr4() as $prefix => $paths) {
             if (0 === strpos($className, $prefix)) {
-                $path = $paths[0] . '/' . str_replace('\\', '/', str_replace($prefix, '', $className)) . '.php';
+                $path = $paths[0].'/'.str_replace('\\', '/', str_replace($prefix, '', $className)).'.php';
 
                 return $this->relativizePath($path);
             }
@@ -94,20 +95,20 @@ class FileManager
 
         foreach ($this->getClassLoader()->getPrefixes() as $prefix => $paths) {
             if (0 === strpos($className, $prefix)) {
-                $path = $paths[0] . '/' . str_replace('\\', '/', $className) . '.php';
+                $path = $paths[0].'/'.str_replace('\\', '/', $className).'.php';
 
                 return $this->relativizePath($path);
             }
         }
 
         if ($this->getClassLoader()->getFallbackDirsPsr4()) {
-            $path = $this->getClassLoader()->getFallbackDirsPsr4()[0] . '/' . str_replace('\\', '/', $className) . '.php';
+            $path = $this->getClassLoader()->getFallbackDirsPsr4()[0].'/'.str_replace('\\', '/', $className).'.php';
 
             return $this->relativizePath($path);
         }
 
         if ($this->getClassLoader()->getFallbackDirs()) {
-            $path = $this->getClassLoader()->getFallbackDirs()[0] . '/' . str_replace('\\', '/', $className) . '.php';
+            $path = $this->getClassLoader()->getFallbackDirs()[0].'/'.str_replace('\\', '/', $className).'.php';
 
             return $this->relativizePath($path);
         }
@@ -154,6 +155,7 @@ class FileManager
      * Resolve '../' in paths (like real_path), but for non-existent files.
      *
      * @param string $absolutePath
+     *
      * @return string
      */
     private function realPath($absolutePath): string
@@ -169,13 +171,13 @@ class FileManager
                 }
 
                 unset($finalParts[$currentIndex]);
-                $currentIndex--;
+                --$currentIndex;
 
                 continue;
             }
 
             $finalParts[] = $pathPart;
-            $currentIndex++;
+            ++$currentIndex;
         }
 
         $finalPath = implode('/', $finalParts);
@@ -187,4 +189,3 @@ class FileManager
         return $finalPath;
     }
 }
-

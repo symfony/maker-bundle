@@ -13,7 +13,6 @@ namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -57,7 +56,7 @@ final class Generator
      *
      * @param string $targetPath
      * @param string $templateName
-     * @param array $variables
+     * @param array  $variables
      */
     public function generateFile(string $targetPath, string $templateName, array $variables)
     {
@@ -87,20 +86,21 @@ final class Generator
      *      // Cool\Stuff\BalloonController
      *      $gen->createClassNameDetails('Cool\\Stuff\\Balloon', 'Controller', 'Controller');
      *
-     * @param string $name              The short "name" that will be turned into the class name
-     * @param string $namespacePrefix   Recommended namespace where this class should live, but *without* the "App\\" part
-     * @param string $suffix            Optional suffix to guarantee is on the end of the class
+     * @param string $name                   The short "name" that will be turned into the class name
+     * @param string $namespacePrefix        Recommended namespace where this class should live, but *without* the "App\\" part
+     * @param string $suffix                 Optional suffix to guarantee is on the end of the class
      * @param string $validationErrorMessage
+     *
      * @return ClassNameDetails
      */
     public function createClassNameDetails(string $name, string $namespacePrefix, string $suffix = '', string $validationErrorMessage = ''): ClassNameDetails
     {
-        $fullNamespacePrefix = $this->namespacePrefix . '\\' . $namespacePrefix;
+        $fullNamespacePrefix = $this->namespacePrefix.'\\'.$namespacePrefix;
         if ('\\' === $name[0]) {
             // class is already "absolute" - leave it alone (but strip opening \)
             $className = substr($name, 1);
         } else {
-            $className = rtrim($fullNamespacePrefix, '\\') . '\\' . Str::asClassName($name, $suffix);
+            $className = rtrim($fullNamespacePrefix, '\\').'\\'.Str::asClassName($name, $suffix);
         }
 
         Validator::validateClassName($className, $validationErrorMessage);

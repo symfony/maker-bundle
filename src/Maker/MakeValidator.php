@@ -16,7 +16,6 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -57,7 +56,7 @@ final class MakeValidator extends AbstractMaker
             $validatorClassNameDetails->getFullName(),
             'validator/Validator.tpl.php',
             [
-                'constraint_class_name' => $constraintFullClassName
+                'constraint_class_name' => $constraintFullClassName,
             ]
         );
 

@@ -16,6 +16,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
+ *
  * @internal
  */
 final class Validator
