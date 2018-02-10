@@ -28,7 +28,7 @@ class GeneratorTest extends TestCase
     {
         yield 'simple_class' => [
             'foo',
-            'App\\Controller',
+            'Controller\\',
             '',
             'App\\Controller\\Foo',
             'Foo'
@@ -36,7 +36,7 @@ class GeneratorTest extends TestCase
 
         yield 'with_suffix' => [
             'foo',
-            'App\\Controller',
+            'Controller',
             'Controller',
             'App\\Controller\\FooController',
             'FooController'
@@ -44,7 +44,7 @@ class GeneratorTest extends TestCase
 
         yield 'custom_class' => [
             '\Foo\Bar\Baz',
-            'App\\Controller',
+            'Controller',
             '',
             'Foo\Bar\Baz',
             'Bar\Baz'
@@ -52,7 +52,7 @@ class GeneratorTest extends TestCase
 
         yield 'custom_class_with_suffix' => [
             '\Foo\Bar\Baz',
-            'App\\Controller',
+            'Controller',
             'Controller',
             'Foo\Bar\Baz',
             'Bar\Baz'

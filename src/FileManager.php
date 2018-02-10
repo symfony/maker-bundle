@@ -32,10 +32,6 @@ class FileManager
 
     public function __construct(Filesystem $fs, string $rootDirectory)
     {
-        if (!file_exists($rootDirectory)) {
-            throw new \InvalidArgumentException(sprintf('Root directory "%s" does not exist.', $rootDirectory));
-        }
-
         $this->fs = $fs;
         $this->rootDirectory = rtrim($this->realpath($rootDirectory).'/');
     }
