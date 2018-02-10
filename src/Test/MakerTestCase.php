@@ -197,7 +197,7 @@ class MakerTestCase extends TestCase
     {
         $files = [];
         foreach (explode("\n", $output) as $line) {
-            if (false === strpos($line, 'created:')) {
+            if (false === strpos($line, 'created:') && false === strpos($line, 'updated:')) {
                 continue;
             }
 
