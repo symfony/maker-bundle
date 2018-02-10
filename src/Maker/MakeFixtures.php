@@ -78,7 +78,9 @@ final class MakeFixtures extends AbstractMaker
         );
         $dependencies->addClassDependency(
             Fixture::class,
-            'orm-fixtures'
+            'orm-fixtures',
+            true,
+            true
         );
     }
 }

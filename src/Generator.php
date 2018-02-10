@@ -20,7 +20,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  *
  * @internal
  */
-final class Generator
+class Generator
 {
     private $fileManager;
     private $io;
