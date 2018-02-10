@@ -67,6 +67,8 @@ final class MakeValidator extends AbstractMaker
             []
         );
 
+        $generator->writeChanges();
+
         $this->writeSuccessMessage($io);
 
         $io->text([

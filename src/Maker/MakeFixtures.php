@@ -57,6 +57,8 @@ final class MakeFixtures extends AbstractMaker
             []
         );
 
+        $generator->writeChanges();
+
         $this->writeSuccessMessage($io);
 
         $io->text([

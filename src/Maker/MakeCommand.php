@@ -60,6 +60,8 @@ final class MakeCommand extends AbstractMaker
             ]
         );
 
+        $generator->writeChanges();
+
         $this->writeSuccessMessage($io);
         $io->text([
             'Next: open your new command class and customize it!',

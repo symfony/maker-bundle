@@ -57,6 +57,8 @@ final class MakeTwigExtension extends AbstractMaker
             []
         );
 
+        $generator->writeChanges();
+
         $this->writeSuccessMessage($io);
 
         $io->text([

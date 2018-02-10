@@ -84,7 +84,12 @@ final class Generator
         ];
     }
 
-    public function flushChanges()
+    public function hasPendingOperations(): bool
+    {
+        return !empty($this->pendingOperations);
+    }
+
+    public function writeChanges()
     {
         foreach ($this->pendingOperations as $targetPath => $templateData) {
             $templatePath = $templateData['template'];
@@ -97,5 +102,7 @@ final class Generator
             $fileContents = $this->fileManager->parseTemplate($templatePath, $templateParameters);
             $this->fileManager->dumpFile($targetPath, $fileContents);
         }
+
+        $this->pendingOperations = [];
     }
 }

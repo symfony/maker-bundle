@@ -84,6 +84,8 @@ final class MakeController extends AbstractMaker
             );
         }
 
+        $generator->writeChanges();
+
         $this->writeSuccessMessage($io);
         $io->text('Next: Open your new controller class and add some pages!');
     }

@@ -90,7 +90,11 @@ final class MakerCommand extends Command
         $generator = new Generator($this->fileManager);
 
         $this->maker->generate($input, $this->io, $generator);
-        $generator->flushChanges();
+
+        // sanity check for custom makers
+        if ($generator->hasPendingOperations()) {
+            throw new \LogicException('Make sure to call the writeChanges() method on the generator.');
+        }
     }
 
     public function setApplication(Application $application = null)

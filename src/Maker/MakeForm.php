@@ -66,6 +66,8 @@ final class MakeForm extends AbstractMaker
             ]
         );
 
+        $generator->writeChanges();
+
         $this->writeSuccessMessage($io);
 
         $io->text([

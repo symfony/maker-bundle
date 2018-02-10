@@ -92,6 +92,8 @@ final class MakeSubscriber extends AbstractMaker
             ]
         );
 
+        $generator->writeChanges();
+
         $this->writeSuccessMessage($io);
 
         $io->text([

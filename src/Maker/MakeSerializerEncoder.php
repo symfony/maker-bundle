@@ -60,6 +60,8 @@ final class MakeSerializerEncoder extends AbstractMaker
             ]
         );
 
+        $generator->writeChanges();
+
         $this->writeSuccessMessage($io);
 
         $io->text([

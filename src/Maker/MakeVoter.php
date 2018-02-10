@@ -57,6 +57,8 @@ final class MakeVoter extends AbstractMaker
             []
         );
 
+        $generator->writeChanges();
+
         $this->writeSuccessMessage($io);
 
         $io->text([

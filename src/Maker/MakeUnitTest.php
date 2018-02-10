@@ -56,6 +56,8 @@ final class MakeUnitTest extends AbstractMaker
             []
         );
 
+        $generator->writeChanges();
+
         $this->writeSuccessMessage($io);
 
         $io->text([

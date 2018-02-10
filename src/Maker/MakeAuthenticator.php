@@ -54,6 +54,7 @@ final class MakeAuthenticator extends AbstractMaker
             'authenticator/Empty.tpl.php',
             []
         );
+        $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
 
