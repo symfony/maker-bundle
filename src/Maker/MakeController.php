@@ -55,19 +55,19 @@ final class MakeController extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $controllerClassNameDetails = ClassNameDetails::createFromName(
+        $controllerClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('controller-class'),
-            'App\\Controller\\',
+            'Controller\\',
             'Controller'
         );
 
-        $templateName = Str::asFilePath($controllerClassNameDetails->getOriginalNameWithoutSuffix()) . '/index.html.twig';
+        $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()) . '/index.html.twig';
         $controllerPath = $generator->generateClass(
             $controllerClassNameDetails->getFullName(),
             'controller/Controller.tpl.php',
             [
-                'route_path' => Str::asRoutePath($controllerClassNameDetails->getOriginalNameWithoutSuffix()),
-                'route_name' => Str::asRouteName($controllerClassNameDetails->getOriginalNameWithoutSuffix()),
+                'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
+                'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'twig_installed' => $this->isTwigInstalled(),
                 'template_name' => $templateName,
             ]

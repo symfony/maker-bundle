@@ -87,7 +87,7 @@ final class MakerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $generator = new Generator($this->fileManager);
+        $generator = new Generator($this->fileManager, 'App\\');
 
         $this->maker->generate($input, $this->io, $generator);
 

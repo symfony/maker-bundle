@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
+use Composer\Autoload\ClassLoader;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -20,17 +21,23 @@ use Symfony\Component\Filesystem\Filesystem;
  *
  * @internal
  */
-final class FileManager
+class FileManager
 {
     private $fs;
     private $rootDirectory;
     /** @var SymfonyStyle */
     private $io;
 
+    private static $classLoader;
+
     public function __construct(Filesystem $fs, string $rootDirectory)
     {
+        if (!file_exists($rootDirectory)) {
+            throw new \InvalidArgumentException(sprintf('Root directory "%s" does not exist.', $rootDirectory));
+        }
+
         $this->fs = $fs;
-        $this->rootDirectory = $rootDirectory;
+        $this->rootDirectory = rtrim($this->realpath($rootDirectory).'/');
     }
 
     public function setIO(SymfonyStyle $io)
@@ -76,21 +83,62 @@ final class FileManager
 
     public function getPathForFutureClass(string $className)
     {
-        $autoloadPath = $this->absolutizePath('vendor/autoload.php');
+        // lookup is obviously modeled off of Composer's autoload logic
+        foreach ($this->getClassLoader()->getPrefixesPsr4() as $prefix => $paths) {
+            if (0 === strpos($className, $prefix)) {
+                $path = $paths[0] . '/' . str_replace('\\', '/', str_replace($prefix, '', $className)) . '.php';
+
+                return $this->relativizePath($path);
+            }
+        }
+
+        foreach ($this->getClassLoader()->getPrefixes() as $prefix => $paths) {
+            if (0 === strpos($className, $prefix)) {
+                $path = $paths[0] . '/' . str_replace('\\', '/', $className) . '.php';
+
+                return $this->relativizePath($path);
+            }
+        }
+
+        if ($this->getClassLoader()->getFallbackDirsPsr4()) {
+            $path = $this->getClassLoader()->getFallbackDirsPsr4()[0] . '/' . str_replace('\\', '/', $className) . '.php';
+
+            return $this->relativizePath($path);
+        }
+
+        if ($this->getClassLoader()->getFallbackDirs()) {
+            $path = $this->getClassLoader()->getFallbackDirs()[0] . '/' . str_replace('\\', '/', $className) . '.php';
+
+            return $this->relativizePath($path);
+        }
+
+        return null;
+    }
+
+    public function getNamespacePrefixForClass(string $className): string
+    {
+        foreach ($this->getClassLoader()->getPrefixesPsr4() as $prefix => $paths) {
+            if (0 === strpos($className, $prefix)) {
+                return $prefix;
+            }
+        }
+
+        return '';
+    }
+
+    private function getClassLoader(): ClassLoader
+    {
+        if (null === self::$classLoader) {
+            $autoloadPath = $this->absolutizePath('vendor/autoload.php');
+
             if (!file_exists($autoloadPath)) {
                 throw new \Exception(sprintf('Could not find the autoload file: "%s"', $autoloadPath));
             }
 
-            /** @var \Composer\Autoload\ClassLoader $loader */
-            $loader = require $autoloadPath;
-            $path = null;
-            foreach ($loader->getPrefixesPsr4() as $prefix => $paths) {
-                if (0 === strpos($className, $prefix)) {
-                    return $paths[0].'/'.str_replace('\\', '/', str_replace($prefix, '', $className)).'.php';
-                }
-            }
+            self::$classLoader = require $autoloadPath;
+        }
 
-            return null;
+        return self::$classLoader;
     }
 
     private function absolutizePath($path): string

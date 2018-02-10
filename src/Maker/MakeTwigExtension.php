@@ -45,9 +45,9 @@ final class MakeTwigExtension extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $extensionClassNameDetails = ClassNameDetails::createFromName(
+        $extensionClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'App\\Twig\\',
+            'Twig\\',
             'Extension'
         );
 

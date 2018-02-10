@@ -46,9 +46,9 @@ class MakeFunctionalTest extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $testClassNameDetails = ClassNameDetails::createFromName(
+        $testClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'App\\Tests\\',
+            'Tests\\',
             'Test'
         );
 

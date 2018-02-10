@@ -22,7 +22,8 @@ final class Validator
 {
     public static function validateClassName(string $className, string $errorMessage = ''): string
     {
-        $pieces = explode('\\', $className);
+        // remove potential opening slash so we don't match on it
+        $pieces = explode('\\', ltrim($className, '\\'));
 
         foreach ($pieces as $piece) {
             if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $piece)) {
@@ -32,6 +33,7 @@ final class Validator
             }
         }
 
+        // return original class name
         return $className;
     }
 

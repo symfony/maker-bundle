@@ -2,7 +2,7 @@
 
 namespace <?= $namespace; ?>;
 
-use App\Entity\<?= $entity_class_name ?>;
+use <?= $entity_class_name ?>;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;

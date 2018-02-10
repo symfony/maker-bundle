@@ -21,20 +21,26 @@ use Symfony\Component\Process\Process;
 
 class MakerTestCase extends TestCase
 {
-    private static $currentRootDir;
+    protected static $currentRootDir;
     private static $flexProjectPath;
     private static $fixturesCachePath;
 
     /** @var Filesystem */
     private static $fs;
 
-    protected function executeMakerCommand(MakerTestDetails $testDetails)
+    /**
+     * @beforeClass
+     */
+    public static function setupPaths()
     {
         self::$currentRootDir = __DIR__.'/../../tests/tmp/current_project';
         self::$flexProjectPath = __DIR__.'/../../tests/tmp/template_project';
         self::$fixturesCachePath = __DIR__.'/../../tests/tmp/cache';
-        self::$fs = new Filesystem();
+    }
 
+    protected function executeMakerCommand(MakerTestDetails $testDetails)
+    {
+        self::$fs = new Filesystem();
         if (!file_exists(self::$flexProjectPath)) {
             $this->buildFlexProject();
         }

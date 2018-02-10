@@ -46,9 +46,9 @@ final class MakeFixtures extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $fixturesClassNameDetails = ClassNameDetails::createFromName(
+        $fixturesClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('fixtures-class'),
-            'App\\DataFixtures\\'
+            'DataFixtures\\'
         );
 
         $generator->generateClass(

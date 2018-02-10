@@ -45,9 +45,9 @@ final class MakeSerializerEncoder extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $encoderClassNameDetails = ClassNameDetails::createFromName(
+        $encoderClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'App\\Serializer\\',
+            'Serializer\\',
             'Encoder'
         );
         $format = $input->getArgument('format');

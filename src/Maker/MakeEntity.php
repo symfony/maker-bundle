@@ -45,14 +45,14 @@ final class MakeEntity extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $entityClassDetails = ClassNameDetails::createFromName(
+        $entityClassDetails = $generator->createClassNameDetails(
             $input->getArgument('entity-class'),
-            'App\\Entity\\'
+            'Entity\\'
         );
 
-        $repositoryClassDetails = ClassNameDetails::createFromName(
+        $repositoryClassDetails = $generator->createClassNameDetails(
             $entityClassDetails->getOriginalName(),
-            'App\\Repository\\',
+            'Repository\\',
             'Repository'
         );
 

@@ -71,9 +71,9 @@ final class MakeSubscriber extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $subscriberClassNameDetails = ClassNameDetails::createFromName(
+        $subscriberClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'App\\EventSubscriber\\',
+            'EventSubscriber\\',
             'Subscriber'
         );
 

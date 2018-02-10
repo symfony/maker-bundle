@@ -45,9 +45,9 @@ final class MakeVoter extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $voterClassNameDetails = ClassNameDetails::createFromName(
+        $voterClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'App\\Security\\Voter\\',
+            'Security\\Voter\\',
             'Voter'
         );
 

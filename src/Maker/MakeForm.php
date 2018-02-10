@@ -46,15 +46,15 @@ final class MakeForm extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $formClassNameDetails = ClassNameDetails::createFromName(
+        $formClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'App\\Form\\',
+            'Form\\',
             'Type'
         );
 
-        $entityClassNameDetails = ClassNameDetails::createFromName(
-            $formClassNameDetails->getOriginalNameWithoutSuffix(),
-            'App\\Entity\\'
+        $entityClassNameDetails = $generator->createClassNameDetails(
+            $formClassNameDetails->getRelativeNameWithoutSuffix(),
+            'Entity\\'
         );
 
         $generator->generateClass(
@@ -62,7 +62,7 @@ final class MakeForm extends AbstractMaker
             'form/Type.tpl.php',
             [
                 'entity_full_class_name' => $entityClassNameDetails->getFullName(),
-                'entity_class_name' => $entityClassNameDetails->getShortName(),
+                'entity_class_name' => $entityClassNameDetails->getFullName(),
             ]
         );
 

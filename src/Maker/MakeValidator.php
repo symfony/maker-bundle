@@ -45,9 +45,9 @@ final class MakeValidator extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $validatorClassNameDetails = ClassNameDetails::createFromName(
+        $validatorClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'App\\Validator\\',
+            'Validator\\',
             'Validator'
         );
 

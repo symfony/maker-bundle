@@ -122,6 +122,18 @@ class FunctionalTest extends MakerTestCase
            })
        ];
 
+        yield 'controller_full_custom_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeController::class),
+            [
+                // controller class name
+                '\App\Foo\Bar\CoolController',
+            ])
+            ->addExtraDependencies('twig')
+            ->assert(function (string $output, string $directory) {
+                $this->assertContains('created: src/Foo/Bar/CoolController.php', $output);
+                $this->assertContains('created: templates/foo/bar/cool/index.html.twig', $output);
+            })
+        ];
 
         yield 'entity' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),

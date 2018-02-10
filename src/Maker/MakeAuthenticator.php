@@ -44,9 +44,9 @@ final class MakeAuthenticator extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $classNameDetails = ClassNameDetails::createFromName(
+        $classNameDetails = $generator->createClassNameDetails(
             $input->getArgument('authenticator-class'),
-            'App\\Security\\'
+            'Security\\'
         );
 
         $generator->generateClass(
