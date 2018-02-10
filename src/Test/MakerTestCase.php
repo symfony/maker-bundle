@@ -129,6 +129,11 @@ class MakerTestCase extends TestCase
         }
     }
 
+    protected function assertContainsCount(string $needle, string $haystack, int $count)
+    {
+        $this->assertEquals(1, substr_count($haystack, $needle), sprintf('Found more than %d occurrences of "%s" in "%s"', $count, $needle, $haystack));
+    }
+
     private function buildFlexProject()
     {
         $process = $this->createProcess('composer create-project symfony/skeleton template_project', dirname(self::$flexProjectPath));

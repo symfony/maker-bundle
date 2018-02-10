@@ -13,8 +13,10 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -41,26 +43,21 @@ final class MakeVoter extends AbstractMaker
         ;
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $voterClassName = Str::asClassName($input->getArgument('name'), 'Voter');
-        Validator::validateClassName($voterClassName);
+        $voterClassNameDetails = ClassNameDetails::createFromName(
+            $input->getArgument('name'),
+            'App\\Security\\Voter\\',
+            'Voter'
+        );
 
-        return [
-            'voter_class_name' => $voterClassName,
-        ];
-    }
+        $generator->generateClass(
+            $voterClassNameDetails->getFullName(),
+            'security/Voter.tpl.php',
+            []
+        );
 
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/security/Voter.tpl.php' => 'src/Security/Voter/'.$params['voter_class_name'].'.php',
-        ];
-    }
-
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $this->writeSuccessMessage($io);
 
         $io->text([
             'Next: Open your voter and add your logic.',

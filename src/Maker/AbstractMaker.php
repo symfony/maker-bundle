@@ -25,7 +25,7 @@ abstract class AbstractMaker implements MakerInterface
     {
     }
 
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
+    protected function writeSuccessMessage(ConsoleStyle $io)
     {
         $io->newLine();
         $io->writeln(' <bg=green;fg=white>          </>');

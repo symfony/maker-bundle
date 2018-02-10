@@ -60,16 +60,20 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommand')
         ];
 
-        yield 'controller' => [MakerTestDetails::createTest(
+        yield 'controller_basic' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeController::class),
             [
                 // controller class name
                 'FooBar',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController')
+            ->assert(function(string $output, string $directory) {
+                // make sure the template was not configured
+                $this->assertContainsCount('created: ', $output, 1);
+            })
         ];
 
-        yield 'controller_with_template' => [MakerTestDetails::createTest(
+        yield 'controller_with_template_and_base' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeController::class),
             [
                 // controller class name
@@ -77,6 +81,9 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeControllerTwig')
             ->addExtraDependencies('twig')
+            ->assert(function(string $output, string $directory) {
+                $this->assertFileExists($directory.'/templates/foo_twig/index.html.twig');
+            })
         ];
 
         yield 'controller_with_template_no_base' => [MakerTestDetails::createTest(
@@ -89,6 +96,32 @@ class FunctionalTest extends MakerTestCase
             ->addExtraDependencies('twig')
             ->addPreMakeCommand('rm templates/base.html.twig')
         ];
+
+        yield 'controller_sub_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeController::class),
+            [
+                // controller class name
+                'Admin\\FooBar',
+            ])
+            ->assert(function(string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Controller/Admin/FooBarController.php');
+
+                $this->assertContains('created: src/Controller/Admin/FooBarController.php', $output);
+            })
+        ];
+
+        yield 'controller_sub_namespace_template' => [MakerTestDetails::createTest(
+           $this->getMakerInstance(MakeController::class),
+           [
+               // controller class name
+               'Admin\\FooBar',
+           ])
+            ->addExtraDependencies('twig')
+           ->assert(function(string $output, string $directory) {
+               $this->assertFileExists($directory.'/templates/admin/foo_bar/index.html.twig');
+           })
+       ];
+
 
         yield 'entity' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),

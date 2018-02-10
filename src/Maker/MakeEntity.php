@@ -14,8 +14,10 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\ORM\Mapping\Column;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -41,50 +43,40 @@ final class MakeEntity extends AbstractMaker
         ;
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-    }
+        $entityClassDetails = ClassNameDetails::createFromName(
+            $input->getArgument('entity-class'),
+            'App\\Entity\\'
+        );
 
-    public function getParameters(InputInterface $input): array
-    {
-        $classname = $input->getArgument('entity-class');
-        
-        $parts = explode('\\',$classname);
-        $short_classname = $parts[count($parts)-1] ;
-        $namespace = implode('\\',array_slice($parts,0,-1));
-        $classname = $short_classname ;
+        $repositoryClassDetails = ClassNameDetails::createFromName(
+            $entityClassDetails->getOriginalName(),
+            'App\\Repository\\',
+            'Repository'
+        );
 
-        $path = str_replace('\\','/',$namespace);
+        $entityAlias = strtolower($entityClassDetails->getShortName()[0]);
 
-        if ($namespace) {
-            $path = $path.'/' ;
-        }
+        $generator->generateClass(
+            $entityClassDetails->getFullName(),
+            'doctrine/Entity.tpl.php',
+            [
+                'repository_full_class_name' => $repositoryClassDetails->getFullName()
+            ]
+        );
 
-        $entityClassName = Str::asClassName($classname);
-        Validator::validateClassName($entityClassName);
-        $entityAlias = strtolower($entityClassName[0]);
-        $repositoryClassName = Str::addSuffix($entityClassName, 'Repository');
+        $generator->generateClass(
+            $repositoryClassDetails->getFullName(),
+            'doctrine/Repository.tpl.php',
+            [
+                'entity_full_class_name' => $entityClassDetails->getFullName(),
+                'entity_class_name' => $entityClassDetails->getShortName(),
+                'entity_alias' => $entityAlias,
+            ]
+        );
 
-        return [
-            'path' => $path,
-            'entity_namespace' => $namespace,
-            'entity_class_name' => $entityClassName,
-            'entity_alias' => $entityAlias,
-            'repository_class_name' => $repositoryClassName,
-        ];
-    }
-
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/doctrine/Entity.tpl.php' => 'src/Entity/'.$params['path'].$params['entity_class_name'].'.php',
-            __DIR__.'/../Resources/skeleton/doctrine/Repository.tpl.php' => 'src/Repository/'.$params['path'].$params['repository_class_name'].'.php',
-        ];
-    }
-
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $this->writeSuccessMessage($io);
 
         $io->text([
             'Next: Add more fields to your entity and start using it.',

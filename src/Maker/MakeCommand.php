@@ -13,8 +13,10 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -40,29 +42,25 @@ final class MakeCommand extends AbstractMaker
         ;
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $commandName = trim($input->getArgument('name'));
-        $commandClassName = Str::asClassName($commandName, 'Command');
-        Validator::validateClassName($commandClassName, sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, $commandClassName));
+        $commandClassNameDetails = ClassNameDetails::createFromName(
+            $commandName,
+            'App\\Command\\',
+            'Command',
+            sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, Str::asClassName($commandName, 'Command'))
+        );
 
-        return [
-            'command_name' => $commandName,
-            'command_class_name' => $commandClassName,
-        ];
-    }
+        $generator->generateClass(
+            $commandClassNameDetails->getFullName(),
+            'command/Command.tpl.php',
+            [
+                'command_name' => $commandName,
+            ]
+        );
 
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/command/Command.tpl.php' => 'src/Command/'.$params['command_class_name'].'.php',
-        ];
-    }
-
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
-
+        $this->writeSuccessMessage($io);
         $io->text([
             'Next: open your new command class and customize it!',
             'Find the documentation at <fg=yellow>https://symfony.com/doc/current/console.html</>',

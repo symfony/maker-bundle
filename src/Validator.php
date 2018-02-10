@@ -16,16 +16,23 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
+ * @internal
  */
 final class Validator
 {
-    public static function validateClassName(string $className, string $errorMessage = '')
+    public static function validateClassName(string $className, string $errorMessage = ''): string
     {
-        if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $className)) {
-            $errorMessage = $errorMessage ?: sprintf('"%s" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)', $className);
+        $pieces = explode('\\', $className);
 
-            throw new RuntimeCommandException($errorMessage);
+        foreach ($pieces as $piece) {
+            if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $piece)) {
+                $errorMessage = $errorMessage ?: sprintf('"%s" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)', $className);
+
+                throw new RuntimeCommandException($errorMessage);
+            }
         }
+
+        return $className;
     }
 
     public static function notBlank(string $value = null): string

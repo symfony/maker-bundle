@@ -13,8 +13,10 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -42,28 +44,29 @@ final class MakeForm extends AbstractMaker
         ;
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $formClassName = Str::asClassName($input->getArgument('name'), 'Type');
-        Validator::validateClassName($formClassName);
-        $entityClassName = Str::removeSuffix($formClassName, 'Type');
+        $formClassNameDetails = ClassNameDetails::createFromName(
+            $input->getArgument('name'),
+            'App\\Form\\',
+            'Type'
+        );
 
-        return [
-            'form_class_name' => $formClassName,
-            'entity_class_name' => $entityClassName,
-        ];
-    }
+        $entityClassNameDetails = ClassNameDetails::createFromName(
+            $formClassNameDetails->getOriginalNameWithoutSuffix(),
+            'App\\Entity\\'
+        );
 
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/form/Type.tpl.php' => 'src/Form/'.$params['form_class_name'].'.php',
-        ];
-    }
+        $generator->generateClass(
+            $formClassNameDetails->getFullName(),
+            'form/Type.tpl.php',
+            [
+                'entity_full_class_name' => $entityClassNameDetails->getFullName(),
+                'entity_class_name' => $entityClassNameDetails->getShortName(),
+            ]
+        );
 
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $this->writeSuccessMessage($io);
 
         $io->text([
             'Next: Add fields to your form and start using it.',

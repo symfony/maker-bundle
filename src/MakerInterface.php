@@ -56,37 +56,11 @@ interface MakerInterface
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command);
 
     /**
-     * Return an array of variables that will be made available to the
-     * template files returned from getFiles().
+     * Called after normal code generation: allows you to do anything.
      *
      * @param InputInterface $input
-     *
-     * @return array
-     */
-    public function getParameters(InputInterface $input): array;
-
-    /**
-     * Return the array of files that should be generated into the user's project.
-     *
-     * For example:
-     *
-     *    return array(
-     *        __DIR__.'/../Resources/skeleton/command/Command.tpl.php' => 'src/Command/'.$params['command_class_name'].'.php',
-     *    );
-     *
-     * These files are parsed as PHP.
-     *
-     * @param array $params The parameters returned from getParameters()
-     *
-     * @return array
-     */
-    public function getFiles(array $params): array;
-
-    /**
-     * An opportunity to write a nice message after generation finishes.
-     *
-     * @param array        $params
      * @param ConsoleStyle $io
+     * @param Generator $generator
      */
-    public function writeSuccessMessage(array $params, ConsoleStyle $io);
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator);
 }

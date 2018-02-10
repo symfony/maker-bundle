@@ -60,9 +60,37 @@ final class FileManager
 
     public function relativizePath($absolutePath): string
     {
-        $relativePath = str_replace($this->rootDirectory, '.', $absolutePath);
+        // see if the path is even in the root
+        if (false === strpos($absolutePath, $this->rootDirectory)) {
+            return $absolutePath;
+        }
 
+        $absolutePath = $this->realPath($absolutePath);
+
+        $relativePath = ltrim(str_replace($this->rootDirectory, '', $absolutePath), '/');
+        if (0 === strpos($relativePath, './')) {
+            $relativePath = substr($relativePath, 2);
+        }
         return is_dir($absolutePath) ? rtrim($relativePath, '/').'/' : $relativePath;
+    }
+
+    public function getPathForFutureClass(string $className): ?string
+    {
+        $autoloadPath = $this->absolutizePath('vendor/autoload.php');
+            if (!file_exists($autoloadPath)) {
+                throw new \Exception(sprintf('Could not find the autoload file: "%s"', $autoloadPath));
+            }
+
+            /** @var \Composer\Autoload\ClassLoader $loader */
+            $loader = require $autoloadPath;
+            $path = null;
+            foreach ($loader->getPrefixesPsr4() as $prefix => $paths) {
+                if (0 === strpos($className, $prefix)) {
+                    return $paths[0].'/'.str_replace('\\', '/', str_replace($prefix, '', $className)).'.php';
+                }
+            }
+
+            return null;
     }
 
     private function absolutizePath($path): string
@@ -73,4 +101,42 @@ final class FileManager
 
         return sprintf('%s/%s', $this->rootDirectory, $path);
     }
+
+    /**
+     * Resolve '../' in paths (like real_path), but for non-existent files.
+     *
+     * @param string $absolutePath
+     * @return string
+     */
+    private function realPath($absolutePath): string
+    {
+        $finalParts = [];
+        $currentIndex = -1;
+
+        foreach (explode('/', $absolutePath) as $pathPart) {
+            if ('..' === $pathPart) {
+                // we need to remove the previous entry
+                if (-1 === $currentIndex) {
+                    throw new \Exception(sprintf('Problem making path relative - is the path "%s" absolute?', $absolutePath));
+                }
+
+                unset($finalParts[$currentIndex]);
+                $currentIndex--;
+
+                continue;
+            }
+
+            $finalParts[] = $pathPart;
+            $currentIndex++;
+        }
+
+        $finalPath = implode('/', $finalParts);
+        // Normalize: // => /
+        // Normalize: /./ => /
+        $finalPath = str_replace('//', '/', $finalPath);
+        $finalPath = str_replace('/./', '/', $finalPath);
+
+        return $finalPath;
+    }
 }
+

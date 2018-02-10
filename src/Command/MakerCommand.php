@@ -15,7 +15,7 @@ use Symfony\Bundle\MakerBundle\ApplicationAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
-use Symfony\Bundle\MakerBundle\ExtraGenerationMakerInterface;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\MakerInterface;
@@ -33,16 +33,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class MakerCommand extends Command
 {
     private $maker;
-    private $generator;
+    private $fileManager;
     private $inputConfig;
     /** @var ConsoleStyle */
     private $io;
     private $checkDependencies = true;
 
-    public function __construct(MakerInterface $maker, Generator $generator)
+    public function __construct(MakerInterface $maker, FileManager $fileManager)
     {
         $this->maker = $maker;
-        $this->generator = $generator;
+        $this->fileManager = $fileManager;
         $this->inputConfig = new InputConfiguration();
 
         parent::__construct();
@@ -56,6 +56,7 @@ final class MakerCommand extends Command
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         $this->io = new ConsoleStyle($input, $output);
+        $this->fileManager->setIo($this->io);
 
         if ($this->checkDependencies) {
             $dependencies = new DependencyBuilder();
@@ -86,15 +87,10 @@ final class MakerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->generator->setIO($this->io);
-        $params = $this->maker->getParameters($input);
-        $this->generator->generate($params, $this->maker->getFiles($params));
+        $generator = new Generator($this->fileManager);
 
-        if ($this->maker instanceof ExtraGenerationMakerInterface) {
-            $this->maker->afterGenerate($this->io, $params);
-        }
-
-        $this->maker->writeSuccessMessage($params, $this->io);
+        $this->maker->generate($input, $this->io, $generator);
+        $generator->flushChanges();
     }
 
     public function setApplication(Application $application = null)

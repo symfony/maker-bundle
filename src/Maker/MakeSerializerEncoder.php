@@ -13,8 +13,10 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -41,28 +43,24 @@ final class MakeSerializerEncoder extends AbstractMaker
         ;
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $encoderClassName = Str::asClassName($input->getArgument('name'), 'Encoder');
-        Validator::validateClassName($encoderClassName);
+        $encoderClassNameDetails = ClassNameDetails::createFromName(
+            $input->getArgument('name'),
+            'App\\Serializer\\',
+            'Encoder'
+        );
         $format = $input->getArgument('format');
 
-        return [
-            'encoder_class_name' => $encoderClassName,
-            'format' => $format,
-        ];
-    }
+        $generator->generateClass(
+            $encoderClassNameDetails->getFullName(),
+            'serializer/Encoder.tpl.php',
+            [
+                'format' => $format,
+            ]
+        );
 
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/serializer/Encoder.tpl.php' => 'src/Serializer/'.$params['encoder_class_name'].'.php',
-        ];
-    }
-
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $this->writeSuccessMessage($io);
 
         $io->text([
             'Next: Open your new serializer encoder class and start customizing it.',

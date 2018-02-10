@@ -13,8 +13,10 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\BrowserKit\Client;
 use Symfony\Component\Console\Command\Command;
@@ -42,26 +44,21 @@ class MakeFunctionalTest extends AbstractMaker
         ;
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $testClassName = Str::asClassName($input->getArgument('name'), 'Test');
-        Validator::validateClassName($testClassName);
+        $testClassNameDetails = ClassNameDetails::createFromName(
+            $input->getArgument('name'),
+            'App\\Tests\\',
+            'Test'
+        );
 
-        return [
-            'test_class_name' => $testClassName,
-        ];
-    }
+        $generator->generateClass(
+            $testClassNameDetails->getFullName(),
+            'test/Functional.tpl.php',
+            []
+        );
 
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/test/Functional.tpl.php' => 'tests/'.$params['test_class_name'].'.php',
-        ];
-    }
-
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $this->writeSuccessMessage($io);
 
         $io->text([
             'Next: Open your new test class and start customizing it.',

@@ -12,10 +12,6 @@
                 <argument>%kernel.project_dir%</argument>
             </service>
 
-            <service id="maker.generator" class="Symfony\Bundle\MakerBundle\Generator">
-                <argument type="service" id="maker.file_manager" />
-            </service>
-
             <service id="maker.event_registry" class="Symfony\Bundle\MakerBundle\EventRegistry">
                 <argument type="service" id="event_dispatcher" />
             </service>

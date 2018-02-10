@@ -1,8 +1,8 @@
 <?= "<?php\n"; ?>
 
-namespace App\Repository<?= $entity_namespace ? '\\'.$entity_namespace : '' ?>;
+namespace <?= $namespace; ?>;
 
-use App\Entity\<?= $entity_namespace ? $entity_namespace.'\\' : '' ?><?= $entity_class_name ?>;
+use <?= $entity_full_class_name; ?>;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -12,7 +12,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method <?= $entity_class_name; ?>[]    findAll()
  * @method <?= $entity_class_name; ?>[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class <?= $repository_class_name; ?> extends ServiceEntityRepository
+class <?= $class_name; ?> extends ServiceEntityRepository
 {
     public function __construct(RegistryInterface $registry)
     {

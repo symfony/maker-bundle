@@ -15,7 +15,7 @@ use Doctrine\Bundle\MigrationsBundle\Command\DoctrineCommand;
 use Symfony\Bundle\MakerBundle\ApplicationAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
-use Symfony\Bundle\MakerBundle\ExtraGenerationMakerInterface;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
@@ -28,7 +28,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
  * @author Amrouche Hamza <hamza.simperfit@gmail.com>
  * @author Ryan Weaver <ryan@knpuniversity.com>
  */
-final class MakeMigration extends AbstractMaker implements ApplicationAwareMakerInterface, ExtraGenerationMakerInterface
+final class MakeMigration extends AbstractMaker implements ApplicationAwareMakerInterface
 {
     private $projectDir;
 
@@ -36,11 +36,6 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
      * @var Application
      */
     private $application;
-
-    /**
-     * @var string
-     */
-    private $migrationOutput;
 
     public function __construct(string $projectDir)
     {
@@ -68,37 +63,22 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         ;
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        return [
-            'options' => [
-                'db' => $input->getOption('db'),
-                'em' => $input->getOption('em'),
-                'shard' => $input->getOption('shard'),
-            ],
+        $options = [
+            'db' => $input->getOption('db'),
+            'em' => $input->getOption('em'),
+            'shard' => $input->getOption('shard'),
         ];
-    }
-
-    public function getFiles(array $params): array
-    {
-        return [];
-    }
-
-    public function afterGenerate(ConsoleStyle $io, array $params)
-    {
-        $options = $params['options'];
 
         $options['command'] = 'doctrine:migrations:diff';
         $generateMigrationCommand = $this->application->find('doctrine:migrations:diff');
 
         $commandOutput = new BufferedOutput($io->getVerbosity());
         $generateMigrationCommand->run(new ArgvInput($options), $commandOutput);
-        $this->migrationOutput = $commandOutput->fetch();
-    }
+        $migrationOutput = $commandOutput->fetch();
 
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        if (false !== strpos($this->migrationOutput, 'No changes detected')) {
+        if (false !== strpos($migrationOutput, 'No changes detected')) {
             $io->warning([
                 'No database changes were detected.',
             ]);
@@ -110,9 +90,9 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
             return;
         }
 
-        parent::writeSuccessMessage($params, $io);
+        $this->writeSuccessMessage($io);
 
-        $migrationName = $this->getGeneratedMigrationFilename($this->migrationOutput);
+        $migrationName = $this->getGeneratedMigrationFilename($migrationOutput);
 
         $io->text([
             sprintf('Next: Review the new migration <info>%s</info>', $migrationName),
