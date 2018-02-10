@@ -64,7 +64,10 @@ final class Generator
     private function addOperation(string $targetPath, string $templateName, array $variables)
     {
         if ($this->fileManager->fileExists($targetPath)) {
-            throw new RuntimeCommandException(sprintf('The file "%s" can\'t be generated because it already exists.', $targetPath));
+            throw new RuntimeCommandException(sprintf(
+                'The file "%s" can\'t be generated because it already exists.',
+                $this->fileManager->relativizePath($targetPath)
+            ));
         }
 
         $variables['relative_path'] = $this->fileManager->relativizePath($targetPath);
