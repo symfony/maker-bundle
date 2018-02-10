@@ -17,6 +17,7 @@
 
             <service id="maker.maker.make_controller" class="Symfony\Bundle\MakerBundle\Maker\MakeController">
                 <argument type="service" id="router" />
+                <argument type="service" id="maker.file_manager" />
                 <tag name="maker.command" />
             </service>
 
@@ -34,6 +35,10 @@
             </service>
 
             <service id="maker.maker.make_entity" class="Symfony\Bundle\MakerBundle\Maker\MakeEntity">
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_fixtures" class="Symfony\Bundle\MakerBundle\Maker\MakeFixtures">
                 <tag name="maker.command" />
             </service>
 

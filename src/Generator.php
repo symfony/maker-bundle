@@ -46,7 +46,11 @@ final class Generator
         }
 
         foreach ($files as $fileTemplatePath => $targetPath) {
-            $fileContents = $this->fileManager->parseTemplate($fileTemplatePath, $parameters);
+            $templateParameters = array_merge($parameters, [
+                'relative_path' => $this->fileManager->relativizePath($targetPath),
+            ]);
+
+            $fileContents = $this->fileManager->parseTemplate($fileTemplatePath, $templateParameters);
             $this->fileManager->dumpFile($targetPath, $fileContents);
         }
     }

@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Common\Annotations\Annotation;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -30,10 +31,12 @@ use Symfony\Component\Routing\RouterInterface;
 final class MakeController extends AbstractMaker
 {
     private $router;
+    private $fileManager;
 
-    public function __construct(RouterInterface $router)
+    public function __construct(RouterInterface $router, FileManager $fileManager)
     {
         $this->router = $router;
+        $this->fileManager = $fileManager;
     }
 
     public static function getCommandName(): string
@@ -54,21 +57,30 @@ final class MakeController extends AbstractMaker
     {
         $controllerClassName = Str::asClassName($input->getArgument('controller-class'), 'Controller');
         Validator::validateClassName($controllerClassName);
+        $baseLayoutExists = $this->fileManager->fileExists('templates/base.html.twig');
 
         return [
             'controller_class_name' => $controllerClassName,
+            'controller_class_file' => 'src/Controller/'.$controllerClassName.'.php',
             'route_path' => Str::asRoutePath(str_replace('Controller', '', $controllerClassName)),
             'route_name' => Str::asRouteName(str_replace('Controller', '', $controllerClassName)),
+            'twig_file' => Str::asFilePath(str_replace('Controller', '', $controllerClassName)).'.html.twig',
+            'base_layout_exists' => $baseLayoutExists,
+            'twig_installed' => $this->isTwigInstalled(),
         ];
     }
 
     public function getFiles(array $params): array
     {
-        $skeletonFile = $this->isTwigInstalled() ? 'ControllerWithTwig.tpl.php' : 'Controller.tpl.php';
+        $dir = __DIR__.'/../Resources/skeleton/controller';
 
-        return [
-            __DIR__.'/../Resources/skeleton/controller/'.$skeletonFile => 'src/Controller/'.$params['controller_class_name'].'.php',
-        ];
+        $paths = [$dir.'/Controller.tpl.php' => $params['controller_class_file']];
+
+        if ($params['twig_installed']) {
+            $paths[$dir.'/twig_template.tpl.php'] = 'templates/'.$params['twig_file'];
+        }
+
+        return $paths;
     }
 
     public function writeSuccessMessage(array $params, ConsoleStyle $io)
