@@ -24,4 +24,6 @@ install:
     - composer --prefer-dist install
     - ./vendor/bin/simple-phpunit install
 
-script: ./vendor/bin/simple-phpunit
+script:
+    - ./vendor/bin/simple-phpunit
+    - ./vendor/bin/php-cs-fixer fix --dry-run
