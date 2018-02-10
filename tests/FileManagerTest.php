@@ -64,6 +64,10 @@ class FileManagerTest extends MakerTestCase
         ];
 
         $fs = new Filesystem();
+        if (!file_exists(self::$currentRootDir)) {
+            $fs->mkdir(self::$currentRootDir);
+        }
+
         $fs->remove(self::$currentRootDir.'/vendor');
         file_put_contents(
             self::$currentRootDir.'/composer.json',
