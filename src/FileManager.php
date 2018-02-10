@@ -74,7 +74,7 @@ final class FileManager
         return is_dir($absolutePath) ? rtrim($relativePath, '/').'/' : $relativePath;
     }
 
-    public function getPathForFutureClass(string $className): ?string
+    public function getPathForFutureClass(string $className)
     {
         $autoloadPath = $this->absolutizePath('vendor/autoload.php');
             if (!file_exists($autoloadPath)) {
