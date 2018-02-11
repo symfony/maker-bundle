@@ -4,11 +4,14 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Psr\Container\ContainerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\FileManager;
+use Symfony\Bundle\MakerBundle\GeneratorHelper;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -16,7 +19,9 @@ use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Validator\Validation;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
@@ -24,12 +29,13 @@ use Symfony\Component\Routing\RouterInterface;
 final class MakeCrud extends AbstractMaker
 {
     private $router;
-
+    private $fileManager;
     private $locator;
 
-    public function __construct(RouterInterface $router, ContainerInterface $serviceLocator)
+    public function __construct(RouterInterface $router, FileManager $fileManager, ContainerInterface $serviceLocator)
     {
         $this->router = $router;
+        $this->fileManager = $fileManager;
         $this->locator = $serviceLocator;
     }
 
@@ -53,27 +59,6 @@ final class MakeCrud extends AbstractMaker
     /**
      * {@inheritdoc}
      */
-    public function configureDependencies(DependencyBuilder $dependencies)
-    {
-        $dependencies->addClassDependency(
-            Route::class,
-            'annotations'
-        );
-
-        $dependencies->addClassDependency(
-            TwigBundle::class,
-            'twig-bundle'
-        );
-
-        $dependencies->addClassDependency(
-            EntityManager::class,
-            'orm-pack'
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
     }
@@ -92,7 +77,12 @@ final class MakeCrud extends AbstractMaker
 
         $metadata = $this->getEntityMetadata($entityClassName);
 
+        $baseLayoutExists = $this->fileManager->fileExists('templates/base.html.twig');
+
+        $helper = new GeneratorHelper();
+
         return array(
+            'helper' => $helper,
             'controller_class_name' => $controllerClassName,
             'entity_var_plural' => lcfirst(Inflector::pluralize($entityClassName)),
             'entity_var_singular' => lcfirst(Inflector::singularize($entityClassName)),
@@ -102,6 +92,7 @@ final class MakeCrud extends AbstractMaker
             'form_class_name' => $formClassName,
             'route_path' => Str::asRoutePath(str_replace('Controller', '', $controllerClassName)),
             'route_name' => Str::asRouteName(str_replace('Controller', '', $controllerClassName)),
+            'base_layout_exists' => $baseLayoutExists,
         );
     }
 
@@ -111,8 +102,8 @@ final class MakeCrud extends AbstractMaker
     public function getFiles(array $params): array
     {
         return array(
-            __DIR__.'/../Resources/skeleton/crud/controller/ControllerWithTwig.tpl.php' => 'src/Controller/'.$params['controller_class_name'].'.php',
-            __DIR__.'/../Resources/skeleton/crud/form/Type.tpl.php' => 'src/Form/'.$params['form_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/crud/controller/Controller.tpl.php' => 'src/Controller/'.$params['controller_class_name'].'.php',
+//            __DIR__.'/../Resources/skeleton/crud/form/Type.tpl.php' => 'src/Form/'.$params['form_class_name'].'.php',
             __DIR__.'/../Resources/skeleton/crud/templates/_delete_form.tpl.php' => 'templates/'.$params['route_name'].'/_delete_form.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/_form.tpl.php' => 'templates/'.$params['route_name'].'/_form.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/index.tpl.php' => 'templates/'.$params['route_name'].'/index.html.twig',
@@ -122,17 +113,45 @@ final class MakeCrud extends AbstractMaker
         );
     }
 
+    public function writeSuccessMessage(array $params, ConsoleStyle $io)
+    {
+        parent::writeSuccessMessage($params, $io);
+
+        $io->text('Next: Check your new crud!');
+    }
+
     /**
      * {@inheritdoc}
      */
-    public function writeNextStepsMessage(array $params, ConsoleStyle $io)
+    public function configureDependencies(DependencyBuilder $dependencies)
     {
-        if (!count($this->router->getRouteCollection())) {
-            $io->text('<error> Warning! </> No routes configuration defined yet.');
-            $io->text('           You should probably uncomment the annotation routes in <comment>config/routes.yaml</>');
-            $io->newLine();
-        }
-        $io->text('Next: Check your new crud!');
+        $dependencies->addClassDependency(
+            Route::class,
+            'annotations'
+        );
+
+//        $dependencies->addClassDependency(
+//            AbstractType::class,
+//            // technically only form is needed, but the user will *probably* also want validation
+//            'form'
+//        );
+//
+//        $dependencies->addClassDependency(
+//            Validation::class,
+//            'validator',
+//            // add as an optional dependency: the user *probably* wants validation
+//            false
+//        );
+
+        $dependencies->addClassDependency(
+            TwigBundle::class,
+            'twig-bundle'
+        );
+
+        $dependencies->addClassDependency(
+            EntityManager::class,
+            'orm-pack'
+        );
     }
 
     private function getEntityMetadata($entityClassName)

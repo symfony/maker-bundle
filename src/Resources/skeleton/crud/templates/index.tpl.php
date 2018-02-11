@@ -1,21 +1,20 @@
-{% extends 'base.html.twig' %}
+<?= $helper->getHead($base_layout_exists, $entity_class_name.' index'); ?>
 
-{% block body %}
+<?= $helper->getBodyStart($base_layout_exists); ?>
+
     <h1><?= $entity_class_name; ?> index</h1>
     <table>
         <thead>
             <tr>
                 <?php foreach ($entity_fields as $field): ?><th><?= ucfirst($field['fieldName']); ?></th>
-                <?php endforeach; ?>
-                <th>actions</th>
+                <?php endforeach; ?><th>actions</th>
             </tr>
         </thead>
         <tbody>
         {% for <?= $entity_var_singular; ?> in <?= $entity_var_plural; ?> %}
             <tr>
-                <?php foreach ($entity_fields as $field): ?><td>{{ <?= $entity_var_singular; ?>.<?= $field['fieldName'].(false === strpos($field['type'], 'date') ? '' : '|date()'); ?> }}</td>
-                <?php endforeach; ?>
-                <td>
+                <?php foreach ($entity_fields as $field): ?><td>{{ <?= $helper->getEntityFieldPrintCode($entity_var_singular, $field); ?> }}</td>
+                <?php endforeach; ?><td>
                     <a href="{{ path('<?= $route_name; ?>_show', {'<?= $entity_identifier; ?>':<?= $entity_var_singular; ?>.<?= $entity_identifier; ?>}) }}">show</a>
                     <a href="{{ path('<?= $route_name; ?>_edit', {'<?= $entity_identifier; ?>':<?= $entity_var_singular; ?>.<?= $entity_identifier; ?>}) }}">edit</a>
                 </td>
@@ -28,4 +27,5 @@
         </tbody>
     </table>
     <a href="{{ path('<?= $route_name; ?>_new') }}">Create new</a>
-{% endblock %}
+
+<?= $helper->getBodyEnd($base_layout_exists); ?>

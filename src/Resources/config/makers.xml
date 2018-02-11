@@ -23,6 +23,7 @@
 
             <service id="maker.maker.make_crud" class="Symfony\Bundle\MakerBundle\Maker\MakeCrud">
                 <argument type="service" id="router" />
+                <argument type="service" id="maker.file_manager" />
                 <argument type="service">
                     <service class="Symfony\Component\DependencyInjection\ServiceLocator">
                         <tag name="container.service_locator" />
