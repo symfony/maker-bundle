@@ -1,10 +1,18 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Psr\Container\ContainerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -81,7 +89,7 @@ final class MakeCrud extends AbstractMaker
 
         $helper = new GeneratorHelper();
 
-        return array(
+        return [
             'helper' => $helper,
             'controller_class_name' => $controllerClassName,
             'entity_var_plural' => lcfirst(Inflector::pluralize($entityClassName)),
@@ -93,7 +101,7 @@ final class MakeCrud extends AbstractMaker
             'route_path' => Str::asRoutePath(str_replace('Controller', '', $controllerClassName)),
             'route_name' => Str::asRouteName(str_replace('Controller', '', $controllerClassName)),
             'base_layout_exists' => $baseLayoutExists,
-        );
+        ];
     }
 
     /**
@@ -101,7 +109,7 @@ final class MakeCrud extends AbstractMaker
      */
     public function getFiles(array $params): array
     {
-        return array(
+        return [
             __DIR__.'/../Resources/skeleton/crud/controller/Controller.tpl.php' => 'src/Controller/'.$params['controller_class_name'].'.php',
 //            __DIR__.'/../Resources/skeleton/crud/form/Type.tpl.php' => 'src/Form/'.$params['form_class_name'].'.php',
             __DIR__.'/../Resources/skeleton/crud/templates/_delete_form.tpl.php' => 'templates/'.$params['route_name'].'/_delete_form.html.twig',
@@ -110,7 +118,7 @@ final class MakeCrud extends AbstractMaker
             __DIR__.'/../Resources/skeleton/crud/templates/show.tpl.php' => 'templates/'.$params['route_name'].'/show.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/new.tpl.php' => 'templates/'.$params['route_name'].'/new.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/edit.tpl.php' => 'templates/'.$params['route_name'].'/edit.html.twig',
-        );
+        ];
     }
 
     public function writeSuccessMessage(array $params, ConsoleStyle $io)
