@@ -59,8 +59,6 @@ class <?= $controller_class_name; ?> extends Controller
      */
     public function show(<?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
     {
-        $deleteForm = $this->createDeleteForm($<?= $entity_var_singular; ?>);
-
         return $this->render('<?= $route_name; ?>/show.html.twig', [
             '<?= $entity_var_singular; ?>' => $<?= $entity_var_singular; ?>,
         ]);
@@ -74,8 +72,6 @@ class <?= $controller_class_name; ?> extends Controller
     {
         $form = $this->createForm(<?= $form_class_name; ?>::class, $<?= $entity_var_singular; ?>);
         $form->handleRequest($request);
-
-        $deleteForm = $this->createDeleteForm($<?= $entity_var_singular; ?>);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
