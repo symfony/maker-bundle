@@ -11,6 +11,9 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
+/**
+ * @author Sadicov Vladimir <sadikoff@gmail.com>
+ */
 class GeneratorHelper
 {
     public function getEntityFieldPrintCode($entity, $field): string

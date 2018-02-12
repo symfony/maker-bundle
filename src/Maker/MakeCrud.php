@@ -11,8 +11,9 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Common\Inflector\Inflector;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\Column;
 use Psr\Container\ContainerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -111,7 +112,7 @@ final class MakeCrud extends AbstractMaker
     {
         return [
             __DIR__.'/../Resources/skeleton/crud/controller/Controller.tpl.php' => 'src/Controller/'.$params['controller_class_name'].'.php',
-//            __DIR__.'/../Resources/skeleton/crud/form/Type.tpl.php' => 'src/Form/'.$params['form_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/crud/form/Type.tpl.php' => 'src/Form/'.$params['form_class_name'].'.php',
             __DIR__.'/../Resources/skeleton/crud/templates/_delete_form.tpl.php' => 'templates/'.$params['route_name'].'/_delete_form.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/_form.tpl.php' => 'templates/'.$params['route_name'].'/_form.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/index.tpl.php' => 'templates/'.$params['route_name'].'/index.html.twig',
@@ -138,18 +139,15 @@ final class MakeCrud extends AbstractMaker
             'annotations'
         );
 
-//        $dependencies->addClassDependency(
-//            AbstractType::class,
-//            // technically only form is needed, but the user will *probably* also want validation
-//            'form'
-//        );
-//
-//        $dependencies->addClassDependency(
-//            Validation::class,
-//            'validator',
-//            // add as an optional dependency: the user *probably* wants validation
-//            false
-//        );
+        $dependencies->addClassDependency(
+            AbstractType::class,
+            'form'
+        );
+
+        $dependencies->addClassDependency(
+            Validation::class,
+            'validator'
+        );
 
         $dependencies->addClassDependency(
             TwigBundle::class,
@@ -157,8 +155,13 @@ final class MakeCrud extends AbstractMaker
         );
 
         $dependencies->addClassDependency(
-            EntityManager::class,
-            'orm-pack'
+            DoctrineBundle::class,
+            'orm'
+        );
+
+        $dependencies->addClassDependency(
+            Column::class,
+            'orm'
         );
     }
 
