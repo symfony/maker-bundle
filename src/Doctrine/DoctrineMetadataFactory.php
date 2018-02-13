@@ -55,7 +55,12 @@ final class DoctrineMetadataFactory
         return $metadata;
     }
 
-    public function getMetadataForClass(string $entity): ?ClassMetadata
+    /**
+     * @param string $entity
+     *
+     * @return ClassMetadata|null
+     */
+    public function getMetadataForClass(string $entity)
     {
         foreach ($this->registry->getManagers() as $em) {
             $cmf = new DisconnectedClassMetadataFactory();
