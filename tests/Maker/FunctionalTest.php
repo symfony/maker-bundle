@@ -289,6 +289,27 @@ class FunctionalTest extends MakerTestCase
             )
             ->addPreMakeCommand('./bin/console doctrine:schema:create --env=test')
         ];
+
+        yield 'crud_with_no_base' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeCrud::class),
+            [
+                // entity class name
+                'SweetFood',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
+            ->addReplacement(
+                'phpunit.xml.dist',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                'sqlite:///%kernel.project_dir%/var/app.db'
+            )
+            ->addReplacement(
+                '.env',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                'sqlite:///%kernel.project_dir%/var/app.db'
+            )
+            ->addPreMakeCommand('./bin/console doctrine:schema:create --env=test')
+            ->addPreMakeCommand('rm templates/base.html.twig')
+        ];
     }
 
     /**

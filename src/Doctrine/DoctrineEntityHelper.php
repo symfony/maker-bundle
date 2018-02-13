@@ -51,7 +51,12 @@ final class DoctrineEntityHelper
         return $fields;
     }
 
-    private function getEntityMetadata($entityClassName): ClassMetadataInfo
+    /**
+     * @param $entityClassName
+     *
+     * @return \Doctrine\ORM\Mapping\ClassMetadata|null
+     */
+    public function getEntityMetadata($entityClassName)
     {
         return $this->metadataFactory->getMetadataForClass('App\\Entity\\'.$entityClassName);
     }

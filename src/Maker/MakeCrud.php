@@ -14,10 +14,10 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\Mapping\Column;
-use Psr\Container\ContainerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineEntityHelper;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\GeneratorHelper;
@@ -39,13 +39,13 @@ final class MakeCrud extends AbstractMaker
 {
     private $router;
     private $fileManager;
-    private $locator;
+    private $entityHelper;
 
-    public function __construct(RouterInterface $router, FileManager $fileManager, ContainerInterface $serviceLocator)
+    public function __construct(RouterInterface $router, FileManager $fileManager, DoctrineEntityHelper $entityHelper)
     {
         $this->router = $router;
         $this->fileManager = $fileManager;
-        $this->locator = $serviceLocator;
+        $this->entityHelper = $entityHelper;
     }
 
     public static function getCommandName(): string
@@ -84,7 +84,11 @@ final class MakeCrud extends AbstractMaker
         $formClassName = Str::asClassName($entityClassName, 'Type');
         Validator::validateClassName($formClassName);
 
-        $metadata = $this->getEntityMetadata($entityClassName);
+        if (!$this->fileManager->fileExists('src/Entity/'.$entityClassName.'.php')) {
+            throw new RuntimeCommandException(sprintf('Entity "%s" doesn\'t exists in your project. May be you would like to create it with "make:entity" command?', $entityClassName));
+        }
+
+        $metadata = $this->entityHelper->getEntityMetadata($entityClassName);
 
         $baseLayoutExists = $this->fileManager->fileExists('templates/base.html.twig');
 
@@ -99,6 +103,7 @@ final class MakeCrud extends AbstractMaker
             'entity_identifier' => $metadata->identifier[0],
             'entity_fields' => $metadata->fieldMappings,
             'form_class_name' => $formClassName,
+            'form_fields' => $this->entityHelper->getFormFieldsFromEntity($entityClassName),
             'route_path' => Str::asRoutePath(str_replace('Controller', '', $controllerClassName)),
             'route_name' => Str::asRouteName(str_replace('Controller', '', $controllerClassName)),
             'base_layout_exists' => $baseLayoutExists,
@@ -112,7 +117,7 @@ final class MakeCrud extends AbstractMaker
     {
         return [
             __DIR__.'/../Resources/skeleton/crud/controller/Controller.tpl.php' => 'src/Controller/'.$params['controller_class_name'].'.php',
-            __DIR__.'/../Resources/skeleton/crud/form/Type.tpl.php' => 'src/Form/'.$params['form_class_name'].'.php',
+            __DIR__.'/../Resources/skeleton/form/Type.tpl.php' => 'src/Form/'.$params['form_class_name'].'.php',
             __DIR__.'/../Resources/skeleton/crud/templates/_delete_form.tpl.php' => 'templates/'.$params['route_name'].'/_delete_form.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/_form.tpl.php' => 'templates/'.$params['route_name'].'/_form.html.twig',
             __DIR__.'/../Resources/skeleton/crud/templates/index.tpl.php' => 'templates/'.$params['route_name'].'/index.html.twig',
@@ -163,14 +168,5 @@ final class MakeCrud extends AbstractMaker
             Column::class,
             'orm'
         );
-    }
-
-    private function getEntityMetadata($entityClassName)
-    {
-        try {
-            return $this->locator->get('doctrine')->getManager()->getClassMetadata('App\\Entity\\'.$entityClassName);
-        } catch (\Doctrine\Common\Persistence\Mapping\MappingException $exception) {
-            throw new RuntimeCommandException(sprintf('Entity "%s" doesn\'t exists in your project. May be you would like to create it with "make:entity" command?', $entityClassName));
-        }
     }
 }
