@@ -129,6 +129,19 @@ class FunctionalTest extends MakerTestCase
                 // form name
                 'FooBar',
             ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeForm')
+        ];
+
+        yield 'entity_form' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeForm::class),
+            [
+                // Entity name
+                'SourFood',
+                // agree with use Entity for form generation
+                'yes'
+            ])
+            ->addExtraDependencies('orm')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFormForEntity')
         ];
 
         yield 'functional' => [MakerTestDetails::createTest(

@@ -1,26 +1,30 @@
-<?= "<?php\n" ?>
+<?= "<?php\n"; ?>
 
 namespace App\Form;
 
-use App\Entity\<?= $entity_class_name ?>;
+<?php if ($entity_class_name): ?>use App\Entity\<?= $entity_class_name; ?>;
+<?php endif; ?>
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+<?php if ($entity_class_name): ?>use Symfony\Component\OptionsResolver\OptionsResolver;
+<?php endif; ?>
 
-class <?= $form_class_name ?> extends AbstractType
+class <?= $form_class_name; ?> extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('field_name')
+<?= $helper->getFormFieldsPrintCode($form_fields); ?>
+
         ;
     }
+<?php if ($entity_class_name): ?>
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            // uncomment if you want to bind to a class
-            //'data_class' => <?= $entity_class_name ?>::class,
+            'data_class' => <?= $entity_class_name; ?>::class,
         ]);
     }
+<?php endif; ?>
 }

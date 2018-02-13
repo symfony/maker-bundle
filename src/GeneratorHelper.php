@@ -16,6 +16,19 @@ namespace Symfony\Bundle\MakerBundle;
  */
 class GeneratorHelper
 {
+    public function getFormFieldsPrintCode(array $formFields): string
+    {
+        $printCode = '';
+
+        foreach ($formFields as $fieldName) {
+            $printCode .= <<<PHP
+            ->add('$fieldName')
+PHP;
+        }
+
+        return $printCode;
+    }
+
     public function getEntityFieldPrintCode($entity, $field): string
     {
         $printCode = $entity.'.'.$field['fieldName'];

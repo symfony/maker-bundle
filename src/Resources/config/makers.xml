@@ -44,6 +44,8 @@
             </service>
 
             <service id="maker.maker.make_form" class="Symfony\Bundle\MakerBundle\Maker\MakeForm">
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.doctrine_entity_helper" />
                 <tag name="maker.command" />
             </service>
 

@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -63,6 +64,14 @@ final class FileManager
         $relativePath = str_replace($this->rootDirectory, '.', $absolutePath);
 
         return is_dir($absolutePath) ? rtrim($relativePath, '/').'/' : $relativePath;
+    }
+
+    public function createFinder(string $in)
+    {
+        $finder = new Finder();
+        $finder->in($this->absolutizePath($in));
+
+        return $finder;
     }
 
     private function absolutizePath($path): string
