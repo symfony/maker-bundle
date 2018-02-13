@@ -30,6 +30,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Validation;
 
 /**
@@ -167,6 +168,11 @@ final class MakeCrud extends AbstractMaker
         $dependencies->addClassDependency(
             Column::class,
             'orm'
+        );
+
+        $dependencies->addClassDependency(
+            CsrfTokenManager::class,
+            'security-csrf'
         );
     }
 }
