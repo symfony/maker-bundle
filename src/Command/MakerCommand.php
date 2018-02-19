@@ -61,8 +61,9 @@ final class MakerCommand extends Command
         if ($this->checkDependencies) {
             $dependencies = new DependencyBuilder();
             $this->maker->configureDependencies($dependencies);
-            if ($missingPackages = $dependencies->getMissingDependencies()) {
-                throw new RuntimeCommandException(sprintf("Missing package%s: to use the %s command, run: \n\ncomposer require %s", 1 === count($missingPackages) ? '' : 's', $this->getName(), implode(' ', $missingPackages)));
+
+            if ($missingPackagesMessage = $dependencies->getMissingPackagesMessage($this->getName())) {
+                throw new RuntimeCommandException($missingPackagesMessage);
             }
         }
     }

@@ -18,7 +18,7 @@ use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-final class Generator
+class Generator
 {
     private $fileManager;
     private $pendingOperations = [];

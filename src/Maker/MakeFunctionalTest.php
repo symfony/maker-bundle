@@ -69,11 +69,15 @@ class MakeFunctionalTest extends AbstractMaker
     {
         $dependencies->addClassDependency(
             Client::class,
-            'browser-kit'
+            'browser-kit',
+            true,
+            true
         );
         $dependencies->addClassDependency(
             CssSelectorConverter::class,
-            'css-selector'
+            'css-selector',
+            true,
+            true
         );
     }
 }

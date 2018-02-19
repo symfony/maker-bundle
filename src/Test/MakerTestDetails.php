@@ -157,6 +157,10 @@ final class MakerTestDetails
         $depBuilder = new DependencyBuilder();
         $this->maker->configureDependencies($depBuilder);
 
-        return array_merge($depBuilder->getAllRequiredDependencies(), $this->extraDependencies);
+        return array_merge(
+            $depBuilder->getAllRequiredDependencies(),
+            $depBuilder->getAllRequiredDevDependencies(),
+            $this->extraDependencies
+        );
     }
 }
