@@ -1,11 +1,11 @@
 <?= "<?php\n" ?>
 
-namespace App\Serializer;
+namespace <?= $namespace; ?>;
 
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
-class <?= $encoder_class_name ?> implements EncoderInterface, DecoderInterface
+class <?= $class_name ?> implements EncoderInterface, DecoderInterface
 {
     const FORMAT = '<?= $format ?>';
 

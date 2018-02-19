@@ -99,6 +99,16 @@ final class Str
         return sprintf('on%s', self::asClassName($eventName));
     }
 
+    public static function getShortClassName(string $fullClassName): string
+    {
+        return substr($fullClassName, strrpos($fullClassName, '\\') + 1);
+    }
+
+    public static function getNamespace(string $fullClassName): string
+    {
+        return substr($fullClassName, 0, strrpos($fullClassName, '\\'));
+    }
+
     public static function asFilePath(string $value): string
     {
         $value = Container::underscore(trim($value));

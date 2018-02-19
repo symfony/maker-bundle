@@ -1,6 +1,6 @@
 <?= "<?php\n" ?>
 
-namespace App\Security;
+namespace <?= $namespace ?>;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;

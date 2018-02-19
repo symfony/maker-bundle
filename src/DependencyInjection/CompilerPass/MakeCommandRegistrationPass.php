@@ -37,7 +37,7 @@ class MakeCommandRegistrationPass implements CompilerPassInterface
                 MakerCommand::class
             )->setArguments([
                 new Reference($id),
-                new Reference('maker.generator'),
+                new Reference('maker.file_manager'),
             ])->addTag('console.command', ['command' => $class::getCommandName()]);
         }
     }

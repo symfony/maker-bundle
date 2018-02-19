@@ -1,11 +1,11 @@
 <?= "<?php\n" ?>
 
-namespace App\Validator\Constraints;
+namespace <?= $namespace; ?>;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
-class <?= $validator_class_name ?> extends ConstraintValidator
+class <?= $class_name ?> extends ConstraintValidator
 {
     public function validate($value, Constraint $constraint)
     {

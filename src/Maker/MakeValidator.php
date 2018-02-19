@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -41,29 +42,33 @@ final class MakeValidator extends AbstractMaker
         ;
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $validatorClassName = Str::asClassName($input->getArgument('name'), 'Validator');
-        Validator::validateClassName($validatorClassName);
-        $constraintClassName = Str::removeSuffix($validatorClassName, 'Validator');
+        $validatorClassNameDetails = $generator->createClassNameDetails(
+            $input->getArgument('name'),
+            'Validator\\',
+            'Validator'
+        );
 
-        return [
-            'validator_class_name' => $validatorClassName,
-            'constraint_class_name' => $constraintClassName,
-        ];
-    }
+        $constraintFullClassName = Str::removeSuffix($validatorClassNameDetails->getFullName(), 'Validator');
 
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/validator/Validator.tpl.php' => 'src/Validator/Constraints/'.$params['validator_class_name'].'.php',
-            __DIR__.'/../Resources/skeleton/validator/Constraint.tpl.php' => 'src/Validator/Constraints/'.$params['constraint_class_name'].'.php',
-        ];
-    }
+        $generator->generateClass(
+            $validatorClassNameDetails->getFullName(),
+            'validator/Validator.tpl.php',
+            [
+                'constraint_class_name' => $constraintFullClassName,
+            ]
+        );
 
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $generator->generateClass(
+            $constraintFullClassName,
+            'validator/Constraint.tpl.php',
+            []
+        );
+
+        $generator->writeChanges();
+
+        $this->writeSuccessMessage($io);
 
         $io->text([
             'Next: Open your new constraint & validators and add your logic.',

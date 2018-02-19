@@ -21,20 +21,26 @@ use Symfony\Component\Process\Process;
 
 class MakerTestCase extends TestCase
 {
-    private static $currentRootDir;
+    protected static $currentRootDir;
     private static $flexProjectPath;
     private static $fixturesCachePath;
 
     /** @var Filesystem */
     private static $fs;
 
-    protected function executeMakerCommand(MakerTestDetails $testDetails)
+    /**
+     * @beforeClass
+     */
+    public static function setupPaths()
     {
         self::$currentRootDir = __DIR__.'/../../tests/tmp/current_project';
         self::$flexProjectPath = __DIR__.'/../../tests/tmp/template_project';
         self::$fixturesCachePath = __DIR__.'/../../tests/tmp/cache';
-        self::$fs = new Filesystem();
+    }
 
+    protected function executeMakerCommand(MakerTestDetails $testDetails)
+    {
+        self::$fs = new Filesystem();
         if (!file_exists(self::$flexProjectPath)) {
             $this->buildFlexProject();
         }
@@ -127,6 +133,11 @@ class MakerTestCase extends TestCase
         } else {
             ($testDetails->getAssert())($makerProcess->getOutput(), self::$currentRootDir);
         }
+    }
+
+    protected function assertContainsCount(string $needle, string $haystack, int $count)
+    {
+        $this->assertEquals(1, substr_count($haystack, $needle), sprintf('Found more than %d occurrences of "%s" in "%s"', $count, $needle, $haystack));
     }
 
     private function buildFlexProject()
