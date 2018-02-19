@@ -90,7 +90,6 @@ final class DependencyBuilder
             "Missing package%s: to use the %s command, run:\n",
             $packagesCount > 1 ? 's' : '',
             $commandName
-            //
         );
 
         if (!empty($packages)) {
