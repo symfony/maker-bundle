@@ -14,6 +14,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeController;
 use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Maker\MakeFixtures;
 use Symfony\Bundle\MakerBundle\Maker\MakeForm;
+use Symfony\Bundle\MakerBundle\Maker\MakeFormTypeExtension;
 use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest;
 use Symfony\Bundle\MakerBundle\Maker\MakeMigration;
 use Symfony\Bundle\MakerBundle\Maker\MakeSerializerEncoder;
@@ -169,6 +170,16 @@ class FunctionalTest extends MakerTestCase
 
         yield 'form' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeForm::class),
+            [
+                // form name
+                'FooBar',
+                // extended type
+                'FormType'
+            ])
+        ];
+
+        yield 'form_type_extension' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeFormTypeExtension::class),
             [
                 // form name
                 'FooBar',
