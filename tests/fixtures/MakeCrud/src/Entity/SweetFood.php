@@ -21,6 +21,11 @@ class SweetFood
      */
     private $title;
 
+    public function getId()
+    {
+        return $this->id;
+    }
+
     /**
      * @return mixed
      */

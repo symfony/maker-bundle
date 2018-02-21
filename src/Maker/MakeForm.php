@@ -11,15 +11,17 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineEntityHelper;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Validator\Validation;
 
@@ -29,6 +31,13 @@ use Symfony\Component\Validator\Validation;
  */
 final class MakeForm extends AbstractMaker
 {
+    private $entityHelper;
+
+    public function __construct(DoctrineEntityHelper $entityHelper)
+    {
+        $this->entityHelper = $entityHelper;
+    }
+
     public static function getCommandName(): string
     {
         return 'make:form';
@@ -41,6 +50,16 @@ final class MakeForm extends AbstractMaker
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('The name of the form class (e.g. <fg=yellow>%sType</>)', Str::asClassName(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeForm.txt'))
         ;
+    }
+
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    {
+        if (null != $input->getArgument('name') && $this->entityHelper->isDoctrineConnected()) {
+            $question = new Question("Enter the class or entity name that the new form will be bound to (empty for none)");
+            $question->setAutocompleterValues($this->entityHelper->getEntitiesForAutocomplete());
+            //$entity = $io->choice("Enter the class or entity name that the new form will be bound to", $this->entityHelper->getEntitiesForAutocomplete(), 'none');
+            $entity = $io->askQuestion($question);
+        }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -56,13 +75,18 @@ final class MakeForm extends AbstractMaker
             'Entity\\'
         );
 
+        $entityClassExists = class_exists($entityClassNameDetails->getFullName());
+
+        $formFields = $entityClassExists ? $this->entityHelper->getFormFieldsFromEntity($entityClassNameDetails->getFullName()) : ['field_name'];
+
         $generator->generateClass(
             $formClassNameDetails->getFullName(),
             'form/Type.tpl.php',
             [
-                'entity_class_exists' => class_exists($entityClassNameDetails->getFullName()),
+                'entity_class_exists' => $entityClassExists,
                 'entity_full_class_name' => $entityClassNameDetails->getFullName(),
                 'entity_class_name' => $entityClassNameDetails->getShortName(),
+                'form_fields' => $formFields,
             ]
         );
 
@@ -88,6 +112,12 @@ final class MakeForm extends AbstractMaker
             Validation::class,
             'validator',
             // add as an optional dependency: the user *probably* wants validation
+            false
+        );
+
+        $dependencies->addClassDependency(
+            DoctrineBundle::class,
+            'orm',
             false
         );
     }

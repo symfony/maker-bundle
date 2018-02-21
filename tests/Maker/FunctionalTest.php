@@ -182,8 +182,7 @@ class FunctionalTest extends MakerTestCase
             [
                 // Entity name
                 'SourFood',
-                // agree with use Entity for form generation
-                'yes'
+                'SourFood',
             ])
             ->addExtraDependencies('orm')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFormForEntity')

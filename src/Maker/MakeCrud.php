@@ -18,18 +18,16 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineEntityHelper;
-use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\GeneratorHelper;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Validation;
 
@@ -38,13 +36,11 @@ use Symfony\Component\Validator\Validation;
  */
 final class MakeCrud extends AbstractMaker
 {
-    private $router;
     private $fileManager;
     private $entityHelper;
 
-    public function __construct(RouterInterface $router, FileManager $fileManager, DoctrineEntityHelper $entityHelper)
+    public function __construct(FileManager $fileManager, DoctrineEntityHelper $entityHelper)
     {
-        $this->router = $router;
         $this->fileManager = $fileManager;
         $this->entityHelper = $entityHelper;
     }
@@ -66,71 +62,117 @@ final class MakeCrud extends AbstractMaker
         ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-    }
+        $entityClassNameDetails = $generator->createClassNameDetails(
+            $input->getArgument('entity-class'),
+            'Entity\\'
+        );
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getParameters(InputInterface $input): array
-    {
-        $entityClassName = Str::asClassName($input->getArgument('entity-class'));
-        Validator::validateClassName($entityClassName);
-        $controllerClassName = Str::asClassName($entityClassName, 'Controller');
-        Validator::validateClassName($controllerClassName);
-        $formClassName = Str::asClassName($entityClassName, 'Type');
-        Validator::validateClassName($formClassName);
+        $controllerClassNameDetails = $generator->createClassNameDetails(
+            $entityClassNameDetails->getRelativeNameWithoutSuffix(),
+            'Controller\\',
+            'Controller'
+        );
 
-        if (!$this->fileManager->fileExists('src/Entity/'.$entityClassName.'.php')) {
-            throw new RuntimeCommandException(sprintf('Entity "%s" doesn\'t exists in your project. May be you would like to create it with "make:entity" command?', $entityClassName));
-        }
+        $formClassNameDetails = $generator->createClassNameDetails(
+            $entityClassNameDetails->getRelativeNameWithoutSuffix(),
+            'Form\\',
+            'Type'
+        );
 
-        $metadata = $this->entityHelper->getEntityMetadata($entityClassName);
+        $metadata = $this->entityHelper->getEntityMetadata($entityClassNameDetails->getFullName());
+        $entityVarPlural = lcfirst(Inflector::pluralize($entityClassNameDetails->getShortName()));
+        $entityVarSingular = lcfirst(Inflector::singularize($entityClassNameDetails->getShortName()));
+        $routeName = Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix());
 
-        $baseLayoutExists = $this->fileManager->fileExists('templates/base.html.twig');
+        $generator->generateClass(
+            $controllerClassNameDetails->getFullName(),
+            'crud/controller/Controller.tpl.php',
+            [
+                'entity_full_class_name' => $entityClassNameDetails->getFullName(),
+                'entity_class_name' => $entityClassNameDetails->getShortName(),
+                'form_full_class_name' => $formClassNameDetails->getFullName(),
+                'form_class_name' => $formClassNameDetails->getShortName(),
+                'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
+                'route_name' => $routeName,
+                'entity_var_plural' => $entityVarPlural,
+                'entity_var_singular' => $entityVarSingular,
+                'entity_identifier' => $metadata->identifier[0],
+            ]
+        );
+
+        $formFields = $this->entityHelper->getFormFieldsFromEntity($entityClassNameDetails->getFullName());
 
         $helper = new GeneratorHelper();
 
-        return [
-            'helper' => $helper,
-            'controller_class_name' => $controllerClassName,
-            'entity_var_plural' => lcfirst(Inflector::pluralize($entityClassName)),
-            'entity_var_singular' => lcfirst(Inflector::singularize($entityClassName)),
-            'entity_class_name' => $entityClassName,
-            'entity_identifier' => $metadata->identifier[0],
-            'entity_fields' => $metadata->fieldMappings,
-            'form_class_name' => $formClassName,
-            'form_fields' => $this->entityHelper->getFormFieldsFromEntity($entityClassName),
-            'route_path' => Str::asRoutePath(str_replace('Controller', '', $controllerClassName)),
-            'route_name' => Str::asRouteName(str_replace('Controller', '', $controllerClassName)),
-            'base_layout_exists' => $baseLayoutExists,
-        ];
-    }
+        $generator->generateClass(
+            $formClassNameDetails->getFullName(),
+            'form/Type.tpl.php',
+            [
+                'entity_class_exists' => true,
+                'entity_full_class_name' => $entityClassNameDetails->getFullName(),
+                'entity_class_name' => $entityClassNameDetails->getShortName(),
+                'form_fields' => $formFields,
+                'helper' => $helper
+            ]
+        );
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/crud/controller/Controller.tpl.php' => 'src/Controller/'.$params['controller_class_name'].'.php',
-            __DIR__.'/../Resources/skeleton/form/Type.tpl.php' => 'src/Form/'.$params['form_class_name'].'.php',
-            __DIR__.'/../Resources/skeleton/crud/templates/_delete_form.tpl.php' => 'templates/'.$params['route_name'].'/_delete_form.html.twig',
-            __DIR__.'/../Resources/skeleton/crud/templates/_form.tpl.php' => 'templates/'.$params['route_name'].'/_form.html.twig',
-            __DIR__.'/../Resources/skeleton/crud/templates/index.tpl.php' => 'templates/'.$params['route_name'].'/index.html.twig',
-            __DIR__.'/../Resources/skeleton/crud/templates/show.tpl.php' => 'templates/'.$params['route_name'].'/show.html.twig',
-            __DIR__.'/../Resources/skeleton/crud/templates/new.tpl.php' => 'templates/'.$params['route_name'].'/new.html.twig',
-            __DIR__.'/../Resources/skeleton/crud/templates/edit.tpl.php' => 'templates/'.$params['route_name'].'/edit.html.twig',
-        ];
-    }
+        $baseLayoutExists = $this->fileManager->fileExists('templates/base.html.twig');
+        $templatesPath = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix());
 
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $templates = [
+            '_delete_form' => [
+                'route_name' => $routeName,
+                'entity_identifier' => $metadata->identifier[0],
+            ],
+            '_form' => [],
+            'edit' => [
+                'helper' => $helper,
+                'base_layout_exists' => $baseLayoutExists,
+                'entity_class_name' => $entityClassNameDetails->getShortName(),
+                'entity_var_singular' => $entityVarSingular,
+                'entity_identifier' => $metadata->identifier[0],
+                'route_name' => $routeName,
+            ],
+            'index' => [
+                'helper' => $helper,
+                'base_layout_exists' => $baseLayoutExists,
+                'entity_class_name' => $entityClassNameDetails->getShortName(),
+                'entity_var_plural' => $entityVarPlural,
+                'entity_var_singular' => $entityVarSingular,
+                'entity_identifier' => $metadata->identifier[0],
+                'entity_fields' => $metadata->fieldMappings,
+                'route_name' => $routeName,
+            ],
+            'new' => [
+                'helper' => $helper,
+                'base_layout_exists' => $baseLayoutExists,
+                'entity_class_name' => $entityClassNameDetails->getShortName(),
+                'route_name' => $routeName,
+            ],
+            'show' => [
+                'helper' => $helper,
+                'base_layout_exists' => $baseLayoutExists,
+                'entity_class_name' => $entityClassNameDetails->getShortName(),
+                'entity_var_singular' => $entityVarSingular,
+                'entity_identifier' => $metadata->identifier[0],
+                'entity_fields' => $metadata->fieldMappings,
+                'route_name' => $routeName,
+            ],
+        ];
+
+        foreach ($templates as $template => $variables) {
+            $generator->generateFile(
+                'templates/'.$templatesPath.'/'.$template.'.html.twig',
+                'crud/templates/'.$template.'.tpl.php',
+                $variables
+            );
+        }
+
+        $generator->writeChanges();
+
+        $this->writeSuccessMessage($io);
 
         $io->text('Next: Check your new crud!');
     }
@@ -162,12 +204,7 @@ final class MakeCrud extends AbstractMaker
 
         $dependencies->addClassDependency(
             DoctrineBundle::class,
-            'orm'
-        );
-
-        $dependencies->addClassDependency(
-            Column::class,
-            'orm'
+            'orm-pack'
         );
 
         $dependencies->addClassDependency(

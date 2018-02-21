@@ -1,9 +1,9 @@
 <?= "<?php\n"; ?>
 
-namespace App\Controller;
+namespace <?= $namespace; ?>;
 
-use App\Entity\<?= $entity_class_name; ?>;
-use App\Form\<?= $form_class_name; ?>;
+use <?= $entity_full_class_name; ?>;
+use <?= $form_full_class_name; ?>;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * @Route("<?= $route_path; ?>", name="<?= $route_name; ?>_")
  */
-class <?= $controller_class_name; ?> extends Controller
+class <?= $class_name ?> extends Controller
 {
     /**
      * @Route("/", name="index")

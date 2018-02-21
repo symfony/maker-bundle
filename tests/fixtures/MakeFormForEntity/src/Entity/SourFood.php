@@ -24,6 +24,14 @@ class SourFood
     /**
      * @return mixed
      */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getTitle()
     {
         return $this->title;

@@ -13,22 +13,11 @@ namespace Symfony\Bundle\MakerBundle;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
+ *
+ * @internal
  */
 class GeneratorHelper
 {
-    public function getFormFieldsPrintCode(array $formFields): string
-    {
-        $printCode = '';
-
-        foreach ($formFields as $fieldName) {
-            $printCode .= <<<PHP
-            ->add('$fieldName')
-PHP;
-        }
-
-        return $printCode;
-    }
-
     public function getEntityFieldPrintCode($entity, $field): string
     {
         $printCode = $entity.'.'.$field['fieldName'];
@@ -51,54 +40,19 @@ PHP;
     public function getHead($baseLayoutExists, $title): string
     {
         if ($baseLayoutExists) {
-            $code = <<<TWIG
+            return <<<TWIG
 {% extends 'base.html.twig' %}
 
 {% block title %}$title{% endblock %}
 
 TWIG;
-        } else {
-            $code = <<<HTML
+        }
+
+        return <<<HTML
 <!DOCTYPE html>
 
-<html>
-    <head>
-        <title>$title</title>
-    </head>
+<title>$title</title>
+
 HTML;
-        }
-
-        return $code;
-    }
-
-    public function getBodyStart($baseLayoutExists): string
-    {
-        if ($baseLayoutExists) {
-            $code = <<<TWIG
-{% block body %}
-TWIG;
-        } else {
-            $code = <<<HTML
-    <body>
-HTML;
-        }
-
-        return $code;
-    }
-
-    public function getBodyEnd($baseLayoutExists): string
-    {
-        if ($baseLayoutExists) {
-            $code = <<<TWIG
-{% endblock %}
-TWIG;
-        } else {
-            $code = <<<HTML
-    </body>
-</html>
-HTML;
-        }
-
-        return $code;
     }
 }

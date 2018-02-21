@@ -1,6 +1,6 @@
 <?= $helper->getHead($base_layout_exists, $entity_class_name.' index'); ?>
 
-<?= $helper->getBodyStart($base_layout_exists); ?>
+{% block body %}
 
     <h1><?= $entity_class_name; ?> index</h1>
     <table>
@@ -15,8 +15,8 @@
             <tr>
                 <?php foreach ($entity_fields as $field): ?><td>{{ <?= $helper->getEntityFieldPrintCode($entity_var_singular, $field); ?> }}</td>
                 <?php endforeach; ?><td>
-                    <a href="{{ path('<?= $route_name; ?>_show', {'<?= $entity_identifier; ?>':<?= $entity_var_singular; ?>.<?= $entity_identifier; ?>}) }}">show</a>
-                    <a href="{{ path('<?= $route_name; ?>_edit', {'<?= $entity_identifier; ?>':<?= $entity_var_singular; ?>.<?= $entity_identifier; ?>}) }}">edit</a>
+                    <a href="{{ path('<?= $route_name; ?>_show', {'<?= $entity_identifier; ?>': <?= $entity_var_singular; ?>.<?= $entity_identifier; ?>}) }}">show</a>
+                    <a href="{{ path('<?= $route_name; ?>_edit', {'<?= $entity_identifier; ?>': <?= $entity_var_singular; ?>.<?= $entity_identifier; ?>}) }}">edit</a>
                 </td>
             </tr>
         {% else %}
@@ -28,4 +28,4 @@
     </table>
     <a href="{{ path('<?= $route_name; ?>_new') }}">Create new</a>
 
-<?= $helper->getBodyEnd($base_layout_exists); ?>
+{% endblock %}
