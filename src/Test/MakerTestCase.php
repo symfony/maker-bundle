@@ -34,8 +34,8 @@ class MakerTestCase extends TestCase
     public static function setupPaths()
     {
         self::$currentRootDir = __DIR__.'/../../tests/tmp/current_project';
-        self::$flexProjectPath = __DIR__.'/../../tests/tmp/template_project';
         self::$fixturesCachePath = __DIR__.'/../../tests/tmp/cache';
+        self::$flexProjectPath = self::$fixturesCachePath.'/flex_project';
     }
 
     protected function executeMakerCommand(MakerTestDetails $testDetails)
@@ -133,7 +133,7 @@ class MakerTestCase extends TestCase
             // execute the tests that were moved into the project!
             $process = $this->createProcess(
                 // using OUR simple-phpunit for speed (to avoid downloading more deps)
-                '../../../vendor/bin/simple-phpunit',
+                __DIR__.'/../../vendor/bin/simple-phpunit',
                 self::$currentRootDir
             );
             $process->run();
@@ -155,7 +155,11 @@ class MakerTestCase extends TestCase
 
     private function buildFlexProject()
     {
-        $process = $this->createProcess('composer create-project symfony/skeleton template_project', dirname(self::$flexProjectPath));
+        $targetFlexDir = dirname(self::$flexProjectPath);
+        if (!file_exists($targetFlexDir)) {
+            self::$fs->mkdir($targetFlexDir);
+        }
+        $process = $this->createProcess('composer create-project symfony/skeleton flex_project', $targetFlexDir);
         $this->runProcess($process);
 
         // processes any changes needed to the Flex project
@@ -168,7 +172,7 @@ class MakerTestCase extends TestCase
             [
                 'filename' => 'composer.json',
                 'find' => '"App\\\Tests\\\": "tests/"',
-                'replace' => sprintf('"App\\\Tests\\\": "tests/",'."\n".'            "Symfony\\\Bundle\\\MakerBundle\\\": "%s/src/"', __DIR__.'../../../'),
+                'replace' => sprintf('"App\\\Tests\\\": "tests/",'."\n".'            "Symfony\\\Bundle\\\MakerBundle\\\": "%s/src/"', str_replace('\\', '\\\\', __DIR__.'../../..')),
             ],
         ];
         $this->processReplacements($replacements, self::$flexProjectPath);

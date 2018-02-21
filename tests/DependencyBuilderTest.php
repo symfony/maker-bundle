@@ -55,6 +55,8 @@ class DependencyBuilderTest extends TestCase
             $depBuilder->addClassDependency('Foo', $missingPackage, true, true);
         }
 
+        // normalize line breaks on Windows for comparison
+        $expectedMessage = str_replace("\r\n", "\n", $expectedMessage);
         $this->assertSame($expectedMessage, $depBuilder->getMissingPackagesMessage('make:something'));
     }
 

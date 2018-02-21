@@ -154,7 +154,7 @@ class FunctionalTest extends MakerTestCase
                 'mysql://db_user:db_password@127.0.0.1:3306/db_name',
                 'sqlite:///%kernel.project_dir%/var/app.db'
             )
-            ->addPostMakeCommand('./bin/console doctrine:schema:create --env=test')
+            ->addPostMakeCommand('php bin/console doctrine:schema:create --env=test')
         ];
 
         yield 'fixtures' => [MakerTestDetails::createTest(
@@ -293,7 +293,7 @@ class FunctionalTest extends MakerTestCase
             )
             ->addExtraDependencies('doctrine/orm')
             // sync the database, so no changes are needed
-            ->addPreMakeCommand('./bin/console doctrine:schema:create --env=test')
+            ->addPreMakeCommand('php bin/console doctrine:schema:create --env=test')
             ->assert(function(string $output, string $directory) {
                 $this->assertNotContains('Success', $output);
 
