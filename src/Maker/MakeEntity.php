@@ -112,7 +112,7 @@ final class MakeEntity extends AbstractMaker
         }
 
         $entityClassDetails = $generator->createClassNameDetails(
-            $input->getArgument('entity-class'),
+            $input->getArgument('name'),
             'Entity\\'
         );
 
