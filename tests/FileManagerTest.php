@@ -45,6 +45,12 @@ class FileManagerTest extends MakerTestCase
             '/home/project/foo/bar/../../src/Baz.php',
             'src/Baz.php',
         ];
+
+        yield 'windows_path' => [
+            'D:\path\to\project',
+            'D:\path\to\project\vendor\composer/../../src/Controller/TestController.php',
+            'src/Controller/TestController.php',
+        ];
     }
 
     public function testGetPathForFutureClass()
