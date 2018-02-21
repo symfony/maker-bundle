@@ -146,20 +146,11 @@ final class EntityRegenerator
 
     private function generateClass(ClassMetadata $metadata): string
     {
-        $path = $this->getPathForFutureClass($metadata->name);
-
-        if (null === $path) {
-            throw new RuntimeCommandException(sprintf('Cannot determine where to generate the class "%s". This could be a bug in the library - please open an issue with your setup details.', $metadata->name));
-        }
-
-        $this->generator->generate([
-            'class_namespace' => $metadata->namespace,
-            'class_name' => Str::getShortClassName($metadata->name),
-        ], [
-            __DIR__.'/../Resources/skeleton/Class.tpl.php' => $path,
-        ]);
-
-        return $path;
+        return $this->generator->generateClass(
+            $metadata->name,
+            'Class.tpl.php',
+            []
+        );
     }
 
     private function createClassManipulator(string $classPath): ClassSourceManipulator
@@ -193,37 +184,15 @@ final class EntityRegenerator
 
         // duplication in MakeEntity
         $entityClassName = Str::getShortClassName($metadata->name);
-        $entityAlias = strtolower($entityClassName[0]);
-        $repositoryClassName = Str::getShortClassName($metadata->customRepositoryClassName);
-        $repositoryNamespace = Str::getNamespace($metadata->customRepositoryClassName);
-        $path = $this->getPathForFutureClass($metadata->customRepositoryClassName);
 
-        $this->generator->generate([
-            'repository_namespace' => $repositoryNamespace,
-            'entity_class_name' => $entityClassName,
-            'repository_class_name' => $repositoryClassName,
-            'entity_alias' => $entityAlias,
-        ], [
-            __DIR__.'/../Resources/skeleton/doctrine/Repository.tpl.php' => $path,
-        ]);
-    }
-
-    private function getPathForFutureClass(string $className): ?string
-    {
-        $autoloadPath = $this->projectDirectory.'/vendor/autoload.php';
-        if (!file_exists($autoloadPath)) {
-            throw new \Exception(sprintf('Could not find the autoload file: "%s"', $autoloadPath));
-        }
-
-        /** @var \Composer\Autoload\ClassLoader $loader */
-        $loader = require $autoloadPath;
-        $path = null;
-        foreach ($loader->getPrefixesPsr4() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
-                return $paths[0].'/'.str_replace('\\', '/', str_replace($prefix, '', $className)).'.php';
-            }
-        }
-
-        return null;
+        $this->generator->generateClass(
+            $metadata->customRepositoryClassName,
+            'doctrine/Repository.tpl.php',
+            [
+                'entity_full_class_name' => $metadata->name,
+                'entity_class_name' => $entityClassName,
+                'entity_alias' => strtolower($entityClassName[0]),
+            ]
+        );
     }
 }

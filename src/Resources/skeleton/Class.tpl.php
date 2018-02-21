@@ -1,6 +1,6 @@
 <?= "<?php\n" ?>
 
-namespace <?= $class_namespace; ?>;
+namespace <?= $namespace; ?>;
 
 class <?= $class_name."\n" ?>
 {

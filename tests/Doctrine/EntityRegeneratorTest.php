@@ -73,7 +73,7 @@ class EntityRegeneratorTest extends TestCase
         $regenerator = new EntityRegenerator(
             $container->get('doctrine'),
             $fileManager,
-            new Generator($fileManager),
+            new Generator($fileManager, 'App\\'),
             // project root: just used to fetch the autoloader
             // and in this case, we want to use *our* autoloader
             __DIR__.'/../../',

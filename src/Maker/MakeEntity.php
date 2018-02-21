@@ -39,14 +39,12 @@ use Symfony\Component\Finder\SplFileInfo;
 final class MakeEntity extends AbstractMaker
 {
     private $fileManager;
-    private $generator;
     private $registry;
     private $projectDirectory;
 
-    public function __construct(FileManager $fileManager, Generator $generator, string $projectDirectory, ?ManagerRegistry $registry)
+    public function __construct(FileManager $fileManager, string $projectDirectory, ?ManagerRegistry $registry)
     {
         $this->fileManager = $fileManager;
-        $this->generator = $generator;
         $this->projectDirectory = $projectDirectory;
         $this->registry = $registry;
     }
@@ -110,7 +108,7 @@ final class MakeEntity extends AbstractMaker
 
         // the regenerate option has entirely custom behavior
         if ($input->getOption('regenerate')) {
-            $this->regenerateEntities($input->getArgument('name'), $overwrite, $io);
+            $this->regenerateEntities($input->getArgument('name'), $overwrite, $generator);
         }
 
         $entityClassDetails = $generator->createClassNameDetails(
@@ -770,10 +768,9 @@ final class MakeEntity extends AbstractMaker
         return $this->fileManager->isPathInVendor($path);
     }
 
-    private function regenerateEntities(string $classOrNamespace, bool $overwrite, ConsoleStyle $io)
+    private function regenerateEntities(string $classOrNamespace, bool $overwrite, Generator $generator)
     {
-        $this->generator->setIO($io);
-        $regenerator = new EntityRegenerator($this->getRegistry(), $this->fileManager, $this->generator, $this->projectDirectory, $overwrite);
+        $regenerator = new EntityRegenerator($this->getRegistry(), $this->fileManager, $generator, $this->projectDirectory, $overwrite);
         $regenerator->regenerateEntities($classOrNamespace);
     }
 }
