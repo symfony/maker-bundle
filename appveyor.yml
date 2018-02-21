@@ -5,6 +5,9 @@ cache:
     - composer.phar
     - .phpunit -> phpunit
 
+init:
+    - SET PATH=c:\php;%PATH%
+
 install:
     - mkdir c:\php && cd c:\php
     - appveyor DownloadFile https://github.com/symfony/binary-utils/releases/download/v0.1/php-7.1.3-Win32-VC14-x86.zip
@@ -35,10 +38,12 @@ install:
     - cd c:\php
     - IF NOT EXIST composer.phar (appveyor DownloadFile https://getcomposer.org/download/1.6.3/composer.phar)
     - php composer.phar self-update
-    - echo @php "c:\php\composer.phar" %*>composer.bat
+    # copy instead of using echo because appveyor does not allow "%s" characters
+    - copy /Y c:\projects\maker-bundle\.appveyor\composer.bat composer.bat
 
     - cd c:\projects\maker-bundle
     - php -dmemory_limit=-1 c:\php\composer.phar install --no-progress --no-suggest --ansi
+    - composer dump-autoload
     - ./vendor/bin/simple-phpunit install
 
 test_script:

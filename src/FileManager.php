@@ -33,7 +33,7 @@ class FileManager
     public function __construct(Filesystem $fs, string $rootDirectory)
     {
         $this->fs = $fs;
-        $this->rootDirectory = rtrim($this->realpath($this->normalizeSlashes($rootDirectory)).'/');
+        $this->rootDirectory = rtrim($this->realpath($this->normalizeSlashes($rootDirectory)), '/');
     }
 
     public function setIO(SymfonyStyle $io)
@@ -61,6 +61,15 @@ class FileManager
         return file_exists($this->absolutizePath($path));
     }
 
+    /**
+     * Attempts to make the path relative to the root directory.
+     *
+     * @param string $absolutePath
+     *
+     * @return string
+     *
+     * @throws \Exception
+     */
     public function relativizePath($absolutePath): string
     {
         $absolutePath = $this->normalizeSlashes($absolutePath);
@@ -80,6 +89,15 @@ class FileManager
         return is_dir($absolutePath) ? rtrim($relativePath, '/').'/' : $relativePath;
     }
 
+    /**
+     * Returns the relative path to where a new class should live.
+     *
+     * @param string $className
+     *
+     * @return null|string
+     *
+     * @throws \Exception
+     */
     public function getPathForFutureClass(string $className)
     {
         // lookup is obviously modeled off of Composer's autoload logic
@@ -140,7 +158,7 @@ class FileManager
         return self::$classLoader;
     }
 
-    private function absolutizePath($path): string
+    public function absolutizePath($path): string
     {
         if (0 === strpos($path, '/')) {
             return $path;

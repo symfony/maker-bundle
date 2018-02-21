@@ -102,4 +102,34 @@ class FileManagerTest extends MakerTestCase
             'Psr0\Package\Admin\Bar' => 'lib/other/Psr0/Package/Admin/Bar.php'
         ];
     }
+
+    /**
+     * @dataProvider getAbsolutePathTests
+     */
+    public function testAbsolutizePath(string $rootDir, string $path, string $expectedPath)
+    {
+        $fileManager = new FileManager(new Filesystem(), $rootDir);
+        $this->assertSame($expectedPath, $fileManager->absolutizePath($path));
+    }
+
+    public function getAbsolutePathTests()
+    {
+        yield 'normal_path_change' => [
+            '/home/project/',
+            'foo/bar',
+            '/home/project/foo/bar',
+        ];
+
+        yield 'already_absolute_path' => [
+            '/home/project/',
+            '/foo/bar',
+            '/foo/bar',
+        ];
+
+        yield 'windows_already_absolute_path' => [
+            'D:\path\to\project',
+            'D:\foo\bar',
+            'D:\foo\bar',
+        ];
+    }
 }
