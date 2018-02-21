@@ -160,7 +160,7 @@ class FileManager
 
     public function absolutizePath($path): string
     {
-        if (0 === strpos($path, '/')) {
+        if (0 === strpos($path, '/')|| 0 === strpos($path, substr($this->rootDirectory, 0, -1))) {
             return $path;
         }
 
