@@ -1,12 +1,12 @@
 <?= "<?php\n" ?>
 
-namespace App\Twig;
+namespace <?= $namespace; ?>;
 
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-class <?= $extension_class_name ?> extends AbstractExtension
+class <?= $class_name ?> extends AbstractExtension
 {
     public function getFilters(): array
     {

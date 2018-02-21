@@ -1,6 +1,6 @@
 <?= "<?php\n"; ?>
 
-namespace App\Command;
+namespace <?= $namespace; ?>;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class <?= $command_class_name; ?> extends Command
+class <?= $class_name; ?> extends Command
 {
     protected static $defaultName = '<?= $command_name; ?>';
 

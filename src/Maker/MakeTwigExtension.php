@@ -13,9 +13,8 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -36,31 +35,28 @@ final class MakeTwigExtension extends AbstractMaker
     {
         $command
             ->setDescription('Creates a new Twig extension class')
-            ->addArgument('name', InputArgument::OPTIONAL, 'The name of the Twig extension class (e.g. <fg=yellow>AppExtension</>).', 'AppExtension')
+            ->addArgument('name', InputArgument::OPTIONAL, 'The name of the Twig extension class (e.g. <fg=yellow>AppExtension</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeTwigExtension.txt'))
         ;
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $extensionClassName = Str::asClassName($input->getArgument('name'), 'Extension');
-        Validator::validateClassName($extensionClassName);
+        $extensionClassNameDetails = $generator->createClassNameDetails(
+            $input->getArgument('name'),
+            'Twig\\',
+            'Extension'
+        );
 
-        return [
-            'extension_class_name' => $extensionClassName,
-        ];
-    }
+        $generator->generateClass(
+            $extensionClassNameDetails->getFullName(),
+            'twig/Extension.tpl.php',
+            []
+        );
 
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/twig/Extension.tpl.php' => 'src/Twig/'.$params['extension_class_name'].'.php',
-        ];
-    }
+        $generator->writeChanges();
 
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $this->writeSuccessMessage($io);
 
         $io->text([
             'Next: Open your new extension class and start customizing it.',

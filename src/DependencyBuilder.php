@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle;
 final class DependencyBuilder
 {
     private $dependencies = [];
+    private $devDependencies = [];
 
     /**
      * Add a dependency that will be reported if the given class is missing.
@@ -22,36 +23,37 @@ final class DependencyBuilder
      * the user if other required dependencies are missing. An example
      * is the "validator" when trying to work with forms.
      */
-    public function addClassDependency(string $class, string $package, bool $required = true)
+    public function addClassDependency(string $class, string $package, bool $required = true, bool $devDependency = false)
     {
-        $this->dependencies[$class] = [
-            'name' => $package,
-            'required' => $required,
-        ];
+        if ($devDependency) {
+            $this->devDependencies[] = [
+                'class' => $class,
+                'name' => $package,
+                'required' => $required,
+            ];
+        } else {
+            $this->dependencies[] = [
+                'class' => $class,
+                'name' => $package,
+                'required' => $required,
+            ];
+        }
     }
 
+    /**
+     * @internal
+     */
     public function getMissingDependencies(): array
     {
-        $missingPackages = [];
-        $missingOptionalPackages = [];
+        return $this->calculateMissingDependencies($this->dependencies);
+    }
 
-        foreach ($this->dependencies as $class => $package) {
-            if (class_exists($class)) {
-                continue;
-            }
-
-            if (true === $package['required']) {
-                $missingPackages[] = $package['name'];
-            } else {
-                $missingOptionalPackages[] = $package['name'];
-            }
-        }
-
-        if (empty($missingPackages)) {
-            return [];
-        }
-
-        return array_merge($missingPackages, $missingOptionalPackages);
+    /**
+     * @internal
+     */
+    public function getMissingDevDependencies(): array
+    {
+        return $this->calculateMissingDependencies($this->devDependencies);
     }
 
     /**
@@ -59,15 +61,79 @@ final class DependencyBuilder
      */
     public function getAllRequiredDependencies(): array
     {
-        $dependencies = [];
-        foreach ($this->dependencies as $class => $package) {
+        return $this->getRequiredDependencyNames($this->dependencies);
+    }
+
+    /**
+     * @internal
+     */
+    public function getAllRequiredDevDependencies(): array
+    {
+        return $this->getRequiredDependencyNames($this->devDependencies);
+    }
+
+    /**
+     * @internal
+     */
+    public function getMissingPackagesMessage(string $commandName): string
+    {
+        $packages = $this->getMissingDependencies();
+        $packagesDev = $this->getMissingDevDependencies();
+
+        if (empty($packages) && empty($packagesDev)) {
+            return '';
+        }
+
+        $packagesCount = count($packages) + count($packagesDev);
+
+        $message = sprintf(
+            "Missing package%s: to use the %s command, run:\n",
+            $packagesCount > 1 ? 's' : '',
+            $commandName
+        );
+
+        if (!empty($packages)) {
+            $message .= sprintf("\ncomposer require %s", implode(' ', $packages));
+        }
+
+        if (!empty($packagesDev)) {
+            $message .= sprintf("\ncomposer require %s --dev", implode(' ', $packagesDev));
+        }
+
+        return $message;
+    }
+
+    private function getRequiredDependencyNames(array $dependencies)
+    {
+        $packages = [];
+        foreach ($dependencies as $package) {
             if (!$package['required']) {
                 continue;
             }
-
-            $dependencies[] = $package['name'];
+            $packages[] = $package['name'];
         }
 
-        return $dependencies;
+        return $packages;
+    }
+
+    private function calculateMissingDependencies(array $dependencies)
+    {
+        $missingPackages = [];
+        $missingOptionalPackages = [];
+        foreach ($dependencies as $package) {
+            if (class_exists($package['class'])) {
+                continue;
+            }
+            if (true === $package['required']) {
+                $missingPackages[] = $package['name'];
+            } else {
+                $missingOptionalPackages[] = $package['name'];
+            }
+        }
+        if (empty($missingPackages)) {
+            return [];
+        }
+
+        return array_merge($missingPackages, $missingOptionalPackages);
     }
 }

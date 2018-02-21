@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\EventRegistry;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -67,37 +68,32 @@ final class MakeSubscriber extends AbstractMaker
         }
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $subscriberClassName = Str::asClassName($input->getArgument('name'), 'Subscriber');
-        Validator::validateClassName($subscriberClassName);
+        $subscriberClassNameDetails = $generator->createClassNameDetails(
+            $input->getArgument('name'),
+            'EventSubscriber\\',
+            'Subscriber'
+        );
+
         $event = $input->getArgument('event');
-        $eventClass = $this->eventRegistry->getEventClassName($event);
-        $eventShortName = null;
-        if ($eventClass) {
-            $pieces = explode('\\', $eventClass);
-            $eventShortName = end($pieces);
-        }
+        $eventFullClassName = $this->eventRegistry->getEventClassName($event);
+        $eventClassName = $eventFullClassName ? Str::getShortClassName($eventFullClassName) : null;
 
-        return [
-            'subscriber_class_name' => $subscriberClassName,
-            'event' => $event,
-            'eventArg' => $eventShortName ? sprintf('%s $event', $eventShortName) : '$event',
-            'methodName' => Str::asEventMethod($event),
-            'eventClass' => $eventClass,
-        ];
-    }
+        $generator->generateClass(
+            $subscriberClassNameDetails->getFullName(),
+            'event/Subscriber.tpl.php',
+            [
+                'event' => $event,
+                'event_full_class_name' => $eventFullClassName,
+                'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
+                'method_name' => Str::asEventMethod($event),
+            ]
+        );
 
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/event/Subscriber.tpl.php' => 'src/EventSubscriber/'.$params['subscriber_class_name'].'.php',
-        ];
-    }
+        $generator->writeChanges();
 
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $this->writeSuccessMessage($io);
 
         $io->text([
             'Next: Open your new subscriber class and start customizing it.',

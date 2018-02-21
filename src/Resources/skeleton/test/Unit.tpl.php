@@ -1,10 +1,10 @@
 <?= "<?php\n" ?>
 
-namespace App\Tests;
+namespace <?= $namespace; ?>;
 
 use PHPUnit\Framework\TestCase;
 
-class <?= $test_class_name ?> extends TestCase
+class <?= $class_name ?> extends TestCase
 {
     public function testSomething()
     {

@@ -15,9 +15,8 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\ORM\Mapping\Column;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -42,26 +41,22 @@ final class MakeFixtures extends AbstractMaker
         ;
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $fixturesClassName = Str::asClassName($input->getArgument('fixtures-class'));
-        Validator::validateClassName($fixturesClassName);
+        $fixturesClassNameDetails = $generator->createClassNameDetails(
+            $input->getArgument('fixtures-class'),
+            'DataFixtures\\'
+        );
 
-        return [
-            'fixtures_class_name' => $fixturesClassName,
-        ];
-    }
+        $generator->generateClass(
+            $fixturesClassNameDetails->getFullName(),
+            'doctrine/Fixtures.tpl.php',
+            []
+        );
 
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/doctrine/Fixtures.tpl.php' => 'src/DataFixtures/'.$params['fixtures_class_name'].'.php',
-        ];
-    }
+        $generator->writeChanges();
 
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $this->writeSuccessMessage($io);
 
         $io->text([
             'Next: Open your new fixtures class and start customizing it.',
@@ -78,7 +73,9 @@ final class MakeFixtures extends AbstractMaker
         );
         $dependencies->addClassDependency(
             Fixture::class,
-            'orm-fixtures'
+            'orm-fixtures',
+            true,
+            true
         );
     }
 }

@@ -1,11 +1,11 @@
 <?= "<?php\n" ?>
 
-namespace App\DataFixtures;
+namespace <?= $namespace; ?>;
 
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class <?= $fixtures_class_name ?> extends Fixture
+class <?= $class_name ?> extends Fixture
 {
     public function load(ObjectManager $manager)
     {

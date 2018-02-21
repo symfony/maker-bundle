@@ -1,12 +1,12 @@
 <?= "<?php\n" ?>
 
-namespace App\Security\Voter;
+namespace <?= $namespace; ?>;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class <?= $voter_class_name ?> extends Voter
+class <?= $class_name ?> extends Voter
 {
     protected function supports($attribute, $subject)
     {

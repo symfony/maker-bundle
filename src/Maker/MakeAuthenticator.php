@@ -13,9 +13,8 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -40,26 +39,21 @@ final class MakeAuthenticator extends AbstractMaker
         ;
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $className = Str::asClassName($input->getArgument('authenticator-class'));
-        Validator::validateClassName($className);
+        $classNameDetails = $generator->createClassNameDetails(
+            $input->getArgument('authenticator-class'),
+            'Security\\'
+        );
 
-        return [
-            'class_name' => $className,
-        ];
-    }
+        $generator->generateClass(
+            $classNameDetails->getFullName(),
+            'authenticator/Empty.tpl.php',
+            []
+        );
+        $generator->writeChanges();
 
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/authenticator/Empty.tpl.php' => 'src/Security/'.$params['class_name'].'.php',
-        ];
-    }
-
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $this->writeSuccessMessage($io);
 
         $io->text([
             'Next: Customize your new authenticator.',

@@ -14,9 +14,9 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\ORM\Mapping\Column;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -41,31 +41,42 @@ final class MakeEntity extends AbstractMaker
         ;
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $entityClassName = Str::asClassName($input->getArgument('entity-class'));
-        Validator::validateClassName($entityClassName);
-        $entityAlias = strtolower($entityClassName[0]);
-        $repositoryClassName = Str::addSuffix($entityClassName, 'Repository');
+        $entityClassDetails = $generator->createClassNameDetails(
+            $input->getArgument('entity-class'),
+            'Entity\\'
+        );
 
-        return [
-            'entity_class_name' => $entityClassName,
-            'entity_alias' => $entityAlias,
-            'repository_class_name' => $repositoryClassName,
-        ];
-    }
+        $repositoryClassDetails = $generator->createClassNameDetails(
+            $entityClassDetails->getRelativeName(),
+            'Repository\\',
+            'Repository'
+        );
 
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/doctrine/Entity.tpl.php' => 'src/Entity/'.$params['entity_class_name'].'.php',
-            __DIR__.'/../Resources/skeleton/doctrine/Repository.tpl.php' => 'src/Repository/'.$params['repository_class_name'].'.php',
-        ];
-    }
+        $entityAlias = strtolower($entityClassDetails->getShortName()[0]);
 
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $generator->generateClass(
+            $entityClassDetails->getFullName(),
+            'doctrine/Entity.tpl.php',
+            [
+                'repository_full_class_name' => $repositoryClassDetails->getFullName(),
+            ]
+        );
+
+        $generator->generateClass(
+            $repositoryClassDetails->getFullName(),
+            'doctrine/Repository.tpl.php',
+            [
+                'entity_full_class_name' => $entityClassDetails->getFullName(),
+                'entity_class_name' => $entityClassDetails->getShortName(),
+                'entity_alias' => $entityAlias,
+            ]
+        );
+
+        $generator->writeChanges();
+
+        $this->writeSuccessMessage($io);
 
         $io->text([
             'Next: Add more fields to your entity and start using it.',

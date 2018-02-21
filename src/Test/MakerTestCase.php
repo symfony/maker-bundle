@@ -21,20 +21,26 @@ use Symfony\Component\Process\Process;
 
 class MakerTestCase extends TestCase
 {
-    private static $currentRootDir;
+    protected static $currentRootDir;
     private static $flexProjectPath;
     private static $fixturesCachePath;
 
     /** @var Filesystem */
     private static $fs;
 
-    protected function executeMakerCommand(MakerTestDetails $testDetails)
+    /**
+     * @beforeClass
+     */
+    public static function setupPaths()
     {
         self::$currentRootDir = __DIR__.'/../../tests/tmp/current_project';
         self::$flexProjectPath = __DIR__.'/../../tests/tmp/template_project';
         self::$fixturesCachePath = __DIR__.'/../../tests/tmp/cache';
-        self::$fs = new Filesystem();
+    }
 
+    protected function executeMakerCommand(MakerTestDetails $testDetails)
+    {
+        self::$fs = new Filesystem();
         if (!file_exists(self::$flexProjectPath)) {
             $this->buildFlexProject();
         }
@@ -86,12 +92,25 @@ class MakerTestCase extends TestCase
             throw new \Exception(sprintf('Running maker command failed: "%s" "%s"', $makerProcess->getOutput(), $makerProcess->getErrorOutput()));
         }
 
-        $files = $this->getGeneratedPhpFilesFromOutputText($makerProcess->getOutput());
+        $files = $this->getGeneratedFilesFromOutputText($makerProcess->getOutput(), '.php');
         foreach ($files as $file) {
             $process = $this->createProcess(
                 sprintf(
                     'php vendor/bin/php-cs-fixer --config=%s fix --dry-run --diff %s',
                     __DIR__.'/../Resources/test/.php_cs.test',
+                    self::$currentRootDir.'/'.$file
+                ),
+                __DIR__.'/../../'
+            );
+            $process->run();
+            $this->assertTrue($process->isSuccessful(), sprintf('File "%s" has a php-cs problem: %s', $file, $process->getOutput()));
+        }
+
+        $files = $this->getGeneratedFilesFromOutputText($makerProcess->getOutput(), '.twig');
+        foreach ($files as $file) {
+            $process = $this->createProcess(
+                sprintf(
+                    'php vendor/bin/twigcs lint %s',
                     self::$currentRootDir.'/'.$file
                 ),
                 __DIR__.'/../../'
@@ -129,6 +148,11 @@ class MakerTestCase extends TestCase
         }
     }
 
+    protected function assertContainsCount(string $needle, string $haystack, int $count)
+    {
+        $this->assertEquals(1, substr_count($haystack, $needle), sprintf('Found more than %d occurrences of "%s" in "%s"', $count, $needle, $haystack));
+    }
+
     private function buildFlexProject()
     {
         $process = $this->createProcess('composer create-project symfony/skeleton template_project', dirname(self::$flexProjectPath));
@@ -154,7 +178,7 @@ class MakerTestCase extends TestCase
         $this->runProcess($process);
     }
 
-    private function getGeneratedPhpFilesFromOutputText($output)
+    private function getGeneratedFilesFromOutputText($output, $fileExtension)
     {
         $files = [];
         foreach (explode("\n", $output) as $line) {
@@ -163,7 +187,10 @@ class MakerTestCase extends TestCase
             }
 
             list(, $filename) = explode(':', $line);
-            $files[] = trim($filename);
+            $filename = trim($filename);
+            if ($fileExtension === substr($filename, (-1 * strlen($fileExtension)))) {
+                $files[] = trim($filename);
+            }
         }
 
         return $files;

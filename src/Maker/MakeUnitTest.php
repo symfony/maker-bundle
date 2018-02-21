@@ -13,9 +13,8 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -35,31 +34,28 @@ final class MakeUnitTest extends AbstractMaker
     {
         $command
             ->setDescription('Creates a new unit test class')
-            ->addArgument('name', InputArgument::OPTIONAL, 'The name of the unit test class (e.g. <fg=yellow>UtilTest</>).')
+            ->addArgument('name', InputArgument::OPTIONAL, 'The name of the unit test class (e.g. <fg=yellow>UtilTest</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeUnitTest.txt'))
         ;
     }
 
-    public function getParameters(InputInterface $input): array
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $testClassName = Str::asClassName($input->getArgument('name'), 'Test');
-        Validator::validateClassName($testClassName);
+        $testClassNameDetails = $generator->createClassNameDetails(
+            $input->getArgument('name'),
+            'Tests\\',
+            'Test'
+        );
 
-        return [
-            'test_class_name' => $testClassName,
-        ];
-    }
+        $generator->generateClass(
+            $testClassNameDetails->getFullName(),
+            'test/Unit.tpl.php',
+            []
+        );
 
-    public function getFiles(array $params): array
-    {
-        return [
-            __DIR__.'/../Resources/skeleton/test/Unit.tpl.php' => 'tests/'.$params['test_class_name'].'.php',
-        ];
-    }
+        $generator->writeChanges();
 
-    public function writeSuccessMessage(array $params, ConsoleStyle $io)
-    {
-        parent::writeSuccessMessage($params, $io);
+        $this->writeSuccessMessage($io);
 
         $io->text([
             'Next: Open your new test class and start customizing it.',

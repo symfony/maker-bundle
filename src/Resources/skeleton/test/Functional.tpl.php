@@ -1,10 +1,10 @@
 <?= "<?php\n" ?>
 
-namespace App\Tests;
+namespace <?= $namespace; ?>;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class <?= $test_class_name ?> extends WebTestCase
+class <?= $class_name ?> extends WebTestCase
 {
     public function testSomething()
     {
