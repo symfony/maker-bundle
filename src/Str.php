@@ -133,16 +133,6 @@ final class Str
         return $value;
     }
 
-    public static function getShortClassName(string $fullClassName): string
-    {
-        return substr($fullClassName, strrpos($fullClassName, '\\') + 1);
-    }
-
-    public static function getNamespace(string $fullClassName): string
-    {
-        return substr($fullClassName, 0, strrpos($fullClassName, '\\'));
-    }
-
     public static function singularCamelCaseToPluralCamelCase(string $camelCase): string
     {
         $snake = self::asSnakeCase($camelCase);
