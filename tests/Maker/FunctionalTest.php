@@ -331,7 +331,7 @@ class FunctionalTest extends MakerTestCase
                 'mysql://db_user:db_password@127.0.0.1:3306/db_name',
                 'sqlite:///%kernel.project_dir%/var/app.db'
             )
-            ->addPreMakeCommand('./bin/console doctrine:schema:create --env=test')
+            ->addPreMakeCommand('php bin/console doctrine:schema:create --env=test')
         ];
 
         yield 'crud_with_no_base' => [MakerTestDetails::createTest(
@@ -351,7 +351,7 @@ class FunctionalTest extends MakerTestCase
                 'mysql://db_user:db_password@127.0.0.1:3306/db_name',
                 'sqlite:///%kernel.project_dir%/var/app.db'
             )
-            ->addPreMakeCommand('./bin/console doctrine:schema:create --env=test')
+            ->addPreMakeCommand('php bin/console doctrine:schema:create --env=test')
             ->addPreMakeCommand('rm templates/base.html.twig')
         ];
     }
