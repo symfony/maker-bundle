@@ -45,6 +45,12 @@ class FileManagerTest extends MakerTestCase
             '/home/project/foo/bar/../../src/Baz.php',
             'src/Baz.php',
         ];
+
+        yield 'windows_path' => [
+            'D:\path\to\project',
+            'D:\path\to\project\vendor\composer/../../src/Controller/TestController.php',
+            'src/Controller/TestController.php',
+        ];
     }
 
     public function testGetPathForFutureClass()
@@ -94,6 +100,36 @@ class FileManagerTest extends MakerTestCase
             'Also\In\Src\Some\OtherClass' => 'src/SubDir/Some/OtherClass.php',
             'Other\Namespace\Admin\Foo' => 'lib/Admin/Foo.php',
             'Psr0\Package\Admin\Bar' => 'lib/other/Psr0/Package/Admin/Bar.php'
+        ];
+    }
+
+    /**
+     * @dataProvider getAbsolutePathTests
+     */
+    public function testAbsolutizePath(string $rootDir, string $path, string $expectedPath)
+    {
+        $fileManager = new FileManager(new Filesystem(), $rootDir);
+        $this->assertSame($expectedPath, $fileManager->absolutizePath($path));
+    }
+
+    public function getAbsolutePathTests()
+    {
+        yield 'normal_path_change' => [
+            '/home/project/',
+            'foo/bar',
+            '/home/project/foo/bar',
+        ];
+
+        yield 'already_absolute_path' => [
+            '/home/project/',
+            '/foo/bar',
+            '/foo/bar',
+        ];
+
+        yield 'windows_already_absolute_path' => [
+            'D:\path\to\project',
+            'D:\foo\bar',
+            'D:\foo\bar',
         ];
     }
 }
