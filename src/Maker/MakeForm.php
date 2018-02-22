@@ -55,7 +55,7 @@ final class MakeForm extends AbstractMaker
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
         if (null != $input->getArgument('name') && $this->entityHelper->isDoctrineConnected()) {
-            $question = new Question("Enter the class or entity name that the new form will be bound to (empty for none)");
+            $question = new Question('Enter the class or entity name that the new form will be bound to (empty for none)');
             $question->setAutocompleterValues($this->entityHelper->getEntitiesForAutocomplete());
             //$entity = $io->choice("Enter the class or entity name that the new form will be bound to", $this->entityHelper->getEntitiesForAutocomplete(), 'none');
             $entity = $io->askQuestion($question);

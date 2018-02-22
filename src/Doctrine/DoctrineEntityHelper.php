@@ -46,7 +46,7 @@ final class DoctrineEntityHelper
         foreach ($allMetadata as $metadata) {
             $entities[] = preg_replace('#^[^\\\\]*\\\\Entity\\\\(.*)#', '$1', $metadata->name);
         }
-        
+
         return $entities;
     }
 

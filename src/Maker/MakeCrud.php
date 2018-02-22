@@ -13,7 +13,6 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Common\Inflector\Inflector;
-use Doctrine\ORM\Mapping\Column;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -114,7 +113,7 @@ final class MakeCrud extends AbstractMaker
                 'entity_full_class_name' => $entityClassNameDetails->getFullName(),
                 'entity_class_name' => $entityClassNameDetails->getShortName(),
                 'form_fields' => $formFields,
-                'helper' => $helper
+                'helper' => $helper,
             ]
         );
 
