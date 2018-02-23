@@ -321,6 +321,8 @@ class FunctionalTest extends MakerTestCase
                 'SweetFood',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
+            // need for crud web tests
+            ->addExtraDependencies('symfony/css-selector')
             ->addReplacement(
                 'phpunit.xml.dist',
                 'mysql://db_user:db_password@127.0.0.1:3306/db_name',
@@ -332,6 +334,25 @@ class FunctionalTest extends MakerTestCase
                 'sqlite:///%kernel.project_dir%/var/app.db'
             )
             ->addPreMakeCommand('php bin/console doctrine:schema:create --env=test')
+            ->assert(function(string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
+                $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
+                $this->assertFileExists($directory.'/templates/sweet_food/_delete_form.html.twig');
+                $this->assertFileExists($directory.'/templates/sweet_food/_form.html.twig');
+                $this->assertFileExists($directory.'/templates/sweet_food/index.html.twig');
+                $this->assertFileExists($directory.'/templates/sweet_food/new.html.twig');
+                $this->assertFileExists($directory.'/templates/sweet_food/edit.html.twig');
+                $this->assertFileExists($directory.'/templates/sweet_food/show.html.twig');
+
+                $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
+                $this->assertContains('created: src/Form/SweetFoodType.php', $output);
+                $this->assertContains('created: templates/sweet_food/_delete_form.html.twig', $output);
+                $this->assertContains('created: templates/sweet_food/_form.html.twig', $output);
+                $this->assertContains('created: templates/sweet_food/index.html.twig', $output);
+                $this->assertContains('created: templates/sweet_food/new.html.twig', $output);
+                $this->assertContains('created: templates/sweet_food/edit.html.twig', $output);
+                $this->assertContains('created: templates/sweet_food/show.html.twig', $output);
+            })
         ];
 
         yield 'crud_with_no_base' => [MakerTestDetails::createTest(
@@ -341,6 +362,8 @@ class FunctionalTest extends MakerTestCase
                 'SweetFood',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
+            // need for crud web tests
+            ->addExtraDependencies('symfony/css-selector')
             ->addReplacement(
                 'phpunit.xml.dist',
                 'mysql://db_user:db_password@127.0.0.1:3306/db_name',
@@ -353,6 +376,25 @@ class FunctionalTest extends MakerTestCase
             )
             ->addPreMakeCommand('php bin/console doctrine:schema:create --env=test')
             ->addPreMakeCommand('rm templates/base.html.twig')
+            ->assert(function(string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
+                $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
+                $this->assertFileExists($directory.'/templates/sweet_food/_delete_form.html.twig');
+                $this->assertFileExists($directory.'/templates/sweet_food/_form.html.twig');
+                $this->assertFileExists($directory.'/templates/sweet_food/index.html.twig');
+                $this->assertFileExists($directory.'/templates/sweet_food/new.html.twig');
+                $this->assertFileExists($directory.'/templates/sweet_food/edit.html.twig');
+                $this->assertFileExists($directory.'/templates/sweet_food/show.html.twig');
+
+                $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
+                $this->assertContains('created: src/Form/SweetFoodType.php', $output);
+                $this->assertContains('created: templates/sweet_food/_delete_form.html.twig', $output);
+                $this->assertContains('created: templates/sweet_food/_form.html.twig', $output);
+                $this->assertContains('created: templates/sweet_food/index.html.twig', $output);
+                $this->assertContains('created: templates/sweet_food/new.html.twig', $output);
+                $this->assertContains('created: templates/sweet_food/edit.html.twig', $output);
+                $this->assertContains('created: templates/sweet_food/show.html.twig', $output);
+            })
         ];
     }
 
