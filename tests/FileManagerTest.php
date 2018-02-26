@@ -80,5 +80,11 @@ class FileManagerTest extends TestCase
             'D:\foo\bar',
             'D:\foo\bar',
         ];
+
+        yield 'windows_already_absolute_path' => [
+            'D:\path\to\project',
+            'D:/foo/bar',
+            'D:/foo/bar',
+        ];
     }
 }

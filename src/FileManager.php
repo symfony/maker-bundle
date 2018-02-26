@@ -136,8 +136,8 @@ class FileManager
             return $path;
         }
 
-        // support windows drive paths: C:\
-        if (1 === strpos($path, ':\\')) {
+        // support windows drive paths: C:\ or C:/
+        if (1 === strpos($path, ':\\') || 1 === strpos($path, ':/')) {
             return $path;
         }
 
