@@ -151,6 +151,11 @@ class FileManager
         return null === $path ? null : $this->relativizePath($path);
     }
 
+    public function getNamespacePrefixForClass(string $className): string
+    {
+        return $this->autoloaderUtil->getNamespacePrefixForClass($className);
+    }
+
     /**
      * Resolve '../' in paths (like real_path), but for non-existent files.
      *
