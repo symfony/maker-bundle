@@ -93,7 +93,7 @@ class MakerTestCase extends TestCase
 
         $makerProcess->run();
 
-        if (!$makerProcess->isSuccessful()) {
+        if (!$makerProcess->isSuccessful() && !$testDetails->isCommandAllowedToFail()) {
             throw new \Exception(sprintf('Running maker command failed: "%s" "%s"', $makerProcess->getOutput(), $makerProcess->getErrorOutput()));
         }
 

@@ -34,6 +34,8 @@ final class MakerTestDetails
 
     private $argumentsString = '';
 
+    private $commandAllowedToFail = false;
+
     /**
      * @param MakerInterface $maker
      * @param array          $inputs
@@ -153,6 +155,13 @@ final class MakerTestDetails
         return $this;
     }
 
+    public function setCommandAllowedToFail(bool $commandAllowedToFail): self
+    {
+        $this->commandAllowedToFail = $commandAllowedToFail;
+
+        return $this;
+    }
+
     public function getInputs(): array
     {
         return $this->inputs;
@@ -215,5 +224,10 @@ final class MakerTestDetails
     public function getArgumentsString(): string
     {
         return $this->argumentsString;
+    }
+
+    public function isCommandAllowedToFail(): bool
+    {
+        return $this->commandAllowedToFail;
     }
 }

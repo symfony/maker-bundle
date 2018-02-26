@@ -191,7 +191,7 @@ class FunctionalTest extends MakerTestCase
             ->updateSchemaAfterCommand()
         ];
 
-        yield 'entity_many_to_one_simple' => [MakerTestDetails::createTest(
+        yield 'entity_many_to_one_simple_with_inverse' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),
             [
                 // entity class name
@@ -474,6 +474,52 @@ class FunctionalTest extends MakerTestCase
                 "dir: '%kernel.project_dir%/config/doctrine'"
             )
             ->configureDatabase(false)
+        ];
+
+        yield 'entity_xml_mapping_error_existing' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                'User',
+            ])
+            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityXmlMappingError')
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                'type: annotation',
+                'type: xml'
+            )
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                "dir: '%kernel.project_dir%/src/Entity'",
+                "dir: '%kernel.project_dir%/config/doctrine'"
+            )
+            ->configureDatabase(false)
+            ->setCommandAllowedToFail(true)
+            ->assert(function(string $output, string $directory) {
+                $this->assertContains('Only annotation mapping is supported', $output);
+            })
+        ];
+
+        yield 'entity_xml_mapping_error_new_class' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                'UserAvatarPhoto',
+            ])
+            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityXmlMappingError')
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                'type: annotation',
+                'type: xml'
+            )
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                "dir: '%kernel.project_dir%/src/Entity'",
+                "dir: '%kernel.project_dir%/config/doctrine'"
+            )
+            ->configureDatabase(false)
+            ->setCommandAllowedToFail(true)
+            ->assert(function(string $output, string $directory) {
+                $this->assertContains('Only annotation mapping is supported', $output);
+            })
         ];
 
         yield 'entity_updating_overwrite' => [MakerTestDetails::createTest(

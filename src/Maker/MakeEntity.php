@@ -15,8 +15,11 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineMetadataFactory;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
@@ -122,7 +125,8 @@ final class MakeEntity extends AbstractMaker
             'Repository'
         );
 
-        if (!class_exists($entityClassDetails->getFullName())) {
+        $classExists = class_exists($entityClassDetails->getFullName());
+        if (!$classExists) {
             $entityPath = $generator->generateClass(
                 $entityClassDetails->getFullName(),
                 'doctrine/Entity.tpl.php',
@@ -143,21 +147,26 @@ final class MakeEntity extends AbstractMaker
             );
 
             $generator->writeChanges();
+        }
 
+        if (!$this->doesEntityUseAnnotationMapping($entityClassDetails->getFullName())) {
+            throw new RuntimeCommandException(sprintf('Only annotation mapping is supported by make:entity, but the <info>%s</info> class uses a different format. If you would like this command to generate the properties & getter/setter methods, add your mapping configuration, and then re-run this command with the <info>--regenerate</info> flag.', $entityClassDetails->getFullName()));
+        }
+
+        if ($classExists) {
+            $entityPath = $this->getPathOfClass($entityClassDetails->getFullName());
+            $io->text([
+                'Your entity already exists! So let\'s add some new fields!',
+            ]);
+        } else {
             $io->text([
                 '',
                 'Entity generated! Now let\'s add some fields!',
                 'You can always add more fields later manually or by re-running this command.',
             ]);
-        } else {
-            $entityPath = $this->getPathOfClass($entityClassDetails->getFullName());
-            $io->text([
-                'Your entity already exists! So let\'s add some new fields!',
-            ]);
         }
 
         $currentFields = $this->getPropertyNames($entityClassDetails->getFullName());
-
         $manipulator = $this->createClassManipulator($entityPath, $io, $overwrite);
 
         $isFirstField = true;
@@ -781,5 +790,24 @@ final class MakeEntity extends AbstractMaker
         return array_map(function (\ReflectionProperty $prop) {
             return $prop->getName();
         }, $reflClass->getProperties());
+    }
+
+    private function doesEntityUseAnnotationMapping(string $className): bool
+    {
+        $metadataFactory = new DoctrineMetadataFactory($this->registry);
+        if (!class_exists($className)) {
+            $otherClassMetadatas = $metadataFactory->getMetadataForNamespace(Str::getNamespace($className));
+
+            // if we have no metadata, we should assume this is the first class being mapped
+            if (empty($otherClassMetadatas)) {
+                return false;
+            }
+
+            $className = $otherClassMetadatas[0]->name;
+        }
+
+        $metadataFactory->getMappingDriverForClass($className);
+
+        return $metadataFactory instanceof AnnotationDriver;
     }
 }
