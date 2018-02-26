@@ -146,11 +146,14 @@ final class EntityRegenerator
 
     private function generateClass(ClassMetadata $metadata): string
     {
-        return $this->generator->generateClass(
+        $path = $this->generator->generateClass(
             $metadata->name,
             'Class.tpl.php',
             []
         );
+        $this->generator->writeChanges();
+
+        return $path;
     }
 
     private function createClassManipulator(string $classPath): ClassSourceManipulator
