@@ -806,8 +806,8 @@ final class MakeEntity extends AbstractMaker
             $className = $otherClassMetadatas[0]->name;
         }
 
-        $metadataFactory->getMappingDriverForClass($className);
+        $driver = $metadataFactory->getMappingDriverForClass($className);
 
-        return $metadataFactory instanceof AnnotationDriver;
+        return $driver instanceof AnnotationDriver;
     }
 }
