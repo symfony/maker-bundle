@@ -112,6 +112,8 @@ final class MakeEntity extends AbstractMaker
         // the regenerate option has entirely custom behavior
         if ($input->getOption('regenerate')) {
             $this->regenerateEntities($input->getArgument('name'), $overwrite, $generator);
+
+            return;
         }
 
         $entityClassDetails = $generator->createClassNameDetails(
