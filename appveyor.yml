@@ -30,7 +30,6 @@ install:
     - echo opcache.enable_cli=1 >> php.ini-max
     - echo extension=php_openssl.dll >> php.ini-max
     - echo extension=php_apcu.dll >> php.ini-max
-    - echo extension=php_pdo_sqlite.dll >> php.ini-max
     - echo apc.enable_cli=1 >> php.ini-max
     - echo extension=php_intl.dll >> php.ini-max
     - echo extension=php_mbstring.dll >> php.ini-max
