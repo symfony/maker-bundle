@@ -157,10 +157,7 @@ final class MakeEntity extends AbstractMaker
             ]);
         }
 
-        $reflClass = new \ReflectionClass($entityClassDetails->getFullName());
-        $currentFields = array_map(function (\ReflectionProperty $prop) {
-            return $prop->getName();
-        }, $reflClass->getProperties());
+        $currentFields = $this->getPropertyNames($entityClassDetails->getFullName());
 
         $manipulator = $this->createClassManipulator($entityPath, $io, $overwrite);
 
@@ -772,5 +769,18 @@ final class MakeEntity extends AbstractMaker
     {
         $regenerator = new EntityRegenerator($this->getRegistry(), $this->fileManager, $generator, $this->projectDirectory, $overwrite);
         $regenerator->regenerateEntities($classOrNamespace);
+    }
+
+    private function getPropertyNames(string $class): array
+    {
+        if (!class_exists($class)) {
+            return [];
+        }
+
+        $reflClass = new \ReflectionClass($class);
+
+        return array_map(function (\ReflectionProperty $prop) {
+            return $prop->getName();
+        }, $reflClass->getProperties());
     }
 }
