@@ -104,7 +104,10 @@ final class MakerTestDetails
 
         // this looks silly, but it's the only way to drop the database *for sure*,
         // as doctrine:database:drop will error if there is no database
-        $this->addPreMakeCommand('php bin/console doctrine:database:create --env=test --if-not-exists');
+        // also, skip for SQLITE, as it does not support --if-not-exists
+        if (0 !== strpos(getenv('TEST_DATABASE_DSN'), 'sqlite://')) {
+            $this->addPreMakeCommand('php bin/console doctrine:database:create --env=test --if-not-exists');
+        }
         $this->addPreMakeCommand('php bin/console doctrine:database:drop --env=test --force');
 
         $this->addPreMakeCommand('php bin/console doctrine:database:create --env=test');
