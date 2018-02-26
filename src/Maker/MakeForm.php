@@ -32,6 +32,7 @@ use Symfony\Component\Validator\Validation;
 final class MakeForm extends AbstractMaker
 {
     private $entityHelper;
+    private $boundEntityOrClass = true;
 
     public function __construct(DoctrineEntityHelper $entityHelper)
     {
@@ -57,8 +58,7 @@ final class MakeForm extends AbstractMaker
         if (null != $input->getArgument('name') && $this->entityHelper->isDoctrineConnected()) {
             $question = new Question('Enter the class or entity name that the new form will be bound to (empty for none)');
             $question->setAutocompleterValues($this->entityHelper->getEntitiesForAutocomplete());
-            //$entity = $io->choice("Enter the class or entity name that the new form will be bound to", $this->entityHelper->getEntitiesForAutocomplete(), 'none');
-            $entity = $io->askQuestion($question);
+            $this->boundEntityOrClass = $io->askQuestion($question);
         }
     }
 
@@ -70,25 +70,37 @@ final class MakeForm extends AbstractMaker
             'Type'
         );
 
-        $entityClassNameDetails = $generator->createClassNameDetails(
-            $formClassNameDetails->getRelativeNameWithoutSuffix(),
-            'Entity\\'
-        );
+        if (null === $this->boundEntityOrClass) {
 
-        $entityClassExists = class_exists($entityClassNameDetails->getFullName());
+            $generator->generateClass(
+                $formClassNameDetails->getFullName(),
+                'form/SimpleType.tpl.php',
+                [ ]
+            );
 
-        $formFields = $entityClassExists ? $this->entityHelper->getFormFieldsFromEntity($entityClassNameDetails->getFullName()) : ['field_name'];
+        } else {
 
-        $generator->generateClass(
-            $formClassNameDetails->getFullName(),
-            'form/Type.tpl.php',
-            [
-                'entity_class_exists' => $entityClassExists,
-                'entity_full_class_name' => $entityClassNameDetails->getFullName(),
-                'entity_class_name' => $entityClassNameDetails->getShortName(),
-                'form_fields' => $formFields,
-            ]
-        );
+            $entityClassNameDetails = $generator->createClassNameDetails(
+                true == $this->boundEntityOrClass ? $formClassNameDetails->getRelativeNameWithoutSuffix() : $this->boundEntityOrClass,
+                'Entity\\'
+            );
+
+            $entityClassExists = class_exists($entityClassNameDetails->getFullName());
+
+            $formFields = $entityClassExists ? $this->entityHelper->getFormFieldsFromEntity($entityClassNameDetails->getFullName()) : ['field_name'];
+
+            $generator->generateClass(
+                $formClassNameDetails->getFullName(),
+                'form/Type.tpl.php',
+                [
+                    'entity_class_exists' => $entityClassExists,
+                    'entity_full_class_name' => $entityClassNameDetails->getFullName(),
+                    'entity_class_name' => $entityClassNameDetails->getShortName(),
+                    'form_fields' => $formFields,
+                ]
+            );
+
+        }
 
         $generator->writeChanges();
 
