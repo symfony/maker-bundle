@@ -51,14 +51,24 @@ final class MakeForm extends AbstractMaker
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('The name of the form class (e.g. <fg=yellow>%sType</>)', Str::asClassName(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeForm.txt'))
         ;
+
+        $inputConf->setArgumentAsNonInteractive('name');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
-        if (null != $input->getArgument('name') && $this->entityHelper->isDoctrineConnected()) {
-            $question = new Question('Enter the class or entity name that the new form will be bound to (empty for none)');
-            $question->setAutocompleterValues($this->entityHelper->getEntitiesForAutocomplete());
-            $this->boundEntityOrClass = $io->askQuestion($question);
+        if (is_null($input->getArgument('name'))) {
+            $argument = $command->getDefinition()->getArgument('name');
+            $question = new Question($argument->getDescription());
+            $value = $io->askQuestion($question);
+
+            $input->setArgument('name', $value);
+
+            if ($this->entityHelper->isDoctrineConnected()) {
+                $question = new Question('Enter the class or entity name that the new form will be bound to (empty for none)');
+                $question->setAutocompleterValues($this->entityHelper->getEntitiesForAutocomplete());
+                $this->boundEntityOrClass = $io->askQuestion($question);
+            }
         }
     }
 
@@ -81,7 +91,7 @@ final class MakeForm extends AbstractMaker
         } else {
 
             $entityClassNameDetails = $generator->createClassNameDetails(
-                true == $this->boundEntityOrClass ? $formClassNameDetails->getRelativeNameWithoutSuffix() : $this->boundEntityOrClass,
+                true === $this->boundEntityOrClass ? $formClassNameDetails->getRelativeNameWithoutSuffix() : $this->boundEntityOrClass,
                 'Entity\\'
             );
 

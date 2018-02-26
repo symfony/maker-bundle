@@ -17,7 +17,6 @@ class <?= $class_name ?> extends AbstractType
 <?php foreach ($form_fields as $form_field): ?>
             ->add('<?= $form_field ?>')
 <?php endforeach; ?>
-
         ;
     }
 
