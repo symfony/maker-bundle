@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Filesystem\Filesystem;
@@ -69,7 +70,17 @@ class EntityRegeneratorTest extends TestCase
         $kernel->boot();
         $container = $kernel->getContainer();
 
-        $fileManager = new FileManager($fs, $tmpDir);
+        $autoloaderUtil = $this->createMock(AutoloaderUtil::class);
+        $autoloaderUtil->expects($this->any())
+            ->method('getPathForFutureClass')
+            ->willReturnCallback(function($className) use ($tmpDir) {
+                $shortClassName = str_replace('Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\\', '', $className);
+
+                // strip the App\, change \ to / and add .php
+                return $tmpDir.'/src/'.str_replace('\\', '/', $shortClassName).'.php';
+            });
+
+        $fileManager = new FileManager($fs, $autoloaderUtil, $tmpDir);
         $regenerator = new EntityRegenerator(
             $container->get('doctrine'),
             $fileManager,

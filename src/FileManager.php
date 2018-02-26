@@ -11,7 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
-use Composer\Autoload\ClassLoader;
+use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -25,15 +25,17 @@ use Symfony\Component\Finder\Finder;
 class FileManager
 {
     private $fs;
+    private $autoloaderUtil;
     private $rootDirectory;
     /** @var SymfonyStyle */
     private $io;
 
-    private static $classLoader;
-
-    public function __construct(Filesystem $fs, string $rootDirectory)
+    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory)
     {
+        // move FileManagerTest stuff
+        // update EntityRegeneratorTest to mock the autoloader
         $this->fs = $fs;
+        $this->autoloaderUtil = $autoloaderUtil;
         $this->rootDirectory = rtrim($this->realpath($this->normalizeSlashes($rootDirectory)), '/');
     }
 
@@ -106,60 +108,6 @@ class FileManager
         return is_dir($absolutePath) ? rtrim($relativePath, '/').'/' : $relativePath;
     }
 
-    /**
-     * Returns the relative path to where a new class should live.
-     *
-     * @param string $className
-     *
-     * @return null|string
-     *
-     * @throws \Exception
-     */
-    public function getPathForFutureClass(string $className)
-    {
-        // lookup is obviously modeled off of Composer's autoload logic
-        foreach ($this->getClassLoader()->getPrefixesPsr4() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
-                $path = $paths[0].'/'.str_replace('\\', '/', str_replace($prefix, '', $className)).'.php';
-
-                return $this->relativizePath($path);
-            }
-        }
-
-        foreach ($this->getClassLoader()->getPrefixes() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
-                $path = $paths[0].'/'.str_replace('\\', '/', $className).'.php';
-
-                return $this->relativizePath($path);
-            }
-        }
-
-        if ($this->getClassLoader()->getFallbackDirsPsr4()) {
-            $path = $this->getClassLoader()->getFallbackDirsPsr4()[0].'/'.str_replace('\\', '/', $className).'.php';
-
-            return $this->relativizePath($path);
-        }
-
-        if ($this->getClassLoader()->getFallbackDirs()) {
-            $path = $this->getClassLoader()->getFallbackDirs()[0].'/'.str_replace('\\', '/', $className).'.php';
-
-            return $this->relativizePath($path);
-        }
-
-        return null;
-    }
-
-    public function getNamespacePrefixForClass(string $className): string
-    {
-        foreach ($this->getClassLoader()->getPrefixesPsr4() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
-                return $prefix;
-            }
-        }
-
-        return '';
-    }
-
     public function getFileContents(string $path): string
     {
         if (!$this->fileExists($path)) {
@@ -182,21 +130,6 @@ class FileManager
         return 0 === strpos($path, $this->rootDirectory.'/vendor/');
     }
 
-    private function getClassLoader(): ClassLoader
-    {
-        if (null === self::$classLoader) {
-            $autoloadPath = $this->absolutizePath('vendor/autoload.php');
-
-            if (!file_exists($autoloadPath)) {
-                throw new \Exception(sprintf('Could not find the autoload file: "%s"', $autoloadPath));
-            }
-
-            self::$classLoader = require $autoloadPath;
-        }
-
-        return self::$classLoader;
-    }
-
     public function absolutizePath($path): string
     {
         if (0 === strpos($path, '/')) {
@@ -209,6 +142,13 @@ class FileManager
         }
 
         return sprintf('%s/%s', $this->rootDirectory, $path);
+    }
+
+    public function getRelativePathForFutureClass(string $className): ?string
+    {
+        $path = $this->autoloaderUtil->getPathForFutureClass($className);
+
+        return null === $path ? null : $this->relativizePath($path);
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Repository;
 
-use App\Entity\User;
+use Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
