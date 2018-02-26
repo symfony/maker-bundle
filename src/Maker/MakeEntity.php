@@ -122,38 +122,37 @@ final class MakeEntity extends AbstractMaker
             'Repository'
         );
 
-        $entityAlias = strtolower($entityClassDetails->getShortName()[0]);
-        $entityExists = class_exists($entityClassDetails->getFullName());
+        if (!class_exists($entityClassDetails->getFullName())) {
+            $entityPath = $generator->generateClass(
+                $entityClassDetails->getFullName(),
+                'doctrine/Entity.tpl.php',
+                [
+                    'repository_full_class_name' => $repositoryClassDetails->getFullName(),
+                ]
+            );
 
-        $generator->generateClass(
-            $entityClassDetails->getFullName(),
-            'doctrine/Entity.tpl.php',
-            [
-                'repository_full_class_name' => $repositoryClassDetails->getFullName(),
-            ]
-        );
+            $entityAlias = strtolower($entityClassDetails->getShortName()[0]);
+            $generator->generateClass(
+                $repositoryClassDetails->getFullName(),
+                'doctrine/Repository.tpl.php',
+                [
+                    'entity_full_class_name' => $entityClassDetails->getFullName(),
+                    'entity_class_name' => $entityClassDetails->getShortName(),
+                    'entity_alias' => $entityAlias,
+                ]
+            );
 
-        $entityPath = $generator->generateClass(
-            $repositoryClassDetails->getFullName(),
-            'doctrine/Repository.tpl.php',
-            [
-                'entity_full_class_name' => $entityClassDetails->getFullName(),
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'entity_alias' => $entityAlias,
-            ]
-        );
+            $generator->writeChanges();
 
-        $generator->writeChanges();
-
-        if ($entityExists) {
-            $io->text([
-                'Your entity already exists! So let\'s add some new fields!',
-            ]);
-        } else {
             $io->text([
                 '',
                 'Entity generated! Now let\'s add some fields!',
                 'You can always add more fields later manually or by re-running this command.',
+            ]);
+        } else {
+            $entityPath = $this->getPathOfClass($entityClassDetails->getFullName());
+            $io->text([
+                'Your entity already exists! So let\'s add some new fields!',
             ]);
         }
 
