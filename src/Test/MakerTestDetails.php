@@ -179,9 +179,7 @@ final class MakerTestDetails
     {
         // for cache purposes, only the dependencies are important
         // shortened to avoid long paths on Windows
-        $dirName = 'maker_'.substr(md5(serialize($this->getDependencies())), 0, 10);
-
-        return $dirName;
+        return 'maker_'.substr(md5(serialize($this->getDependencies())), 0, 10);
     }
 
     public function getPreMakeCommands(): array
