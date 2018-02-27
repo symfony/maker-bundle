@@ -50,4 +50,4 @@ install:
     - ./vendor/bin/simple-phpunit install
 
 test_script:
-    - ./vendor/bin/simple-phpunit
+    - ./vendor/bin/simple-phpunit --stop-on-error
