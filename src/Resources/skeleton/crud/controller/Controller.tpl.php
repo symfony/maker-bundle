@@ -4,21 +4,18 @@ namespace <?= $namespace; ?>;
 
 use <?= $entity_full_class_name; ?>;
 use <?= $form_full_class_name; ?>;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("<?= $route_path; ?>", name="<?= $route_name; ?>_")
+ * @Route("<?= $route_path; ?>")
  */
 class <?= $class_name ?> extends Controller
 {
     /**
-     * @Route("/", name="index")
-     *
-     * @return Response
+     * @Route("/", name="<?= $route_name; ?>_index", methods="GET"): Response
      */
     public function index()
     {
@@ -30,10 +27,9 @@ class <?= $class_name ?> extends Controller
     }
 
     /**
-     * @Route("/new", name="new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="<?= $route_name; ?>_new", methods="GET|POST")
      */
-    public function new(Request $request)
+    public function new(Request $request): Response
     {
         $<?= $entity_var_singular; ?> = new <?= $entity_class_name; ?>();
         $form = $this->createForm(<?= $form_class_name; ?>::class, $<?= $entity_var_singular; ?>);
@@ -44,7 +40,7 @@ class <?= $class_name ?> extends Controller
             $em->persist($<?= $entity_var_singular; ?>);
             $em->flush();
 
-            return $this->redirectToRoute('<?= $route_name; ?>_edit', ['<?= $entity_identifier; ?>' => $<?= $entity_var_singular; ?>->get<?= ucfirst($entity_identifier); ?>()]);
+            return $this->redirectToRoute('<?= $route_name; ?>_index');
         }
 
         return $this->render('<?= $route_name; ?>/new.html.twig', [
@@ -54,21 +50,17 @@ class <?= $class_name ?> extends Controller
     }
 
     /**
-     * @Route("/{<?= $entity_identifier; ?>}", name="show")
-     * @Method("GET")
+     * @Route("/{<?= $entity_identifier; ?>}", name="<?= $route_name; ?>_show", methods="GET")
      */
-    public function show(<?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
+    public function show(<?= $entity_class_name; ?> $<?= $entity_var_singular; ?>): Response
     {
-        return $this->render('<?= $route_name; ?>/show.html.twig', [
-            '<?= $entity_var_singular; ?>' => $<?= $entity_var_singular; ?>,
-        ]);
+        return $this->render('<?= $route_name; ?>/show.html.twig', ['<?= $entity_var_singular; ?>' => $<?= $entity_var_singular; ?>]);
     }
 
     /**
-     * @Route("/{<?= $entity_identifier; ?>}/edit", name="edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{<?= $entity_identifier; ?>}/edit", name="<?= $route_name; ?>_edit", methods="GET|POST")
      */
-    public function edit(Request $request, <?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
+    public function edit(Request $request, <?= $entity_class_name; ?> $<?= $entity_var_singular; ?>): Response
     {
         $form = $this->createForm(<?= $form_class_name; ?>::class, $<?= $entity_var_singular; ?>);
         $form->handleRequest($request);
@@ -86,10 +78,9 @@ class <?= $class_name ?> extends Controller
     }
 
     /**
-     * @Route("/{<?= $entity_identifier; ?>}", name="delete")
-     * @Method("DELETE")
+     * @Route("/{<?= $entity_identifier; ?>}", name="<?= $route_name; ?>_delete", methods="DELETE")
      */
-    public function delete(Request $request, <?= $entity_class_name; ?> $<?= $entity_var_singular; ?>)
+    public function delete(Request $request, <?= $entity_class_name; ?> $<?= $entity_var_singular; ?>): Response
     {
         if (!$this->isCsrfTokenValid('delete'.$<?= $entity_var_singular; ?>->get<?= ucfirst($entity_identifier); ?>(), $request->request->get('_token'))) {
             return $this->redirectToRoute('<?= $route_name; ?>_index');

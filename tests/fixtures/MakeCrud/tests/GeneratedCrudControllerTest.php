@@ -28,9 +28,14 @@ class GeneratedCrudControllerTest extends WebTestCase
         $crawler = $client->followRedirect();
         $this->assertTrue($client->getResponse()->isSuccessful());
         $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
+        $this->assertContains('SweetFood index', $client->getResponse()->getContent());
+        $this->assertContains('<td>Candy</td>', $client->getResponse()->getContent());
+
+        $editLink = $crawler->filter('a:contains("edit")')->eq(0)->link();
+        $crawler = $client->click($editLink);
+        $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
         $this->assertContains('Edit SweetFood', $client->getResponse()->getContent());
         $this->assertGreaterThan(0, $crawler->filter('input[type=text]')->count());
-        $this->assertEquals('Candy', $crawler->filter('input[type=text]')->attr('value'));
 
         $editForm = $crawler->selectButton('Edit')->form();
         $client->submit($editForm, ['sweet_food[title]' => 'Candy edited']);

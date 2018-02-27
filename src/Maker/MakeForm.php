@@ -57,14 +57,14 @@ final class MakeForm extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
-        if (is_null($input->getArgument('name'))) {
+        if (null === $input->getArgument('name')) {
             $argument = $command->getDefinition()->getArgument('name');
             $question = new Question($argument->getDescription());
             $value = $io->askQuestion($question);
 
             $input->setArgument('name', $value);
 
-            if ($this->entityHelper->isDoctrineConnected()) {
+            if ($this->entityHelper->isDoctrineInstalled()) {
                 $question = new Question('Enter the class or entity name that the new form will be bound to (empty for none)');
                 $question->setAutocompleterValues($this->entityHelper->getEntitiesForAutocomplete());
                 $this->boundEntityOrClass = $io->askQuestion($question);
@@ -81,15 +81,12 @@ final class MakeForm extends AbstractMaker
         );
 
         if (null === $this->boundEntityOrClass) {
-
             $generator->generateClass(
                 $formClassNameDetails->getFullName(),
                 'form/SimpleType.tpl.php',
-                [ ]
+                []
             );
-
         } else {
-
             $entityClassNameDetails = $generator->createClassNameDetails(
                 true === $this->boundEntityOrClass ? $formClassNameDetails->getRelativeNameWithoutSuffix() : $this->boundEntityOrClass,
                 'Entity\\'
@@ -109,7 +106,6 @@ final class MakeForm extends AbstractMaker
                     'form_fields' => $formFields,
                 ]
             );
-
         }
 
         $generator->writeChanges();

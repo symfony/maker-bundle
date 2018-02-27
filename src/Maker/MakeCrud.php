@@ -123,6 +123,7 @@ final class MakeCrud extends AbstractMaker
         $templates = [
             '_delete_form' => [
                 'route_name' => $routeName,
+                'entity_var_singular' => $entityVarSingular,
                 'entity_identifier' => $metadata->identifier[0],
             ],
             '_form' => [],

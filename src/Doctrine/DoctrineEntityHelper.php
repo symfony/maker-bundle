@@ -21,26 +21,21 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
  */
 final class DoctrineEntityHelper
 {
-    private $metadataFactory = null;
+    private $metadataFactory;
 
     public function __construct(ManagerRegistry $registry = null)
     {
-        if (null !== $registry) {
-            $this->metadataFactory = new DoctrineMetadataFactory($registry);
-        }
+        $this->metadataFactory = null !== $registry ? new DoctrineMetadataFactory($registry) : null;
     }
 
-    public function isDoctrineConnected(): bool
+    public function isDoctrineInstalled(): bool
     {
         return null !== $this->metadataFactory;
     }
 
-    /**
-     * @return array
-     */
     public function getEntitiesForAutocomplete(): array
     {
-        $entities = ['none'];
+        $entities = [];
         $allMetadata = $this->metadataFactory->getAllMetadata();
         /** @var ClassMetadataInfo $metadata */
         foreach ($allMetadata as $metadata) {

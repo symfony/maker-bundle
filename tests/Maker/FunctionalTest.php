@@ -177,11 +177,11 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeForm')
         ];
 
-        yield 'entity_form' => [MakerTestDetails::createTest(
+        yield 'form_with_entity' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeForm::class),
             [
                 // Entity name
-                'SourFood',
+                'SourFoodType',
                 'SourFood',
             ])
             ->addExtraDependencies('orm')
@@ -337,21 +337,9 @@ class FunctionalTest extends MakerTestCase
             ->assert(function(string $output, string $directory) {
                 $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
                 $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
-                $this->assertFileExists($directory.'/templates/sweet_food/_delete_form.html.twig');
-                $this->assertFileExists($directory.'/templates/sweet_food/_form.html.twig');
-                $this->assertFileExists($directory.'/templates/sweet_food/index.html.twig');
-                $this->assertFileExists($directory.'/templates/sweet_food/new.html.twig');
-                $this->assertFileExists($directory.'/templates/sweet_food/edit.html.twig');
-                $this->assertFileExists($directory.'/templates/sweet_food/show.html.twig');
 
                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
-                $this->assertContains('created: templates/sweet_food/_delete_form.html.twig', $output);
-                $this->assertContains('created: templates/sweet_food/_form.html.twig', $output);
-                $this->assertContains('created: templates/sweet_food/index.html.twig', $output);
-                $this->assertContains('created: templates/sweet_food/new.html.twig', $output);
-                $this->assertContains('created: templates/sweet_food/edit.html.twig', $output);
-                $this->assertContains('created: templates/sweet_food/show.html.twig', $output);
             })
         ];
 
@@ -379,21 +367,9 @@ class FunctionalTest extends MakerTestCase
             ->assert(function(string $output, string $directory) {
                 $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
                 $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
-                $this->assertFileExists($directory.'/templates/sweet_food/_delete_form.html.twig');
-                $this->assertFileExists($directory.'/templates/sweet_food/_form.html.twig');
-                $this->assertFileExists($directory.'/templates/sweet_food/index.html.twig');
-                $this->assertFileExists($directory.'/templates/sweet_food/new.html.twig');
-                $this->assertFileExists($directory.'/templates/sweet_food/edit.html.twig');
-                $this->assertFileExists($directory.'/templates/sweet_food/show.html.twig');
 
                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
-                $this->assertContains('created: templates/sweet_food/_delete_form.html.twig', $output);
-                $this->assertContains('created: templates/sweet_food/_form.html.twig', $output);
-                $this->assertContains('created: templates/sweet_food/index.html.twig', $output);
-                $this->assertContains('created: templates/sweet_food/new.html.twig', $output);
-                $this->assertContains('created: templates/sweet_food/edit.html.twig', $output);
-                $this->assertContains('created: templates/sweet_food/show.html.twig', $output);
             })
         ];
     }
