@@ -119,9 +119,11 @@ final class MakerTestDetails
 
     public function getUniqueCacheDirectoryName(): string
     {
-        // create a unique directory name for this project
-        // but one that will be the same each time the tests are run
-        return (new \ReflectionObject($this->maker))->getShortName().'_'.($this->fixtureFilesPath ? basename($this->fixtureFilesPath) : 'default').'_'.md5(serialize($this->extraDependencies));
+        // for cache purposes, only the dependencies are important
+        // shortened to avoid long paths on Windows
+        $dirName = 'maker_'.substr(md5(serialize($this->getDependencies())), 0, 10);
+
+        return $dirName;
     }
 
     public function getPreMakeCommands(): array
