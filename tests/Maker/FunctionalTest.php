@@ -34,9 +34,6 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\RouteCollectionBuilder;
 
-/**
- * @group functional
- */
 class FunctionalTest extends MakerTestCase
 {
     /**
@@ -45,10 +42,23 @@ class FunctionalTest extends MakerTestCase
     private $kernel;
 
     /**
+     * @group functional_group1
      * @dataProvider getCommandTests
      */
     public function testCommands(MakerTestDetails $makerTestDetails)
     {
+        $this->executeMakerCommand($makerTestDetails);
+    }
+
+    /**
+     * @group functional_group2
+     * @dataProvider getCommandEntityTests
+     */
+    public function testEntityCommands(MakerTestDetails $makerTestDetails)
+    {
+        // entity tests are split into a different method so we can batch on appveyor
+        // this solves a weird issue where phpunit would die while running the tests
+
         $this->executeMakerCommand($makerTestDetails);
     }
 
@@ -138,6 +148,144 @@ class FunctionalTest extends MakerTestCase
             })
         ];
 
+        yield 'fixtures' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeFixtures::class),
+            [
+                'AppFixtures'
+            ])
+            ->assert(function(string $output, string $directory) {
+                $this->assertContains('created: src/DataFixtures/AppFixtures.php', $output);
+            })
+        ];
+
+        yield 'form' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeForm::class),
+            [
+                // form name
+                'FooBar',
+            ])
+        ];
+
+        yield 'functional' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeFunctionalTest::class),
+            [
+                // functional test class name
+                'FooBar',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
+        ];
+
+        yield 'subscriber' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeSubscriber::class),
+            [
+                // subscriber name
+                'FooBar',
+                // event name
+                'kernel.request',
+            ])
+        ];
+
+        yield 'subscriber_unknown_event_class' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeSubscriber::class),
+            [
+                // subscriber name
+                'FooBar',
+                // event name
+                'foo.unknown_event',
+            ])
+        ];
+
+        yield 'serializer_encoder' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeSerializerEncoder::class),
+            [
+                // encoder class name
+                'FooBarEncoder',
+                // encoder format
+                'foobar',
+            ])
+        ];
+
+        yield 'twig_extension' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeTwigExtension::class),
+            [
+                // extension class name
+                'FooBar',
+            ])
+        ];
+
+        yield 'unit_test' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeUnitTest::class),
+            [
+                // class name
+                'FooBar',
+            ])
+        ];
+
+        yield 'validator' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeValidator::class),
+            [
+                // validator name
+                'FooBar',
+            ])
+        ];
+
+        yield 'voter' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeVoter::class),
+            [
+                // voter class name
+                'FooBar',
+            ])
+        ];
+
+        yield 'auth_empty' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeAuthenticator::class),
+            [
+                // class name
+                'AppCustomAuthenticator',
+            ])
+        ];
+
+        yield 'migration_with_changes' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeMigration::class),
+            [/* no input */])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
+            ->configureDatabase(false)
+            // doctrine-migrations-bundle only requires doctrine-bundle, which
+            // only requires doctrine/dbal. But we're testing with the ORM,
+            // so let's install it
+            ->addExtraDependencies('doctrine/orm')
+            ->assert(function(string $output, string $directory) {
+                $this->assertContains('Success', $output);
+
+                $finder = new Finder();
+                $finder->in($directory.'/src/Migrations')
+                    ->name('*.php');
+                $this->assertCount(1, $finder);
+
+                // see that the exact filename is in the output
+                $iterator = $finder->getIterator();
+                $iterator->rewind();
+                $this->assertContains(sprintf('"src/Migrations/%s"', $iterator->current()->getFilename()), $output);
+            })
+        ];
+
+        yield 'migration_no_changes' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeMigration::class),
+            [/* no input */])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
+            ->configureDatabase()
+            // sync the database, so no changes are needed
+            ->addExtraDependencies('doctrine/orm')
+            ->assert(function(string $output, string $directory) {
+                $this->assertNotContains('Success', $output);
+
+                $this->assertContains('No database changes were detected', $output);
+            })
+        ];
+    }
+
+    public function getCommandEntityTests()
+    {
         yield 'entity_new' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),
             [
@@ -540,141 +688,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setArgumentsString('--overwrite')
             ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityOverwrite')
-        ];
-
-        yield 'fixtures' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeFixtures::class),
-            [
-                'AppFixtures'
-            ])
-            ->assert(function(string $output, string $directory) {
-                $this->assertContains('created: src/DataFixtures/AppFixtures.php', $output);
-            })
-        ];
-
-        yield 'form' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeForm::class),
-            [
-                // form name
-                'FooBar',
-            ])
-        ];
-
-        yield 'functional' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeFunctionalTest::class),
-            [
-                // functional test class name
-                'FooBar',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
-        ];
-
-        yield 'subscriber' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeSubscriber::class),
-            [
-                // subscriber name
-                'FooBar',
-                // event name
-                'kernel.request',
-            ])
-        ];
-
-        yield 'subscriber_unknown_event_class' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeSubscriber::class),
-            [
-                // subscriber name
-                'FooBar',
-                // event name
-                'foo.unknown_event',
-            ])
-        ];
-
-        yield 'serializer_encoder' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeSerializerEncoder::class),
-            [
-                // encoder class name
-                'FooBarEncoder',
-                // encoder format
-                'foobar',
-            ])
-        ];
-
-        yield 'twig_extension' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeTwigExtension::class),
-            [
-                // extension class name
-                'FooBar',
-            ])
-        ];
-
-        yield 'unit_test' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeUnitTest::class),
-            [
-                // class name
-                'FooBar',
-            ])
-        ];
-
-        yield 'validator' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeValidator::class),
-            [
-                // validator name
-                'FooBar',
-            ])
-        ];
-
-        yield 'voter' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeVoter::class),
-            [
-                // voter class name
-                'FooBar',
-            ])
-        ];
-
-        yield 'auth_empty' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeAuthenticator::class),
-            [
-                // class name
-                'AppCustomAuthenticator',
-            ])
-        ];
-
-        yield 'migration_with_changes' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeMigration::class),
-            [/* no input */])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
-            ->configureDatabase(false)
-            // doctrine-migrations-bundle only requires doctrine-bundle, which
-            // only requires doctrine/dbal. But we're testing with the ORM,
-            // so let's install it
-            ->addExtraDependencies('doctrine/orm')
-            ->assert(function(string $output, string $directory) {
-                $this->assertContains('Success', $output);
-
-                $finder = new Finder();
-                $finder->in($directory.'/src/Migrations')
-                    ->name('*.php');
-                $this->assertCount(1, $finder);
-
-                // see that the exact filename is in the output
-                $iterator = $finder->getIterator();
-                $iterator->rewind();
-                $this->assertContains(sprintf('"src/Migrations/%s"', $iterator->current()->getFilename()), $output);
-            })
-        ];
-
-        yield 'migration_no_changes' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeMigration::class),
-            [/* no input */])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
-            ->configureDatabase()
-            // sync the database, so no changes are needed
-            ->addExtraDependencies('doctrine/orm')
-            ->assert(function(string $output, string $directory) {
-                $this->assertNotContains('Success', $output);
-
-                $this->assertContains('No database changes were detected', $output);
-            })
         ];
     }
 
