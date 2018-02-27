@@ -34,6 +34,9 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\RouteCollectionBuilder;
 
+/**
+ * @group functional
+ */
 class FunctionalTest extends MakerTestCase
 {
     /**

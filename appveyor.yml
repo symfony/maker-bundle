@@ -50,4 +50,5 @@ install:
     - ./vendor/bin/simple-phpunit install
 
 test_script:
-    - ./vendor/bin/simple-phpunit --stop-on-error
+    - ./vendor/bin/simple-phpunit --group=functional --stop-on-error
+    - ./vendor/bin/simple-phpunit --exclude-group=functional --stop-on-error
