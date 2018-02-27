@@ -46,7 +46,7 @@ class AutoloaderUtilTest extends MakerTestCase
         foreach ($this->getPathForFutureClassTests() as $className => $expectedPath) {
             $this->assertSame(
                 // the paths will start in vendor/composer and be relative
-                $rootDir.'/vendor/composer/../../'.$expectedPath,
+                str_replace('\\', '/', $rootDir.'/vendor/composer/../../'.$expectedPath),
                 // normalize slashes for Windows comparison
                 str_replace('\\', '/', $autoloaderUtil->getPathForFutureClass($className)),
                 sprintf('class "%s" should have been in path "%s"', $className, $expectedPath)
