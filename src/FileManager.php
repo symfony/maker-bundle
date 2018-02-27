@@ -127,7 +127,7 @@ class FileManager
 
     public function isPathInVendor(string $path): bool
     {
-        return 0 === strpos($path, $this->rootDirectory.'/vendor/');
+        return 0 === strpos($this->normalizeSlashes($path), $this->normalizeSlashes($this->rootDirectory.'/vendor/'));
     }
 
     public function absolutizePath($path): string

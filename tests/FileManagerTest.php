@@ -87,4 +87,46 @@ class FileManagerTest extends TestCase
             'D:/foo/bar',
         ];
     }
+
+    /**
+     * @dataProvider getIsPathInVendorTests
+     */
+    public function testIsPathInVendor(string $rootDir, string $path, bool $expectedIsInVendor)
+    {
+        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir);
+        $this->assertSame($expectedIsInVendor, $fileManager->isPathInVendor($path));
+    }
+
+    public function getIsPathInVendorTests()
+    {
+        yield 'not_in_vendor' => [
+            '/home/project/',
+            '/home/project/foo/bar',
+            false,
+        ];
+
+        yield 'in_vendor' => [
+            '/home/project/',
+            '/home/project/vendor/foo',
+            true,
+        ];
+
+        yield 'not_in_this_vendor' => [
+            '/home/project/',
+            '/other/path/vendor/foo',
+            false,
+        ];
+
+        yield 'windows_not_in_vendor' => [
+            'D:\path\to\project',
+            'D:\path\to\project\src\foo',
+            false,
+        ];
+
+        yield 'windows_in_vendor' => [
+            'D:\path\to\project',
+            'D:\path\to\project\vendor\foo',
+            true,
+        ];
+    }
 }
