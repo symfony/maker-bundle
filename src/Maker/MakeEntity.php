@@ -351,7 +351,7 @@ final class MakeEntity extends AbstractMaker
         $data = ['fieldName' => $fieldName, 'type' => $type];
         if ('string' == $type) {
             // default to 255, avoid the question
-            $data['length'] = 255;
+            $data['length'] = $io->ask('Field length', 255, [Validator::class, 'validateLength']);;
         } elseif ('decimal' === $type) {
             // 10 is the default value given in \Doctrine\DBAL\Schema\Column::$_precision
             $data['precision'] = $io->ask('Precision (total number of digits stored: 100.00 would be 5)', 10, [Validator::class, 'validatePrecision']);

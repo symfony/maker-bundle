@@ -307,6 +307,7 @@ class FunctionalTest extends MakerTestCase
                 // add not additional fields
                 'name',
                 'string',
+                '', // length (default 255)
                 // nullable
                 'y',
                 'createdAt',
@@ -332,6 +333,7 @@ class FunctionalTest extends MakerTestCase
                 // add additional fields
                 'lastName',
                 'string',
+                '', // length (default 255)
                 // nullable
                 'y',
                 // finish adding fields
@@ -681,6 +683,7 @@ class FunctionalTest extends MakerTestCase
                 // field name
                 'firstName',
                 'string',
+                '', // length (default 255)
                 // nullable
                 '',
                 // finish adding fields
