@@ -16,8 +16,15 @@ namespace Symfony\Bundle\MakerBundle;
  *
  * @internal
  */
-class GeneratorHelper
+class GeneratorTwigHelper
 {
+    private $baseLayoutExists;
+
+    public function __construct(FileManager $fileManager)
+    {
+        $this->baseLayoutExists = $fileManager->fileExists('templates/base.html.twig');
+    }
+
     public function getEntityFieldPrintCode($entity, $field): string
     {
         $printCode = $entity.'.'.$field['fieldName'];
@@ -37,9 +44,9 @@ class GeneratorHelper
         return $printCode;
     }
 
-    public function getHead($baseLayoutExists, $title): string
+    public function getHeadPrintCode($title): string
     {
-        if ($baseLayoutExists) {
+        if ($this->baseLayoutExists) {
             return <<<TWIG
 {% extends 'base.html.twig' %}
 

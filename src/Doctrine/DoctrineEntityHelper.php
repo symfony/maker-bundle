@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
@@ -39,7 +40,8 @@ final class DoctrineEntityHelper
         $allMetadata = $this->metadataFactory->getAllMetadata();
         /** @var ClassMetadataInfo $metadata */
         foreach ($allMetadata as $metadata) {
-            $entities[] = preg_replace('#^[^\\\\]*\\\\Entity\\\\(.*)#', '$1', $metadata->name);
+            $entityClassDetails = new ClassNameDetails($metadata->name, 'App\\Entity');
+            $entities[] = $entityClassDetails->getRelativeName();
         }
 
         return $entities;
