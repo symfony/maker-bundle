@@ -142,7 +142,8 @@ class MakerTestCase extends TestCase
                 self::$currentRootDir
             );
             $process->run();
-            $this->assertTrue($process->isSuccessful(), "Error while running the PHPUnit tests *in* the project: \n\n".$process->getOutput());
+
+            $this->assertTrue($process->isSuccessful(), sprintf("Error while running the PHPUnit tests *in* the project: \n\n %s \n\n Command Output: %s", $process->getOutput(), $makerProcess->getOutput()));
         }
 
         if (null === $testDetails->getAssert()) {

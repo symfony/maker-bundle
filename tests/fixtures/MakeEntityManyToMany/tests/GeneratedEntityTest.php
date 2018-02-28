@@ -51,7 +51,6 @@ class GeneratedEntityTest extends KernelTestCase
         // remove some!
         $user->removeCourse($course3);
         $course2->removeStudent($user);
-        var_dump(count($user->getCourses()));
         $em->flush();
         $em->refresh($user);
         $em->refresh($course2);

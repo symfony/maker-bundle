@@ -629,7 +629,9 @@ final class ClassSourceManipulator
 
         $traverser = new NodeTraverser();
         $traverser->addVisitor(new NodeVisitor\CloningVisitor());
-        $traverser->addVisitor(new NodeVisitor\NameResolver());
+        $traverser->addVisitor(new NodeVisitor\NameResolver(null, [
+            'replaceNodes' => false,
+        ]));
         $this->newStmts = $traverser->traverse($this->oldStmts);
     }
 
