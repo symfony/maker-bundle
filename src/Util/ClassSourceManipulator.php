@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Util;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use PhpParser\BuilderHelpers;
 use PhpParser\Lexer;
 use PhpParser\Node;
 use PhpParser\Parser;
@@ -37,8 +38,9 @@ final class ClassSourceManipulator
     const CONTEXT_CLASS = 'class';
     const CONTEXT_CLASS_METHOD = 'class_method';
 
-    private $overwrite = false;
-    private $useAnnotations = true;
+    private $overwrite;
+    private $useAnnotations;
+    private $fluentMutators;
     private $parser;
     private $lexer;
     private $printer;
@@ -52,10 +54,11 @@ final class ClassSourceManipulator
 
     private $pendingComments = [];
 
-    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true)
+    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true)
     {
         $this->overwrite = $overwrite;
         $this->useAnnotations = $useAnnotations;
+        $this->fluentMutators = $fluentMutators;
         $this->lexer = new Lexer\Emulative([
             'usedAttributes' => [
                 'comments',
@@ -162,7 +165,9 @@ final class ClassSourceManipulator
 
     private function addSetter(string $propertyName, ?string $type, bool $isNullable, array $commentLines = [])
     {
-        $this->addMethod($this->createSetterNodeBuilder($propertyName, $type, $isNullable, $commentLines)->getNode());
+        $builder = $this->createSetterNodeBuilder($propertyName, $type, $isNullable, $commentLines);
+        $this->makeMethodFluent($builder);
+        $this->addMethod($builder->getNode());
     }
 
     private function createSetterNodeBuilder(string $propertyName, ?string $type, bool $isNullable, array $commentLines = [])
@@ -302,6 +307,7 @@ final class ClassSourceManipulator
             $this->addNodesToSetOtherSideOfOneToOne($relation, $setterNodeBuilder);
         }
 
+        $this->makeMethodFluent($setterNodeBuilder);
         $this->addMethod($setterNodeBuilder->getNode());
     }
 
@@ -368,12 +374,6 @@ final class ClassSourceManipulator
 
         $argName = Str::pluralCamelCaseToSingular($relation->getPropertyName());
 
-        $containsMethodCallNode = new Node\Expr\MethodCall(
-            new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $relation->getPropertyName()),
-            'contains',
-            [new Node\Expr\Variable($argName)]
-        );
-
         // adder method
         $adderNodeBuilder = (new Builder\Method($relation->getAdderMethodName()))->makePublic();
 
@@ -381,33 +381,39 @@ final class ClassSourceManipulator
         $paramBuilder->setTypeHint($typeHint);
         $adderNodeBuilder->addParam($paramBuilder->getNode());
 
-        // add if check to see if item already exists
-        $ifStmt = new Node\Stmt\If_($containsMethodCallNode);
-        $ifStmt->stmts = [new Node\Stmt\Return_(null)];
-        $adderNodeBuilder->addStmt($ifStmt);
-        $adderNodeBuilder->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD));
+        //if (!$this->avatars->contains($avatar))
+        $containsMethodCallNode = new Node\Expr\MethodCall(
+            new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $relation->getPropertyName()),
+            'contains',
+            [new Node\Expr\Variable($argName)]
+        );
+        $ifNotContainsStmt = new Node\Stmt\If_(
+            new Node\Expr\BooleanNot($containsMethodCallNode)
+        );
+        $adderNodeBuilder->addStmt($ifNotContainsStmt);
 
         // append the item
-        $adderNodeBuilder->addStmt(
-            new Node\Stmt\Expression(new Node\Expr\Assign(
+        $ifNotContainsStmt->stmts[] = new Node\Stmt\Expression(
+            new Node\Expr\Assign(
                 new Node\Expr\ArrayDimFetch(
                     new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $relation->getPropertyName())
                 ),
                 new Node\Expr\Variable($argName)
             ))
-        );
+        ;
 
         // set the owning side of the relationship
         if (!$relation->isOwning()) {
-            $adderNodeBuilder->addStmt(
-                new Node\Stmt\Expression(new Node\Expr\MethodCall(
+            $ifNotContainsStmt->stmts[] = new Node\Stmt\Expression(
+                new Node\Expr\MethodCall(
                     new Node\Expr\Variable($argName),
                     $relation->getTargetSetterMethodName(),
                     [new Node\Expr\Variable('this')]
-                ))
+                )
             );
         }
 
+        $this->makeMethodFluent($adderNodeBuilder);
         $this->addMethod($adderNodeBuilder->getNode());
 
         /*
@@ -419,20 +425,17 @@ final class ClassSourceManipulator
         $paramBuilder->setTypeHint($typeHint);
         $removerNodeBuilder->addParam($paramBuilder->getNode());
 
-        // add if check to see if item already exists
-        $ifStmt = new Node\Stmt\If_(new Node\Expr\BooleanNot($containsMethodCallNode));
-        $ifStmt->stmts = [new Node\Stmt\Return_(null)];
-        $removerNodeBuilder->addStmt($ifStmt);
-        $removerNodeBuilder->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD));
+        // add if check to see if item actually exists
+        //if ($this->avatars->contains($avatar))
+        $ifContainsStmt = new Node\Stmt\If_($containsMethodCallNode);
+        $removerNodeBuilder->addStmt($ifContainsStmt);
 
         // call removeElement
-        $removerNodeBuilder->addStmt(
-            new Node\Expr\MethodCall(
-                new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $relation->getPropertyName()),
-                'removeElement',
-                [new Node\Expr\Variable($argName)]
-            )
-        );
+        $ifContainsStmt->stmts[] = BuilderHelpers::normalizeStmt(new Node\Expr\MethodCall(
+            new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $relation->getPropertyName()),
+            'removeElement',
+            [new Node\Expr\Variable($argName)]
+        ));
 
         // set the owning side of the relationship
         if (!$relation->isOwning()) {
@@ -445,10 +448,10 @@ final class ClassSourceManipulator
                  * }
                  */
 
-                $removerNodeBuilder->addStmt($this->createSingleLineCommentNode(
+                $ifContainsStmt->stmts[] = $this->createSingleLineCommentNode(
                     'set the owning side to null (unless already changed)',
                     self::CONTEXT_CLASS_METHOD
-                ));
+                );
 
                 // if ($student->getCourse() === $this) {
                 $ifNode = new Node\Stmt\If_(new Node\Expr\BinaryOp\Identical(
@@ -468,21 +471,20 @@ final class ClassSourceManipulator
                     )),
                 ];
 
-                $removerNodeBuilder->addStmt($ifNode);
+                $ifContainsStmt->stmts[] = $ifNode;
             } elseif ($relation instanceof RelationManyToMany) {
                 // ManyToMany: $student->removeCourse($this);
-                $removerNodeBuilder->addStmt(
-                    new Node\Stmt\Expression(new Node\Expr\MethodCall(
-                        new Node\Expr\Variable($argName),
-                        $relation->getTargetRemoverMethodName(),
-                        [new Node\Expr\Variable('this')]
-                    ))
-                );
+                $ifContainsStmt->stmts[] = new Node\Stmt\Expression(new Node\Expr\MethodCall(
+                    new Node\Expr\Variable($argName),
+                    $relation->getTargetRemoverMethodName(),
+                    [new Node\Expr\Variable('this')]
+                ));
             } else {
                 throw new \Exception('Unknown relation type');
             }
         }
 
+        $this->makeMethodFluent($removerNodeBuilder);
         $this->addMethod($removerNodeBuilder->getNode());
     }
 
@@ -710,7 +712,7 @@ final class ClassSourceManipulator
                 // just not needed yet
                 throw new \Exception('not supported');
             case self::CONTEXT_CLASS_METHOD:
-                return new Node\Expr\Variable('__COMMENT__VAR_'.(count($this->pendingComments) - 1));
+                return BuilderHelpers::normalizeStmt(new Node\Expr\Variable(sprintf('__COMMENT__VAR_%d', (count($this->pendingComments) - 1))));
             default:
                 throw new \Exception('Unknown context: '.$context);
         }
@@ -770,6 +772,19 @@ final class ClassSourceManipulator
         }
 
         $this->updateSourceCodeFromNewStmts();
+    }
+
+    private function makeMethodFluent(Builder\Method $methodBuilder)
+    {
+        if (!$this->fluentMutators) {
+            return;
+        }
+
+        $methodBuilder
+            ->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD))
+            ->addStmt(new Node\Stmt\Return_(new Node\Expr\Variable('this')))
+        ;
+        $methodBuilder->setReturnType('self');
     }
 
     private function getEntityTypeHint($doctrineType)

@@ -31,7 +31,7 @@ class UserProfile
         return $this->user;
     }
 
-    public function setUser(?User $user)
+    public function setUser(?User $user): self
     {
         $this->user = $user;
 
@@ -40,6 +40,8 @@ class UserProfile
         if ($newUserProfile !== $user->getUserProfile()) {
             $user->setUserProfile($newUserProfile);
         }
+
+        return $this;
     }
 
     // add your own fields

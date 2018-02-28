@@ -34,9 +34,11 @@ class User
         return $this->category;
     }
 
-    public function setCategory(?\App\OtherEntity\Category $category)
+    public function setCategory(?\App\OtherEntity\Category $category): self
     {
         $this->category = $category;
+
+        return $this;
     }
 
     // add your own fields

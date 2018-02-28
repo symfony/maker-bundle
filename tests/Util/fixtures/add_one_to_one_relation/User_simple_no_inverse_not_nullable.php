@@ -32,9 +32,11 @@ class User
         return $this->userProfile;
     }
 
-    public function setUserProfile(UserProfile $userProfile)
+    public function setUserProfile(UserProfile $userProfile): self
     {
         $this->userProfile = $userProfile;
+
+        return $this;
     }
 
     // add your own fields

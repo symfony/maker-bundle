@@ -37,9 +37,11 @@ class User
         return $this->firstName;
     }
 
-    public function setFirstName(string $firstName)
+    public function setFirstName(string $firstName): self
     {
         $this->firstName = $firstName;
+
+        return $this;
     }
 
     // add your own fields

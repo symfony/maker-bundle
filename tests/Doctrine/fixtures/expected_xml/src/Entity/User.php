@@ -30,27 +30,27 @@ class User
         return $this->avatars;
     }
 
-    public function addAvatar(UserAvatar $avatar)
-    {
-        if ($this->avatars->contains($avatar)) {
-            return;
-        }
-
-        $this->avatars[] = $avatar;
-        $avatar->setUser($this);
-    }
-
-    public function removeAvatar(UserAvatar $avatar)
+    public function addAvatar(UserAvatar $avatar): self
     {
         if (!$this->avatars->contains($avatar)) {
-            return;
+            $this->avatars[] = $avatar;
+            $avatar->setUser($this);
         }
 
-        $this->avatars->removeElement($avatar);
-        // set the owning side to null (unless already changed)
-        if ($avatar->getUser() === $this) {
-            $avatar->setUser(null);
+        return $this;
+    }
+
+    public function removeAvatar(UserAvatar $avatar): self
+    {
+        if ($this->avatars->contains($avatar)) {
+            $this->avatars->removeElement($avatar);
+            // set the owning side to null (unless already changed)
+            if ($avatar->getUser() === $this) {
+                $avatar->setUser(null);
+            }
         }
+
+        return $this;
     }
 
     // add your own fields

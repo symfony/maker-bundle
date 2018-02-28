@@ -32,9 +32,11 @@ class User
         return $this->category;
     }
 
-    public function setCategory(?Category $category)
+    public function setCategory(?Category $category): self
     {
         $this->category = $category;
+
+        return $this;
     }
 
     // add your own fields

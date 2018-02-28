@@ -63,27 +63,27 @@ class User
         return $this->avatars;
     }
 
-    public function addAvatar(UserAvatar $avatar)
-    {
-        if ($this->avatars->contains($avatar)) {
-            return;
-        }
-
-        $this->avatars[] = $avatar;
-        $avatar->setUser($this);
-    }
-
-    public function removeAvatar(UserAvatar $avatar)
+    public function addAvatar(UserAvatar $avatar): self
     {
         if (!$this->avatars->contains($avatar)) {
-            return;
+            $this->avatars[] = $avatar;
+            $avatar->setUser($this);
         }
 
-        $this->avatars->removeElement($avatar);
-        // set the owning side to null (unless already changed)
-        if ($avatar->getUser() === $this) {
-            $avatar->setUser(null);
+        return $this;
+    }
+
+    public function removeAvatar(UserAvatar $avatar): self
+    {
+        if ($this->avatars->contains($avatar)) {
+            $this->avatars->removeElement($avatar);
+            // set the owning side to null (unless already changed)
+            if ($avatar->getUser() === $this) {
+                $avatar->setUser(null);
+            }
         }
+
+        return $this;
     }
 
     public function getUserProfile(): ?UserProfile
@@ -99,22 +99,22 @@ class User
         return $this->tags;
     }
 
-    public function addTag(Tag $tag)
-    {
-        if ($this->tags->contains($tag)) {
-            return;
-        }
-
-        $this->tags[] = $tag;
-    }
-
-    public function removeTag(Tag $tag)
+    public function addTag(Tag $tag): self
     {
         if (!$this->tags->contains($tag)) {
-            return;
+            $this->tags[] = $tag;
         }
 
-        $this->tags->removeElement($tag);
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): self
+    {
+        if ($this->tags->contains($tag)) {
+            $this->tags->removeElement($tag);
+        }
+
+        return $this;
     }
 
     // add your own fields

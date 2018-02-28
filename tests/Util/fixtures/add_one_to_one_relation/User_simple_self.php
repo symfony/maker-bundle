@@ -31,9 +31,11 @@ class User
         return $this->embeddedUser;
     }
 
-    public function setEmbeddedUser(?self $embeddedUser)
+    public function setEmbeddedUser(?self $embeddedUser): self
     {
         $this->embeddedUser = $embeddedUser;
+
+        return $this;
     }
 
     // add your own fields

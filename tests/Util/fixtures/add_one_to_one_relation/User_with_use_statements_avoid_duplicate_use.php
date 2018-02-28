@@ -34,9 +34,11 @@ class User
         return $this->userProfile;
     }
 
-    public function setUserProfile(?\App\OtherEntity\UserProfile $userProfile)
+    public function setUserProfile(?\App\OtherEntity\UserProfile $userProfile): self
     {
         $this->userProfile = $userProfile;
+
+        return $this;
     }
 
     // add your own fields

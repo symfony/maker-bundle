@@ -19,8 +19,10 @@ class User
      * @param string $fooProp
      * @internal
      */
-    public function setFooProp(?string $fooProp)
+    public function setFooProp(?string $fooProp): self
     {
         $this->fooProp = $fooProp;
+
+        return $this;
     }
 }

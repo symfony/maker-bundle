@@ -41,22 +41,22 @@ class User
         return $this->recipes;
     }
 
-    public function addRecipe(Recipe $recipe)
-    {
-        if ($this->recipes->contains($recipe)) {
-            return;
-        }
-
-        $this->recipes[] = $recipe;
-    }
-
-    public function removeRecipe(Recipe $recipe)
+    public function addRecipe(Recipe $recipe): self
     {
         if (!$this->recipes->contains($recipe)) {
-            return;
+            $this->recipes[] = $recipe;
         }
 
-        $this->recipes->removeElement($recipe);
+        return $this;
+    }
+
+    public function removeRecipe(Recipe $recipe): self
+    {
+        if ($this->recipes->contains($recipe)) {
+            $this->recipes->removeElement($recipe);
+        }
+
+        return $this;
     }
 
     // add your own fields
