@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by stof at 2018-03-01T16:52:11Z
+
+This example in the readme assumes that this is used in a Flex project (flex will make `maker` work)
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-03-01T17:35:05Z
+
+Hmm. Stof is correct. The question is, should we use the longer, but more universal package name?
+
+---------------------------------------------------------------------------
+
+by tavy315 at 2018-03-01T22:05:10Z
+
+Documentation for all the rest of the bundles use the longer package name (ex: https://symfony.com/doc/current/bundles/DoctrineBundle/installation.html, https://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/index.html, https://symfony.com/doc/current/bundles/SensioGeneratorBundle/index.html etc).
