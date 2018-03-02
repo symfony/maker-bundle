@@ -1,0 +1,21 @@
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2018-02-27T16:04:06Z
+
+For what it's worth, in the Symfony Docs we don't add parenthesis when there's no arguments. Example: https://symfony.com/doc/current/doctrine.html#creating-an-entity-class
+
+Maybe we must change Symfony Docs. I'm not sure.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2018-02-27T16:39:45Z
+
+> Maybe we must change Symfony Docs. I'm not sure.
+
+I think. We never use `$date = new DateTime`. It's the same for annotation ;)
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-02-27T17:49:46Z
+
+This is cool with me - I slightly prefer with `()`
