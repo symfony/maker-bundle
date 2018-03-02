@@ -314,7 +314,7 @@ class FunctionalTest extends MakerTestCase
             })
         ];
 
-        yield 'crud' => [MakerTestDetails::createTest(
+        yield 'crud_basic' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeCrud::class),
             [
                 // entity class name
