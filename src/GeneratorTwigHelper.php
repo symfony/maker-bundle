@@ -13,32 +13,36 @@ namespace Symfony\Bundle\MakerBundle;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
- *
- * @internal
  */
-class GeneratorTwigHelper
+final class GeneratorTwigHelper
 {
-    private $baseLayoutExists;
+    private $fileManager;
 
     public function __construct(FileManager $fileManager)
     {
-        $this->baseLayoutExists = $fileManager->fileExists('templates/base.html.twig');
+        $this->fileManager = $fileManager;
     }
 
     public function getEntityFieldPrintCode($entity, $field): string
     {
         $printCode = $entity.'.'.$field['fieldName'];
 
-        if (in_array($field['type'], ['datetime'])) {
-            $printCode = $printCode.' ? '.$printCode.'|date(\'Y-m-d H:i:s\') : \'\'';
-        } elseif (in_array($field['type'], ['date'])) {
-            $printCode = $printCode.' ? '.$printCode.'|date(\'Y-m-d\') : \'\'';
-        } elseif (in_array($field['type'], ['time'])) {
-            $printCode = $printCode.' ? '.$printCode.'|date(\'H:i:s\') : \'\'';
-        } elseif (in_array($field['type'], ['array'])) {
-            $printCode = $printCode.' ? '.$printCode.'|join(\', \') : \'\'';
-        } elseif (in_array($field['type'], ['boolean'])) {
-            $printCode = $printCode.' ? \'Yes\' : \'No\'';
+        switch ($field['type']) {
+            case 'datetime':
+                $printCode .= ' ? '.$printCode.'|date(\'Y-m-d H:i:s\') : \'\'';
+                break;
+            case 'date':
+                $printCode .= ' ? '.$printCode.'|date(\'Y-m-d\') : \'\'';
+                break;
+            case 'time':
+                $printCode .= ' ? '.$printCode.'|date(\'H:i:s\') : \'\'';
+                break;
+            case 'array':
+                $printCode .= ' ? '.$printCode.'|join(\', \') : \'\'';
+                break;
+            case 'boolean':
+                $printCode .= ' ? \'Yes\' : \'No\'';
+                break;
         }
 
         return $printCode;
@@ -46,7 +50,7 @@ class GeneratorTwigHelper
 
     public function getHeadPrintCode($title): string
     {
-        if ($this->baseLayoutExists) {
+        if ($this->fileManager->fileExists('templates/base.html.twig')) {
             return <<<TWIG
 {% extends 'base.html.twig' %}
 

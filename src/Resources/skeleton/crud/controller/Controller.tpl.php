@@ -18,15 +18,15 @@ use Symfony\Component\Routing\Annotation\Route;
 class <?= $class_name ?> extends Controller
 {
     /**
-     * @Route("/", name="<?= $route_name ?>_index", methods="GET"): Response
+     * @Route("/", name="<?= $route_name ?>_index", methods="GET")
      */
 <?php if ($repository_exists): ?>
-    public function index(<?= $repository_full_class_name ?> $<?= $repository_var ?>)
+    public function index(<?= $repository_class_name ?> $<?= $repository_var ?>): Response
     {
         return $this->render('<?= $route_name ?>/index.html.twig', ['<?= $entity_var_plural ?>' => $<?= $repository_var ?>->findAll()]);
     }
 <?php else: ?>
-    public function index()
+    public function index(): Response
     {
         $<?= $entity_var_plural ?> = $this->getDoctrine()
             ->getRepository(<?= $entity_class_name ?>::class)
