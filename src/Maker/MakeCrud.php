@@ -119,6 +119,10 @@ final class MakeCrud extends AbstractMaker
 
         $entityVarPlural = lcfirst(Inflector::pluralize($entityClassDetails->getShortName()));
         $entityVarSingular = lcfirst(Inflector::singularize($entityClassDetails->getShortName()));
+
+        $entityTwigVarPlural = Str::asTwigVariable($entityVarPlural);
+        $entityTwigVarSingular = Str::asTwigVariable($entityVarSingular);
+
         $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
 
         $generator->generateClass(
@@ -132,7 +136,9 @@ final class MakeCrud extends AbstractMaker
                     'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
                     'route_name' => $routeName,
                     'entity_var_plural' => $entityVarPlural,
+                    'entity_twig_var_plural' => $entityTwigVarPlural,
                     'entity_var_singular' => $entityVarSingular,
+                    'entity_twig_var_singular' => $entityTwigVarSingular,
                     'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
                 ],
                 $repositoryVars
@@ -155,20 +161,20 @@ final class MakeCrud extends AbstractMaker
         $templates = [
             '_delete_form' => [
                 'route_name' => $routeName,
-                'entity_var_singular' => $entityVarSingular,
+                'entity_twig_var_singular' => $entityTwigVarSingular,
                 'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
             ],
             '_form' => [],
             'edit' => [
                 'entity_class_name' => $entityClassDetails->getShortName(),
-                'entity_var_singular' => $entityVarSingular,
+                'entity_twig_var_singular' => $entityTwigVarSingular,
                 'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
                 'route_name' => $routeName,
             ],
             'index' => [
                 'entity_class_name' => $entityClassDetails->getShortName(),
-                'entity_var_plural' => $entityVarPlural,
-                'entity_var_singular' => $entityVarSingular,
+                'entity_twig_var_plural' => $entityTwigVarPlural,
+                'entity_twig_var_singular' => $entityTwigVarSingular,
                 'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
                 'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
                 'route_name' => $routeName,
@@ -179,7 +185,7 @@ final class MakeCrud extends AbstractMaker
             ],
             'show' => [
                 'entity_class_name' => $entityClassDetails->getShortName(),
-                'entity_var_singular' => $entityVarSingular,
+                'entity_twig_var_singular' => $entityTwigVarSingular,
                 'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
                 'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
                 'route_name' => $routeName,

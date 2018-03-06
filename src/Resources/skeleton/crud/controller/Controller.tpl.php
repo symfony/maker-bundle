@@ -32,7 +32,7 @@ class <?= $class_name ?> extends Controller
             ->getRepository(<?= $entity_class_name ?>::class)
             ->findAll();
 
-        return $this->render('<?= $route_name ?>/index.html.twig', ['<?= $entity_var_plural ?>' => $<?= $entity_var_plural ?>]);
+        return $this->render('<?= $route_name ?>/index.html.twig', ['<?= $entity_twig_var_plural ?>' => $<?= $entity_var_plural ?>]);
     }
 <?php endif ?>
 
@@ -54,7 +54,7 @@ class <?= $class_name ?> extends Controller
         }
 
         return $this->render('<?= $route_name ?>/new.html.twig', [
-            '<?= $entity_var_singular ?>' => $<?= $entity_var_singular ?>,
+            '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
             'form' => $form->createView(),
         ]);
     }
@@ -64,7 +64,7 @@ class <?= $class_name ?> extends Controller
      */
     public function show(<?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
-        return $this->render('<?= $route_name ?>/show.html.twig', ['<?= $entity_var_singular ?>' => $<?= $entity_var_singular ?>]);
+        return $this->render('<?= $route_name ?>/show.html.twig', ['<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>]);
     }
 
     /**
@@ -82,7 +82,7 @@ class <?= $class_name ?> extends Controller
         }
 
         return $this->render('<?= $route_name ?>/edit.html.twig', [
-            '<?= $entity_var_singular ?>' => $<?= $entity_var_singular ?>,
+            '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
             'form' => $form->createView(),
         ]);
     }

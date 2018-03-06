@@ -13,14 +13,14 @@
             </tr>
         </thead>
         <tbody>
-        {% for <?= $entity_var_singular ?> in <?= $entity_var_plural ?> %}
+        {% for <?= $entity_twig_var_singular ?> in <?= $entity_twig_var_plural ?> %}
             <tr>
 <?php foreach ($entity_fields as $field): ?>
-                <td>{{ <?= $helper->getEntityFieldPrintCode($entity_var_singular, $field) ?> }}</td>
+                <td>{{ <?= $helper->getEntityFieldPrintCode($entity_twig_var_singular, $field) ?> }}</td>
 <?php endforeach; ?>
                 <td>
-                    <a href="{{ path('<?= $route_name ?>_show', {'<?= $entity_identifier ?>': <?= $entity_var_singular ?>.<?= $entity_identifier ?>}) }}">show</a>
-                    <a href="{{ path('<?= $route_name ?>_edit', {'<?= $entity_identifier ?>': <?= $entity_var_singular ?>.<?= $entity_identifier ?>}) }}">edit</a>
+                    <a href="{{ path('<?= $route_name ?>_show', {'<?= $entity_identifier ?>': <?= $entity_twig_var_singular ?>.<?= $entity_identifier ?>}) }}">show</a>
+                    <a href="{{ path('<?= $route_name ?>_edit', {'<?= $entity_identifier ?>': <?= $entity_twig_var_singular ?>.<?= $entity_identifier ?>}) }}">edit</a>
                 </td>
             </tr>
         {% else %}
