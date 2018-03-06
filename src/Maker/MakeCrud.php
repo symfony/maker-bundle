@@ -53,8 +53,8 @@ final class MakeCrud extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig)
     {
         $command
-            ->setDescription('Creates crud for Doctrine entity class')
-            ->addArgument('entity-class', InputArgument::OPTIONAL, sprintf('The class name of the entity to create crud (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
+            ->setDescription('Creates CRUD for Doctrine entity class')
+            ->addArgument('entity-class', InputArgument::OPTIONAL, sprintf('The class name of the entity to create CRUD (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCrud.txt'))
         ;
 
@@ -63,15 +63,17 @@ final class MakeCrud extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
-        $argument = $command->getDefinition()->getArgument('entity-class');
+        if (null === $input->getArgument('entity-class')) {
+            $argument = $command->getDefinition()->getArgument('entity-class');
 
-        $question = new Question($argument->getDescription());
-        $question->setValidator([Validator::class, 'notBlank']);
-        $question->setAutocompleterValues($this->entityHelper->getEntitiesForAutocomplete());
+            $question = new Question($argument->getDescription());
+            $question->setValidator([Validator::class, 'validateClassName']);
+            $question->setAutocompleterValues($this->entityHelper->getEntitiesForAutocomplete());
 
-        $value = $io->askQuestion($question);
+            $value = $io->askQuestion($question);
 
-        $input->setArgument('entity-class', $value);
+            $input->setArgument('entity-class', $value);
+        }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -81,11 +83,23 @@ final class MakeCrud extends AbstractMaker
             'Entity\\'
         );
 
-        $repositoryClassDetails = $generator->createClassNameDetails(
-            $entityClassDetails->getRelativeName(),
-            'Repository\\',
-            'Repository'
-        );
+        $entityDoctrineDetails = $this->entityHelper->createDoctrineDetails($entityClassDetails->getFullName());
+
+        $repositoryVars = [];
+
+        if (null !== $entityDoctrineDetails->getRepositoryClass()) {
+            $repositoryClassDetails = $generator->createClassNameDetails(
+                '\\'.$entityDoctrineDetails->getRepositoryClass(),
+                'Repository\\',
+                'Repository'
+            );
+
+            $repositoryVars = [
+                'repository_full_class_name' => $repositoryClassDetails->getFullName(),
+                'repository_class_name' => $repositoryClassDetails->getShortName(),
+                'repository_var' => lcfirst(Inflector::singularize($repositoryClassDetails->getShortName())),
+            ];
+        }
 
         $controllerClassDetails = $generator->createClassNameDetails(
             $entityClassDetails->getRelativeNameWithoutSuffix(),
@@ -93,13 +107,16 @@ final class MakeCrud extends AbstractMaker
             'Controller'
         );
 
-        $formClassDetails = $generator->createClassNameDetails(
-            $entityClassDetails->getRelativeNameWithoutSuffix(),
-            'Form\\',
-            'Type'
-        );
+        $iter = 0;
+        do {
+            $formClassDetails = $generator->createClassNameDetails(
+                $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: ''),
+                'Form\\',
+                'Type'
+            );
+            ++$iter;
+        } while (class_exists($formClassDetails->getFullName()));
 
-        $metadata = $this->entityHelper->getEntityMetadata($entityClassDetails->getFullName());
         $entityVarPlural = lcfirst(Inflector::pluralize($entityClassDetails->getShortName()));
         $entityVarSingular = lcfirst(Inflector::singularize($entityClassDetails->getShortName()));
         $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
@@ -107,24 +124,20 @@ final class MakeCrud extends AbstractMaker
         $generator->generateClass(
             $controllerClassDetails->getFullName(),
             'crud/controller/Controller.tpl.php',
-            [
-                'entity_full_class_name' => $entityClassDetails->getFullName(),
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'repository_exists' => class_exists($repositoryClassDetails->getFullName()),
-                'repository_full_class_name' => $repositoryClassDetails->getFullName(),
-                'repository_class_name' => $repositoryClassDetails->getShortName(),
-                'repository_var' => lcfirst(Inflector::singularize($repositoryClassDetails->getShortName())),
-                'form_full_class_name' => $formClassDetails->getFullName(),
-                'form_class_name' => $formClassDetails->getShortName(),
-                'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
-                'route_name' => $routeName,
-                'entity_var_plural' => $entityVarPlural,
-                'entity_var_singular' => $entityVarSingular,
-                'entity_identifier' => $metadata->identifier[0],
-            ]
+            array_merge([
+                    'entity_full_class_name' => $entityClassDetails->getFullName(),
+                    'entity_class_name' => $entityClassDetails->getShortName(),
+                    'form_full_class_name' => $formClassDetails->getFullName(),
+                    'form_class_name' => $formClassDetails->getShortName(),
+                    'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
+                    'route_name' => $routeName,
+                    'entity_var_plural' => $entityVarPlural,
+                    'entity_var_singular' => $entityVarSingular,
+                    'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
+                ],
+                $repositoryVars
+            )
         );
-
-        $formFields = $this->entityHelper->getFormFieldsFromEntity($entityClassDetails->getFullName());
 
         $generator->generateClass(
             $formClassDetails->getFullName(),
@@ -133,7 +146,7 @@ final class MakeCrud extends AbstractMaker
                 'entity_class_exists' => true,
                 'entity_full_class_name' => $entityClassDetails->getFullName(),
                 'entity_class_name' => $entityClassDetails->getShortName(),
-                'form_fields' => $formFields,
+                'form_fields' => $entityDoctrineDetails->getFormFields(),
             ]
         );
 
@@ -143,21 +156,21 @@ final class MakeCrud extends AbstractMaker
             '_delete_form' => [
                 'route_name' => $routeName,
                 'entity_var_singular' => $entityVarSingular,
-                'entity_identifier' => $metadata->identifier[0],
+                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
             ],
             '_form' => [],
             'edit' => [
                 'entity_class_name' => $entityClassDetails->getShortName(),
                 'entity_var_singular' => $entityVarSingular,
-                'entity_identifier' => $metadata->identifier[0],
+                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
                 'route_name' => $routeName,
             ],
             'index' => [
                 'entity_class_name' => $entityClassDetails->getShortName(),
                 'entity_var_plural' => $entityVarPlural,
                 'entity_var_singular' => $entityVarSingular,
-                'entity_identifier' => $metadata->identifier[0],
-                'entity_fields' => $metadata->fieldMappings,
+                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
+                'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
                 'route_name' => $routeName,
             ],
             'new' => [
@@ -167,8 +180,8 @@ final class MakeCrud extends AbstractMaker
             'show' => [
                 'entity_class_name' => $entityClassDetails->getShortName(),
                 'entity_var_singular' => $entityVarSingular,
-                'entity_identifier' => $metadata->identifier[0],
-                'entity_fields' => $metadata->fieldMappings,
+                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
+                'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
                 'route_name' => $routeName,
             ],
         ];
@@ -185,7 +198,7 @@ final class MakeCrud extends AbstractMaker
 
         $this->writeSuccessMessage($io);
 
-        $io->text('Next: Check your new crud!');
+        $io->text(sprintf('Next: Check your new CRUD by going to <fg=yellow>%s/</>', Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix())));
     }
 
     /**

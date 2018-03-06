@@ -29,7 +29,7 @@ final class DoctrineEntityHelper
         $this->metadataFactory = null !== $registry ? new DoctrineMetadataFactory($registry) : null;
     }
 
-    public function isDoctrineInstalled(): bool
+    private function isDoctrineInstalled(): bool
     {
         return null !== $this->metadataFactory;
     }
@@ -37,11 +37,14 @@ final class DoctrineEntityHelper
     public function getEntitiesForAutocomplete(): array
     {
         $entities = [];
-        $allMetadata = $this->metadataFactory->getAllMetadata();
-        /** @var ClassMetadataInfo $metadata */
-        foreach ($allMetadata as $metadata) {
-            $entityClassDetails = new ClassNameDetails($metadata->name, 'App\\Entity');
-            $entities[] = $entityClassDetails->getRelativeName();
+
+        if ($this->isDoctrineInstalled()) {
+            $allMetadata = $this->metadataFactory->getAllMetadata();
+            /** @var ClassMetadataInfo $metadata */
+            foreach ($allMetadata as $metadata) {
+                $entityClassDetails = new ClassNameDetails($metadata->name, 'App\\Entity');
+                $entities[] = $entityClassDetails->getRelativeName();
+            }
         }
 
         return $entities;
@@ -50,14 +53,27 @@ final class DoctrineEntityHelper
     /**
      * @param string $entityClassName
      *
-     * @return array
-     *
+     * @return null|DoctrineEntityDetails
      * @throws \Exception
      */
-    public function getFormFieldsFromEntity(string $entityClassName): array
+    public function createDoctrineDetails(string $entityClassName)
     {
         $metadata = $this->getEntityMetadata($entityClassName);
 
+        if (null !== $metadata) {
+            return new DoctrineEntityDetails(
+                $metadata->customRepositoryClassName,
+                $metadata->identifier[0],
+                $metadata->fieldMappings,
+                $this->getFormFieldsFromEntity($metadata)
+            );
+        }
+
+        return null;
+    }
+
+    public function getFormFieldsFromEntity(ClassMetadataInfo $metadata): array
+    {
         $fields = (array) $metadata->fieldNames;
         // Remove the primary key field if it's not managed manually
         if (!$metadata->isIdentifierNatural()) {
@@ -72,13 +88,6 @@ final class DoctrineEntityHelper
         return $fields;
     }
 
-    /**
-     * @param $entityClassName
-     *
-     * @return \Doctrine\ORM\Mapping\ClassMetadata|null
-     *
-     * @throws \Exception
-     */
     public function getEntityMetadata($entityClassName)
     {
         if (null === $this->metadataFactory) {

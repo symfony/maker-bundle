@@ -18,6 +18,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\DoctrineEntityHelper;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -32,7 +33,6 @@ use Symfony\Component\Validator\Validation;
 final class MakeForm extends AbstractMaker
 {
     private $entityHelper;
-    private $boundEntityOrClass = true;
 
     public function __construct(DoctrineEntityHelper $entityHelper)
     {
@@ -49,26 +49,22 @@ final class MakeForm extends AbstractMaker
         $command
             ->setDescription('Creates a new form class')
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('The name of the form class (e.g. <fg=yellow>%sType</>)', Str::asClassName(Str::getRandomTerm())))
+            ->addArgument('bound-class', InputArgument::OPTIONAL, 'The name of Entity or custom model class that the new form will be bound to (empty for none)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeForm.txt'))
         ;
 
-        $inputConf->setArgumentAsNonInteractive('name');
+        $inputConf->setArgumentAsNonInteractive('bound-class');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
-        if (null === $input->getArgument('name')) {
-            $argument = $command->getDefinition()->getArgument('name');
+        if (null === $input->getArgument('bound-class')) {
+            $argument = $command->getDefinition()->getArgument('bound-class');
+
             $question = new Question($argument->getDescription());
-            $value = $io->askQuestion($question);
+            $question->setAutocompleterValues($this->entityHelper->getEntitiesForAutocomplete());
 
-            $input->setArgument('name', $value);
-
-            if ($this->entityHelper->isDoctrineInstalled()) {
-                $question = new Question('Enter the class or entity name that the new form will be bound to (empty for none)');
-                $question->setAutocompleterValues($this->entityHelper->getEntitiesForAutocomplete());
-                $this->boundEntityOrClass = $io->askQuestion($question);
-            }
+            $input->setArgument('bound-class', $io->askQuestion($question));
         }
     }
 
@@ -80,33 +76,36 @@ final class MakeForm extends AbstractMaker
             'Type'
         );
 
-        if (null === $this->boundEntityOrClass) {
-            $generator->generateClass(
-                $formClassNameDetails->getFullName(),
-                'form/SimpleType.tpl.php',
-                []
-            );
-        } else {
-            $entityClassNameDetails = $generator->createClassNameDetails(
-                true === $this->boundEntityOrClass ? $formClassNameDetails->getRelativeNameWithoutSuffix() : $this->boundEntityOrClass,
+        $formFields = ['field_name'];
+        $boundClassVars = [];
+
+        $boundClass = $input->getArgument('bound-class');
+
+        if (null !== $boundClass) {
+            $boundClassDetails = $generator->createClassNameDetails(
+                $boundClass,
                 'Entity\\'
             );
 
-            $entityClassExists = class_exists($entityClassNameDetails->getFullName());
+            if (class_exists($boundClassDetails->getFullName())) {
+                $doctrineEntityDetails = $this->entityHelper->createDoctrineDetails($boundClassDetails->getFullName());
 
-            $formFields = $entityClassExists ? $this->entityHelper->getFormFieldsFromEntity($entityClassNameDetails->getFullName()) : ['field_name'];
+                if (null !== $doctrineEntityDetails) {
+                    $formFields = $doctrineEntityDetails->getFormFields();
+                }
 
-            $generator->generateClass(
-                $formClassNameDetails->getFullName(),
-                'form/Type.tpl.php',
-                [
-                    'entity_class_exists' => $entityClassExists,
-                    'entity_full_class_name' => $entityClassNameDetails->getFullName(),
-                    'entity_class_name' => $entityClassNameDetails->getShortName(),
-                    'form_fields' => $formFields,
-                ]
-            );
+                $boundClassVars = [
+                    'bounded_full_class_name' => $boundClassDetails->getFullName(),
+                    'bounded_class_name' => $boundClassDetails->getShortName()
+                ];
+            }
         }
+
+        $generator->generateClass(
+            $formClassNameDetails->getFullName(),
+            'form/Type.tpl.php',
+            array_merge(['form_fields' => $formFields], $boundClassVars)
+        );
 
         $generator->writeChanges();
 

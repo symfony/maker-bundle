@@ -4,7 +4,7 @@ namespace <?= $namespace ?>;
 
 use <?= $entity_full_class_name ?>;
 use <?= $form_full_class_name ?>;
-<?php if ($repository_exists): ?>
+<?php if (isset($repository_full_class_name)): ?>
 use <?= $repository_full_class_name ?>;
 <?php endif ?>
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -20,7 +20,7 @@ class <?= $class_name ?> extends Controller
     /**
      * @Route("/", name="<?= $route_name ?>_index", methods="GET")
      */
-<?php if ($repository_exists): ?>
+<?php if (isset($repository_full_class_name)): ?>
     public function index(<?= $repository_class_name ?> $<?= $repository_var ?>): Response
     {
         return $this->render('<?= $route_name ?>/index.html.twig', ['<?= $entity_var_plural ?>' => $<?= $repository_var ?>->findAll()]);

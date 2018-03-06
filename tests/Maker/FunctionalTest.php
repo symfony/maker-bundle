@@ -173,6 +173,7 @@ class FunctionalTest extends MakerTestCase
             [
                 // form name
                 'FooBar',
+                '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeForm')
         ];
