@@ -96,7 +96,7 @@ final class MakeForm extends AbstractMaker
 
                 $boundClassVars = [
                     'bounded_full_class_name' => $boundClassDetails->getFullName(),
-                    'bounded_class_name' => $boundClassDetails->getShortName()
+                    'bounded_class_name' => $boundClassDetails->getShortName(),
                 ];
             }
         }

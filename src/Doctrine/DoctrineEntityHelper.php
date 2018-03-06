@@ -54,6 +54,7 @@ final class DoctrineEntityHelper
      * @param string $entityClassName
      *
      * @return null|DoctrineEntityDetails
+     *
      * @throws \Exception
      */
     public function createDoctrineDetails(string $entityClassName)
