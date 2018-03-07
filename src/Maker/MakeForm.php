@@ -61,8 +61,12 @@ final class MakeForm extends AbstractMaker
         if (null === $input->getArgument('bound-class')) {
             $argument = $command->getDefinition()->getArgument('bound-class');
 
+            $entities = $this->entityHelper->getEntitiesForAutocomplete();
+
             $question = new Question($argument->getDescription());
-            $question->setAutocompleterValues($this->entityHelper->getEntitiesForAutocomplete());
+            $question->setValidator(function ($answer) use ($entities) {return Validator::existsOrNull($answer, $entities); });
+            $question->setAutocompleterValues($entities);
+            $question->setMaxAttempts(3);
 
             $input->setArgument('bound-class', $io->askQuestion($question));
         }
@@ -87,18 +91,16 @@ final class MakeForm extends AbstractMaker
                 'Entity\\'
             );
 
-            if (class_exists($boundClassDetails->getFullName())) {
-                $doctrineEntityDetails = $this->entityHelper->createDoctrineDetails($boundClassDetails->getFullName());
+            $doctrineEntityDetails = $this->entityHelper->createDoctrineDetails($boundClassDetails->getFullName());
 
-                if (null !== $doctrineEntityDetails) {
-                    $formFields = $doctrineEntityDetails->getFormFields();
-                }
-
-                $boundClassVars = [
-                    'bounded_full_class_name' => $boundClassDetails->getFullName(),
-                    'bounded_class_name' => $boundClassDetails->getShortName(),
-                ];
+            if (null !== $doctrineEntityDetails) {
+                $formFields = $doctrineEntityDetails->getFormFields();
             }
+
+            $boundClassVars = [
+                'bounded_full_class_name' => $boundClassDetails->getFullName(),
+                'bounded_class_name' => $boundClassDetails->getShortName(),
+            ];
         }
 
         $generator->generateClass(

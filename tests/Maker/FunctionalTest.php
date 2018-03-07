@@ -168,7 +168,7 @@ class FunctionalTest extends MakerTestCase
             })
         ];
 
-        yield 'form' => [MakerTestDetails::createTest(
+        yield 'form_basic' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeForm::class),
             [
                 // form name
