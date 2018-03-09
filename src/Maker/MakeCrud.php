@@ -151,9 +151,8 @@ final class MakeCrud extends AbstractMaker
             $formClassDetails->getFullName(),
             'form/Type.tpl.php',
             [
-                'entity_class_exists' => true,
-                'entity_full_class_name' => $entityClassDetails->getFullName(),
-                'entity_class_name' => $entityClassDetails->getShortName(),
+                'bounded_full_class_name' => $entityClassDetails->getFullName(),
+                'bounded_class_name' => $entityClassDetails->getShortName(),
                 'form_fields' => $entityDoctrineDetails->getFormFields(),
             ]
         );
