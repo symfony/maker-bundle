@@ -20,6 +20,4 @@ class <?= $class_name."\n" ?>
     {
         return $this->id;
     }
-
-    // add your own fields
 }
