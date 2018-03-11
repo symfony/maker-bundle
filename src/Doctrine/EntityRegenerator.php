@@ -80,12 +80,21 @@ final class EntityRegenerator
                 $manipulator->addEntityField($fieldName, $mapping);
             }
 
+            $getIsNullable = function(array $mapping) {
+                if (!isset($mapping['joinColumns'][0]) || !isset($mapping['joinColumns'][0]['nullable'])) {
+                    // the default for relationships IS nullable
+                    return true;
+                }
+
+                return $mapping['joinColumns'][0]['nullable'];
+            };
+
             foreach ($classMetadata->associationMappings as $fieldName => $mapping) {
                 switch ($mapping['type']) {
                     case ClassMetadata::MANY_TO_ONE:
                         $relation = (new RelationManyToOne())
                             ->setPropertyName($mapping['fieldName'])
-                            ->setIsNullable($mapping['joinColumns'][0]['nullable'])
+                            ->setIsNullable($getIsNullable($mapping))
                             ->setTargetClassName($mapping['targetEntity'])
                             ->setTargetPropertyName($mapping['inversedBy'])
                             ->setMapInverseRelation(null !== $mapping['inversedBy'])
@@ -124,7 +133,7 @@ final class EntityRegenerator
                             ->setTargetPropertyName($mapping['isOwningSide'] ? $mapping['inversedBy'] : $mapping['mappedBy'])
                             ->setIsOwning($mapping['isOwningSide'])
                             ->setMapInverseRelation($mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true)
-                            ->setIsNullable(isset($mapping['joinColumns'][0]) ? $mapping['joinColumns'][0]['nullable'] : true)
+                            ->setIsNullable($getIsNullable($mapping))
                         ;
 
                         $manipulator->addOneToOneRelation($relation);
