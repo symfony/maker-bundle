@@ -13,6 +13,8 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
+ *
+ * @internal
  */
 final class DoctrineEntityDetails
 {

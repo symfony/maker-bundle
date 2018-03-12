@@ -69,7 +69,6 @@ final class MakeCrud extends AbstractMaker
             $entities = $this->entityHelper->getEntitiesForAutocomplete();
 
             $question = new Question($argument->getDescription());
-            $question->setValidator(function ($answer) use ($entities) {return Validator::entityExists($answer, $entities); });
             $question->setAutocompleterValues($entities);
 
             $value = $io->askQuestion($question);
@@ -81,7 +80,7 @@ final class MakeCrud extends AbstractMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $entityClassDetails = $generator->createClassNameDetails(
-            $input->getArgument('entity-class'),
+            Validator::entityExists($input->getArgument('entity-class'), $this->entityHelper->getEntitiesForAutocomplete()),
             'Entity\\'
         );
 
