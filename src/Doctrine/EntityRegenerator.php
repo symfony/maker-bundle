@@ -80,7 +80,7 @@ final class EntityRegenerator
                 $manipulator->addEntityField($fieldName, $mapping);
             }
 
-            $getIsNullable = function(array $mapping) {
+            $getIsNullable = function (array $mapping) {
                 if (!isset($mapping['joinColumns'][0]) || !isset($mapping['joinColumns'][0]['nullable'])) {
                     // the default for relationships IS nullable
                     return true;
