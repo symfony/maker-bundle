@@ -1,0 +1,314 @@
+---------------------------------------------------------------------------
+
+by komujohn at 2018-01-25T12:27:56Z
+
+good work @sadikoff  just what I needed
+
+---------------------------------------------------------------------------
+
+by sblondeau at 2018-01-28T13:18:30Z
+
+Thanks @sadikoff for this great work. However it seems to be exactly the same crud as in sf3, with the same drawbacks, like the ugly html code with ul/li, the unuseful "action" col in the index table (a link on the id should be much more convenient ...).
+I know it is impossible to satisfy everybody with this kind of generator but I think that the sf4 crud should be an enhancement of sf3 version, not just  the same. ;-)
+
+---------------------------------------------------------------------------
+
+by YannickFricke at 2018-01-28T16:34:37Z
+
+@sblondeau But what about custom designs?
+I would not like to have prewritten CSS for that.
+Maybe there should be an option for the command (but please set the standard to false).
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-01-28T18:59:21Z
+
+@sblondeau I agree that we need some enhancements. May be we can discuss it?
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-01-29T07:34:47Z
+
+I have a question. Is it right to inject EntityManager to maker? or may be there is another way to get Entity metadata?
+
+---------------------------------------------------------------------------
+
+by codedmonkey at 2018-01-30T21:46:19Z
+
+@sblondeau I immediately think of Bootstrap templates as well, but that's something that should be outside this bundle as these differences in styling are trivial at best when it's so easy to create your own maker. In fact, I'm planning on doing that exact thing if @sadikoff doesn't mind if I run off with some of his code.
+
+---------------------------------------------------------------------------
+
+by featuriz at 2018-02-01T16:55:51Z
+
+Thanks for making CRUD friends. I'm using symfony4.0.4 . I created maker extension as https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html#creating-your-own-makers . It works great. The problems i faced are
+
+1. EntityManagerInterface::class, 'orm-pack' ;; @ MakeCrud Controller -> configureDependencies
+**Error:**
+
+>           [ERROR] Missing package: to use the make:crud command, run:
+>
+>          composer require orm-pack
+
+Allread orm-pack is installed, eventhough the error occurs.
+Solution: I comment this check.
+
+2. ControllerWithTwig.tpl.php after generate, the controller throws error for new().
+Solution: I changed new() to newAction(). I added Action at the end of all the public (crud) methods.
+
+3. Template index.twig.html ;; Error for datetime entity.
+Solution: I manually added |date('m d y');
+
+How to add date  at index.tpl.php ;;
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-02-01T17:14:44Z
+
+@featuriz
+1. was fixed in last code revision
+2. which php version do you use? from php 7.0 we can use reserved words as function names
+3. will think what I can do with this, I think the solution is to check fields and generate specific code for some types
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-02-01T17:31:46Z
+
+Thanks for getting this rolling! It’s on my radar - I’ll review this after I finish the make:entity changes :)
+
+---------------------------------------------------------------------------
+
+by featuriz at 2018-02-02T12:32:17Z
+
+Good Every thing works.
+My suggestion is that.
+1. We are just creating the frame. So at create let it be " |date() ", timezone is not required, let them add it. Any how we have to update template as our taste.
+2. return must need " 'delete_form' => $deleteForm->createView(), " this, only then the generated twig will be complete. I think this is must for a good template.
+3. At show() route add " , requirements={"id"="\d+"} ". This will prevent parameter exception. i.e. /{id} and /new are same. Conflict!.
+4. Correct HTTP methods. https://stackoverflow.com/a/19728045/624533
+5. Need confirmation at delete. " < input type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this item?');">  "
+6. At ControllerWithTwig.tpl.php in delete method the token must be " _token"
+
+This is for https://github.com/symfony/maker-bundle/pull/113#issuecomment-362336764
+
+> Also "Action()" needs to be added in all crud methods at ControllerWithTwig.tpl.php . Because I'm using XAMPP in which php is 7.1.11 . And the generated code throws syntax error for **new()** in NETBEANS 8.2. But php built in server runs without error.
+> from php 7.0 we can use reserved words as function names. :: OK, THANKS FOR YOUR INFO
+
+These are the things I updated in my work.
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-02-05T17:00:48Z
+
+@featuriz
+1, 6 fixed.
+
+> 3 ... requirements={"id"="\d+"} ...
+
+it's not very good idea, in my project, for example, primary key is uuid and this requirement won't work. I fixed this problem with simple moving new action before show.
+
+> 5 ... Need confirmation at delete
+
+agreed but not on click, I think better will be to place it in onSubmit event
+
+Need more discussion about 2 and 4. May be there are more ideas?
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-02-10T20:15:10Z
+
+@weaverryan thx for your review, I'll try to fix everything tomorrow.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-02-10T20:51:09Z
+
+That's great @sadikoff! I'll review again after that - I haven't looked too closely yet at the actual generated controller or template code :)
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-02-11T18:00:28Z
+
+@weaverryan could you please check GeneratorHelper class? Is it good or may be we need something else?
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-02-13T12:31:59Z
+
+Hi all, need review for improved make:form command and GeneratorHelper.
+
+my next step is to write tests for crud generation to make sure everything works as expected.
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-02-22T08:09:29Z
+
+`make:crud` is ready for next review
+
+need some more time for `make:form`
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-02-26T11:06:52Z
+
+Lets discuss CRUD controller
+is this good? or we need to change something?
+```
+ ------------------ ----------- ----------------- ------------------------
+  Name               Method      Path              Controller
+ ------------------ ----------- ----------------- ------------------------
+  post_index         GET         /post/            PostController:index
+  post_new           GET         /post/new         PostController:new
+  post_create        POST        /post/            PostController:new   // don't know if we need it
+  post_show          GET         /post/{id}        PostController:show
+  post_edit          GET         /post/{id}/edit   PostController:edit
+  post_update        PATCH|PUT   /post/{id}        PostController:edit  // don't know if we need it
+  post_delete        DELETE      /post/{id}        PostController:delete
+ ------------------ ----------- ----------------- ------------------------
+```
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-02-26T14:24:58Z
+
+Hey @sadikoff!
+
+I would say that we do not need separate routes for `post_new` and `post_create` and also for update. Let's use `post_new` and `post_edit` :)
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-02-26T14:44:40Z
+
+@weaverryan Agreed, just tried to implement crud as was mentioned in #3 and check if we need it.
+
+I think that old implementation is good, and finally it will be something like:
+```
+ ------------------ ----------- ----------------- ------------------------
+  Name               Method      Path              Controller
+ ------------------ ----------- ----------------- ------------------------
+  post_index         GET         /post/            PostController:index
+  post_new           GET|POST    /post/new         PostController:new
+  post_show          GET         /post/{id}        PostController:show
+  post_edit          GET|POST    /post/{id}/edit   PostController:edit
+  post_delete        DELETE      /post/{id}        PostController:delete
+ ------------------ ----------- ----------------- ------------------------
+```
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-02-26T14:48:08Z
+
+I like this route setup indeed :).
+
+So what are the next steps from here? Keep me posted so I can continue helping, reviewing, etc
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-02-26T15:00:16Z
+
+Today I'll push an update for make:form command, and than everything will be ready for complete review.
+
+---------------------------------------------------------------------------
+
+by chapterjason at 2018-02-27T06:30:49Z
+
+What about the possibility that `/new` getting matched instead of `/{id}` the requirement to be an number could be possible, but what if the user changes the id to anything like a slug/name?
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-02-27T07:16:01Z
+
+@chapterjason lets think that `/new` is reserved route. I don't think that user will have some `slug` with `new` value.
+
+---------------------------------------------------------------------------
+
+by fictiont at 2018-03-03T09:38:23Z
+
+@sadikoff how could i use maker:crud now in symfony4?
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-03-03T09:46:31Z
+
+@fictiont while this PR is not ready you can try to use my [koff/crud-maker-bundle](https://packagist.org/packages/koff/crud-maker-bundle)
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-03-07T11:27:40Z
+
+@javiereguiluz thanks for your review, it's really important for me!
+I would like to discuss your last point about minimal CSS. Is it will be enough to style links as buttons with `class="btn"`?
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2018-03-07T14:23:30Z
+
+Not sure what to do, honestly. I'd say adding some minimal CSS classes (compatible with Bootstrap) would be nice for most people ... but maybe my guess is wrong and we make most people angry. @weaverryan what do you think about this? Thanks!
+
+---------------------------------------------------------------------------
+
+by jlcd at 2018-03-08T21:03:44Z
+
+Hey there @sadikoff , first of all thanks for the great work you've put in.
+
+I've just tried to make a crud here and noticed that for my `Location` Entity it didn't quite work as expected.
+The Entity in question has only one field, `location`, being also the Entity's ID.
+
+When I ran `make:crud Location`, the controller and forms were created, but the new and edit forms are broken as they don't have the only table's field. Maybe it has something to do with the field being the ID field, not sure though.
+
+Here's the Entity:
+
+```
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity(repositoryClass="App\Repository\LocationRepository")
+ */
+class Location
+{
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="NONE")
+     * @ORM\Column(type="string", length=60)
+     */
+    private $location;
+
+    /**
+     * @return string
+     */
+    public function getLocation()
+    {
+        return $this->location;
+    }
+
+    /**
+     * @param string $location
+     *
+     * @return self
+     */
+    public function setLocation($location)
+    {
+        $this->location = $location;
+
+        return $this;
+    }
+}
+```
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-03-09T07:55:17Z
+
+Hello @jlcd I've just tested your entity with last commited version here and everything works perfect. May be you are using my `koff\crud-maker-bundle`? Possibly there is a bug with some type of entities.
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-03-12T10:19:40Z
+
+Everything ready!
+
+Thanks to all for reviews and discussion!
