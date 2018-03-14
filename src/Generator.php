@@ -21,12 +21,14 @@ use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 class Generator
 {
     private $fileManager;
+    private $twigHelper;
     private $pendingOperations = [];
     private $namespacePrefix;
 
     public function __construct(FileManager $fileManager, $namespacePrefix)
     {
         $this->fileManager = $fileManager;
+        $this->twigHelper = new GeneratorTwigHelper($fileManager);
         $this->namespacePrefix = rtrim($namespacePrefix, '\\');
     }
 
@@ -60,6 +62,10 @@ class Generator
      */
     public function generateFile(string $targetPath, string $templateName, array $variables)
     {
+        $variables = array_merge($variables, [
+            'helper' => $this->twigHelper,
+        ]);
+
         $this->addOperation($targetPath, $templateName, $variables);
     }
 

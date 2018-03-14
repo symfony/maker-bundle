@@ -1,3 +1,11 @@
+1.2
+===
+
+* New maker command! `make:crud` - thanks to @sadikoff in #113.
+
+* Greatly improved `make:form` command that auto-adds fields if
+  your form is bound to an entity class - thanks to @sadikoff in #113.
+
 1.1
 ===
 

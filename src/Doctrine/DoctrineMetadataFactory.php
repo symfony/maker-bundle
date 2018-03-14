@@ -99,7 +99,7 @@ final class DoctrineMetadataFactory
     /**
      * @return array
      */
-    private function getAllMetadata()
+    public function getAllMetadata()
     {
         $metadata = [];
         foreach ($this->registry->getManagers() as $em) {
