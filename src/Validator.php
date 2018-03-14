@@ -46,4 +46,51 @@ final class Validator
 
         return $value;
     }
+
+    public static function existsOrNull(string $className = null, array $entites = [])
+    {
+        if (null !== $className) {
+            self::validateClassName($className);
+
+            if (0 === strpos($className, '\\')) {
+                self::classExists($className);
+            } else {
+                self::entityExists($className, $entites);
+            }
+        }
+
+        return $className;
+    }
+
+    public static function classExists(string $className, string $errorMessage = ''): string
+    {
+        self::notBlank($className);
+
+        if (!class_exists($className)) {
+            $errorMessage = $errorMessage ?: sprintf('Class "%s" does\'t exists. Please enter existing full class name', $className);
+
+            throw new RuntimeCommandException($errorMessage);
+        }
+
+        return $className;
+    }
+
+    public static function entityExists(string $className = null, array $entites = []): string
+    {
+        self::notBlank($className);
+
+        if (empty($entites)) {
+            throw new RuntimeCommandException(sprintf('There is no registered entites. Please create entity before use this command', $className));
+        }
+
+        if (0 === strpos($className, '\\')) {
+            self::classExists($className, sprintf('Entity "%s" does\'t exists. Please enter existing one or create new', $className));
+        }
+
+        if (!in_array($className, $entites)) {
+            throw new RuntimeCommandException(sprintf('Entity "%s" does\'t exists. Please enter existing one or create new', $className));
+        }
+
+        return $className;
+    }
 }

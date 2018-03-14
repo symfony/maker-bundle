@@ -20,6 +20,11 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_crud" class="Symfony\Bundle\MakerBundle\Maker\MakeCrud">
+                <argument type="service" id="maker.doctrine_entity_helper" />
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_entity" class="Symfony\Bundle\MakerBundle\Maker\MakeEntity">
                 <tag name="maker.command" />
             </service>
@@ -29,6 +34,7 @@
             </service>
 
             <service id="maker.maker.make_form" class="Symfony\Bundle\MakerBundle\Maker\MakeForm">
+                <argument type="service" id="maker.doctrine_entity_helper" />
                 <tag name="maker.command" />
             </service>
 

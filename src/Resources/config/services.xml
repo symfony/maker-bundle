@@ -19,5 +19,9 @@
             <service id="maker.console_error_listener" class="Symfony\Bundle\MakerBundle\Event\ConsoleErrorSubscriber">
                 <tag name="kernel.event_subscriber" />
             </service>
+
+            <service id="maker.doctrine_entity_helper" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineEntityHelper">
+                <argument type="service" id="doctrine" on-invalid="ignore"/>
+            </service>
         </services>
 </container>

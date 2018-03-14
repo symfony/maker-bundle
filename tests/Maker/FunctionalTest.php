@@ -11,6 +11,7 @@ use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator;
 use Symfony\Bundle\MakerBundle\Maker\MakeCommand;
 use Symfony\Bundle\MakerBundle\Maker\MakeController;
+use Symfony\Bundle\MakerBundle\Maker\MakeCrud;
 use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Maker\MakeFixtures;
 use Symfony\Bundle\MakerBundle\Maker\MakeForm;
@@ -167,12 +168,25 @@ class FunctionalTest extends MakerTestCase
             })
         ];
 
-        yield 'form' => [MakerTestDetails::createTest(
+        yield 'form_basic' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeForm::class),
             [
                 // form name
                 'FooBar',
+                '',
             ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeForm')
+        ];
+
+        yield 'form_with_entity' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeForm::class),
+            [
+                // Entity name
+                'SourFoodType',
+                'SourFood',
+            ])
+            ->addExtraDependencies('orm')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFormForEntity')
         ];
 
         yield 'functional' => [MakerTestDetails::createTest(
@@ -298,6 +312,65 @@ class FunctionalTest extends MakerTestCase
                 $this->assertNotContains('Success', $output);
 
                 $this->assertContains('No database changes were detected', $output);
+            })
+        ];
+
+        yield 'crud_basic' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeCrud::class),
+            [
+                // entity class name
+                'SweetFood',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
+            // need for crud web tests
+            ->addExtraDependencies('symfony/css-selector')
+            ->addReplacement(
+                'phpunit.xml.dist',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                'sqlite:///%kernel.project_dir%/var/app.db'
+            )
+            ->addReplacement(
+                '.env',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                'sqlite:///%kernel.project_dir%/var/app.db'
+            )
+            ->addPreMakeCommand('php bin/console doctrine:schema:create --env=test')
+            ->assert(function(string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
+                $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
+
+                $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
+                $this->assertContains('created: src/Form/SweetFoodType.php', $output);
+            })
+        ];
+
+        yield 'crud_with_no_base' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeCrud::class),
+            [
+                // entity class name
+                'SweetFood',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
+            // need for crud web tests
+            ->addExtraDependencies('symfony/css-selector')
+            ->addReplacement(
+                'phpunit.xml.dist',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                'sqlite:///%kernel.project_dir%/var/app.db'
+            )
+            ->addReplacement(
+                '.env',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                'sqlite:///%kernel.project_dir%/var/app.db'
+            )
+            ->addPreMakeCommand('php bin/console doctrine:schema:create --env=test')
+            ->addPreMakeCommand('rm templates/base.html.twig')
+            ->assert(function(string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
+                $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
+
+                $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
+                $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
         ];
     }
