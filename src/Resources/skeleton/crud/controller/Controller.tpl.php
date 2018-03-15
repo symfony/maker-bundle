@@ -92,13 +92,11 @@ class <?= $class_name ?> extends Controller
      */
     public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
-        if (!$this->isCsrfTokenValid('delete'.$<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(), $request->request->get('_token'))) {
-            return $this->redirectToRoute('<?= $route_name ?>_index');
+        if ($this->isCsrfTokenValid('delete'.$<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(), $request->request->get('_token'))) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($<?= $entity_var_singular ?>);
+            $em->flush();
         }
-
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($<?= $entity_var_singular ?>);
-        $em->flush();
 
         return $this->redirectToRoute('<?= $route_name ?>_index');
     }
