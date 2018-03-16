@@ -72,6 +72,10 @@ final class MakeEntity extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
+        if ($input->getArgument('name')) {
+            return;
+        }
+
         if ($input->getOption('regenerate')) {
             $io->block([
                 'This command will generate any missing methods (e.g. getters & setters) for a class or all classes in a namespace.',
