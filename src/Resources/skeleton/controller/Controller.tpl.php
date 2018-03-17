@@ -8,7 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 class <?= $class_name; ?> extends Controller
 {
     /**
-     * @Route("<?= $route_path ?>", name="<?= $route_name ?>")
+     * @Route("<?= $route_path.'/' ?>", name="<?= $route_name ?>")
      */
     public function index()
     {
