@@ -1,0 +1,39 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-03-15T18:26:20Z
+
+Makes sense to me!
+
+About the flash messages, I would like to add them... but it’s a bit weird because we don’t know if the user is actually printing them or not in the base template. But still, I think we should add them
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-03-15T18:33:58Z
+
+I think we don't need to know if the user is printing them or not, We just add them in `index` and `edit` templates and each user will decide to use it or not.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-03-16T00:43:53Z
+
+@sadikoff I'm not sure about printing the flash messages in `index.html.twig` and `edit.html.twig`... because the user will *always* need to remove those... as flash messages should *really* live in the base layout.... That's what complicates things for me.
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-03-16T07:37:07Z
+
+@weaverryan maybe than we can ask user to use flash or not, and inject them in `base` layout including something like `_flash.html.twig`?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-03-17T17:58:00Z
+
+@sadikoff We don't have any ability to modify Twig files right now. Also, I want to avoid asking unnecessary questions.... but *maybe* we should ask them if they want flash messages or not.
+
+Currently, I'm leaning towards this: we always add flash messages in the controller. Then, we can do a quick check in their `base.html.twig`: if we do not see the flash messages being printed there (we could do some simple string check, not perfect, but good enough), we could print out a warning that tells them they should add this to their base.html.twig.
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-03-17T18:27:42Z
+
+@weaverryan If you don't mind lets merge this PR. It will fix some bugs. After I will prepare PR for flash messages and we will discuss it there.
