@@ -4,18 +4,17 @@ namespace Symfony\Bundle\MakerBundle\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\FileManager;
-use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
+use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Process\Process;
 
-class FileManagerTest extends MakerTestCase
+class FileManagerTest extends TestCase
 {
     /**
      * @dataProvider getRelativizePathTests
      */
     public function testRelativizePath(string $rootDir, string $absolutePath, string $expectedPath)
     {
-        $fileManager = new FileManager(new Filesystem(), $rootDir);
+        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir);
 
         $this->assertSame($expectedPath, $fileManager->relativizePath($absolutePath));
     }
@@ -53,62 +52,12 @@ class FileManagerTest extends MakerTestCase
         ];
     }
 
-    public function testGetPathForFutureClass()
-    {
-        $composerJson = [
-            'autoload' => [
-                'psr-4' => [
-                    'Also\\In\\Src\\' => 'src/SubDir',
-                    'App\\' => 'src/',
-                    'Other\\Namespace\\' => 'lib',
-                    '' => 'fallback_dir',
-                ],
-                'psr-0' => [
-                    'Psr0\\Package' => 'lib/other',
-                ],
-            ],
-        ];
-
-        $fs = new Filesystem();
-        if (!file_exists(self::$currentRootDir)) {
-            $fs->mkdir(self::$currentRootDir);
-        }
-
-        $fs->remove(self::$currentRootDir.'/vendor');
-        file_put_contents(
-            self::$currentRootDir.'/composer.json',
-            json_encode($composerJson, JSON_PRETTY_PRINT)
-        );
-        $process = new Process('composer dump-autoload', self::$currentRootDir);
-        $process->run();
-        if (!$process->isSuccessful()) {
-            throw new \Exception('Error running composer dump-autoload: '.$process->getErrorOutput());
-        }
-
-        $fileManager = new FileManager(new Filesystem(), self::$currentRootDir);
-        foreach ($this->getPathForFutureClassTests() as $className => $expectedPath) {
-            $this->assertSame($expectedPath, $fileManager->getPathForFutureClass($className), sprintf('class "%s" should have been in path "%s"', $className, $expectedPath));
-        }
-    }
-
-    public function getPathForFutureClassTests()
-    {
-        return [
-            'App\Foo' => 'src/Foo.php',
-            'App\Entity\Product' => 'src/Entity/Product.php',
-            'Totally\Weird' => 'fallback_dir/Totally/Weird.php',
-            'Also\In\Src\Some\OtherClass' => 'src/SubDir/Some/OtherClass.php',
-            'Other\Namespace\Admin\Foo' => 'lib/Admin/Foo.php',
-            'Psr0\Package\Admin\Bar' => 'lib/other/Psr0/Package/Admin/Bar.php'
-        ];
-    }
-
     /**
      * @dataProvider getAbsolutePathTests
      */
     public function testAbsolutizePath(string $rootDir, string $path, string $expectedPath)
     {
-        $fileManager = new FileManager(new Filesystem(), $rootDir);
+        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir);
         $this->assertSame($expectedPath, $fileManager->absolutizePath($path));
     }
 
@@ -130,6 +79,54 @@ class FileManagerTest extends MakerTestCase
             'D:\path\to\project',
             'D:\foo\bar',
             'D:\foo\bar',
+        ];
+
+        yield 'windows_already_absolute_path' => [
+            'D:\path\to\project',
+            'D:/foo/bar',
+            'D:/foo/bar',
+        ];
+    }
+
+    /**
+     * @dataProvider getIsPathInVendorTests
+     */
+    public function testIsPathInVendor(string $rootDir, string $path, bool $expectedIsInVendor)
+    {
+        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir);
+        $this->assertSame($expectedIsInVendor, $fileManager->isPathInVendor($path));
+    }
+
+    public function getIsPathInVendorTests()
+    {
+        yield 'not_in_vendor' => [
+            '/home/project/',
+            '/home/project/foo/bar',
+            false,
+        ];
+
+        yield 'in_vendor' => [
+            '/home/project/',
+            '/home/project/vendor/foo',
+            true,
+        ];
+
+        yield 'not_in_this_vendor' => [
+            '/home/project/',
+            '/other/path/vendor/foo',
+            false,
+        ];
+
+        yield 'windows_not_in_vendor' => [
+            'D:\path\to\project',
+            'D:\path\to\project\src\foo',
+            false,
+        ];
+
+        yield 'windows_in_vendor' => [
+            'D:\path\to\project',
+            'D:\path\to\project\vendor\foo',
+            true,
         ];
     }
 }

@@ -12,6 +12,9 @@
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
+use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 
@@ -55,12 +58,7 @@ final class DoctrineMetadataFactory
         return $metadata;
     }
 
-    /**
-     * @param string $entity
-     *
-     * @return ClassMetadata|null
-     */
-    public function getMetadataForClass(string $entity)
+    public function getMetadataForClass(string $entity): ?ClassMetadata
     {
         foreach ($this->registry->getManagers() as $em) {
             $cmf = new DisconnectedClassMetadataFactory();
@@ -72,6 +70,30 @@ final class DoctrineMetadataFactory
         }
 
         return null;
+    }
+
+    public function getMappingDriverForClass(string $className): ?MappingDriver
+    {
+        /** @var EntityManagerInterface $em */
+        $em = $this->registry->getManagerForClass($className);
+
+        if (null === $em) {
+            throw new \InvalidArgumentException(sprintf('Cannot find the entity manager for class "%s"', $className));
+        }
+
+        $metadataDriver = $em->getConfiguration()->getMetadataDriverImpl();
+
+        if (!$metadataDriver instanceof MappingDriverChain) {
+            return $metadataDriver;
+        }
+
+        foreach ($metadataDriver->getDrivers() as $namespace => $driver) {
+            if (0 === strpos($className, $namespace)) {
+                return $driver;
+            }
+        }
+
+        return $metadataDriver->getDefaultDriver();
     }
 
     /**

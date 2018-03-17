@@ -19,15 +19,31 @@ class <?= $class_name; ?> extends ServiceEntityRepository
         parent::__construct($registry, <?= $entity_class_name; ?>::class);
     }
 
+//    /**
+//     * @return <?= $entity_class_name ?>[] Returns an array of <?= $entity_class_name ?> objects
+//     */
     /*
-    public function findBySomething($value)
+    public function findByExampleField($value)
     {
         return $this->createQueryBuilder('<?= $entity_alias; ?>')
-            ->where('<?= $entity_alias; ?>.something = :value')->setParameter('value', $value)
+            ->andWhere('<?= $entity_alias; ?>.exampleField = :val')
+            ->setParameter('val', $value)
             ->orderBy('<?= $entity_alias; ?>.id', 'ASC')
             ->setMaxResults(10)
             ->getQuery()
             ->getResult()
+        ;
+    }
+    */
+
+    /*
+    public function findOneBySomeField($value): ?<?= $entity_class_name."\n" ?>
+    {
+        return $this->createQueryBuilder('<?= $entity_alias ?>')
+            ->andWhere('<?= $entity_alias ?>.exampleField = :val')
+            ->setParameter('val', $value)
+            ->getQuery()
+            ->getOneOrNullResult()
         ;
     }
     */

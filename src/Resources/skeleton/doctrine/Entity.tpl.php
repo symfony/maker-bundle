@@ -16,5 +16,8 @@ class <?= $class_name."\n" ?>
      */
     private $id;
 
-    // add your own fields
+    public function getId()
+    {
+        return $this->id;
+    }
 }

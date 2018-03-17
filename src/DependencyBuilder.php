@@ -113,7 +113,7 @@ final class DependencyBuilder
             $packages[] = $package['name'];
         }
 
-        return $packages;
+        return array_unique($packages);
     }
 
     private function calculateMissingDependencies(array $dependencies)
@@ -134,6 +134,6 @@ final class DependencyBuilder
             return [];
         }
 
-        return array_merge($missingPackages, $missingOptionalPackages);
+        return array_unique(array_merge($missingPackages, $missingOptionalPackages));
     }
 }

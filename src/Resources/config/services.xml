@@ -9,6 +9,11 @@
 
             <service id="maker.file_manager" class="Symfony\Bundle\MakerBundle\FileManager">
                 <argument type="service" id="filesystem" />
+                <argument type="service" id="maker.autoloader_util" />
+                <argument>%kernel.project_dir%</argument>
+            </service>
+
+            <service id="maker.autoloader_util" class="Symfony\Bundle\MakerBundle\Util\AutoloaderUtil">
                 <argument>%kernel.project_dir%</argument>
             </service>
 

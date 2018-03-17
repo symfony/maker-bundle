@@ -1,5 +1,14 @@
-The <info>%command.name%</info> command generates a new entity and repository class.
+The <info>%command.name%</info> command creates or updates an entity and repository class.
 
 <info>php %command.full_name% BlogPost</info>
 
 If the argument is missing, the command will ask for the entity class name interactively.
+
+You can also generate all the getter/setter/adder/remover methods
+for the properties of existing entities:
+
+<info>php %command.full_name% --regenerate</info>
+
+You can also *overwrite* any existing methods:
+
+<info>php %command.full_name% --regenerate --overwrite</info>

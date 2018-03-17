@@ -37,7 +37,7 @@ class Generator
      */
     public function generateClass(string $className, string $templateName, array $variables): string
     {
-        $targetPath = $this->fileManager->getPathForFutureClass($className);
+        $targetPath = $this->fileManager->getRelativePathForFutureClass($className);
 
         if (null === $targetPath) {
             throw new \LogicException(sprintf('Could not determine where to locate the new class "%s".', $className));

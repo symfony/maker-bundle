@@ -14,6 +14,7 @@ class DependencyBuilderTest extends TestCase
         $depBuilder->addClassDependency('Bar', 'bar-package');
         $depBuilder->addClassDependency('DevStuff', 'dev-stuff-package', true, true);
         $depBuilder->addClassDependency('DevStuff2', 'dev-stuff2-package', true, true);
+        $depBuilder->addClassDependency('DevStuff3', 'dev-stuff2-package', true, true);
 
         $this->assertSame(['foo-package', 'bar-package'], $depBuilder->getAllRequiredDependencies());
         $this->assertSame(['dev-stuff-package', 'dev-stuff2-package'], $depBuilder->getAllRequiredDevDependencies());

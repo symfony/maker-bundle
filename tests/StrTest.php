@@ -99,4 +99,66 @@ class StrTest extends TestCase
         yield ['gen-erate:Co-mman-d', 'gen_erate_co_mman_d'];
         yield ['generate', 'generate'];
     }
+
+    /**
+     * @dataProvider getCamelCaseToPluralCamelCaseTests
+     */
+    public function testCamelCaseToPluralCamelCase(string $original, string $expected)
+    {
+        $this->assertSame(Str::singularCamelCaseToPluralCamelCase($original), $expected);
+    }
+
+    public function getCamelCaseToPluralCamelCaseTests()
+    {
+        yield ['bar', 'bars'];
+        yield ['fooBar', 'fooBars'];
+        yield ['FooBar', 'fooBars'];
+        yield ['FooABar', 'fooABars'];
+    }
+
+    /**
+     * @dataProvider getPluralCamelCaseToSingularTests
+     */
+    public function testPluralCamelCaseToSingular(string $original, string $expected)
+    {
+        $this->assertSame(Str::pluralCamelCaseToSingular($original), $expected);
+    }
+
+    public function getPluralCamelCaseToSingularTests()
+    {
+        yield ['bar', 'bar'];
+        yield ['bars', 'bar'];
+        yield ['fooBars', 'fooBar'];
+        yield ['FooBars', 'fooBar'];
+        yield ['FooABars', 'fooABar'];
+    }
+
+    /**
+     * @dataProvider getNamespaceTests
+     */
+    public function testGetNamespace(string $fullClassName, string $expectedNamespace)
+    {
+        $this->assertSame($expectedNamespace, Str::getNamespace($fullClassName));
+    }
+
+    public function getNamespaceTests()
+    {
+        yield ['App\\Entity\\Foo', 'App\\Entity'];
+        yield ['DateTime', ''];
+    }
+
+    /**
+     * @dataProvider getAsCamelCaseTests
+     */
+    public function testAsCamelCase(string $original, string $expected)
+    {
+        $this->assertSame($expected, Str::asCamelCase($original));
+    }
+
+    public function getAsCamelCaseTests()
+    {
+        yield ['foo', 'Foo'];
+
+        yield ['foo_bar.baz\\pizza', 'FooBarBazPizza'];
+    }
 }

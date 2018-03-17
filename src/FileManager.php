@@ -11,9 +11,10 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
-use Composer\Autoload\ClassLoader;
+use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -24,15 +25,17 @@ use Symfony\Component\Filesystem\Filesystem;
 class FileManager
 {
     private $fs;
+    private $autoloaderUtil;
     private $rootDirectory;
     /** @var SymfonyStyle */
     private $io;
 
-    private static $classLoader;
-
-    public function __construct(Filesystem $fs, string $rootDirectory)
+    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory)
     {
+        // move FileManagerTest stuff
+        // update EntityRegeneratorTest to mock the autoloader
         $this->fs = $fs;
+        $this->autoloaderUtil = $autoloaderUtil;
         $this->rootDirectory = rtrim($this->realpath($this->normalizeSlashes($rootDirectory)), '/');
     }
 
@@ -52,8 +55,24 @@ class FileManager
 
     public function dumpFile(string $filename, string $content)
     {
-        $this->fs->dumpFile($this->absolutizePath($filename), $content);
-        $this->io->comment(sprintf('<fg=green>created</>: %s', $this->relativizePath($filename)));
+        $absolutePath = $this->absolutizePath($filename);
+        $newFile = !$this->fileExists($filename);
+        $existingContent = $newFile ? '' : file_get_contents($absolutePath);
+
+        $comment = $newFile ? 'created' : 'updated';
+        if ($existingContent === $content) {
+            $comment = 'no change';
+        }
+
+        $this->fs->dumpFile($absolutePath, $content);
+
+        if ($this->io) {
+            $this->io->comment(sprintf(
+                '<fg=green>%s</>: %s',
+                $comment,
+                $this->relativizePath($filename)
+            ));
+        }
     }
 
     public function fileExists($path): bool
@@ -89,73 +108,26 @@ class FileManager
         return is_dir($absolutePath) ? rtrim($relativePath, '/').'/' : $relativePath;
     }
 
-    /**
-     * Returns the relative path to where a new class should live.
-     *
-     * @param string $className
-     *
-     * @return null|string
-     *
-     * @throws \Exception
-     */
-    public function getPathForFutureClass(string $className)
+    public function getFileContents(string $path): string
     {
-        // lookup is obviously modeled off of Composer's autoload logic
-        foreach ($this->getClassLoader()->getPrefixesPsr4() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
-                $path = $paths[0].'/'.str_replace('\\', '/', str_replace($prefix, '', $className)).'.php';
-
-                return $this->relativizePath($path);
-            }
+        if (!$this->fileExists($path)) {
+            throw new \InvalidArgumentException(sprintf('Cannot find file "%s"', $path));
         }
 
-        foreach ($this->getClassLoader()->getPrefixes() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
-                $path = $paths[0].'/'.str_replace('\\', '/', $className).'.php';
-
-                return $this->relativizePath($path);
-            }
-        }
-
-        if ($this->getClassLoader()->getFallbackDirsPsr4()) {
-            $path = $this->getClassLoader()->getFallbackDirsPsr4()[0].'/'.str_replace('\\', '/', $className).'.php';
-
-            return $this->relativizePath($path);
-        }
-
-        if ($this->getClassLoader()->getFallbackDirs()) {
-            $path = $this->getClassLoader()->getFallbackDirs()[0].'/'.str_replace('\\', '/', $className).'.php';
-
-            return $this->relativizePath($path);
-        }
-
-        return null;
+        return file_get_contents($this->absolutizePath($path));
     }
 
-    public function getNamespacePrefixForClass(string $className): string
+    public function createFinder(string $in)
     {
-        foreach ($this->getClassLoader()->getPrefixesPsr4() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
-                return $prefix;
-            }
-        }
+        $finder = new Finder();
+        $finder->in($this->absolutizePath($in));
 
-        return '';
+        return $finder;
     }
 
-    private function getClassLoader(): ClassLoader
+    public function isPathInVendor(string $path): bool
     {
-        if (null === self::$classLoader) {
-            $autoloadPath = $this->absolutizePath('vendor/autoload.php');
-
-            if (!file_exists($autoloadPath)) {
-                throw new \Exception(sprintf('Could not find the autoload file: "%s"', $autoloadPath));
-            }
-
-            self::$classLoader = require $autoloadPath;
-        }
-
-        return self::$classLoader;
+        return 0 === strpos($this->normalizeSlashes($path), $this->normalizeSlashes($this->rootDirectory.'/vendor/'));
     }
 
     public function absolutizePath($path): string
@@ -164,12 +136,24 @@ class FileManager
             return $path;
         }
 
-        // support windows drive paths: C:\
-        if (1 === strpos($path, ':\\')) {
+        // support windows drive paths: C:\ or C:/
+        if (1 === strpos($path, ':\\') || 1 === strpos($path, ':/')) {
             return $path;
         }
 
         return sprintf('%s/%s', $this->rootDirectory, $path);
+    }
+
+    public function getRelativePathForFutureClass(string $className): ?string
+    {
+        $path = $this->autoloaderUtil->getPathForFutureClass($className);
+
+        return null === $path ? null : $this->relativizePath($path);
+    }
+
+    public function getNamespacePrefixForClass(string $className): string
+    {
+        return $this->autoloaderUtil->getNamespacePrefixForClass($className);
     }
 
     /**

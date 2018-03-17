@@ -41,6 +41,11 @@ class MakerTestCase extends TestCase
     protected function executeMakerCommand(MakerTestDetails $testDetails)
     {
         self::$fs = new Filesystem();
+
+        if (!file_exists(self::$fixturesCachePath)) {
+            self::$fs->mkdir(self::$fixturesCachePath);
+        }
+
         if (!file_exists(self::$flexProjectPath)) {
             $this->buildFlexProject();
         }
@@ -59,7 +64,7 @@ class MakerTestCase extends TestCase
         $executableFinder = new PhpExecutableFinder();
         $phpPath = $executableFinder->find(false);
         $makerProcess = $this->createProcess(
-            sprintf('%s bin/console %s', $phpPath, ($testDetails->getMaker())::getCommandName()),
+            sprintf('%s bin/console %s %s', $phpPath, ($testDetails->getMaker())::getCommandName(), $testDetails->getArgumentsString()),
             self::$currentRootDir
         );
         $makerProcess->setTimeout(10);
@@ -88,7 +93,7 @@ class MakerTestCase extends TestCase
 
         $makerProcess->run();
 
-        if (!$makerProcess->isSuccessful()) {
+        if (!$makerProcess->isSuccessful() && !$testDetails->isCommandAllowedToFail()) {
             throw new \Exception(sprintf('Running maker command failed: "%s" "%s"', $makerProcess->getOutput(), $makerProcess->getErrorOutput()));
         }
 
@@ -137,7 +142,8 @@ class MakerTestCase extends TestCase
                 self::$currentRootDir
             );
             $process->run();
-            $this->assertTrue($process->isSuccessful(), "Error while running the PHPUnit tests *in* the project: \n\n".$process->getOutput());
+
+            $this->assertTrue($process->isSuccessful(), sprintf("Error while running the PHPUnit tests *in* the project: \n\n %s \n\n Command Output: %s", $process->getOutput(), $makerProcess->getOutput()));
         }
 
         if (null === $testDetails->getAssert()) {
@@ -170,9 +176,15 @@ class MakerTestCase extends TestCase
                 'replace' => "Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],\n    Symfony\Bundle\MakerBundle\MakerBundle::class => ['dev' => true],",
             ],
             [
+                // ugly way to autoload Maker & any other vendor libs needed in the command
                 'filename' => 'composer.json',
                 'find' => '"App\\\Tests\\\": "tests/"',
-                'replace' => sprintf('"App\\\Tests\\\": "tests/",'."\n".'            "Symfony\\\Bundle\\\MakerBundle\\\": "%s/src/"', str_replace('\\', '\\\\', __DIR__.'../../..')),
+                'replace' => sprintf(
+                    '"App\\\Tests\\\": "tests/",'."\n".'            "Symfony\\\Bundle\\\MakerBundle\\\": "%s/src/",'."\n".'            "PhpParser\\\": "%s/vendor/nikic/php-parser/lib/PhpParser"',
+                    // escape \ for Windows
+                    str_replace('\\', '\\\\', __DIR__.'../../..'),
+                    str_replace('\\', '\\\\', __DIR__.'../../..')
+                ),
             ],
         ];
         $this->processReplacements($replacements, self::$flexProjectPath);
@@ -186,7 +198,7 @@ class MakerTestCase extends TestCase
     {
         $files = [];
         foreach (explode("\n", $output) as $line) {
-            if (false === strpos($line, 'created:')) {
+            if (false === strpos($line, 'created:') && false === strpos($line, 'updated:')) {
                 continue;
             }
 
