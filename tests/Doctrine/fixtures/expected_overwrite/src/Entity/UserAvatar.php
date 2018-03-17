@@ -38,6 +38,4 @@ class UserAvatar
 
         return $this;
     }
-
-    // add your own fields
 }

@@ -21,6 +21,4 @@ class UserAvatar
      * @ORM\JoinColumn(nullable=false)
      */
     private $user;
-
-    // add your own fields
 }

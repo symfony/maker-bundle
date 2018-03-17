@@ -20,6 +20,4 @@ class User
     {
         return $this->id;
     }
-
-    // add your own fields
 }

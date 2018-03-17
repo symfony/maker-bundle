@@ -27,6 +27,4 @@ class User
 
         return $this;
     }
-
-    // add your own fields
 }

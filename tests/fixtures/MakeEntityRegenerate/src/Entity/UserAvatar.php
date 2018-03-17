@@ -26,6 +26,4 @@ class UserAvatar
     {
         return $this->id;
     }
-
-    // add your own fields
 }

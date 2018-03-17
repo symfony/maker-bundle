@@ -21,6 +21,4 @@ class UserProfile
      * @ORM\JoinColumn(nullable=false)
      */
     private $user;
-
-    // add your own fields
 }

@@ -11,6 +11,4 @@ class User
         // custom comment
         return $this->id;
     }
-
-    // add your own fields
 }

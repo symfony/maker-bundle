@@ -45,6 +45,4 @@ class User
     {
         return $this->createdAt;
     }
-
-    // add your own fields
 }

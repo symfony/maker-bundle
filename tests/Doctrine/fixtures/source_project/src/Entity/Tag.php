@@ -20,6 +20,4 @@ class Tag
     {
         return $this->id;
     }
-
-    // add your own fields
 }

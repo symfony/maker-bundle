@@ -43,6 +43,4 @@ class UserProfile
 
         return $this;
     }
-
-    // add your own fields
 }

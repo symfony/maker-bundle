@@ -52,6 +52,4 @@ class User
     {
         $this->userProfile = $userProfile;
     }
-
-    // add your own fields
 }

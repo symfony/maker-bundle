@@ -36,6 +36,4 @@ class User
         // some custom comment
         return $this->firstName;
     }
-
-    // add your own fields
 }

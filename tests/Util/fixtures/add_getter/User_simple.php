@@ -25,6 +25,4 @@ class User
     {
         return $this->fooProp;
     }
-
-    // add your own fields
 }

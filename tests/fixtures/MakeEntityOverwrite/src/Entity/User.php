@@ -25,6 +25,4 @@ class User
     {
         throw new \Exception('This does not work!');
     }
-
-    // add your own fields
 }
