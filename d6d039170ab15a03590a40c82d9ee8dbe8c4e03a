@@ -1,0 +1,345 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-01-08T20:19:25Z
+
+Made a few tweaks and improvements! Ready for review again :)
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-01-09T01:56:56Z
+
+I've also *started* support for relations/associations. You can see the beginning of how this will work (the command now supports relation types). But nothing generates yet :).
+
+---------------------------------------------------------------------------
+
+by codedmonkey at 2018-01-09T14:41:12Z
+
+Very nice work. I like the idea of the `ClassSourceManipulator`, as it could be a basis for structured customization of the output, but it would need to be injectable for that.
+
+I also like the idea of a relation helper. Here's my idea of a verbose guide that puts less emphasis on the words one and many and more on the collection aspect:
+
+     Class name of the entity to create or update (e.g. GentleChef):
+     > Article
+
+     New field name (press <return> to stop adding fields):
+     > sections
+
+     Field type (enter ? to see all types) [string]:
+     > relation
+
+     What class should this entity be related to?:
+     > Section
+
+    ManyToOne  The sections field is a reference to a single Section object.
+               The Section object can have a field with a collection of Article objects.
+
+    OneToMany  The sections field is a collection of Section objects.
+               The Section object has a field referencing a single Article object.
+
+    ManyToMany The sections field is a collection of Section objects.
+               The Section object has a field with a collection of Article objects.
+               A join table is created to store the relationships between the objects.
+
+    OneToOne   The sections field is a reference to a single Section object.
+               The Section object can have a field referencing a single Article object.
+
+Just an idea of course :) Keep up the good work.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-01-09T19:21:37Z
+
+FYI = I've just set this back to WIP, and I'm going to finish the relation stuff in this PR.
+
+@codedmonkey thanks for the quick review of things and UX suggestions! I actually already modified the text a bit further before reading this, but eventually, your version might be better. When I've fully finished the command (as I'm still messing around and doing all kinds of craziness), I would very much appreciate your review again! :)
+
+---------------------------------------------------------------------------
+
+by tvogt at 2018-01-20T07:04:14Z
+
+This is excellent. Will it work on existing Entities? Because most of the time, while prototyping, I will start with a simple entity, and then add fields and relations to it alter.
+
+---------------------------------------------------------------------------
+
+by TheKassaK at 2018-02-07T14:41:40Z
+
+Hello, i'm here because I'm looking for the old command : php bin/console doctrine:generate:entities for generate getters and setters... Any news ?
+
+---------------------------------------------------------------------------
+
+by biji at 2018-02-07T15:24:59Z
+
+Adding setter and getter to existing entity would be great
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-02-07T19:20:07Z
+
+I’ll be pushing the final version during the next day I hope. Generating getters/setters to an existing entity IS supported - I think you’ll like it ;)
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-02-08T01:37:20Z
+
+Ok! Just added support for regenerating getters/setters (to replace `doctrine:generate:entities`) AND support for relationships! Wooo!
+
+There is an external blocker for release (see above), but it's time to review and test. I'm quite confident in this feature, but (as you can see by the PR), it's quite complex.
+
+---------------------------------------------------------------------------
+
+by Kudze at 2018-02-12T17:05:44Z
+
+I've tested it. Looks really nice, however I have some suggestions for make:entity.
+
+When generating a string `generate:doctrine:entity` used to ask for length, and this one doesn't. In my opinion it should ask for it.
+
+Also an option for setters that would return the object would be nice. (If you can't understand what i mean by `setters that would return the object`, heres an example)
+```
+class Entity {
+
+    private $value;
+
+    //...
+
+    public funcition setValue(string $value) : Entity
+    {
+        $this->value = $value;
+
+        return $this;
+    }
+
+    //...
+
+}
+```
+This would allow to set a lot of variables at once like this:
+```
+$entity->setValue1("val1")->setValue2(420);
+```
+
+---------------------------------------------------------------------------
+
+by Xymanek at 2018-02-12T17:16:36Z
+
+> Also an option for setters that would return the object
+
+Usually called fluent setters
+
+---------------------------------------------------------------------------
+
+by gabiudrescu at 2018-02-13T20:46:09Z
+
+I just (briefly) tested this and looks very nice. It is definitely an improvement from previous command.
+
+Two mentions, one already said:
+ - the new command does not ask how long it should be a string field (something the old command did); but it's not a deal breaker, IMO
+ - there seems to be an opinionated command that allows only annotations mapping; not a bad thing, but some prefer yaml or xml.
+
+ok, I admit, I prefer yaml. I know that Doctrine maintainers are not big fans of this format and they plan to remove the support for it. but is this command going to support other mapping formats besides annotations?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-02-14T14:39:07Z
+
+Thanks for the feedback guys! Awesome! Both suggestions - the length & fluent setters - were something I was thinking about. I’ll add those :).
+
+About Yaml or XML, it’s sort of supported :). You cannot use the command to generate XML mapping code or YAML. But if you write some YAML, you can run make:entity -- regenerate to create al the getters and setters. I’d really like to *not* support anything beyond this... but we’ll see ;)
+
+---------------------------------------------------------------------------
+
+by stof at 2018-02-14T15:22:07Z
+
+> About Yaml or XML, it’s sort of supported :). You cannot use the command to generate XML mapping code or YAML. But if you write some YAML, you can run make:entity -- regenerate to create al the getters and setters. I’d really like to not support anything beyond this... but we’ll see ;)
+
+@weaverryan would this regeneration generate the mapping annotations on properties too or no ? If yes, your solution does not work (having both the XML and the annotation mapping will cause issues, as you would then have 2 source of truth for the mapping, with Doctrine probably using only one of them, but maybe not the one you modified)
+
+---------------------------------------------------------------------------
+
+by gabiudrescu at 2018-02-14T15:42:31Z
+
+to make the discussion simpler: if someone has only XML annotations in the app, is that person going to be able to use this command or not?
+
+or should the app be migrated to metadata written as annotation so this command can be used?
+
+I'm asking this to clarify the behavior, not because I'm requesting any implementations. I feel that it should remain written so it can be indexed by search engines and answer future questions.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-02-14T17:24:05Z
+
+Hey guys!
+
+If you have xml or yaml, the regenerate option generates the getters and setters, but does NOT add annotations to your class. So, your original xml or yaml is still used.
+
+So yes! This command IS still useful for someone uselse by XML or yaml. Well, *half* of the command is useful: the normal version that asks for new fields is not useful. In fact, that *would* generate new fields with annotations. I should throw an exception in this case to tell the user what’s going on :). But the regenerate option *does* work fine with xml or yaml.
+
+---------------------------------------------------------------------------
+
+by gabiudrescu at 2018-02-15T07:03:48Z
+
+if I got this right, when starting a new project you have the following options for your entities mapping:
+ - write yaml or xml by hand and use the command to generate PHP classes based on these files
+ - use the command entirely and go with annotations
+
+well, although personally I would have liked the idea of having yaml generated by the command to, given that Doctrine is planning to drop support for it, this sounds like a good compromise for switching to annotations.
+
+and the new command also sweetens the deal of adopting a new format.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-02-28T15:47:24Z
+
+Updates! Added:
+
+* Fluent setters/adders/removers
+* For string field, `make:entity` now asks for the field length
+* Error if you try to generate classes that use non-annotation mapping
+
+The only current block is waiting for the stable 4.0 of nikic/PHP-Parser - see nikic/PHP-Parser#474
+
+---------------------------------------------------------------------------
+
+by nckenn at 2018-03-01T01:54:38Z
+
+nikic/PHP-Parser#474 has now a stable version, hope you can make release version of this PR :)
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-03-01T21:07:56Z
+
+Ok! I've just updated to use `nikic/PHP-Parser` 4.0 *stable*!
+
+There are no known, pending issues with this PR. So, now would be the time for anyone to do any last review or testing.
+
+The tests on appveyor ARE randomly failing - different tests each time :/. I've started debugging them, but the circumstances are very odd. As long as no appveyor tests consistently fail, I'm not going to let that block this PR (i.e. we'll debug the phantom failures later).
+
+Cheers!
+
+---------------------------------------------------------------------------
+
+by MrNicodemuz at 2018-03-03T03:59:47Z
+
+@weaverryan regarding the randomly failing tests, maybe you can let your CI script echo out the User entity that seems to have the missing methods.
+
+Maybe it's a file permission issue or the disk is full?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-03-03T17:41:52Z
+
+Thanks for checking the tests :). I actually did that earlier from inside the test class that reports them missing. Ready for your mind to be blown? The methods were there! It’s as if the test class in the tmp project already have an old version of the class in memory, but I don’t know how that’s possible, or what on windows would cause it. I’m open to ideas :)
+
+---------------------------------------------------------------------------
+
+by Gwynei at 2018-03-06T07:19:03Z
+
+This is the most wanted feature for me in Symfony 4.
+
+I have tested it, and I have two suggestions:
+
+- Is it possible to regenerate ALL entities at once? Not that all entities will be changed, but thing is that it speeds up developing. For example, I make changes in six entities (deleted ManyToOne, changed data type, added field, etc), now I have to run the --regenerate command six times and I have to find out the exact names of those six entities. In Symfony 3.4 I could run doctrine:generate:entities App and it would check/update every entity.
+
+- Minor one: When generating an entity and you use the maker to generate fields, the // your fields here comment is at the bottom, after the $id field and the GetId() getter. Previously it was between those two (I usually have all my fields first, and then the getters/setters.
+
+Thanks a bunch!
+
+[EDIT]
+Found a bug (I think) fields with nullable=true give this error while regenerating:
+
+```
+2018-03-06T09:29:26+01:00 [error] Error thrown while running command "make:entity --regenerate". ` Message: "Notice: Undefined index: nullable"
+
+In EntityRegenerator.php line 127:
+
+Notice: Undefined index: nullable
+```
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-03-11T18:42:12Z
+
+Thanks for testing @Gwynei :). About your questions/comments:
+
+> Is it possible to regenerate ALL entities at once? Not that all entities will be changed, but thing is that it speeds up developing. For example, I make changes in six entities (deleted ManyToOne, changed data type, added field, etc), now I have to run the --regenerate command six times and I have to find out the exact names of those six entities. In Symfony 3.4 I could run doctrine:generate:entities App and it would check/update every entity.
+
+Yes, you should be able to just do `bin/console make:entity --regenerate` and use the default `App` value (i.e. the namespace, not the class name) for the one question. You can regenerate a single class, or *all* classes matching a namespace. Let me know if you're seeing otherwise.
+
+> Minor one: When generating an entity and you use the maker to generate fields, the // your fields here comment is at the bottom, after the $id field and the GetId() getter. Previously it was between those two (I usually have all my fields first, and then the getters/setters.
+
+Good catch! I'm going to remove the comment entirely.
+
+> Found a bug (I think) fields with nullable=true give this error while regenerating:
+
+> 2018-03-06T09:29:26+01:00 [error] Error thrown while running command "make:entity --regenerate". ` Message: "Notice: Undefined index: nullable"
+> In EntityRegenerator.php line 127:
+> Notice: Undefined index: nullable
+
+Another good catch - I should have it fixed now :). But let me know if you see anything else like this.
+
+---------------------------------------------------------------------------
+
+by Gwynei at 2018-03-12T19:42:08Z
+
+Thanks for the fixes @weaverryan - works fine now!
+
+If I may do one more request? Can you make it so that I can give a parameter to the entity/entities to regenerate? Such as this:
+
+`bin/console make:entity --regenerate App`
+or
+`bin/console make:entity --regenerate App\Entity\User`
+
+Not mandatory but just a convenience. :)
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-03-16T00:40:02Z
+
+@Gwynei good catch - I've fixed the command so you can just run `bin/console make:entity --regenerate App` and *not* get the interactive question - that was *indeed* the intention :)
+
+---------------------------------------------------------------------------
+
+by MrNicodemuz at 2018-03-16T07:09:21Z
+
+Can we add an option to skip generation of annotations? I'm using YML.
+
+---------------------------------------------------------------------------
+
+by MrNicodemuz at 2018-03-16T07:27:21Z
+
+Adding a comment on an field does not work:
+
+    App\Entity\Testing:
+        type: entity
+        table: testing
+        repositoryClass: App\Repository\TestingRepository
+        id:
+            id:
+                type: integer
+                id: true
+                generator:
+                    strategy: AUTO
+        fields:
+            created:
+                type: datetime
+                options:
+                    comment: Date of creation.
+
+It gives me the following error:
+
+    In ClassSourceManipulator.php line 211:
+
+      Not currently supported
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-03-17T18:00:12Z
+
+@MrNicodemuz
+
+> Can we add an option to skip generation of annotations? I'm using YML.
+
+I don't understand what you mean. If you use YAML, you cannot use this command to add new fields: you can only use the `--regenerate` option. And when you use the `--regenerate` option, it only generates the properties, getters, setters, etc - it does *not* generate annotations above the properties. If you see something different, please let me know :).
+
+> It gives me the following error:
+
+This is legit - I just finished telling someone this situation wasn't possible. I was wrong :). I'll fix it.
