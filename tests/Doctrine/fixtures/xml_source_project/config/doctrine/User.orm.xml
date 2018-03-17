@@ -7,6 +7,11 @@
         <id name="id" type="integer">
             <generator strategy="AUTO" />
         </id>
+        <field name="name" type="string" length="100">
+            <options>
+                <option name="coment">First Name</option>
+            </options>
+        </field>
         <one-to-many field="avatars" target-entity="UserAvatar" mapped-by="user" />
     </entity>
 </doctrine-mapping>

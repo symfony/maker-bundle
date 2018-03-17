@@ -206,5 +206,7 @@ final class EntityRegenerator
                 'entity_alias' => strtolower($entityClassName[0]),
             ]
         );
+
+        $this->generator->writeChanges();
     }
 }
