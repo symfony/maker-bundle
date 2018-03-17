@@ -23,7 +23,7 @@ class <?= $class_name ?> extends Controller
 <?php if (isset($repository_full_class_name)): ?>
     public function index(<?= $repository_class_name ?> $<?= $repository_var ?>): Response
     {
-        return $this->render('<?= $route_name ?>/index.html.twig', ['<?= $entity_var_plural ?>' => $<?= $repository_var ?>->findAll()]);
+        return $this->render('<?= $route_name ?>/index.html.twig', ['<?= $entity_twig_var_plural ?>' => $<?= $repository_var ?>->findAll()]);
     }
 <?php else: ?>
     public function index(): Response
@@ -92,13 +92,11 @@ class <?= $class_name ?> extends Controller
      */
     public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
-        if (!$this->isCsrfTokenValid('delete'.$<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(), $request->request->get('_token'))) {
-            return $this->redirectToRoute('<?= $route_name ?>_index');
+        if ($this->isCsrfTokenValid('delete'.$<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(), $request->request->get('_token'))) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($<?= $entity_var_singular ?>);
+            $em->flush();
         }
-
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($<?= $entity_var_singular ?>);
-        $em->flush();
 
         return $this->redirectToRoute('<?= $route_name ?>_index');
     }

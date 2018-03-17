@@ -344,6 +344,35 @@ class FunctionalTest extends MakerTestCase
             })
         ];
 
+        yield 'crud_repository' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeCrud::class),
+            [
+                // entity class name
+                'SweetFood',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudRepository')
+            // need for crud web tests
+            ->addExtraDependencies('symfony/css-selector')
+            ->addReplacement(
+                'phpunit.xml.dist',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                'sqlite:///%kernel.project_dir%/var/app.db'
+            )
+            ->addReplacement(
+                '.env',
+                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                'sqlite:///%kernel.project_dir%/var/app.db'
+            )
+            ->addPreMakeCommand('php bin/console doctrine:schema:create --env=test')
+            ->assert(function(string $output, string $directory) {
+                 $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
+                 $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
+
+                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
+                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
+            })
+        ];
+
         yield 'crud_with_no_base' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeCrud::class),
             [
