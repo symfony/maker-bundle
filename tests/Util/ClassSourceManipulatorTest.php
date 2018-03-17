@@ -211,6 +211,7 @@ class ClassSourceManipulatorTest extends TestCase
                 'type' => 'string',
                 'length' => 255,
                 'nullable' => false,
+                'options' => ['comment' => 'new field']
             ],
             false, // only methods
             'User_simple.php'

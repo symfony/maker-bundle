@@ -206,6 +206,10 @@ final class ClassSourceManipulator
         $formattedOptions = array_map(function ($option, $value) {
             if (is_array($value)) {
                 if (!isset($value[0])) {
+                    return sprintf('%s={%s}', $option, implode(', ', array_map(function ($val, $key) {
+                        return sprintf('"%s" = %s', $key, $this->quoteAnnotationValue($val));
+                    }, $value, array_keys($value))));
+
                     // associative array: we'll add this if/when we need it
                     throw new \Exception('Not currently supported');
                 }
