@@ -61,6 +61,9 @@ class MakerTestCase extends TestCase
             }
         }
 
+        $cacheProcess = $this->createProcess('php bin/console cache:clear', $workingDir);
+        $cacheProcess->run();
+
         $executableFinder = new PhpExecutableFinder();
         $phpPath = $executableFinder->find(false);
         $makerProcess = $this->createProcess(
