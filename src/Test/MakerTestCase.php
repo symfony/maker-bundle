@@ -51,10 +51,10 @@ class MakerTestCase extends TestCase
         }
 
         // puts the project into self::$currentRootDir
-        $this->prepareProjectDirectory($testDetails);
+        $workingDir = $this->prepareProjectDirectory($testDetails);
 
         foreach ($testDetails->getPreMakeCommands() as $preCommand) {
-            $process = $this->createProcess($preCommand, self::$currentRootDir);
+            $process = $this->createProcess($preCommand, $workingDir);
             $process->run();
             if (!$process->isSuccessful()) {
                 throw new \Exception(sprintf('Error with pre command: "%s": "%s" "%s"', $preCommand, $process->getOutput(), $process->getErrorOutput()));
@@ -65,7 +65,7 @@ class MakerTestCase extends TestCase
         $phpPath = $executableFinder->find(false);
         $makerProcess = $this->createProcess(
             sprintf('%s bin/console %s %s', $phpPath, ($testDetails->getMaker())::getCommandName(), $testDetails->getArgumentsString()),
-            self::$currentRootDir
+            $workingDir
         );
         $makerProcess->setTimeout(10);
 
@@ -103,7 +103,7 @@ class MakerTestCase extends TestCase
                 sprintf(
                     'php vendor/bin/php-cs-fixer --config=%s fix --dry-run --diff %s',
                     __DIR__.'/../Resources/test/.php_cs.test',
-                    self::$currentRootDir.'/'.$file
+                    $workingDir.'/'.$file
                 ),
                 __DIR__.'/../../'
             );
@@ -116,7 +116,7 @@ class MakerTestCase extends TestCase
             $process = $this->createProcess(
                 sprintf(
                     'php vendor/bin/twigcs lint %s',
-                    self::$currentRootDir.'/'.$file
+                    $workingDir.'/'.$file
                 ),
                 __DIR__.'/../../'
             );
@@ -125,7 +125,7 @@ class MakerTestCase extends TestCase
         }
 
         foreach ($testDetails->getPostMakeCommands() as $postCommand) {
-            $process = $this->createProcess($postCommand, self::$currentRootDir);
+            $process = $this->createProcess($postCommand, $workingDir);
             $process->run();
             if (!$process->isSuccessful()) {
                 throw new \Exception(sprintf('Error with post command: "%s": "%s" "%s"', $postCommand, $process->getOutput(), $process->getErrorOutput()));
@@ -133,13 +133,13 @@ class MakerTestCase extends TestCase
         }
 
         $finder = new Finder();
-        $finder->in(self::$currentRootDir.'/tests')->files();
+        $finder->in($workingDir.'/tests')->files();
         if ($finder->count() > 0) {
             // execute the tests that were moved into the project!
             $process = $this->createProcess(
                 // using OUR simple-phpunit for speed (to avoid downloading more deps)
                 __DIR__.'/../../vendor/bin/simple-phpunit',
-                self::$currentRootDir
+                $workingDir
             );
             $process->run();
 
@@ -150,8 +150,10 @@ class MakerTestCase extends TestCase
             // a generic assert
             $this->assertContains('Success', $makerProcess->getOutput(), $makerProcess->getErrorOutput());
         } else {
-            ($testDetails->getAssert())($makerProcess->getOutput(), self::$currentRootDir);
+            ($testDetails->getAssert())($makerProcess->getOutput(), $workingDir);
         }
+
+        $this->resetProjectDirectory($testDetails);
     }
 
     protected function assertContainsCount(string $needle, string $haystack, int $count)
@@ -228,11 +230,32 @@ class MakerTestCase extends TestCase
 
     private function createProcess($commandLine, $cwd)
     {
-        $process = new Process($commandLine, $cwd);
+        $process = new Process($commandLine, $cwd, null, null, null);
         // avoid 3.x deprecation warnings
         $process->inheritEnvironmentVariables();
 
         return $process;
+    }
+
+    private function createSnapshot(string $fixturesCacheDir, $save = false): array
+    {
+        $fixturesCacheDir = realpath($fixturesCacheDir);
+
+        $snapshot = [];
+        $finder = new Finder();
+        $finder->files()->in($fixturesCacheDir)->exclude(['vendor','var/cache', 'var/log']);
+        if ($finder->count() > 0) {
+            foreach ($finder as $file) {
+                $snapshot[] = $file->getPathname();
+            }
+            $snapshot[] = $fixturesCacheDir.DIRECTORY_SEPARATOR.basename($fixturesCacheDir).'.lock';
+
+            if ($save) {
+                self::$fs->dumpFile(realpath($fixturesCacheDir).'/'.basename($fixturesCacheDir).'.lock', json_encode($snapshot));
+            }
+        }
+
+        return $snapshot;
     }
 
     private function prepareProjectDirectory(MakerTestDetails $makerTestDetails)
@@ -244,6 +267,7 @@ class MakerTestCase extends TestCase
         // initialize the app corresponding to *this* fixtures directory
         // and put it in a cache file so any re-runs are much faster
         $fixturesCacheDir = self::$fixturesCachePath.'/'.$makerTestDetails->getUniqueCacheDirectoryName();
+
         if (!file_exists($fixturesCacheDir)) {
             try {
                 self::$fs->mirror(self::$flexProjectPath, $fixturesCacheDir);
@@ -253,6 +277,8 @@ class MakerTestCase extends TestCase
                     $process = $this->createProcess(sprintf('composer require %s', implode(' ', $dependencies)), $fixturesCacheDir);
                     $this->runProcess($process);
                 }
+
+                $this->createSnapshot($fixturesCacheDir, true);
             } catch (ProcessFailedException $e) {
                 self::$fs->remove($fixturesCacheDir);
 
@@ -260,13 +286,13 @@ class MakerTestCase extends TestCase
             }
         }
 
-        self::$fs->remove(self::$currentRootDir);
-        self::$fs->mirror($fixturesCacheDir, self::$currentRootDir);
+        $fixturesCacheDir = realpath($fixturesCacheDir);
 
         // re-dump the autoloader so that it's correct for the new directory
         // this is due the directory being moved and Composer storing the
         // path internally in a relative way
-        $process = $this->createProcess('composer dump-autoload', self::$currentRootDir);
+
+        $process = $this->createProcess('composer dump-autoload', $fixturesCacheDir);
         $this->runProcess($process);
 
         if (null !== $makerTestDetails->getFixtureFilesPath()) {
@@ -279,12 +305,61 @@ class MakerTestCase extends TestCase
                     continue;
                 }
 
-                self::$fs->copy($file->getPathname(), self::$currentRootDir.'/'.$file->getRelativePathname(), true);
+                self::$fs->copy($file->getPathname(), $fixturesCacheDir.'/'.$file->getRelativePathname(), true);
             }
         }
 
         if ($makerTestDetails->getReplacements()) {
-            $this->processReplacements($makerTestDetails->getReplacements(), self::$currentRootDir);
+            $this->processReplacements($makerTestDetails->getReplacements(), $fixturesCacheDir);
+        }
+
+        if ($makerTestDetails->getIgnoredFiles()) {
+            foreach ($makerTestDetails->getIgnoredFiles() as $file) {
+                if (file_exists($fixturesCacheDir.$file)) {
+                    self::$fs->rename($fixturesCacheDir.$file, $fixturesCacheDir.$file.'.ignored');
+                }
+            }
+        }
+
+        return $fixturesCacheDir;
+    }
+
+    private function resetProjectDirectory(MakerTestDetails $makerTestDetails)
+    {
+        $fixturesCacheDir = realpath(self::$fixturesCachePath.'/'.$makerTestDetails->getUniqueCacheDirectoryName());
+
+        $cleanSnapshot = json_decode(file_get_contents(realpath($fixturesCacheDir).'/'.basename($fixturesCacheDir).'.lock'));
+        $currentSnapshot = $this->createSnapshot($fixturesCacheDir);
+
+        $diff = array_diff($currentSnapshot, $cleanSnapshot);
+
+        if (count($diff)) {
+            self::$fs->remove($diff);
+        }
+
+        $this->unignoreFiles($makerTestDetails->getIgnoredFiles(), $fixturesCacheDir);
+        $this->revertReplacements($makerTestDetails->getReplacements(), $fixturesCacheDir);
+    }
+
+    private function unignoreFiles(array $files, $rootDir)
+    {
+        foreach ($files as $file) {
+            if (file_exists($rootDir.$file.'.ignore')) {
+                self::$fs->rename($rootDir.$file.'.ignore', $rootDir.$file);
+            }
+        }
+    }
+
+    private function revertReplacements(array $replacements, $rootDir)
+    {
+        foreach ($replacements as $replacement) {
+            $path = $rootDir.'/'.$replacement['filename'];
+            $contents = file_get_contents($path);
+            if (false === strpos($contents, $replacement['replace'])) {
+                continue;
+            }
+
+            file_put_contents($path, str_replace($replacement['replace'], $replacement['find'], $contents));
         }
     }
 

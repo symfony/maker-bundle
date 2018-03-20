@@ -22,6 +22,8 @@ final class MakerTestDetails
 
     private $fixtureFilesPath;
 
+    private $ignoredFiles = [];
+
     private $replacements = [];
 
     private $preMakeCommands = [];
@@ -72,6 +74,18 @@ final class MakerTestDetails
         $this->postMakeCommands[] = $postMakeCommand;
 
         return $this;
+    }
+
+    public function ignoreFile(string $filename): self
+    {
+        $this->ignoredFiles[] = $filename;
+
+        return $this;
+    }
+
+    public function getIgnoredFiles(): array
+    {
+        return $this->ignoredFiles;
     }
 
     public function addReplacement(string $filename, string $find, string $replace): self
