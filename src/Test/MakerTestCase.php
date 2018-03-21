@@ -246,7 +246,7 @@ class MakerTestCase extends TestCase
 
         $snapshot = [];
         $finder = new Finder();
-        $finder->files()->in($fixturesCacheDir)->exclude(['vendor','var/cache', 'var/log']);
+        $finder->files()->in($fixturesCacheDir)->exclude(['vendor', 'var/cache', 'var/log']);
         if ($finder->count() > 0) {
             foreach ($finder as $file) {
                 $snapshot[] = $file->getPathname();
