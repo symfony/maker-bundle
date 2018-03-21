@@ -23,6 +23,9 @@ install:
     - composer --prefer-dist install
     - ./vendor/bin/simple-phpunit install
 
+before_script:
+    - phpenv config-rm xdebug.ini
+
 script:
     - ./vendor/bin/simple-phpunit
     - ./vendor/bin/php-cs-fixer fix --dry-run
