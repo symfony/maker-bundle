@@ -62,7 +62,7 @@ final class Validator
             throw new RuntimeCommandException(sprintf('Invalid length "%s".', $length));
         }
 
-        return $length;
+        return $result;
     }
 
     public static function validatePrecision($precision)
@@ -79,7 +79,7 @@ final class Validator
             throw new RuntimeCommandException(sprintf('Invalid precision "%s".', $precision));
         }
 
-        return $precision;
+        return $result;
     }
 
     public static function validateScale($scale)
@@ -96,7 +96,7 @@ final class Validator
             throw new RuntimeCommandException(sprintf('Invalid scale "%s".', $scale));
         }
 
-        return $scale;
+        return $result;
     }
 
     public static function validateBoolean($value)
