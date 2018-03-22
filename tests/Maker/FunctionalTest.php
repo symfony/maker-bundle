@@ -548,7 +548,7 @@ class FunctionalTest extends MakerTestCase
                 // add a relationship field
                 'ManyToOne',
                 // the target entity
-                'Some\Vendor\Group',
+                'Some\\Vendor\\Group',
                 // nullable
                 '',
                 /*
