@@ -83,7 +83,7 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController')
             ->assert(function(string $output, string $directory) {
                 // make sure the template was not configured
-                $this->assertFileExists($directory.'/src/Controller/FooBarController.php');
+                $this->assertContainsCount('created: ', $output, 1);
             })
         ];
 
@@ -95,9 +95,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeControllerTwig')
             ->addExtraDependencies('twig')
-            ->assert(function(string $output, string $directory) {
-                $this->assertFileExists($directory.'/templates/foo_twig/index.html.twig');
-            })
         ];
 
         yield 'controller_with_template_no_base' => [MakerTestDetails::createTest(
@@ -108,7 +105,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeControllerTwig')
             ->addExtraDependencies('twig')
-            //->addPreMakeCommand('rm templates/base.html.twig')
             ->ignoreFile('/templates/base.html.twig')
         ];
 
@@ -121,7 +117,7 @@ class FunctionalTest extends MakerTestCase
             ->assert(function(string $output, string $directory) {
                 $this->assertFileExists($directory.'/src/Controller/Admin/FooBarController.php');
 
-                //$this->assertContains('created: src/Controller/Admin/FooBarController.php', $output);
+                $this->assertContains('created: src/Controller/Admin/FooBarController.php', $output);
             })
         ];
 
@@ -145,10 +141,8 @@ class FunctionalTest extends MakerTestCase
             ])
             ->addExtraDependencies('twig')
             ->assert(function (string $output, string $directory) {
-                $this->assertFileExists($directory.'/src/Foo/Bar/CoolController.php');
-                $this->assertFileExists($directory.'/templates/foo/bar/cool/index.html.twig');
-//                $this->assertContains('created: src/Foo/Bar/CoolController.php', $output);
-//                $this->assertContains('created: templates/foo/bar/cool/index.html.twig', $output);
+                $this->assertContains('created: src/Foo/Bar/CoolController.php', $output);
+                $this->assertContains('created: templates/foo/bar/cool/index.html.twig', $output);
             })
         ];
 
@@ -158,8 +152,7 @@ class FunctionalTest extends MakerTestCase
                 'AppFixtures'
             ])
             ->assert(function(string $output, string $directory) {
-                $this->assertFileExists($directory.'/src/DataFixtures/AppFixtures.php');
-                //$this->assertContains('created: src/DataFixtures/AppFixtures.php', $output);
+                $this->assertContains('created: src/DataFixtures/AppFixtures.php', $output);
             })
         ];
 
@@ -312,11 +305,8 @@ class FunctionalTest extends MakerTestCase
             ->addExtraDependencies('symfony/css-selector')
             ->configureDatabase()
             ->assert(function(string $output, string $directory) {
-                $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
-                $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
-
-                //$this->assertContains('created: src/Controller/SweetFoodController.php', $output);
-                //$this->assertContains('created: src/Form/SweetFoodType.php', $output);
+                $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
+                $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
         ];
 
@@ -331,11 +321,8 @@ class FunctionalTest extends MakerTestCase
             ->addExtraDependencies('symfony/css-selector')
             ->configureDatabase()
             ->assert(function(string $output, string $directory) {
-                 $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
-                 $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
-
-                 //$this->assertContains('created: src/Controller/SweetFoodController.php', $output);
-                 //$this->assertContains('created: src/Form/SweetFoodType.php', $output);
+                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
+                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
         ];
 
@@ -352,11 +339,8 @@ class FunctionalTest extends MakerTestCase
             //->addPreMakeCommand('rm templates/base.html.twig')
             ->ignoreFile('/templates/base.html.twig')
             ->assert(function(string $output, string $directory) {
-                $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
-                $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
-
-                //$this->assertContains('created: src/Controller/SweetFoodController.php', $output);
-                //$this->assertContains('created: src/Form/SweetFoodType.php', $output);
+                $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
+                $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
         ];
     }
@@ -583,8 +567,8 @@ class FunctionalTest extends MakerTestCase
                 '"App\\\Tests\\\": "tests/",' . "\n" . '            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
             ->assert(function (string $output, string $directory) {
-                //$this->assertContains('updated: src/Entity/User.php', $output);
-                //$this->assertNotContains('updated: vendor/', $output);
+                $this->assertContains('updated: src/Entity/User.php', $output);
+                $this->assertNotContains('updated: vendor/', $output);
 
                 // sanity checks on the generated code
                 $finder = new Finder();
@@ -622,7 +606,7 @@ class FunctionalTest extends MakerTestCase
                 '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
             ->assert(function(string $output, string $directory) {
-                //$this->assertNotContains('updated: vendor/', $output);
+                $this->assertNotContains('updated: vendor/', $output);
 
                 $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
             })
@@ -657,7 +641,7 @@ class FunctionalTest extends MakerTestCase
                 '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
             ->assert(function(string $output, string $directory) {
-                //$this->assertNotContains('updated: vendor/', $output);
+                $this->assertNotContains('updated: vendor/', $output);
 
                 $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
             })
