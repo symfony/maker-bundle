@@ -302,7 +302,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
             // need for crud web tests
-            ->addExtraDependencies('symfony/css-selector')
             ->configureDatabase()
             ->assert(function(string $output, string $directory) {
                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
@@ -318,7 +317,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudRepository')
             // need for crud web tests
-            ->addExtraDependencies('symfony/css-selector')
             ->configureDatabase()
             ->assert(function(string $output, string $directory) {
                  $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
@@ -336,7 +334,6 @@ class FunctionalTest extends MakerTestCase
             // need for crud web tests
             ->addExtraDependencies('symfony/css-selector')
             ->configureDatabase()
-            //->addPreMakeCommand('rm templates/base.html.twig')
             ->ignoreFile('/templates/base.html.twig')
             ->assert(function(string $output, string $directory) {
                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);

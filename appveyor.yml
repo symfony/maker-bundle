@@ -31,7 +31,7 @@ environment:
         php_ver_target: 7.2
 
 install:
-    #- IF EXIST c:\tools\php (SET PHP=0) # Checks for the PHP install being cached
+    - IF EXIST c:\tools\php (SET PHP=0) # Checks for the PHP install being cached
     - ps: appveyor-retry cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version ((choco search php --exact --all-versions -r | select-string -pattern $env:php_ver_target | sort { [version]($_ -split '\|' | select -last 1) } -Descending | Select-Object -first 1) -replace '[php|]','')
     - cd c:\tools\php
     - IF %PHP%==1 copy php.ini-production php.ini /Y
@@ -47,6 +47,7 @@ install:
     - cd c:\projects\maker-bundle
     - IF %dependencies%==lowest appveyor-retry composer update --prefer-lowest --no-progress --profile -n
     - IF %dependencies%==highest appveyor-retry composer update --no-progress --profile -n
+    - vendor/bin/simple-phpunit install
 
 test_script:
     - cd c:\projects\maker-bundle
