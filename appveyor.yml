@@ -42,7 +42,7 @@ install:
     - IF %PHP%==1 echo extension=php_fileinfo.dll >> php.ini
     - IF %PHP%==1 echo @php %%~dp0composer.phar %%* > composer.bat
     - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer.phar
-    - cd c:\projects\php-project-workspace
+    - cd c:\projects\maker-bundle
     - IF %dependencies%==lowest appveyor-retry composer update --prefer-lowest --no-progress --profile -n
     - IF %dependencies%==highest appveyor-retry composer update --no-progress --profile -n
     - composer show
