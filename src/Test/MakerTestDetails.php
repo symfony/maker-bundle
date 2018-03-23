@@ -22,7 +22,7 @@ final class MakerTestDetails
 
     private $fixtureFilesPath;
 
-    private $ignoredFiles = [];
+    private $deletedFiles = [];
 
     private $replacements = [];
 
@@ -76,16 +76,16 @@ final class MakerTestDetails
         return $this;
     }
 
-    public function ignoreFile(string $filename): self
+    public function deleteFile(string $filename): self
     {
-        $this->ignoredFiles[] = $filename;
+        $this->deletedFiles[] = $filename;
 
         return $this;
     }
 
-    public function getIgnoredFiles(): array
+    public function getFilesToDelete(): array
     {
-        return $this->ignoredFiles;
+        return $this->deletedFiles;
     }
 
     public function addReplacement(string $filename, string $find, string $replace): self

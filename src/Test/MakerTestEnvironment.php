@@ -114,10 +114,10 @@ final class MakerTestEnvironment
             $this->processReplacements($this->testDetails->getReplacements(), $this->path);
         }
 
-        if ($ignoredFiles = $this->testDetails->getIgnoredFiles()) {
+        if ($ignoredFiles = $this->testDetails->getFilesToDelete()) {
             foreach ($ignoredFiles as $file) {
-                if (file_exists($this->path.$file)) {
-                    $this->fs->rename($this->path.$file, $this->path.$file.'.ignored');
+                if (file_exists($this->path.DIRECTORY_SEPARATOR.$file)) {
+                    $this->fs->rename($this->path.DIRECTORY_SEPARATOR.$file, $this->path.DIRECTORY_SEPARATOR.$file.'.deleted');
                 }
             }
         }
@@ -206,6 +206,9 @@ final class MakerTestEnvironment
 
     public function runInternalTests()
     {
+        MakerTestProcess::create('php bin/console cache:clear', $this->path)
+                        ->run();
+
         $finder = new Finder();
         $finder->in($this->path.DIRECTORY_SEPARATOR.'tests')->files();
         if ($finder->count() > 0) {
@@ -236,10 +239,10 @@ final class MakerTestEnvironment
             $this->fs->remove($diff);
         }
 
-        if ($ignoredFiles = $this->testDetails->getIgnoredFiles()) {
+        if ($ignoredFiles = $this->testDetails->getFilesToDelete()) {
             foreach ($ignoredFiles as $file) {
-                if (file_exists($this->path.$file.'.ignored')) {
-                    $this->fs->rename($this->path.$file.'.ignored', $this->path.$file);
+                if (file_exists($this->path.DIRECTORY_SEPARATOR.$file.'.deleted')) {
+                    $this->fs->rename($this->path.DIRECTORY_SEPARATOR.$file.'.deleted', $this->path.DIRECTORY_SEPARATOR.$file);
                 }
             }
         }

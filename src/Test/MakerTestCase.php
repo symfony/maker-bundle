@@ -56,13 +56,9 @@ class MakerTestCase extends TestCase
             } else {
                 ($testDetails->getAssert())($makerTestProcess->getOutput(), $testEnv->getPath());
             }
-        } catch (\Exception $e) {
+        } finally {
             $testEnv->reset();
-            throw $e;
         }
-
-        // reset envirinment
-        $testEnv->reset();
     }
 
     protected function assertContainsCount(string $needle, string $haystack, int $count)

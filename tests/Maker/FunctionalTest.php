@@ -105,7 +105,7 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeControllerTwig')
             ->addExtraDependencies('twig')
-            ->ignoreFile('/templates/base.html.twig')
+            ->deleteFile('templates/base.html.twig')
         ];
 
         yield 'controller_sub_namespace' => [MakerTestDetails::createTest(
@@ -334,7 +334,7 @@ class FunctionalTest extends MakerTestCase
             // need for crud web tests
             ->addExtraDependencies('symfony/css-selector')
             ->configureDatabase()
-            ->ignoreFile('/templates/base.html.twig')
+            ->deleteFile('templates/base.html.twig')
             ->assert(function(string $output, string $directory) {
                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
