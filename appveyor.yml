@@ -31,8 +31,8 @@ environment:
         php_ver_target: 7.2
 
 install:
-    - IF EXIST c:\tools\php (SET PHP=1) # Checks for the PHP install being cached
-    - IF %PHP%==0 ps: cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version ((choco search php --exact --all-versions -r | select-string -pattern $env:php_ver_target | sort { [version]($_ -split '\|' | select -last 1) } -Descending | Select-Object -first 1) -replace '[php|]','')
+    #- IF EXIST c:\tools\php (SET PHP=1) # Checks for the PHP install being cached
+    - IF %PHP%==0 cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version $env:php_ver_target
     - cd c:\tools\php
     - IF %PHP%==0 copy php.ini-production php.ini /Y
     - IF %PHP%==0 echo date.timezone="UTC" >> php.ini
