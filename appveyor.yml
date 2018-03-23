@@ -19,7 +19,7 @@ services:
 init:
     - SET PATH=C:\Program Files\OpenSSL;c:\tools\php;%PATH%
     - SET COMPOSER_NO_INTERACTION=1
-    - SET PHP=1 # This var is connected to PHP install cache
+    - SET PHP=0 # This var is connected to PHP install cache
     - SET ANSICON=121x90 (121x90)
 
 environment:
@@ -31,18 +31,18 @@ environment:
         php_ver_target: 7.2
 
 install:
-    - IF EXIST c:\tools\php (SET PHP=0) # Checks for the PHP install being cached
-    - ps: appveyor-retry cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version ((choco search php --exact --all-versions -r | select-string -pattern $env:php_ver_target | sort { [version]($_ -split '\|' | select -last 1) } -Descending | Select-Object -first 1) -replace '[php|]','')
+    - IF EXIST c:\tools\php (SET PHP=1) # Checks for the PHP install being cached
+    - IF %PHP%==0 cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version ((choco search php --exact --all-versions -r | select-string -pattern $env:php_ver_target | sort { [version]($_ -split '\|' | select -last 1) } -Descending | Select-Object -first 1) -replace '[php|]','')
     - cd c:\tools\php
-    - IF %PHP%==1 copy php.ini-production php.ini /Y
-    - IF %PHP%==1 echo date.timezone="UTC" >> php.ini
-    - IF %PHP%==1 echo extension_dir=ext >> php.ini
-    - IF %PHP%==1 echo extension=php_openssl.dll >> php.ini
-    - IF %PHP%==1 echo extension=php_mbstring.dll >> php.ini
-    - IF %PHP%==1 echo extension=php_fileinfo.dll >> php.ini
-    - IF %PHP%==1 echo extension=php_mysqli.dll >> php.ini
-    - IF %PHP%==1 echo extension=php_pdo_mysql.dll >> php.ini
-    - IF %PHP%==1 echo @php %%~dp0composer.phar %%* > composer.bat
+    - IF %PHP%==0 copy php.ini-production php.ini /Y
+    - IF %PHP%==0 echo date.timezone="UTC" >> php.ini
+    - IF %PHP%==0 echo extension_dir=ext >> php.ini
+    - IF %PHP%==0 echo extension=php_openssl.dll >> php.ini
+    - IF %PHP%==0 echo extension=php_mbstring.dll >> php.ini
+    - IF %PHP%==0 echo extension=php_fileinfo.dll >> php.ini
+    - IF %PHP%==0 echo extension=php_mysqli.dll >> php.ini
+    - IF %PHP%==0 echo extension=php_pdo_mysql.dll >> php.ini
+    - IF %PHP%==0 echo @php %%~dp0composer.phar %%* > composer.bat
     - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer.phar
     - cd c:\projects\maker-bundle
     - IF %dependencies%==lowest appveyor-retry composer update --prefer-lowest --no-progress --profile -n
