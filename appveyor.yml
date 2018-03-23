@@ -52,7 +52,7 @@ install:
     - IF %PHP%==0 echo extension=php_pdo_mysql.dll >> php.ini
     - IF %PHP%==0 echo @php %%~dp0composer.phar %%* > composer.bat
     - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer.phar
-    - composer global require hirak/prestissimo
+    - composer global require hirak/prestissimo --no-progress
     - cd C:\projects\maker-bundle
     - IF %dependencies%==lowest appveyor-retry composer update --prefer-lowest --no-progress --no-suggest --ansi
     - IF %dependencies%==highest appveyor-retry composer update --no-progress --no-suggest --ansi
