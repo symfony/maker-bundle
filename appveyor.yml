@@ -48,6 +48,7 @@ install:
     - IF %PHP%==0 echo extension=php_mbstring.dll >> php.ini
     - IF %PHP%==0 echo extension=php_fileinfo.dll >> php.ini
     - IF %PHP%==0 echo extension=php_mysqli.dll >> php.ini
+    - IF %PHP%==0 echo extension=php_curl.dll >> php.ini
     - IF %PHP%==0 echo extension=php_pdo_mysql.dll >> php.ini
     - IF %PHP%==0 echo @php %%~dp0composer.phar %%* > composer.bat
     - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer.phar
