@@ -26,9 +26,9 @@ environment:
     TEST_DATABASE_DSN: mysql://root:Password12!@127.0.0.1:3306/test_maker
     matrix:
       - dependencies: lowest
-        php_ver_target: 7.1
+        php_ver_target: 7.1.15
       - dependencies: highest
-        php_ver_target: 7.2
+        php_ver_target: 7.2.3
 
 install:
     #- IF EXIST c:\tools\php (SET PHP=1) # Checks for the PHP install being cached
