@@ -47,8 +47,8 @@ install:
     - IF %PHP%==0 echo @php %%~dp0composer.phar %%* > composer.bat
     - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer.phar
     - cd C:\projects\maker-bundle
-    - IF %dependencies%==lowest appveyor-retry composer update --prefer-lowest --no-progress --profile -n
-    - IF %dependencies%==highest appveyor-retry composer update --no-progress --profile -n
+    - IF %dependencies%==lowest appveyor-retry composer update --prefer-lowest --no-progress --no-suggest --ansi
+    - IF %dependencies%==highest appveyor-retry composer update --no-progress --no-suggest --ansi
     - vendor/bin/simple-phpunit install
 
 test_script:
