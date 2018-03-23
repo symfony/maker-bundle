@@ -32,7 +32,7 @@ environment:
 
 install:
     #- IF EXIST c:\tools\php (SET PHP=1) # Checks for the PHP install being cached
-    - IF %PHP%==0 cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version $env:php_ver_target
+    - IF %PHP%==0 cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version %php_ver_target%
     - cd c:\tools\php
     - IF %PHP%==0 copy php.ini-production php.ini /Y
     - IF %PHP%==0 echo date.timezone="UTC" >> php.ini
