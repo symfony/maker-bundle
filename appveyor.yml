@@ -33,12 +33,17 @@ environment:
 
 install:
     - ps: Set-Service wuauserv -StartupType Manual
-    - IF EXIST c:\tools\php (SET PHP=1) # Checks for the PHP install being cached
+    - IF EXIST C:\tools\php (SET PHP=1) # Checks for the PHP install being cached
     - IF %PHP%==0 cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version %php_ver_target%
     - cd C:\tools\php
-    - IF %PHP%==0 copy php.ini-production php.ini /Y
+    - IF %PHP%==0 copy php.ini-development php.ini /Y
+    - IF %PHP%==0 echo memory_limit=-1 >> php.ini
+    - IF %PHP%==0 echo serialize_precision=14 >> php.ini
+    - IF %PHP%==0 echo max_execution_time=1200 >> php.ini
     - IF %PHP%==0 echo date.timezone="UTC" >> php.ini
     - IF %PHP%==0 echo extension_dir=ext >> php.ini
+    - IF %PHP%==0 echo zend_extension=php_opcache.dll >> php.ini
+    - IF %PHP%==0 echo opcache.enable_cli=1 >> php.ini
     - IF %PHP%==0 echo extension=php_openssl.dll >> php.ini
     - IF %PHP%==0 echo extension=php_mbstring.dll >> php.ini
     - IF %PHP%==0 echo extension=php_fileinfo.dll >> php.ini
@@ -46,6 +51,7 @@ install:
     - IF %PHP%==0 echo extension=php_pdo_mysql.dll >> php.ini
     - IF %PHP%==0 echo @php %%~dp0composer.phar %%* > composer.bat
     - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer.phar
+    - composer global require hirak/prestissimo
     - cd C:\projects\maker-bundle
     - IF %dependencies%==lowest appveyor-retry composer update --prefer-lowest --no-progress --no-suggest --ansi
     - IF %dependencies%==highest appveyor-retry composer update --no-progress --no-suggest --ansi
