@@ -18,6 +18,8 @@ use Symfony\Component\Process\InputStream;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
+ *
+ * @internal
  */
 final class MakerTestEnvironment
 {
@@ -52,11 +54,11 @@ final class MakerTestEnvironment
         }
 
         $this->cachePath = realpath($cachePath);
-        $this->flexPath = $this->cachePath.DIRECTORY_SEPARATOR.'flex_project';
+        $this->flexPath = $this->cachePath.'/flex_project';
 
-        $this->path = $this->cachePath.DIRECTORY_SEPARATOR.$testDetails->getUniqueCacheDirectoryName();
+        $this->path = $this->cachePath.'/'.$testDetails->getUniqueCacheDirectoryName();
 
-        $this->snapshotFile = $this->path.DIRECTORY_SEPARATOR.basename($this->path).'.json';
+        $this->snapshotFile = $this->path.'/'.basename($this->path).'.json';
     }
 
     public static function create(MakerTestDetails $testDetails): self
@@ -116,8 +118,8 @@ final class MakerTestEnvironment
 
         if ($ignoredFiles = $this->testDetails->getFilesToDelete()) {
             foreach ($ignoredFiles as $file) {
-                if (file_exists($this->path.DIRECTORY_SEPARATOR.$file)) {
-                    $this->fs->rename($this->path.DIRECTORY_SEPARATOR.$file, $this->path.DIRECTORY_SEPARATOR.$file.'.deleted');
+                if (file_exists($this->path.'/'.$file)) {
+                    $this->fs->rename($this->path.'/'.$file, $this->path.'/'.$file.'.deleted');
                 }
             }
         }
@@ -189,7 +191,7 @@ final class MakerTestEnvironment
 
     public function fileExists(string $file)
     {
-        return $this->fs->exists($this->path.DIRECTORY_SEPARATOR.$file);
+        return $this->fs->exists($this->path.'/'.$file);
     }
 
     public function runPhpCSFixer(string $file)
@@ -210,7 +212,7 @@ final class MakerTestEnvironment
                         ->run();
 
         $finder = new Finder();
-        $finder->in($this->path.DIRECTORY_SEPARATOR.'tests')->files();
+        $finder->in($this->path.'/tests')->files();
         if ($finder->count() > 0) {
             // execute the tests that were moved into the project!
             return MakerTestProcess::create(sprintf('php %s', $this->rootPath.'/vendor/bin/simple-phpunit'), $this->path)
@@ -241,8 +243,8 @@ final class MakerTestEnvironment
 
         if ($ignoredFiles = $this->testDetails->getFilesToDelete()) {
             foreach ($ignoredFiles as $file) {
-                if (file_exists($this->path.DIRECTORY_SEPARATOR.$file.'.deleted')) {
-                    $this->fs->rename($this->path.DIRECTORY_SEPARATOR.$file.'.deleted', $this->path.DIRECTORY_SEPARATOR.$file);
+                if (file_exists($this->path.'/'.$file.'.deleted')) {
+                    $this->fs->rename($this->path.'/'.$file.'.deleted', $this->path.'/'.$file);
                 }
             }
         }
@@ -334,12 +336,5 @@ final class MakerTestEnvironment
 
             file_put_contents($path, str_replace($replacement['find'], $replacement['replace'], $contents));
         }
-    }
-
-    public static function debug($var)
-    {
-        echo "\n\n------------DEBUG------------\n\n";
-        var_dump($var);
-        exit;
     }
 }

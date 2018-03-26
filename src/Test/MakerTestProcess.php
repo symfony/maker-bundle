@@ -15,6 +15,8 @@ use Symfony\Component\Process\Process;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
+ *
+ * @internal
  */
 final class MakerTestProcess
 {
