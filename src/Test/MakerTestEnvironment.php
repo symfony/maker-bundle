@@ -58,7 +58,7 @@ final class MakerTestEnvironment
 
         $this->path = $this->cachePath.'/'.$testDetails->getUniqueCacheDirectoryName();
 
-        $this->snapshotFile = $this->path.'/'.basename($this->path).'.json';
+        $this->snapshotFile = $this->path.'/'.$testDetails->getUniqueCacheDirectoryName().'.json';
     }
 
     public static function create(MakerTestDetails $testDetails): self
