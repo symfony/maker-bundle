@@ -55,10 +55,10 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new migration based on database changes.')
-            ->addOption('db', null, InputOption::VALUE_REQUIRED, 'The database connection name.')
+            ->setDescription('Creates a new migration based on database changes')
+            ->addOption('db', null, InputOption::VALUE_REQUIRED, 'The database connection name')
             ->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager name')
-            ->addOption('shard', null, InputOption::VALUE_REQUIRED, 'The shard connection name.')
+            ->addOption('shard', null, InputOption::VALUE_REQUIRED, 'The shard connection name')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeMigration.txt'))
         ;
     }
