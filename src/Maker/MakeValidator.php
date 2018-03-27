@@ -37,7 +37,7 @@ final class MakeValidator extends AbstractMaker
     {
         $command
             ->setDescription('Creates a new validator and constraint class')
-            ->addArgument('name', InputArgument::OPTIONAL, 'The name of the validator class (e.g. <fg=yellow>EnabledValidator</>).')
+            ->addArgument('name', InputArgument::OPTIONAL, 'The name of the validator class (e.g. <fg=yellow>EnabledValidator</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeValidator.txt'))
         ;
     }
