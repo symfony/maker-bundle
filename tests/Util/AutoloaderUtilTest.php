@@ -2,13 +2,24 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
-use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
+use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 
-class AutoloaderUtilTest extends MakerTestCase
+class AutoloaderUtilTest extends TestCase
 {
+    protected static $currentRootDir;
+
+    /**
+     * @beforeClass
+     */
+    public static function setupPaths()
+    {
+        self::$currentRootDir = realpath(__DIR__.'/../../tests/tmp/current_project');
+
+    }
+
     public function testGetPathForFutureClass()
     {
         $composerJson = [
@@ -41,12 +52,12 @@ class AutoloaderUtilTest extends MakerTestCase
             throw new \Exception('Error running composer dump-autoload: '.$process->getErrorOutput());
         }
 
-        $rootDir = realpath(self::$currentRootDir);
-        $autoloaderUtil = new AutoloaderUtil($rootDir);
+
+        $autoloaderUtil = new AutoloaderUtil(self::$currentRootDir);
         foreach ($this->getPathForFutureClassTests() as $className => $expectedPath) {
             $this->assertSame(
                 // the paths will start in vendor/composer and be relative
-                str_replace('\\', '/', $rootDir.'/vendor/composer/../../'.$expectedPath),
+                str_replace('\\', '/', self::$currentRootDir.'/vendor/composer/../../'.$expectedPath),
                 // normalize slashes for Windows comparison
                 str_replace('\\', '/', $autoloaderUtil->getPathForFutureClass($className)),
                 sprintf('class "%s" should have been in path "%s"', $className, $expectedPath)

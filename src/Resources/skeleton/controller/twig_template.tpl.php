@@ -1,12 +1,4 @@
-<?php if ($base_layout_exists): ?>
-{% extends 'base.html.twig' %}
-
-{% block title %}Hello {{ controller_name }}!{% endblock %}
-<?php else: ?>
-<!DOCTYPE html>
-
-<title>Hello {{ controller_name }}!</title>
-<?php endif; ?>
+<?= $helper->getHeadPrintCode('Hello {{ controller_name }}!'); ?>
 
 {% block body %}
 <style>

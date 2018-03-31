@@ -95,9 +95,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeControllerTwig')
             ->addExtraDependencies('twig')
-            ->assert(function(string $output, string $directory) {
-                $this->assertFileExists($directory.'/templates/foo_twig/index.html.twig');
-            })
         ];
 
         yield 'controller_with_template_no_base' => [MakerTestDetails::createTest(
@@ -108,7 +105,7 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeControllerTwig')
             ->addExtraDependencies('twig')
-            ->addPreMakeCommand('rm templates/base.html.twig')
+            ->deleteFile('templates/base.html.twig')
         ];
 
         yield 'controller_sub_namespace' => [MakerTestDetails::createTest(
@@ -125,15 +122,15 @@ class FunctionalTest extends MakerTestCase
         ];
 
         yield 'controller_sub_namespace_template' => [MakerTestDetails::createTest(
-           $this->getMakerInstance(MakeController::class),
-           [
-               // controller class name
-               'Admin\\FooBar',
-           ])
+            $this->getMakerInstance(MakeController::class),
+            [
+                // controller class name
+                'Admin\\FooBar',
+            ])
             ->addExtraDependencies('twig')
-           ->assert(function(string $output, string $directory) {
-               $this->assertFileExists($directory.'/templates/admin/foo_bar/index.html.twig');
-           })
+            ->assert(function(string $output, string $directory) {
+                $this->assertFileExists($directory.'/templates/admin/foo_bar/index.html.twig');
+            })
        ];
 
         yield 'controller_full_custom_namespace' => [MakerTestDetails::createTest(
@@ -305,22 +302,8 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
             // need for crud web tests
-            ->addExtraDependencies('symfony/css-selector')
-            ->addReplacement(
-                'phpunit.xml.dist',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
-                'sqlite:///%kernel.project_dir%/var/app.db'
-            )
-            ->addReplacement(
-                '.env',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
-                'sqlite:///%kernel.project_dir%/var/app.db'
-            )
-            ->addPreMakeCommand('php bin/console doctrine:schema:create --env=test')
+            ->configureDatabase()
             ->assert(function(string $output, string $directory) {
-                $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
-                $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
-
                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
@@ -334,22 +317,8 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudRepository')
             // need for crud web tests
-            ->addExtraDependencies('symfony/css-selector')
-            ->addReplacement(
-                'phpunit.xml.dist',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
-                'sqlite:///%kernel.project_dir%/var/app.db'
-            )
-            ->addReplacement(
-                '.env',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
-                'sqlite:///%kernel.project_dir%/var/app.db'
-            )
-            ->addPreMakeCommand('php bin/console doctrine:schema:create --env=test')
+            ->configureDatabase()
             ->assert(function(string $output, string $directory) {
-                 $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
-                 $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
-
                  $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
                  $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
@@ -364,22 +333,9 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
             // need for crud web tests
             ->addExtraDependencies('symfony/css-selector')
-            ->addReplacement(
-                'phpunit.xml.dist',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
-                'sqlite:///%kernel.project_dir%/var/app.db'
-            )
-            ->addReplacement(
-                '.env',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
-                'sqlite:///%kernel.project_dir%/var/app.db'
-            )
-            ->addPreMakeCommand('php bin/console doctrine:schema:create --env=test')
-            ->addPreMakeCommand('rm templates/base.html.twig')
+            ->configureDatabase()
+            ->deleteFile('templates/base.html.twig')
             ->assert(function(string $output, string $directory) {
-                $this->assertFileExists($directory.'/src/Controller/SweetFoodController.php');
-                $this->assertFileExists($directory.'/src/Form/SweetFoodType.php');
-
                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
@@ -589,7 +545,7 @@ class FunctionalTest extends MakerTestCase
                 // add a relationship field
                 'ManyToOne',
                 // the target entity
-                'Some\Vendor\Group',
+                'Some\\Vendor\\Group',
                 // nullable
                 '',
                 /*

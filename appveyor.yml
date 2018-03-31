@@ -1,55 +1,63 @@
 build: false
+platform:
+    - x64
 clone_folder: c:\projects\maker-bundle
 
 cache:
+    - '%LOCALAPPDATA%\Composer\files -> composer.lock'
     - composer.phar
+    # Cache chocolatey packages
+    - C:\ProgramData\chocolatey\bin -> .appveyor.yml
+    - C:\ProgramData\chocolatey\lib -> .appveyor.yml
+    # Cache php install
+    - C:\tools\php -> .appveyor.yml
     - .phpunit -> phpunit
+    - C:\projects\maker-bundle\vendor -> composer.json
+
+services:
+  - mysql
 
 init:
-    - SET PATH=c:\php;%PATH%
+    - SET PATH=C:\Program Files\OpenSSL;C:\tools\php;%PATH%
+    - SET COMPOSER_NO_INTERACTION=1
+    - SET PHP=0 # This var is connected to PHP install cache
+    - SET ANSICON=121x90 (121x90)
 
 environment:
-    TEST_DATABASE_DSN: sqlite:///c:\projects\maker-bundle\tests\tmp\app.db
+    TEST_DATABASE_DSN: mysql://root:Password12!@127.0.0.1:3306/test_maker
+    matrix:
+      - dependencies: lowest
+        php_ver_target: 7.1.3
+      - dependencies: highest
+        php_ver_target: 7.2.3
 
 install:
-    - mkdir c:\php && cd c:\php
-    - appveyor DownloadFile https://github.com/symfony/binary-utils/releases/download/v0.1/php-7.1.3-Win32-VC14-x86.zip
-    - 7z x php-7.1.3-Win32-VC14-x86.zip -y >nul
-    - cd ext
-    - appveyor DownloadFile https://github.com/symfony/binary-utils/releases/download/v0.1/php_apcu-5.1.8-7.1-ts-vc14-x86.zip
-    - 7z x php_apcu-5.1.8-7.1-ts-vc14-x86.zip -y >nul
-    - cd ..
-    - copy /Y php.ini-development php.ini-min
-    - echo memory_limit=-1 >> php.ini-min
-    - echo serialize_precision=14 >> php.ini-min
-    - echo max_execution_time=1200 >> php.ini-min
-    - echo date.timezone="America/Los_Angeles" >> php.ini-min
-    - echo extension_dir=ext >> php.ini-min
-    - copy /Y php.ini-min php.ini-max
-    - echo zend_extension=php_opcache.dll >> php.ini-max
-    - echo opcache.enable_cli=1 >> php.ini-max
-    - echo extension=php_openssl.dll >> php.ini-max
-    - echo extension=php_apcu.dll >> php.ini-max
-    - echo apc.enable_cli=1 >> php.ini-max
-    - echo extension=php_intl.dll >> php.ini-max
-    - echo extension=php_mbstring.dll >> php.ini-max
-    - echo extension=php_fileinfo.dll >> php.ini-max
-    - echo extension=php_pdo_sqlite.dll >> php.ini-max
-    - echo extension=php_curl.dll >> php.ini-max
-    - copy /Y php.ini-max php.ini
-
-    - cd c:\php
-    - IF NOT EXIST composer.phar (appveyor DownloadFile https://getcomposer.org/download/1.6.3/composer.phar)
-    - php composer.phar self-update
-    # copy instead of using echo because appveyor does not allow "%s" characters
-    - copy /Y c:\projects\maker-bundle\.appveyor\composer.bat composer.bat
-
-    - cd c:\projects\maker-bundle
-    - php -dmemory_limit=-1 c:\php\composer.phar install --no-progress --no-suggest --ansi
-    - composer dump-autoload
-    - ./vendor/bin/simple-phpunit install
+    - ps: Set-Service wuauserv -StartupType Manual
+    - IF EXIST C:\tools\php (SET PHP=1) # Checks for the PHP install being cached
+    - IF %PHP%==0 cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version %php_ver_target%
+    - cd C:\tools\php
+    - IF %PHP%==0 copy php.ini-development php.ini /Y
+    - IF %PHP%==0 echo memory_limit=-1 >> php.ini
+    - IF %PHP%==0 echo serialize_precision=14 >> php.ini
+    - IF %PHP%==0 echo max_execution_time=1200 >> php.ini
+    - IF %PHP%==0 echo date.timezone="UTC" >> php.ini
+    - IF %PHP%==0 echo extension_dir=ext >> php.ini
+    - IF %PHP%==0 echo zend_extension=php_opcache.dll >> php.ini
+    - IF %PHP%==0 echo opcache.enable_cli=1 >> php.ini
+    - IF %PHP%==0 echo extension=php_openssl.dll >> php.ini
+    - IF %PHP%==0 echo extension=php_mbstring.dll >> php.ini
+    - IF %PHP%==0 echo extension=php_fileinfo.dll >> php.ini
+    - IF %PHP%==0 echo extension=php_mysqli.dll >> php.ini
+    - IF %PHP%==0 echo extension=php_curl.dll >> php.ini
+    - IF %PHP%==0 echo extension=php_pdo_mysql.dll >> php.ini
+    - IF %PHP%==0 echo @php %%~dp0composer.phar %%* > composer.bat
+    - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer.phar
+    - composer global require hirak/prestissimo --no-progress
+    - cd C:\projects\maker-bundle
+    - IF %dependencies%==lowest appveyor-retry composer update --prefer-lowest --no-progress --no-suggest --ansi
+    - IF %dependencies%==highest appveyor-retry composer update --no-progress --no-suggest --ansi
+    - vendor/bin/simple-phpunit install
 
 test_script:
-    - ./vendor/bin/simple-phpunit --group=functional_group1
-    - ./vendor/bin/simple-phpunit --group=functional_group2
-    - ./vendor/bin/simple-phpunit --exclude-group=functional_group1,functional_group2
+    - cd C:\projects\maker-bundle
+    - vendor/bin/simple-phpunit

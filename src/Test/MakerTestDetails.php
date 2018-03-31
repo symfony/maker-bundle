@@ -22,6 +22,8 @@ final class MakerTestDetails
 
     private $fixtureFilesPath;
 
+    private $deletedFiles = [];
+
     private $replacements = [];
 
     private $preMakeCommands = [];
@@ -72,6 +74,18 @@ final class MakerTestDetails
         $this->postMakeCommands[] = $postMakeCommand;
 
         return $this;
+    }
+
+    public function deleteFile(string $filename): self
+    {
+        $this->deletedFiles[] = $filename;
+
+        return $this;
+    }
+
+    public function getFilesToDelete(): array
+    {
+        return $this->deletedFiles;
     }
 
     public function addReplacement(string $filename, string $find, string $replace): self

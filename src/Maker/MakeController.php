@@ -75,7 +75,6 @@ final class MakeController extends AbstractMaker
                 'templates/'.$templateName,
                 'controller/twig_template.tpl.php',
                 [
-                    'base_layout_exists' => $this->fileManager->fileExists('templates/base.html.twig'),
                     'controller_path' => $controllerPath,
                 ]
             );
