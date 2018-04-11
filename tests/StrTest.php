@@ -161,4 +161,18 @@ class StrTest extends TestCase
 
         yield ['foo_bar.baz\\pizza', 'FooBarBazPizza'];
     }
+
+    /**
+     * @dataProvider getShortClassNameCaseTests
+     */
+    public function testShortClassName(string $original, string $expected)
+    {
+        $this->assertSame($expected, Str::getShortClassName($original));
+    }
+
+    public function getShortClassNameCaseTests()
+    {
+        yield ['App\\Entity\\Foo', 'Foo'];
+        yield ['Foo', 'Foo'];
+    }
 }
