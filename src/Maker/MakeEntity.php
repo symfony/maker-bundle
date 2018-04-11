@@ -12,13 +12,12 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
-use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
-use Symfony\Bundle\MakerBundle\Doctrine\DoctrineMetadataFactory;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
@@ -42,14 +41,14 @@ use Symfony\Component\Finder\SplFileInfo;
 final class MakeEntity extends AbstractMaker
 {
     private $fileManager;
-    private $registry;
+    private $doctrineHelper;
     private $projectDirectory;
 
-    public function __construct(FileManager $fileManager, string $projectDirectory, ?ManagerRegistry $registry)
+    public function __construct(FileManager $fileManager, string $projectDirectory, DoctrineHelper $doctrineHelper)
     {
         $this->fileManager = $fileManager;
         $this->projectDirectory = $projectDirectory;
-        $this->registry = $registry;
+        $this->doctrineHelper = $doctrineHelper;
     }
 
     public static function getCommandName(): string
@@ -301,7 +300,7 @@ final class MakeEntity extends AbstractMaker
                 throw new \InvalidArgumentException(sprintf('The "%s" property already exists.', $name));
             }
 
-            return Validator::validateDoctrineFieldName($name, $this->getRegistry());
+            return Validator::validateDoctrineFieldName($name, $this->doctrineHelper->getRegistry());
         });
 
         if (!$fieldName) {
@@ -449,17 +448,6 @@ final class MakeEntity extends AbstractMaker
         $printSection($allTypes);
     }
 
-    private function getRegistry(): ManagerRegistry
-    {
-        // this should never happen: we will have checked for the
-        // DoctrineBundle dependency before calling this
-        if (null === $this->registry) {
-            throw new \Exception('Somehow the doctrine service is missing. Is DoctrineBundle installed?');
-        }
-
-        return $this->registry;
-    }
-
     private function createEntityClassQuestion(string $questionText): Question
     {
         $entityFinder = $this->fileManager->createFinder('src/Entity/')
@@ -522,7 +510,7 @@ final class MakeEntity extends AbstractMaker
                         throw new \InvalidArgumentException(sprintf('The "%s" class already has a "%s" property.', $targetClass, $name));
                     }
 
-                    return Validator::validateDoctrineFieldName($name, $this->getRegistry());
+                    return Validator::validateDoctrineFieldName($name, $this->doctrineHelper->getRegistry());
                 }
             );
         };
@@ -782,7 +770,7 @@ final class MakeEntity extends AbstractMaker
 
     private function regenerateEntities(string $classOrNamespace, bool $overwrite, Generator $generator)
     {
-        $regenerator = new EntityRegenerator($this->getRegistry(), $this->fileManager, $generator, $this->projectDirectory, $overwrite);
+        $regenerator = new EntityRegenerator($this->doctrineHelper, $this->fileManager, $generator, $this->projectDirectory, $overwrite);
         $regenerator->regenerateEntities($classOrNamespace);
     }
 
@@ -801,19 +789,18 @@ final class MakeEntity extends AbstractMaker
 
     private function doesEntityUseAnnotationMapping(string $className): bool
     {
-        $metadataFactory = new DoctrineMetadataFactory($this->registry);
         if (!class_exists($className)) {
-            $otherClassMetadatas = $metadataFactory->getMetadataForNamespace(Str::getNamespace($className));
+            $otherClassMetadatas = $this->doctrineHelper->getMetadata(Str::getNamespace($className), true);
 
             // if we have no metadata, we should assume this is the first class being mapped
             if (empty($otherClassMetadatas)) {
                 return false;
             }
 
-            $className = $otherClassMetadatas[0]->name;
+            $className = (reset($otherClassMetadatas))->getName();
         }
 
-        $driver = $metadataFactory->getMappingDriverForClass($className);
+        $driver = $this->doctrineHelper->getMappingDriverForClass($className);
 
         return $driver instanceof AnnotationDriver;
     }

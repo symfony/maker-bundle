@@ -16,7 +16,7 @@ use Doctrine\Common\Inflector\Inflector;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
-use Symfony\Bundle\MakerBundle\Doctrine\DoctrineEntityHelper;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
@@ -35,11 +35,11 @@ use Symfony\Component\Validator\Validation;
  */
 final class MakeCrud extends AbstractMaker
 {
-    private $entityHelper;
+    private $doctrineHelper;
 
-    public function __construct(DoctrineEntityHelper $entityHelper)
+    public function __construct(DoctrineHelper $doctrineHelper)
     {
-        $this->entityHelper = $entityHelper;
+        $this->doctrineHelper = $doctrineHelper;
     }
 
     public static function getCommandName(): string
@@ -66,7 +66,7 @@ final class MakeCrud extends AbstractMaker
         if (null === $input->getArgument('entity-class')) {
             $argument = $command->getDefinition()->getArgument('entity-class');
 
-            $entities = $this->entityHelper->getEntitiesForAutocomplete();
+            $entities = $this->doctrineHelper->getEntitiesForAutocomplete();
 
             $question = new Question($argument->getDescription());
             $question->setAutocompleterValues($entities);
@@ -80,11 +80,11 @@ final class MakeCrud extends AbstractMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $entityClassDetails = $generator->createClassNameDetails(
-            Validator::entityExists($input->getArgument('entity-class'), $this->entityHelper->getEntitiesForAutocomplete()),
+            Validator::entityExists($input->getArgument('entity-class'), $this->doctrineHelper->getEntitiesForAutocomplete()),
             'Entity\\'
         );
 
-        $entityDoctrineDetails = $this->entityHelper->createDoctrineDetails($entityClassDetails->getFullName());
+        $entityDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($entityClassDetails->getFullName());
 
         $repositoryVars = [];
 

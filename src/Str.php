@@ -117,7 +117,11 @@ final class Str
 
     public static function getShortClassName(string $fullClassName): string
     {
-        return substr($fullClassName, strrpos($fullClassName, '\\') + 1);
+        if (!empty(self::getNamespace($fullClassName))) {
+            return substr($fullClassName, strrpos($fullClassName, '\\') + 1);
+        } else {
+            return $fullClassName;
+        }
     }
 
     public static function getNamespace(string $fullClassName): string
