@@ -1,13 +1,11 @@
 <?= $helper->getHeadPrintCode('Hello {{ controller_name }}!'); ?>
 
-{% block stylesheets %}
+{% block body %}
 <style>
     .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
     .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
 </style>
-{% endblock %}
 
-{% block body %}
 <div class="example-wrapper">
     <h1>Hello {{ controller_name }}! ✅</h1>
 
