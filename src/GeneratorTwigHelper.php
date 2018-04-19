@@ -66,4 +66,9 @@ TWIG;
 
 HTML;
     }
+
+    public function getFileLink($path): string
+    {
+        return sprintf('<a href="{{ \'%s\'|file_link(0) }}">%1$s</a>', $path);
+    }
 }

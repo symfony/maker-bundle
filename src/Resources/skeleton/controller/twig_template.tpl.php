@@ -11,8 +11,8 @@
 
     This friendly message is coming from:
     <ul>
-        <li>Your controller at <code><?= $controller_path; ?></code></li>
-        <li>Your template at <code><?= $relative_path ?></code></li>
+        <li>Your controller at <code><?= $helper->getFileLink($controller_path); ?></code></li>
+        <li>Your template at <code><?= $helper->getFileLink($relative_path); ?></code></li>
     </ul>
 </div>
 {% endblock %}
