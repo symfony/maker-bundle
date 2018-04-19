@@ -14,7 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
-use Symfony\Bundle\MakerBundle\Doctrine\DoctrineEntityHelper;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
@@ -34,7 +34,7 @@ final class MakeForm extends AbstractMaker
 {
     private $entityHelper;
 
-    public function __construct(DoctrineEntityHelper $entityHelper)
+    public function __construct(DoctrineHelper $entityHelper)
     {
         $this->entityHelper = $entityHelper;
     }

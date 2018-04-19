@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Symfony\Bridge\Doctrine\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -24,39 +23,31 @@ use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
  */
 final class EntityRegenerator
 {
-    private $doctrineRegistry;
+    private $doctrineHelper;
     private $fileManager;
     private $generator;
     private $projectDirectory;
     private $overwrite;
-    private $metadataFactory;
 
-    public function __construct(ManagerRegistry $doctrineRegistry, FileManager $fileManager, Generator $generator, string $projectDirectory, bool $overwrite)
+    public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, string $projectDirectory, bool $overwrite)
     {
-        $this->doctrineRegistry = $doctrineRegistry;
+        $this->doctrineHelper = $doctrineHelper;
         $this->fileManager = $fileManager;
         $this->generator = $generator;
         $this->projectDirectory = $projectDirectory;
         $this->overwrite = $overwrite;
-        $this->metadataFactory = new DoctrineMetadataFactory($this->doctrineRegistry);
     }
 
     public function regenerateEntities(string $classOrNamespace)
     {
-        if (class_exists($classOrNamespace)) {
-            $metadata = $this->metadataFactory->getMetadataForClass($classOrNamespace);
+        $metadata = $this->doctrineHelper->getMetadata($classOrNamespace, true);
 
-            if (null === $metadata) {
-                throw new RuntimeCommandException(sprintf('Could not find Doctrine metadata for "%s". Is it mapped as an entity?', $classOrNamespace));
-            }
-
+        if ($metadata instanceof ClassMetadata) {
             $metadata = [$metadata];
-        } else {
-            $metadata = $this->metadataFactory->getMetadataForNamespace($classOrNamespace);
-
-            if (empty($metadata)) {
-                throw new RuntimeCommandException(sprintf('No entities were found in the "%s" namespace.', $classOrNamespace));
-            }
+        } elseif (class_exists($classOrNamespace)) {
+            throw new RuntimeCommandException(sprintf('Could not find Doctrine metadata for "%s". Is it mapped as an entity?', $classOrNamespace));
+        } elseif (empty($metadata)) {
+            throw new RuntimeCommandException(sprintf('No entities were found in the "%s" namespace.', $classOrNamespace));
         }
 
         /** @var ClassSourceManipulator[] $operations */

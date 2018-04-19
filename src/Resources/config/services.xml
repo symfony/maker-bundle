@@ -25,7 +25,7 @@
                 <tag name="kernel.event_subscriber" />
             </service>
 
-            <service id="maker.doctrine_entity_helper" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineEntityHelper">
+            <service id="maker.doctrine_helper" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper">
                 <argument type="service" id="doctrine" on-invalid="ignore"/>
             </service>
         </services>

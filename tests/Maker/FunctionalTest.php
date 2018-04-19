@@ -177,6 +177,28 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFormForEntity')
         ];
 
+        yield 'form_for_sti_entity' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeForm::class),
+            [
+                // Entity name
+                'SourFoodType',
+                'SourFood',
+            ])
+            ->addExtraDependencies('orm')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFormSTIEntity')
+        ];
+
+        yield 'form_for_embebadle_entity' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeForm::class),
+            [
+                // Entity name
+                'FoodType',
+                'Food',
+            ])
+            ->addExtraDependencies('orm')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFormEmbedableEntity')
+        ];
+
         yield 'functional' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeFunctionalTest::class),
             [

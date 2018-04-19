@@ -6,6 +6,7 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -81,8 +82,9 @@ class EntityRegeneratorTest extends TestCase
             });
 
         $fileManager = new FileManager($fs, $autoloaderUtil, $tmpDir);
+        $doctrineHelper = new DoctrineHelper($container->get('doctrine'));
         $regenerator = new EntityRegenerator(
-            $container->get('doctrine'),
+            $doctrineHelper,
             $fileManager,
             new Generator($fileManager, 'App\\'),
             // project root: just used to fetch the autoloader
