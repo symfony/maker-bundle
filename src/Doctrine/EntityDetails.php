@@ -63,7 +63,7 @@ final class EntityDetails
         }
 
         foreach ($this->metadata->associationMappings as $fieldName => $relation) {
-            if (ClassMetadata::ONE_TO_MANY !== $relation['type']) {
+            if (\Doctrine\ORM\Mapping\ClassMetadata::ONE_TO_MANY !== $relation['type']) {
                 $fields[] = $fieldName;
             }
         }
