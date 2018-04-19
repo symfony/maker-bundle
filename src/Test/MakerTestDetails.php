@@ -38,6 +38,8 @@ final class MakerTestDetails
 
     private $commandAllowedToFail = false;
 
+    private $requiredPhpVersion;
+
     /**
      * @param MakerInterface $maker
      * @param array          $inputs
@@ -179,6 +181,13 @@ final class MakerTestDetails
         return $this;
     }
 
+    public function setRequiredPhpVersion(int $version): self
+    {
+        $this->requiredPhpVersion = $version;
+
+        return $this;
+    }
+
     public function getInputs(): array
     {
         return $this->inputs;
@@ -244,5 +253,10 @@ final class MakerTestDetails
     public function isCommandAllowedToFail(): bool
     {
         return $this->commandAllowedToFail;
+    }
+
+    public function isSupportedByCurrentPhpVersion(): bool
+    {
+        return null === $this->requiredPhpVersion || \PHP_VERSION_ID >= $this->requiredPhpVersion;
     }
 }

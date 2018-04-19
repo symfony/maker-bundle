@@ -16,8 +16,14 @@ class AutoloaderUtilTest extends TestCase
      */
     public static function setupPaths()
     {
-        self::$currentRootDir = realpath(__DIR__.'/../../tests/tmp/current_project');
+        $path = __DIR__.'/../tmp/current_project';
 
+        $fs = new Filesystem();
+        if (!file_exists($path)) {
+            $fs->mkdir($path);
+        }
+
+        self::$currentRootDir = realpath($path);
     }
 
     public function testGetPathForFutureClass()

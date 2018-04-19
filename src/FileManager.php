@@ -144,7 +144,14 @@ class FileManager
         return sprintf('%s/%s', $this->rootDirectory, $path);
     }
 
-    public function getRelativePathForFutureClass(string $className): ?string
+    /**
+     * @param string $className
+     *
+     * @return string|null
+     *
+     * @throws \Exception
+     */
+    public function getRelativePathForFutureClass(string $className)
     {
         $path = $this->autoloaderUtil->getPathForFutureClass($className);
 

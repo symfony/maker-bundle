@@ -142,7 +142,7 @@ final class ClassSourceManipulator
         $this->addNodeAfterProperties($newPropertyNode);
     }
 
-    private function addGetter(string $propertyName, ?string $returnType, bool $isReturnTypeNullable, array $commentLines = [])
+    private function addGetter(string $propertyName, $returnType, bool $isReturnTypeNullable, array $commentLines = [])
     {
         $methodName = 'get'.Str::asCamelCase($propertyName);
         $getterNodeBuilder = (new Builder\Method($methodName))
@@ -163,14 +163,14 @@ final class ClassSourceManipulator
         $this->addMethod($getterNodeBuilder->getNode());
     }
 
-    private function addSetter(string $propertyName, ?string $type, bool $isNullable, array $commentLines = [])
+    private function addSetter(string $propertyName, $type, bool $isNullable, array $commentLines = [])
     {
         $builder = $this->createSetterNodeBuilder($propertyName, $type, $isNullable, $commentLines);
         $this->makeMethodFluent($builder);
         $this->addMethod($builder->getNode());
     }
 
-    private function createSetterNodeBuilder(string $propertyName, ?string $type, bool $isNullable, array $commentLines = [])
+    private function createSetterNodeBuilder(string $propertyName, $type, bool $isNullable, array $commentLines = [])
     {
         $methodName = 'set'.Str::asCamelCase($propertyName);
         $setterNodeBuilder = (new Builder\Method($methodName))->makePublic();
@@ -504,7 +504,12 @@ final class ClassSourceManipulator
         $this->updateSourceCodeFromNewStmts();
     }
 
-    private function getConstructorNode(): ?Node\Stmt\ClassMethod
+    /**
+     * @return Node\Stmt\ClassMethod|null
+     *
+     * @throws \Exception
+     */
+    private function getConstructorNode()
     {
         foreach ($this->getClassNode()->stmts as $classNode) {
             if ($classNode instanceof Node\Stmt\ClassMethod && '__construct' == $classNode->name) {
@@ -665,7 +670,12 @@ final class ClassSourceManipulator
         return $node;
     }
 
-    private function findFirstNode(callable $filterCallback): ?Node
+    /**
+     * @param callable $filterCallback
+     *
+     * @return Node|null
+     */
+    private function findFirstNode(callable $filterCallback)
     {
         $traverser = new NodeTraverser();
         $visitor = new NodeVisitor\FirstFindingVisitor($filterCallback);
@@ -675,7 +685,13 @@ final class ClassSourceManipulator
         return $visitor->getFoundNode();
     }
 
-    private function findLastNode(callable $filterCallback, array $ast): ?Node
+    /**
+     * @param callable $filterCallback
+     * @param array    $ast
+     *
+     * @return Node|null
+     */
+    private function findLastNode(callable $filterCallback, array $ast)
     {
         $traverser = new NodeTraverser();
         $visitor = new NodeVisitor\FindingVisitor($filterCallback);
