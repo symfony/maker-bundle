@@ -52,7 +52,7 @@ abstract class BaseRelation
         return $this->targetPropertyName;
     }
 
-    public function setTargetPropertyName(?string $targetPropertyName)
+    public function setTargetPropertyName($targetPropertyName)
     {
         $this->targetPropertyName = $targetPropertyName;
 

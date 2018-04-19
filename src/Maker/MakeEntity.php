@@ -110,6 +110,10 @@ final class MakeEntity extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
+        if (\PHP_VERSION_ID < 70100) {
+            throw new RuntimeCommandException('The make:entity command requires that you use PHP 7.1 or higher.');
+        }
+
         $overwrite = $input->getOption('overwrite');
 
         // the regenerate option has entirely custom behavior

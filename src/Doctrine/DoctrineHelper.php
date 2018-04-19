@@ -54,7 +54,14 @@ final class DoctrineHelper
         return null !== $this->registry;
     }
 
-    public function getMappingDriverForClass(string $className): ?MappingDriver
+    /**
+     * @param string $className
+     *
+     * @return MappingDriver|null
+     *
+     * @throws \Exception
+     */
+    public function getMappingDriverForClass(string $className)
     {
         /** @var EntityManagerInterface $em */
         $em = $this->getRegistry()->getManagerForClass($className);
@@ -134,8 +141,10 @@ final class DoctrineHelper
 
     /**
      * @param string $entityClassName
+     *
+     * @return EntityDetails|null
      */
-    public function createDoctrineDetails(string $entityClassName): ?EntityDetails
+    public function createDoctrineDetails(string $entityClassName)
     {
         $metadata = $this->getMetadata($entityClassName);
 

@@ -19,6 +19,9 @@ use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\RouteCollectionBuilder;
 
+/**
+ * @requires PHP 7.1
+ */
 class EntityRegeneratorTest extends TestCase
 {
     /**

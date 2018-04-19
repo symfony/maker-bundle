@@ -17,6 +17,10 @@ class MakerTestCase extends TestCase
 {
     protected function executeMakerCommand(MakerTestDetails $testDetails)
     {
+        if (!$testDetails->isSupportedByCurrentPhpVersion()) {
+            $this->markTestSkipped();
+        }
+
         $testEnv = MakerTestEnvironment::create($testDetails);
 
         // prepare environment to test

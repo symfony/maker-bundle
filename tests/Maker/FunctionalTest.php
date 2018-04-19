@@ -377,6 +377,7 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_with_fields' => [MakerTestDetails::createTest(
@@ -401,6 +402,7 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_updating' => [MakerTestDetails::createTest(
@@ -422,6 +424,7 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityUpdate')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_many_to_one_simple_with_inverse' => [MakerTestDetails::createTest(
@@ -451,6 +454,7 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToOne')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_many_to_one_simple_no_inverse' => [MakerTestDetails::createTest(
@@ -476,6 +480,7 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToOneNoInverse')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_one_to_many_simple' => [MakerTestDetails::createTest(
@@ -503,6 +508,7 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOneToMany')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_many_to_many_simple' => [MakerTestDetails::createTest(
@@ -528,6 +534,7 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToMany')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_one_to_one_simple' => [MakerTestDetails::createTest(
@@ -555,6 +562,7 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOneToOne')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_many_to_one_vendor_target' => [MakerTestDetails::createTest(
@@ -596,6 +604,7 @@ class FunctionalTest extends MakerTestCase
 
                 $this->assertNotContains('inversedBy', file_get_contents($directory . '/src/Entity/User.php'));
             })
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_many_to_many_vendor_target' => [MakerTestDetails::createTest(
@@ -629,6 +638,7 @@ class FunctionalTest extends MakerTestCase
 
                 $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
             })
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_one_to_one_vendor_target' => [MakerTestDetails::createTest(
@@ -664,6 +674,7 @@ class FunctionalTest extends MakerTestCase
 
                 $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
             })
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_regenerate' => [MakerTestDetails::createTest(
@@ -675,6 +686,7 @@ class FunctionalTest extends MakerTestCase
             ->setArgumentsString('--regenerate')
             ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRegenerate')
             ->configureDatabase(true)
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_regenerate_overwrite' => [MakerTestDetails::createTest(
@@ -686,6 +698,7 @@ class FunctionalTest extends MakerTestCase
             ->setArgumentsString('--regenerate --overwrite')
             ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRegenerateOverwrite')
             ->configureDatabase(false)
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_regenerate_xml' => [MakerTestDetails::createTest(
@@ -707,6 +720,7 @@ class FunctionalTest extends MakerTestCase
                 "dir: '%kernel.project_dir%/config/doctrine'"
             )
             ->configureDatabase(false)
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_xml_mapping_error_existing' => [MakerTestDetails::createTest(
@@ -730,6 +744,7 @@ class FunctionalTest extends MakerTestCase
             ->assert(function(string $output, string $directory) {
                 $this->assertContains('Only annotation mapping is supported', $output);
             })
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_xml_mapping_error_new_class' => [MakerTestDetails::createTest(
@@ -753,6 +768,7 @@ class FunctionalTest extends MakerTestCase
             ->assert(function(string $output, string $directory) {
                 $this->assertContains('Only annotation mapping is supported', $output);
             })
+            ->setRequiredPhpVersion(70100)
         ];
 
         yield 'entity_updating_overwrite' => [MakerTestDetails::createTest(
@@ -771,6 +787,7 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setArgumentsString('--overwrite')
             ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityOverwrite')
+            ->setRequiredPhpVersion(70100)
         ];
     }
 
