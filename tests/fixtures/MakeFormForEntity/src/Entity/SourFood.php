@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -20,6 +21,16 @@ class SourFood
      * @ORM\Column(name="title", type="string", length=255)
      */
     private $title;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Property", mappedBy="sourFood")
+     */
+    private $properties;
+
+    public function __construct()
+    {
+        $this->properties = new ArrayCollection();
+    }
 
     /**
      * @return mixed
