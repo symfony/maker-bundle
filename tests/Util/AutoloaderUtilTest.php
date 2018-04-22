@@ -2,10 +2,10 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
+use Composer\Autoload\ClassLoader;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Process\Process;
 
 class AutoloaderUtilTest extends TestCase
 {
@@ -28,47 +28,57 @@ class AutoloaderUtilTest extends TestCase
 
     public function testGetPathForFutureClass()
     {
+        $classLoader = new ClassLoader();
         $composerJson = [
             'autoload' => [
                 'psr-4' => [
-                    'Also\\In\\Src\\' => 'src/SubDir',
-                    'App\\' => 'src/',
-                    'Other\\Namespace\\' => 'lib',
-                    '' => 'fallback_dir',
+                    'Also\\In\\Src\\' => '/src/SubDir',
+                    'App\\' => '/src',
+                    'Other\\Namespace\\' => '/lib',
+                    '' => '/fallback_dir',
                 ],
                 'psr-0' => [
-                    'Psr0\\Package' => 'lib/other',
+                    'Psr0\\Package' => '/lib/other',
                 ],
             ],
         ];
 
-        $fs = new Filesystem();
-        if (!file_exists(self::$currentRootDir)) {
-            $fs->mkdir(self::$currentRootDir);
+        foreach ($composerJson['autoload'] as $psr => $dirs) {
+            foreach ($dirs as $prefix => $path) {
+                if ($psr == 'psr-4') {
+                    $classLoader->addPsr4($prefix, self::$currentRootDir.$path);
+                } else {
+                    $classLoader->add($prefix, self::$currentRootDir.$path);
+                }
+            }
         }
 
-        $fs->remove(self::$currentRootDir.'/vendor');
-        file_put_contents(
-            self::$currentRootDir.'/composer.json',
-            json_encode($composerJson, JSON_PRETTY_PRINT)
-        );
-        $process = new Process('composer dump-autoload', self::$currentRootDir);
-        $process->run();
-        if (!$process->isSuccessful()) {
-            throw new \Exception('Error running composer dump-autoload: '.$process->getErrorOutput());
-        }
+        $reflection = new \ReflectionClass(AutoloaderUtil::class);
+        $property = $reflection->getProperty('classLoader');
+        $property->setAccessible(true);
 
+        $autoloaderUtil = new AutoloaderUtil();
 
-        $autoloaderUtil = new AutoloaderUtil(self::$currentRootDir);
+        $property->setValue($autoloaderUtil, $classLoader);
+
         foreach ($this->getPathForFutureClassTests() as $className => $expectedPath) {
             $this->assertSame(
-                // the paths will start in vendor/composer and be relative
-                str_replace('\\', '/', self::$currentRootDir.'/vendor/composer/../../'.$expectedPath),
+                str_replace('\\', '/', self::$currentRootDir.'/'.$expectedPath),
                 // normalize slashes for Windows comparison
                 str_replace('\\', '/', $autoloaderUtil->getPathForFutureClass($className)),
                 sprintf('class "%s" should have been in path "%s"', $className, $expectedPath)
             );
         }
+    }
+
+    public function testCanFindClassLoader()
+    {
+        $reflection = new \ReflectionClass(AutoloaderUtil::class);
+        $method = $reflection->getMethod('getClassLoader');
+        $method->setAccessible(true);
+        $autoloaderUtil = new AutoloaderUtil();
+        $autoloader = $method->invoke($autoloaderUtil);
+        $this->assertInstanceOf(ClassLoader::class, $autoloader, 'Wrong ClassLoader found');
     }
 
     public function getPathForFutureClassTests()
