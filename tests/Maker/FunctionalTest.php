@@ -689,6 +689,18 @@ class FunctionalTest extends MakerTestCase
             ->setRequiredPhpVersion(70100)
         ];
 
+        yield 'entity_regenerate_embeddable' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // namespace: use default App\Entity
+                '',
+            ])
+            ->setArgumentsString('--regenerate --overwrite')
+            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRegenerateEmbedable')
+            ->configureDatabase()
+            ->setRequiredPhpVersion(70100)
+        ];
+
         yield 'entity_regenerate_overwrite' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),
             [

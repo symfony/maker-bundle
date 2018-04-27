@@ -106,6 +106,46 @@ final class ClassSourceManipulator
         }
     }
 
+    public function addEmbeddedEntity(string $propertyName, string $className)
+    {
+        $typeHint = self::addUseStatementIfNecessary($className);
+
+        $annotations = [
+            $this->buildAnnotationLine(
+                '@ORM\\Embedded',
+                [
+                    'class' => $className,
+                ]
+            ),
+        ];
+
+        $this->addProperty($propertyName, $annotations);
+
+        // logic to avoid re-adding the same ArrayCollection line
+        $addEmbedded = true;
+        if ($this->getConstructorNode()) {
+            // We print the constructor to a string, then
+            // look for "$this->propertyName = "
+
+            $constructorString = $this->printer->prettyPrint([$this->getConstructorNode()]);
+            if (false !== strpos($constructorString, sprintf('$this->%s = ', $propertyName))) {
+                $addEmbedded = false;
+            }
+        }
+
+        if ($addEmbedded) {
+            $this->addStatementToConstructor(
+                new Node\Stmt\Expression(new Node\Expr\Assign(
+                    new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $propertyName),
+                    new Node\Expr\New_(new Node\Name($typeHint))
+                ))
+            );
+        }
+
+        $this->addGetter($propertyName, $typeHint, false);
+        $this->addSetter($propertyName, $typeHint, false);
+    }
+
     public function addManyToOneRelation(RelationManyToOne $manyToOne)
     {
         $this->addSingularRelation($manyToOne);
