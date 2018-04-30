@@ -27,9 +27,8 @@ class MakerTestCase extends TestCase
         $testEnv->prepare();
 
         try {
+            // run tests
             $makerTestProcess = $testEnv->runMaker();
-            //  Run tests
-
             $files = $testEnv->getGeneratedFilesFromOutputText();
 
             foreach ($files as $file) {
@@ -48,13 +47,13 @@ class MakerTestCase extends TestCase
                 }
             }
 
-            //run internal tests
+            // run internal tests
             $internalTestProcess = $testEnv->runInternalTests();
             if (null !== $internalTestProcess) {
                 $this->assertTrue($internalTestProcess->isSuccessful(), sprintf("Error while running the PHPUnit tests *in* the project: \n\n %s \n\n Command Output: %s", $internalTestProcess->getOutput(), $makerTestProcess->getOutput()));
             }
 
-            //checkout user asserts
+            // checkout user asserts
             if (null === $testDetails->getAssert()) {
                 $this->assertContains('Success', $makerTestProcess->getOutput(), $makerTestProcess->getErrorOutput());
             } else {
