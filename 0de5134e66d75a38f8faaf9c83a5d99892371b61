@@ -1,0 +1,23 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-04-22T13:47:36Z
+
+Tests are failing. But, yea, I think this approach makes even more sense!
+
+---------------------------------------------------------------------------
+
+by silvester at 2018-04-22T14:13:02Z
+
+Just fixed the closely related test. I will look into others.
+
+---------------------------------------------------------------------------
+
+by stof at 2018-04-25T13:22:42Z
+
+I also suggest using an instance variable rather than a static variable for the cache
+
+---------------------------------------------------------------------------
+
+by silvester at 2018-04-29T21:17:08Z
+
+Any other changes needed?
