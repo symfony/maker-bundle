@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Util;
 
 use Composer\Autoload\ClassLoader;
+use Symfony\Component\Debug\DebugClassLoader;
 
 /**
  * @author Ryan Weaver <weaverryan@gmail.com>
@@ -20,13 +21,10 @@ use Composer\Autoload\ClassLoader;
  */
 class AutoloaderUtil
 {
-    private static $classLoader;
-    private $rootDir;
-
-    public function __construct(string $rootDir)
-    {
-        $this->rootDir = $rootDir;
-    }
+    /**
+     * @var ClassLoader
+     */
+    private $classLoader;
 
     /**
      * Returns the relative path to where a new class should live.
@@ -76,16 +74,27 @@ class AutoloaderUtil
 
     private function getClassLoader(): ClassLoader
     {
-        if (null === self::$classLoader) {
-            $autoloadPath = $this->rootDir.'/vendor/autoload.php';
-
-            if (!file_exists($autoloadPath)) {
-                throw new \Exception(sprintf('Could not find the autoload file: "%s"', $autoloadPath));
+        if (null === $this->classLoader) {
+            $autoloadFunctions = spl_autoload_functions();
+            foreach ($autoloadFunctions as $autoloader) {
+                if (is_array($autoloader) && isset($autoloader[0]) && is_object($autoloader[0])) {
+                    if ($autoloader[0] instanceof ClassLoader) {
+                        $this->classLoader = $autoloader[0];
+                        break;
+                    }
+                    if ($autoloader[0] instanceof DebugClassLoader
+                        && is_array($autoloader[0]->getClassLoader())
+                        && $autoloader[0]->getClassLoader()[0] instanceof ClassLoader) {
+                        $this->classLoader = $autoloader[0]->getClassLoader()[0];
+                        break;
+                    }
+                }
             }
-
-            self::$classLoader = require $autoloadPath;
+            if (null === $this->classLoader) {
+                throw new \Exception('Composer ClassLoader not found!');
+            }
         }
 
-        return self::$classLoader;
+        return $this->classLoader;
     }
 }
