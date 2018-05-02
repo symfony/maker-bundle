@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\MappingException;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -40,7 +41,11 @@ final class EntityRegenerator
 
     public function regenerateEntities(string $classOrNamespace)
     {
-        $metadata = $this->doctrineHelper->getMetadata($classOrNamespace, true);
+        try {
+            $metadata = $this->doctrineHelper->getMetadata($classOrNamespace);
+        } catch (MappingException $mappingException) {
+            $metadata = $this->doctrineHelper->getMetadata($classOrNamespace, true);
+        }
 
         if ($metadata instanceof ClassMetadata) {
             $metadata = [$metadata];
@@ -67,7 +72,28 @@ final class EntityRegenerator
             $manipulator = $this->createClassManipulator($classPath);
             $operations[$classPath] = $manipulator;
 
+            $embeddedClasses = [];
+
+            foreach ($classMetadata->embeddedClasses as $fieldName => $mapping) {
+                $className = $mapping['class'];
+
+                $embeddedClasses[$fieldName] = $this->getPathOfClass($className);
+
+                $operations[$embeddedClasses[$fieldName]] = $this->createClassManipulator($embeddedClasses[$fieldName]);
+
+                $manipulator->addEmbeddedEntity($fieldName, $className);
+            }
+
             foreach ($classMetadata->fieldMappings as $fieldName => $mapping) {
+                // skip embedded fields
+                if (false !== strpos($fieldName, '.')) {
+                    list($fieldName, $embeddedFiledName) = explode('.', $fieldName);
+
+                    $operations[$embeddedClasses[$fieldName]]->addEntityField($embeddedFiledName, $mapping);
+
+                    continue;
+                }
+
                 $manipulator->addEntityField($fieldName, $mapping);
             }
 
