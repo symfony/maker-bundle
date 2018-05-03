@@ -150,7 +150,7 @@ final class Validator
         self::notBlank($className);
 
         if (!class_exists($className)) {
-            $errorMessage = $errorMessage ?: sprintf('Class "%s" does\'t exists. Please enter existing full class name', $className);
+            $errorMessage = $errorMessage ?: sprintf('Class "%s" doesn\'t exists. Please enter existing full class name', $className);
 
             throw new RuntimeCommandException($errorMessage);
         }
