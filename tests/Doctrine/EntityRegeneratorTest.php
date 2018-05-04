@@ -85,7 +85,7 @@ class EntityRegeneratorTest extends TestCase
             });
 
         $fileManager = new FileManager($fs, $autoloaderUtil, $tmpDir);
-        $doctrineHelper = new DoctrineHelper($container->get('doctrine'));
+        $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
         $regenerator = new EntityRegenerator(
             $doctrineHelper,
             $fileManager,

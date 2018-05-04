@@ -34,15 +34,17 @@ final class MakerCommand extends Command
 {
     private $maker;
     private $fileManager;
+    private $rootNamespace;
     private $inputConfig;
     /** @var ConsoleStyle */
     private $io;
     private $checkDependencies = true;
 
-    public function __construct(MakerInterface $maker, FileManager $fileManager)
+    public function __construct(MakerInterface $maker, FileManager $fileManager, string $rootNamespace)
     {
         $this->maker = $maker;
         $this->fileManager = $fileManager;
+        $this->rootNamespace = trim($rootNamespace, '\\');
         $this->inputConfig = new InputConfiguration();
 
         parent::__construct();
@@ -88,7 +90,7 @@ final class MakerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $generator = new Generator($this->fileManager, 'App\\');
+        $generator = new Generator($this->fileManager, $this->rootNamespace);
 
         $this->maker->generate($input, $this->io, $generator);
 

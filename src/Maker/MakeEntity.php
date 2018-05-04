@@ -43,12 +43,14 @@ final class MakeEntity extends AbstractMaker
     private $fileManager;
     private $doctrineHelper;
     private $projectDirectory;
+    private $entityNamespace;
 
-    public function __construct(FileManager $fileManager, string $projectDirectory, DoctrineHelper $doctrineHelper)
+    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, string $entityNamespace)
     {
         $this->fileManager = $fileManager;
-        $this->projectDirectory = $projectDirectory;
         $this->doctrineHelper = $doctrineHelper;
+        $this->projectDirectory = $projectDirectory;
+        $this->entityNamespace = $entityNamespace;
     }
 
     public static function getCommandName(): string
@@ -80,7 +82,7 @@ final class MakeEntity extends AbstractMaker
                 'This command will generate any missing methods (e.g. getters & setters) for a class or all classes in a namespace.',
                 'To overwrite any existing methods, re-run this command with the --overwrite flag',
             ], null, 'fg=yellow');
-            $classOrNamespace = $io->ask('Enter a class or namespace to regenerate', 'App\\Entity', [Validator::class, 'notBlank']);
+            $classOrNamespace = $io->ask('Enter a class or namespace to regenerate', $this->entityNamespace, [Validator::class, 'notBlank']);
 
             $input->setArgument('name', $classOrNamespace);
 
@@ -485,14 +487,14 @@ final class MakeEntity extends AbstractMaker
             $targetEntityClass = $io->askQuestion($question);
 
             if (!class_exists($targetEntityClass)) {
-                if (!class_exists('App\\Entity\\'.$targetEntityClass)) {
+                if (!class_exists($this->entityNamespace.'\\'.$targetEntityClass)) {
                     $io->error(sprintf('Unknown class "%s"', $targetEntityClass));
                     $targetEntityClass = null;
 
                     continue;
                 }
 
-                $targetEntityClass = 'App\\Entity\\'.$targetEntityClass;
+                $targetEntityClass = $this->entityNamespace.'\\'.$targetEntityClass;
             }
         }
 

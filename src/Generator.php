@@ -25,11 +25,11 @@ class Generator
     private $pendingOperations = [];
     private $namespacePrefix;
 
-    public function __construct(FileManager $fileManager, $namespacePrefix)
+    public function __construct(FileManager $fileManager, string $namespacePrefix)
     {
         $this->fileManager = $fileManager;
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
-        $this->namespacePrefix = rtrim($namespacePrefix, '\\');
+        $this->namespacePrefix = trim($namespacePrefix, '\\');
     }
 
     /**

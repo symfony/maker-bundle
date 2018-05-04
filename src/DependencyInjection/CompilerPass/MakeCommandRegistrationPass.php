@@ -17,6 +17,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 
 class MakeCommandRegistrationPass implements CompilerPassInterface
@@ -38,6 +39,7 @@ class MakeCommandRegistrationPass implements CompilerPassInterface
             )->setArguments([
                 new Reference($id),
                 new Reference('maker.file_manager'),
+                new Parameter('maker.root_namespace'),
             ])->addTag('console.command', ['command' => $class::getCommandName()]);
         }
     }

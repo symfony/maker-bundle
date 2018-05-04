@@ -27,8 +27,9 @@
 
             <service id="maker.maker.make_entity" class="Symfony\Bundle\MakerBundle\Maker\MakeEntity">
                 <argument type="service" id="maker.file_manager" />
-                <argument>%kernel.project_dir%</argument>
                 <argument type="service" id="maker.doctrine_helper" />
+                <argument>%kernel.project_dir%</argument>
+                <argument>%maker.entity_namespace%</argument>
                 <tag name="maker.command" />
             </service>
 

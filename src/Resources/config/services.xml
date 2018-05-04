@@ -24,6 +24,7 @@
             </service>
 
             <service id="maker.doctrine_helper" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper">
+                <argument>%maker.entity_namespace%</argument>
                 <argument type="service" id="doctrine" on-invalid="ignore"/>
             </service>
         </services>

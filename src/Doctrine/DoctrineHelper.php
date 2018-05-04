@@ -29,12 +29,18 @@ use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 final class DoctrineHelper
 {
     /**
+     * @var string
+     */
+    private $entityNamespace;
+
+    /**
      * @var ManagerRegistry
      */
     private $registry;
 
-    public function __construct(ManagerRegistry $registry = null)
+    public function __construct(string $entityNamespace, ManagerRegistry $registry = null)
     {
+        $this->entityNamespace = trim($entityNamespace, '\\');
         $this->registry = $registry;
     }
 
@@ -94,7 +100,7 @@ final class DoctrineHelper
 
             /* @var ClassMetadata $metadata */
             foreach (array_keys($allMetadata) as $classname) {
-                $entityClassDetails = new ClassNameDetails($classname, 'App\\Entity');
+                $entityClassDetails = new ClassNameDetails($classname, $this->entityNamespace);
                 $entities[] = $entityClassDetails->getRelativeName();
             }
         }
