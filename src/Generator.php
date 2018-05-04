@@ -35,7 +35,7 @@ class Generator
     /**
      * Generate a new file for a class from a template.
      */
-    public function generateClass(string $className, string $templateName, array $variables): string
+    public function generateClass(string $className, string $templateName, array $variables, $force = false): string
     {
         $targetPath = $this->fileManager->getRelativePathForFutureClass($className);
 
@@ -48,7 +48,7 @@ class Generator
             'namespace' => Str::getNamespace($className),
         ]);
 
-        $this->addOperation($targetPath, $templateName, $variables);
+        $this->addOperation($targetPath, $templateName, $variables, $force);
 
         return $targetPath;
     }
@@ -60,13 +60,13 @@ class Generator
      * @param string $templateName
      * @param array  $variables
      */
-    public function generateFile(string $targetPath, string $templateName, array $variables)
+    public function generateFile(string $targetPath, string $templateName, array $variables, $force = false)
     {
         $variables = array_merge($variables, [
             'helper' => $this->twigHelper,
         ]);
 
-        $this->addOperation($targetPath, $templateName, $variables);
+        $this->addOperation($targetPath, $templateName, $variables, $force);
     }
 
     /**
@@ -109,6 +109,8 @@ class Generator
             $className = rtrim($fullNamespacePrefix, '\\').'\\'.Str::asClassName($name, $suffix);
         }
 
+        $className = implode('\\', array_map([Str::class, 'addUnderscoreIfPhpKeyword'], explode('\\', $className)));
+
         Validator::validateClassName($className, $validationErrorMessage);
 
         // if this is a custom class, we may be completely different than the namespace prefix
@@ -120,9 +122,9 @@ class Generator
         return new ClassNameDetails($className, $fullNamespacePrefix, $suffix);
     }
 
-    private function addOperation(string $targetPath, string $templateName, array $variables)
+    private function addOperation(string $targetPath, string $templateName, array $variables, $force = false)
     {
-        if ($this->fileManager->fileExists($targetPath)) {
+        if (!$force && $this->fileManager->fileExists($targetPath)) {
             throw new RuntimeCommandException(sprintf(
                 'The file "%s" can\'t be generated because it already exists.',
                 $this->fileManager->relativizePath($targetPath)

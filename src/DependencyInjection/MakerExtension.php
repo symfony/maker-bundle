@@ -30,6 +30,11 @@ class MakerExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container)
     {
+        $container->setParameter(
+            'maker.security_roles',
+            $container->hasParameter('security.role_hierarchy.roles') ? $container->getParameter('security.role_hierarchy.roles') : []
+        );
+
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
         $loader->load('makers.xml');

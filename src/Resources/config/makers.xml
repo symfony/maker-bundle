@@ -41,7 +41,11 @@
                 <tag name="maker.command" />
             </service>
 
-            <service id="maker.maker.make_functional_test" class="Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest">
+            <service id="maker.maker.make_functional_tests" class="Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTests">
+                <argument type="service" id="Symfony\Component\Routing\RouterInterface" />
+                <argument type="service" id="Symfony\Component\HttpKernel\KernelInterface" />
+                <argument type="service" id="maker.file_manager" />
+                <argument>%maker.security_roles%</argument>
                 <tag name="maker.command" />
             </service>
 

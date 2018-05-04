@@ -1,0 +1,13 @@
+The <info>%command.name%</info> command generates HTTP functional tests based on the routes defined
+in your application.
+
+<info>php %command.full_name% [route-name]</info>
+
+The route name is optionnal: if it is missing, the command will generate HTTP functional tests for
+all the routes in your application.
+
+You can safely run this command multiple times. On each call, a new HTTP functional test will be
+created for each new route and previously created files won't be modified.
+
+However, if you need to, you can use the <info>--force</info> option to overwrite tests files with the
+MakerBundle generated code.

@@ -15,7 +15,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeCrud;
 use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Maker\MakeFixtures;
 use Symfony\Bundle\MakerBundle\Maker\MakeForm;
-use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest;
+use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTests;
 use Symfony\Bundle\MakerBundle\Maker\MakeMigration;
 use Symfony\Bundle\MakerBundle\Maker\MakeSerializerEncoder;
 use Symfony\Bundle\MakerBundle\Maker\MakeSubscriber;
@@ -197,15 +197,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->addExtraDependencies('orm')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFormEmbedableEntity')
-        ];
-
-        yield 'functional' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeFunctionalTest::class),
-            [
-                // functional test class name
-                'FooBar',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
         ];
 
         yield 'subscriber' => [MakerTestDetails::createTest(
