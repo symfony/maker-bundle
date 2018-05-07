@@ -38,7 +38,6 @@ class MakerExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $container->setParameter('maker.root_namespace', $config['root_namespace']);
-        $container->setParameter('maker.entity_namespace', $config['entity_namespace'] ?: '%maker.root_namespace%\\Entity');
 
         $container->registerForAutoconfiguration(MakerInterface::class)
             ->addTag(MakeCommandRegistrationPass::MAKER_TAG);
