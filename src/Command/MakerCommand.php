@@ -60,7 +60,7 @@ final class MakerCommand extends Command
 
         if ($this->checkDependencies) {
             $dependencies = new DependencyBuilder();
-            $this->maker->configureDependencies($dependencies);
+            $this->maker->configureDependencies($dependencies, $input);
 
             if ($missingPackagesMessage = $dependencies->getMissingPackagesMessage($this->getName())) {
                 throw new RuntimeCommandException($missingPackagesMessage);
