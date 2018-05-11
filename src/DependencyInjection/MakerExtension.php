@@ -42,20 +42,4 @@ class MakerExtension extends Extension
         $container->registerForAutoconfiguration(MakerInterface::class)
             ->addTag(MakeCommandRegistrationPass::MAKER_TAG);
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getAlias()
-    {
-        return 'maker';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getConfiguration(array $config, ContainerBuilder $container)
-    {
-        return new Configuration();
-    }
 }
