@@ -135,10 +135,10 @@ final class MakerTestEnvironment
 
     public function runMaker()
     {
+        $this->preMake();
+
         MakerTestProcess::create('php bin/console cache:clear --no-ansi', $this->path)
                         ->run();
-
-        $this->preMake();
 
         // We don't need ansi coloring in tests!
         $testProcess = MakerTestProcess::create(

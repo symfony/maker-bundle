@@ -38,6 +38,8 @@ final class MakerTestDetails
 
     private $commandAllowedToFail = false;
 
+    private $snapshotSuffix = '';
+
     private $requiredPhpVersion;
 
     /**
@@ -62,6 +64,46 @@ final class MakerTestDetails
         $this->fixtureFilesPath = $fixtureFilesPath;
 
         return $this;
+    }
+
+    public function changeRootNamespace(string $rootNamespace): self
+    {
+        $rootNamespace = trim($rootNamespace, '\\');
+
+        // to bypass read before flush issue
+        $this->snapshotSuffix = $rootNamespace;
+
+        return $this
+            ->addReplacement(
+                'composer.json',
+                '"App\\\\": "src/"',
+                '"'.$rootNamespace.'\\\\": "src/"'
+            )
+            ->addReplacement(
+                'src/Kernel.php',
+                'namespace App',
+                'namespace '.$rootNamespace
+            )
+            ->addReplacement(
+                'bin/console',
+                'use App\\Kernel',
+                'use '.$rootNamespace.'\\Kernel'
+            )
+            ->addReplacement(
+                'public/index.php',
+                'use App\\Kernel',
+                'use '.$rootNamespace.'\\Kernel'
+            )
+            ->addReplacement(
+                'config/services.yaml',
+                'App\\',
+                $rootNamespace.'\\'
+            )
+            ->addReplacement(
+                'phpunit.xml.dist',
+                '<env name="KERNEL_CLASS" value="App\\Kernel" />',
+                '<env name="KERNEL_CLASS" value="'.$rootNamespace.'\\Kernel" />'
+            );
     }
 
     public function addPreMakeCommand(string $preMakeCommand): self
@@ -202,7 +244,7 @@ final class MakerTestDetails
     {
         // for cache purposes, only the dependencies are important
         // shortened to avoid long paths on Windows
-        return 'maker_'.substr(md5(serialize($this->getDependencies())), 0, 10);
+        return 'maker_'.substr(md5(serialize($this->getDependencies()).$this->snapshotSuffix), 0, 10);
     }
 
     public function getPreMakeCommands(): array

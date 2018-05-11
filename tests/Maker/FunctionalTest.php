@@ -74,6 +74,18 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommand')
         ];
 
+        yield 'command_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeCommand::class),
+            [
+                // command name
+                'app:foo',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommand')
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
+        ];
+
         yield 'controller_basic' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeController::class),
             [
@@ -81,6 +93,22 @@ class FunctionalTest extends MakerTestCase
                 'FooBar',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController')
+            ->assert(function(string $output, string $directory) {
+                // make sure the template was not configured
+                $this->assertContainsCount('created: ', $output, 1);
+            })
+        ];
+
+        yield 'controller_basic_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeController::class),
+            [
+                // controller class name
+                'FooBar',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController')
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
             ->assert(function(string $output, string $directory) {
                 // make sure the template was not configured
                 $this->assertContainsCount('created: ', $output, 1);
@@ -156,6 +184,19 @@ class FunctionalTest extends MakerTestCase
             })
         ];
 
+        yield 'fixtures_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeFixtures::class),
+            [
+                'AppFixtures'
+            ])
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
+            ->assert(function(string $output, string $directory) {
+                $this->assertContains('created: src/DataFixtures/AppFixtures.php', $output);
+            })
+        ];
+
         yield 'form_basic' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeForm::class),
             [
@@ -164,6 +205,19 @@ class FunctionalTest extends MakerTestCase
                 '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeForm')
+        ];
+
+        yield 'form_basic_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeForm::class),
+            [
+                // form name
+                'FooBar',
+                '',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFormInCustomRootNamespace')
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
         ];
 
         yield 'form_with_entity' => [MakerTestDetails::createTest(
@@ -208,6 +262,18 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
         ];
 
+        yield 'functional_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeFunctionalTest::class),
+            [
+                // functional test class name
+                'FooBar',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctionalInCustomRootNamespace')
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
+        ];
+
         yield 'subscriber' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeSubscriber::class),
             [
@@ -216,6 +282,19 @@ class FunctionalTest extends MakerTestCase
                 // event name
                 'kernel.request',
             ])
+        ];
+
+        yield 'subscriber_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeSubscriber::class),
+            [
+                // subscriber name
+                'FooBar',
+                // event name
+                'kernel.request',
+            ])
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
         ];
 
         yield 'subscriber_unknown_event_class' => [MakerTestDetails::createTest(
@@ -238,12 +317,36 @@ class FunctionalTest extends MakerTestCase
             ])
         ];
 
+        yield 'serializer_encoder_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeSerializerEncoder::class),
+            [
+                // encoder class name
+                'FooBarEncoder',
+                // encoder format
+                'foobar',
+            ])
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
+        ];
+
         yield 'twig_extension' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeTwigExtension::class),
             [
                 // extension class name
                 'FooBar',
             ])
+        ];
+
+        yield 'twig_extension_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeTwigExtension::class),
+            [
+                // extension class name
+                'FooBar',
+            ])
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
         ];
 
         yield 'unit_test' => [MakerTestDetails::createTest(
@@ -254,12 +357,34 @@ class FunctionalTest extends MakerTestCase
             ])
         ];
 
+        yield 'unit_test_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeUnitTest::class),
+            [
+                // class name
+                'FooBar',
+            ])
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
+        ];
+
         yield 'validator' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeValidator::class),
             [
                 // validator name
                 'FooBar',
             ])
+        ];
+
+        yield 'validator_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeValidator::class),
+            [
+                // validator name
+                'FooBar',
+            ])
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
         ];
 
         yield 'voter' => [MakerTestDetails::createTest(
@@ -270,6 +395,17 @@ class FunctionalTest extends MakerTestCase
             ])
         ];
 
+        yield 'voter_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeVoter::class),
+            [
+                // voter class name
+                'FooBar',
+            ])
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
+        ];
+
         yield 'auth_empty' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeAuthenticator::class),
             [
@@ -278,10 +414,48 @@ class FunctionalTest extends MakerTestCase
             ])
         ];
 
+        yield 'auth_empty_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeAuthenticator::class),
+            [
+                // class name
+                'AppCustomAuthenticator',
+            ])
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
+        ];
+
         yield 'migration_with_changes' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeMigration::class),
             [/* no input */])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
+            ->configureDatabase(false)
+            // doctrine-migrations-bundle only requires doctrine-bundle, which
+            // only requires doctrine/dbal. But we're testing with the ORM,
+            // so let's install it
+            ->addExtraDependencies('doctrine/orm')
+            ->assert(function(string $output, string $directory) {
+                $this->assertContains('Success', $output);
+
+                $finder = new Finder();
+                $finder->in($directory.'/src/Migrations')
+                    ->name('*.php');
+                $this->assertCount(1, $finder);
+
+                // see that the exact filename is in the output
+                $iterator = $finder->getIterator();
+                $iterator->rewind();
+                $this->assertContains(sprintf('"src/Migrations/%s"', $iterator->current()->getFilename()), $output);
+            })
+        ];
+
+        yield 'migration_with_changes_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeMigration::class),
+            [/* no input */])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigrationInCustomRootNamespace')
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
             ->configureDatabase(false)
             // doctrine-migrations-bundle only requires doctrine-bundle, which
             // only requires doctrine/dbal. But we're testing with the ORM,
@@ -323,6 +497,24 @@ class FunctionalTest extends MakerTestCase
                 'SweetFood',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
+            // need for crud web tests
+            ->configureDatabase()
+            ->assert(function(string $output, string $directory) {
+                $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
+                $this->assertContains('created: src/Form/SweetFoodType.php', $output);
+            })
+        ];
+
+        yield 'crud_basic_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeCrud::class),
+            [
+                // entity class name
+                'SweetFood',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudInCustomRootNamespace')
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
+            ->addPreMakeCommand('composer dump-autoload')
             // need for crud web tests
             ->configureDatabase()
             ->assert(function(string $output, string $directory) {
