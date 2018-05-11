@@ -33,6 +33,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -110,6 +111,14 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $value = $io->askQuestion($question);
 
         $input->setArgument('name', $value);
+
+        if (class_exists(ApiResource::class) && !$input->getOption('api-resource')) {
+            $description = $command->getDefinition()->getOption('api-resource')->getDescription();
+            $question = new ConfirmationQuestion($description, false);
+            $value = $io->askQuestion($question);
+
+            $input->setOption('api-resource', $value);
+        }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
