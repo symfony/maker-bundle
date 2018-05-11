@@ -3,6 +3,18 @@
 if (!file_exists(__DIR__.'/src')) {
     exit(0);
 }
+
+$finder = PhpCsFixer\Finder::create()
+    ->in(__DIR__.'/src')
+    // the PHP template files are a bit special
+    ->notName('*.tpl.php')
+;
+
+if (\PHP_VERSION_ID < 70100) {
+    // EntityRegenerator works only with PHP 7.1+
+    $finder->notName('EntityRegenerator.php');
+}
+
 return PhpCsFixer\Config::create()
     ->setRules(array(
         '@Symfony' => true,
@@ -22,10 +34,5 @@ EOF
         ]
     ))
     ->setRiskyAllowed(true)
-    ->setFinder(
-        PhpCsFixer\Finder::create()
-            ->in(__DIR__.'/src')
-            // the PHP template files are a bit special
-            ->notName('*.tpl.php')
-    )
+    ->setFinder($finder)
 ;
