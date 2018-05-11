@@ -24,6 +24,8 @@ final class MakerTestDetails
 
     private $deletedFiles = [];
 
+    private $createdFiles = [];
+
     private $replacements = [];
 
     private $preMakeCommands = [];
@@ -74,6 +76,7 @@ final class MakerTestDetails
         $this->snapshotSuffix = $rootNamespace;
 
         return $this
+            ->createFile('config/packages/dev/maker.yaml', "maker:\n    root_namespace: Custom\n")
             ->addReplacement(
                 'composer.json',
                 '"App\\\\": "src/"',
@@ -130,6 +133,18 @@ final class MakerTestDetails
     public function getFilesToDelete(): array
     {
         return $this->deletedFiles;
+    }
+
+    public function createFile(string $filename, string $content): self
+    {
+        $this->createdFiles[$filename] = $content;
+
+        return $this;
+    }
+
+    public function getFilesToCreate(): array
+    {
+        return $this->createdFiles;
     }
 
     public function addReplacement(string $filename, string $find, string $replace): self

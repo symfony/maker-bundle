@@ -82,7 +82,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommand')
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
         ];
 
@@ -107,7 +106,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController')
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
             ->assert(function(string $output, string $directory) {
                 // make sure the template was not configured
@@ -190,7 +188,6 @@ class FunctionalTest extends MakerTestCase
                 'AppFixtures'
             ])
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
             ->assert(function(string $output, string $directory) {
                 $this->assertContains('created: src/DataFixtures/AppFixtures.php', $output);
@@ -216,7 +213,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFormInCustomRootNamespace')
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
         ];
 
@@ -270,7 +266,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctionalInCustomRootNamespace')
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
         ];
 
@@ -293,7 +288,6 @@ class FunctionalTest extends MakerTestCase
                 'kernel.request',
             ])
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
         ];
 
@@ -326,7 +320,6 @@ class FunctionalTest extends MakerTestCase
                 'foobar',
             ])
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
         ];
 
@@ -345,7 +338,6 @@ class FunctionalTest extends MakerTestCase
                 'FooBar',
             ])
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
         ];
 
@@ -364,7 +356,6 @@ class FunctionalTest extends MakerTestCase
                 'FooBar',
             ])
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
         ];
 
@@ -383,7 +374,6 @@ class FunctionalTest extends MakerTestCase
                 'FooBar',
             ])
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
         ];
 
@@ -402,7 +392,6 @@ class FunctionalTest extends MakerTestCase
                 'FooBar',
             ])
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
         ];
 
@@ -421,7 +410,6 @@ class FunctionalTest extends MakerTestCase
                 'AppCustomAuthenticator',
             ])
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
         ];
 
@@ -454,7 +442,6 @@ class FunctionalTest extends MakerTestCase
             [/* no input */])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigrationInCustomRootNamespace')
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
             ->configureDatabase(false)
             // doctrine-migrations-bundle only requires doctrine-bundle, which
@@ -513,7 +500,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudInCustomRootNamespace')
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand("echo 'maker:\n    root_namespace: Custom\n' > config/packages/dev/maker.yaml")
             ->addPreMakeCommand('composer dump-autoload')
             // need for crud web tests
             ->configureDatabase()
