@@ -64,7 +64,7 @@ can be improved and new commands can be added.
 
 For that reason, in general, the generated code cannot be modified. In many cases,
 adding your *own* maker command is so easy, that we recommend that. However, if there
-is some extension point that you'd like, please open an issue do we can discuss!
+is some extension point that you'd like, please open an issue so we can discuss!
 
 .. _`SensioGeneratorBundle`: https://github.com/sensiolabs/SensioGeneratorBundle
 .. _`Symfony Flex`: https://symfony.com/doc/current/setup/flex.html
