@@ -38,12 +38,14 @@ final class MakerCommand extends Command
     /** @var ConsoleStyle */
     private $io;
     private $checkDependencies = true;
+    private $generator;
 
     public function __construct(MakerInterface $maker, FileManager $fileManager)
     {
         $this->maker = $maker;
         $this->fileManager = $fileManager;
         $this->inputConfig = new InputConfiguration();
+        $this->generator = new Generator($this->fileManager, 'App\\');
 
         parent::__construct();
     }
@@ -83,17 +85,15 @@ final class MakerCommand extends Command
             $input->setArgument($argument->getName(), $value);
         }
 
-        $this->maker->interact($input, $this->io, $this);
+        $this->maker->interact($input, $this->io, $this, $this->generator);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $generator = new Generator($this->fileManager, 'App\\');
-
-        $this->maker->generate($input, $this->io, $generator);
+        $this->maker->generate($input, $this->io, $this->generator);
 
         // sanity check for custom makers
-        if ($generator->hasPendingOperations()) {
+        if ($this->generator->hasPendingOperations()) {
             throw new \LogicException('Make sure to call the writeChanges() method on the generator.');
         }
     }

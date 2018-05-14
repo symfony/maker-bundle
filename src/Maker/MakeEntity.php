@@ -21,6 +21,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\GeneratorAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
@@ -42,7 +43,7 @@ use Symfony\Component\Finder\SplFileInfo;
  * @author Ryan Weaver <weaverryan@gmail.com>
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
+final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface, GeneratorAwareMakerInterface
 {
     private $fileManager;
     private $doctrineHelper;
@@ -74,7 +75,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $inputConf->setArgumentAsNonInteractive('name');
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command, Generator $generator = null)
     {
         if ($input->getArgument('name')) {
             return;
@@ -112,7 +113,11 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $input->setArgument('name', $value);
 
-        if (class_exists(ApiResource::class) && !$input->getOption('api-resource')) {
+        if (
+            !$input->getOption('api-resource') &&
+            class_exists(ApiResource::class) &&
+            !class_exists($generator->createClassNameDetails($value, 'Entity\\')->getFullName())
+        ) {
             $description = $command->getDefinition()->getOption('api-resource')->getDescription();
             $question = new ConfirmationQuestion($description, false);
             $value = $io->askQuestion($question);
