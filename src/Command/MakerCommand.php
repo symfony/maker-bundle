@@ -56,7 +56,7 @@ final class MakerCommand extends Command
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         $this->io = new ConsoleStyle($input, $output);
-        $this->fileManager->setIo($this->io);
+        $this->fileManager->setIO($this->io);
 
         if ($this->checkDependencies) {
             $dependencies = new DependencyBuilder();
@@ -75,7 +75,7 @@ final class MakerCommand extends Command
                 continue;
             }
 
-            if (in_array($argument->getName(), $this->inputConfig->getNonInteractiveArguments(), true)) {
+            if (\in_array($argument->getName(), $this->inputConfig->getNonInteractiveArguments(), true)) {
                 continue;
             }
 
