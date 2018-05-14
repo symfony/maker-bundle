@@ -40,12 +40,12 @@ final class MakerCommand extends Command
     private $checkDependencies = true;
     private $generator;
 
-    public function __construct(MakerInterface $maker, FileManager $fileManager)
+    public function __construct(MakerInterface $maker, FileManager $fileManager, Generator $generator)
     {
         $this->maker = $maker;
         $this->fileManager = $fileManager;
         $this->inputConfig = new InputConfiguration();
-        $this->generator = new Generator($this->fileManager, 'App\\');
+        $this->generator = $generator;
 
         parent::__construct();
     }
@@ -85,7 +85,7 @@ final class MakerCommand extends Command
             $input->setArgument($argument->getName(), $value);
         }
 
-        $this->maker->interact($input, $this->io, $this, $this->generator);
+        $this->maker->interact($input, $this->io, $this);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

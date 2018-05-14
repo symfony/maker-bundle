@@ -21,7 +21,6 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
-use Symfony\Bundle\MakerBundle\GeneratorAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
@@ -43,17 +42,25 @@ use Symfony\Component\Finder\SplFileInfo;
  * @author Ryan Weaver <weaverryan@gmail.com>
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface, GeneratorAwareMakerInterface
+final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 {
     private $fileManager;
     private $doctrineHelper;
     private $projectDirectory;
+    private $generator;
 
-    public function __construct(FileManager $fileManager, string $projectDirectory, DoctrineHelper $doctrineHelper)
+    public function __construct(FileManager $fileManager, string $projectDirectory, DoctrineHelper $doctrineHelper, Generator $generator = null)
     {
         $this->fileManager = $fileManager;
         $this->projectDirectory = $projectDirectory;
         $this->doctrineHelper = $doctrineHelper;
+
+        if (null === $generator) {
+            @trigger_error(sprintf('Passing a "%s" instance as 4th argument is mandatory since version 1.5.', Generator::class), E_USER_DEPRECATED);
+            $this->generator = new Generator($fileManager, 'App\\');
+        } else {
+            $this->generator = $generator;
+        }
     }
 
     public static function getCommandName(): string
@@ -75,7 +82,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $inputConf->setArgumentAsNonInteractive('name');
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command, Generator $generator = null)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
         if ($input->getArgument('name')) {
             return;
@@ -116,7 +123,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         if (
             !$input->getOption('api-resource') &&
             class_exists(ApiResource::class) &&
-            !class_exists($generator->createClassNameDetails($value, 'Entity\\')->getFullName())
+            !class_exists($this->generator->createClassNameDetails($value, 'Entity\\')->getFullName())
         ) {
             $description = $command->getDefinition()->getOption('api-resource')->getDescription();
             $question = new ConfirmationQuestion($description, false);

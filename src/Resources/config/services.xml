@@ -26,5 +26,10 @@
             <service id="maker.doctrine_helper" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper">
                 <argument type="service" id="doctrine" on-invalid="ignore"/>
             </service>
+
+            <service id="maker.generator" class="Symfony\Bundle\MakerBundle\Generator">
+                <argument type="service" id="maker.file_manager" />
+                <argument>App\</argument>
+            </service>
         </services>
 </container>

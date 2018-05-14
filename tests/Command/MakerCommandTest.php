@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\FileManager;
+use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -26,7 +27,7 @@ class MakerCommandTest extends TestCase
 
         $fileManager = $this->createMock(FileManager::class);
 
-        $command = new MakerCommand($maker, $fileManager);
+        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, 'App\\'));
         // needed because it's normally set by the Application
         $command->setName('make:foo');
         $tester = new CommandTester($command);
