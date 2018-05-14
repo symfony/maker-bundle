@@ -77,13 +77,13 @@ class AutoloaderUtil
         if (null === $this->classLoader) {
             $autoloadFunctions = spl_autoload_functions();
             foreach ($autoloadFunctions as $autoloader) {
-                if (is_array($autoloader) && isset($autoloader[0]) && is_object($autoloader[0])) {
+                if (\is_array($autoloader) && isset($autoloader[0]) && \is_object($autoloader[0])) {
                     if ($autoloader[0] instanceof ClassLoader) {
                         $this->classLoader = $autoloader[0];
                         break;
                     }
                     if ($autoloader[0] instanceof DebugClassLoader
-                        && is_array($autoloader[0]->getClassLoader())
+                        && \is_array($autoloader[0]->getClassLoader())
                         && $autoloader[0]->getClassLoader()[0] instanceof ClassLoader) {
                         $this->classLoader = $autoloader[0]->getClassLoader()[0];
                         break;

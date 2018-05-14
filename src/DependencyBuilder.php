@@ -84,7 +84,7 @@ final class DependencyBuilder
             return '';
         }
 
-        $packagesCount = count($packages) + count($packagesDev);
+        $packagesCount = \count($packages) + \count($packagesDev);
 
         $message = sprintf(
             "Missing package%s: to use the %s command, run:\n",
@@ -103,7 +103,7 @@ final class DependencyBuilder
         return $message;
     }
 
-    private function getRequiredDependencyNames(array $dependencies)
+    private function getRequiredDependencyNames(array $dependencies): array
     {
         $packages = [];
         foreach ($dependencies as $package) {
@@ -116,7 +116,7 @@ final class DependencyBuilder
         return array_unique($packages);
     }
 
-    private function calculateMissingDependencies(array $dependencies)
+    private function calculateMissingDependencies(array $dependencies): array
     {
         $missingPackages = [];
         $missingOptionalPackages = [];

@@ -125,7 +125,7 @@ final class DoctrineHelper
                 if (null === $classOrNamespace) {
                     $metadata[$m->getName()] = $m;
                 } else {
-                    if ($m->getName() == $classOrNamespace) {
+                    if ($m->getName() === $classOrNamespace) {
                         return $m;
                     }
 

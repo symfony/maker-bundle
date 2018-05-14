@@ -51,7 +51,7 @@ final class MakerTestProcess
     {
         $this->process->run();
 
-        if (!$this->process->isSuccessful() && !$allowToFail) {
+        if (!$allowToFail && !$this->process->isSuccessful()) {
             throw new \Exception(sprintf(
                 'Error running command: "%s". Output: "%s". Error: "%s"',
                 $this->process->getCommandLine(),

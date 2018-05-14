@@ -28,7 +28,6 @@ final class EntityRegenerator
     private $doctrineHelper;
     private $fileManager;
     private $generator;
-    private $projectDirectory;
     private $overwrite;
 
     public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, string $projectDirectory, bool $overwrite)
@@ -36,7 +35,6 @@ final class EntityRegenerator
         $this->doctrineHelper = $doctrineHelper;
         $this->fileManager = $fileManager;
         $this->generator = $generator;
-        $this->projectDirectory = $projectDirectory;
         $this->overwrite = $overwrite;
     }
 
@@ -105,7 +103,7 @@ final class EntityRegenerator
             }
 
             $getIsNullable = function (array $mapping) {
-                if (!isset($mapping['joinColumns'][0]) || !isset($mapping['joinColumns'][0]['nullable'])) {
+                if (!isset($mapping['joinColumns'][0]['nullable'])) {
                     // the default for relationships IS nullable
                     return true;
                 }
