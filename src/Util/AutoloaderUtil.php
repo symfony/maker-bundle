@@ -79,7 +79,7 @@ class AutoloaderUtil
     }
 
     /**
-     * Returns if the namespace is configured by composer autoloader
+     * Returns if the namespace is configured by composer autoloader.
      *
      * @param string $namespace
      *
