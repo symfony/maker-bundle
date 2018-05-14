@@ -24,14 +24,14 @@
             </service>
 
             <service id="maker.doctrine_helper" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper">
-                <argument>%maker.root_namespace%\Entity</argument>
+                <argument /> <!-- entity namespace -->
                 <argument type="service" id="doctrine" on-invalid="ignore" />
             </service>
 
             <service id="maker.auto_command.abstract" class="Symfony\Bundle\MakerBundle\Command\MakerCommand" abstract="true">
-                <argument /> <!-- maker -->
                 <argument type="service" id="maker.file_manager" />
-                <argument>%maker.root_namespace%</argument>
+                <argument /> <!-- maker -->
+                <argument /> <!-- root namespace -->
             </service>
         </services>
 </container>

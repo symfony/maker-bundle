@@ -60,6 +60,11 @@ final class DoctrineHelper
         return null !== $this->registry;
     }
 
+    public function getEntityNamespace(): string
+    {
+        return $this->entityNamespace;
+    }
+
     /**
      * @param string $className
      *

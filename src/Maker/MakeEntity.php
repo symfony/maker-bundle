@@ -45,12 +45,12 @@ final class MakeEntity extends AbstractMaker
     private $projectDirectory;
     private $entityNamespace;
 
-    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, string $entityNamespace)
+    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory)
     {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
         $this->projectDirectory = $projectDirectory;
-        $this->entityNamespace = $entityNamespace;
+        $this->entityNamespace = $doctrineHelper->getEntityNamespace();
     }
 
     public static function getCommandName(): string

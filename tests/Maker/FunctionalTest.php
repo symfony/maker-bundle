@@ -80,7 +80,7 @@ class FunctionalTest extends MakerTestCase
                 // command name
                 'app:foo',
             ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommand')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommandInCustomRootNamespace')
             ->changeRootNamespace('Custom')
             ->addPreMakeCommand('composer dump-autoload')
         ];
@@ -92,22 +92,7 @@ class FunctionalTest extends MakerTestCase
                 'FooBar',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController')
-            ->assert(function(string $output, string $directory) {
-                // make sure the template was not configured
-                $this->assertContainsCount('created: ', $output, 1);
-            })
-        ];
-
-        yield 'controller_basic_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeController::class),
-            [
-                // controller class name
-                'FooBar',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController')
-            ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 // make sure the template was not configured
                 $this->assertContainsCount('created: ', $output, 1);
             })
@@ -140,7 +125,7 @@ class FunctionalTest extends MakerTestCase
                 // controller class name
                 'Admin\\FooBar',
             ])
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertFileExists($directory.'/src/Controller/Admin/FooBarController.php');
 
                 $this->assertContains('created: src/Controller/Admin/FooBarController.php', $output);
@@ -154,10 +139,10 @@ class FunctionalTest extends MakerTestCase
                 'Admin\\FooBar',
             ])
             ->addExtraDependencies('twig')
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertFileExists($directory.'/templates/admin/foo_bar/index.html.twig');
             })
-       ];
+        ];
 
         yield 'controller_full_custom_namespace' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeController::class),
@@ -175,21 +160,9 @@ class FunctionalTest extends MakerTestCase
         yield 'fixtures' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeFixtures::class),
             [
-                'AppFixtures'
+                'AppFixtures',
             ])
-            ->assert(function(string $output, string $directory) {
-                $this->assertContains('created: src/DataFixtures/AppFixtures.php', $output);
-            })
-        ];
-
-        yield 'fixtures_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeFixtures::class),
-            [
-                'AppFixtures'
-            ])
-            ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertContains('created: src/DataFixtures/AppFixtures.php', $output);
             })
         ];
@@ -202,18 +175,6 @@ class FunctionalTest extends MakerTestCase
                 '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeForm')
-        ];
-
-        yield 'form_basic_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeForm::class),
-            [
-                // form name
-                'FooBar',
-                '',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFormInCustomRootNamespace')
-            ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
         ];
 
         yield 'form_with_entity' => [MakerTestDetails::createTest(
@@ -258,17 +219,6 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
         ];
 
-        yield 'functional_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeFunctionalTest::class),
-            [
-                // functional test class name
-                'FooBar',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctionalInCustomRootNamespace')
-            ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
-        ];
-
         yield 'subscriber' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeSubscriber::class),
             [
@@ -277,18 +227,6 @@ class FunctionalTest extends MakerTestCase
                 // event name
                 'kernel.request',
             ])
-        ];
-
-        yield 'subscriber_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeSubscriber::class),
-            [
-                // subscriber name
-                'FooBar',
-                // event name
-                'kernel.request',
-            ])
-            ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
         ];
 
         yield 'subscriber_unknown_event_class' => [MakerTestDetails::createTest(
@@ -311,34 +249,12 @@ class FunctionalTest extends MakerTestCase
             ])
         ];
 
-        yield 'serializer_encoder_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeSerializerEncoder::class),
-            [
-                // encoder class name
-                'FooBarEncoder',
-                // encoder format
-                'foobar',
-            ])
-            ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
-        ];
-
         yield 'twig_extension' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeTwigExtension::class),
             [
                 // extension class name
                 'FooBar',
             ])
-        ];
-
-        yield 'twig_extension_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeTwigExtension::class),
-            [
-                // extension class name
-                'FooBar',
-            ])
-            ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
         ];
 
         yield 'unit_test' => [MakerTestDetails::createTest(
@@ -349,32 +265,12 @@ class FunctionalTest extends MakerTestCase
             ])
         ];
 
-        yield 'unit_test_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeUnitTest::class),
-            [
-                // class name
-                'FooBar',
-            ])
-            ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
-        ];
-
         yield 'validator' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeValidator::class),
             [
                 // validator name
                 'FooBar',
             ])
-        ];
-
-        yield 'validator_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeValidator::class),
-            [
-                // validator name
-                'FooBar',
-            ])
-            ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
         ];
 
         yield 'voter' => [MakerTestDetails::createTest(
@@ -385,32 +281,12 @@ class FunctionalTest extends MakerTestCase
             ])
         ];
 
-        yield 'voter_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeVoter::class),
-            [
-                // voter class name
-                'FooBar',
-            ])
-            ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
-        ];
-
         yield 'auth_empty' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeAuthenticator::class),
             [
                 // class name
                 'AppCustomAuthenticator',
             ])
-        ];
-
-        yield 'auth_empty_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeAuthenticator::class),
-            [
-                // class name
-                'AppCustomAuthenticator',
-            ])
-            ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
         ];
 
         yield 'migration_with_changes' => [MakerTestDetails::createTest(
@@ -422,33 +298,7 @@ class FunctionalTest extends MakerTestCase
             // only requires doctrine/dbal. But we're testing with the ORM,
             // so let's install it
             ->addExtraDependencies('doctrine/orm')
-            ->assert(function(string $output, string $directory) {
-                $this->assertContains('Success', $output);
-
-                $finder = new Finder();
-                $finder->in($directory.'/src/Migrations')
-                    ->name('*.php');
-                $this->assertCount(1, $finder);
-
-                // see that the exact filename is in the output
-                $iterator = $finder->getIterator();
-                $iterator->rewind();
-                $this->assertContains(sprintf('"src/Migrations/%s"', $iterator->current()->getFilename()), $output);
-            })
-        ];
-
-        yield 'migration_with_changes_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeMigration::class),
-            [/* no input */])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigrationInCustomRootNamespace')
-            ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
-            ->configureDatabase(false)
-            // doctrine-migrations-bundle only requires doctrine-bundle, which
-            // only requires doctrine/dbal. But we're testing with the ORM,
-            // so let's install it
-            ->addExtraDependencies('doctrine/orm')
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertContains('Success', $output);
 
                 $finder = new Finder();
@@ -470,7 +320,7 @@ class FunctionalTest extends MakerTestCase
             ->configureDatabase()
             // sync the database, so no changes are needed
             ->addExtraDependencies('doctrine/orm')
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertNotContains('Success', $output);
 
                 $this->assertContains('No database changes were detected', $output);
@@ -486,7 +336,7 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
             // need for crud web tests
             ->configureDatabase()
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
@@ -503,7 +353,7 @@ class FunctionalTest extends MakerTestCase
             ->addPreMakeCommand('composer dump-autoload')
             // need for crud web tests
             ->configureDatabase()
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
@@ -518,9 +368,9 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudRepository')
             // need for crud web tests
             ->configureDatabase()
-            ->assert(function(string $output, string $directory) {
-                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
-                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
+            ->assert(function (string $output, string $directory) {
+                $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
+                $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
         ];
 
@@ -535,7 +385,7 @@ class FunctionalTest extends MakerTestCase
             ->addExtraDependencies('symfony/css-selector')
             ->configureDatabase()
             ->deleteFile('templates/base.html.twig')
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
@@ -575,7 +425,7 @@ class FunctionalTest extends MakerTestCase
                 // nullable
                 'y',
                 // finish adding fields
-                ''
+                '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
             ->configureDatabase()
@@ -597,7 +447,7 @@ class FunctionalTest extends MakerTestCase
                 // nullable
                 'y',
                 // finish adding fields
-                ''
+                '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityUpdate')
             ->configureDatabase()
@@ -627,7 +477,7 @@ class FunctionalTest extends MakerTestCase
                 // orphanRemoval (default to no)
                 '',
                 // finish adding fields
-                ''
+                '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToOne')
             ->configureDatabase()
@@ -653,7 +503,7 @@ class FunctionalTest extends MakerTestCase
                 // do you want to generate an inverse relation? (default to yes)
                 'n',
                 // finish adding fields
-                ''
+                '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToOneNoInverse')
             ->configureDatabase()
@@ -681,7 +531,7 @@ class FunctionalTest extends MakerTestCase
                 // orphanRemoval
                 'y',
                 // finish adding fields
-                ''
+                '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOneToMany')
             ->configureDatabase()
@@ -707,9 +557,37 @@ class FunctionalTest extends MakerTestCase
                 // field name on opposite side - use default 'courses'
                 '',
                 // finish adding fields
-                ''
+                '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToMany')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
+        ];
+
+        yield 'entity_many_to_many_simple_in_custom_root_namespace' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'Course',
+                // field name
+                'students',
+                // add a relationship field
+                'relation',
+                // the target entity
+                'User',
+                // relation type
+                'ManyToMany',
+                // inverse side?
+                'y',
+                // field name on opposite side - use default 'courses'
+                '',
+                // finish adding fields
+                '',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToManyInCustomNamespace')
+            ->changeRootNamespace('Custom')
+            ->addPreMakeCommand('composer dump-autoload')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
             ->setRequiredPhpVersion(70100)
@@ -735,7 +613,7 @@ class FunctionalTest extends MakerTestCase
                 // field name on opposite side - use default 'userProfile'
                 '',
                 // finish adding fields
-                ''
+                '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOneToOne')
             ->configureDatabase()
@@ -761,15 +639,15 @@ class FunctionalTest extends MakerTestCase
                  * do not here, since the other side won't be mapped.
                  */
                 // finish adding fields
-                ''
+                '',
             ])
-            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRelationVendorTarget')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRelationVendorTarget')
             ->configureDatabase()
             ->addPreMakeCommand('composer dump-autoload')
             ->addReplacement(
                 'composer.json',
                 '"App\\\Tests\\\": "tests/",',
-                '"App\\\Tests\\\": "tests/",' . "\n" . '            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
+                '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
             ->assert(function (string $output, string $directory) {
                 $this->assertContains('updated: src/Entity/User.php', $output);
@@ -777,10 +655,10 @@ class FunctionalTest extends MakerTestCase
 
                 // sanity checks on the generated code
                 $finder = new Finder();
-                $finder->in($directory . '/src/Entity');
+                $finder->in($directory.'/src/Entity');
                 $this->assertEquals(1, count($finder));
 
-                $this->assertNotContains('inversedBy', file_get_contents($directory . '/src/Entity/User.php'));
+                $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
             })
             ->setRequiredPhpVersion(70100)
         ];
@@ -801,9 +679,9 @@ class FunctionalTest extends MakerTestCase
                  * do not here, since the other side won't be mapped.
                  */
                 // finish adding fields
-                ''
+                '',
             ])
-            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRelationVendorTarget')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRelationVendorTarget')
             ->configureDatabase()
             ->addPreMakeCommand('composer dump-autoload')
             ->addReplacement(
@@ -811,7 +689,7 @@ class FunctionalTest extends MakerTestCase
                 '"App\\\Tests\\\": "tests/",',
                 '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertNotContains('updated: vendor/', $output);
 
                 $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
@@ -837,9 +715,9 @@ class FunctionalTest extends MakerTestCase
                  * do not here, since the other side won't be mapped.
                  */
                 // finish adding fields
-                ''
+                '',
             ])
-            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRelationVendorTarget')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRelationVendorTarget')
             ->configureDatabase()
             ->addPreMakeCommand('composer dump-autoload')
             ->addReplacement(
@@ -847,7 +725,7 @@ class FunctionalTest extends MakerTestCase
                 '"App\\\Tests\\\": "tests/",',
                 '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertNotContains('updated: vendor/', $output);
 
                 $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
@@ -862,7 +740,7 @@ class FunctionalTest extends MakerTestCase
                 '',
             ])
             ->setArgumentsString('--regenerate')
-            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRegenerate')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerate')
             ->configureDatabase(true)
             ->setRequiredPhpVersion(70100)
         ];
@@ -874,7 +752,7 @@ class FunctionalTest extends MakerTestCase
                 '',
             ])
             ->setArgumentsString('--regenerate --overwrite')
-            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRegenerateEmbedable')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateEmbedable')
             ->configureDatabase()
             ->setRequiredPhpVersion(70100)
         ];
@@ -886,7 +764,7 @@ class FunctionalTest extends MakerTestCase
                 '',
             ])
             ->setArgumentsString('--regenerate --overwrite')
-            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRegenerateOverwrite')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateOverwrite')
             ->configureDatabase(false)
             ->setRequiredPhpVersion(70100)
         ];
@@ -898,7 +776,7 @@ class FunctionalTest extends MakerTestCase
                 '',
             ])
             ->setArgumentsString('--regenerate')
-            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityRegenerateXml')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateXml')
             ->addReplacement(
                 'config/packages/doctrine.yaml',
                 'type: annotation',
@@ -918,7 +796,7 @@ class FunctionalTest extends MakerTestCase
             [
                 'User',
             ])
-            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityXmlMappingError')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityXmlMappingError')
             ->addReplacement(
                 'config/packages/doctrine.yaml',
                 'type: annotation',
@@ -931,7 +809,7 @@ class FunctionalTest extends MakerTestCase
             )
             ->configureDatabase(false)
             ->setCommandAllowedToFail(true)
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertContains('Only annotation mapping is supported', $output);
             })
             ->setRequiredPhpVersion(70100)
@@ -942,7 +820,7 @@ class FunctionalTest extends MakerTestCase
             [
                 'UserAvatarPhoto',
             ])
-            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityXmlMappingError')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityXmlMappingError')
             ->addReplacement(
                 'config/packages/doctrine.yaml',
                 'type: annotation',
@@ -955,7 +833,7 @@ class FunctionalTest extends MakerTestCase
             )
             ->configureDatabase(false)
             ->setCommandAllowedToFail(true)
-            ->assert(function(string $output, string $directory) {
+            ->assert(function (string $output, string $directory) {
                 $this->assertContains('Only annotation mapping is supported', $output);
             })
             ->setRequiredPhpVersion(70100)
@@ -973,10 +851,10 @@ class FunctionalTest extends MakerTestCase
                 // nullable
                 '',
                 // finish adding fields
-                ''
+                '',
             ])
             ->setArgumentsString('--overwrite')
-            ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeEntityOverwrite')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOverwrite')
             ->setRequiredPhpVersion(70100)
         ];
     }
@@ -1028,10 +906,10 @@ class FunctionalTestKernel extends Kernel implements CompilerPassInterface
 
     public function registerBundles()
     {
-        return array(
+        return [
             new FrameworkBundle(),
-            new MakerBundle(),
-        );
+            new MakerBundle()
+        ];
     }
 
     protected function configureRoutes(RouteCollectionBuilder $routes)

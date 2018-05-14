@@ -123,13 +123,6 @@ final class MakerTestEnvironment
                 }
             }
         }
-
-        foreach ($this->testDetails->getFilesToCreate() as $file => $content) {
-            if (file_exists($this->path.'/'.$file)) {
-                throw new \Exception(sprintf('Could not create find "%s" because it already exists', $file));
-            }
-            file_put_contents($this->path.'/'.$file, $content);
-        }
     }
 
     private function preMake()

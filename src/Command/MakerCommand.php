@@ -32,18 +32,18 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class MakerCommand extends Command
 {
-    private $maker;
     private $fileManager;
+    private $maker;
     private $rootNamespace;
     private $inputConfig;
     /** @var ConsoleStyle */
     private $io;
     private $checkDependencies = true;
 
-    public function __construct(MakerInterface $maker, FileManager $fileManager, string $rootNamespace)
+    public function __construct(FileManager $fileManager, MakerInterface $maker, string $rootNamespace)
     {
-        $this->maker = $maker;
         $this->fileManager = $fileManager;
+        $this->maker = $maker;
         $this->rootNamespace = trim($rootNamespace, '\\');
         $this->inputConfig = new InputConfiguration();
 

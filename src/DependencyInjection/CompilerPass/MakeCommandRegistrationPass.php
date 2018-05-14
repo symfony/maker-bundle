@@ -35,7 +35,7 @@ class MakeCommandRegistrationPass implements CompilerPassInterface
 
             $commandDefinition = new ChildDefinition('maker.auto_command.abstract');
             $commandDefinition->setClass(MakerCommand::class);
-            $commandDefinition->replaceArgument(0, new Reference($id));
+            $commandDefinition->replaceArgument(1, new Reference($id));
             $commandDefinition->addTag('console.command', ['command' => $class::getCommandName()]);
 
             $container->setDefinition(sprintf('maker.auto_command.%s', Str::asTwigVariable($class::getCommandName())), $commandDefinition);

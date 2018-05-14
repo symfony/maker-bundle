@@ -37,7 +37,13 @@ class MakerExtension extends Extension
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
 
-        $container->setParameter('maker.root_namespace', $config['root_namespace']);
+        $rootNamespace = trim($config['root_namespace'], '\\');
+
+        $makeCommandDefinition = $container->getDefinition('maker.auto_command.abstract');
+        $makeCommandDefinition->replaceArgument(2, $rootNamespace);
+
+        $doctrineHelperDefinition = $container->getDefinition('maker.doctrine_helper');
+        $doctrineHelperDefinition->replaceArgument(0, $rootNamespace.'\\Entity');
 
         $container->registerForAutoconfiguration(MakerInterface::class)
             ->addTag(MakeCommandRegistrationPass::MAKER_TAG);

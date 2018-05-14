@@ -29,7 +29,6 @@
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.doctrine_helper" />
                 <argument>%kernel.project_dir%</argument>
-                <argument>%maker.root_namespace%\Entity</argument>
                 <tag name="maker.command" />
             </service>
 
