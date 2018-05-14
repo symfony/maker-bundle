@@ -26,7 +26,24 @@ class MakerCommandTest extends TestCase
 
         $fileManager = $this->createMock(FileManager::class);
 
-        $command = new MakerCommand($fileManager, $maker, 'App\\');
+        $command = new MakerCommand($maker, 'App', $fileManager);
+        // needed because it's normally set by the Application
+        $command->setName('make:foo');
+        $tester = new CommandTester($command);
+        $tester->execute(array());
+    }
+
+    /**
+     * @expectedException \LogicException
+     * @expectedExceptionMessage using a namespace other than "Unknown".
+     */
+    public function testExceptionOnUnknownRootNamespace()
+    {
+        $maker = $this->createMock(MakerInterface::class);
+
+        $fileManager = $this->createMock(FileManager::class);
+
+        $command = new MakerCommand($maker, 'Unknown', $fileManager);
         // needed because it's normally set by the Application
         $command->setName('make:foo');
         $tester = new CommandTester($command);

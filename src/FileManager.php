@@ -163,6 +163,11 @@ class FileManager
         return $this->autoloaderUtil->getNamespacePrefixForClass($className);
     }
 
+    public function isNamespaceConfiguredToAutoload(string $namespace): string
+    {
+        return $this->autoloaderUtil->isNamespaceConfiguredToAutoload($namespace);
+    }
+
     /**
      * Resolve '../' in paths (like real_path), but for non-existent files.
      *

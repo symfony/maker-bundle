@@ -32,19 +32,19 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class MakerCommand extends Command
 {
-    private $fileManager;
     private $maker;
     private $rootNamespace;
+    private $fileManager;
     private $inputConfig;
     /** @var ConsoleStyle */
     private $io;
     private $checkDependencies = true;
 
-    public function __construct(FileManager $fileManager, MakerInterface $maker, string $rootNamespace)
+    public function __construct(MakerInterface $maker, string $rootNamespace, FileManager $fileManager)
     {
-        $this->fileManager = $fileManager;
         $this->maker = $maker;
         $this->rootNamespace = trim($rootNamespace, '\\');
+        $this->fileManager = $fileManager;
         $this->inputConfig = new InputConfiguration();
 
         parent::__construct();
@@ -90,6 +90,16 @@ final class MakerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if (!$this->fileManager->isNamespaceConfiguredToAutoload($this->rootNamespace)) {
+            throw new \LogicException(
+                sprintf(
+                    'It looks like your app may be using a namespace other than "%s".'.
+                    ' See https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html for how to configure this.',
+                    $this->rootNamespace
+                )
+            );
+        }
+
         $generator = new Generator($this->fileManager, $this->rootNamespace);
 
         $this->maker->generate($input, $this->io, $generator);
