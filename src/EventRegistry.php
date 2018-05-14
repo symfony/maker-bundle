@@ -96,7 +96,7 @@ class EventRegistry
         }
 
         foreach ($listeners as $listener) {
-            if (!is_array($listener) || 2 !== count($listener)) {
+            if (!\is_array($listener) || 2 !== \count($listener)) {
                 continue;
             }
 

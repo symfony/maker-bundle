@@ -98,7 +98,7 @@ final class MakeEntity extends AbstractMaker
                 continue;
             }
 
-            $classes[] = str_replace('/', '\\', str_replace('.php', '', $item->getRelativePathname()));
+            $classes[] = str_replace(['.php', '/'], ['', '\\'], $item->getRelativePathname());
         }
 
         $argument = $command->getDefinition()->getArgument('name');
@@ -191,7 +191,7 @@ final class MakeEntity extends AbstractMaker
             $fileManagerOperations = [];
             $fileManagerOperations[$entityPath] = $manipulator;
 
-            if (is_array($newField)) {
+            if (\is_array($newField)) {
                 $annotationOptions = $newField;
                 unset($annotationOptions['fieldName']);
                 $manipulator->addEntityField($newField['fieldName'], $annotationOptions);
@@ -254,7 +254,7 @@ final class MakeEntity extends AbstractMaker
             }
 
             foreach ($fileManagerOperations as $path => $manipulatorOrMessage) {
-                if (is_string($manipulatorOrMessage)) {
+                if (\is_string($manipulatorOrMessage)) {
                     $io->comment($manipulatorOrMessage);
                 } else {
                     $this->fileManager->dumpFile($path, $manipulatorOrMessage->getSourceCode());
@@ -300,7 +300,7 @@ final class MakeEntity extends AbstractMaker
                 return $name;
             }
 
-            if (in_array($name, $fields)) {
+            if (\in_array($name, $fields)) {
                 throw new \InvalidArgumentException(sprintf('The "%s" property already exists.', $name));
             }
 
@@ -308,20 +308,21 @@ final class MakeEntity extends AbstractMaker
         });
 
         if (!$fieldName) {
-            return;
+            return null;
         }
 
         $defaultType = 'string';
         // try to guess the type by the field name prefix/suffix
         // convert to snake case for simplicity
         $snakeCasedField = Str::asSnakeCase($fieldName);
-        if ('_at' == substr($snakeCasedField, -3)) {
+
+        if ('_at' === $suffix = substr($snakeCasedField, -3)) {
             $defaultType = 'datetime';
-        } elseif ('_id' == substr($snakeCasedField, -3)) {
+        } elseif ('_id' === $suffix) {
             $defaultType = 'integer';
-        } elseif ('is_' == substr($snakeCasedField, 0, 3)) {
+        } elseif (0 === strpos($snakeCasedField, 'is_')) {
             $defaultType = 'boolean';
-        } elseif ('has_' == substr($snakeCasedField, 0, 4)) {
+        } elseif (0 === strpos($snakeCasedField, 'has_')) {
             $defaultType = 'boolean';
         }
 
@@ -341,7 +342,7 @@ final class MakeEntity extends AbstractMaker
                 $io->writeln('');
 
                 $type = null;
-            } elseif (!in_array($type, $allValidTypes)) {
+            } elseif (!\in_array($type, $allValidTypes)) {
                 $this->printAvailableTypes($io);
                 $io->error(sprintf('Invalid type "%s".', $type));
                 $io->writeln('');
@@ -350,7 +351,7 @@ final class MakeEntity extends AbstractMaker
             }
         }
 
-        if ('relation' === $type || in_array($type, EntityRelation::getValidRelationTypes())) {
+        if ('relation' === $type || \in_array($type, EntityRelation::getValidRelationTypes())) {
             return $this->askRelationDetails($io, $entityClass, $type, $fieldName);
         }
 
@@ -414,9 +415,9 @@ final class MakeEntity extends AbstractMaker
                 unset($allTypes[$mainType]);
                 $line = sprintf('  * <comment>%s</comment>', $mainType);
 
-                if (is_string($subTypes) && $subTypes) {
+                if (\is_string($subTypes) && $subTypes) {
                     $line .= sprintf(' (%s)', $subTypes);
-                } elseif (is_array($subTypes) && !empty($subTypes)) {
+                } elseif (\is_array($subTypes) && !empty($subTypes)) {
                     $line .= sprintf(' (or %s)', implode(', ', array_map(function ($subType) {
                         return sprintf('<comment>%s</comment>', $subType);
                     }, $subTypes)));
@@ -560,7 +561,7 @@ final class MakeEntity extends AbstractMaker
             }
 
             // recommend an inverse side, except for OneToOne, where it's inefficient
-            $recommendMappingInverse = EntityRelation::ONE_TO_ONE === $relation->getType() ? false : true;
+            $recommendMappingInverse = EntityRelation::ONE_TO_ONE !== $relation->getType();
 
             $getterMethodName = 'get'.Str::asCamelCase(Str::getShortClassName($relation->getOwningClass()));
             if (EntityRelation::ONE_TO_ONE !== $relation->getType()) {
@@ -742,7 +743,7 @@ final class MakeEntity extends AbstractMaker
         ));
         $question->setAutocompleterValues(EntityRelation::getValidRelationTypes());
         $question->setValidator(function ($type) {
-            if (!in_array($type, EntityRelation::getValidRelationTypes())) {
+            if (!\in_array($type, EntityRelation::getValidRelationTypes())) {
                 throw new \InvalidArgumentException(sprintf('Invalid type: use one of: %s', implode(', ', EntityRelation::getValidRelationTypes())));
             }
 
@@ -801,7 +802,7 @@ final class MakeEntity extends AbstractMaker
                 return false;
             }
 
-            $className = (reset($otherClassMetadatas))->getName();
+            $className = reset($otherClassMetadatas)->getName();
         }
 
         $driver = $this->doctrineHelper->getMappingDriverForClass($className);
