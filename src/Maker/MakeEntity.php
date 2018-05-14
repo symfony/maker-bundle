@@ -63,6 +63,7 @@ final class MakeEntity extends AbstractMaker
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('Class name of the entity to create or update (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
+            ->addOption('src', null, InputOption::VALUE_OPTIONAL, 'source Entity Path', 'src/Entity/')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
         ;
 
@@ -87,7 +88,7 @@ final class MakeEntity extends AbstractMaker
             return;
         }
 
-        $entityFinder = $this->fileManager->createFinder('src/Entity/')
+        $entityFinder = $this->fileManager->createFinder($input->getOption('src'))
             // remove if/when we allow entities in subdirectories
             ->depth('<1')
             ->name('*.php');
@@ -102,7 +103,7 @@ final class MakeEntity extends AbstractMaker
         }
 
         $argument = $command->getDefinition()->getArgument('name');
-        $question = $this->createEntityClassQuestion($argument->getDescription());
+        $question = $this->createEntityClassQuestion($argument->getDescription(), $input->getOption('src'));
         $value = $io->askQuestion($question);
 
         $input->setArgument('name', $value);
@@ -452,9 +453,15 @@ final class MakeEntity extends AbstractMaker
         $printSection($allTypes);
     }
 
-    private function createEntityClassQuestion(string $questionText): Question
+    /**
+     * @param string $questionText
+     * @param string $src
+     *
+     * @return Question
+     */
+    private function createEntityClassQuestion(string $questionText, string $src = 'src/Entity'): Question
     {
-        $entityFinder = $this->fileManager->createFinder('src/Entity/')
+        $entityFinder = $this->fileManager->createFinder($src)
             // remove if/when we allow entities in subdirectories
             ->depth('<1')
             ->name('*.php');
