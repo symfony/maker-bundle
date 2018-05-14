@@ -13,7 +13,11 @@
                 <argument>%kernel.project_dir%</argument>
             </service>
 
-            <service id="maker.autoloader_util" class="Symfony\Bundle\MakerBundle\Util\AutoloaderUtil" />
+            <service id="maker.autoloader_finder" class="Symfony\Bundle\MakerBundle\Util\ComposerAutoloaderFinder" />
+
+            <service id="maker.autoloader_util" class="Symfony\Bundle\MakerBundle\Util\AutoloaderUtil">
+                <argument type="service" id="maker.autoloader_finder" />
+            </service>
 
             <service id="maker.event_registry" class="Symfony\Bundle\MakerBundle\EventRegistry">
                 <argument type="service" id="event_dispatcher" />
