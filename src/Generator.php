@@ -40,7 +40,7 @@ class Generator
         $targetPath = $this->fileManager->getRelativePathForFutureClass($className);
 
         if (null === $targetPath) {
-            throw new \LogicException(sprintf('Could not determine where to locate the new class "%s".', $className));
+            throw new \LogicException(sprintf('Could not determine where to locate the new class "%s", maybe try with a full namespace like "\\My\\Full\\Namespace\\%s"', $className, Str::getShortClassName($className)));
         }
 
         $variables = array_merge($variables, [

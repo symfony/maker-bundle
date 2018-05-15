@@ -25,7 +25,7 @@ final class Str
      */
     public static function hasSuffix(string $value, string $suffix): bool
     {
-        return 0 === strcasecmp($suffix, substr($value, -strlen($suffix)));
+        return 0 === strcasecmp($suffix, substr($value, -\strlen($suffix)));
     }
 
     /**
@@ -45,7 +45,7 @@ final class Str
      */
     public static function removeSuffix(string $value, string $suffix): string
     {
-        return self::hasSuffix($value, $suffix) ? substr($value, 0, -strlen($suffix)) : $value;
+        return self::hasSuffix($value, $suffix) ? substr($value, 0, -\strlen($suffix)) : $value;
     }
 
     /**
@@ -117,11 +117,11 @@ final class Str
 
     public static function getShortClassName(string $fullClassName): string
     {
-        if (!empty(self::getNamespace($fullClassName))) {
-            return substr($fullClassName, strrpos($fullClassName, '\\') + 1);
-        } else {
+        if (empty(self::getNamespace($fullClassName))) {
             return $fullClassName;
         }
+
+        return substr($fullClassName, strrpos($fullClassName, '\\') + 1);
     }
 
     public static function getNamespace(string $fullClassName): string
@@ -141,7 +141,7 @@ final class Str
     {
         $snake = self::asSnakeCase($camelCase);
         $words = explode('_', $snake);
-        $words[count($words) - 1] = Inflector::pluralize($words[count($words) - 1]);
+        $words[\count($words) - 1] = Inflector::pluralize($words[\count($words) - 1]);
         $reSnaked = implode('_', $words);
 
         return self::asLowerCamelCase($reSnaked);
@@ -151,7 +151,7 @@ final class Str
     {
         $snake = self::asSnakeCase($camelCase);
         $words = explode('_', $snake);
-        $words[count($words) - 1] = Inflector::singularize($words[count($words) - 1]);
+        $words[\count($words) - 1] = Inflector::singularize($words[\count($words) - 1]);
         $reSnaked = implode('_', $words);
 
         return self::asLowerCamelCase($reSnaked);

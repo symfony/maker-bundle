@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
+use Doctrine\Common\Persistence\Mapping\MappingException as CommonMappingException;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
@@ -27,7 +28,6 @@ final class EntityRegenerator
     private $doctrineHelper;
     private $fileManager;
     private $generator;
-    private $projectDirectory;
     private $overwrite;
 
     public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, string $projectDirectory, bool $overwrite)
@@ -35,7 +35,6 @@ final class EntityRegenerator
         $this->doctrineHelper = $doctrineHelper;
         $this->fileManager = $fileManager;
         $this->generator = $generator;
-        $this->projectDirectory = $projectDirectory;
         $this->overwrite = $overwrite;
     }
 
@@ -43,7 +42,7 @@ final class EntityRegenerator
     {
         try {
             $metadata = $this->doctrineHelper->getMetadata($classOrNamespace);
-        } catch (MappingException $mappingException) {
+        } catch (MappingException | CommonMappingException $mappingException) {
             $metadata = $this->doctrineHelper->getMetadata($classOrNamespace, true);
         }
 
@@ -98,7 +97,7 @@ final class EntityRegenerator
             }
 
             $getIsNullable = function (array $mapping) {
-                if (!isset($mapping['joinColumns'][0]) || !isset($mapping['joinColumns'][0]['nullable'])) {
+                if (!isset($mapping['joinColumns'][0]['nullable'])) {
                     // the default for relationships IS nullable
                     return true;
                 }

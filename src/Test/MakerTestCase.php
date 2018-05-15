@@ -34,13 +34,13 @@ class MakerTestCase extends TestCase
             foreach ($files as $file) {
                 $this->assertTrue($testEnv->fileExists($file));
 
-                if ('.php' == substr($file, -4)) {
+                if ('.php' === substr($file, -4)) {
                     $csProcess = $testEnv->runPhpCSFixer($file);
 
                     $this->assertTrue($csProcess->isSuccessful(), sprintf('File "%s" has a php-cs problem: %s', $file, $csProcess->getOutput()));
                 }
 
-                if ('.twig' == substr($file, -5)) {
+                if ('.twig' === substr($file, -5)) {
                     $csProcess = $testEnv->runTwigCSLint($file);
 
                     $this->assertTrue($csProcess->isSuccessful(), sprintf('File "%s" has a twig-cs problem: %s', $file, $csProcess->getOutput()));
