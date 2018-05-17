@@ -163,7 +163,7 @@ class FileManager
         return $this->autoloaderUtil->getNamespacePrefixForClass($className);
     }
 
-    public function isNamespaceConfiguredToAutoload(string $namespace): string
+    public function isNamespaceConfiguredToAutoload(string $namespace): bool
     {
         return $this->autoloaderUtil->isNamespaceConfiguredToAutoload($namespace);
     }

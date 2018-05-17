@@ -80,12 +80,8 @@ class AutoloaderUtil
 
     /**
      * Returns if the namespace is configured by composer autoloader.
-     *
-     * @param string $namespace
-     *
-     * @return bool
      */
-    public function isNamespaceConfiguredToAutoload(string $namespace)
+    public function isNamespaceConfiguredToAutoload(string $namespace): bool
     {
         $namespace = trim($namespace, '\\').'\\';
         $classLoader = $this->getClassLoader();
