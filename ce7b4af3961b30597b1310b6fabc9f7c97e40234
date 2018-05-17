@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-05-13T17:17:06Z
+
+Good catch! But, let's remove the argument entirely from the constructor. Then, there are 2 other references to `new EntityRegenerator()` that need to be updated: in `MakeEntity` and `EntityRegeneratorTest`.
+
+---------------------------------------------------------------------------
+
+by dunglas at 2018-05-14T07:25:16Z
+
+Removing the argument is a BC break. Is it allowed?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-05-14T13:57:11Z
+
+Ah, yes. The class is marked as `@internal`. Almost the entirely library is marked as `@internal`. We purposely don't support using the classes of the library to build on top of.
