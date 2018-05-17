@@ -72,6 +72,13 @@ final class MakerCommand extends Command
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
+        if (!$this->fileManager->isNamespaceConfiguredToAutoload($this->rootNamespace)) {
+            $this->io->note([
+                sprintf('It looks like your app may be using a namespace other than "%s".', $this->rootNamespace),
+                'To configure this and make your life easier, see: https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html#configuration.',
+            ]);
+        }
+
         foreach ($this->getDefinition()->getArguments() as $argument) {
             if ($input->getArgument($argument->getName())) {
                 continue;
@@ -90,16 +97,6 @@ final class MakerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (!$this->fileManager->isNamespaceConfiguredToAutoload($this->rootNamespace)) {
-            throw new \LogicException(
-                sprintf(
-                    'It looks like your app may be using a namespace other than "%s".'.
-                    ' See https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html for how to configure this.',
-                    $this->rootNamespace
-                )
-            );
-        }
-
         $generator = new Generator($this->fileManager, $this->rootNamespace);
 
         $this->maker->generate($input, $this->io, $generator);

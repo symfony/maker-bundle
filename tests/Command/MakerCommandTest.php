@@ -33,10 +33,6 @@ class MakerCommandTest extends TestCase
         $tester->execute(array());
     }
 
-    /**
-     * @expectedException \LogicException
-     * @expectedExceptionMessage using a namespace other than "Unknown".
-     */
     public function testExceptionOnUnknownRootNamespace()
     {
         $maker = $this->createMock(MakerInterface::class);
@@ -48,5 +44,7 @@ class MakerCommandTest extends TestCase
         $command->setName('make:foo');
         $tester = new CommandTester($command);
         $tester->execute(array());
+
+        $this->assertContains('using a namespace other than "Unknown"', $tester->getDisplay());
     }
 }
