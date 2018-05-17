@@ -176,7 +176,7 @@ final class MakeCrud extends AbstractMaker
                 'entity_twig_var_plural' => $entityTwigVarPlural,
                 'entity_twig_var_singular' => $entityTwigVarSingular,
                 'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
-                'entity_fields' => str_replace('_', '', $entityDoctrineDetails->getDisplayFields()),
+                'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
                 'route_name' => $routeName,
             ],
             'new' => [
@@ -187,7 +187,7 @@ final class MakeCrud extends AbstractMaker
                 'entity_class_name' => $entityClassDetails->getShortName(),
                 'entity_twig_var_singular' => $entityTwigVarSingular,
                 'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
-                'entity_fields' => str_replace('_', '', $entityDoctrineDetails->getDisplayFields()),
+                'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
                 'route_name' => $routeName,
             ],
         ];

@@ -22,7 +22,7 @@ class GeneratedCrudControllerTest extends WebTestCase
         $this->assertContains('New SweetFood', $client->getResponse()->getContent());
 
         $newForm = $crawler->selectButton('Save')->form();
-        $client->submit($newForm, ['sweet_food[title]' => 'Candy', 'sweet_food[with_underscore]' => 'myVal']);
+        $client->submit($newForm, ['sweet_food[title]' => 'Candy']);
         $this->assertTrue($client->getResponse()->isRedirect());
 
         $crawler = $client->followRedirect();
@@ -30,7 +30,6 @@ class GeneratedCrudControllerTest extends WebTestCase
         $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
         $this->assertContains('SweetFood index', $client->getResponse()->getContent());
         $this->assertContains('<td>Candy</td>', $client->getResponse()->getContent());
-        $this->assertContains('<td>myVal</td>', $client->getResponse()->getContent());
 
         $editLink = $crawler->filter('a:contains("edit")')->eq(0)->link();
         $crawler = $client->click($editLink);
@@ -39,11 +38,15 @@ class GeneratedCrudControllerTest extends WebTestCase
         $this->assertGreaterThan(0, $crawler->filter('input[type=text]')->count());
 
         $editForm = $crawler->selectButton('Update')->form();
-        $client->submit($editForm, ['sweet_food[title]' => 'Candy edited', 'sweet_food[with_underscore]' => 'myVal edited']);
+        $client->submit($editForm, ['sweet_food[title]' => 'Candy edited']);
         $this->assertTrue($client->getResponse()->isRedirect());
 
         $crawler = $client->followRedirect();
         $this->assertTrue($client->getResponse()->isSuccessful());
+        $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
+        $this->assertContains('Edit SweetFood', $client->getResponse()->getContent());
+        $this->assertGreaterThan(0, $crawler->filter('input[type=text]')->count());
+        $this->assertEquals('Candy edited', $crawler->filter('input[type=text]')->attr('value'));
 
         $backTolistLink = $crawler->filter('a:contains("back to list")')->eq(0)->link();
 
@@ -52,7 +55,6 @@ class GeneratedCrudControllerTest extends WebTestCase
         $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
         $this->assertContains('SweetFood index', $client->getResponse()->getContent());
         $this->assertContains('Candy edited', $client->getResponse()->getContent());
-        $this->assertContains('myVal edited', $client->getResponse()->getContent());
 
         $showLink = $crawler->filter('a:contains("show")')->eq(0)->link();
 
@@ -61,7 +63,6 @@ class GeneratedCrudControllerTest extends WebTestCase
         $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
         $this->assertContains('SweetFood', $client->getResponse()->getContent());
         $this->assertContains('Candy edited', $client->getResponse()->getContent());
-        $this->assertContains('myVal edited', $client->getResponse()->getContent());
 
         $deleteForm = $crawler->selectButton('Delete')->form();
         $client->submit($deleteForm);

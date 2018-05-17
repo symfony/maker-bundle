@@ -21,11 +21,6 @@ class SweetFood
      */
     private $title;
 
-    /**
-     * @ORM\Column(name="with_underscore", type="string", length=255)
-     */
-    private $with_underscore;
-
     public function getId()
     {
         return $this->id;
@@ -47,19 +42,4 @@ class SweetFood
         $this->title = $title;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getWithUnderscore()
-    {
-        return $this->with_underscore;
-    }
-
-    /**
-     * @param mixed $with_underscore
-     */
-    public function setWithUnderscore($with_underscore)
-    {
-        $this->with_underscore = $with_underscore;
-    }
 }
