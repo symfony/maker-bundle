@@ -34,8 +34,13 @@
 
             <service id="maker.auto_command.abstract" class="Symfony\Bundle\MakerBundle\Command\MakerCommand" abstract="true">
                 <argument /> <!-- maker -->
-                <argument /> <!-- root namespace -->
                 <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.generator" />
+            </service>
+
+            <service id="maker.generator" class="Symfony\Bundle\MakerBundle\Generator">
+                <argument type="service" id="maker.file_manager" />
+                <argument /> <!-- root namespace -->
             </service>
         </services>
 </container>

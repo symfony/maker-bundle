@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
+use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Mapping\Column;
@@ -20,6 +21,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
@@ -31,26 +33,36 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Finder\SplFileInfo;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
+ * @author Kévin Dunglas <dunglas@gmail.com>
  */
-final class MakeEntity extends AbstractMaker
+final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 {
     private $fileManager;
     private $doctrineHelper;
     private $projectDirectory;
     private $entityNamespace;
+    private $generator;
 
-    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory)
+    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null)
     {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
         $this->projectDirectory = $projectDirectory;
         $this->entityNamespace = $doctrineHelper->getEntityNamespace();
+
+        if (null === $generator) {
+            @trigger_error(sprintf('Passing a "%s" instance as 4th argument is mandatory since version 1.5.', Generator::class), E_USER_DEPRECATED);
+            $this->generator = new Generator($fileManager, 'App\\');
+        } else {
+            $this->generator = $generator;
+        }
     }
 
     public static function getCommandName(): string
@@ -61,8 +73,9 @@ final class MakeEntity extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates or updates a Doctrine entity class')
+            ->setDescription('Creates or updates a Doctrine entity class, and optionally an API Platform resource')
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('Class name of the entity to create or update (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
+            ->addOption('api-resource', 'a', InputOption::VALUE_NONE, 'Mark this class as an API Platform resource (expose a CRUD API for it)')
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
@@ -108,6 +121,18 @@ final class MakeEntity extends AbstractMaker
         $value = $io->askQuestion($question);
 
         $input->setArgument('name', $value);
+
+        if (
+            !$input->getOption('api-resource') &&
+            class_exists(ApiResource::class) &&
+            !class_exists($this->generator->createClassNameDetails($value, 'Entity\\')->getFullName())
+        ) {
+            $description = $command->getDefinition()->getOption('api-resource')->getDescription();
+            $question = new ConfirmationQuestion($description, false);
+            $value = $io->askQuestion($question);
+
+            $input->setOption('api-resource', $value);
+        }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -144,6 +169,7 @@ final class MakeEntity extends AbstractMaker
                 'doctrine/Entity.tpl.php',
                 [
                     'repository_full_class_name' => $repositoryClassDetails->getFullName(),
+                    'api_resource' => $input->getOption('api-resource'),
                 ]
             );
 
@@ -271,8 +297,15 @@ final class MakeEntity extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)
     {
+        if (null !== $input && $input->getOption('api-resource')) {
+            $dependencies->addClassDependency(
+                ApiResource::class,
+                'api'
+            );
+        }
+
         // guarantee DoctrineBundle
         $dependencies->addClassDependency(
             DoctrineBundle::class,

@@ -39,7 +39,7 @@ class MakerExtension extends Extension
 
         $rootNamespace = trim($config['root_namespace'], '\\');
 
-        $makeCommandDefinition = $container->getDefinition('maker.auto_command.abstract');
+        $makeCommandDefinition = $container->getDefinition('maker.generator');
         $makeCommandDefinition->replaceArgument(1, $rootNamespace);
 
         $doctrineHelperDefinition = $container->getDefinition('maker.doctrine_helper');

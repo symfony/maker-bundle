@@ -408,6 +408,30 @@ class FunctionalTest extends MakerTestCase
             ->setRequiredPhpVersion(70100)
         ];
 
+        yield 'entity_new_api_resource' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // Mark the entity as an API Platform resource
+                'y',
+                // add not additional fields
+                '',
+            ])
+            ->addExtraDependencies('api')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
+            ->assert(function(string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Entity/User.php');
+
+                $content = file_get_contents($directory.'/src/Entity/User.php');
+                $this->assertContains('use ApiPlatform\Core\Annotation\ApiResource;', $content);
+                $this->assertContains('@ApiResource', $content);
+            })
+        ];
+
         yield 'entity_with_fields' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),
             [

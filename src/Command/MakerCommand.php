@@ -33,19 +33,19 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class MakerCommand extends Command
 {
     private $maker;
-    private $rootNamespace;
     private $fileManager;
     private $inputConfig;
     /** @var ConsoleStyle */
     private $io;
     private $checkDependencies = true;
+    private $generator;
 
-    public function __construct(MakerInterface $maker, string $rootNamespace, FileManager $fileManager)
+    public function __construct(MakerInterface $maker, FileManager $fileManager, Generator $generator)
     {
         $this->maker = $maker;
-        $this->rootNamespace = trim($rootNamespace, '\\');
         $this->fileManager = $fileManager;
         $this->inputConfig = new InputConfiguration();
+        $this->generator = $generator;
 
         parent::__construct();
     }
@@ -62,7 +62,7 @@ final class MakerCommand extends Command
 
         if ($this->checkDependencies) {
             $dependencies = new DependencyBuilder();
-            $this->maker->configureDependencies($dependencies);
+            $this->maker->configureDependencies($dependencies, $input);
 
             if ($missingPackagesMessage = $dependencies->getMissingPackagesMessage($this->getName())) {
                 throw new RuntimeCommandException($missingPackagesMessage);
@@ -97,12 +97,10 @@ final class MakerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $generator = new Generator($this->fileManager, $this->rootNamespace);
-
-        $this->maker->generate($input, $this->io, $generator);
+        $this->maker->generate($input, $this->io, $this->generator);
 
         // sanity check for custom makers
-        if ($generator->hasPendingOperations()) {
+        if ($this->generator->hasPendingOperations()) {
             throw new \LogicException('Make sure to call the writeChanges() method on the generator.');
         }
     }
