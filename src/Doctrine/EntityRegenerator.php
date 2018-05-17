@@ -64,6 +64,8 @@ final class EntityRegenerator
                 $classPath = $this->getPathOfClass($classMetadata->name);
             }
 
+            $mappedFields = $this->getMappedFieldsInEntity($classMetadata);
+
             if ($classMetadata->customRepositoryClassName) {
                 $this->generateRepository($classMetadata);
             }
@@ -93,6 +95,10 @@ final class EntityRegenerator
                     continue;
                 }
 
+                if (!in_array($fieldName, $mappedFields)) {
+                    continue;
+                }
+
                 $manipulator->addEntityField($fieldName, $mapping);
             }
 
@@ -106,6 +112,10 @@ final class EntityRegenerator
             };
 
             foreach ($classMetadata->associationMappings as $fieldName => $mapping) {
+                if (!in_array($fieldName, $mappedFields)) {
+                    continue;
+                }
+
                 switch ($mapping['type']) {
                     case ClassMetadata::MANY_TO_ONE:
                         $relation = (new RelationManyToOne())
@@ -224,5 +234,37 @@ final class EntityRegenerator
         );
 
         $this->generator->writeChanges();
+    }
+
+    private function getMappedFieldsInEntity(ClassMetadata $classMetadata)
+    {
+        /* @var $classReflection \ReflectionClass */
+        $classReflection = $classMetadata->reflClass;
+
+        $targetFields = array_merge(
+            array_keys($classMetadata->fieldMappings),
+            array_keys($classMetadata->associationMappings)
+        );
+
+        if ($classReflection) {
+            // exclude traits
+            $traitProperties = [];
+
+            foreach ($classReflection->getTraits() as $trait) {
+                foreach ($trait->getProperties() as $property) {
+                    $traitProperties[] = $property->getName();
+                }
+            }
+
+            $targetFields = array_diff($targetFields, $traitProperties);
+
+            // exclude inherited properties
+            $targetFields = array_filter($targetFields, function ($field) use ($classReflection) {
+                return $classReflection->hasProperty($field) &&
+                    $classReflection->getProperty($field)->getDeclaringClass()->getName() == $classReflection->getName();
+            });
+        }
+
+        return $targetFields;
     }
 }

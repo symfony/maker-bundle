@@ -69,7 +69,9 @@ class EntityRegeneratorTest extends TestCase
         $fs = new Filesystem();
         $tmpDir = __DIR__.'/../tmp/current_project';
         $fs->remove($tmpDir);
-        $fs->mirror($sourceDir, $tmpDir);
+
+        // if traits (Timestampable, Teamable) gets copied into new project, tests will fail because of double exclusion
+        $fs->mirror($sourceDir, $tmpDir, $this->createAllButTraitsIterator($sourceDir));
 
         $kernel->boot();
         $container = $kernel->getContainer();
@@ -113,6 +115,13 @@ class EntityRegeneratorTest extends TestCase
 
             $this->assertEquals($expectedContents, $actualContents, sprintf('File "%s" does not match: %s', $file->getFilename(), $actualContents));
         }
+    }
+
+    private function createAllButTraitsIterator(string $sourceDir): \Iterator
+    {
+        $directoryIterator = new \RecursiveDirectoryIterator($sourceDir, \FilesystemIterator::SKIP_DOTS);
+        $filter = new AllButTraitsIterator($directoryIterator);
+        return new \RecursiveIteratorIterator($filter, \RecursiveIteratorIterator::SELF_FIRST);
     }
 }
 
@@ -202,5 +211,12 @@ class TestXmlEntityRegeneratorKernel extends Kernel
     public function getRootDir()
     {
         return __DIR__.'/../tmp/current_project';
+    }
+}
+
+class AllButTraitsIterator extends \RecursiveFilterIterator
+{
+    public function accept() {
+        return !in_array($this->current()->getFilename(), ['TeamTrait.php', 'TimestampableTrait.php']);
     }
 }
