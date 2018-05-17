@@ -533,6 +533,19 @@ final class ClassSourceManipulator
     {
         if (!$this->getConstructorNode()) {
             $constructorNode = (new Builder\Method('__construct'))->makePublic()->getNode();
+
+            // add call to parent::__construct() if there is a need to
+            try {
+                $ref = new \ReflectionClass($this->getThisFullClassName());
+
+                if ($ref->getParentClass() && $ref->getParentClass()->getConstructor()) {
+                    $constructorNode->stmts[] = new Node\Stmt\Expression(
+                        new Node\Expr\StaticCall(new Node\Name('parent'), new Node\Identifier('__construct'))
+                    );
+                }
+            } catch (\ReflectionException $e) {
+            }
+
             $this->addNodeAfterProperties($constructorNode);
         }
 

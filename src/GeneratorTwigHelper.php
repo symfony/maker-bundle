@@ -25,7 +25,10 @@ final class GeneratorTwigHelper
 
     public function getEntityFieldPrintCode($entity, $field): string
     {
-        $printCode = $entity.'.'.$field['fieldName'];
+        $twigField = preg_replace_callback('/(?!^)_([a-z0-9])/', function ($s) {
+            return strtoupper($s[1]);
+        }, $field['fieldName']);
+        $printCode = $entity.'.'.str_replace('_', '', $twigField);
 
         switch ($field['type']) {
             case 'datetime':
