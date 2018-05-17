@@ -1,3 +1,22 @@
+1.5
+===
+
+* Before 1.5, the `App\` namespace prefix was always assumed so that
+  when you type a short class name, it is converted into a full class
+  name with this prefix. Now, this is configurable #173 thanks to @upyx
+
+* Added an option to to `make:enity` to make your class automatically
+  an ApiPlatform resource. Pass `--api-resource` #178 thanks to @dunglas
+
+* Fixed `make:entity` when your class uses traits or a mapped
+  super class #181 thanks to @andrewtch
+
+* Improved messages when you need to pass a fully-qualified class
+  name #188 & #171 - thanks to @sadikoff and @LeJeanbono
+
+* Fixed a bug where `make:crud` would not render the correct form
+  names when your property included an underscore.
+
 1.4
 ===
 
