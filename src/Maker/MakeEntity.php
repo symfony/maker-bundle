@@ -46,14 +46,13 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 {
     private $fileManager;
     private $doctrineHelper;
-    private $projectDirectory;
     private $generator;
 
     public function __construct(FileManager $fileManager, string $projectDirectory, DoctrineHelper $doctrineHelper, Generator $generator = null)
     {
         $this->fileManager = $fileManager;
-        $this->projectDirectory = $projectDirectory;
         $this->doctrineHelper = $doctrineHelper;
+        // $projectDirectory is unused, argument kept for BC
 
         if (null === $generator) {
             @trigger_error(sprintf('Passing a "%s" instance as 4th argument is mandatory since version 1.5.', Generator::class), E_USER_DEPRECATED);
@@ -808,7 +807,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function regenerateEntities(string $classOrNamespace, bool $overwrite, Generator $generator)
     {
-        $regenerator = new EntityRegenerator($this->doctrineHelper, $this->fileManager, $generator, $this->projectDirectory, $overwrite);
+        $regenerator = new EntityRegenerator($this->doctrineHelper, $this->fileManager, $generator, $overwrite);
         $regenerator->regenerateEntities($classOrNamespace);
     }
 
