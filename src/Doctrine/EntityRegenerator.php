@@ -30,7 +30,7 @@ final class EntityRegenerator
     private $generator;
     private $overwrite;
 
-    public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, string $projectDirectory, bool $overwrite)
+    public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, bool $overwrite)
     {
         $this->doctrineHelper = $doctrineHelper;
         $this->fileManager = $fileManager;
