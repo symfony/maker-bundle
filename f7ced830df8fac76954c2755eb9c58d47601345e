@@ -1,0 +1,163 @@
+---------------------------------------------------------------------------
+
+by LeJeanbono at 2018-05-04T17:06:25Z
+
+Doc and Recipe sound good !
+I'll take a look
+Nice job ;)
+
+---------------------------------------------------------------------------
+
+by LeJeanbono at 2018-05-04T17:17:37Z
+
+You did a conf for entity namespace, should we have for others classes (Form, Repo, Twig, etc)?
+
+---------------------------------------------------------------------------
+
+by upyx at 2018-05-04T17:57:26Z
+
+@LeJeanbono Yes, I think we should. This PR is WIP.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-05-06T02:36:32Z
+
+Hey @upyx!
+
+Woo! Thanks for starting this! I have some thoughts:
+
+1) I think we should only make the `root_namespace` configurable, at least for now. This bundle is highly opinionated on purpose, and isn't intended to work for all edge cases. Besides, if you really do want to, for example, generate a form in a different directory, you can do that by passing the `\Full\Namespace`. So, only include `root_namespace`. It will be much faster to finish  & merge this PR anyways.
+
+2) I don't think we should update the recipe to create the config file, because 99% of people won't need it. Let's just document it. Actually, (maybe in a future PR), it would be cool to detect when the user is having problems using the `App\` namespace (e.g. they try to generate some entity called `Foo`, and we determine that there is no `App\` in their autoloader), ask them if they want to define a different root namespace, then create the config file for them. After all, MakerBundle is all about generating code :)
+
+Cheers!
+
+---------------------------------------------------------------------------
+
+by upyx at 2018-05-06T08:10:55Z
+
+Hi @weaverryan !
+At the first look I thought to change only root namespace. But in our project we have many legacy code and have non standard directories. So configuration of many namespaces will be very helpful for our project and may be other. But I understand that our project only one of all. If you are absolutely sure this feature isn't practical then I remove configuration of entity namespace. But think again. We can do bundle more configurable without any disadvantages. Why not do it?
+
+---------------------------------------------------------------------------
+
+by JSkalskiSBG at 2018-05-10T10:03:33Z
+
+Other ways to fix it for 'advanced users with other namespace then App' would be:
+1. check namespace of Kernel.php
+2. handle namespace parameter:
+```
+bin/console maker:command my-command --namespace Custom\\Namespace\\Project
+```
+3. handle namespace given in name:
+```
+bin/console maker:command \\Custom\\Namespace\\Project\\my-command
+-- OR:
+bin/console maker:command \\Custom\\Namespace\\Project\\Command\\my-command
+```
+Right now 3rd option gives error:
+
+> [ERROR] The "\Custom\Namespace\Project\Command\my-command" command name is not valid because it would be implemented by
+>          "\Custom\Namespace\Project\Command\myCommand" class, which is not valid as a PHP class name (it must start with
+>          a letter or underscore, followed by any number of letters, numbers, or underscores).
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-05-10T10:49:13Z
+
+About that error - that looks like a bug to me - we may have too much validation on make:command. We need to fix that :)
+
+---------------------------------------------------------------------------
+
+by upyx at 2018-05-10T11:47:28Z
+
+Guys! Let's finish this work.
+
+Could you help me with these questions:
+1. Does implementation of `getAlias()` and `getConfiguration()` methods interfere to performance? ~~Should I really delete these method?~~ I have deleted these method.
+2. What do we configure the root namespace only or namespaces for all commands?
+3. If we configure root namespace only can I remove configuration file and use `parameters`?
+4. If we continue to use the configuration file how parameters can be removed?
+5. Will we use a recipe?
+6. What tests should I add?
+
+@weaverryan what do you think about it?
+
+---------------------------------------------------------------------------
+
+by JSkalskiSBG at 2018-05-10T14:54:48Z
+
+**About this solution:**
+It looks bad with current config file:
+```
+root_namespace: 'App'
+entity_namespace: '%maker.root_namespace%\Entity'
+```
+If we got special config for 'entity', why not special config for 'command'?
+Someone may want to keep it in **MySpace\Console**, so adding 'Command\' to namespace is bad idea.
+Someone may also use other directory than 'src/Command'.
+
+I think that options '--namespace My\\Name\\Space\\CustomDir' and '--dirpath src/CustomDir' would be much better (directory path relational to folder with composer.json).
+
+Issue should be renamed to 'Add configurable namespace and file path'.
+Code that fix this issue should fix it in all 'make' commands, not only 'make:entity' and 'make:command'.
+
+**About performance:**
+maker-bundle should be installed only in 'dev' environment.
+Does anyone know, if loading config will affect perfomance after installation on production without 'require-dev' from composer?
+
+---------------------------------------------------------------------------
+
+by upyx at 2018-05-11T06:55:11Z
+
+Hello @LeJeanbono! I've already removed `entity_namespace` from configuration as @weaverryan advised. But I prefer to add more configurable options. However we still able to add it later. You are right about `dev` environment so we shouldn't care about <1ms performance impact. I don't like idea about options because it requires to type more letters every time. But really benefit of this bundle it is creation files quick and simple.
+
+Symfony uses aggressive caching of configuration so performance very weak depends on configuration size. However default `App\Kernel` class has that string:
+```php
+$loader->load($confDir . '/{packages}/*' . self::CONFIG_EXTS, 'glob');
+$loader->load($confDir . '/{packages}/' . $this->environment . '/**/*' . self::CONFIG_EXTS, 'glob');
+```
+So if you will place `maker.yaml` to `config/packages` directory it would be affected on production environment. But you can place one in `config/packages/dev` to fix it.
+
+---------------------------------------------------------------------------
+
+by upyx at 2018-05-11T10:04:47Z
+
+I've added tests for changed namespace cases. @weaverryan could you check it, please?
+
+---------------------------------------------------------------------------
+
+by LeJeanbono at 2018-05-13T14:42:14Z
+
+Done for dev env @upyx
+
+---------------------------------------------------------------------------
+
+by upyx at 2018-05-14T11:01:37Z
+
+Thank you for review @weaverryan! I've done changes by your requests. Could you review again, please?
+And may I ask you to do PR in documentation?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-05-17T15:53:02Z
+
+Actually, I just made all the changes - including the docs - because they were so minor. Let's see if the tests still pass!
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-05-17T16:10:19Z
+
+Also updated after a nasty merge conflict with a related PR. Let's see if the tests pass. @upyx can you check out the latest code to make sure the conflict didn't mess anything up? A lot of the same lines of code were changed.
+
+---------------------------------------------------------------------------
+
+by upyx at 2018-05-17T17:36:45Z
+
+Oh! Great! I see you strongly determined to comlete this :smiley:
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-05-17T17:38:09Z
+
+Ha - I am! It’s a missing feature. I knew that :). And I’ll make a release as soon as it’s done.
