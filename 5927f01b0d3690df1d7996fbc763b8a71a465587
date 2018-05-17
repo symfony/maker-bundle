@@ -1,0 +1,13 @@
+---------------------------------------------------------------------------
+
+by andrewtch at 2018-05-12T14:10:32Z
+
+@dunglas , can you kindly remind how did you debug these kind of errors? I am again having 18 failed tests on Mac, zero in AppVeyour and 2 on Travis.
+
+Upd: Sorry, nevermind - got out of composer github calls white testing (as the bundle installs flex internally)
+
+---------------------------------------------------------------------------
+
+by andrewtch at 2018-05-16T07:20:56Z
+
+@weaverryan anything else to change before you can merge this (and before it gets some conflicts with base master :))?
