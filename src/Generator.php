@@ -170,4 +170,9 @@ class Generator
 
         $this->pendingOperations = [];
     }
+
+    public function getRootNamespace(): string
+    {
+        return $this->namespacePrefix;
+    }
 }

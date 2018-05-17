@@ -72,9 +72,9 @@ final class MakerCommand extends Command
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        if (!$this->fileManager->isNamespaceConfiguredToAutoload($this->rootNamespace)) {
+        if (!$this->fileManager->isNamespaceConfiguredToAutoload($this->generator->getRootNamespace())) {
             $this->io->note([
-                sprintf('It looks like your app may be using a namespace other than "%s".', $this->rootNamespace),
+                sprintf('It looks like your app may be using a namespace other than "%s".', $this->generator->getRootNamespace()),
                 'To configure this and make your life easier, see: https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html#configuration.',
             ]);
         }
