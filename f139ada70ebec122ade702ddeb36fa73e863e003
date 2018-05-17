@@ -1,0 +1,29 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-05-10T18:34:26Z
+
+Ignoring your question about testing for a moment, I don't like the `--api-resource` flag from a user's perspective. I think it only makes sense to add a new interactive question to `make:entity` automatically IF ApiPlatform is installed.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-05-11T02:37:28Z
+
+Or, the option AND automatically asking if the flag isn’t passed and API Platform is installed
+
+---------------------------------------------------------------------------
+
+by dunglas at 2018-05-11T06:02:29Z
+
+@weaverryan done
+
+<img width="1034" alt="capture d ecran 2018-05-11 a 08 00 55" src="https://user-images.githubusercontent.com/57224/39909133-a2d11258-54f1-11e8-8061-f24c29612d87.png">
+
+---------------------------------------------------------------------------
+
+by dunglas at 2018-05-14T22:16:55Z
+
+Tests added.
+
+I also transformed `Generator` in a service: it's better from a design POV (this class should be a service anyway), and it prevents to add a new magic interface to be able to retrieve the `Generator` instance in the `interact` method.
+
+IMO we should also remove the `Generator` argument from the `MakerInterface::generate()` method and recommend using the service instead (it's allowed by our BC policy, and won't break existing external implementation as long a we still pass this argument even if not defined in the interface). But I'll handle that in another PR, because all other makers need to be updated, and it's not related at all with the purpose of this PR.
