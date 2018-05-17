@@ -41,6 +41,22 @@ optional arguments and options. Check them out with the ``--help`` option:
 
     $ php bin/console make:controller --help
 
+Configuration
+-------------
+
+This bundles doesn't require any configuration. But, you *can* configure
+the root namespace that is used to "guess" what classes you want to generate:
+
+.. code-block:: yaml
+
+    # config/packages/maker.yaml
+    # create this file if you need to configure anything
+    maker:
+        # tell MakerBundle that all of your classes lives in an
+        # Acme namespace, instead of the default App
+        # (e.g. Acme\Entity\Article, Acme\Command\MyCommand, etc)
+        root_namespace: 'Acme'
+
 Creating your Own Makers
 ------------------------
 
