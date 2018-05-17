@@ -5,6 +5,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Util;
 use Composer\Autoload\ClassLoader;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
+use Symfony\Bundle\MakerBundle\Util\ComposerAutoloaderFinder;
 use Symfony\Component\Filesystem\Filesystem;
 
 class AutoloaderUtilTest extends TestCase
@@ -28,8 +29,36 @@ class AutoloaderUtilTest extends TestCase
 
     public function testGetPathForFutureClass()
     {
-        $classLoader = new ClassLoader();
-        $composerJson = [
+        $autoloaderUtil = new AutoloaderUtil($this->createComposerAutoloaderFinder());
+
+        foreach ($this->getPathForFutureClassTests() as $className => $expectedPath) {
+            $this->assertSame(
+                str_replace('\\', '/', self::$currentRootDir.'/'.$expectedPath),
+                // normalize slashes for Windows comparison
+                str_replace('\\', '/', $autoloaderUtil->getPathForFutureClass($className)),
+                sprintf('class "%s" should have been in path "%s"', $className, $expectedPath)
+            );
+        }
+    }
+
+    public function testIsNamespaceConfiguredToAutoload()
+    {
+        $autoloaderUtil = new AutoloaderUtil($this->createComposerAutoloaderFinder());
+
+        foreach ($this->isNamespaceConfiguredToAutoloadTests() as $namespace => $expected) {
+            $configured = $autoloaderUtil->isNamespaceConfiguredToAutoload($namespace);
+
+            if ($expected) {
+                $this->assertTrue($configured, sprintf('namespace "%s" is not found but must be', $namespace));
+            } else {
+                $this->assertFalse($configured, sprintf('namespace "%s" is found but must not be', $namespace));
+            }
+        }
+    }
+
+    private function createComposerAutoloaderFinder(array $composerJsonParams = null): ComposerAutoloaderFinder
+    {
+        $composerJsonParams = $composerJsonParams ?: [
             'autoload' => [
                 'psr-4' => [
                     'Also\\In\\Src\\' => '/src/SubDir',
@@ -43,7 +72,9 @@ class AutoloaderUtilTest extends TestCase
             ],
         ];
 
-        foreach ($composerJson['autoload'] as $psr => $dirs) {
+        $classLoader = new ClassLoader();
+
+        foreach ($composerJsonParams['autoload'] as $psr => $dirs) {
             foreach ($dirs as $prefix => $path) {
                 if ($psr == 'psr-4') {
                     $classLoader->addPsr4($prefix, self::$currentRootDir.$path);
@@ -53,35 +84,19 @@ class AutoloaderUtilTest extends TestCase
             }
         }
 
-        $reflection = new \ReflectionClass(AutoloaderUtil::class);
-        $property = $reflection->getProperty('classLoader');
-        $property->setAccessible(true);
+        /** @var \PHPUnit_Framework_MockObject_MockObject|ComposerAutoloaderFinder $finder */
+        $finder = $this
+            ->getMockBuilder(ComposerAutoloaderFinder::class)
+            ->getMock();
 
-        $autoloaderUtil = new AutoloaderUtil();
+        $finder
+            ->method('getClassLoader')
+            ->willReturn($classLoader);
 
-        $property->setValue($autoloaderUtil, $classLoader);
-
-        foreach ($this->getPathForFutureClassTests() as $className => $expectedPath) {
-            $this->assertSame(
-                str_replace('\\', '/', self::$currentRootDir.'/'.$expectedPath),
-                // normalize slashes for Windows comparison
-                str_replace('\\', '/', $autoloaderUtil->getPathForFutureClass($className)),
-                sprintf('class "%s" should have been in path "%s"', $className, $expectedPath)
-            );
-        }
+        return $finder;
     }
 
-    public function testCanFindClassLoader()
-    {
-        $reflection = new \ReflectionClass(AutoloaderUtil::class);
-        $method = $reflection->getMethod('getClassLoader');
-        $method->setAccessible(true);
-        $autoloaderUtil = new AutoloaderUtil();
-        $autoloader = $method->invoke($autoloaderUtil);
-        $this->assertInstanceOf(ClassLoader::class, $autoloader, 'Wrong ClassLoader found');
-    }
-
-    public function getPathForFutureClassTests()
+    private function getPathForFutureClassTests()
     {
         return [
             'App\Foo' => 'src/Foo.php',
@@ -89,7 +104,23 @@ class AutoloaderUtilTest extends TestCase
             'Totally\Weird' => 'fallback_dir/Totally/Weird.php',
             'Also\In\Src\Some\OtherClass' => 'src/SubDir/Some/OtherClass.php',
             'Other\Namespace\Admin\Foo' => 'lib/Admin/Foo.php',
-            'Psr0\Package\Admin\Bar' => 'lib/other/Psr0/Package/Admin/Bar.php'
+            'Psr0\Package\Admin\Bar' => 'lib/other/Psr0/Package/Admin/Bar.php',
+        ];
+    }
+
+    private function isNamespaceConfiguredToAutoloadTests()
+    {
+        return [
+            'App' => true,
+            'App\\' => true,
+            '\\App' => true,
+            '\\App\\' => true,
+            'App\\Entity' => true,
+            'Also\\In\\Src\\Some' => true,
+            'Other\\Namespace\\Admin' => true,
+            'Psr0\\Package' => true,
+            'Psr0\\Package\\Some' => true,
+            'Unknown' => false,
         ];
     }
 }

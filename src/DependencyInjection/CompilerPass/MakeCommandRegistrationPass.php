@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass;
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
@@ -32,14 +33,12 @@ class MakeCommandRegistrationPass implements CompilerPassInterface
                 throw new InvalidArgumentException(sprintf('Service "%s" must implement interface "%s".', $id, MakerInterface::class));
             }
 
-            $container->register(
-                sprintf('maker.auto_command.%s', Str::asTwigVariable($class::getCommandName())),
-                MakerCommand::class
-            )->setArguments([
-                new Reference($id),
-                new Reference('maker.file_manager'),
-                new Reference('maker.generator'),
-            ])->addTag('console.command', ['command' => $class::getCommandName()]);
+            $commandDefinition = new ChildDefinition('maker.auto_command.abstract');
+            $commandDefinition->setClass(MakerCommand::class);
+            $commandDefinition->replaceArgument(0, new Reference($id));
+            $commandDefinition->addTag('console.command', ['command' => $class::getCommandName()]);
+
+            $container->setDefinition(sprintf('maker.auto_command.%s', Str::asTwigVariable($class::getCommandName())), $commandDefinition);
         }
     }
 }

@@ -48,7 +48,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     private $doctrineHelper;
     private $generator;
 
-    public function __construct(FileManager $fileManager, string $projectDirectory, DoctrineHelper $doctrineHelper, Generator $generator = null)
+    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null)
     {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
@@ -92,7 +92,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 'This command will generate any missing methods (e.g. getters & setters) for a class or all classes in a namespace.',
                 'To overwrite any existing methods, re-run this command with the --overwrite flag',
             ], null, 'fg=yellow');
-            $classOrNamespace = $io->ask('Enter a class or namespace to regenerate', 'App\\Entity', [Validator::class, 'notBlank']);
+            $classOrNamespace = $io->ask('Enter a class or namespace to regenerate', $this->getEntityNamespace(), [Validator::class, 'notBlank']);
 
             $input->setArgument('name', $classOrNamespace);
 
@@ -518,14 +518,14 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $targetEntityClass = $io->askQuestion($question);
 
             if (!class_exists($targetEntityClass)) {
-                if (!class_exists('App\\Entity\\'.$targetEntityClass)) {
+                if (!class_exists($this->getEntityNamespace().'\\'.$targetEntityClass)) {
                     $io->error(sprintf('Unknown class "%s"', $targetEntityClass));
                     $targetEntityClass = null;
 
                     continue;
                 }
 
-                $targetEntityClass = 'App\\Entity\\'.$targetEntityClass;
+                $targetEntityClass = $this->getEntityNamespace().'\\'.$targetEntityClass;
             }
         }
 
@@ -840,5 +840,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $driver = $this->doctrineHelper->getMappingDriverForClass($className);
 
         return $driver instanceof AnnotationDriver;
+    }
+
+    private function getEntityNamespace(): string
+    {
+        return $this->doctrineHelper->getEntityNamespace();
     }
 }

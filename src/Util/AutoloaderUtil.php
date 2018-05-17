@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Util;
 
 use Composer\Autoload\ClassLoader;
-use Symfony\Component\Debug\DebugClassLoader;
 
 /**
  * @author Ryan Weaver <weaverryan@gmail.com>
@@ -22,9 +21,14 @@ use Symfony\Component\Debug\DebugClassLoader;
 class AutoloaderUtil
 {
     /**
-     * @var ClassLoader
+     * @var ComposerAutoloaderFinder
      */
-    private $classLoader;
+    private $autoloaderFinder;
+
+    public function __construct(ComposerAutoloaderFinder $autoloaderFinder)
+    {
+        $this->autoloaderFinder = $autoloaderFinder;
+    }
 
     /**
      * Returns the relative path to where a new class should live.
@@ -37,25 +41,27 @@ class AutoloaderUtil
      */
     public function getPathForFutureClass(string $className)
     {
+        $classLoader = $this->getClassLoader();
+
         // lookup is obviously modeled off of Composer's autoload logic
-        foreach ($this->getClassLoader()->getPrefixesPsr4() as $prefix => $paths) {
+        foreach ($classLoader->getPrefixesPsr4() as $prefix => $paths) {
             if (0 === strpos($className, $prefix)) {
                 return $paths[0].'/'.str_replace('\\', '/', str_replace($prefix, '', $className)).'.php';
             }
         }
 
-        foreach ($this->getClassLoader()->getPrefixes() as $prefix => $paths) {
+        foreach ($classLoader->getPrefixes() as $prefix => $paths) {
             if (0 === strpos($className, $prefix)) {
                 return $paths[0].'/'.str_replace('\\', '/', $className).'.php';
             }
         }
 
-        if ($this->getClassLoader()->getFallbackDirsPsr4()) {
-            return $this->getClassLoader()->getFallbackDirsPsr4()[0].'/'.str_replace('\\', '/', $className).'.php';
+        if ($classLoader->getFallbackDirsPsr4()) {
+            return $classLoader->getFallbackDirsPsr4()[0].'/'.str_replace('\\', '/', $className).'.php';
         }
 
-        if ($this->getClassLoader()->getFallbackDirs()) {
-            return $this->getClassLoader()->getFallbackDirs()[0].'/'.str_replace('\\', '/', $className).'.php';
+        if ($classLoader->getFallbackDirs()) {
+            return $classLoader->getFallbackDirs()[0].'/'.str_replace('\\', '/', $className).'.php';
         }
 
         return null;
@@ -72,29 +78,31 @@ class AutoloaderUtil
         return '';
     }
 
-    private function getClassLoader(): ClassLoader
+    /**
+     * Returns if the namespace is configured by composer autoloader.
+     */
+    public function isNamespaceConfiguredToAutoload(string $namespace): bool
     {
-        if (null === $this->classLoader) {
-            $autoloadFunctions = spl_autoload_functions();
-            foreach ($autoloadFunctions as $autoloader) {
-                if (\is_array($autoloader) && isset($autoloader[0]) && \is_object($autoloader[0])) {
-                    if ($autoloader[0] instanceof ClassLoader) {
-                        $this->classLoader = $autoloader[0];
-                        break;
-                    }
-                    if ($autoloader[0] instanceof DebugClassLoader
-                        && \is_array($autoloader[0]->getClassLoader())
-                        && $autoloader[0]->getClassLoader()[0] instanceof ClassLoader) {
-                        $this->classLoader = $autoloader[0]->getClassLoader()[0];
-                        break;
-                    }
-                }
-            }
-            if (null === $this->classLoader) {
-                throw new \Exception('Composer ClassLoader not found!');
+        $namespace = trim($namespace, '\\').'\\';
+        $classLoader = $this->getClassLoader();
+
+        foreach ($classLoader->getPrefixesPsr4() as $prefix => $paths) {
+            if (0 === strpos($namespace, $prefix)) {
+                return true;
             }
         }
 
-        return $this->classLoader;
+        foreach ($classLoader->getPrefixes() as $prefix => $paths) {
+            if (0 === strpos($namespace, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function getClassLoader(): ClassLoader
+    {
+        return $this->autoloaderFinder->getClassLoader();
     }
 }

@@ -13,7 +13,11 @@
                 <argument>%kernel.project_dir%</argument>
             </service>
 
-            <service id="maker.autoloader_util" class="Symfony\Bundle\MakerBundle\Util\AutoloaderUtil" />
+            <service id="maker.autoloader_finder" class="Symfony\Bundle\MakerBundle\Util\ComposerAutoloaderFinder" />
+
+            <service id="maker.autoloader_util" class="Symfony\Bundle\MakerBundle\Util\AutoloaderUtil">
+                <argument type="service" id="maker.autoloader_finder" />
+            </service>
 
             <service id="maker.event_registry" class="Symfony\Bundle\MakerBundle\EventRegistry">
                 <argument type="service" id="event_dispatcher" />
@@ -24,12 +28,19 @@
             </service>
 
             <service id="maker.doctrine_helper" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper">
-                <argument type="service" id="doctrine" on-invalid="ignore"/>
+                <argument /> <!-- entity namespace -->
+                <argument type="service" id="doctrine" on-invalid="ignore" />
+            </service>
+
+            <service id="maker.auto_command.abstract" class="Symfony\Bundle\MakerBundle\Command\MakerCommand" abstract="true">
+                <argument /> <!-- maker -->
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.generator" />
             </service>
 
             <service id="maker.generator" class="Symfony\Bundle\MakerBundle\Generator">
                 <argument type="service" id="maker.file_manager" />
-                <argument>App\</argument>
+                <argument /> <!-- root namespace -->
             </service>
         </services>
 </container>
