@@ -21,7 +21,7 @@ env:
         - SYMFONY_PHPUNIT_DIR=.phpunit
 
 install:
-    - composer --prefer-dist install
+    - composer install
     - ./vendor/bin/simple-phpunit install
 
 before_script:
