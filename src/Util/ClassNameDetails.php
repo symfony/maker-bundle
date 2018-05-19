@@ -54,6 +54,6 @@ final class ClassNameDetails
 
     public function getRelativeNameWithoutSuffix(): string
     {
-        return str::removeSuffix($this->getRelativeName(), $this->suffix);
+        return Str::removeSuffix($this->getRelativeName(), $this->suffix);
     }
 }
