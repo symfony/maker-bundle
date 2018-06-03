@@ -11,10 +11,12 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
+use Doctrine\Common\Persistence\Mapping\AbstractClassMetadataFactory;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 use Symfony\Bridge\Doctrine\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
@@ -125,11 +127,21 @@ final class DoctrineHelper
 
         /** @var EntityManagerInterface $em */
         foreach ($this->getRegistry()->getManagers() as $em) {
+            $cmf = $em->getMetadataFactory();
+
             if ($disconnected) {
+                try {
+                    $loaded = $cmf->getAllMetadata();
+                } catch (MappingException $e) {
+                    $loaded = $cmf instanceof AbstractClassMetadataFactory ? $cmf->getLoadedMetadata() : [];
+                }
+
                 $cmf = new DisconnectedClassMetadataFactory();
                 $cmf->setEntityManager($em);
-            } else {
-                $cmf = $em->getMetadataFactory();
+
+                foreach ($loaded as $m) {
+                    $cmf->setMetadataFor($m->getName(), $m);
+                }
             }
 
             foreach ($cmf->getAllMetadata() as $m) {
