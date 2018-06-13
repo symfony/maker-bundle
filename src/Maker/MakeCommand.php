@@ -43,8 +43,13 @@ final class MakeCommand extends AbstractMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $commandName = trim($input->getArgument('name'));
+        $classNameSrc = $commandName;
+        if (0 === strpos($commandName, 'app:')) {
+            $classNameSrc = substr($classNameSrc, 4);
+        }
+
         $commandClassNameDetails = $generator->createClassNameDetails(
-            $commandName,
+            $classNameSrc,
             'Command\\',
             'Command',
             sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, Str::asClassName($commandName, 'Command'))
