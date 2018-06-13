@@ -100,7 +100,8 @@ class FileManager
 
         $absolutePath = $this->realPath($absolutePath);
 
-        $relativePath = ltrim(str_replace($this->rootDirectory, '', $absolutePath), '/');
+        // str_replace but only the first occurrence
+        $relativePath = ltrim(implode('', explode($this->rootDirectory, $absolutePath, 2)), '/');
         if (0 === strpos($relativePath, './')) {
             $relativePath = substr($relativePath, 2);
         }

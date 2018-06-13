@@ -2,10 +2,10 @@
 
 namespace <?= $namespace; ?>;
 
+use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name; ?>;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-class <?= $class_name; ?> extends Controller
+class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 {
     /**
      * @Route("<?= $route_path ?>", name="<?= $route_name ?>")

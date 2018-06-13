@@ -50,6 +50,12 @@ class FileManagerTest extends TestCase
             'D:\path\to\project\vendor\composer/../../src/Controller/TestController.php',
             'src/Controller/TestController.php',
         ];
+
+        yield 'double_src' => [
+            '/src',
+            '/src/vendor/composer/../../src/Command/FooCommand.php',
+            'src/Command/FooCommand.php',
+        ];
     }
 
     /**
