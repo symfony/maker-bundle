@@ -1,0 +1,15 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-06-03T16:38:18Z
+
+Hey @ro0NL!
+
+We load the disconnected metadata factory when/because we can’t use the normal metadata factory, usually (entirely?) when we’re readijg metadata for an entity whose class doesn’t yet exist (so the normal metadata factory throws an error). Won’t using the metadata factory here trigger that error? It looks like the tests may be failing due to this.
+
+---------------------------------------------------------------------------
+
+by ro0NL at 2018-06-03T18:36:02Z
+
+after submitting the PR i realized a call to `$em->getMetadataFactory()->getAllMetadata()` is probably unintended in disconnected state. Now reverted as such to see if test pass
+
+The current approach (try/catching) works for me.
