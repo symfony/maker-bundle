@@ -152,6 +152,11 @@ class Generator
         return new ClassNameDetails($className, $fullNamespacePrefix, $suffix);
     }
 
+    public function getRootDirectory(): string
+    {
+        return $this->fileManager->getRootDirectory();
+    }
+
     private function addOperation(string $targetPath, string $templateName, array $variables)
     {
         if ($this->fileManager->fileExists($targetPath)) {

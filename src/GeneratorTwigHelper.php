@@ -70,8 +70,10 @@ TWIG;
 HTML;
     }
 
-    public function getFileLink($path): string
+    public function getFileLink($path, $text = null, $line = 0): string
     {
-        return sprintf('<a href="{{ \'%s\'|file_link(0) }}">%1$s</a>', $path);
+        $text = $text ?: $path;
+
+        return "<a href=\"{{ '$path'|file_link($line) }}\">$text</a>";
     }
 }
