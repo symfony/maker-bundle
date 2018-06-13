@@ -32,9 +32,7 @@
         "symfony/process": "^3.4|^4.0"
     },
     "config": {
-        "preferred-install": {
-            "*": "dist"
-        },
+        "preferred-install": "dist",
         "sort-packages": true
     },
     "autoload": {
