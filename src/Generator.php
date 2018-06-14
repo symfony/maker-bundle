@@ -70,6 +70,22 @@ class Generator
     }
 
     /**
+     * Appends template to an existing file.
+     *
+     * @param string $targetPath
+     * @param string $templateName
+     * @param array $variables
+     */
+    public function appendToFile(string $targetPath, string $templateName, array $variables)
+    {
+        $variables = array_merge($variables, [
+            'helper' => $this->twigHelper,
+        ]);
+
+        $this->addOperation($targetPath, $templateName, $variables, true);
+    }
+
+    /**
      * Creates a helper object to get data about a class name.
      *
      * Examples:
@@ -120,13 +136,15 @@ class Generator
         return new ClassNameDetails($className, $fullNamespacePrefix, $suffix);
     }
 
-    private function addOperation(string $targetPath, string $templateName, array $variables)
+    private function addOperation(string $targetPath, string $templateName, array $variables, bool $append = false)
     {
         if ($this->fileManager->fileExists($targetPath)) {
-            throw new RuntimeCommandException(sprintf(
-                'The file "%s" can\'t be generated because it already exists.',
-                $this->fileManager->relativizePath($targetPath)
-            ));
+            if (!$append) {
+                throw new RuntimeCommandException(sprintf(
+                    'The file "%s" can\'t be generated because it already exists.',
+                    $this->fileManager->relativizePath($targetPath)
+                ));
+            }
         }
 
         $variables['relative_path'] = $this->fileManager->relativizePath($targetPath);

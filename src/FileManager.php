@@ -64,6 +64,10 @@ class FileManager
             $comment = 'no change';
         }
 
+        if (!$newFile) {
+            $content = $existingContent . $content;
+        }
+
         $this->fs->dumpFile($absolutePath, $content);
 
         if ($this->io) {
