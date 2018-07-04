@@ -21,6 +21,7 @@ use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -55,6 +56,7 @@ final class MakeController extends AbstractMaker
             $controllerClassNameDetails->getFullName(),
             'controller/Controller.tpl.php',
             [
+                'parent_class_name' => (Kernel::VERSION_ID) >= 40100 ? 'AbstractController' : 'Controller',
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'twig_installed' => $this->isTwigInstalled(),
