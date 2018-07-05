@@ -1,0 +1,14 @@
+---------------------------------------------------------------------------
+
+by lyrixx at 2018-06-21T20:48:19Z
+
+What if id are uuid ?
+
+---------------------------------------------------------------------------
+
+by gharlan at 2018-06-21T21:26:59Z
+
+> What if id are uuid ?
+
+Then the doctrine type for `$id` is already wrong, right? (line 19)
+So imo it is consistent to use int type hint here.
