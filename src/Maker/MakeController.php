@@ -56,7 +56,7 @@ final class MakeController extends AbstractMaker
             $controllerClassNameDetails->getFullName(),
             'controller/Controller.tpl.php',
             [
-                'parent_class_name' => class_exists(AbstractController::class) ? 'AbstractController' : 'Controller',
+                'parent_class_name' => \method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'twig_installed' => $this->isTwigInstalled(),
