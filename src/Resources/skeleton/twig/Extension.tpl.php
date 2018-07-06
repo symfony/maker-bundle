@@ -11,7 +11,7 @@ class <?= $class_name ?> extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('filter_name', [$this, 'doSomething'], ['is_safe' => ['html']]),
+            new TwigFilter('filter_name', [$this, 'doSomething']),
         ];
     }
 
