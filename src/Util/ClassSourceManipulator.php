@@ -895,7 +895,6 @@ final class ClassSourceManipulator
             case 'dateinterval':
                 return '\\'.\DateInterval::class;
 
-            case 'json_array':
             case 'json':
             case 'object':
             case 'decimal':
