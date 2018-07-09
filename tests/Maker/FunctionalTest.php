@@ -12,6 +12,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator;
 use Symfony\Bundle\MakerBundle\Maker\MakeCommand;
 use Symfony\Bundle\MakerBundle\Maker\MakeController;
 use Symfony\Bundle\MakerBundle\Maker\MakeCrud;
+use Symfony\Bundle\MakerBundle\Maker\MakeE2eTest;
 use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Maker\MakeFixtures;
 use Symfony\Bundle\MakerBundle\Maker\MakeForm;
@@ -217,6 +218,15 @@ class FunctionalTest extends MakerTestCase
                 'FooBar',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
+        ];
+
+        yield 'e2e' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeE2eTest::class),
+            [
+                // e2e test class name
+                'FooBar',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeE2e')
         ];
 
         yield 'subscriber' => [MakerTestDetails::createTest(
