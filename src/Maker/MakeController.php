@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Common\Annotations\Annotation;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -55,6 +56,7 @@ final class MakeController extends AbstractMaker
             $controllerClassNameDetails->getFullName(),
             'controller/Controller.tpl.php',
             [
+                'parent_class_name' => \method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'twig_installed' => $this->isTwigInstalled(),
