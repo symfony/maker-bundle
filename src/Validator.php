@@ -130,7 +130,7 @@ final class Validator
         return $name;
     }
 
-    public static function existsOrNull(string $className = null, array $entites = [])
+    public static function existsOrNull(string $className = null, array $entities = [])
     {
         if (null !== $className) {
             self::validateClassName($className);
@@ -138,7 +138,7 @@ final class Validator
             if (0 === strpos($className, '\\')) {
                 self::classExists($className);
             } else {
-                self::entityExists($className, $entites);
+                self::entityExists($className, $entities);
             }
         }
 
@@ -158,20 +158,20 @@ final class Validator
         return $className;
     }
 
-    public static function entityExists(string $className = null, array $entites = []): string
+    public static function entityExists(string $className = null, array $entities = []): string
     {
         self::notBlank($className);
 
-        if (empty($entites)) {
-            throw new RuntimeCommandException('There is no registered entites. Please create entity before use this command');
+        if (empty($entities)) {
+            throw new RuntimeCommandException('There is no registered entities. Please create entity before use this command');
         }
 
         if (0 === strpos($className, '\\')) {
-            self::classExists($className, sprintf('Entity "%s" does\'t exists. Please enter existing one or create new', $className));
+            self::classExists($className, sprintf('Entity "%s" doesn\'t exists. Please enter existing one or create new', $className));
         }
 
-        if (!\in_array($className, $entites)) {
-            throw new RuntimeCommandException(sprintf('Entity "%s" does\'t exists. Please enter existing one or create new', $className));
+        if (!\in_array($className, $entities)) {
+            throw new RuntimeCommandException(sprintf('Entity "%s" doesn\'t exists. Please enter existing one or create new', $className));
         }
 
         return $className;
