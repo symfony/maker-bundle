@@ -112,7 +112,7 @@ final class MakeCrud extends AbstractMaker
         do {
             $formClassDetails = $generator->createClassNameDetails(
                 $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: ''),
-                'Form\\',
+                'Form\\Type\\',
                 'Type'
             );
             ++$iter;
