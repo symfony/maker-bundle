@@ -11,6 +11,6 @@ class <?= $class_name ?> extends PanthereTestCase
         $client = static::createPanthereClient();
         $crawler = $client->request('GET', '/');
 
-        $this->assertCount(1, $crawler->filterXPath('//h1:[contains(text(), "Hello World")]'));
+        $this->assertContains('Hello World', $crawler->filter('h1')->text());
     }
 }
