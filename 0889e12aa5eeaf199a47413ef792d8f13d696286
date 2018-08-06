@@ -1,0 +1,31 @@
+---------------------------------------------------------------------------
+
+by lyrixx at 2018-06-14T07:31:48Z
+
+It looks like the broken test is not related to my patch
+
+<details>
+
+```
+There was 1 error:
+1) Symfony\Bundle\MakerBundle\Tests\Maker\FunctionalTest::testCommands with data set "command_in_custom_root_namespace" (Symfony\Bundle\MakerBundle\Test\MakerTestDetails Object (...))
+Exception: Error running command: "php bin/console cache:clear --no-ansi". Output: "
+Fatal error: Uncaught Symfony\Component\Debug\Exception\ClassNotFoundException: Attempted to load class "Kernel" from namespace "App".
+Did you forget a "use" statement for "Symfony\Component\HttpKernel\Kernel"? in C:\projects\maker-bundle\tests\tmp\cache\maker_52f79a109e\bin\console:37
+Stack trace:
+#0 {main}
+  thrown in C:\projects\maker-bundle\tests\tmp\cache\maker_52f79a109e\bin\console on line 37
+". Error: "PHP Fatal error:  Uncaught Symfony\Component\Debug\Exception\ClassNotFoundException: Attempted to load class "Kernel" from namespace "App".
+Did you forget a "use" statement for "Symfony\Component\HttpKernel\Kernel"? in C:\projects\maker-bundle\tests\tmp\cache\maker_52f79a109e\bin\console:37
+Stack trace:
+#0 {main}
+  thrown in C:\projects\maker-bundle\tests\tmp\cache\maker_52f79a109e\bin\console on line 37
+"
+C:\projects\maker-bundle\src\Test\MakerTestProcess.php:55
+C:\projects\maker-bundle\src\Test\MakerTestEnvironment.php:141
+C:\projects\maker-bundle\src\Test\MakerTestCase.php:31
+C:\projects\maker-bundle\tests\Maker\FunctionalTest.php:51
+ERRORS!
+Tests: 192, Assertions: 524, Errors: 1.
+```
+</details>
