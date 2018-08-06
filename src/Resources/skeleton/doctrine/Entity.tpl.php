@@ -20,7 +20,7 @@ class <?= $class_name."\n" ?>
      */
     private $id;
 
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
