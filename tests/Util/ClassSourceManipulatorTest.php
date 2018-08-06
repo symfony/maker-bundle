@@ -8,6 +8,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class ClassSourceManipulatorTest extends TestCase
 {
@@ -191,13 +192,13 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddEntityFieldTests
      */
-    public function testAddEntityField(string $sourceFilename, string $propertyName, array $fieldOptions, bool $onlyMethods, $expectedSourceFilename)
+    public function testAddEntityField(string $sourceFilename, string $propertyName, array $fieldOptions, $expectedSourceFilename)
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_entity_field/'.$expectedSourceFilename);
 
         $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addEntityField($propertyName, $fieldOptions, $onlyMethods);
+        $manipulator->addEntityField($propertyName, $fieldOptions);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -213,7 +214,6 @@ class ClassSourceManipulatorTest extends TestCase
                 'nullable' => false,
                 'options' => ['comment' => 'new field']
             ],
-            false, // only methods
             'User_simple.php'
         ];
 
@@ -224,11 +224,10 @@ class ClassSourceManipulatorTest extends TestCase
                 'type' => 'datetime',
                 'nullable' => true,
             ],
-            false, // only methods
             'User_simple_datetime.php'
         ];
 
-        yield 'entity_field_only_methods' => [
+        yield 'entity_field_property_already_exists' => [
             'User_some_props.php',
             'firstName',
             [
@@ -236,8 +235,7 @@ class ClassSourceManipulatorTest extends TestCase
                 'length' => 255,
                 'nullable' => false,
             ],
-            true, // only methods
-            'User_some_props_only_methods.php'
+            'User_simple_prop_already_exists.php'
         ];
     }
 
@@ -530,6 +528,17 @@ class ClassSourceManipulatorTest extends TestCase
         $method = (new \ReflectionObject($manipulator))->getMethod('addGetter');
         $method->setAccessible(true);
         $method->invoke($manipulator, 'id', 'int', false);
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddInterface()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/implements_interface/User_simple.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+        $manipulator->addInterface(UserInterface::class);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }

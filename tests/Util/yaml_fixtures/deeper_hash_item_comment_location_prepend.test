@@ -1,0 +1,16 @@
+security:
+    foo: true
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        in_memory: { memory: ~ }
+    firewalls: false
+===
+$data['security'] = ['another_key' => 'foo'] + $data['security'];
+===
+security:
+    another_key: foo
+    foo: true
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        in_memory: { memory: ~ }
+    firewalls: false

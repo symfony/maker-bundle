@@ -16,6 +16,8 @@ final class DependencyBuilder
     private $dependencies = [];
     private $devDependencies = [];
 
+    private $minimumPHPVersion = 70000;
+
     /**
      * Add a dependency that will be reported if the given class is missing.
      *
@@ -38,6 +40,11 @@ final class DependencyBuilder
                 'required' => $required,
             ];
         }
+    }
+
+    public function requirePHP71()
+    {
+        $this->minimumPHPVersion = 70100;
     }
 
     /**
@@ -75,7 +82,7 @@ final class DependencyBuilder
     /**
      * @internal
      */
-    public function getMissingPackagesMessage(string $commandName): string
+    public function getMissingPackagesMessage(string $commandName, $message = null): string
     {
         $packages = $this->getMissingDependencies();
         $packagesDev = $this->getMissingDevDependencies();
@@ -87,9 +94,9 @@ final class DependencyBuilder
         $packagesCount = \count($packages) + \count($packagesDev);
 
         $message = sprintf(
-            "Missing package%s: to use the %s command, run:\n",
+            "Missing package%s: %s, run:\n",
             $packagesCount > 1 ? 's' : '',
-            $commandName
+            $message ? $message : sprintf('to use the %s command', $commandName)
         );
 
         if (!empty($packages)) {
@@ -101,6 +108,14 @@ final class DependencyBuilder
         }
 
         return $message;
+    }
+
+    /**
+     * @internal
+     */
+    public function isPhpVersionSatisfied(): bool
+    {
+        return \PHP_VERSION_ID >= $this->minimumPHPVersion;
     }
 
     private function getRequiredDependencyNames(array $dependencies): array
@@ -121,7 +136,7 @@ final class DependencyBuilder
         $missingPackages = [];
         $missingOptionalPackages = [];
         foreach ($dependencies as $package) {
-            if (class_exists($package['class'])) {
+            if (class_exists($package['class']) || interface_exists($package['class'])) {
                 continue;
             }
             if (true === $package['required']) {

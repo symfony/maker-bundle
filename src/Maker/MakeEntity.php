@@ -12,13 +12,13 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use ApiPlatform\Core\Annotation\ApiResource;
-use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
+use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
+use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
@@ -134,10 +134,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        if (\PHP_VERSION_ID < 70100) {
-            throw new RuntimeCommandException('The make:entity command requires that you use PHP 7.1 or higher.');
-        }
-
         $overwrite = $input->getOption('overwrite');
 
         // the regenerate option has entirely custom behavior
@@ -153,32 +149,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             'Entity\\'
         );
 
-        $repositoryClassDetails = $generator->createClassNameDetails(
-            $entityClassDetails->getRelativeName(),
-            'Repository\\',
-            'Repository'
-        );
-
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {
-            $entityPath = $generator->generateClass(
-                $entityClassDetails->getFullName(),
-                'doctrine/Entity.tpl.php',
-                [
-                    'repository_full_class_name' => $repositoryClassDetails->getFullName(),
-                    'api_resource' => $input->getOption('api-resource'),
-                ]
-            );
-
-            $entityAlias = strtolower($entityClassDetails->getShortName()[0]);
-            $generator->generateClass(
-                $repositoryClassDetails->getFullName(),
-                'doctrine/Repository.tpl.php',
-                [
-                    'entity_full_class_name' => $entityClassDetails->getFullName(),
-                    'entity_class_name' => $entityClassDetails->getShortName(),
-                    'entity_alias' => $entityAlias,
-                ]
+            $entityClassGenerator = new EntityClassGenerator($generator);
+            $entityPath = $entityClassGenerator->generateEntityClass(
+                $entityClassDetails,
+                $input->getOption('api-resource')
             );
 
             $generator->writeChanges();
@@ -296,6 +272,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)
     {
+        $dependencies->requirePHP71();
+
         if (null !== $input && $input->getOption('api-resource')) {
             $dependencies->addClassDependency(
                 ApiResource::class,
@@ -303,17 +281,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             );
         }
 
-        // guarantee DoctrineBundle
-        $dependencies->addClassDependency(
-            DoctrineBundle::class,
-            'orm'
-        );
-
-        // guarantee ORM
-        $dependencies->addClassDependency(
-            Column::class,
-            'orm'
-        );
+        ORMDependencyBuilder::buildDependencies($dependencies);
     }
 
     private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField)

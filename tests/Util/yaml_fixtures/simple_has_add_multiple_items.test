@@ -1,0 +1,16 @@
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers:
+    in_memory: { memory: ~ }
+firewalls: false
+===
+$data['providers']['anything'] = 'Hi';
+$data['providers']['anything_'] = 'Hey';
+$data['providers']['anything__'] = 'Hey2';
+===
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers:
+    in_memory: { memory: ~ }
+    anything: Hi
+    anything_: Hey
+    anything__: Hey2
+firewalls: false

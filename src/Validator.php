@@ -116,16 +116,24 @@ final class Validator
         return $valueAsBool;
     }
 
+    public static function validatePropertyName(string $name)
+    {
+        // check for valid PHP variable name
+        if (null !== $name && !Str::isValidPhpVariableName($name)) {
+            throw new \InvalidArgumentException(sprintf('"%s" is not a valid PHP property name.', $name));
+        }
+
+        return $name;
+    }
+
     public static function validateDoctrineFieldName(string $name, ManagerRegistry $registry)
     {
         // check reserved words
         if ($registry->getConnection()->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name)) {
             throw new \InvalidArgumentException(sprintf('Name "%s" is a reserved word.', $name));
         }
-        // check for valid PHP variable name
-        if (null !== $name && !Str::isValidPhpVariableName($name)) {
-            throw new \InvalidArgumentException(sprintf('"%s" is not a valid PHP property name.', $name));
-        }
+
+        self::validatePropertyName($name);
 
         return $name;
     }

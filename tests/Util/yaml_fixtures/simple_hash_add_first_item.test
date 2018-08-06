@@ -1,0 +1,10 @@
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers: {}
+firewalls: false
+===
+$data['providers']['first_key'] = 'foo';
+===
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers:
+    first_key: foo
+firewalls: false
