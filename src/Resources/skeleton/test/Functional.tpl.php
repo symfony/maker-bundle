@@ -12,6 +12,6 @@ class <?= $class_name ?> extends WebTestCase
         $crawler = $client->request('GET', '/');
 
         $this->assertSame(200, $client->getResponse()->getStatusCode());
-        $this->assertCount(1, $crawler->filterXPath('//h1:[contains(text(), "Hello World")]'));
+        $this->assertContains('Hello World', $crawler->filter('h1')->text());
     }
 }
