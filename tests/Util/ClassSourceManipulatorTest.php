@@ -515,4 +515,22 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setIsOwning(true)
         ];
     }
+
+    public function testGenerationWithTabs()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/ProductWithTabs.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/with_tabs/ProductWithTabs.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $method = (new \ReflectionObject($manipulator))->getMethod('addProperty');
+        $method->setAccessible(true);
+        $method->invoke($manipulator, 'name', ['@ORM\Column(type="string", length=255)']);
+
+        $method = (new \ReflectionObject($manipulator))->getMethod('addGetter');
+        $method->setAccessible(true);
+        $method->invoke($manipulator, 'id', 'int', false);
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
 }
