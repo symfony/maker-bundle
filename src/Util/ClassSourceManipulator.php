@@ -658,8 +658,10 @@ final class ClassSourceManipulator
             $this->oldTokens
         );
 
-        // this fake property is a placeholder for a linebreak
-        $newCode = str_replace(['    private $__EXTRA__LINE;', 'use __EXTRA__LINE;', '        $__EXTRA__LINE;'], '', $newCode);
+        // replace the 3 "fake" items that may be in the code (allowing for different indentation)
+        $newCode = preg_replace('/(\ |\t)*private\ \$__EXTRA__LINE;/', '', $newCode);
+        $newCode = preg_replace('/use __EXTRA__LINE;/', '', $newCode);
+        $newCode = preg_replace('/(\ |\t)*\$__EXTRA__LINE;/', '', $newCode);
 
         // process comment lines
         foreach ($this->pendingComments as $i => $comment) {
@@ -829,7 +831,7 @@ final class ClassSourceManipulator
         $newStatements[] = $methodNode;
 
         if (null === $existingIndex) {
-            // just them on the end!
+            // add them to the end!
 
             $classNode->stmts = array_merge($classNode->stmts, $newStatements);
         } else {
