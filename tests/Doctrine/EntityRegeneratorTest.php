@@ -25,6 +25,7 @@ use Symfony\Component\Routing\RouteCollectionBuilder;
 class EntityRegeneratorTest extends TestCase
 {
     /**
+     * @group legacy
      * @dataProvider getRegenerateEntitiesTests
      */
     public function testRegenerateEntities(string $expectedDirName, bool $overwrite)
