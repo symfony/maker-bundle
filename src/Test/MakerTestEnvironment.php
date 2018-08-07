@@ -301,6 +301,16 @@ final class MakerTestEnvironment
         MakerTestProcess::create('composer require phpunit browser-kit symfony/css-selector', $this->flexPath)
                         ->run();
 
+        $replacements = [
+            [
+                'filename' => 'phpunit.xml.dist',
+                'find' => '</php>',
+                'replace' => '    <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak_vendors" />'."\n".'    </php>',
+            ],
+        ];
+
+        $this->processReplacements($replacements, $this->flexPath);
+
         MakerTestProcess::create('php bin/console cache:clear --no-warmup', $this->flexPath)
                         ->run();
     }
