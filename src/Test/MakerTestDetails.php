@@ -244,7 +244,7 @@ final class MakerTestDetails
     {
         // for cache purposes, only the dependencies are important
         // shortened to avoid long paths on Windows
-        return 'maker_'.substr(md5(serialize($this->getDependencies()).$this->snapshotSuffix), 0, 10);
+        return 'maker_'.substr(md5(serialize($this->getDependencies()).$this->snapshotSuffix.spl_object_hash($this)), 0, 10);
     }
 
     public function getPreMakeCommands(): array
