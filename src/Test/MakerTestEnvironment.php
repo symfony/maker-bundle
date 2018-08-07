@@ -56,9 +56,9 @@ final class MakerTestEnvironment
         $this->cachePath = realpath($cachePath);
         $this->flexPath = $this->cachePath.'/flex_project';
 
-        $this->path = $this->cachePath.DIRECTORY_SEPARATOR.$testDetails->getUniqueCacheDirectoryName();
+        $this->path = $this->cachePath.\DIRECTORY_SEPARATOR.$testDetails->getUniqueCacheDirectoryName();
 
-        $this->snapshotFile = $this->path.DIRECTORY_SEPARATOR.basename($this->path).'.json';
+        $this->snapshotFile = $this->path.\DIRECTORY_SEPARATOR.basename($this->path).'.json';
     }
 
     public static function create(MakerTestDetails $testDetails): self
@@ -305,8 +305,8 @@ final class MakerTestEnvironment
             [
                 'filename' => 'phpunit.xml.dist',
                 'find' => '</php>',
-                'replace' => '    <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak_vendors" />'."\n".'    </php>'
-            ]
+                'replace' => '    <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak_vendors" />'."\n".'    </php>',
+            ],
         ];
 
         $this->processReplacements($replacements, $this->flexPath);
