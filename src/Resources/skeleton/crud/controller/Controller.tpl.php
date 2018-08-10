@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 {
     /**
-     * @Route("/", name="<?= $route_name ?>_index", methods="GET")
+     * @Route("/", name="<?= $route_name ?>_index", methods={"GET"})
      */
 <?php if (isset($repository_full_class_name)): ?>
     public function index(<?= $repository_class_name ?> $<?= $repository_var ?>): Response
@@ -37,7 +37,7 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 <?php endif ?>
 
     /**
-     * @Route("/new", name="<?= $route_name ?>_new", methods="GET|POST")
+     * @Route("/new", name="<?= $route_name ?>_new", methods={"GET","POST"})
      */
     public function new(Request $request): Response
     {
@@ -60,7 +60,7 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
     }
 
     /**
-     * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_show", methods="GET")
+     * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_show", methods={"GET"})
      */
     public function show(<?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
@@ -68,7 +68,7 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
     }
 
     /**
-     * @Route("/{<?= $entity_identifier ?>}/edit", name="<?= $route_name ?>_edit", methods="GET|POST")
+     * @Route("/{<?= $entity_identifier ?>}/edit", name="<?= $route_name ?>_edit", methods={"GET","POST"})
      */
     public function edit(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
@@ -88,7 +88,7 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
     }
 
     /**
-     * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_delete", methods="DELETE")
+     * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_delete", methods={"DELETE"})
      */
     public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {

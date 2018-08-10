@@ -15,6 +15,7 @@ cache:
     directories:
         - $HOME/.composer/cache/files
         - .phpunit
+        - vendor
 
 env:
     global:
@@ -24,7 +25,7 @@ before_install:
     - phpenv config-rm xdebug.ini
 
 install:
-    - composer install
+    - composer update --no-suggest
     - ./vendor/bin/simple-phpunit install
 
 script:
