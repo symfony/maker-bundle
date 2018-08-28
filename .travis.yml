@@ -29,4 +29,4 @@ before_script:
 
 script:
     - ./vendor/bin/simple-phpunit
-    - ./vendor/bin/php-cs-fixer fix --dry-run
+    - ./vendor/bin/php-cs-fixer fix --dry-run --diff
