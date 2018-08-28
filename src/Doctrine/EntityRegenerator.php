@@ -95,7 +95,7 @@ final class EntityRegenerator
                     continue;
                 }
 
-                if (!in_array($fieldName, $mappedFields)) {
+                if (!\in_array($fieldName, $mappedFields)) {
                     continue;
                 }
 
@@ -112,7 +112,7 @@ final class EntityRegenerator
             };
 
             foreach ($classMetadata->associationMappings as $fieldName => $mapping) {
-                if (!in_array($fieldName, $mappedFields)) {
+                if (!\in_array($fieldName, $mappedFields)) {
                     continue;
                 }
 
