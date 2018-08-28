@@ -109,7 +109,7 @@ final class SecurityConfigUpdater
 
         $providersConfig = $this->manipulator->getData()['security']['providers'];
 
-        if (1 !== count($providersConfig)) {
+        if (1 !== \count($providersConfig)) {
             return false;
         }
 

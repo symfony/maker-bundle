@@ -55,7 +55,7 @@ class YamlSourceManipulator
         $this->contents = $contents;
         $this->currentData = Yaml::parse($contents);
 
-        if (!is_array($this->currentData)) {
+        if (!\is_array($this->currentData)) {
             throw new \InvalidArgumentException('Only YAML with a top-level array structure is supported');
         }
     }
@@ -201,7 +201,7 @@ class YamlSourceManipulator
             // if the current data is an array, we should keep
             // walking through that data, even if it didn't change,
             // so that we can advance the current position
-            if (is_array($currentData[$key]) && is_array($newVal)) {
+            if (\is_array($currentData[$key]) && \is_array($newVal)) {
                 $this->log('Calling updateData() on next level');
                 $this->updateData($newVal);
 
@@ -226,12 +226,12 @@ class YamlSourceManipulator
 
         // Edge case: if the last item on a multi-line array has a comment,
         // we want to move to the end of the line, beyond that comment
-        if (count($currentData) < count($newData) && $this->isCurrentArrayMultiline()) {
+        if (\count($currentData) < \count($newData) && $this->isCurrentArrayMultiline()) {
             $this->advanceToEndOfLine();
         }
 
-        while (count($currentData) < count($newData)) {
-            $newKey = array_keys($newData)[count($currentData)];
+        while (\count($currentData) < \count($newData)) {
+            $newKey = array_keys($newData)[\count($currentData)];
 
             // manually move the paths forward
             // mostly duplicated above
@@ -271,7 +271,7 @@ class YamlSourceManipulator
             // The array that we're appending is empty:
 
             // First, fix the "type" - it could be changing from a sequence to a hash or vice versa
-            $this->arrayTypeForDepths[$this->depth] = is_int($key) ? self::ARRAY_TYPE_SEQUENCE : self::ARRAY_TYPE_HASH;
+            $this->arrayTypeForDepths[$this->depth] = \is_int($key) ? self::ARRAY_TYPE_SEQUENCE : self::ARRAY_TYPE_HASH;
 
             // we prefer multi-line, so let's convert to it!
             $this->arrayFormatForDepths[$this->depth] = self::ARRAY_FORMAT_MULTILINE;
@@ -312,7 +312,7 @@ class YamlSourceManipulator
             }
         }
 
-        if (is_int($key)) {
+        if (\is_int($key)) {
             if ($this->isCurrentArrayMultiline()) {
                 $newYamlValue = '- '.$this->convertToYaml($value);
             } else {
@@ -355,7 +355,7 @@ class YamlSourceManipulator
             .substr($this->contents, $this->currentPosition + $extraOffset);
         // manually bump the position: we didn't really move forward
         // any in the existing string, we just added our own new content
-        $this->currentPosition = $this->currentPosition + strlen($newYamlValue);
+        $this->currentPosition = $this->currentPosition + \strlen($newYamlValue);
 
         if (0 === $this->depth) {
             $newData = $this->currentData;
@@ -390,7 +390,7 @@ class YamlSourceManipulator
             }
         } else {
             // find next ending character - , } or ]
-            while (!in_array($currentChar = substr($this->contents, $endKeyPosition, 1), [',', ']', '}'])) {
+            while (!\in_array($currentChar = substr($this->contents, $endKeyPosition, 1), [',', ']', '}'])) {
                 ++$endKeyPosition;
             }
 
@@ -402,7 +402,7 @@ class YamlSourceManipulator
 
         $newPositionBump = 0;
         $extraContent = '';
-        if (1 === count($this->getCurrentData(1))) {
+        if (1 === \count($this->getCurrentData(1))) {
             // the key being removed is the *only* key
             // we need to close the new, empty array
             $extraContent = ' []';
@@ -460,7 +460,7 @@ class YamlSourceManipulator
             .$newDataString
             .substr($this->contents, $endValuePosition);
 
-        $newPosition = $this->currentPosition + strlen($newDataString);
+        $newPosition = $this->currentPosition + \strlen($newDataString);
 
         $newData = $this->currentData;
         $newData = $this->setValueAtCurrentPath($value, $newData);
@@ -486,7 +486,7 @@ class YamlSourceManipulator
 
     private function advanceBeyondValue($value)
     {
-        if (is_array($value)) {
+        if (\is_array($value)) {
             throw new \LogicException('Do not pass an array to this method');
         }
 
@@ -500,14 +500,14 @@ class YamlSourceManipulator
 
         if (empty($matches)) {
             // for integers, the key may not be explicitly printed
-            if (is_int($key)) {
+            if (\is_int($key)) {
                 return $this->currentPosition;
             }
 
             throw new YamlManipulationFailedException(sprintf('Cannot find the key "%s"', $key));
         }
 
-        return $matches[0][1] + strlen($matches[0][0]);
+        return $matches[0][1] + \strlen($matches[0][0]);
     }
 
     /**
@@ -519,7 +519,7 @@ class YamlSourceManipulator
 
         if (empty($matches)) {
             // for integers, the key may not be explicitly printed
-            if (is_int($key)) {
+            if (\is_int($key)) {
                 return $this->currentPosition;
             }
 
@@ -544,7 +544,7 @@ class YamlSourceManipulator
         }
 
         // find either a line break or a , that is the end of the previous key
-        while (in_array(($char = substr($this->contents, $startOfKey - 1, 1)), [',', "\n"])) {
+        while (\in_array(($char = substr($this->contents, $startOfKey - 1, 1)), [',', "\n"])) {
             --$startOfKey;
         }
 
@@ -655,16 +655,16 @@ class YamlSourceManipulator
         $offset = array_search($this->previousPath[$this->depth], array_keys($data));
 
         // if the target is currently the end of the array, just append
-        if ($offset === (count($data) - 1)) {
+        if ($offset === (\count($data) - 1)) {
             $data[$key] = $value;
 
             return $data;
         }
 
         return array_merge(
-            array_slice($data, 0, $offset + 1),
+            \array_slice($data, 0, $offset + 1),
             [$key => $value],
-            array_slice($data, $offset + 1, null)
+            \array_slice($data, $offset + 1, null)
         );
     }
 
@@ -675,7 +675,7 @@ class YamlSourceManipulator
 
         // start depth at $limitLevels (instead of 0) to properly detect when to set the key
         $depth = $limitLevels;
-        $path = array_slice($this->currentPath, 0, count($this->currentPath) - $limitLevels);
+        $path = \array_slice($this->currentPath, 0, \count($this->currentPath) - $limitLevels);
         foreach ($path as $key) {
             if (!array_key_exists($key, $dataRef)) {
                 throw new \LogicException(sprintf('Could not find the key "%s" from the current path "%s" in data "%s"', $key, implode(', ', $path), var_export($data, true)));
@@ -724,7 +724,7 @@ class YamlSourceManipulator
     private function getCurrentData(int $limitLevels = 0)
     {
         $data = $this->currentData;
-        $path = array_slice($this->currentPath, 0, count($this->currentPath) - $limitLevels);
+        $path = \array_slice($this->currentPath, 0, \count($this->currentPath) - $limitLevels);
         foreach ($path as $key) {
             if (!array_key_exists($key, $data)) {
                 throw new \LogicException(sprintf('Could not find the key "%s" from the current path "%s" in data "%s"', $key, implode(', ', $path), var_export($this->currentData, true)));
@@ -738,7 +738,7 @@ class YamlSourceManipulator
 
     private function findEndPositionOfValue($value, $offset = null)
     {
-        if (is_array($value)) {
+        if (\is_array($value)) {
             $currentPosition = $this->currentPosition;
             $this->log('Walking across array to find end position of array');
             $this->updateData($value);
@@ -749,7 +749,7 @@ class YamlSourceManipulator
         }
 
         if (is_scalar($value) || null === $value) {
-            if (is_bool($value)) {
+            if (\is_bool($value)) {
                 // (?i) & (?-i) opens/closes case insensitive match
                 $pattern = sprintf('(?i)%s(?-i)', $value ? 'true' : 'false');
             } elseif (null === $value) {
@@ -765,11 +765,11 @@ class YamlSourceManipulator
                 throw new YamlManipulationFailedException(sprintf('Cannot find the original value "%s"', $value));
             }
 
-            return $matches[0][1] + strlen($matches[0][0]);
+            return $matches[0][1] + \strlen($matches[0][0]);
         }
 
         // there are other possible values, but we don't support them
-        throw new YamlManipulationFailedException(sprintf('Unsupported Yaml value of type "%s"', gettype($value)));
+        throw new YamlManipulationFailedException(sprintf('Unsupported Yaml value of type "%s"', \gettype($value)));
     }
 
     private function advanceCurrentPosition(int $newPosition)
@@ -790,7 +790,7 @@ class YamlSourceManipulator
         if (false !== strpos($advancedContent, "\n")) {
             $lines = explode("\n", $advancedContent);
             if (!empty($lines)) {
-                $lastLine = $lines[count($lines) - 1];
+                $lastLine = $lines[\count($lines) - 1];
                 $lastLine = trim($lastLine, "\r");
                 $indentation = 0;
                 while (' ' === substr($lastLine, $indentation, 1)) {
@@ -901,7 +901,7 @@ class YamlSourceManipulator
             $nextCharacter = substr($this->contents, $currentPosition, 1);
             ++$currentPosition;
 
-            if (in_array($nextCharacter, $chars)) {
+            if (\in_array($nextCharacter, $chars)) {
                 return $currentPosition;
             }
         }
@@ -956,11 +956,11 @@ class YamlSourceManipulator
     {
         // https://stackoverflow.com/questions/173400/how-to-check-if-php-array-is-associative-or-sequential/4254008#4254008
         $hasStringKeys = function (array $array) {
-            return count(array_filter(array_keys($array), 'is_string')) > 0;
+            return \count(array_filter(array_keys($array), 'is_string')) > 0;
         };
 
         foreach ($data as $key => $val) {
-            if (!is_array($val)) {
+            if (!\is_array($val)) {
                 continue;
             }
 
@@ -980,7 +980,7 @@ class YamlSourceManipulator
     private function removeMetadataKeys(array $data)
     {
         foreach ($data as $key => $val) {
-            if (is_array($val)) {
+            if (\is_array($val)) {
                 $data[$key] = $this->removeMetadataKeys($val);
 
                 continue;
@@ -1043,7 +1043,7 @@ class YamlSourceManipulator
     {
         $position = null === $position ? $this->currentPosition : $position;
 
-        return $position === strlen($this->contents);
+        return $position === \strlen($this->contents);
     }
 
     private function isPreviousLineComment(int $position): bool
