@@ -45,6 +45,8 @@ final class UserClassBuilder
                 $userClassConfig->getIdentityPropertyName(),
                 [
                     'type' => 'string',
+                    // https://github.com/FriendsOfSymfony/FOSUserBundle/issues/1919
+                    'length' => 180,
                     'unique' => true,
                 ]
             );
