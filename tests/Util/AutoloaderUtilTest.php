@@ -105,6 +105,7 @@ class AutoloaderUtilTest extends TestCase
             'Also\In\Src\Some\OtherClass' => 'src/SubDir/Some/OtherClass.php',
             'Other\Namespace\Admin\Foo' => 'lib/Admin/Foo.php',
             'Psr0\Package\Admin\Bar' => 'lib/other/Psr0/Package/Admin/Bar.php',
+            'App\Controller\App\MyController' => 'src/Controller/App/MyController.php',
         ];
     }
 
