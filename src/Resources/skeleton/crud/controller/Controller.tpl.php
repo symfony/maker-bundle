@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @Route("<?= $route_path ?>")
  */
-class <?= $class_name ?> extends <?= $parent_class_name ?>
+class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 {
     /**
      * @Route("/", name="<?= $route_name ?>_index", methods="GET")
