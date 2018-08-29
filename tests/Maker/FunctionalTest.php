@@ -881,6 +881,21 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOverwrite')
             ->setRequiredPhpVersion(70100)
         ];
+
+        // see #192
+        yield 'entity_into_sub_namespace_matching_entity' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'Product\\Category',
+                // add not additional fields
+                '',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntitySubNamespaceMatchingEntity')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
+        ];
     }
 
     /**
