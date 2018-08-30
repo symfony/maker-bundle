@@ -1,3 +1,43 @@
+1.7
+===
+
+* Added `make:user` command that generates a `User` class, generates
+  a user provider (when needed) and configures your the `providers`
+  and `encoders` section in your `security.yaml` file - #250 thanks
+  to @weaverryan
+
+* Properly extend `AbstractController` and use core `@Route` annotation
+  in `make:crud` - #246 thanks to @royklutman 
+
+* Fixed a bug when a class name contained the namespace `App\` - #243
+  thanks to @gmanen
+
+* Fix bug with `make:entity` when generating inside a sub-directory - #245
+  thanks to @nikophil
+
+1.6
+===
+
+* Fixing bad empty line when source file uses tabs - #238 thanks to @weaverryan
+
+* Str case mismatch - #190 thanks to @localheinz
+
+* Preserve existing class metadata - #197 thanks to @ro0NL
+
+* Fixing a bug where having relativizePath failed - #214 thanks to @weaverryan
+
+* Do not prefix Command Class Name by 'App' if the prefix is app: - #205 thanks to @lyrixx
+
+* make:entity: Add return type to getId() - #215 thanks to @gharlan
+
+* Don't make Twig filters safe for HTML by default - #222, #202 thanks to @lyrixx
+
+* Remove support for the deprecated json_array Doctrine type - #224 thanks to @javiereguiluz
+
+* Extend from AbstractController when using Symfony 4.1 or higher - #221 thanks to @javiereguiluz
+
+* Don't use :contains in the functional test tpl - #226 thanks to @dunglas
+
 1.5
 ===
 
