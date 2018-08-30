@@ -1,0 +1,12 @@
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers:
+    in_memory: { memory: ~ }
+firewalls: false
+===
+$data = ['new_key' => true] + $data;
+===
+new_key: true
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers:
+    in_memory: { memory: ~ }
+firewalls: false

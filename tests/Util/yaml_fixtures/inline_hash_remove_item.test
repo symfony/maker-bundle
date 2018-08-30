@@ -1,0 +1,13 @@
+security:
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        in_memory: { memory: ~, foo: bar } # my provider config
+    firewalls: false
+===
+unset($data['security']['providers']['in_memory']['foo']);
+===
+security:
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        in_memory: { memory: ~ } # my provider config
+    firewalls: false

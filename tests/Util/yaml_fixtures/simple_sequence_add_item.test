@@ -1,0 +1,10 @@
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers: []
+firewalls: false
+===
+$data['providers'][] = 'foo';
+===
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers:
+    - foo
+firewalls: false

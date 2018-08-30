@@ -1,0 +1,10 @@
+security:
+    providers:
+        in_memory: { memory: ~ }
+===
+$data['security'] = ['encoders' => true] + $data['security'];
+===
+security:
+    encoders: true
+    providers:
+        in_memory: { memory: ~ }

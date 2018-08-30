@@ -1,0 +1,12 @@
+security:
+    first: bar
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        in_memory: { memory: ~ }
+    firewalls: false
+  # 2 spaces & a random comment
+===
+$data['security'] = false;
+===
+security: false
+  # 2 spaces & a random comment

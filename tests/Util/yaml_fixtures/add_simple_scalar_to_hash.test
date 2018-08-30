@@ -1,0 +1,28 @@
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers:
+    in_memory: { memory: ~ }
+firewalls:
+    dev:
+        pattern: ^/(_(profiler|wdt)|css|images|js)/
+        security: false
+    main:
+        anonymous: true
+
+        # activate different ways to authenticate
+===
+$data['firewalls']['dev']['bool_key'] = true;
+$data['firewalls']['dev']['string_key'] = 'bar';
+===
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers:
+    in_memory: { memory: ~ }
+firewalls:
+    dev:
+        pattern: ^/(_(profiler|wdt)|css|images|js)/
+        security: false
+        bool_key: true
+        string_key: bar
+    main:
+        anonymous: true
+
+        # activate different ways to authenticate

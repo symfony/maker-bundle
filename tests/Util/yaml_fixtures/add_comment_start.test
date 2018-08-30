@@ -1,0 +1,12 @@
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers:
+    in_memory: { memory: ~ }
+firewalls: false
+===
+$data['providers']['anything'] = '__COMMENT__ This is my comment';
+===
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers:
+    in_memory: { memory: ~ }
+    # This is my comment
+firewalls: false

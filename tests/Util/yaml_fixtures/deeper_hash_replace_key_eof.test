@@ -1,0 +1,18 @@
+security:
+    first: bar
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        in_memory: { memory: ~ }
+    firewalls: false
+  # 2 spaces & a random comment
+===
+unset($data['security']['firewalls']);
+$data['security']['aloha'] = true;
+===
+security:
+    first: bar
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        in_memory: { memory: ~ }
+    aloha: true
+  # 2 spaces & a random comment

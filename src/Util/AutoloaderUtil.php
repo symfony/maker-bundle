@@ -46,7 +46,7 @@ class AutoloaderUtil
         // lookup is obviously modeled off of Composer's autoload logic
         foreach ($classLoader->getPrefixesPsr4() as $prefix => $paths) {
             if (0 === strpos($className, $prefix)) {
-                return $paths[0].'/'.str_replace('\\', '/', substr($className, strlen($prefix))).'.php';
+                return $paths[0].'/'.str_replace('\\', '/', substr($className, \strlen($prefix))).'.php';
             }
         }
 

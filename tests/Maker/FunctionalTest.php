@@ -21,6 +21,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeSerializerEncoder;
 use Symfony\Bundle\MakerBundle\Maker\MakeSubscriber;
 use Symfony\Bundle\MakerBundle\Maker\MakeTwigExtension;
 use Symfony\Bundle\MakerBundle\Maker\MakeUnitTest;
+use Symfony\Bundle\MakerBundle\Maker\MakeUser;
 use Symfony\Bundle\MakerBundle\Maker\MakeValidator;
 use Symfony\Bundle\MakerBundle\Maker\MakeVoter;
 use Symfony\Bundle\MakerBundle\MakerBundle;
@@ -287,6 +288,43 @@ class FunctionalTest extends MakerTestCase
                 // class name
                 'AppCustomAuthenticator',
             ])
+        ];
+
+        yield 'user_security_entity_with_password' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeUser::class),
+            [
+                // user class name
+                'User',
+                'y', // entity
+                'email', // identity property
+                'y', // with password
+                'y', // argon
+            ])
+            ->addExtraDependencies('doctrine')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeUserEntityPassword')
+            ->configureDatabase()
+            ->setGuardAuthenticator('main', 'App\\Security\\AutomaticAuthenticator')
+            ->setRequiredPhpVersion(70100)
+            ->updateSchemaAfterCommand()
+        ];
+
+        yield 'user_security_model_no_password' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeUser::class),
+            [
+                // user class name
+                'User',
+                'n', // entity
+                'username', // identity property
+                'n', // login with password?
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeUserModelNoPassword')
+            ->setGuardAuthenticator('main', 'App\\Security\\AutomaticAuthenticator')
+            ->setRequiredPhpVersion(70100)
+            ->addPostMakeReplacement(
+                'src/Security/UserProvider.php',
+                'throw new \Exception(\'TODO: fill in refreshUser() inside \'.__FILE__);',
+                'return $user;'
+            )
         ];
 
         yield 'migration_with_changes' => [MakerTestDetails::createTest(

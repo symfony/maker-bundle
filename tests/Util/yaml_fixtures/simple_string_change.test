@@ -1,0 +1,7 @@
+firewalls: bar
+another_key: foo
+===
+$data['firewalls'] = 'baz';
+===
+firewalls: baz
+another_key: foo

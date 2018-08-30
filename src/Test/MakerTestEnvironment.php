@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Test;
 
+use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -112,9 +113,7 @@ final class MakerTestEnvironment
             }
         }
 
-        if ($this->testDetails->getReplacements()) {
-            $this->processReplacements($this->testDetails->getReplacements(), $this->path);
-        }
+        $this->processReplacements($this->testDetails->getReplacements(), $this->path);
 
         if ($ignoredFiles = $this->testDetails->getFilesToDelete()) {
             foreach ($ignoredFiles as $file) {
@@ -122,6 +121,14 @@ final class MakerTestEnvironment
                     $this->fs->rename($this->path.'/'.$file, $this->path.'/'.$file.'.deleted');
                 }
             }
+        }
+
+        foreach ($this->testDetails->getFilesToRevert() as $file) {
+            if (!file_exists($this->path.'/'.$file)) {
+                throw new \Exception(sprintf('Cannot find "%s"', $file));
+            }
+
+            $this->fs->copy($this->path.'/'.$file, $this->path.'/'.$file.'.original');
         }
     }
 
@@ -222,6 +229,26 @@ final class MakerTestEnvironment
 
     private function postMake()
     {
+        $this->processReplacements($this->testDetails->getPostMakeReplacements(), $this->path);
+
+        $guardAuthenticators = $this->testDetails->getGuardAuthenticators();
+        if (!empty($guardAuthenticators)) {
+            $yaml = file_get_contents($this->path.'/config/packages/security.yaml');
+            $manipulator = new YamlSourceManipulator($yaml);
+            $data = $manipulator->getData();
+            foreach ($guardAuthenticators as $firewallName => $id) {
+                if (!isset($data['security']['firewalls'][$firewallName])) {
+                    throw new \Exception(sprintf('Could not find firewall "%s"', $firewallName));
+                }
+
+                $data['security']['firewalls'][$firewallName]['guard'] = [
+                    'authenticators' => [$id],
+                ];
+            }
+            $manipulator->setData($data);
+            file_put_contents($this->path.'/config/packages/security.yaml', $manipulator->getContents());
+        }
+
         foreach ($this->testDetails->getPostMakeCommands() as $postCommand) {
             MakerTestProcess::create($postCommand, $this->path)
                             ->run();
@@ -230,6 +257,14 @@ final class MakerTestEnvironment
 
     public function reset()
     {
+        foreach ($this->testDetails->getFilesToRevert() as $file) {
+            if (!file_exists($this->path.'/'.$file.'.original')) {
+                throw new \Exception(sprintf('Cannot find original file for "%s"', $file));
+            }
+
+            $this->fs->rename($this->path.'/'.$file.'.original', $this->path.'/'.$file, true);
+        }
+
         $cleanSnapshot = json_decode(file_get_contents($this->snapshotFile));
         $currentSnapshot = $this->createSnapshot();
 
@@ -247,6 +282,8 @@ final class MakerTestEnvironment
             }
         }
 
+        // no need to revert post make replacements: if something was replaced
+        // "post make", then it was a generated file, which will be deleted anyways
         $this->revertReplacements($this->testDetails->getReplacements(), $this->path);
     }
 

@@ -71,6 +71,13 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_user" class="Symfony\Bundle\MakerBundle\Maker\MakeUser">
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.user_class_builder" />
+                <argument type="service" id="maker.security_config_updater" />
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_migration" class="Symfony\Bundle\MakerBundle\Maker\MakeMigration">
                 <argument>%kernel.project_dir%</argument>
                 <tag name="maker.command" />

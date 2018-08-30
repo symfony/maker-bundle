@@ -1,0 +1,22 @@
+security:
+    first: bar
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        in_memory: { memory: ~ }
+    firewalls: false
+===
+$data['security'] = [
+    'first' => 'bar',
+    'another_key' => 'foo',
+    'providers' => $data['security']['providers'],
+    // remove last key & add a new one too
+    'security' => false,
+];
+===
+security:
+    first: bar
+    another_key: foo
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        in_memory: { memory: ~ }
+    security: false

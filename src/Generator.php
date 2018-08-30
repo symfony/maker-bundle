@@ -34,8 +34,16 @@ class Generator
 
     /**
      * Generate a new file for a class from a template.
+     *
+     * @param string $className    The fully-qualified class name
+     * @param string $templateName Template name in Resources/skeleton to use
+     * @param array  $variables    Array of variables to pass to the template
+     *
+     * @return string The path where the file will be created
+     *
+     * @throws \Exception
      */
-    public function generateClass(string $className, string $templateName, array $variables): string
+    public function generateClass(string $className, string $templateName, array $variables = []): string
     {
         $targetPath = $this->fileManager->getRelativePathForFutureClass($className);
 
@@ -67,6 +75,13 @@ class Generator
         ]);
 
         $this->addOperation($targetPath, $templateName, $variables);
+    }
+
+    public function dumpFile(string $targetPath, string $contents)
+    {
+        $this->pendingOperations[$targetPath] = [
+            'contents' => $contents,
+        ];
     }
 
     /**
@@ -157,6 +172,12 @@ class Generator
     public function writeChanges()
     {
         foreach ($this->pendingOperations as $targetPath => $templateData) {
+            if (isset($templateData['contents'])) {
+                $this->fileManager->dumpFile($targetPath, $templateData['contents']);
+
+                continue;
+            }
+
             $templatePath = $templateData['template'];
             $parameters = $templateData['variables'];
 

@@ -1,0 +1,16 @@
+security:
+    # ideally the comment below would end up on the line above
+    # or short arrays would stay inline.
+    providers:
+        in_memory: [] # my provider config
+    firewalls: false
+===
+$data['security']['providers']['in_memory'][] = 'baz';
+===
+security:
+    # ideally the comment below would end up on the line above
+    # or short arrays would stay inline.
+    providers:
+        in_memory:
+            - baz # my provider config
+    firewalls: false

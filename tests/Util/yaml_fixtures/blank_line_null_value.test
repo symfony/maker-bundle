@@ -1,0 +1,26 @@
+security:
+    providers:
+        in_memory: { memory: ~ }
+    firewalls:
+
+    other_key: []
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }
+===
+$data['security']['other_key'][] = 'new_val';
+===
+security:
+    providers:
+        in_memory: { memory: ~ }
+    firewalls:
+
+    other_key:
+        - new_val
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }
