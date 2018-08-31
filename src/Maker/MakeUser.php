@@ -99,7 +99,7 @@ final class MakeUser extends AbstractMaker
         }
         $input->setOption('is-entity', $userIsEntity);
 
-        $identityFieldName = $io->ask('Enter a property name that will be the unique "display" name for the user (e.g. <comment>email, username, uuid</comment>', 'email', [Validator::class, 'validatePropertyName']);
+        $identityFieldName = $io->ask('Enter a property name that will be the unique "display" name for the user (e.g. <comment>email, username, uuid</comment>)', 'email', [Validator::class, 'validatePropertyName']);
         $input->setOption('identity-property-name', $identityFieldName);
 
         $io->text('Will this app need to hash/check user passwords? Choose <comment>No</comment> if passwords are not needed or will be checked/hashed by some other system (e.g. a single sign-on server).');
