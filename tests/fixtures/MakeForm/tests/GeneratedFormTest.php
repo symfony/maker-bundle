@@ -2,7 +2,7 @@
 
 namespace App\Tests;
 
-use App\Form\FooBarType;
+use App\Form\Type\FooBarType;
 use Symfony\Component\Form\Test\TypeTestCase;
 
 class GeneratedFormTest extends TypeTestCase

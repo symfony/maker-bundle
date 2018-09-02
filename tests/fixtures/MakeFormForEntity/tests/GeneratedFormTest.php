@@ -3,7 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\SourFood;
-use App\Form\SourFoodType;
+use App\Form\Type\SourFoodType;
 use Symfony\Component\Form\Test\TypeTestCase;
 
 class GeneratedFormTest extends TypeTestCase
