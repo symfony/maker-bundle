@@ -243,5 +243,10 @@ final class MakeCrud extends AbstractMaker
             CsrfTokenManager::class,
             'security-csrf'
         );
+
+        $dependencies->addClassDependency(
+            ParamConverter::class,
+            'sensio/framework-extra-bundle'
+        );
     }
 }
