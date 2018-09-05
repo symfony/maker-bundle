@@ -1,0 +1,5 @@
+security:
+    firewalls:
+        main:
+            guard:
+                authenticators: [App\Security\AppCustomAuthenticator]

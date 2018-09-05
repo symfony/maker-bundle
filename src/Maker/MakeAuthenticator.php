@@ -16,13 +16,17 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Exception\InvalidOptionException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @author Ryan Weaver <ryan@knpuniversity.com>
@@ -53,6 +57,22 @@ final class MakeAuthenticator extends AbstractMaker
         ;
     }
 
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    {
+        $fs = new Filesystem();
+
+        if (!$fs->exists($path = 'config/packages/security.yaml')) {
+            return;
+        }
+
+        $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents($path));
+        $securityData = $manipulator->getData();
+
+        $interactiveSecurityHelper = new InteractiveSecurityHelper();
+        $command->addOption('firewall-name', null, InputOption::VALUE_OPTIONAL, '');
+        $interactiveSecurityHelper->guessFirewallName($input, $io, $securityData);
+    }
+
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $classNameDetails = $generator->createClassNameDetails(
@@ -66,14 +86,17 @@ final class MakeAuthenticator extends AbstractMaker
             []
         );
 
+        $securityYamlUpdated = false;
         $path = 'config/packages/security.yaml';
         if ($this->fileManager->fileExists($path)) {
             try {
                 $newYaml = $this->configUpdater->updateForAuthenticator(
                     $this->fileManager->getFileContents($path),
+                    $input->getOption('firewall-name'),
                     $classNameDetails->getFullName()
                 );
                 $generator->dumpFile($path, $newYaml);
+                $securityYamlUpdated = true;
             } catch (YamlManipulationFailedException $e) {
             }
         }
@@ -82,10 +105,11 @@ final class MakeAuthenticator extends AbstractMaker
 
         $this->writeSuccessMessage($io);
 
-        $io->text([
-            'Next: Customize your new authenticator.',
-            'Then, configure the "guard" key on your firewall to use it.',
-        ]);
+        $text = ['Next: Customize your new authenticator.'];
+        if (!$securityYamlUpdated) {
+            $text[] = 'Then, configure the "guard" key on your firewall to use it.';
+        }
+        $io->text($text);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies)

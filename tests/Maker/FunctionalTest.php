@@ -35,6 +35,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\RouteCollectionBuilder;
+use Symfony\Component\Yaml\Yaml;
 
 class FunctionalTest extends MakerTestCase
 {
@@ -282,12 +283,63 @@ class FunctionalTest extends MakerTestCase
             ])
         ];
 
-        yield 'auth_empty' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeAuthenticator::class),
-            [
-                // class name
-                'AppCustomAuthenticator',
-            ])
+        yield 'auth_empty_one_firewall' => [
+            MakerTestDetails::createTest(
+                $this->getMakerInstance(MakeAuthenticator::class),
+                [
+                    // class name
+                    'AppCustomAuthenticator',
+                ]
+            )
+                ->addExtraDependencies('security')
+                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticator')
+                ->setRequiredPhpVersion(70100)
+                ->assert(
+                    function (string $output, string $directory) {
+                        $this->assertContains('Success', $output);
+
+                        $finder = new Finder();
+                        $finder->in($directory.'/src/Security')
+                            ->name('AppCustomAuthenticator.php');
+                        $this->assertCount(1, $finder);
+
+                        $securityConfig = Yaml::parse(file_get_contents("$directory/config/packages/security.yaml"));
+                        $this->assertEquals(
+                            'App\\Security\\AppCustomAuthenticator',
+                            $securityConfig['security']['firewalls']['main']['guard']['authenticators'][0]
+                        );
+                    }
+                ),
+        ];
+
+        yield 'auth_empty_multiple_firewalls' => [
+            MakerTestDetails::createTest(
+                $this->getMakerInstance(MakeAuthenticator::class),
+                [
+                    // class name
+                    'AppCustomAuthenticator',
+                    1
+                ]
+            )
+                ->addExtraDependencies('security')
+                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorMultipleFirewalls')
+                ->setRequiredPhpVersion(70100)
+                ->assert(
+                    function (string $output, string $directory) {
+                        $this->assertContains('Success', $output);
+
+                        $finder = new Finder();
+                        $finder->in($directory.'/src/Security')
+                            ->name('AppCustomAuthenticator.php');
+                        $this->assertCount(1, $finder);
+
+                        $securityConfig = Yaml::parse(file_get_contents("$directory/config/packages/security.yaml"));
+                        $this->assertEquals(
+                            'App\\Security\\AppCustomAuthenticator',
+                            $securityConfig['security']['firewalls']['second']['guard']['authenticators'][0]
+                        );
+                    }
+                ),
         ];
 
         yield 'user_security_entity_with_password' => [MakerTestDetails::createTest(

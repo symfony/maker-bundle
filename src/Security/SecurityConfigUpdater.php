@@ -48,7 +48,7 @@ final class SecurityConfigUpdater
         return $contents;
     }
 
-    public function updateForAuthenticator(string $yamlSource, string $authenticatorFQCN)
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, string $userClass)
     {
         $this->manipulator = new YamlSourceManipulator($yamlSource);
 
@@ -60,18 +60,12 @@ final class SecurityConfigUpdater
             $newData['security']['firewalls'] = [];
         }
 
-        $firewalls = array_filter(
-            $newData['security']['firewalls'],
-            function ($item) {
-                return !isset($item['security']) || true === $item['security'];
-            }
-        );
-
-        if (!$firewalls) {
-            $firewalls['main'] = ['anonymous' => true];
+        if (!isset($newData['security']['firewalls'][$firewallName])) {
+            $newData['security']['firewalls'][$firewallName] = [];
         }
 
-        $firewall = $firewalls['main'];
+        $firewall = $newData['security']['firewalls'][$firewallName];
+
         if (!isset($firewall['guard'])) {
             $firewall['guard'] = [];
         }
@@ -80,11 +74,14 @@ final class SecurityConfigUpdater
             $firewall['guard']['authenticators'] = [];
         }
 
-        $firewall['guard']['authenticators'][] = $authenticatorFQCN;
+        $firewall['guard']['authenticators'][] = $userClass;
 
-        $newData['security']['firewalls']['main'] = $firewall;
+        if (count($firewall['guard']['authenticators']) > 1) {
+            $firewall['guard']['entry_point'] = current($firewall['guard']['authenticators']);
+        }
+
+        $newData['security']['firewalls'][$firewallName] = $firewall;
         $this->manipulator->setData($newData);
-
         $contents = $this->manipulator->getContents();
 
         return $contents;
