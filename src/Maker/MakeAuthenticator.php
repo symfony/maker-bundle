@@ -13,8 +13,12 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
+use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
+use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -25,6 +29,16 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 final class MakeAuthenticator extends AbstractMaker
 {
+    private $fileManager;
+
+    private $configUpdater;
+
+    public function __construct(FileManager $fileManager, SecurityConfigUpdater $configUpdater)
+    {
+        $this->fileManager = $fileManager;
+        $this->configUpdater = $configUpdater;
+    }
+
     public static function getCommandName(): string
     {
         return 'make:auth';
@@ -51,6 +65,19 @@ final class MakeAuthenticator extends AbstractMaker
             'authenticator/Empty.tpl.php',
             []
         );
+
+        $path = 'config/packages/security.yaml';
+        if ($this->fileManager->fileExists($path)) {
+            try {
+                $newYaml = $this->configUpdater->updateForAuthenticator(
+                    $this->fileManager->getFileContents($path),
+                    $classNameDetails->getFullName()
+                );
+                $generator->dumpFile($path, $newYaml);
+            } catch (YamlManipulationFailedException $e) {
+            }
+        }
+
         $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
