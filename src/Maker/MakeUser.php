@@ -103,7 +103,7 @@ final class MakeUser extends AbstractMaker
         $input->setOption('identity-property-name', $identityFieldName);
 
         $io->text('Will this app need to hash/check user passwords? Choose <comment>No</comment> if passwords are not needed or will be checked/hashed by some other system (e.g. a single sign-on server).');
-        $userWillHavePassword = $io->confirm('Do this app need to hash/check user passwords?');
+        $userWillHavePassword = $io->confirm('Does this app need to hash/check user passwords?');
         $input->setOption('with-password', $userWillHavePassword);
 
         $useArgon2Encoder = false;
