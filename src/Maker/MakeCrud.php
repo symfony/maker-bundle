@@ -216,7 +216,7 @@ final class MakeCrud extends AbstractMaker
     {
         $dependencies->addClassDependency(
             Route::class,
-            'annotations'
+            'router'
         );
 
         $dependencies->addClassDependency(
@@ -246,7 +246,7 @@ final class MakeCrud extends AbstractMaker
 
         $dependencies->addClassDependency(
             ParamConverter::class,
-            'sensio/framework-extra-bundle'
+            'annotations'
         );
     }
 }
