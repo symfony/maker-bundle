@@ -303,6 +303,7 @@ class FunctionalTest extends MakerTestCase
             ->addExtraDependencies('doctrine')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeUserEntityPassword')
             ->configureDatabase()
+            ->addExtraDependencies('doctrine')
             ->setGuardAuthenticator('main', 'App\\Security\\AutomaticAuthenticator')
             ->setRequiredPhpVersion(70100)
             ->updateSchemaAfterCommand()

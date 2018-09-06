@@ -450,7 +450,7 @@ class YamlSourceManipulator
         $endValuePosition = $this->findEndPositionOfValue($originalVal);
 
         $newYamlValue = $this->convertToYaml($value);
-        if (!is_array($originalVal) && is_array($value)) {
+        if (!\is_array($originalVal) && \is_array($value)) {
             // we're converting from a scalar to a (multiline) array
             // this means we need to break onto the next line
 
@@ -798,7 +798,7 @@ class YamlSourceManipulator
          * to look for indentation.
          */
         if ($this->isCharLineBreak(substr($this->contents, $originalPosition - 1, 1))) {
-            $originalPosition--;
+            --$originalPosition;
         }
 
         // look for empty lines and track the current indentation
@@ -890,7 +890,7 @@ class YamlSourceManipulator
             // because we are either moving along one line until [ {
             // or we are finding a line break and stopping: indentation
             // should not be calculated
-            $this->currentPosition++;
+            ++$this->currentPosition;
 
             if ($this->isCharLineBreak($nextCharacter)) {
                 return self::ARRAY_FORMAT_MULTILINE;
