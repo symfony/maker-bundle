@@ -326,14 +326,21 @@ final class MakerTestDetails
 
     public function getDependencies()
     {
-        $depBuilder = new DependencyBuilder();
-        $this->maker->configureDependencies($depBuilder);
+        $depBuilder = $this->getDependencyBuilder();
 
         return array_merge(
             $depBuilder->getAllRequiredDependencies(),
             $depBuilder->getAllRequiredDevDependencies(),
             $this->extraDependencies
         );
+    }
+
+    public function getDependencyBuilder(): DependencyBuilder
+    {
+        $depBuilder = new DependencyBuilder();
+        $this->maker->configureDependencies($depBuilder);
+
+        return $depBuilder;
     }
 
     public function getArgumentsString(): string
