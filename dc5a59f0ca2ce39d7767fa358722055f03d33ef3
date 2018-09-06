@@ -1,0 +1,45 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-09-05T19:11:09Z
+
+Hey @ckrack!
+
+Hmm, this makes sense. But, we have a test to catch this.... @sadikoff what do you think? It looks like our CRUD test definitely checks controllers that use this - https://github.com/symfony/maker-bundle/blob/master/tests/fixtures/MakeCrud/tests/GeneratedCrudControllerTest.php - so if we're missing a dependency, shouldn't that test fail?
+
+---------------------------------------------------------------------------
+
+by ckrack at 2018-09-05T21:00:43Z
+
+Hi @weaverryan
+I haven't found out all details about the tests, but:
+There is an exclude for `tests/fixtures` in `phpunit.xml.dist`
+
+I found one other test here, but it's only making a GET to the list method. https://github.com/symfony/maker-bundle/blob/master/tests/fixtures/MakeCrudRepository/tests/GeneratedCrudControllerTest.php
+
+In https://github.com/symfony/maker-bundle/blob/master/tests/Maker/FunctionalTest.php, there are a couple of comments `// need for crud web tests`, maybe that's an indication of missing tests?
+
+`MakeCrud::configureDependencies` only checks for the existance of `Symfony\Component\Routing\Annotation\Route`, which is part of the routing component.
+If this fails, it suggests installing "annotations". I'd change this to suggest the router in this place and add the block in this pull request for the annotations.
+
+By the way: I can't run the tests properly.
+When i leave the example db DSN in phpunit.xml.dist, it complains about Access denied. When i replace it with sqlite, it complains about:
+
+> 1) Symfony\Bundle\MakerBundle\Tests\Maker\FunctionalTest::testCommands with data set "crud_with_no_base" (Symfony\Bundle\MakerBundle\Test\MakerTestDetails Object (...))
+Exception: Could not find "mysql://db_user:db_password@127.0.0.1:3306/db_name" inside "phpunit.xml.dist"
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-09-06T01:24:56Z
+
+Hey @ckrack!
+
+Ah, this is great debugging! This issue is clear to me now. A few important things:
+
+> MakeCrud::configureDependencies only checks for the existance of Symfony\Component\Routing\Annotation\Route, which is part of the routing component.
+If this fails, it suggests installing "annotations". I'd change this to suggest the router in this place and add the block in this pull request for the annotations.
+
+This is the key. This bug is because we recently changed from using the `Route` class from FWExtraBundle to the core one.
+
+The reason the tests aren't catching it because of another small bug in the tests. Specifically, in the "mini app's" setup by the tests, we install ALL the dependencies listed. So, `annotations` is being installed. But actually, we should only install any "missing" dependencies (the same way the user would - i.e. the user would never get a message currently to install `annotations` because they will always have the core `Route` class). I'm going to fix that in a separate pull request.
+
+So yes, this is perfect. 💯 :)
