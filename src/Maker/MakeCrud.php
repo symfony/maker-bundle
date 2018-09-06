@@ -216,7 +216,7 @@ final class MakeCrud extends AbstractMaker
     {
         $dependencies->addClassDependency(
             Route::class,
-            'annotations'
+            'router'
         );
 
         $dependencies->addClassDependency(
@@ -242,6 +242,11 @@ final class MakeCrud extends AbstractMaker
         $dependencies->addClassDependency(
             CsrfTokenManager::class,
             'security-csrf'
+        );
+
+        $dependencies->addClassDependency(
+            ParamConverter::class,
+            'annotations'
         );
     }
 }
