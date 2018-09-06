@@ -49,6 +49,12 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_login_form" class="Symfony\Bundle\MakerBundle\Maker\MakeLoginForm">
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.security_config_updater" />
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_serializer_encoder" class="Symfony\Bundle\MakerBundle\Maker\MakeSerializerEncoder">
                 <tag name="maker.command" />
             </service>

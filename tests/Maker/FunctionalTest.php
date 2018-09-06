@@ -16,6 +16,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Maker\MakeFixtures;
 use Symfony\Bundle\MakerBundle\Maker\MakeForm;
 use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest;
+use Symfony\Bundle\MakerBundle\Maker\MakeLoginForm;
 use Symfony\Bundle\MakerBundle\Maker\MakeMigration;
 use Symfony\Bundle\MakerBundle\Maker\MakeSerializerEncoder;
 use Symfony\Bundle\MakerBundle\Maker\MakeSubscriber;
@@ -525,6 +526,15 @@ class FunctionalTest extends MakerTestCase
                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
+        ];
+
+        yield 'login_form' => [
+            MakerTestDetails::createTest(
+                $this->getMakerInstance(MakeLoginForm::class),
+                []
+            )
+                ->addExtraDependencies('security')
+                ->addExtraDependencies('twig'),
         ];
     }
 
