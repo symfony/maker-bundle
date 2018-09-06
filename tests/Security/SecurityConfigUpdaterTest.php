@@ -90,7 +90,7 @@ class SecurityConfigUpdaterTest extends TestCase
             'empty_security.yaml'
         ];
 
-        yield 'empty_source' => [
+        yield 'simple_security' => [
             'main',
             null,
             'simple_security_source.yaml',

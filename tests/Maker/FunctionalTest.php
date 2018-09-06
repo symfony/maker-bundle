@@ -32,6 +32,7 @@ use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\RouteCollectionBuilder;
@@ -293,17 +294,14 @@ class FunctionalTest extends MakerTestCase
             )
                 ->addExtraDependencies('security')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticator')
-                ->setRequiredPhpVersion(70100)
                 ->assert(
                     function (string $output, string $directory) {
                         $this->assertContains('Success', $output);
 
-                        $finder = new Finder();
-                        $finder->in($directory.'/src/Security')
-                            ->name('AppCustomAuthenticator.php');
-                        $this->assertCount(1, $finder);
+                        $fs = new Filesystem();
+                        $this->assertTrue($fs->exists(sprintf('%s/src/Security/AppCustomAuthenticator.php', $directory)));
 
-                        $securityConfig = Yaml::parse(file_get_contents("$directory/config/packages/security.yaml"));
+                        $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
                         $this->assertEquals(
                             'App\\Security\\AppCustomAuthenticator',
                             $securityConfig['security']['firewalls']['main']['guard']['authenticators'][0]
@@ -318,22 +316,17 @@ class FunctionalTest extends MakerTestCase
                 [
                     // class name
                     'AppCustomAuthenticator',
+                    // firewall name
                     1
                 ]
             )
                 ->addExtraDependencies('security')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorMultipleFirewalls')
-                ->setRequiredPhpVersion(70100)
                 ->assert(
                     function (string $output, string $directory) {
                         $this->assertContains('Success', $output);
 
-                        $finder = new Finder();
-                        $finder->in($directory.'/src/Security')
-                            ->name('AppCustomAuthenticator.php');
-                        $this->assertCount(1, $finder);
-
-                        $securityConfig = Yaml::parse(file_get_contents("$directory/config/packages/security.yaml"));
+                        $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
                         $this->assertEquals(
                             'App\\Security\\AppCustomAuthenticator',
                             $securityConfig['security']['firewalls']['second']['guard']['authenticators'][0]
@@ -348,22 +341,17 @@ class FunctionalTest extends MakerTestCase
                 [
                     // class name
                     'AppCustomAuthenticator',
+                    // firewall name
                     1
                 ]
             )
                 ->addExtraDependencies('security')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorExistingAuthenticator')
-                ->setRequiredPhpVersion(70100)
                 ->assert(
                     function (string $output, string $directory) {
                         $this->assertContains('Success', $output);
 
-                        $finder = new Finder();
-                        $finder->in($directory.'/src/Security')
-                            ->name('AppCustomAuthenticator.php');
-                        $this->assertCount(1, $finder);
-
-                        $securityConfig = Yaml::parse(file_get_contents("$directory/config/packages/security.yaml"));
+                        $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
                         $this->assertEquals(
                             'App\\Security\\AppCustomAuthenticator',
                             $securityConfig['security']['firewalls']['main']['guard']['entry_point']
@@ -378,23 +366,19 @@ class FunctionalTest extends MakerTestCase
                 [
                     // class name
                     'AppCustomAuthenticator',
+                    // firewall name
                     1,
+                    // entry point
                     1
                 ]
             )
                 ->addExtraDependencies('security')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorMultipleFirewallsExistingAuthenticator')
-                ->setRequiredPhpVersion(70100)
                 ->assert(
                     function (string $output, string $directory) {
                         $this->assertContains('Success', $output);
 
-                        $finder = new Finder();
-                        $finder->in($directory.'/src/Security')
-                            ->name('AppCustomAuthenticator.php');
-                        $this->assertCount(1, $finder);
-
-                        $securityConfig = Yaml::parse(file_get_contents("$directory/config/packages/security.yaml"));
+                        $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
                         $this->assertEquals(
                             'App\\Security\\AppCustomAuthenticator',
                             $securityConfig['security']['firewalls']['second']['guard']['entry_point']

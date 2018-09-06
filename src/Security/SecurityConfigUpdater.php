@@ -48,15 +48,7 @@ final class SecurityConfigUpdater
         return $contents;
     }
 
-    /**
-     * @param string $yamlSource
-     * @param string $firewallName
-     * @param string $chosenEntryPoint
-     * @param string $authenticatorClass
-     *
-     * @return string
-     */
-    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass)
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass): string
     {
         $this->manipulator = new YamlSourceManipulator($yamlSource);
 
@@ -69,7 +61,7 @@ final class SecurityConfigUpdater
         }
 
         if (!isset($newData['security']['firewalls'][$firewallName])) {
-            $newData['security']['firewalls'][$firewallName] = [];
+            $newData['security']['firewalls'][$firewallName] = ['anonymous' => true];
         }
 
         $firewall = $newData['security']['firewalls'][$firewallName];
@@ -84,7 +76,7 @@ final class SecurityConfigUpdater
 
         $firewall['guard']['authenticators'][] = $authenticatorClass;
 
-        if (count($firewall['guard']['authenticators']) > 1) {
+        if (\count($firewall['guard']['authenticators']) > 1) {
             $firewall['guard']['entry_point'] = $chosenEntryPoint ?? current($firewall['guard']['authenticators']);
         }
 

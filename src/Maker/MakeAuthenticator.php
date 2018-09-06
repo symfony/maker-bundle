@@ -20,16 +20,16 @@ use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Exception\InvalidOptionException;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * @author Ryan Weaver <ryan@knpuniversity.com>
+ *
+ * @internal
  */
 final class MakeAuthenticator extends AbstractMaker
 {
@@ -56,15 +56,12 @@ final class MakeAuthenticator extends AbstractMaker
         $command
             ->setDescription('Creates an empty Guard authenticator')
             ->addArgument('authenticator-class', InputArgument::OPTIONAL, 'The class name of the authenticator to create (e.g. <fg=yellow>AppCustomAuthenticator</>)')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeAuth.txt'))
-        ;
+            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeAuth.txt'));
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
-        $fs = new Filesystem();
-
-        if (!$fs->exists($path = 'config/packages/security.yaml')) {
+        if (!$this->fileManager->fileExists($path = 'config/packages/security.yaml')) {
             return;
         }
 
@@ -74,10 +71,19 @@ final class MakeAuthenticator extends AbstractMaker
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
 
         $command->addOption('firewall-name', null, InputOption::VALUE_OPTIONAL, '');
-        $interactiveSecurityHelper->guessFirewallName($input, $io, $securityData);
+        $input->setOption('firewall-name', $firewallName = $interactiveSecurityHelper->guessFirewallName($io, $securityData));
 
         $command->addOption('entry-point', null, InputOption::VALUE_OPTIONAL);
-        $interactiveSecurityHelper->guessEntryPoint($input, $io, $this->generator, $securityData);
+
+        $authenticatorClassNameDetails = $this->generator->createClassNameDetails(
+            $input->getArgument('authenticator-class'),
+            'Security\\'
+        );
+
+        $input->setOption(
+            'entry-point',
+            $interactiveSecurityHelper->guessEntryPoint($io, $securityData, $authenticatorClassNameDetails->getFullName(), $firewallName)
+        );
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -115,7 +121,13 @@ final class MakeAuthenticator extends AbstractMaker
 
         $text = ['Next: Customize your new authenticator.'];
         if (!$securityYamlUpdated) {
-            $text[] = 'Then, configure the "guard" key on your firewall to use it.';
+            $yamlExample = $this->configUpdater->updateForAuthenticator(
+                'security: {}',
+                'main',
+                null,
+                $classNameDetails->getFullName()
+            );
+            $text[] = "Your <info>security.yaml</info> could not be updated automatically. You'll need to add the following config manually:\n\n".$yamlExample;
         }
         $io->text($text);
     }

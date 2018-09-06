@@ -12,8 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
-use Symfony\Bundle\MakerBundle\Generator;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
@@ -21,47 +19,28 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 final class InteractiveSecurityHelper
 {
-    /**
-     * @param InputInterface $input
-     * @param SymfonyStyle   $io
-     * @param array          $securityData
-     */
-    public function guessFirewallName(InputInterface $input, SymfonyStyle $io, array $securityData)
+    public function guessFirewallName(SymfonyStyle $io, array $securityData)
     {
-        $firewalls = array_filter(
+        $realFirewalls = array_filter(
             $securityData['security']['firewalls'] ?? [],
             function ($item) {
                 return !isset($item['security']) || true === $item['security'];
             }
         );
 
-        if (count($firewalls) < 2) {
-            if ($firewalls) {
-                $input->setOption('firewall-name', key($firewalls));
-            } else {
-                $input->setOption('firewall-name', 'main');
-            }
-
-            return;
+        if (0 === \count($realFirewalls)) {
+            return 'main';
         }
 
-        $firewallName = $io->choice('Which firewall you want to update ?', array_keys($firewalls), key($firewalls));
-        $input->setOption('firewall-name', $firewallName);
+        if (1 === \count($realFirewalls)) {
+            return key($realFirewalls);
+        }
+
+        return $io->choice('Which firewall do you want to update ?', array_keys($realFirewalls), key($realFirewalls));
     }
 
-    /**
-     * @param InputInterface $input
-     * @param SymfonyStyle   $io
-     * @param Generator      $generator
-     * @param array          $securityData
-     */
-    public function guessEntryPoint(InputInterface $input, SymfonyStyle $io, Generator $generator, array $securityData)
+    public function guessEntryPoint(SymfonyStyle $io, array $securityData, string $authenticatorClass, string $firewallName)
     {
-        $firewallName = $input->getOption('firewall-name');
-        if (!$firewallName) {
-            throw new RuntimeCommandException("Option \"firewall-name\" must be provided.");
-        }
-
         if (!isset($securityData['security'])) {
             $securityData['security'] = [];
         }
@@ -72,23 +51,28 @@ final class InteractiveSecurityHelper
 
         $firewalls = $securityData['security']['firewalls'];
         if (!isset($firewalls[$firewallName])) {
-            throw new RuntimeCommandException("Firewall \"$firewallName\" does not exist");
+            throw new RuntimeCommandException(sprintf('Firewall "%s" does not exist', $firewallName));
         }
 
         if (!isset($firewalls[$firewallName]['guard'])
             || !isset($firewalls[$firewallName]['guard']['authenticators'])
-            || !$firewalls[$firewallName]['guard']['authenticators']) {
-            return;
+            || !$firewalls[$firewallName]['guard']['authenticators']
+            || isset($firewalls[$firewallName]['guard']['entry_point'])) {
+            return null;
         }
 
         $authenticators = $firewalls[$firewallName]['guard']['authenticators'];
-        $classNameDetails = $generator->createClassNameDetails(
-            $input->getArgument('authenticator-class'),
-            'Security\\'
-        );
-        $authenticators[] = $classNameDetails->getFullName();
+        $authenticators[] = $authenticatorClass;
 
-        $entryPoint = $io->choice('Which authenticator will be the entry point ?', $authenticators, current($authenticators));
-        $input->setOption('entry-point', $entryPoint);
+        return $io->choice(
+            'The entry point for your firewall is what should happen when an anonymous user tries to access
+a protected page. For example, a common "entry point" behavior is to redirect to the login page.
+The "entry point" behavior is controlled by the start() method on your authenticator.
+However, you will now have multiple authenticators. You need to choose which authenticator\'s
+start() method should be used as the entry point (the start() method on all other
+authenticators will be ignored, and can be blank.',
+            $authenticators,
+            current($authenticators)
+        );
     }
 }
