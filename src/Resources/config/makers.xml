@@ -10,6 +10,7 @@
             <service id="maker.maker.make_authenticator" class="Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator">
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.security_config_updater" />
+                <argument type="service" id="maker.generator" />
                 <tag name="maker.command" />
             </service>
 

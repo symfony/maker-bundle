@@ -4,8 +4,13 @@ security:
         in_memory: { memory: ~ }
 
     firewalls:
-        dev: ~
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
         main:
+            anonymous: true
             guard:
                 authenticators:
-                    - App\Security\AppCustomAuthenticator
+                    - App\Security\Authenticator
+        foo:
+            anonymous: true

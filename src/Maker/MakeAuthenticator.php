@@ -37,10 +37,13 @@ final class MakeAuthenticator extends AbstractMaker
 
     private $configUpdater;
 
-    public function __construct(FileManager $fileManager, SecurityConfigUpdater $configUpdater)
+    private $generator;
+
+    public function __construct(FileManager $fileManager, SecurityConfigUpdater $configUpdater, Generator $generator)
     {
         $this->fileManager = $fileManager;
         $this->configUpdater = $configUpdater;
+        $this->generator = $generator;
     }
 
     public static function getCommandName(): string
@@ -69,8 +72,12 @@ final class MakeAuthenticator extends AbstractMaker
         $securityData = $manipulator->getData();
 
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
+
         $command->addOption('firewall-name', null, InputOption::VALUE_OPTIONAL, '');
         $interactiveSecurityHelper->guessFirewallName($input, $io, $securityData);
+
+        $command->addOption('entry-point', null, InputOption::VALUE_OPTIONAL);
+        $interactiveSecurityHelper->guessEntryPoint($input, $io, $this->generator, $securityData);
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -93,6 +100,7 @@ final class MakeAuthenticator extends AbstractMaker
                 $newYaml = $this->configUpdater->updateForAuthenticator(
                     $this->fileManager->getFileContents($path),
                     $input->getOption('firewall-name'),
+                    $input->getOption('entry-point'),
                     $classNameDetails->getFullName()
                 );
                 $generator->dumpFile($path, $newYaml);
