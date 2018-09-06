@@ -814,14 +814,7 @@ class YamlSourceManipulator
             }
         }
 
-        /*
-        if ($newIndentation === $previousIndentation) {
-            $this->log(sprintf('Indentation unchanged: %d', $newIndentation));
-        } else {
-            $this->log(sprintf('Indentation changed to: %d', $newIndentation));
-        }
-        */
-
+        $this->log(sprintf('Calculating new indentation: changing from %d to %d', $this->indentationForDepths[$this->depth], $newIndentation), true);
         $this->indentationForDepths[$this->depth] = $newIndentation;
     }
 
@@ -850,12 +843,13 @@ class YamlSourceManipulator
             'key' => isset($this->currentPath[$this->depth]) ? $this->currentPath[$this->depth] : 'n/a',
             'depth' => $this->depth,
             'position' => $this->currentPosition,
+            'indentation' => $this->indentationForDepths[$this->depth],
         ];
 
         if ($includeContent) {
             $context['content'] = sprintf(
-                '%s...',
-                str_replace(["\r\n", "\n"], ['\r\n', '\n'], substr($this->contents, $this->currentPosition, 20))
+                '>%s<',
+                str_replace(["\r\n", "\n"], ['\r\n', '\n'], substr($this->contents, $this->currentPosition, 50))
             );
         }
 
