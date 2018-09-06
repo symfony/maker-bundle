@@ -338,6 +338,15 @@ final class MakerTestEnvironment
         MakerTestProcess::create('composer require phpunit browser-kit symfony/css-selector', $this->flexPath)
                         ->run();
 
+        // temporarily ignoring indirect deprecations - see #237
+        $replacements = [
+            [
+                'filename' => 'phpunit.xml.dist',
+                'find' => '</php>',
+                'replace' => '    <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak_vendors" />'."\n".'    </php>',
+            ],
+        ];
+
         MakerTestProcess::create('php bin/console cache:clear --no-warmup', $this->flexPath)
                         ->run();
     }
