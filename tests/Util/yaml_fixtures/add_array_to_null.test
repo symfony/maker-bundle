@@ -1,0 +1,29 @@
+security:
+    firewalls:
+        main: ~
+        other_firewall:
+            security: false
+===
+$data['security']['firewalls']['main'] = [
+    'anonymous' => true,
+    'guard' => [
+        'authenticators' => [
+            'some_key' => true,
+            'great_colors' => ['green', 'pink', 'orange'],
+        ],
+    ],
+];
+===
+security:
+    firewalls:
+        main:
+            anonymous: true
+            guard:
+                authenticators:
+                    some_key: true
+                    great_colors:
+                        - green
+                        - pink
+                        - orange
+        other_firewall:
+            security: false

@@ -130,7 +130,7 @@ class YamlSourceManipulator
         $this->arrayTypeForDepths[$this->depth] = $this->isHash($currentData) ? self::ARRAY_TYPE_HASH : self::ARRAY_TYPE_SEQUENCE;
 
         $this->log(sprintf(
-            'Array type: %s, format: %s ',
+            'Changing array type & format via updateData()',
             $this->arrayTypeForDepths[$this->depth],
             $this->arrayFormatForDepths[$this->depth]
         ));
@@ -333,12 +333,7 @@ class YamlSourceManipulator
                 // because we're inside a multi-line array, put this item
                 // onto the *next* line & indent it
 
-                // But, if the *value* is an array, then ITS children will
-                // also need to be indented artificially by the same amount
-                $newYamlValue = str_replace("\n", "\n".$this->getCurrentIndentation(), $newYamlValue);
-
-                // now add the new line & indentation to the top-level
-                $newYamlValue = "\n".$this->getCurrentIndentation().$newYamlValue;
+                $newYamlValue = "\n".$this->indentMultilineYamlArray($newYamlValue);
             } else {
                 if ($firstItemInArray) {
                     // avoid the starting "," if first item in array
@@ -454,13 +449,23 @@ class YamlSourceManipulator
 
         $endValuePosition = $this->findEndPositionOfValue($originalVal);
 
-        // empty space between key & value
-        $newDataString = ' '.$this->convertToYaml($value);
+        $newYamlValue = $this->convertToYaml($value);
+        if (!is_array($originalVal) && is_array($value)) {
+            // we're converting from a scalar to a (multiline) array
+            // this means we need to break onto the next line
+
+            // increase the indentation
+            $this->manuallyIncrementIndentation();
+            $newYamlValue = "\n".$this->indentMultilineYamlArray($newYamlValue);
+        } else {
+            // empty space between key & value
+            $newYamlValue = ' '.$newYamlValue;
+        }
         $newContents = substr($this->contents, 0, $this->currentPosition)
-            .$newDataString
+            .$newYamlValue
             .substr($this->contents, $endValuePosition);
 
-        $newPosition = $this->currentPosition + \strlen($newDataString);
+        $newPosition = $this->currentPosition + \strlen($newYamlValue);
 
         $newData = $this->currentData;
         $newData = $this->setValueAtCurrentPath($value, $newData);
@@ -844,6 +849,8 @@ class YamlSourceManipulator
             'depth' => $this->depth,
             'position' => $this->currentPosition,
             'indentation' => $this->indentationForDepths[$this->depth],
+            'type' => $this->arrayTypeForDepths[$this->depth],
+            'format' => $this->arrayFormatForDepths[$this->depth],
         ];
 
         if ($includeContent) {
@@ -1122,5 +1129,22 @@ class YamlSourceManipulator
     private function isCharLineBreak(string $char): bool
     {
         return "\n" === $char || "\r" === $char;
+    }
+
+    /**
+     * Takes an unindented multi-line YAML string and indents it so
+     * it can be inserted into the current position.
+     *
+     * Usually an empty line needs to be prepended to this result before
+     * adding to the content.
+     */
+    private function indentMultilineYamlArray(string $yaml): string
+    {
+        // But, if the *value* is an array, then ITS children will
+        // also need to be indented artificially by the same amount
+        $yaml = str_replace("\n", "\n".$this->getCurrentIndentation(), $yaml);
+
+        // now indent this level
+        return $this->getCurrentIndentation().$yaml;
     }
 }
