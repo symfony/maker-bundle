@@ -83,7 +83,8 @@ final class MakerTestEnvironment
                 $this->fs->mirror($this->flexPath, $this->path);
 
                 // install any missing dependencies
-                if ($dependencies = $this->testDetails->getDependencies()) {
+                $dependencies = $this->determineMissingDependencies();
+                if ($dependencies) {
                     MakerTestProcess::create(sprintf('composer require %s', implode(' ', $dependencies)), $this->path)
                         ->run();
                 }
@@ -380,5 +381,37 @@ final class MakerTestEnvironment
 
             file_put_contents($path, str_replace($replacement['find'], $replacement['replace'], $contents));
         }
+    }
+
+    /**
+     * Executes the DependencyBuilder for the Maker command inside the
+     * actual project, so we know exactly what dependencies we need or
+     * don't need.
+     */
+    private function determineMissingDependencies(): array
+    {
+        $depBuilder = $this->testDetails->getDependencyBuilder();
+        file_put_contents($this->path.'/dep_builder', serialize($depBuilder));
+        file_put_contents($this->path.'/dep_runner.php', '<?php
+
+require __DIR__."/vendor/autoload.php";
+$depBuilder = unserialize(file_get_contents("dep_builder"));
+$missingDependencies = array_merge(
+    $depBuilder->getMissingDependencies(),
+    $depBuilder->getMissingDevDependencies()
+);
+echo json_encode($missingDependencies);
+        ');
+
+        $process = MakerTestProcess::create('php dep_runner.php', $this->path)->run();
+        $data = json_decode($process->getOutput(), true);
+        if (null === $data) {
+            throw new \Exception('Could not determine dependencies');
+        }
+
+        unlink($this->path.'/dep_builder');
+        unlink($this->path.'/dep_runner.php');
+
+        return array_merge($data, $this->testDetails->getExtraDependencies());
     }
 }
