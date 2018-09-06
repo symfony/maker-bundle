@@ -335,6 +335,11 @@ final class MakerTestDetails
         );
     }
 
+    public function getExtraDependencies()
+    {
+        return $this->extraDependencies;
+    }
+
     public function getDependencyBuilder(): DependencyBuilder
     {
         $depBuilder = new DependencyBuilder();

@@ -412,6 +412,6 @@ echo json_encode($missingDependencies);
         unlink($this->path.'/dep_builder');
         unlink($this->path.'/dep_runner.php');
 
-        return $data;
+        return array_merge($data, $this->testDetails->getExtraDependencies());
     }
 }
