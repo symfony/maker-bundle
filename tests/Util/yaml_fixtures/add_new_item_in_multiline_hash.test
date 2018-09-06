@@ -1,0 +1,18 @@
+security:
+    firewalls:
+        main:
+            anonymous: true
+            guard:
+                authenticators:
+                    - App\Security\Test
+===
+$data['security']['firewalls']['main']['guard']['authenticators'][] = 'App\Security\Test2';
+===
+security:
+    firewalls:
+        main:
+            anonymous: true
+            guard:
+                authenticators:
+                    - App\Security\Test
+                    - App\Security\Test2

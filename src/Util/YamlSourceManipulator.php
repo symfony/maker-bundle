@@ -783,6 +783,19 @@ class YamlSourceManipulator
             return;
         }
 
+        /*
+         * A bit of a workaround. At times, this function will be called when the
+         * position is at the beginning of the line: so, one character *after*
+         * a line break. In that case, if there are a group of spaces at the
+         * beginning of this first line, they *should* be used to calculate the new
+         * indentation. To force this, if we detect this situation, we move one
+         * character backwards, so that the first line is considered a valid line
+         * to look for indentation.
+         */
+        if ($this->isCharLineBreak(substr($this->contents, $originalPosition - 1, 1))) {
+            $originalPosition--;
+        }
+
         // look for empty lines and track the current indentation
         $advancedContent = substr($this->contents, $originalPosition, $newPosition - $originalPosition);
         $previousIndentation = $this->indentationForDepths[$this->depth];
@@ -872,7 +885,11 @@ class YamlSourceManipulator
 
             // get the next char & advance immediately
             $nextCharacter = substr($this->contents, $this->currentPosition, 1);
-            $this->advanceCurrentPosition($this->currentPosition + 1);
+            // advance, but without advanceCurrentPosition()
+            // because we are either moving along one line until [ {
+            // or we are finding a line break and stopping: indentation
+            // should not be calculated
+            $this->currentPosition++;
 
             if ($this->isCharLineBreak($nextCharacter)) {
                 return self::ARRAY_FORMAT_MULTILINE;
