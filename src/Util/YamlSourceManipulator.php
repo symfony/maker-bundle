@@ -130,7 +130,7 @@ class YamlSourceManipulator
         $this->arrayTypeForDepths[$this->depth] = $this->isHash($currentData) ? self::ARRAY_TYPE_HASH : self::ARRAY_TYPE_SEQUENCE;
 
         $this->log(sprintf(
-            'Array type: %s, format: %s ',
+            'Changing array type & format via updateData()',
             $this->arrayTypeForDepths[$this->depth],
             $this->arrayFormatForDepths[$this->depth]
         ));
@@ -333,12 +333,7 @@ class YamlSourceManipulator
                 // because we're inside a multi-line array, put this item
                 // onto the *next* line & indent it
 
-                // But, if the *value* is an array, then ITS children will
-                // also need to be indented artificially by the same amount
-                $newYamlValue = str_replace("\n", "\n".$this->getCurrentIndentation(), $newYamlValue);
-
-                // now add the new line & indentation to the top-level
-                $newYamlValue = "\n".$this->getCurrentIndentation().$newYamlValue;
+                $newYamlValue = "\n".$this->indentMultilineYamlArray($newYamlValue);
             } else {
                 if ($firstItemInArray) {
                     // avoid the starting "," if first item in array
@@ -454,13 +449,23 @@ class YamlSourceManipulator
 
         $endValuePosition = $this->findEndPositionOfValue($originalVal);
 
-        // empty space between key & value
-        $newDataString = ' '.$this->convertToYaml($value);
+        $newYamlValue = $this->convertToYaml($value);
+        if (!is_array($originalVal) && is_array($value)) {
+            // we're converting from a scalar to a (multiline) array
+            // this means we need to break onto the next line
+
+            // increase the indentation
+            $this->manuallyIncrementIndentation();
+            $newYamlValue = "\n".$this->indentMultilineYamlArray($newYamlValue);
+        } else {
+            // empty space between key & value
+            $newYamlValue = ' '.$newYamlValue;
+        }
         $newContents = substr($this->contents, 0, $this->currentPosition)
-            .$newDataString
+            .$newYamlValue
             .substr($this->contents, $endValuePosition);
 
-        $newPosition = $this->currentPosition + \strlen($newDataString);
+        $newPosition = $this->currentPosition + \strlen($newYamlValue);
 
         $newData = $this->currentData;
         $newData = $this->setValueAtCurrentPath($value, $newData);
@@ -783,6 +788,19 @@ class YamlSourceManipulator
             return;
         }
 
+        /*
+         * A bit of a workaround. At times, this function will be called when the
+         * position is at the beginning of the line: so, one character *after*
+         * a line break. In that case, if there are a group of spaces at the
+         * beginning of this first line, they *should* be used to calculate the new
+         * indentation. To force this, if we detect this situation, we move one
+         * character backwards, so that the first line is considered a valid line
+         * to look for indentation.
+         */
+        if ($this->isCharLineBreak(substr($this->contents, $originalPosition - 1, 1))) {
+            $originalPosition--;
+        }
+
         // look for empty lines and track the current indentation
         $advancedContent = substr($this->contents, $originalPosition, $newPosition - $originalPosition);
         $previousIndentation = $this->indentationForDepths[$this->depth];
@@ -801,14 +819,7 @@ class YamlSourceManipulator
             }
         }
 
-        /*
-        if ($newIndentation === $previousIndentation) {
-            $this->log(sprintf('Indentation unchanged: %d', $newIndentation));
-        } else {
-            $this->log(sprintf('Indentation changed to: %d', $newIndentation));
-        }
-        */
-
+        $this->log(sprintf('Calculating new indentation: changing from %d to %d', $this->indentationForDepths[$this->depth], $newIndentation), true);
         $this->indentationForDepths[$this->depth] = $newIndentation;
     }
 
@@ -837,12 +848,15 @@ class YamlSourceManipulator
             'key' => isset($this->currentPath[$this->depth]) ? $this->currentPath[$this->depth] : 'n/a',
             'depth' => $this->depth,
             'position' => $this->currentPosition,
+            'indentation' => $this->indentationForDepths[$this->depth],
+            'type' => $this->arrayTypeForDepths[$this->depth],
+            'format' => $this->arrayFormatForDepths[$this->depth],
         ];
 
         if ($includeContent) {
             $context['content'] = sprintf(
-                '%s...',
-                str_replace(["\r\n", "\n"], ['\r\n', '\n'], substr($this->contents, $this->currentPosition, 20))
+                '>%s<',
+                str_replace(["\r\n", "\n"], ['\r\n', '\n'], substr($this->contents, $this->currentPosition, 50))
             );
         }
 
@@ -872,7 +886,11 @@ class YamlSourceManipulator
 
             // get the next char & advance immediately
             $nextCharacter = substr($this->contents, $this->currentPosition, 1);
-            $this->advanceCurrentPosition($this->currentPosition + 1);
+            // advance, but without advanceCurrentPosition()
+            // because we are either moving along one line until [ {
+            // or we are finding a line break and stopping: indentation
+            // should not be calculated
+            $this->currentPosition++;
 
             if ($this->isCharLineBreak($nextCharacter)) {
                 return self::ARRAY_FORMAT_MULTILINE;
@@ -1111,5 +1129,22 @@ class YamlSourceManipulator
     private function isCharLineBreak(string $char): bool
     {
         return "\n" === $char || "\r" === $char;
+    }
+
+    /**
+     * Takes an unindented multi-line YAML string and indents it so
+     * it can be inserted into the current position.
+     *
+     * Usually an empty line needs to be prepended to this result before
+     * adding to the content.
+     */
+    private function indentMultilineYamlArray(string $yaml): string
+    {
+        // But, if the *value* is an array, then ITS children will
+        // also need to be indented artificially by the same amount
+        $yaml = str_replace("\n", "\n".$this->getCurrentIndentation(), $yaml);
+
+        // now indent this level
+        return $this->getCurrentIndentation().$yaml;
     }
 }

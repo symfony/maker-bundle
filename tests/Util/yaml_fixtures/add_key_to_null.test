@@ -1,0 +1,10 @@
+security:
+    firewalls:
+        main: ~
+===
+$data['security']['firewalls']['main'] = ['anonymous' => true];
+===
+security:
+    firewalls:
+        main:
+            anonymous: true
