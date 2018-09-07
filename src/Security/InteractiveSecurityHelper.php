@@ -19,7 +19,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 final class InteractiveSecurityHelper
 {
-    public function guessFirewallName(SymfonyStyle $io, array $securityData)
+    public function guessFirewallName(SymfonyStyle $io, array $securityData): string
     {
         $realFirewalls = array_filter(
             $securityData['security']['firewalls'] ?? [],
