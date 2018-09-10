@@ -27,6 +27,7 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('root_namespace')->defaultValue('App')->end()
+                ->scalarNode('root_entity_directory')->defaultValue('src/Entity/')->end()
             ->end()
         ;
 

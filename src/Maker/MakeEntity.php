@@ -47,11 +47,13 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     private $fileManager;
     private $doctrineHelper;
     private $generator;
+    private $rootEntityDirectory;
 
-    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null)
+    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, string $rootEntityDirectory, Generator $generator = null)
     {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
+        $this->rootEntityDirectory = $rootEntityDirectory;
         // $projectDirectory is unused, argument kept for BC
 
         if (null === $generator) {
@@ -75,6 +77,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             ->addOption('api-resource', 'a', InputOption::VALUE_NONE, 'Mark this class as an API Platform resource (expose a CRUD API for it)')
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
+            ->addOption('rootdir', null, InputOption::VALUE_OPTIONAL, 'Allow you to define a custom root directory, instead of the one by default. Can also be configured with "root_entity_directory" from the bundle conf', $this->rootEntityDirectory)
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
         ;
 
@@ -99,7 +102,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             return;
         }
 
-        $entityFinder = $this->fileManager->createFinder('src/Entity/')
+        $entityFinder = $this->fileManager->createFinder($input->getOption('rootdir'))
             // remove if/when we allow entities in subdirectories
             ->depth('<1')
             ->name('*.php');
@@ -114,7 +117,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         $argument = $command->getDefinition()->getArgument('name');
-        $question = $this->createEntityClassQuestion($argument->getDescription());
+        $question = $this->createEntityClassQuestion($argument->getDescription(), $input);
         $value = $io->askQuestion($question);
 
         $input->setArgument('name', $value);
@@ -182,7 +185,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $isFirstField = true;
         while (true) {
-            $newField = $this->askForNextField($io, $currentFields, $entityClassDetails->getFullName(), $isFirstField);
+            $newField = $this->askForNextField($input, $io, $currentFields, $entityClassDetails->getFullName(), $isFirstField);
             $isFirstField = false;
 
             if (null === $newField) {
@@ -284,7 +287,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         ORMDependencyBuilder::buildDependencies($dependencies);
     }
 
-    private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField)
+    private function askForNextField(InputInterface $input, ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField)
     {
         $io->writeln('');
 
@@ -352,7 +355,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         if ('relation' === $type || \in_array($type, EntityRelation::getValidRelationTypes())) {
-            return $this->askRelationDetails($io, $entityClass, $type, $fieldName);
+            return $this->askRelationDetails($input, $io, $entityClass, $type, $fieldName);
         }
 
         // this is a normal field
@@ -453,9 +456,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $printSection($allTypes);
     }
 
-    private function createEntityClassQuestion(string $questionText): Question
+    private function createEntityClassQuestion(string $questionText, InputInterface $input): Question
     {
-        $entityFinder = $this->fileManager->createFinder('src/Entity/')
+        $entityFinder = $this->fileManager->createFinder($input->getOption('rootdir'))
             // remove if/when we allow entities in subdirectories
             ->depth('<1')
             ->name('*.php');
@@ -476,12 +479,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $question;
     }
 
-    private function askRelationDetails(ConsoleStyle $io, string $generatedEntityClass, string $type, string $newFieldName)
+    private function askRelationDetails(InputInterface $input, ConsoleStyle $io, string $generatedEntityClass, string $type, string $newFieldName)
     {
         // ask the targetEntity
         $targetEntityClass = null;
         while (null === $targetEntityClass) {
-            $question = $this->createEntityClassQuestion('What class should this entity be related to?');
+            $question = $this->createEntityClassQuestion('What class should this entity be related to?', $input);
 
             $targetEntityClass = $io->askQuestion($question);
 

@@ -37,6 +37,11 @@ class MakerExtension extends Extension
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
 
+        $rootEntityDirectory = trim($config['root_entity_directory']);
+
+        $makeEntityCommandDefinition = $container->getDefinition('maker.maker.make_entity');
+        $makeEntityCommandDefinition->replaceArgument(3, $rootEntityDirectory);
+
         $rootNamespace = trim($config['root_namespace'], '\\');
 
         $makeCommandDefinition = $container->getDefinition('maker.generator');
