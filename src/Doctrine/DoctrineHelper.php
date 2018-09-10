@@ -177,4 +177,13 @@ final class DoctrineHelper
 
         return null;
     }
+
+    public function isClassAMappedEntity(string $className): bool
+    {
+        if (!$this->isDoctrineInstalled()) {
+            return false;
+        }
+
+        return (bool) $this->getMetadata($className);
+    }
 }

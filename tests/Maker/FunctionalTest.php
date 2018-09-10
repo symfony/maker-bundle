@@ -289,6 +289,8 @@ class FunctionalTest extends MakerTestCase
             MakerTestDetails::createTest(
                 $this->getMakerInstance(MakeAuthenticator::class),
                 [
+                    // authenticator type => empty-auth
+                    0,
                     // class name
                     'AppCustomAuthenticator',
                 ]
@@ -315,6 +317,8 @@ class FunctionalTest extends MakerTestCase
             MakerTestDetails::createTest(
                 $this->getMakerInstance(MakeAuthenticator::class),
                 [
+                    // authenticator type => empty-auth
+                    0,
                     // class name
                     'AppCustomAuthenticator',
                     // firewall name
@@ -340,6 +344,8 @@ class FunctionalTest extends MakerTestCase
             MakerTestDetails::createTest(
                 $this->getMakerInstance(MakeAuthenticator::class),
                 [
+                    // authenticator type => empty-auth
+                    0,
                     // class name
                     'AppCustomAuthenticator',
                     // firewall name
@@ -365,6 +371,8 @@ class FunctionalTest extends MakerTestCase
             MakerTestDetails::createTest(
                 $this->getMakerInstance(MakeAuthenticator::class),
                 [
+                    // authenticator type => empty-auth
+                    0,
                     // class name
                     'AppCustomAuthenticator',
                     // firewall name
@@ -386,6 +394,23 @@ class FunctionalTest extends MakerTestCase
                         );
                     }
                 ),
+        ];
+
+        yield 'auth_login_form' => [
+            MakerTestDetails::createTest(
+                $this->getMakerInstance(MakeAuthenticator::class),
+                [
+                    // authenticator type => login-form
+                    1,
+                    // class name
+                    'AppCustomAuthenticator',
+                    // controller name
+                    'SecurityController'
+                ]
+            )
+                ->addExtraDependencies('doctrine')
+                ->addExtraDependencies('security')
+                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginForm'),
         ];
 
         yield 'user_security_entity_with_password' => [MakerTestDetails::createTest(
@@ -526,15 +551,6 @@ class FunctionalTest extends MakerTestCase
                 $this->assertContains('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
-        ];
-
-        yield 'login_form' => [
-            MakerTestDetails::createTest(
-                $this->getMakerInstance(MakeLoginForm::class),
-                []
-            )
-                ->addExtraDependencies('security')
-                ->addExtraDependencies('twig'),
         ];
     }
 

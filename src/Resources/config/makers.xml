@@ -11,6 +11,7 @@
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.security_config_updater" />
                 <argument type="service" id="maker.generator" />
+                <argument type="service" id="maker.doctrine_helper" />
                 <tag name="maker.command" />
             </service>
 
@@ -46,12 +47,6 @@
             </service>
 
             <service id="maker.maker.make_functional_test" class="Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest">
-                <tag name="maker.command" />
-            </service>
-
-            <service id="maker.maker.make_login_form" class="Symfony\Bundle\MakerBundle\Maker\MakeLoginForm">
-                <argument type="service" id="maker.file_manager" />
-                <argument type="service" id="maker.security_config_updater" />
                 <tag name="maker.command" />
             </service>
 
