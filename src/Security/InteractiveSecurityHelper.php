@@ -12,14 +12,16 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @internal
  */
 final class InteractiveSecurityHelper
 {
-    public function guessFirewallName(SymfonyStyle $io, array $securityData): string
+    public static function guessFirewallName(SymfonyStyle $io, array $securityData): string
     {
         $realFirewalls = array_filter(
             $securityData['security']['firewalls'] ?? [],
@@ -39,7 +41,7 @@ final class InteractiveSecurityHelper
         return $io->choice('Which firewall do you want to update ?', array_keys($realFirewalls), key($realFirewalls));
     }
 
-    public function guessEntryPoint(SymfonyStyle $io, array $securityData, string $authenticatorClass, string $firewallName)
+    public static function guessEntryPoint(SymfonyStyle $io, array $securityData, string $authenticatorClass, string $firewallName)
     {
         if (!isset($securityData['security'])) {
             $securityData['security'] = [];
@@ -74,5 +76,27 @@ authenticators will be ignored, and can be blank.',
             $authenticators,
             current($authenticators)
         );
+    }
+
+    public static function guessUserClass(SymfonyStyle $io, array $securityData): string
+    {
+        if (1 === \count($securityData['security']['providers']) && isset(current($securityData['security']['providers'])['entity'])) {
+            $entityProvider = current($securityData['security']['providers']);
+            $userClass = $entityProvider['entity']['class'];
+        } else {
+            $userClass = $io->ask(
+                'Enter the User class you want to authenticate (e.g. <fg=yellow>App\\Entity\\User</>)
+ (It has to be handled by one of the firewall\'s providers)',
+                class_exists('App\\Entity\\User') && isset(class_implements('App\\Entity\\User')[UserInterface::class]) ? 'App\\Entity\\User'
+                    : class_exists('App\\Security\\User') && isset(class_implements('App\\Security\\User')[UserInterface::class]) ? 'App\\Security\\User' : null,
+                [Validator::class, 'classExists']
+            );
+
+            if (!isset(class_implements($userClass)[UserInterface::class])) {
+                throw new RuntimeCommandException(sprintf('The class "%s" doesn\'t implement "%s"', $userClass, UserInterface::class));
+            }
+        }
+
+        return $userClass;
     }
 }

@@ -217,6 +217,12 @@ final class ClassSourceManipulator
         $this->addMethod($methodBuilder->getNode());
     }
 
+    public function addMethodBody(Builder\Method $methodBuilder, string $methodBody)
+    {
+        $nodes = $this->parser->parse($methodBody);
+        $methodBuilder->addStmts($nodes);
+    }
+
     public function createMethodBuilder(string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = []): Builder\Method
     {
         $methodNodeBuilder = (new Builder\Method($methodName))
@@ -662,7 +668,7 @@ final class ClassSourceManipulator
      *
      * @return string The alias to use when referencing this class
      */
-    private function addUseStatementIfNecessary(string $class): string
+    public function addUseStatementIfNecessary(string $class): string
     {
         $shortClassName = Str::getShortClassName($class);
         if ($this->isInSameNamespace($class)) {
@@ -771,6 +777,7 @@ final class ClassSourceManipulator
     {
         $this->sourceCode = $sourceCode;
         $this->oldStmts = $this->parser->parse($sourceCode);
+        dump($this->oldStmts);
         $this->oldTokens = $this->lexer->getTokens();
 
         $traverser = new NodeTraverser();

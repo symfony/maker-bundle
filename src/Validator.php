@@ -184,4 +184,15 @@ final class Validator
 
         return $className;
     }
+
+    public static function validateClassDoesNotExist($className)
+    {
+        self::notBlank($className);
+
+        if (class_exists($className)) {
+            throw new RuntimeCommandException(sprintf('Class "%s" already exists', $className));
+        }
+
+        return $className;
+    }
 }

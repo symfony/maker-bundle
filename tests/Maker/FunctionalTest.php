@@ -291,7 +291,7 @@ class FunctionalTest extends MakerTestCase
                 [
                     // authenticator type => empty-auth
                     0,
-                    // class name
+                    // authenticator class name
                     'AppCustomAuthenticator',
                 ]
             )
