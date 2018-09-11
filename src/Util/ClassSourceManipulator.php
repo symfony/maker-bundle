@@ -777,7 +777,6 @@ final class ClassSourceManipulator
     {
         $this->sourceCode = $sourceCode;
         $this->oldStmts = $this->parser->parse($sourceCode);
-        dump($this->oldStmts);
         $this->oldTokens = $this->lexer->getTokens();
 
         $traverser = new NodeTraverser();

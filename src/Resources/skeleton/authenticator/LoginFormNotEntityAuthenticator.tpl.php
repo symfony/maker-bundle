@@ -59,7 +59,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
             throw new InvalidCsrfTokenException();
         }
 
-        return $userProvider->loadUserByUsername($credentials['email']);A
+        return $userProvider->loadUserByUsername($credentials['email']);
     }
 
     public function checkCredentials($credentials, UserInterface $user)

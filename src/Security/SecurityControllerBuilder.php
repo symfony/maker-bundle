@@ -52,4 +52,16 @@ CODE
         $manipulator->addUseStatementIfNecessary('Symfony\\Component\\Routing\\Annotation\\Route');
         $manipulator->addUseStatementIfNecessary('Symfony\\Component\\Security\\Http\\Authentication\\AuthenticationUtils');
     }
+
+    public function addLogoutMethod(ClassSourceManipulator $manipulator)
+    {
+        $loginMethodBuilder = $manipulator->createMethodBuilder('logout', null, false, ['@Route("/logout", name="app_logout")']);
+
+        $manipulator->addMethodBody($loginMethodBuilder, <<<'CODE'
+<?php
+throw new \Exception('will be intercepted before getting here');
+CODE
+        );
+        $manipulator->addMethodBuilder($loginMethodBuilder);
+    }
 }

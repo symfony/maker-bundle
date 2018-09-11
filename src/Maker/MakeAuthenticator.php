@@ -105,6 +105,7 @@ final class MakeAuthenticator extends AbstractMaker
         $questionAuthenticatorClass->setValidator(
             function ($answer) {
                 Validator::notBlank($answer);
+
                 return Validator::validateClassDoesNotExist(
                     $this->generator->createClassNameDetails(
                         $answer,
@@ -187,6 +188,12 @@ final class MakeAuthenticator extends AbstractMaker
                 );
                 $securityControllerBuilder = new SecurityControllerBuilder();
                 $securityControllerBuilder->addLoginMethod($manipulator);
+
+                if (method_exists($controllerClassNameDetails->getFullName(), 'logout')) {
+                    throw new RuntimeCommandException(sprintf('Method "logout" already exists on class %s', $controllerClassNameDetails->getFullName()));
+                }
+                $securityControllerBuilder->addLogoutMethod($manipulator);
+
                 $this->generator->dumpFile($controllerPath, $manipulator->getSourceCode());
             } else {
                 // otherwise, create security controller
