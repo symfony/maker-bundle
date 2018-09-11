@@ -34,12 +34,7 @@ final class SecurityConfigUpdater
     {
         $this->manipulator = new YamlSourceManipulator($yamlSource);
 
-        // normalize the top level, just in case
-        if (!isset($this->manipulator->getData()['security'])) {
-            $newData = $this->manipulator->getData();
-            $newData['security'] = [];
-            $this->manipulator->setData($newData);
-        }
+        $this->normalizeSecurityYamlFile();
 
         $this->updateProviders($userConfig, $userClass);
 
@@ -51,6 +46,54 @@ final class SecurityConfigUpdater
         $this->manipulator = null;
 
         return $contents;
+    }
+
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass): string
+    {
+        $this->manipulator = new YamlSourceManipulator($yamlSource);
+
+        $this->normalizeSecurityYamlFile();
+
+        $newData = $this->manipulator->getData();
+
+        if (!isset($newData['security']['firewalls'])) {
+            $newData['security']['firewalls'] = [];
+        }
+
+        if (!isset($newData['security']['firewalls'][$firewallName])) {
+            $newData['security']['firewalls'][$firewallName] = ['anonymous' => true];
+        }
+
+        $firewall = $newData['security']['firewalls'][$firewallName];
+
+        if (!isset($firewall['guard'])) {
+            $firewall['guard'] = [];
+        }
+
+        if (!isset($firewall['guard']['authenticators'])) {
+            $firewall['guard']['authenticators'] = [];
+        }
+
+        $firewall['guard']['authenticators'][] = $authenticatorClass;
+
+        if (\count($firewall['guard']['authenticators']) > 1) {
+            $firewall['guard']['entry_point'] = $chosenEntryPoint ?? current($firewall['guard']['authenticators']);
+        }
+
+        $newData['security']['firewalls'][$firewallName] = $firewall;
+        $this->manipulator->setData($newData);
+        $contents = $this->manipulator->getContents();
+
+        return $contents;
+    }
+
+    private function normalizeSecurityYamlFile()
+    {
+        if (!isset($this->manipulator->getData()['security'])) {
+            $newData = $this->manipulator->getData();
+            $newData['security'] = [];
+            $this->manipulator->setData($newData);
+        }
     }
 
     private function updateProviders(UserClassConfiguration $userConfig, string $userClass)

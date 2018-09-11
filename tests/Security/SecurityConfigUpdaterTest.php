@@ -67,4 +67,55 @@ class SecurityConfigUpdaterTest extends TestCase
             'empty_security.yaml'
         ];
     }
+
+    /**
+     * @dataProvider getAuthenticatorTests
+     */
+    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename)
+    {
+        $updater = new SecurityConfigUpdater();
+        $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
+        $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator');
+        $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_authenticator/'.$expectedSourceFilename);
+
+        $this->assertSame($expectedSource, $actualSource);
+    }
+
+    public function getAuthenticatorTests()
+    {
+        yield 'empty_source' => [
+            'main',
+            null,
+            'empty_source.yaml',
+            'empty_security.yaml'
+        ];
+
+        yield 'simple_security' => [
+            'main',
+            null,
+            'simple_security_source.yaml',
+            'simple_security.yaml'
+        ];
+
+        yield 'simple_security_with_firewalls' => [
+            'main',
+            null,
+            'simple_security_with_firewalls.yaml',
+            'simple_security_with_firewalls.yaml'
+        ];
+
+        yield 'simple_security_with_firewalls' => [
+            'main',
+            null,
+            'simple_security_with_firewalls.yaml',
+            'simple_security_with_firewalls.yaml'
+        ];
+
+        yield 'simple_security_with_firewalls_and_authenticator' => [
+            'main',
+            'App\\Security\\AppCustomAuthenticator',
+            'simple_security_with_firewalls_and_authenticator.yaml',
+            'simple_security_with_firewalls_and_authenticator.yaml'
+        ];
+    }
 }
