@@ -2,12 +2,6 @@
 
 {% block title %}Login!{% endblock %}
 
-{% block stylesheets %}
-{{ parent() }}
-
-<link rel="stylesheet" href="{{ asset('css/login.css') }}">
-{% endblock %}
-
 {% block body %}
 <form class="form-signin" method="post">
     {% if error %}

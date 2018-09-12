@@ -410,7 +410,10 @@ class FunctionalTest extends MakerTestCase
             )
                 ->addExtraDependencies('doctrine')
                 ->addExtraDependencies('security')
+                ->addExtraDependencies('twig')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntity')
+                ->configureDatabase()
+                ->updateSchemaAfterCommand()
                 ->assert(
                     function (string $output, string $directory) {
                         $this->assertContains('Success', $output);
@@ -438,6 +441,8 @@ class FunctionalTest extends MakerTestCase
                 ]
             )
                 ->addExtraDependencies('security')
+                ->addExtraDependencies('twig')
+                ->addExtraDependencies('sensio/framework-extra-bundle annot')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserNotEntity')
                 ->assert(
                     function (string $output) {
@@ -460,7 +465,10 @@ class FunctionalTest extends MakerTestCase
             )
                 ->addExtraDependencies('doctrine')
                 ->addExtraDependencies('security')
+                ->addExtraDependencies('twig')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormExistingController')
+                ->configureDatabase()
+                ->updateSchemaAfterCommand()
                 ->assert(
                     function (string $output) {
                         $this->assertContains('Success', $output);
