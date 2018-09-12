@@ -120,4 +120,37 @@ class InteractiveSecurityHelperTest extends TestCase
             'main',
         ];
     }
+
+    /**
+     * @dataProvider getUserClassTests
+     */
+    public function testGuessUserClass(array $securityData, string $expectedUserClass, bool $userClassAutomaticallyGuessed)
+    {
+        /** @var SymfonyStyle|\PHPUnit_Framework_MockObject_MockObject $io */
+        $io = $this->createMock(SymfonyStyle::class);
+        $io->expects($this->exactly(true === $userClassAutomaticallyGuessed ? 0 : 1))
+            ->method('ask')
+            ->willReturn($expectedUserClass);
+
+        $helper = new InteractiveSecurityHelper();
+        $this->assertEquals(
+            $expectedUserClass,
+            $helper->guessUserClass($io, $securityData)
+        );
+    }
+
+    public function getUserClassTests()
+    {
+        yield 'user_from_provider' => [
+            ['security' => ['providers' => ['app_provider' => ['entity' => ['class' => 'App\\Entity\\User']]]]],
+            'App\\Entity\\User',
+            true,
+        ];
+
+        yield 'user_asked_user' => [
+            ['security' => ['providers' => []]],
+            'App\\Entity\\User',
+            false,
+        ];
+    }
 }

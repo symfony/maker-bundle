@@ -63,5 +63,6 @@ throw new \Exception('will be intercepted before getting here');
 CODE
         );
         $manipulator->addMethodBuilder($loginMethodBuilder);
+        $manipulator->addUseStatementIfNecessary('Symfony\\Component\\Routing\\Annotation\\Route');
     }
 }

@@ -20,7 +20,9 @@ class SecurityControllerTest extends WebTestCase
         $form = $crawler->filter('form')->form();
         $client->submit($form);
 
+        $this->assertEquals(302, $client->getResponse()->getStatusCode());
+        $client->followRedirect();
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $this->assertContains($client->getResponse()->getContent(), 'Invalid credentials');
+        $this->assertContains('Username could not be found.', $client->getResponse()->getContent());
     }
 }
