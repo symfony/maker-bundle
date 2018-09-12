@@ -2,7 +2,7 @@
 
 namespace <?= $namespace ?>;
 
-use App\Entity\User;
+use <?= $user_fully_qualified_class_name ?>;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -62,7 +62,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
             throw new InvalidCsrfTokenException();
         }
 
-        return $this->entityManager->getRepository(User::class)->findOneBy(['email' => $credentials['email']]);
+        return $this->entityManager->getRepository(<?= $user_class_name ?>::class)->findOneBy(['email' => $credentials['email']]);
     }
 
     public function checkCredentials($credentials, UserInterface $user)

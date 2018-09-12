@@ -89,12 +89,8 @@ authenticators will be ignored, and can be blank.',
  (It has to be handled by one of the firewall\'s providers)',
                 class_exists('App\\Entity\\User') && isset(class_implements('App\\Entity\\User')[UserInterface::class]) ? 'App\\Entity\\User'
                     : class_exists('App\\Security\\User') && isset(class_implements('App\\Security\\User')[UserInterface::class]) ? 'App\\Security\\User' : null,
-                [Validator::class, 'classExists']
+                [Validator::class, 'classIsUserInterface']
             );
-
-            if (!isset(class_implements($userClass)[UserInterface::class])) {
-                throw new RuntimeCommandException(sprintf('The class "%s" doesn\'t implement "%s"', $userClass, UserInterface::class));
-            }
         }
 
         return $userClass;

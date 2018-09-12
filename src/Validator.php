@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -185,7 +186,7 @@ final class Validator
         return $className;
     }
 
-    public static function validateClassDoesNotExist($className)
+    public static function classDoesNotExist($className)
     {
         self::notBlank($className);
 
@@ -194,5 +195,16 @@ final class Validator
         }
 
         return $className;
+    }
+
+    public static function classIsUserInterface($userClassName)
+    {
+        self::classExists($userClassName);
+
+        if (!isset(class_implements($userClassName)[UserInterface::class])) {
+            throw new RuntimeCommandException(sprintf('The class "%s" doesn\'t implement "%s"', $userClassName, UserInterface::class));
+        }
+
+        return $userClassName;
     }
 }

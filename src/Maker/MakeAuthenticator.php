@@ -106,7 +106,7 @@ final class MakeAuthenticator extends AbstractMaker
             function ($answer) {
                 Validator::notBlank($answer);
 
-                return Validator::validateClassDoesNotExist(
+                return Validator::classDoesNotExist(
                     $this->generator->createClassNameDetails(
                         $answer,
                         'Security\\'
@@ -149,7 +149,12 @@ final class MakeAuthenticator extends AbstractMaker
             self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type') ?
                 ($this->doctrineHelper->isClassAMappedEntity($input->getArgument('user-class')) ? 'authenticator/LoginFormEntityAuthenticator.tpl.php' : 'authenticator/LoginFormNotEntityAuthenticator.tpl.php')
                 : 'authenticator/Empty.tpl.php',
-            []
+            $input->hasArgument('user-class') ?
+                [
+                    'user_fully_qualified_class_name' => $input->getArgument('user-class'),
+                    'user_class_name' => substr(strrchr($input->getArgument('user-class'), '\\'), 1),
+                ]
+                : []
         );
 
         // update security.yaml with guard config
