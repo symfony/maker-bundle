@@ -22,6 +22,7 @@ use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -39,6 +40,7 @@ final class MakeController extends AbstractMaker
         $command
             ->setDescription('Creates a new controller class')
             ->addArgument('controller-class', InputArgument::OPTIONAL, sprintf('Choose a name for your controller class (e.g. <fg=yellow>%sController</>)', Str::asClassName(Str::getRandomTerm())))
+            ->addOption('no-annotations', null, InputOption::VALUE_NONE, 'Do not use annotations for declaring routes')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeController.txt'))
         ;
     }
@@ -60,6 +62,7 @@ final class MakeController extends AbstractMaker
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'twig_installed' => $this->isTwigInstalled(),
+                'use_annotations' => !$input->getOption('no-annotations'),
                 'template_name' => $templateName,
             ]
         );
@@ -80,14 +83,16 @@ final class MakeController extends AbstractMaker
         $io->text('Next: Open your new controller class and add some pages!');
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)
     {
-        $dependencies->addClassDependency(
-            // we only need doctrine/annotations, which contains
-            // the recipe that loads annotation routes
-            Annotation::class,
-            'annotations'
-        );
+        if (null === $input) {
+            $dependencies->addClassDependency(
+                // we only need doctrine/annotations, which contains
+                // the recipe that loads annotation routes
+                Annotation::class,
+                'annotations'
+            );
+        }
     }
 
     private function isTwigInstalled()
