@@ -405,6 +405,7 @@ class FunctionalTest extends MakerTestCase
             )
                 ->addExtraDependencies('doctrine')
                 ->addExtraDependencies('twig')
+                ->addExtraDependencies('symfony/form')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntity')
                 ->configureDatabase()
                 ->updateSchemaAfterCommand()
@@ -436,11 +437,10 @@ class FunctionalTest extends MakerTestCase
                     0
                 ]
             )
-                ->addExtraDependencies('doctrine')
+                ->addExtraDependencies('doctrine/annotations')
                 ->addExtraDependencies('twig')
+                ->addExtraDependencies('symfony/form')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormCustomUsernameField')
-                ->configureDatabase()
-                ->updateSchemaAfterCommand(),
         ];
 
         yield 'auth_login_form_user_entity_no_encoder' => [
@@ -457,6 +457,7 @@ class FunctionalTest extends MakerTestCase
             )
                 ->addExtraDependencies('doctrine')
                 ->addExtraDependencies('twig')
+                ->addExtraDependencies('symfony/form')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntityNoEncoder')
                 ->configureDatabase()
                 ->updateSchemaAfterCommand(),

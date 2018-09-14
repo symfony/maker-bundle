@@ -159,4 +159,70 @@ class InteractiveSecurityHelperTest extends TestCase
             false,
         ];
     }
+
+    /**
+     * @dataProvider getUsernameFieldsTest
+     */
+    public function testGuessUserNameField(array $providers, string $expectedUsernameField, bool $fieldAutomaticallyGuessed, string $class = '', array $choices = [])
+    {
+        /** @var SymfonyStyle|\PHPUnit_Framework_MockObject_MockObject $io */
+        $io = $this->createMock(SymfonyStyle::class);
+        $io->expects($this->exactly(true === $fieldAutomaticallyGuessed ? 0 : 1))
+            ->method('choice')
+            ->with(sprintf('Which field on your <fg=yellow>%s</> class will people enter when logging in?', $class), $choices, 'username')
+            ->willReturn($expectedUsernameField);
+
+        $interactiveSecurityHelper = new InteractiveSecurityHelper();
+        $this->assertEquals(
+            $expectedUsernameField,
+            $interactiveSecurityHelper->guessUserNameField($io, $class, $providers)
+        );
+    }
+
+    public function getUsernameFieldsTest()
+    {
+        yield 'guess_with_providers' => [
+            'providers' => ['app_provider' => ['entity' => ['property' => 'userEmail']]],
+            'expectedUsernameField' => 'userEmail',
+            true
+        ];
+
+        yield 'guess_fixture_class' => [
+            'providers' => [],
+            'expectedUsernameField' => 'email',
+            true,
+            FixtureClass::class
+        ];
+
+        yield 'guess_fixture_class_2' => [
+            'providers' => [],
+            'expectedUsernameField' => 'username',
+            true,
+            FixtureClass2::class
+        ];
+
+        yield 'guess_fixture_class_3' => [
+            'providers' => [],
+            'expectedUsernameField' => 'username',
+            false,
+            FixtureClass3::class,
+            ['username', 'email']
+        ];
+    }
+}
+
+class FixtureClass
+{
+    private $email;
+}
+
+class FixtureClass2
+{
+    private $username;
+}
+
+class FixtureClass3
+{
+    private $username;
+    private $email;
 }

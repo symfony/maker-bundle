@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -33,7 +32,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Form\Form;
 
 /**
  * @author Ryan Weaver <ryan@knpuniversity.com>
@@ -101,10 +102,19 @@ final class MakeAuthenticator extends AbstractMaker
             $dependencies = new DependencyBuilder();
             $dependencies->addClassDependency(
                 TwigBundle::class,
-                'tiwg'
+                'twig'
             );
+            $missingPackagesMessage = 'Twig must be installed to display login form';
 
-            $missingPackagesMessage = $dependencies->getMissingPackagesMessage(self::getCommandName(), 'Twig must be installed to display login form');
+            if (Kernel::VERSION_ID < 40100) {
+                $dependencies->addClassDependency(
+                    Form::class,
+                    'symfony/form'
+                );
+                $missingPackagesMessage = 'Twig and symfony/form must be installed to display login form';
+            }
+
+            $missingPackagesMessage = $dependencies->getMissingPackagesMessage(self::getCommandName(), $missingPackagesMessage);
             if ($missingPackagesMessage) {
                 throw new RuntimeCommandException($missingPackagesMessage);
             }
@@ -237,7 +247,7 @@ final class MakeAuthenticator extends AbstractMaker
                     'user_class_name' => $userClassNameDetails->getShortName(),
                     'username_field' => $input->getArgument('username-field'),
                     'user_needs_encoder' => $userNeedsEncoder,
-                    'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($input->getArgument('user-class'))
+                    'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($input->getArgument('user-class')),
                 ]
             );
         }
@@ -252,12 +262,9 @@ final class MakeAuthenticator extends AbstractMaker
         );
 
         if (!class_exists($controllerClassNameDetails->getFullName())) {
-            $controllerPath = $this->generator->generateClass(
+            $controllerPath = $this->generator->generateController(
                 $controllerClassNameDetails->getFullName(),
-                'authenticator/EmptySecurityController.tpl.php',
-                [
-                    'parent_class_name' => \method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
-                ]
+                'authenticator/EmptySecurityController.tpl.php'
             );
 
             $controllerSourceCode = $this->generator->getFileContents($controllerPath);
@@ -282,7 +289,7 @@ final class MakeAuthenticator extends AbstractMaker
             'templates/security/login.html.twig',
             'authenticator/login_form.tpl.php',
             [
-                'username_field' => $input->getArgument('username-field')
+                'username_field' => $input->getArgument('username-field'),
             ]
         );
     }

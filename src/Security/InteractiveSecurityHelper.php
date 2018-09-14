@@ -133,7 +133,7 @@ authenticators will be ignored, and can be blank.',
         return $io->choice(
             sprintf('Which field on your <fg=yellow>%s</> class will people enter when logging in?', $userClass),
             $classProperties,
-            property_exists($userClass, 'username') ? 'username' : property_exists($userClass, 'email') ? 'email' : null
+            property_exists($userClass, 'username') ? 'username' : (property_exists($userClass, 'email') ? 'email' : null)
         );
     }
 }

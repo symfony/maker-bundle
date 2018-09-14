@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 
@@ -90,7 +91,7 @@ class Generator
             throw new RuntimeCommandException(sprintf('File "%s" is not in the Generator\'s pending operations', $targetPath));
         }
 
-        return $this->generateFileContents(
+        return $this->getFileContentsForPendingOperation(
             $targetPath,
             $this->pendingOperations[$targetPath]
         );
@@ -192,14 +193,14 @@ class Generator
 
             $this->fileManager->dumpFile(
                 $targetPath,
-                $this->generateFileContents($targetPath, $templateData)
+                $this->getFileContentsForPendingOperation($targetPath, $templateData)
             );
         }
 
         $this->pendingOperations = [];
     }
 
-    private function generateFileContents(string $targetPath, array $templateData)
+    private function getFileContentsForPendingOperation(string $targetPath, array $templateData): string
     {
         $templatePath = $templateData['template'];
         $parameters = $templateData['variables'];
@@ -214,5 +215,17 @@ class Generator
     public function getRootNamespace(): string
     {
         return $this->namespacePrefix;
+    }
+
+    public function generateController(string $controllerClassName, string $controllerTemplatePath, array $parameters = []): string
+    {
+        return $this->generateClass(
+            $controllerClassName,
+            $controllerTemplatePath,
+            $parameters +
+            [
+                'parent_class_name' => \method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
+            ]
+        );
     }
 }
