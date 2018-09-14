@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\User;
+use App\Security\AppCustomAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -10,6 +11,10 @@ class SecurityControllerTest extends WebTestCase
 {
     public function testCommand()
     {
+        $authenticatorReflection = new \ReflectionClass(AppCustomAuthenticator::class);
+        $constructorParameters = $authenticatorReflection->getConstructor()->getParameters();
+        $this->assertSame('entityManager', $constructorParameters[0]->getName());
+
         $client  = self::createClient();
         $crawler = $client->request('GET', '/login');
 
@@ -47,7 +52,6 @@ class SecurityControllerTest extends WebTestCase
         );
         $client->submit($form);
 
-        $this->assertEquals(302, $client->getResponse()->getStatusCode());
-        $this->assertContains('/home', $client->getResponse()->getContent());
+        $this->assertContains('TODO: provide a valid redirection', $client->getResponse()->getContent());
     }
 }

@@ -19,6 +19,7 @@ use Symfony\Component\Security\Http\Util\TargetPathTrait;
 class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
 {
     use TargetPathTrait;
+
     private $router;
     private $csrfTokenManager;
     private $passwordEncoder;
@@ -58,6 +59,8 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
             throw new InvalidCsrfTokenException();
         }
 
+        // Load / create our user however you need.
+        // You can do this by calling the user provider, or with custom logic here.
         return $userProvider->loadUserByUsername($credentials['email']);
     }
 
@@ -72,7 +75,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
             return new RedirectResponse($targetPath);
         }
 
-        return new RedirectResponse($this->router->generate('app_homepage'));
+        throw new \Exception('TODO: provide a valid redirection inside '.__FILE__);
     }
 
     protected function getLoginUrl()

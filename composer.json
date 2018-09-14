@@ -20,8 +20,10 @@
         "symfony/dependency-injection": "^3.4|^4.0",
         "symfony/filesystem": "^3.4|^4.0",
         "symfony/finder": "^3.4|^4.0",
+        "symfony/form": "^4.1",
         "symfony/framework-bundle": "^3.4|^4.0",
-        "symfony/http-kernel": "^3.4|^4.0"
+        "symfony/http-kernel": "^3.4|^4.0",
+        "symfony/security": "^4.1"
     },
     "require-dev": {
         "allocine/twigcs": "^3.0",

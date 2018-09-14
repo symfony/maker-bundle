@@ -21,6 +21,7 @@ use Symfony\Component\Security\Http\Util\TargetPathTrait;
 class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
 {
     use TargetPathTrait;
+
     private $entityManager;
     private $router;
     private $csrfTokenManager;
@@ -28,10 +29,10 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
 
     public function __construct(EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, UserPasswordEncoderInterface $passwordEncoder)
     {
+        $this->entityManager = $entityManager;
         $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->passwordEncoder = $passwordEncoder;
-        $this->entityManager = $entityManager;
     }
 
     public function supports(Request $request)
@@ -76,7 +77,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
             return new RedirectResponse($targetPath);
         }
 
-        return new RedirectResponse($this->router->generate('app_homepage'));
+        throw new \Exception('TODO: provide a valid redirection inside '.__FILE__);
     }
 
     protected function getLoginUrl()

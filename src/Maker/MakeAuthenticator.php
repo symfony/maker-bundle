@@ -22,12 +22,12 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
-use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
+use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -75,6 +75,12 @@ final class MakeAuthenticator extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
+        if (!$this->fileManager->fileExists($path = 'config/packages/security.yaml')) {
+            throw new RuntimeCommandException('File "security.yaml" does not exist!');
+        }
+        $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents($path));
+        $securityData = $manipulator->getData();
+
         // authenticator type
         $authenticatorTypeValues = [
             'Empty authenticator' => self::AUTH_TYPE_EMPTY_AUTHENTICATOR,
@@ -82,7 +88,7 @@ final class MakeAuthenticator extends AbstractMaker
         ];
         $command->addArgument('authenticator-type', InputArgument::REQUIRED);
         $authenticatorType = $io->choice(
-            'Which authentication type do you want ?',
+            'What style of authentication do you want?',
             array_keys($authenticatorTypeValues),
             key($authenticatorTypeValues)
         );
@@ -91,12 +97,21 @@ final class MakeAuthenticator extends AbstractMaker
             $authenticatorTypeValues[$authenticatorType]
         );
 
-        $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents('config/packages/security.yaml'));
-        $securityData = $manipulator->getData();
+        if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {
+            $dependencies = new DependencyBuilder();
+            $dependencies->addClassDependency(
+                TwigBundle::class,
+                'tiwg'
+            );
 
-        if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')
-            && !isset($securityData['security']['providers']) || !$securityData['security']['providers']) {
-            throw new RuntimeCommandException('You need to have at least one provider defined in security.yaml');
+            $missingPackagesMessage = $dependencies->getMissingPackagesMessage(self::getCommandName(), 'Twig must be installed to display login form');
+            if ($missingPackagesMessage) {
+                throw new RuntimeCommandException($missingPackagesMessage);
+            }
+
+            if (!isset($securityData['security']['providers']) || !$securityData['security']['providers']) {
+                throw new RuntimeCommandException('To generate a form login authentication, you must configure at least one entry under "providers" in "security.yaml".');
+            }
         }
 
         // authenticator class
@@ -116,17 +131,18 @@ final class MakeAuthenticator extends AbstractMaker
         );
         $input->setArgument('authenticator-class', $io->askQuestion($questionAuthenticatorClass));
 
+        $interactiveSecurityHelper = new InteractiveSecurityHelper();
         $command->addOption('firewall-name', null, InputOption::VALUE_OPTIONAL);
-        $input->setOption('firewall-name', $firewallName = InteractiveSecurityHelper::guessFirewallName($io, $securityData));
+        $input->setOption('firewall-name', $firewallName = $interactiveSecurityHelper->guessFirewallName($io, $securityData));
 
         $command->addOption('entry-point', null, InputOption::VALUE_OPTIONAL);
         $input->setOption(
             'entry-point',
-            InteractiveSecurityHelper::guessEntryPoint($io, $securityData, $input->getArgument('authenticator-class'), $firewallName)
+            $interactiveSecurityHelper->guessEntryPoint($io, $securityData, $input->getArgument('authenticator-class'), $firewallName)
         );
 
         if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {
-            $command->addArgument('controller-class', InputArgument::OPTIONAL);
+            $command->addArgument('controller-class', InputArgument::REQUIRED);
             $input->setArgument(
                 'controller-class',
                 $io->ask(
@@ -137,25 +153,44 @@ final class MakeAuthenticator extends AbstractMaker
             );
 
             $command->addArgument('user-class', InputArgument::OPTIONAL);
-            $input->setArgument('user-class', InteractiveSecurityHelper::guessUserClass($io, $securityData));
+            $userClass = $interactiveSecurityHelper->guessUserClass($io, $securityData['security']['providers']);
+            if (0 !== strpos($userClass, '\\')) {
+                $userClass = '\\'.$userClass;
+            }
+            $input->setArgument('user-class', $userClass);
         }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         // generate authenticator class
-        $generator->generateClass(
-            $input->getArgument('authenticator-class'),
-            self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type') ?
-                ($this->doctrineHelper->isClassAMappedEntity($input->getArgument('user-class')) ? 'authenticator/LoginFormEntityAuthenticator.tpl.php' : 'authenticator/LoginFormNotEntityAuthenticator.tpl.php')
-                : 'authenticator/Empty.tpl.php',
-            $input->hasArgument('user-class') ?
+        if (self::AUTH_TYPE_EMPTY_AUTHENTICATOR === $input->getArgument('authenticator-type')) {
+            $generator->generateClass(
+                $input->getArgument('authenticator-class'),
+                'authenticator/EmptyAuthenticator.tpl.php',
+                []
+            );
+        } elseif ($this->doctrineHelper->isClassAMappedEntity($input->getArgument('user-class'))) {
+            $userClassNameDetails = $generator->createClassNameDetails(
+                $input->getArgument('user-class'),
+                'Entity\\'
+            );
+
+            $generator->generateClass(
+                $input->getArgument('authenticator-class'),
+                'authenticator/LoginFormEntityAuthenticator.tpl.php',
                 [
-                    'user_fully_qualified_class_name' => $input->getArgument('user-class'),
-                    'user_class_name' => substr(strrchr($input->getArgument('user-class'), '\\'), 1),
+                    'user_fully_qualified_class_name' => trim($userClassNameDetails->getFullName(), '\\'),
+                    'user_class_name' => $userClassNameDetails->getShortName(),
                 ]
-                : []
-        );
+            );
+        } else {
+            $generator->generateClass(
+                $input->getArgument('authenticator-class'),
+                'authenticator/LoginFormNotEntityAuthenticator.tpl.php',
+                []
+            );
+        }
 
         // update security.yaml with guard config
         $securityYamlUpdated = false;
@@ -175,51 +210,7 @@ final class MakeAuthenticator extends AbstractMaker
         }
 
         if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {
-            $controllerClassNameDetails = $generator->createClassNameDetails(
-                $input->getArgument('controller-class'),
-                'Controller\\',
-                'Controller'
-            );
-
-            if (class_exists($controllerClassNameDetails->getFullName())) {
-                // If provided security controller class exist, add login() method
-                if (method_exists($controllerClassNameDetails->getFullName(), 'login')) {
-                    throw new RuntimeCommandException(sprintf('Method "login" already exists on class %s', $controllerClassNameDetails->getFullName()));
-                }
-
-                $manipulator = new ClassSourceManipulator(
-                    $this->fileManager->getFileContents($controllerPath = $this->fileManager->getRelativePathForFutureClass($controllerClassNameDetails->getFullName())),
-                    true
-                );
-                $securityControllerBuilder = new SecurityControllerBuilder();
-                $securityControllerBuilder->addLoginMethod($manipulator);
-
-                if (method_exists($controllerClassNameDetails->getFullName(), 'logout')) {
-                    throw new RuntimeCommandException(sprintf('Method "logout" already exists on class %s', $controllerClassNameDetails->getFullName()));
-                }
-                $securityControllerBuilder->addLogoutMethod($manipulator);
-
-                $this->generator->dumpFile($controllerPath, $manipulator->getSourceCode());
-            } else {
-                // otherwise, create security controller
-                $controllerPath = $generator->generateClass(
-                    $controllerClassNameDetails->getFullName(),
-                    'authenticator/SecurityController.tpl.php',
-                    [
-                        'parent_class_name' => \method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
-                    ]
-                );
-            }
-
-            // create login form template
-            $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()).'/login.html.twig';
-            $generator->generateFile(
-                'templates/'.$templateName,
-                'authenticator/login_form.tpl.php',
-                [
-                    'controller_path' => $controllerPath,
-                ]
-            );
+            $this->generateFormLoginFiles($input);
         }
 
         $generator->writeChanges();
@@ -237,6 +228,50 @@ final class MakeAuthenticator extends AbstractMaker
             $text[] = "Your <info>security.yaml</info> could not be updated automatically. You'll need to add the following config manually:\n\n".$yamlExample;
         }
         $io->text($text);
+    }
+
+    private function generateFormLoginFiles(InputInterface $input)
+    {
+        $controllerClassNameDetails = $this->generator->createClassNameDetails(
+            $input->getArgument('controller-class'),
+            'Controller\\',
+            'Controller'
+        );
+
+        if (!class_exists($controllerClassNameDetails->getFullName())) {
+            $controllerPath = $this->generator->generateClass(
+                $controllerClassNameDetails->getFullName(),
+                'authenticator/EmptySecurityController.tpl.php',
+                [
+                    'parent_class_name' => \method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
+                ]
+            );
+
+            $controllerSourceCode = $this->generator->getFileContents($controllerPath);
+        } else {
+            $controllerPath = $this->fileManager->getRelativePathForFutureClass($controllerClassNameDetails->getFullName());
+            $controllerSourceCode = $this->fileManager->getFileContents($controllerPath);
+        }
+
+        if (method_exists($controllerClassNameDetails->getFullName(), 'login')) {
+            throw new RuntimeCommandException(sprintf('Method "login" already exists on class %s', $controllerClassNameDetails->getFullName()));
+        }
+
+        $manipulator = new ClassSourceManipulator($controllerSourceCode, true);
+
+        $securityControllerBuilder = new SecurityControllerBuilder();
+        $securityControllerBuilder->addLoginMethod($manipulator);
+
+        $this->generator->dumpFile($controllerPath, $manipulator->getSourceCode());
+
+        // create login form template
+        $this->generator->generateFile(
+            'templates/security/login.html.twig',
+            'authenticator/login_form.tpl.php',
+            [
+                'controller_path' => $controllerPath,
+            ]
+        );
     }
 
     public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)

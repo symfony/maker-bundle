@@ -186,7 +186,7 @@ final class Validator
         return $className;
     }
 
-    public static function classDoesNotExist($className)
+    public static function classDoesNotExist($className): string
     {
         self::notBlank($className);
 
@@ -197,12 +197,12 @@ final class Validator
         return $className;
     }
 
-    public static function classIsUserInterface($userClassName)
+    public static function classIsUserInterface($userClassName): string
     {
         self::classExists($userClassName);
 
         if (!isset(class_implements($userClassName)[UserInterface::class])) {
-            throw new RuntimeCommandException(sprintf('The class "%s" doesn\'t implement "%s"', $userClassName, UserInterface::class));
+            throw new RuntimeCommandException(sprintf('The class "%s" must implement "%s".', $userClassName, UserInterface::class));
         }
 
         return $userClassName;

@@ -124,13 +124,13 @@ class InteractiveSecurityHelperTest extends TestCase
     /**
      * @dataProvider getUserClassTests
      */
-    public function testGuessUserClass(array $securityData, string $expectedUserClass, bool $userClassAutomaticallyGuessed)
+    public function testGuessUserClass(array $securityData, string $expectedUserClass, bool $userClassAutomaticallyGuessed, string $providedClass = '')
     {
         /** @var SymfonyStyle|\PHPUnit_Framework_MockObject_MockObject $io */
         $io = $this->createMock(SymfonyStyle::class);
         $io->expects($this->exactly(true === $userClassAutomaticallyGuessed ? 0 : 1))
             ->method('ask')
-            ->willReturn($expectedUserClass);
+            ->willReturn($providedClass);
 
         $helper = new InteractiveSecurityHelper();
         $this->assertEquals(
@@ -142,15 +142,23 @@ class InteractiveSecurityHelperTest extends TestCase
     public function getUserClassTests()
     {
         yield 'user_from_provider' => [
-            ['security' => ['providers' => ['app_provider' => ['entity' => ['class' => 'App\\Entity\\User']]]]],
-            'App\\Entity\\User',
+            ['app_provider' => ['entity' => ['class' => 'App\\Entity\\User']]],
+            '\\App\\Entity\\User',
             true,
         ];
 
-        yield 'user_asked_user' => [
-            ['security' => ['providers' => []]],
-            'App\\Entity\\User',
+        yield 'multiple_providers' => [
+            ['provider_1' => ['id' => 'app.provider_1'], 'provider_2' => ['id' => 'app.provider_2']],
+            '\\App\\Entity\\User',
             false,
+            '\\App\\Entity\\User'
+        ];
+
+        yield 'no_provider' => [
+            [[]],
+            '\\App\\Entity\\User',
+            false,
+            'App\\Entity\\User'
         ];
     }
 }

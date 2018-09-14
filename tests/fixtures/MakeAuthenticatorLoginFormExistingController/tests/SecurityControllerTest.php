@@ -12,7 +12,6 @@ class SecurityControllerTest extends WebTestCase
     public function testCommand()
     {
         $this->assertTrue(method_exists(SecurityController::class, 'login'));
-        $this->assertTrue(method_exists(SecurityController::class, 'logout'));
 
         $client  = self::createClient();
         $crawler = $client->request('GET', '/login');
@@ -51,7 +50,6 @@ class SecurityControllerTest extends WebTestCase
         );
         $client->submit($form);
 
-        $this->assertEquals(302, $client->getResponse()->getStatusCode());
-        $this->assertContains('/home', $client->getResponse()->getContent());
+        $this->assertContains('TODO: provide a valid redirection', $client->getResponse()->getContent());
     }
 }

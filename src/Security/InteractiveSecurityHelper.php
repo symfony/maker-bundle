@@ -21,7 +21,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class InteractiveSecurityHelper
 {
-    public static function guessFirewallName(SymfonyStyle $io, array $securityData): string
+    public function guessFirewallName(SymfonyStyle $io, array $securityData): string
     {
         $realFirewalls = array_filter(
             $securityData['security']['firewalls'] ?? [],
@@ -41,7 +41,7 @@ final class InteractiveSecurityHelper
         return $io->choice('Which firewall do you want to update ?', array_keys($realFirewalls), key($realFirewalls));
     }
 
-    public static function guessEntryPoint(SymfonyStyle $io, array $securityData, string $authenticatorClass, string $firewallName)
+    public function guessEntryPoint(SymfonyStyle $io, array $securityData, string $authenticatorClass, string $firewallName)
     {
         if (!isset($securityData['security'])) {
             $securityData['security'] = [];
@@ -78,21 +78,33 @@ authenticators will be ignored, and can be blank.',
         );
     }
 
-    public static function guessUserClass(SymfonyStyle $io, array $securityData): string
+    public function guessUserClass(SymfonyStyle $io, array $providers): string
     {
-        if (1 === \count($securityData['security']['providers']) && isset(current($securityData['security']['providers'])['entity'])) {
-            $entityProvider = current($securityData['security']['providers']);
-            $userClass = $entityProvider['entity']['class'];
-        } else {
-            $userClass = $io->ask(
-                'Enter the User class you want to authenticate (e.g. <fg=yellow>App\\Entity\\User</>)
- (It has to be handled by one of the firewall\'s providers)',
-                class_exists('App\\Entity\\User') && isset(class_implements('App\\Entity\\User')[UserInterface::class]) ? 'App\\Entity\\User'
-                    : class_exists('App\\Security\\User') && isset(class_implements('App\\Security\\User')[UserInterface::class]) ? 'App\\Security\\User' : null,
-                [Validator::class, 'classIsUserInterface']
-            );
+        if (1 === \count($providers) && isset(current($providers)['entity'])) {
+            $entityProvider = current($providers);
+
+            return $entityProvider['entity']['class'];
         }
 
+        $userClass = $io->ask(
+            'Enter the User class that you want to authenticate (e.g. <fg=yellow>App\\Entity\\User</>)',
+            $this->guessUserClassDefault(),
+            [Validator::class, 'classIsUserInterface']
+        );
+
         return $userClass;
+    }
+
+    private function guessUserClassDefault()
+    {
+        if (class_exists('App\\Entity\\User') && isset(class_implements('App\\Entity\\User')[UserInterface::class])) {
+            return 'App\\Entity\\User';
+        }
+
+        if (class_exists('App\\Security\\User') && isset(class_implements('App\\Security\\User')[UserInterface::class])) {
+            return 'App\\Security\\User';
+        }
+
+        return null;
     }
 }

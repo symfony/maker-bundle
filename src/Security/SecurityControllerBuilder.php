@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the Symfony MakerBundle package.
  *
@@ -14,6 +12,9 @@ declare(strict_types=1);
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 /**
  * @internal
@@ -23,6 +24,11 @@ final class SecurityControllerBuilder
     public function addLoginMethod(ClassSourceManipulator $manipulator)
     {
         $loginMethodBuilder = $manipulator->createMethodBuilder('login', 'Response', false, ['@Route("/login", name="app_login")']);
+
+        $manipulator->addUseStatementIfNecessary(Response::class);
+        $manipulator->addUseStatementIfNecessary(Route::class);
+        $manipulator->addUseStatementIfNecessary(AuthenticationUtils::class);
+
         $loginMethodBuilder->addParam(
             (new \PhpParser\Builder\Param('authenticationUtils'))->setTypeHint('AuthenticationUtils')
         );
@@ -48,21 +54,5 @@ return $this->render(
 CODE
         );
         $manipulator->addMethodBuilder($loginMethodBuilder);
-        $manipulator->addUseStatementIfNecessary('Symfony\\Component\\HttpFoundation\\Response');
-        $manipulator->addUseStatementIfNecessary('Symfony\\Component\\Routing\\Annotation\\Route');
-        $manipulator->addUseStatementIfNecessary('Symfony\\Component\\Security\\Http\\Authentication\\AuthenticationUtils');
-    }
-
-    public function addLogoutMethod(ClassSourceManipulator $manipulator)
-    {
-        $loginMethodBuilder = $manipulator->createMethodBuilder('logout', null, false, ['@Route("/logout", name="app_logout")']);
-
-        $manipulator->addMethodBody($loginMethodBuilder, <<<'CODE'
-<?php
-throw new \Exception('will be intercepted before getting here');
-CODE
-        );
-        $manipulator->addMethodBuilder($loginMethodBuilder);
-        $manipulator->addUseStatementIfNecessary('Symfony\\Component\\Routing\\Annotation\\Route');
     }
 }

@@ -84,6 +84,18 @@ class Generator
         ];
     }
 
+    public function getFileContents(string $targetPath): string
+    {
+        if (!isset($this->pendingOperations[$targetPath])) {
+            throw new RuntimeCommandException(sprintf('File "%s" is not in the Generator\'s pending operations', $targetPath));
+        }
+
+        return $this->generateFileContents(
+            $targetPath,
+            $this->pendingOperations[$targetPath]
+        );
+    }
+
     /**
      * Creates a helper object to get data about a class name.
      *
@@ -178,18 +190,25 @@ class Generator
                 continue;
             }
 
-            $templatePath = $templateData['template'];
-            $parameters = $templateData['variables'];
-
-            $templateParameters = array_merge($parameters, [
-                'relative_path' => $this->fileManager->relativizePath($targetPath),
-            ]);
-
-            $fileContents = $this->fileManager->parseTemplate($templatePath, $templateParameters);
-            $this->fileManager->dumpFile($targetPath, $fileContents);
+            $this->fileManager->dumpFile(
+                $targetPath,
+                $this->generateFileContents($targetPath, $templateData)
+            );
         }
 
         $this->pendingOperations = [];
+    }
+
+    private function generateFileContents(string $targetPath, array $templateData)
+    {
+        $templatePath = $templateData['template'];
+        $parameters = $templateData['variables'];
+
+        $templateParameters = array_merge($parameters, [
+            'relative_path' => $this->fileManager->relativizePath($targetPath),
+        ]);
+
+        return $this->fileManager->parseTemplate($templatePath, $templateParameters);
     }
 
     public function getRootNamespace(): string

@@ -57,5 +57,13 @@ class GeneratorTest extends TestCase
             'Foo\Bar\Baz',
             'Bar\Baz'
         ];
+
+        yield 'enty_fqcn' => [
+            '\\App\\Entity\\User',
+            'Entity\\',
+            '',
+            'App\\Entity\\User',
+            'User'
+        ];
     }
 }
