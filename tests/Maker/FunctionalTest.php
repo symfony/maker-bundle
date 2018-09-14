@@ -420,6 +420,25 @@ class FunctionalTest extends MakerTestCase
                 ),
         ];
 
+        yield 'auth_login_form_user_entity_no_encoder' => [
+            MakerTestDetails::createTest(
+                $this->getMakerInstance(MakeAuthenticator::class),
+                [
+                    // authenticator type => login-form
+                    1,
+                    // class name
+                    'AppCustomAuthenticator',
+                    // controller name
+                    'SecurityController',
+                ]
+            )
+                ->addExtraDependencies('doctrine')
+                ->addExtraDependencies('twig')
+                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntityNoEncoder')
+                ->configureDatabase()
+                ->updateSchemaAfterCommand(),
+        ];
+
         yield 'auth_login_form_user_not_entity' => [
             MakerTestDetails::createTest(
                 $this->getMakerInstance(MakeAuthenticator::class),
@@ -438,6 +457,26 @@ class FunctionalTest extends MakerTestCase
                 ->addExtraDependencies('doctrine/annotations')
                 ->addExtraDependencies('symfony/form')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserNotEntity'),
+        ];
+
+        yield 'auth_login_form_user_not_entity_no_encoder' => [
+            MakerTestDetails::createTest(
+                $this->getMakerInstance(MakeAuthenticator::class),
+                [
+                    // authenticator type => login-form
+                    1,
+                    // class name
+                    'AppCustomAuthenticator',
+                    // controller name
+                    'SecurityController',
+                    // user class
+                    'App\Security\User',
+                ]
+            )
+                ->addExtraDependencies('twig')
+                ->addExtraDependencies('doctrine/annotations')
+                ->addExtraDependencies('symfony/form')
+                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserNotEntityNoEncoder'),
         ];
 
         yield 'auth_login_form_existing_controller' => [

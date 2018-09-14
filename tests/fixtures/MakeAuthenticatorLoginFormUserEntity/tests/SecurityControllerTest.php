@@ -15,6 +15,9 @@ class SecurityControllerTest extends WebTestCase
         $constructorParameters = $authenticatorReflection->getConstructor()->getParameters();
         $this->assertSame('entityManager', $constructorParameters[0]->getName());
 
+        // assert authenticator is injected
+        $this->assertEquals(4, \count($constructorParameters));
+
         $client  = self::createClient();
         $crawler = $client->request('GET', '/login');
 
@@ -53,5 +56,7 @@ class SecurityControllerTest extends WebTestCase
         $client->submit($form);
 
         $this->assertContains('TODO: provide a valid redirection', $client->getResponse()->getContent());
+        $this->assertNotNull($token = $client->getContainer()->get('security.token_storage')->getToken());
+        $this->assertInstanceOf(User::class, $token->getUser());
     }
 }

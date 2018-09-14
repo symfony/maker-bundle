@@ -154,59 +154,26 @@ final class MakeAuthenticator extends AbstractMaker
 
             $command->addArgument('user-class', InputArgument::OPTIONAL);
             $userClass = $interactiveSecurityHelper->guessUserClass($io, $securityData['security']['providers']);
-            if (0 !== strpos($userClass, '\\')) {
-                $userClass = '\\'.$userClass;
-            }
             $input->setArgument('user-class', $userClass);
         }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        // generate authenticator class
-        if (self::AUTH_TYPE_EMPTY_AUTHENTICATOR === $input->getArgument('authenticator-type')) {
-            $generator->generateClass(
-                $input->getArgument('authenticator-class'),
-                'authenticator/EmptyAuthenticator.tpl.php',
-                []
-            );
-        } elseif ($this->doctrineHelper->isClassAMappedEntity($input->getArgument('user-class'))) {
-            $userClassNameDetails = $generator->createClassNameDetails(
-                $input->getArgument('user-class'),
-                'Entity\\'
-            );
-
-            $generator->generateClass(
-                $input->getArgument('authenticator-class'),
-                'authenticator/LoginFormEntityAuthenticator.tpl.php',
-                [
-                    'user_fully_qualified_class_name' => trim($userClassNameDetails->getFullName(), '\\'),
-                    'user_class_name' => $userClassNameDetails->getShortName(),
-                ]
-            );
-        } else {
-            $generator->generateClass(
-                $input->getArgument('authenticator-class'),
-                'authenticator/LoginFormNotEntityAuthenticator.tpl.php',
-                []
-            );
-        }
+        $this->generateAuthenticatorClass($input);
 
         // update security.yaml with guard config
         $securityYamlUpdated = false;
-        $path = 'config/packages/security.yaml';
-        if ($this->fileManager->fileExists($path)) {
-            try {
-                $newYaml = $this->configUpdater->updateForAuthenticator(
-                    $this->fileManager->getFileContents($path),
-                    $input->getOption('firewall-name'),
-                    $input->getOption('entry-point'),
-                    $input->getArgument('authenticator-class')
-                );
-                $generator->dumpFile($path, $newYaml);
-                $securityYamlUpdated = true;
-            } catch (YamlManipulationFailedException $e) {
-            }
+        try {
+            $newYaml = $this->configUpdater->updateForAuthenticator(
+                $this->fileManager->getFileContents($path = 'config/packages/security.yaml'),
+                $input->getOption('firewall-name'),
+                $input->getOption('entry-point'),
+                $input->getArgument('authenticator-class')
+            );
+            $generator->dumpFile($path, $newYaml);
+            $securityYamlUpdated = true;
+        } catch (YamlManipulationFailedException $e) {
         }
 
         if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {
@@ -228,6 +195,52 @@ final class MakeAuthenticator extends AbstractMaker
             $text[] = "Your <info>security.yaml</info> could not be updated automatically. You'll need to add the following config manually:\n\n".$yamlExample;
         }
         $io->text($text);
+    }
+
+    private function generateAuthenticatorClass(InputInterface $input)
+    {
+        // generate authenticator class
+        if (self::AUTH_TYPE_EMPTY_AUTHENTICATOR === $input->getArgument('authenticator-type')) {
+            $this->generator->generateClass(
+                $input->getArgument('authenticator-class'),
+                'authenticator/EmptyAuthenticator.tpl.php',
+                []
+            );
+        } else {
+            $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents('config/packages/security.yaml'));
+            $securityData = $manipulator->getData();
+
+            $userNeedsEncoder = false;
+            if (isset($securityData['security']['encoders']) && $securityData['security']['encoders']) {
+                foreach ($securityData['security']['encoders'] as $userClassWithEncoder => $encoder) {
+                    if ($input->getArgument('user-class') === $userClassWithEncoder || is_subclass_of($input->getArgument('user-class'), $userClassWithEncoder)) {
+                        $userNeedsEncoder = true;
+                    }
+                }
+            }
+
+            if ($this->doctrineHelper->isClassAMappedEntity($input->getArgument('user-class'))) {
+                $userClassNameDetails = $this->generator->createClassNameDetails(
+                    '\\'.$input->getArgument('user-class'),
+                    'Entity\\'
+                );
+
+                $this->generator->generateClass(
+                    $input->getArgument('authenticator-class'),
+                    $userNeedsEncoder ? 'authenticator/LoginFormEntityAuthenticator.tpl.php' : 'authenticator/LoginFormEntityAuthenticatorNoEncoder.tpl.php',
+                    [
+                        'user_fully_qualified_class_name' => trim($userClassNameDetails->getFullName(), '\\'),
+                        'user_class_name' => $userClassNameDetails->getShortName(),
+                    ]
+                );
+            } else {
+                $this->generator->generateClass(
+                    $input->getArgument('authenticator-class'),
+                    $userNeedsEncoder ? 'authenticator/LoginFormNotEntityAuthenticator.tpl.php' : 'authenticator/LoginFormNotEntityAuthenticatorNoEncoder.tpl.php',
+                    []
+                );
+            }
+        }
     }
 
     private function generateFormLoginFiles(InputInterface $input)
