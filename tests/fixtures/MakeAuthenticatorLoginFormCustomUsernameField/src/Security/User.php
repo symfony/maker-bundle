@@ -1,42 +1,19 @@
 <?php
 
-namespace App\Entity;
+namespace App\Security;
 
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * @ORM\Entity()
- */
 class User implements UserInterface
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-
-    /**
-     * @ORM\Column(type="string", length=180, unique=true)
-     */
     private $userEmail;
 
-    /**
-     * @ORM\Column(type="array")
-     */
     private $roles = [];
 
     /**
      * @var string The hashed password
-     * @ORM\Column(type="string")
      */
     private $password;
-
-    public function getId()
-    {
-        return $this->id;
-    }
 
     public function getUserEmail()
     {

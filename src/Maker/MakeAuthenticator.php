@@ -122,10 +122,7 @@ final class MakeAuthenticator extends AbstractMaker
                 Validator::notBlank($answer);
 
                 return Validator::classDoesNotExist(
-                    $this->generator->createClassNameDetails(
-                        $answer,
-                        'Security\\'
-                    )->getFullName()
+                    $this->generator->createClassNameDetails($answer, 'Security\\', 'Authenticator')->getFullName()
                 );
             }
         );
@@ -152,9 +149,17 @@ final class MakeAuthenticator extends AbstractMaker
                 )
             );
 
-            $command->addArgument('user-class', InputArgument::OPTIONAL);
-            $userClass = $interactiveSecurityHelper->guessUserClass($io, $securityData['security']['providers']);
-            $input->setArgument('user-class', $userClass);
+            $command->addArgument('user-class', InputArgument::REQUIRED);
+            $input->setArgument(
+                'user-class',
+                $userClass = $interactiveSecurityHelper->guessUserClass($io, $securityData['security']['providers'])
+            );
+
+            $command->addArgument('username-field', InputArgument::REQUIRED);
+            $input->setArgument(
+                'username-field',
+                $interactiveSecurityHelper->guessUserNameField($io, $userClass, $securityData['security']['providers'])
+            );
         }
     }
 
@@ -219,27 +224,22 @@ final class MakeAuthenticator extends AbstractMaker
                 }
             }
 
-            if ($this->doctrineHelper->isClassAMappedEntity($input->getArgument('user-class'))) {
-                $userClassNameDetails = $this->generator->createClassNameDetails(
-                    '\\'.$input->getArgument('user-class'),
-                    'Entity\\'
-                );
+            $userClassNameDetails = $this->generator->createClassNameDetails(
+                '\\'.$input->getArgument('user-class'),
+                'Entity\\'
+            );
 
-                $this->generator->generateClass(
-                    $input->getArgument('authenticator-class'),
-                    $userNeedsEncoder ? 'authenticator/LoginFormEntityAuthenticator.tpl.php' : 'authenticator/LoginFormEntityAuthenticatorNoEncoder.tpl.php',
-                    [
-                        'user_fully_qualified_class_name' => trim($userClassNameDetails->getFullName(), '\\'),
-                        'user_class_name' => $userClassNameDetails->getShortName(),
-                    ]
-                );
-            } else {
-                $this->generator->generateClass(
-                    $input->getArgument('authenticator-class'),
-                    $userNeedsEncoder ? 'authenticator/LoginFormNotEntityAuthenticator.tpl.php' : 'authenticator/LoginFormNotEntityAuthenticatorNoEncoder.tpl.php',
-                    []
-                );
-            }
+            $this->generator->generateClass(
+                $input->getArgument('authenticator-class'),
+                'authenticator/LoginFormAuthenticator.tpl.php',
+                [
+                    'user_fully_qualified_class_name' => trim($userClassNameDetails->getFullName(), '\\'),
+                    'user_class_name' => $userClassNameDetails->getShortName(),
+                    'username_field' => $input->getArgument('username-field'),
+                    'user_needs_encoder' => $userNeedsEncoder,
+                    'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($input->getArgument('user-class'))
+                ]
+            );
         }
     }
 
@@ -282,7 +282,7 @@ final class MakeAuthenticator extends AbstractMaker
             'templates/security/login.html.twig',
             'authenticator/login_form.tpl.php',
             [
-                'controller_path' => $controllerPath,
+                'username_field' => $input->getArgument('username-field')
             ]
         );
     }

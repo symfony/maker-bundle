@@ -2,10 +2,13 @@
 
 namespace <?= $namespace ?>;
 
+<?= $user_is_entity ? "use $user_fully_qualified_class_name;\n" : null ?>
+<?= $user_is_entity ? "use Doctrine\\ORM\\EntityManagerInterface;\n" : null ?>
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+<?= $user_needs_encoder ? "use Symfony\\Component\\Security\\Core\\Encoder\\UserPasswordEncoderInterface;\n" : null ?>
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -19,13 +22,17 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
 {
     use TargetPathTrait;
 
+<?= $user_is_entity ? "    private \$entityManager;\n" : null ?>
     private $router;
     private $csrfTokenManager;
+<?= $user_needs_encoder ? "    private \$passwordEncoder;\n" : null ?>
 
-    public function __construct(RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager)
+    public function __construct(<?= $user_is_entity ? 'EntityManagerInterface $entityManager, ' : null ?>RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager<?= $user_needs_encoder ? ', UserPasswordEncoderInterface $passwordEncoder' : null ?>)
     {
+<?= $user_is_entity ? "        \$this->entityManager = \$entityManager;\n" : null ?>
         $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
+<?= $user_needs_encoder ? "        \$this->passwordEncoder = \$passwordEncoder;\n" : null ?>
     }
 
     public function supports(Request $request)
@@ -37,13 +44,13 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
     public function getCredentials(Request $request)
     {
         $credentials = [
-            'email' => $request->request->get('email'),
+            '<?= $username_field ?>' => $request->request->get('<?= $username_field ?>'),
             'password' => $request->request->get('password'),
             'csrf_token' => $request->request->get('_csrf_token'),
         ];
         $request->getSession()->set(
             Security::LAST_USERNAME,
-            $credentials['email']
+            $credentials['<?= $username_field ?>']
         );
 
         return $credentials;
@@ -56,14 +63,15 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
             throw new InvalidCsrfTokenException();
         }
 
-        // Load / create our user however you need.
+        <?= $user_is_entity ? "return \$this->entityManager->getRepository($user_class_name::class)->findOneBy(['$username_field' => \$credentials['$username_field']]);\n"
+        : "// Load / create our user however you need.
         // You can do this by calling the user provider, or with custom logic here.
-        return $userProvider->loadUserByUsername($credentials['email']);
+        return \$userProvider->loadUserByUsername(\$credentials['$username_field']);\n"; ?>
     }
 
     public function checkCredentials($credentials, UserInterface $user)
     {
-        return true;
+        <?= $user_needs_encoder ? "return \$this->passwordEncoder->isPasswordValid(\$user, \$credentials['password']);\n" : "return true;\n" ?>
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)

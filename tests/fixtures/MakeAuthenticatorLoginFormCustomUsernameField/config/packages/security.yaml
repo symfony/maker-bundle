@@ -1,13 +1,11 @@
 security:
     encoders:
-        App\Entity\User: plaintext
+        App\Security\User: plaintext
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
         app_user_provider:
-            entity:
-                class: App\Entity\User
-                property: userEmail
+            id: App\Security\UserProvider
 
     firewalls:
         dev:

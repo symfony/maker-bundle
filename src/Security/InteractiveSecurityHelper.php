@@ -107,4 +107,33 @@ authenticators will be ignored, and can be blank.',
 
         return null;
     }
+
+    public function guessUserNameField(SymfonyStyle $io, string $userClass, array $providers): string
+    {
+        if (1 === \count($providers) && isset(current($providers)['entity'])) {
+            $entityProvider = current($providers);
+
+            return $entityProvider['entity']['property'];
+        }
+
+        if (property_exists($userClass, 'email') && !property_exists($userClass, 'username')) {
+            return 'email';
+        }
+
+        if (!property_exists($userClass, 'email') && property_exists($userClass, 'username')) {
+            return 'username';
+        }
+
+        $classProperties = [];
+        $reflectionClass = new \ReflectionClass($userClass);
+        foreach ($reflectionClass->getProperties() as $property) {
+            $classProperties[] = $property->name;
+        }
+
+        return $io->choice(
+            sprintf('Which field on your <fg=yellow>%s</> class will people enter when logging in?', $userClass),
+            $classProperties,
+            property_exists($userClass, 'username') ? 'username' : property_exists($userClass, 'email') ? 'email' : null
+        );
+    }
 }

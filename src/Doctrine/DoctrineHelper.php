@@ -184,6 +184,6 @@ final class DoctrineHelper
             return false;
         }
 
-        return (bool) $this->getMetadata(trim($className, '\\'));
+        return (bool) $this->getMetadata($className);
     }
 }

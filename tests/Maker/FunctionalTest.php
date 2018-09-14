@@ -391,7 +391,7 @@ class FunctionalTest extends MakerTestCase
                 ),
         ];
 
-        yield 'auth_login_form_user_entity' => [
+        yield 'auth_login_form_user_entity_with_encoder' => [
             MakerTestDetails::createTest(
                 $this->getMakerInstance(MakeAuthenticator::class),
                 [
@@ -420,6 +420,29 @@ class FunctionalTest extends MakerTestCase
                 ),
         ];
 
+        yield 'auth_login_form_custom_username_field' => [
+            MakerTestDetails::createTest(
+                $this->getMakerInstance(MakeAuthenticator::class),
+                [
+                    // authenticator type => login-form
+                    1,
+                    // class name
+                    'AppCustomAuthenticator',
+                    // controller name
+                    'SecurityController',
+                    // user class
+                    'App\\Security\\User',
+                    // username field => userEmail
+                    0
+                ]
+            )
+                ->addExtraDependencies('doctrine')
+                ->addExtraDependencies('twig')
+                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormCustomUsernameField')
+                ->configureDatabase()
+                ->updateSchemaAfterCommand(),
+        ];
+
         yield 'auth_login_form_user_entity_no_encoder' => [
             MakerTestDetails::createTest(
                 $this->getMakerInstance(MakeAuthenticator::class),
@@ -439,7 +462,7 @@ class FunctionalTest extends MakerTestCase
                 ->updateSchemaAfterCommand(),
         ];
 
-        yield 'auth_login_form_user_not_entity' => [
+        yield 'auth_login_form_user_not_entity_with_encoder' => [
             MakerTestDetails::createTest(
                 $this->getMakerInstance(MakeAuthenticator::class),
                 [

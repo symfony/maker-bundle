@@ -28,7 +28,7 @@ class SecurityControllerTest extends WebTestCase
             ->get('doctrine')
             ->getManager();
 
-        $user = (new User())->setEmail('test@symfony.com')
+        $user = (new User())->setUserEmail('test@symfony.com')
             ->setPassword('password');
         $em->persist($user);
         $em->flush();
@@ -36,11 +36,15 @@ class SecurityControllerTest extends WebTestCase
         $form = $crawler->filter('form')->form();
         $form->setValues(
             [
-                'email'    => 'test@symfony.com',
+                'userEmail' => 'test@symfony.com',
                 'password' => 'foo',
             ]
         );
-        $client->submit($form);
+        $crawler = $client->submit($form);
+
+        if ($client->getResponse()->getStatusCode() === 500) {
+            $this->assertEquals('', $crawler->filter('h1.exception-message')->text());
+        }
 
         $this->assertEquals(302, $client->getResponse()->getStatusCode());
         $client->followRedirect();
@@ -49,7 +53,7 @@ class SecurityControllerTest extends WebTestCase
 
         $form->setValues(
             [
-                'email'    => 'test@symfony.com',
+                'userEmail'    => 'test@symfony.com',
                 'password' => 'password',
             ]
         );
