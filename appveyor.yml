@@ -1,18 +1,16 @@
 build: false
 platform:
     - x64
-clone_folder: c:\projects\maker-bundle
+clone_folder: C:\projects\maker-bundle
 
 cache:
-    - '%LOCALAPPDATA%\Composer\files -> composer.lock'
-    - composer.phar
+    - C:\projects\maker-bundle\vendor -> composer.json
     # Cache chocolatey packages
     - C:\ProgramData\chocolatey\bin -> .appveyor.yml
     - C:\ProgramData\chocolatey\lib -> .appveyor.yml
     # Cache php install
     - C:\tools\php -> .appveyor.yml
     - .phpunit -> phpunit
-    - C:\projects\maker-bundle\vendor -> composer.json
 
 services:
   - mysql
@@ -26,8 +24,6 @@ init:
 environment:
     TEST_DATABASE_DSN: mysql://root:Password12!@127.0.0.1:3306/test_maker
     matrix:
-      - dependencies: lowest
-        php_ver_target: 7.1.3
       - dependencies: highest
         php_ver_target: 7.2.3
 
@@ -39,10 +35,10 @@ install:
     - IF %PHP%==0 copy php.ini-development php.ini /Y
     - IF %PHP%==0 echo memory_limit=-1 >> php.ini
     - IF %PHP%==0 echo serialize_precision=14 >> php.ini
+    - IF %PHP%==0 echo realpath_cache_size=8192k >> php.ini
     - IF %PHP%==0 echo max_execution_time=1200 >> php.ini
     - IF %PHP%==0 echo date.timezone="UTC" >> php.ini
     - IF %PHP%==0 echo extension_dir=ext >> php.ini
-    - IF %PHP%==0 echo zend_extension=php_opcache.dll >> php.ini
     - IF %PHP%==0 echo opcache.enable_cli=1 >> php.ini
     - IF %PHP%==0 echo extension=php_openssl.dll >> php.ini
     - IF %PHP%==0 echo extension=php_mbstring.dll >> php.ini
@@ -52,9 +48,7 @@ install:
     - IF %PHP%==0 echo extension=php_pdo_mysql.dll >> php.ini
     - IF %PHP%==0 echo @php %%~dp0composer.phar %%* > composer.bat
     - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer.phar
-    - composer global require hirak/prestissimo --no-progress
     - cd C:\projects\maker-bundle
-    - IF %dependencies%==lowest appveyor-retry composer update --prefer-lowest --no-progress --no-suggest --ansi
     - IF %dependencies%==highest appveyor-retry composer update --no-progress --no-suggest --ansi
     - vendor/bin/simple-phpunit install
 

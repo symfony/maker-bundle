@@ -85,7 +85,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommandInCustomRootNamespace')
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
         ];
 
         yield 'controller_basic' => [MakerTestDetails::createTest(
@@ -294,21 +293,21 @@ class FunctionalTest extends MakerTestCase
                     'AppCustomAuthenticator',
                 ]
             )
-                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticator')
-                ->assert(
-                    function (string $output, string $directory) {
-                        $this->assertContains('Success', $output);
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticator')
+            ->assert(
+                function (string $output, string $directory) {
+                    $this->assertContains('Success', $output);
 
-                        $fs = new Filesystem();
-                        $this->assertTrue($fs->exists(sprintf('%s/src/Security/AppCustomAuthenticator.php', $directory)));
+                    $fs = new Filesystem();
+                    $this->assertTrue($fs->exists(sprintf('%s/src/Security/AppCustomAuthenticator.php', $directory)));
 
-                        $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
-                        $this->assertEquals(
-                            'App\\Security\\AppCustomAuthenticator',
-                            $securityConfig['security']['firewalls']['main']['guard']['authenticators'][0]
-                        );
-                    }
-                ),
+                    $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
+                    $this->assertEquals(
+                        'App\\Security\\AppCustomAuthenticator',
+                        $securityConfig['security']['firewalls']['main']['guard']['authenticators'][0]
+                    );
+                }
+            ),
         ];
 
         yield 'auth_empty_multiple_firewalls' => [
@@ -323,18 +322,18 @@ class FunctionalTest extends MakerTestCase
                     1,
                 ]
             )
-                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorMultipleFirewalls')
-                ->assert(
-                    function (string $output, string $directory) {
-                        $this->assertContains('Success', $output);
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorMultipleFirewalls')
+            ->assert(
+                function (string $output, string $directory) {
+                    $this->assertContains('Success', $output);
 
-                        $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
-                        $this->assertEquals(
-                            'App\\Security\\AppCustomAuthenticator',
-                            $securityConfig['security']['firewalls']['second']['guard']['authenticators'][0]
-                        );
-                    }
-                ),
+                    $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
+                    $this->assertEquals(
+                        'App\\Security\\AppCustomAuthenticator',
+                        $securityConfig['security']['firewalls']['second']['guard']['authenticators'][0]
+                    );
+                }
+            ),
         ];
 
         yield 'auth_empty_existing_authenticator' => [
@@ -349,18 +348,18 @@ class FunctionalTest extends MakerTestCase
                     1,
                 ]
             )
-                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorExistingAuthenticator')
-                ->assert(
-                    function (string $output, string $directory) {
-                        $this->assertContains('Success', $output);
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorExistingAuthenticator')
+            ->assert(
+                function (string $output, string $directory) {
+                    $this->assertContains('Success', $output);
 
-                        $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
-                        $this->assertEquals(
-                            'App\\Security\\AppCustomAuthenticator',
-                            $securityConfig['security']['firewalls']['main']['guard']['entry_point']
-                        );
-                    }
-                ),
+                    $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
+                    $this->assertEquals(
+                        'App\\Security\\AppCustomAuthenticator',
+                        $securityConfig['security']['firewalls']['main']['guard']['entry_point']
+                    );
+                }
+            ),
         ];
 
         yield 'auth_empty_multiple_firewalls_existing_authenticator' => [
@@ -377,18 +376,18 @@ class FunctionalTest extends MakerTestCase
                     1,
                 ]
             )
-                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorMultipleFirewallsExistingAuthenticator')
-                ->assert(
-                    function (string $output, string $directory) {
-                        $this->assertContains('Success', $output);
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorMultipleFirewallsExistingAuthenticator')
+            ->assert(
+                function (string $output, string $directory) {
+                    $this->assertContains('Success', $output);
 
-                        $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
-                        $this->assertEquals(
-                            'App\\Security\\AppCustomAuthenticator',
-                            $securityConfig['security']['firewalls']['second']['guard']['entry_point']
-                        );
-                    }
-                ),
+                    $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
+                    $this->assertEquals(
+                        'App\\Security\\AppCustomAuthenticator',
+                        $securityConfig['security']['firewalls']['second']['guard']['entry_point']
+                    );
+                }
+            ),
         ];
 
         yield 'auth_login_form_user_entity_with_encoder' => [
@@ -403,22 +402,22 @@ class FunctionalTest extends MakerTestCase
                     'SecurityController',
                 ]
             )
-                ->addExtraDependencies('doctrine')
-                ->addExtraDependencies('twig')
-                ->addExtraDependencies('symfony/form')
-                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntity')
-                ->configureDatabase()
-                ->updateSchemaAfterCommand()
-                ->assert(
-                    function (string $output, string $directory) {
-                        $this->assertContains('Success', $output);
+            ->addExtraDependencies('doctrine')
+            ->addExtraDependencies('twig')
+            ->addExtraDependencies('symfony/form')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntity')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->assert(
+                function (string $output, string $directory) {
+                    $this->assertContains('Success', $output);
 
-                        $fs = new Filesystem();
-                        $this->assertTrue($fs->exists(sprintf('%s/src/Controller/SecurityController.php', $directory)));
-                        $this->assertTrue($fs->exists(sprintf('%s/templates/security/login.html.twig', $directory)));
-                        $this->assertTrue($fs->exists(sprintf('%s/src/Security/AppCustomAuthenticator.php', $directory)));
-                    }
-                ),
+                    $fs = new Filesystem();
+                    $this->assertTrue($fs->exists(sprintf('%s/src/Controller/SecurityController.php', $directory)));
+                    $this->assertTrue($fs->exists(sprintf('%s/templates/security/login.html.twig', $directory)));
+                    $this->assertTrue($fs->exists(sprintf('%s/src/Security/AppCustomAuthenticator.php', $directory)));
+                }
+            ),
         ];
 
         yield 'auth_login_form_custom_username_field' => [
@@ -437,10 +436,10 @@ class FunctionalTest extends MakerTestCase
                     0
                 ]
             )
-                ->addExtraDependencies('doctrine/annotations')
-                ->addExtraDependencies('twig')
-                ->addExtraDependencies('symfony/form')
-                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormCustomUsernameField')
+            ->addExtraDependencies('doctrine/annotations')
+            ->addExtraDependencies('twig')
+            ->addExtraDependencies('symfony/form')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormCustomUsernameField')
         ];
 
         yield 'auth_login_form_user_entity_no_encoder' => [
@@ -455,12 +454,12 @@ class FunctionalTest extends MakerTestCase
                     'SecurityController',
                 ]
             )
-                ->addExtraDependencies('doctrine')
-                ->addExtraDependencies('twig')
-                ->addExtraDependencies('symfony/form')
-                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntityNoEncoder')
-                ->configureDatabase()
-                ->updateSchemaAfterCommand(),
+            ->addExtraDependencies('doctrine')
+            ->addExtraDependencies('twig')
+            ->addExtraDependencies('symfony/form')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntityNoEncoder')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand(),
         ];
 
         yield 'auth_login_form_user_not_entity_with_encoder' => [
@@ -477,10 +476,10 @@ class FunctionalTest extends MakerTestCase
                     'App\Security\User',
                 ]
             )
-                ->addExtraDependencies('twig')
-                ->addExtraDependencies('doctrine/annotations')
-                ->addExtraDependencies('symfony/form')
-                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserNotEntity'),
+            ->addExtraDependencies('twig')
+            ->addExtraDependencies('doctrine/annotations')
+            ->addExtraDependencies('symfony/form')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserNotEntity'),
         ];
 
         yield 'auth_login_form_user_not_entity_no_encoder' => [
@@ -497,10 +496,10 @@ class FunctionalTest extends MakerTestCase
                     'App\Security\User',
                 ]
             )
-                ->addExtraDependencies('twig')
-                ->addExtraDependencies('doctrine/annotations')
-                ->addExtraDependencies('symfony/form')
-                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserNotEntityNoEncoder'),
+            ->addExtraDependencies('twig')
+            ->addExtraDependencies('doctrine/annotations')
+            ->addExtraDependencies('symfony/form')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserNotEntityNoEncoder'),
         ];
 
         yield 'auth_login_form_existing_controller' => [
@@ -515,12 +514,12 @@ class FunctionalTest extends MakerTestCase
                     'SecurityController',
                 ]
             )
-                ->addExtraDependencies('doctrine')
-                ->addExtraDependencies('twig')
-                ->addExtraDependencies('symfony/form')
-                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormExistingController')
-                ->configureDatabase()
-                ->updateSchemaAfterCommand(),
+            ->addExtraDependencies('doctrine')
+            ->addExtraDependencies('twig')
+            ->addExtraDependencies('symfony/form')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormExistingController')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand(),
         ];
 
         yield 'user_security_entity_with_password' => [MakerTestDetails::createTest(
@@ -622,7 +621,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudInCustomRootNamespace')
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
             // need for crud web tests
             ->configureDatabase()
             ->assert(function (string $output, string $directory) {
@@ -883,7 +881,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToManyInCustomNamespace')
             ->changeRootNamespace('Custom')
-            ->addPreMakeCommand('composer dump-autoload')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
             ->setRequiredPhpVersion(70100)
@@ -939,7 +936,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRelationVendorTarget')
             ->configureDatabase()
-            ->addPreMakeCommand('composer dump-autoload')
             ->addReplacement(
                 'composer.json',
                 '"App\\\Tests\\\": "tests/",',
@@ -951,7 +947,7 @@ class FunctionalTest extends MakerTestCase
 
                 // sanity checks on the generated code
                 $finder = new Finder();
-                $finder->in($directory.'/src/Entity');
+                $finder->in($directory.'/src/Entity')->files()->name('*.php');
                 $this->assertEquals(1, count($finder));
 
                 $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
@@ -979,7 +975,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRelationVendorTarget')
             ->configureDatabase()
-            ->addPreMakeCommand('composer dump-autoload')
             ->addReplacement(
                 'composer.json',
                 '"App\\\Tests\\\": "tests/",',
@@ -1015,7 +1010,6 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRelationVendorTarget')
             ->configureDatabase()
-            ->addPreMakeCommand('composer dump-autoload')
             ->addReplacement(
                 'composer.json',
                 '"App\\\Tests\\\": "tests/",',
