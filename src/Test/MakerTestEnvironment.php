@@ -95,6 +95,16 @@ final class MakerTestEnvironment
 
                 throw $e;
             }
+
+            $this->processReplacements($this->testDetails->getReplacements(), $this->path);
+
+            MakerTestProcess::create('git init && git config user.name "symfony" && git config user.email "test@symfony.com" && git add . && git commit -a -m "first commit"',
+                $this->path
+            )
+                ->run();
+        } else {
+            MakerTestProcess::create('git reset --hard && git clean -f -d', $this->path)
+                ->run();
         }
 
         MakerTestProcess::create('composer dump-autoload', $this->path)
@@ -113,8 +123,6 @@ final class MakerTestEnvironment
                 $this->fs->copy($file->getPathname(), $this->path.'/'.$file->getRelativePathname(), true);
             }
         }
-
-        $this->processReplacements($this->testDetails->getReplacements(), $this->path);
 
         if ($ignoredFiles = $this->testDetails->getFilesToDelete()) {
             foreach ($ignoredFiles as $file) {
@@ -256,38 +264,6 @@ final class MakerTestEnvironment
         }
     }
 
-    public function reset()
-    {
-        foreach ($this->testDetails->getFilesToRevert() as $file) {
-            if (!file_exists($this->path.'/'.$file.'.original')) {
-                throw new \Exception(sprintf('Cannot find original file for "%s"', $file));
-            }
-
-            $this->fs->rename($this->path.'/'.$file.'.original', $this->path.'/'.$file, true);
-        }
-
-        $cleanSnapshot = json_decode(file_get_contents($this->snapshotFile));
-        $currentSnapshot = $this->createSnapshot();
-
-        $diff = array_diff($currentSnapshot, $cleanSnapshot);
-
-        if (\count($diff)) {
-            $this->fs->remove($diff);
-        }
-
-        if ($ignoredFiles = $this->testDetails->getFilesToDelete()) {
-            foreach ($ignoredFiles as $file) {
-                if (file_exists($this->path.'/'.$file.'.deleted')) {
-                    $this->fs->rename($this->path.'/'.$file.'.deleted', $this->path.'/'.$file);
-                }
-            }
-        }
-
-        // no need to revert post make replacements: if something was replaced
-        // "post make", then it was a generated file, which will be deleted anyways
-        $this->revertReplacements($this->testDetails->getReplacements(), $this->path);
-    }
-
     private function createSnapshot($save = false): array
     {
         $snapshot = [];
@@ -350,19 +326,6 @@ final class MakerTestEnvironment
 
         MakerTestProcess::create('php bin/console cache:clear --no-warmup', $this->flexPath)
                         ->run();
-    }
-
-    private function revertReplacements(array $replacements, $rootDir)
-    {
-        foreach ($replacements as $replacement) {
-            $path = $rootDir.'/'.$replacement['filename'];
-            $contents = file_get_contents($path);
-            if (false === strpos($contents, $replacement['replace'])) {
-                continue;
-            }
-
-            file_put_contents($path, str_replace($replacement['replace'], $replacement['find'], $contents));
-        }
     }
 
     private function processReplacements(array $replacements, $rootDir)
