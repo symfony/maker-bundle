@@ -30,6 +30,6 @@ class SecurityControllerTest extends WebTestCase
         );
         $client->submit($form);
 
-        $this->assertContains('TODO: provide a valid redirection', $client->getResponse()->getContent());
+        $this->assertContains('TODO: check the credentials', $client->getResponse()->getContent());
     }
 }

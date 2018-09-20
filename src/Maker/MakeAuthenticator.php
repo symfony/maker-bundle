@@ -77,7 +77,7 @@ final class MakeAuthenticator extends AbstractMaker
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
         if (!$this->fileManager->fileExists($path = 'config/packages/security.yaml')) {
-            throw new RuntimeCommandException('File "security.yaml" does not exist!');
+            throw new RuntimeCommandException('The file "config/packages/security.yaml" does not exist. This command requires that file to exist so that it can be updated.');
         }
         $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents($path));
         $securityData = $manipulator->getData();
@@ -85,7 +85,7 @@ final class MakeAuthenticator extends AbstractMaker
         // authenticator type
         $authenticatorTypeValues = [
             'Empty authenticator' => self::AUTH_TYPE_EMPTY_AUTHENTICATOR,
-            'Form login' => self::AUTH_TYPE_FORM_LOGIN,
+            'Login form authenticator' => self::AUTH_TYPE_FORM_LOGIN,
         ];
         $command->addArgument('authenticator-type', InputArgument::REQUIRED);
         $authenticatorType = $io->choice(
@@ -99,22 +99,15 @@ final class MakeAuthenticator extends AbstractMaker
         );
 
         if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {
-            $dependencies = new DependencyBuilder();
-            $dependencies->addClassDependency(
-                TwigBundle::class,
-                'twig'
-            );
-            $missingPackagesMessage = 'Twig must be installed to display login form';
+            $neededDependencies = [TwigBundle::class => 'twig'];
+            $missingPackagesMessage = 'Twig must be installed to display the login form.';
 
             if (Kernel::VERSION_ID < 40100) {
-                $dependencies->addClassDependency(
-                    Form::class,
-                    'symfony/form'
-                );
-                $missingPackagesMessage = 'Twig and symfony/form must be installed to display login form';
+                $neededDependencies[Form::class] = 'symfony/form';
+                $missingPackagesMessage = 'Twig and symfony/form must be installed to display the login form';
             }
 
-            $missingPackagesMessage = $dependencies->getMissingPackagesMessage(self::getCommandName(), $missingPackagesMessage);
+            $missingPackagesMessage = $this->addDependencies($neededDependencies, $missingPackagesMessage);
             if ($missingPackagesMessage) {
                 throw new RuntimeCommandException($missingPackagesMessage);
             }
@@ -175,7 +168,16 @@ final class MakeAuthenticator extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $this->generateAuthenticatorClass($input);
+        $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents('config/packages/security.yaml'));
+        $securityData = $manipulator->getData();
+
+        $this->generateAuthenticatorClass(
+            $securityData,
+            $input->getArgument('authenticator-type'),
+            $input->getArgument('authenticator-class'),
+            $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
+            $input->hasArgument('username-field') ? $input->getArgument('username-field') : null
+        );
 
         // update security.yaml with guard config
         $securityYamlUpdated = false;
@@ -192,71 +194,59 @@ final class MakeAuthenticator extends AbstractMaker
         }
 
         if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {
-            $this->generateFormLoginFiles($input);
+            $this->generateFormLoginFiles($input->getArgument('controller-class'), $input->getArgument('username-field'));
         }
 
         $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
 
-        $text = ['Next: Customize your new authenticator.'];
-        if (!$securityYamlUpdated) {
-            $yamlExample = $this->configUpdater->updateForAuthenticator(
-                'security: {}',
-                'main',
-                null,
-                $input->getArgument('authenticator-class')
-            );
-            $text[] = "Your <info>security.yaml</info> could not be updated automatically. You'll need to add the following config manually:\n\n".$yamlExample;
-        }
-        $io->text($text);
+        $io->text(
+            $this->generateNextMessage(
+                $securityYamlUpdated,
+                $input->getArgument('authenticator-type'),
+                $input->getArgument('authenticator-class'),
+                $securityData,
+                $input->hasArgument('user-class') ? $input->getArgument('user-class') : null
+            )
+        );
     }
 
-    private function generateAuthenticatorClass(InputInterface $input)
+    private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, $userClass, $userNameField)
     {
         // generate authenticator class
-        if (self::AUTH_TYPE_EMPTY_AUTHENTICATOR === $input->getArgument('authenticator-type')) {
+        if (self::AUTH_TYPE_EMPTY_AUTHENTICATOR === $authenticatorType) {
             $this->generator->generateClass(
-                $input->getArgument('authenticator-class'),
+                $authenticatorClass,
                 'authenticator/EmptyAuthenticator.tpl.php',
                 []
             );
-        } else {
-            $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents('config/packages/security.yaml'));
-            $securityData = $manipulator->getData();
 
-            $userNeedsEncoder = false;
-            if (isset($securityData['security']['encoders']) && $securityData['security']['encoders']) {
-                foreach ($securityData['security']['encoders'] as $userClassWithEncoder => $encoder) {
-                    if ($input->getArgument('user-class') === $userClassWithEncoder || is_subclass_of($input->getArgument('user-class'), $userClassWithEncoder)) {
-                        $userNeedsEncoder = true;
-                    }
-                }
-            }
-
-            $userClassNameDetails = $this->generator->createClassNameDetails(
-                '\\'.$input->getArgument('user-class'),
-                'Entity\\'
-            );
-
-            $this->generator->generateClass(
-                $input->getArgument('authenticator-class'),
-                'authenticator/LoginFormAuthenticator.tpl.php',
-                [
-                    'user_fully_qualified_class_name' => trim($userClassNameDetails->getFullName(), '\\'),
-                    'user_class_name' => $userClassNameDetails->getShortName(),
-                    'username_field' => $input->getArgument('username-field'),
-                    'user_needs_encoder' => $userNeedsEncoder,
-                    'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($input->getArgument('user-class')),
-                ]
-            );
+            return;
         }
+
+        $userClassNameDetails = $this->generator->createClassNameDetails(
+            '\\'.$userClass,
+            'Entity\\'
+        );
+
+        $this->generator->generateClass(
+            $authenticatorClass,
+            'authenticator/LoginFormAuthenticator.tpl.php',
+            [
+                'user_fully_qualified_class_name' => trim($userClassNameDetails->getFullName(), '\\'),
+                'user_class_name' => $userClassNameDetails->getShortName(),
+                'username_field' => $userNameField,
+                'user_needs_encoder' => $this->userNeedsEncoder($securityData, $userClass),
+                'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($userClass),
+            ]
+        );
     }
 
-    private function generateFormLoginFiles(InputInterface $input)
+    private function generateFormLoginFiles(string $controllerClass, string $userNameField)
     {
         $controllerClassNameDetails = $this->generator->createClassNameDetails(
-            $input->getArgument('controller-class'),
+            $controllerClass,
             'Controller\\',
             'Controller'
         );
@@ -267,7 +257,7 @@ final class MakeAuthenticator extends AbstractMaker
                 'authenticator/EmptySecurityController.tpl.php'
             );
 
-            $controllerSourceCode = $this->generator->getFileContents($controllerPath);
+            $controllerSourceCode = $this->generator->getFileContentsForPendingOperation($controllerPath);
         } else {
             $controllerPath = $this->fileManager->getRelativePathForFutureClass($controllerClassNameDetails->getFullName());
             $controllerSourceCode = $this->fileManager->getFileContents($controllerPath);
@@ -289,9 +279,54 @@ final class MakeAuthenticator extends AbstractMaker
             'templates/security/login.html.twig',
             'authenticator/login_form.tpl.php',
             [
-                'username_field' => $input->getArgument('username-field'),
+                'username_field' => $userNameField,
             ]
         );
+    }
+
+    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, array $securityData, $userClass): array
+    {
+        $nextTexts = ['Next:'];
+        $nextTexts[] = '- Customize your new authenticator.';
+
+        if (!$securityYamlUpdated) {
+            $yamlExample = $this->configUpdater->updateForAuthenticator(
+                'security: {}',
+                'main',
+                null,
+                $authenticatorClass
+            );
+            $nextTexts[] = '- Your <info>security.yaml</info> could not be updated automatically. You\'ll need to add the following config manually:\n\n'.$yamlExample;
+        }
+
+        if (self::AUTH_TYPE_FORM_LOGIN === $authenticatorType) {
+            $nextTexts[] = sprintf('- You must provide a valid redirection in the method <info>%s::onAuthenticationSuccess()</info>.', $authenticatorClass);
+            $nextTexts[] = '- Review & adapt the login template : <info>/templates/security/login.html.twig</info>.';
+
+            if (!$this->doctrineHelper->isClassAMappedEntity($userClass)) {
+                $nextTexts[] = sprintf('- Review <info>%s::getUser()</info>, if it match your needs.', $authenticatorClass);
+            }
+
+            if (!$this->userNeedsEncoder($securityData, $userClass)) {
+                $nextTexts[] = sprintf('- Check user\'s password in <info>%s::checkCredentials()</info>.', $authenticatorClass);
+            }
+        }
+
+        return $nextTexts;
+    }
+
+    private function userNeedsEncoder(array $securityData, string $userClass): bool
+    {
+        $userNeedsEncoder = false;
+        if (isset($securityData['security']['encoders']) && $securityData['security']['encoders']) {
+            foreach ($securityData['security']['encoders'] as $userClassWithEncoder => $encoder) {
+                if ($userClass === $userClassWithEncoder || is_subclass_of($userClass, $userClassWithEncoder)) {
+                    $userNeedsEncoder = true;
+                }
+            }
+        }
+
+        return $userNeedsEncoder;
     }
 
     public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)
