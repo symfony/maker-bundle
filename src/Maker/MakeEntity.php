@@ -378,7 +378,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     private function printAvailableTypes(ConsoleStyle $io)
     {
         $allTypes = Type::getTypesMap();
-        
+
         if ('Hyper' === getenv('TERM_PROGRAM')) {
             $wizard = 'wizard 🧙';
         } else {
