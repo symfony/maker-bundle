@@ -12,7 +12,9 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @internal
@@ -73,6 +75,65 @@ start() method should be used as the entry point (the start() method on all othe
 authenticators will be ignored, and can be blank.',
             $authenticators,
             current($authenticators)
+        );
+    }
+
+    public function guessUserClass(SymfonyStyle $io, array $providers): string
+    {
+        if (1 === \count($providers) && isset(current($providers)['entity'])) {
+            $entityProvider = current($providers);
+
+            return $entityProvider['entity']['class'];
+        }
+
+        $userClass = $io->ask(
+            'Enter the User class that you want to authenticate (e.g. <fg=yellow>App\\Entity\\User</>)',
+            $this->guessUserClassDefault(),
+            [Validator::class, 'classIsUserInterface']
+        );
+
+        return $userClass;
+    }
+
+    private function guessUserClassDefault()
+    {
+        if (class_exists('App\\Entity\\User') && isset(class_implements('App\\Entity\\User')[UserInterface::class])) {
+            return 'App\\Entity\\User';
+        }
+
+        if (class_exists('App\\Security\\User') && isset(class_implements('App\\Security\\User')[UserInterface::class])) {
+            return 'App\\Security\\User';
+        }
+
+        return null;
+    }
+
+    public function guessUserNameField(SymfonyStyle $io, string $userClass, array $providers): string
+    {
+        if (1 === \count($providers) && isset(current($providers)['entity'])) {
+            $entityProvider = current($providers);
+
+            return $entityProvider['entity']['property'];
+        }
+
+        if (property_exists($userClass, 'email') && !property_exists($userClass, 'username')) {
+            return 'email';
+        }
+
+        if (!property_exists($userClass, 'email') && property_exists($userClass, 'username')) {
+            return 'username';
+        }
+
+        $classProperties = [];
+        $reflectionClass = new \ReflectionClass($userClass);
+        foreach ($reflectionClass->getProperties() as $property) {
+            $classProperties[] = $property->name;
+        }
+
+        return $io->choice(
+            sprintf('Which field on your <fg=yellow>%s</> class will people enter when logging in?', $userClass),
+            $classProperties,
+            property_exists($userClass, 'username') ? 'username' : (property_exists($userClass, 'email') ? 'email' : null)
         );
     }
 }

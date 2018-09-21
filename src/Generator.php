@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 
@@ -82,6 +83,22 @@ class Generator
         $this->pendingOperations[$targetPath] = [
             'contents' => $contents,
         ];
+    }
+
+    public function getFileContentsForPendingOperation(string $targetPath): string
+    {
+        if (!isset($this->pendingOperations[$targetPath])) {
+            throw new RuntimeCommandException(sprintf('File "%s" is not in the Generator\'s pending operations', $targetPath));
+        }
+
+        $templatePath = $this->pendingOperations[$targetPath]['template'];
+        $parameters = $this->pendingOperations[$targetPath]['variables'];
+
+        $templateParameters = array_merge($parameters, [
+            'relative_path' => $this->fileManager->relativizePath($targetPath),
+        ]);
+
+        return $this->fileManager->parseTemplate($templatePath, $templateParameters);
     }
 
     /**
@@ -178,15 +195,10 @@ class Generator
                 continue;
             }
 
-            $templatePath = $templateData['template'];
-            $parameters = $templateData['variables'];
-
-            $templateParameters = array_merge($parameters, [
-                'relative_path' => $this->fileManager->relativizePath($targetPath),
-            ]);
-
-            $fileContents = $this->fileManager->parseTemplate($templatePath, $templateParameters);
-            $this->fileManager->dumpFile($targetPath, $fileContents);
+            $this->fileManager->dumpFile(
+                $targetPath,
+                $this->getFileContentsForPendingOperation($targetPath, $templateData)
+            );
         }
 
         $this->pendingOperations = [];
@@ -195,5 +207,17 @@ class Generator
     public function getRootNamespace(): string
     {
         return $this->namespacePrefix;
+    }
+
+    public function generateController(string $controllerClassName, string $controllerTemplatePath, array $parameters = []): string
+    {
+        return $this->generateClass(
+            $controllerClassName,
+            $controllerTemplatePath,
+            $parameters +
+            [
+                'parent_class_name' => \method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
+            ]
+        );
     }
 }

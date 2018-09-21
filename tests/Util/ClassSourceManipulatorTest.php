@@ -542,4 +542,27 @@ class ClassSourceManipulatorTest extends TestCase
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
+
+    public function testAddMethodWithBody()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/EmptyController.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_method/Controller_with_action.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $methodBuilder = $manipulator->createMethodBuilder('action', 'JsonResponse', false, ['@Route("/action", name="app_action")']);
+        $methodBuilder->addParam(
+            (new \PhpParser\Builder\Param('param'))->setTypeHint('string')
+        );
+        $manipulator->addMethodBody($methodBuilder, <<<'CODE'
+<?php
+return new JsonResponse(['param' => $param]);
+CODE
+        );
+        $manipulator->addMethodBuilder($methodBuilder);
+        $manipulator->addUseStatementIfNecessary('Symfony\\Component\\HttpFoundation\\JsonResponse');
+        $manipulator->addUseStatementIfNecessary('Symfony\\Component\\Routing\\Annotation\\Route');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
 }

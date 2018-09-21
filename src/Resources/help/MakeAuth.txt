@@ -1,6 +1,8 @@
-The <info>%command.name%</info> command generates an empty
-Guard Authenticator class.
+The <info>%command.name%</info> command generates various authentication systems,
+by asking questions.
 
-<info>php %command.full_name% AppCustomAuthenticator</info>
+It can provide an empty authenticator, or a full login form authentication process.
+In both cases it also updates your <info>security.yaml</info>.
+For the login form, it also generates a controller and the twig template.
 
-If the argument is missing, the command will ask for the class name interactively.
+<info>php %command.full_name%</info>
