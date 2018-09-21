@@ -72,7 +72,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
     public function checkCredentials($credentials, UserInterface $user)
     {
         <?= $user_needs_encoder ? "return \$this->passwordEncoder->isPasswordValid(\$user, \$credentials['password']);\n"
-        : "// Check the user’s password or other credentials and return true or false
+        : "// Check the user's password or other credentials and return true or false
         // If there are no credentials to check, you can just return true
         throw new \Exception('TODO: check the credentials inside '.__FILE__);\n" ?>
     }
@@ -83,8 +83,8 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
             return new RedirectResponse($targetPath);
         }
 
-        // e.g. : return new RedirectResponse($this->router->generate('some_route'));
-        throw new \Exception('TODO: provide a valid redirection inside '.__FILE__);
+        // For example : return new RedirectResponse($this->router->generate('some_route'));
+        throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
     }
 
     protected function getLoginUrl()

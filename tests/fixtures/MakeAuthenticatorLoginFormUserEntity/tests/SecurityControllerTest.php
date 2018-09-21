@@ -59,7 +59,7 @@ class SecurityControllerTest extends WebTestCase
         );
         $client->submit($form);
 
-        $this->assertContains('TODO: provide a valid redirection', $client->getResponse()->getContent());
+        $this->assertContains('TODO: provide a valid redirect', $client->getResponse()->getContent());
         $this->assertNotNull($token = $client->getContainer()->get('security.token_storage')->getToken());
         $this->assertInstanceOf(User::class, $token->getUser());
     }

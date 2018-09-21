@@ -9,8 +9,8 @@
     {% endif %}
 
     <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <label for="inputEmail" class="sr-only">Email address</label>
-    <input type="email" value="{{ last_username }}" name="<?= $username_field; ?>" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+    <label for="input<?= ucfirst($username_field); ?>" class="sr-only"><?= $username_label; ?></label>
+    <input type="<?= $username_is_email ? 'email' : 'text'; ?>" value="{{ last_username }}" name="<?= $username_field; ?>" id="input<?= ucfirst($username_field); ?>" class="form-control" placeholder="<?= $username_label; ?>" required autofocus>
     <label for="inputPassword" class="sr-only">Password</label>
     <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
 

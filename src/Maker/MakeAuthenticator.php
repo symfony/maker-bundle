@@ -237,7 +237,7 @@ final class MakeAuthenticator extends AbstractMaker
                 'user_fully_qualified_class_name' => trim($userClassNameDetails->getFullName(), '\\'),
                 'user_class_name' => $userClassNameDetails->getShortName(),
                 'username_field' => $userNameField,
-                'user_needs_encoder' => $this->userNeedsEncoder($securityData, $userClass),
+                'user_needs_encoder' => $this->userClassHasEncoder($securityData, $userClass),
                 'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($userClass),
             ]
         );
@@ -280,6 +280,8 @@ final class MakeAuthenticator extends AbstractMaker
             'authenticator/login_form.tpl.php',
             [
                 'username_field' => $userNameField,
+                'username_is_email' => false !== stripos($userNameField, 'email'),
+                'username_label' => ucfirst(implode(' ', preg_split('/(?=[A-Z])/', 'oneTwoThree'))),
             ]
         );
     }
@@ -300,22 +302,23 @@ final class MakeAuthenticator extends AbstractMaker
         }
 
         if (self::AUTH_TYPE_FORM_LOGIN === $authenticatorType) {
-            $nextTexts[] = sprintf('- You must provide a valid redirection in the method <info>%s::onAuthenticationSuccess()</info>.', $authenticatorClass);
-            $nextTexts[] = '- Review & adapt the login template : <info>/templates/security/login.html.twig</info>.';
+            $nextTexts[] = sprintf('- Finish the redirect "TODO" in the <info>%s::onAuthenticationSuccess()</info> method.', $authenticatorClass);
 
             if (!$this->doctrineHelper->isClassAMappedEntity($userClass)) {
-                $nextTexts[] = sprintf('- Review <info>%s::getUser()</info>, if it match your needs.', $authenticatorClass);
+                $nextTexts[] = sprintf('- Review <info>%s::getUser()</info> to make sure it matches your needs.', $authenticatorClass);
             }
 
-            if (!$this->userNeedsEncoder($securityData, $userClass)) {
-                $nextTexts[] = sprintf('- Check user\'s password in <info>%s::checkCredentials()</info>.', $authenticatorClass);
+            if (!$this->userClassHasEncoder($securityData, $userClass)) {
+                $nextTexts[] = sprintf('- Check the user\'s password in <info>%s::checkCredentials()</info>.', $authenticatorClass);
             }
+
+            $nextTexts[] = '- Review & adapt the login template: <info>templates/security/login.html.twig</info>.';
         }
 
         return $nextTexts;
     }
 
-    private function userNeedsEncoder(array $securityData, string $userClass): bool
+    private function userClassHasEncoder(array $securityData, string $userClass): bool
     {
         $userNeedsEncoder = false;
         if (isset($securityData['security']['encoders']) && $securityData['security']['encoders']) {
