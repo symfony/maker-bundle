@@ -379,6 +379,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     {
         $allTypes = Type::getTypesMap();
 
+        if ('Hyper' === getenv('TERM_PROGRAM')) {
+            $wizard = 'wizard 🧙';
+        } else {
+            $wizard = '\\' === \DIRECTORY_SEPARATOR ? 'wizard' : 'wizard 🧙';
+        }
+
         $typesTable = [
             'main' => [
                 'string' => [],
@@ -388,7 +394,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 'float' => [],
             ],
             'relation' => [
-                'relation' => 'a wizard will help you build the relation',
+                'relation' => 'a '.$wizard.' will help you build the relation',
                 EntityRelation::MANY_TO_ONE => [],
                 EntityRelation::ONE_TO_MANY => [],
                 EntityRelation::MANY_TO_MANY => [],
