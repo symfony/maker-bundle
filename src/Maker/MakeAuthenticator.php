@@ -281,7 +281,7 @@ final class MakeAuthenticator extends AbstractMaker
             [
                 'username_field' => $userNameField,
                 'username_is_email' => false !== stripos($userNameField, 'email'),
-                'username_label' => ucfirst(implode(' ', preg_split('/(?=[A-Z])/', 'oneTwoThree'))),
+                'username_label' => ucfirst(implode(' ', preg_split('/(?=[A-Z])/', $userNameField))),
             ]
         );
     }
