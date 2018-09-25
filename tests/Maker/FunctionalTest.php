@@ -805,6 +805,36 @@ class FunctionalTest extends MakerTestCase
             ->setRequiredPhpVersion(70100)
         ];
 
+        yield 'entity_many_to_one_self_referencing' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // field name
+                'guardian',
+                // add a relationship field
+                'relation',
+                // the target entity
+                'User',
+                // relation type
+                'ManyToOne',
+                // nullable
+                'n',
+                // do you want to generate an inverse relation? (default to yes)
+                '',
+                // field name on opposite side - use default 'userAvatarPhotos'
+                'wards',
+                // orphanRemoval (default to no)
+                '',
+                // finish adding fields
+                '',
+            ])
+           ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntitySelfReferencing')
+           ->configureDatabase()
+           ->updateSchemaAfterCommand()
+           ->setRequiredPhpVersion(70100)
+        ];
+
         yield 'entity_one_to_many_simple' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),
             [
