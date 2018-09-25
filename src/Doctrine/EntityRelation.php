@@ -33,6 +33,8 @@ final class EntityRelation
 
     private $isNullable = false;
 
+    private $isSelfReferencing = false;
+
     private $orphanRemoval = false;
 
     private $mapInverseRelation = true;
@@ -50,6 +52,7 @@ final class EntityRelation
         $this->type = $type;
         $this->owningClass = $owningClass;
         $this->inverseClass = $inverseClass;
+        $this->isSelfReferencing = $owningClass === $inverseClass;
     }
 
     public function setOwningProperty(string $owningProperty)
@@ -95,6 +98,7 @@ final class EntityRelation
                     ->setTargetClassName($this->inverseClass)
                     ->setTargetPropertyName($this->inverseProperty)
                     ->setIsNullable($this->isNullable)
+                    ->setIsSelfReferencing($this->isSelfReferencing)
                     ->setMapInverseRelation($this->mapInverseRelation)
                 ;
                 break;
@@ -104,6 +108,7 @@ final class EntityRelation
                     ->setTargetClassName($this->inverseClass)
                     ->setTargetPropertyName($this->inverseProperty)
                     ->setIsOwning(true)->setMapInverseRelation($this->mapInverseRelation)
+                    ->setIsSelfReferencing($this->isSelfReferencing)
                 ;
                 break;
             case self::ONE_TO_ONE:
@@ -113,6 +118,7 @@ final class EntityRelation
                     ->setTargetPropertyName($this->inverseProperty)
                     ->setIsNullable($this->isNullable)
                     ->setIsOwning(true)
+                    ->setIsSelfReferencing($this->isSelfReferencing)
                     ->setMapInverseRelation($this->mapInverseRelation)
                 ;
                 break;
@@ -130,6 +136,7 @@ final class EntityRelation
                     ->setTargetClassName($this->owningClass)
                     ->setTargetPropertyName($this->owningProperty)
                     ->setOrphanRemoval($this->orphanRemoval)
+                    ->setIsSelfReferencing($this->isSelfReferencing)
                 ;
                 break;
             case self::MANY_TO_MANY:
@@ -138,6 +145,7 @@ final class EntityRelation
                     ->setTargetClassName($this->owningClass)
                     ->setTargetPropertyName($this->owningProperty)
                     ->setIsOwning(false)
+                    ->setIsSelfReferencing($this->isSelfReferencing)
                 ;
                 break;
             case self::ONE_TO_ONE:
@@ -147,6 +155,7 @@ final class EntityRelation
                     ->setTargetPropertyName($this->owningProperty)
                     ->setIsNullable($this->isNullable)
                     ->setIsOwning(false)
+                    ->setIsSelfReferencing($this->isSelfReferencing)
                 ;
                 break;
             default:
@@ -182,6 +191,11 @@ final class EntityRelation
     public function isNullable(): bool
     {
         return $this->isNullable;
+    }
+
+    public function isSelfReferencing(): bool
+    {
+        return $this->isSelfReferencing;
     }
 
     public function getMapInverseRelation(): bool
