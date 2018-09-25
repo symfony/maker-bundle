@@ -30,6 +30,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Validation;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
