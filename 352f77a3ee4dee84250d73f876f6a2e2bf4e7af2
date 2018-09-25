@@ -1,0 +1,30 @@
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-09-20T08:20:24Z
+
+Hm it looks like everything is ok, but I need several days to optimize some functions.
+@weaverryan maybe you will have some time to review changes?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-09-21T00:56:52Z
+
+@sadikoff I still see some failing tests :/. Were they fixed, and then unfixed by later commits? And a few new tests are failing on Travis - probably we broke something by accident.
+
+I would love to know what you think the cause is for the Windows tests failures :).
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-09-21T10:09:36Z
+
+@weaverryan There was something broken, first time I started tests it takes 50 minutes to pass everything :)
+
+And now It looks like some string replacements doesn't work as expected, All exceptions and failures were caused by wrong namespace or config used in cached env. Sometimes it was wrong from the beginning.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-09-25T01:44:51Z
+
+@sadikoff Can I get one more favor? :) Can you rebase? This PR will merge cleanly, but rebasing is causing conflicts, and we need to squash the commits, unfortunately.
+
+Thanks! I'm eager to merge this!
