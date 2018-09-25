@@ -819,10 +819,10 @@ class FunctionalTest extends MakerTestCase
                 // relation type
                 'ManyToOne',
                 // nullable
-                'n',
+                'y',
                 // do you want to generate an inverse relation? (default to yes)
                 '',
-                // field name on opposite side - use default 'userAvatarPhotos'
+                // field name on opposite side
                 'wards',
                 // orphanRemoval (default to no)
                 '',
