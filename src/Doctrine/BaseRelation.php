@@ -19,6 +19,7 @@ abstract class BaseRelation
     private $propertyName;
     private $targetClassName;
     private $targetPropertyName;
+    private $isSelfReferencing = false;
     private $mapInverseRelation = true;
 
     abstract public function isOwning(): bool;
@@ -55,6 +56,18 @@ abstract class BaseRelation
     public function setTargetPropertyName($targetPropertyName)
     {
         $this->targetPropertyName = $targetPropertyName;
+
+        return $this;
+    }
+
+    public function isSelfReferencing(): bool
+    {
+        return $this->isSelfReferencing;
+    }
+
+    public function setIsSelfReferencing(bool $isSelfReferencing)
+    {
+        $this->isSelfReferencing = $isSelfReferencing;
 
         return $this;
     }
