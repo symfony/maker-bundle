@@ -159,7 +159,10 @@ final class MakeUser extends AbstractMaker
             $userClassConfiguration->setUserProviderClass('App\\Security\\UserProvider');
             $customProviderPath = $generator->generateClass(
                 $userClassConfiguration->getUserProviderClass(),
-                'security/UserProvider.tpl.php'
+                'security/UserProvider.tpl.php',
+                [
+                    'user_short_name' => $userClassNameDetails->getShortName(),
+                ]
             );
         }
 
