@@ -1,0 +1,77 @@
+---------------------------------------------------------------------------
+
+by lyrixx at 2018-09-21T15:11:59Z
+
+How does it behave on system that does not support it? (we may don't care :) )
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-09-21T15:22:42Z
+
+Indeed... thanks has some "magic" logic for that 🎩
+
+https://github.com/symfony/thanks/blob/master/src/Thanks.php#L87-L93
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2018-09-21T15:41:05Z
+
+Does anyone see a wizard here?
+
+![error-1](https://user-images.githubusercontent.com/73419/45891294-80170780-bdc5-11e8-8973-6cce7b321d82.png)
+
+![error-2](https://user-images.githubusercontent.com/73419/45891299-81e0cb00-bdc5-11e8-9164-911fc0d6e030.png)
+
+---------------------------------------------------------------------------
+
+by tgalopin at 2018-09-21T15:45:40Z
+
+Updated :)
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2018-09-21T15:48:58Z
+
+@javiereguiluz
+
+<img src="https://user-images.githubusercontent.com/243674/45891731-9c677400-bdc6-11e8-9893-0b66e3d94d51.png" width="100">
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2018-09-21T16:06:14Z
+
+@tgalopin I'm on a macOS computer and still can't see this emoji:
+
+![error-3](https://user-images.githubusercontent.com/73419/45892653-0254fb00-bdc9-11e8-8db0-568e94292cc8.png)
+
+---------------------------------------------------------------------------
+
+by tgalopin at 2018-09-21T16:23:31Z
+
+It's a question of font. Do you see other emojis, like in thanks code?
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2018-09-21T17:51:30Z
+
+@tgalopin yes, I can see all emojis perfectly ... but not the one you added here. I only see an empty square.
+
+---------------------------------------------------------------------------
+
+by ogizanagi at 2018-09-21T18:31:05Z
+
+@javiereguiluz : You might still be on OS X Sierra, but this emoji is part of Unicode 10 for which the Apple Color Emoji font was only updated since High Sierra.
+
+_Note: You can try installing the [emoji-one font](https://github.com/emojione/emojione/tree/master/extras/fonts#apple-font) or get a more recent version of the Apple font from another High Sierra install._
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2018-09-22T14:29:35Z
+
+@ogizanagi you are right ... and that was my point: we may be trying to use a too new emoji ... which is not seen by some (lots?) of users. Please, think twice before merging it 🙏  Thanks!
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2018-09-23T13:53:48Z
+
+As time passes, this compat issue will disappear. Given the outcome is a simple square, I'm all for merging this now :)
