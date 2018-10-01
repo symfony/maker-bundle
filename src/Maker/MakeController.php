@@ -39,7 +39,7 @@ final class MakeController extends AbstractMaker
         $command
             ->setDescription('Creates a new controller class')
             ->addArgument('controller-class', InputArgument::OPTIONAL, sprintf('Choose a name for your controller class (e.g. <fg=yellow>%sController</>)', Str::asClassName(Str::getRandomTerm())))
-            ->addOption('--no-template', '-n', InputOption::VALUE_OPTIONAL)
+            ->addOption('no-template', 'n', InputOption::VALUE_NONE, 'Use this option to disable template generation')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeController.txt'))
         ;
     }
@@ -52,7 +52,7 @@ final class MakeController extends AbstractMaker
             'Controller'
         );
 
-        $withTemplate = !$input->getOption('--no-template');
+        $noTemplate = $input->getOption('no-template');
         $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()).'/index.html.twig';
         $controllerPath = $generator->generateController(
             $controllerClassNameDetails->getFullName(),
@@ -60,12 +60,12 @@ final class MakeController extends AbstractMaker
             [
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
-                'twig_installed' => $this->isTwigInstalled() && $withTemplate,
+                'with_template' => $this->isTwigInstalled() && !$noTemplate,
                 'template_name' => $templateName,
             ]
         );
 
-        if ($this->isTwigInstalled() && $withTemplate) {
+        if ($this->isTwigInstalled() && !$noTemplate) {
             $generator->generateFile(
                 'templates/'.$templateName,
                 'controller/twig_template.tpl.php',

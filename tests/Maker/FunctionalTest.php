@@ -125,15 +125,16 @@ class FunctionalTest extends MakerTestCase
             $this->getMakerInstance(MakeController::class),
             [
                 // controller class name
-                'FooTwig',
+                'FooNoTemplate',
                 // option to disable template generation
                 '--no-template'
             ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController')
             ->addExtraDependencies('twig')
             ->assert(function (string $output, string $directory) {
                 // make sure the template was not configured
                 $this->assertContainsCount('created: ', $output, 1);
+                $this->assertContains('created: src/Controller/FooNoTemplateController.php', $output);
+                $this->assertNotContains('created: templates/foo_no_template/index.html.twig', $output);
             })
         ];
 

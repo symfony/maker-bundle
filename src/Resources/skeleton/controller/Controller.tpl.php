@@ -12,7 +12,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
      */
     public function index()
     {
-<?php if ($twig_installed) { ?>
+<?php if ($with_template) { ?>
         return $this->render('<?= $template_name ?>', [
             'controller_name' => '<?= $class_name ?>',
         ]);
