@@ -9,10 +9,24 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+* Class <?= $class_name; ?>
+* @package <?= $namespace; ?>
+*/
 class <?= $class_name; ?> extends Command
 {
+    /**
+     * Command name
+     *
+     * @var string
+     */
     protected static $defaultName = '<?= $command_name; ?>';
 
+    /**
+     * Setup command configuration
+     *
+     * @return void
+     */
     protected function configure()
     {
         $this
@@ -22,6 +36,13 @@ class <?= $class_name; ?> extends Command
         ;
     }
 
+    /**
+     * Command execution
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return void
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
@@ -32,7 +53,7 @@ class <?= $class_name; ?> extends Command
         }
 
         if ($input->getOption('option1')) {
-            // ...
+            // TODO: Do something if option1 is set
         }
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
