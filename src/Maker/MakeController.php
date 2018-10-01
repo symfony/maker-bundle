@@ -21,6 +21,7 @@ use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -38,6 +39,7 @@ final class MakeController extends AbstractMaker
         $command
             ->setDescription('Creates a new controller class')
             ->addArgument('controller-class', InputArgument::OPTIONAL, sprintf('Choose a name for your controller class (e.g. <fg=yellow>%sController</>)', Str::asClassName(Str::getRandomTerm())))
+            ->addOption('--no-template', '-n', InputOption::VALUE_OPTIONAL)
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeController.txt'))
         ;
     }
@@ -50,6 +52,7 @@ final class MakeController extends AbstractMaker
             'Controller'
         );
 
+        $withTemplate = !$input->getOption('--no-template');
         $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()).'/index.html.twig';
         $controllerPath = $generator->generateController(
             $controllerClassNameDetails->getFullName(),
@@ -57,12 +60,12 @@ final class MakeController extends AbstractMaker
             [
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
-                'twig_installed' => $this->isTwigInstalled(),
+                'twig_installed' => $this->isTwigInstalled() && $withTemplate,
                 'template_name' => $templateName,
             ]
         );
 
-        if ($this->isTwigInstalled()) {
+        if ($this->isTwigInstalled() && $withTemplate) {
             $generator->generateFile(
                 'templates/'.$templateName,
                 'controller/twig_template.tpl.php',

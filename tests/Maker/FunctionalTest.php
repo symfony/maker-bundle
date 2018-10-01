@@ -121,6 +121,22 @@ class FunctionalTest extends MakerTestCase
             ->deleteFile('templates/base.html.twig')
         ];
 
+        yield 'controller_without_template' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeController::class),
+            [
+                // controller class name
+                'FooTwig',
+                // option to disable template generation
+                '--no-template'
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeController')
+            ->addExtraDependencies('twig')
+            ->assert(function (string $output, string $directory) {
+                // make sure the template was not configured
+                $this->assertContainsCount('created: ', $output, 1);
+            })
+        ];
+
         yield 'controller_sub_namespace' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeController::class),
             [
