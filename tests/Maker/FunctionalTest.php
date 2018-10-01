@@ -126,9 +126,8 @@ class FunctionalTest extends MakerTestCase
             [
                 // controller class name
                 'FooNoTemplate',
-                // option to disable template generation
-                '--no-template'
             ])
+            ->setArgumentsString('--no-template')
             ->addExtraDependencies('twig')
             ->assert(function (string $output, string $directory) {
                 // make sure the template was not configured
