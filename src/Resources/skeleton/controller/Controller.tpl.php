@@ -5,6 +5,10 @@ namespace <?= $namespace; ?>;
 use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name; ?>;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Class <?= $class_name; ?>
+ * @package <?= $namespace; ?>
+ */
 class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 {
     /**
