@@ -823,7 +823,7 @@ class FunctionalTest extends MakerTestCase
                 // do you want to generate an inverse relation? (default to yes)
                 '',
                 // field name on opposite side
-                'wards',
+                'dependants',
                 // orphanRemoval (default to no)
                 '',
                 // finish adding fields

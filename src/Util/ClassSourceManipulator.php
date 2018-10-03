@@ -447,7 +447,7 @@ final class ClassSourceManipulator
 
     private function addCollectionRelation(BaseCollectionRelation $relation)
     {
-        $typeHint = !$relation->isSelfReferencing() ? $this->addUseStatementIfNecessary($relation->getTargetClassName()) : 'self';
+        $typeHint = $relation->isSelfReferencing() ? 'self' : $this->addUseStatementIfNecessary($relation->getTargetClassName());
 
         $arrayCollectionTypeHint = $this->addUseStatementIfNecessary(ArrayCollection::class);
         $collectionTypeHint = $this->addUseStatementIfNecessary(Collection::class);

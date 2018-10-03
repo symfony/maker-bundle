@@ -21,7 +21,7 @@ class GeneratedEntityTest extends KernelTestCase
 
         $user = new User();
         // check that the constructor was instantiated properly
-        $this->assertInstanceOf(ArrayCollection::class, $user->getWards());
+        $this->assertInstanceOf(ArrayCollection::class, $user->getDependants());
         // set existing field
         $user->setFirstName('Ryan');
         $em->persist($user);
@@ -34,7 +34,7 @@ class GeneratedEntityTest extends KernelTestCase
         // set via the inverse side
         $ward2 = new User();
         $ward2->setFirstName('Fabien');
-        $user->addWard($ward2);
+        $user->addDependant($ward2);
         $em->persist($ward2);
 
         $em->flush();
@@ -44,6 +44,6 @@ class GeneratedEntityTest extends KernelTestCase
             ->findAll();
 
         $this->assertCount(3, $actualUser);
-        $this->assertCount(2, $actualUser[0]->getWards());
+        $this->assertCount(2, $actualUser[0]->getDependants());
     }
 }
