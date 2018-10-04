@@ -9,8 +9,18 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * Class <?= $class_name ?>
+ * @package <?= $namespace ?>
+ */
 class <?= $class_name ?> extends AbstractType
 {
+    /**
+     * Builds the form.
+     *
+     * @param FormBuilderInterface $builder The form builder
+     * @param array                $options The options
+     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
@@ -20,6 +30,11 @@ class <?= $class_name ?> extends AbstractType
         ;
     }
 
+    /**
+     * Configures the options for this type.
+     *
+     * @param OptionsResolver $resolver The resolver for the options
+     */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
