@@ -42,11 +42,11 @@ class <?= $class_name ?> implements UserProviderInterface
      */
     public function refreshUser(UserInterface $user)
     {
-        if (!$user instanceof User) {
+        if (!$user instanceof <?= $user_short_name ?>) {
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
 
-        /* @var User $user */
+        /* @var <?= $user_short_name ?> $user */
 
         // Return a User object after making sure its data is "fresh".
         // Or throw a UsernameNotFoundException if the user no longer exists.
@@ -58,6 +58,6 @@ class <?= $class_name ?> implements UserProviderInterface
      */
     public function supportsClass($class)
     {
-        return User::class === $class;
+        return <?= $user_short_name ?>::class === $class;
     }
 }

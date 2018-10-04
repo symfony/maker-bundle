@@ -544,8 +544,8 @@ class FunctionalTest extends MakerTestCase
         yield 'user_security_model_no_password' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeUser::class),
             [
-                // user class name
-                'User',
+                // user class name (with non-traditional name)
+                'FunUser',
                 'n', // entity
                 'username', // identity property
                 'n', // login with password?
