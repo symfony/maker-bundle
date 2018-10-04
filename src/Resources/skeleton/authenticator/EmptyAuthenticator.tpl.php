@@ -12,7 +12,6 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
 /**
  * Class <?= $class_name ?>
- *
  * @package <?= $namespace ?>
  */
 class <?= $class_name ?> extends AbstractGuardAuthenticator

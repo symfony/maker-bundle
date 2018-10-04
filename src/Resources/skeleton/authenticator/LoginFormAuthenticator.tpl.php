@@ -20,7 +20,6 @@ use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 /**
  * Class <?= $class_name ?>
- *
  * @package <?= $namespace ?>
  */
 class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
