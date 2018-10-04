@@ -13,11 +13,19 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
+ * Class <?= $class_name ?>
+ * @package <?= $namespace ?>
  * @Route("<?= $route_path ?>")
  */
 class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 {
     /**
+     * Index page
+     *
+<?php if (isset($repository_full_class_name)): ?>
+     * @param <?= $repository_class_name ?> $<?= $repository_var ?>
+<?php endif ?>
+     * @return Response
      * @Route("/", name="<?= $route_name ?>_index", methods="GET")
      */
 <?php if (isset($repository_full_class_name)): ?>
@@ -37,6 +45,10 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 <?php endif ?>
 
     /**
+     * Add page
+     *
+     * @param Request $request
+     * @return Response
      * @Route("/new", name="<?= $route_name ?>_new", methods="GET|POST")
      */
     public function new(Request $request): Response
@@ -60,14 +72,32 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
     }
 
     /**
+     * Show page
+     *
+     * @param <?= $entity_class_name ?> $<?= $entity_var_singular ?>
+     * @return Response
      * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_show", methods="GET")
      */
     public function show(<?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
         return $this->render('<?= $route_name ?>/show.html.twig', ['<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>]);
     }
+<?php
+    $entityClassNameLen = mb_strlen($entity_class_name);
+    $requestClassNameLen = mb_strlen('Request');
+    $differenceBetweenNames = abs($entityClassNameLen - $requestClassNameLen);
+    $spaces = '';
+    for ($i = 1; $i <= $differenceBetweenNames; ++$i) {
+        $spaces .= ' ';
+    }
+?>
 
     /**
+     * Show page
+     *
+     * @param Request<?= ($requestClassNameLen >= $entityClassNameLen ? ' ' : $spaces) ?>$request
+     * @param <?= $entity_class_name ?><?= ($entityClassNameLen >= $requestClassNameLen ? ' ' : $spaces) ?>$<?= $entity_var_singular ?>
+     * @return Response
      * @Route("/{<?= $entity_identifier ?>}/edit", name="<?= $route_name ?>_edit", methods="GET|POST")
      */
     public function edit(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
@@ -88,6 +118,11 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
     }
 
     /**
+     * Remove page
+     *
+     * @param Request<?= ($requestClassNameLen >= $entityClassNameLen ? ' ' : $spaces) ?>$request
+     * @param <?= $entity_class_name ?><?= ($entityClassNameLen >= $requestClassNameLen ? ' ' : $spaces) ?>$<?= $entity_var_singular ?>
+     * @return Response
      * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_delete", methods="DELETE")
      */
     public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response

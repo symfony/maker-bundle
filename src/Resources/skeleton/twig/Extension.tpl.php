@@ -6,8 +6,17 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
+/**
+* Class <?= $class_name ?>
+* @package <?= $namespace; ?>
+*/
 class <?= $class_name ?> extends AbstractExtension
 {
+    /**
+     * Returns a list of filters to add to the existing list.
+     *
+     * @return Twig_Filter[]
+     */
     public function getFilters(): array
     {
         return [
@@ -18,6 +27,11 @@ class <?= $class_name ?> extends AbstractExtension
         ];
     }
 
+    /**
+     * Returns a list of functions to add to the existing list.
+     *
+     * @return Twig_Function[]
+     */
     public function getFunctions(): array
     {
         return [
@@ -25,6 +39,11 @@ class <?= $class_name ?> extends AbstractExtension
         ];
     }
 
+    /**
+     * This is your custom method
+     *
+     * @param mixed $value
+     */
     public function doSomething($value)
     {
         // ...

@@ -5,7 +5,9 @@ namespace <?= $namespace; ?>;
 use Symfony\Component\Validator\Constraint;
 
 /**
+ * Class <?= $class_name ?>
  * @Annotation
+ * @package <?= $namespace; ?>
  */
 class <?= $class_name ?> extends Constraint
 {
