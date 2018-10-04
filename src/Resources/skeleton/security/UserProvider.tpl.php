@@ -35,7 +35,7 @@ class <?= $class_name ?> implements UserProviderInterface
      * called. Your job is to make sure the user's data is still fresh by,
      * for example, re-querying for fresh User data.
      *
-     * If your firewall is "stateless: false" (for a pure API), this
+     * If your firewall is "stateless: true" (for a pure API), this
      * method is not called.
      *
      * @return UserInterface
