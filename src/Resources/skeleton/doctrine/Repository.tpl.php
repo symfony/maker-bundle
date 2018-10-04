@@ -7,6 +7,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
+ * Class <?= $class_name; ?>
+ * @package <?= $namespace; ?>
  * @method <?= $entity_class_name; ?>|null find($id, $lockMode = null, $lockVersion = null)
  * @method <?= $entity_class_name; ?>|null findOneBy(array $criteria, array $orderBy = null)
  * @method <?= $entity_class_name; ?>[]    findAll()
@@ -14,12 +16,18 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class <?= $class_name; ?> extends ServiceEntityRepository
 {
+    /**
+     * <?= $class_name; ?> constructor.
+     *
+     * @param RegistryInterface $registry
+     */
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, <?= $entity_class_name; ?>::class);
     }
 
 //    /**
+//     * @param mixed $value
 //     * @return <?= $entity_class_name ?>[] Returns an array of <?= $entity_class_name ?> objects
 //     */
     /*
@@ -36,6 +44,10 @@ class <?= $class_name; ?> extends ServiceEntityRepository
     }
     */
 
+//    /**
+//     * @param mixed $value
+//     * @return <?= $entity_class_name ?>
+//     */
     /*
     public function findOneBySomeField($value): ?<?= $entity_class_name."\n" ?>
     {
