@@ -4,6 +4,10 @@ namespace <?= $namespace; ?>;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
+/**
+ * Class <?= $class_name ?>
+ * @package <?= $namespace; ?>
+ */
 class <?= $class_name ?> extends WebTestCase
 {
     public function testSomething()
