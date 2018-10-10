@@ -138,7 +138,7 @@ final class MakeCrud extends AbstractMaker
                     'form_class_name' => $formClassDetails->getShortName(),
                     'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
                     'route_name' => $routeName,
-                    'template_path' => $templatesPath,
+                    'templates_path' => $templatesPath,
                     'entity_var_plural' => $entityVarPlural,
                     'entity_twig_var_plural' => $entityTwigVarPlural,
                     'entity_var_singular' => $entityVarSingular,
