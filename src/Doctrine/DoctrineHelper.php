@@ -133,10 +133,9 @@ final class DoctrineHelper
             if ($disconnected) {
                 try {
                     $loaded = $cmf->getAllMetadata();
-                } catch (\Throwable $e) {
-                    if (!$e instanceof ORMMappingException && !$e instanceof PersistenceMappingException) {
-                        throw $e;
-                    }
+                } catch (ORMMappingException $e) {
+                    $loaded = $cmf instanceof AbstractClassMetadataFactory ? $cmf->getLoadedMetadata() : [];
+                } catch (PersistenceMappingException $e) {
                     $loaded = $cmf instanceof AbstractClassMetadataFactory ? $cmf->getLoadedMetadata() : [];
                 }
 
