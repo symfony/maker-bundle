@@ -1,3 +1,21 @@
+1.8
+===
+
+* make:auth can now generate an entire form login system with
+  authenticator, login form and controller! #266 thanks to @nikophil
+
+* make:auth now registers your guard authenticator in your security.yaml
+  file automatically - #261 thanks to @nikophil
+
+* Generate more explicit voter attribute names - #283 thanks to @lyrixx
+
+* Fixing incorrect dependency for make:crud - #256 thanks to @ckrack
+
+* Fix self-referencing relation issue - #278 thanks to @codedmonkey
+
+* Fix edge-case bad template name in make:crud - #286 thanks
+  to @thlbaut
+
 1.7
 ===
 
