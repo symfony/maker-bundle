@@ -201,8 +201,13 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             } elseif ($newField instanceof EntityRelation) {
                 // both overridden below for OneToMany
                 $newFieldName = $newField->getOwningProperty();
-                $otherManipulatorFilename = $this->getPathOfClass($newField->getInverseClass());
-                $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
+                if ($newField->isSelfReferencing()) {
+                    $otherManipulatorFilename = $entityPath;
+                    $otherManipulator = $manipulator;
+                } else {
+                    $otherManipulatorFilename = $this->getPathOfClass($newField->getInverseClass());
+                    $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
+                }
                 switch ($newField->getType()) {
                     case EntityRelation::MANY_TO_ONE:
                         if ($newField->getOwningClass() === $entityClassDetails->getFullName()) {
