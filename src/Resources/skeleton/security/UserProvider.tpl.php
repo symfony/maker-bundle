@@ -17,6 +17,8 @@ class <?= $class_name ?> implements UserProviderInterface
      * this method.
      *
      * @return UserInterface
+     *
+     * @throws UsernameNotFoundException if the user is not found
      */
     public function loadUserByUsername($username)
     {
@@ -45,8 +47,6 @@ class <?= $class_name ?> implements UserProviderInterface
         if (!$user instanceof <?= $user_short_name ?>) {
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
-
-        /* @var <?= $user_short_name ?> $user */
 
         // Return a User object after making sure its data is "fresh".
         // Or throw a UsernameNotFoundException if the user no longer exists.
