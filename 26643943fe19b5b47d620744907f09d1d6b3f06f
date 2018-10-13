@@ -1,0 +1,35 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-10-13T18:38:33Z
+
+Hey @mertoksuz!
+
+Thanks for making this PR to fix this! But, the tests are failing because the old exception class *is* needed in the catch. Can why your change fixes things? It's quite possible that we may need to catch *both* `MappingException`.
+
+Cheers!
+
+---------------------------------------------------------------------------
+
+by mertoksuz at 2018-10-13T18:49:01Z
+
+@weaverryan
+
+Hey, i updated my codes. Is that recover both exceptions ?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-10-13T19:02:58Z
+
+@mertoksuz thanks! You did well! But, we can't use the `|` syntax in catch - it breaks in 7.0. Can you manually add 2 separate catches - one for each exception?
+
+And also, do you have any idea why the `Common` exception is the one that fixes your problem? I'll tag a release shortly - as you are working quickly, we can hopefully include this :)
+
+---------------------------------------------------------------------------
+
+by mertoksuz at 2018-10-13T19:07:12Z
+
+@weaverryan
+
+i updated again :).
+
+I think, when doctrine tries to load metadata somehow it checks php classes but if you have only yml/xml files for entities than it throws Class not found ( MappingException ).
