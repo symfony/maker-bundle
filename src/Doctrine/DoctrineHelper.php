@@ -16,7 +16,8 @@ use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\MappingException;
+use Doctrine\ORM\Mapping\MappingException as ORMMappingException;
+use Doctrine\Common\Persistence\Mapping\MappingException as PersistenceMappingException;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 use Symfony\Bridge\Doctrine\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
@@ -132,7 +133,9 @@ final class DoctrineHelper
             if ($disconnected) {
                 try {
                     $loaded = $cmf->getAllMetadata();
-                } catch (MappingException $e) {
+                } catch (ORMMappingException $e) {
+                    $loaded = $cmf instanceof AbstractClassMetadataFactory ? $cmf->getLoadedMetadata() : [];
+                } catch (PersistenceMappingException $e) {
                     $loaded = $cmf instanceof AbstractClassMetadataFactory ? $cmf->getLoadedMetadata() : [];
                 }
 
