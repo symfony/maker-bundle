@@ -48,8 +48,6 @@ class <?= $class_name ?> implements UserProviderInterface
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
 
-        /* @var <?= $user_short_name ?> $user */
-
         // Return a User object after making sure its data is "fresh".
         // Or throw a UsernameNotFoundException if the user no longer exists.
         throw new \Exception('TODO: fill in refreshUser() inside '.__FILE__);
