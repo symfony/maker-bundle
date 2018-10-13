@@ -17,6 +17,8 @@ class <?= $class_name ?> implements UserProviderInterface
      * this method.
      *
      * @return UserInterface
+     *
+     * @throws UsernameNotFoundException if the user is not found
      */
     public function loadUserByUsername($username)
     {
