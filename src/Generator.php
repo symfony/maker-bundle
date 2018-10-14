@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 
@@ -85,22 +84,6 @@ class Generator
         ];
     }
 
-    public function getFileContentsForPendingOperation(string $targetPath): string
-    {
-        if (!isset($this->pendingOperations[$targetPath])) {
-            throw new RuntimeCommandException(sprintf('File "%s" is not in the Generator\'s pending operations', $targetPath));
-        }
-
-        $templatePath = $this->pendingOperations[$targetPath]['template'];
-        $parameters = $this->pendingOperations[$targetPath]['variables'];
-
-        $templateParameters = array_merge($parameters, [
-            'relative_path' => $this->fileManager->relativizePath($targetPath),
-        ]);
-
-        return $this->fileManager->parseTemplate($templatePath, $templateParameters);
-    }
-
     /**
      * Creates a helper object to get data about a class name.
      *
@@ -139,6 +122,27 @@ class Generator
             $className = substr($name, 1);
         } else {
             $className = rtrim($fullNamespacePrefix, '\\').'\\'.Str::asClassName($name, $suffix);
+        }
+
+        Validator::validateClassName($className, $validationErrorMessage);
+
+        // if this is a custom class, we may be completely different than the namespace prefix
+        // the best way can do, is find the PSR4 prefix and use that
+        if (0 !== strpos($className, $fullNamespacePrefix)) {
+            $fullNamespacePrefix = $this->fileManager->getNamespacePrefixForClass($className);
+        }
+
+        return new ClassNameDetails($className, $fullNamespacePrefix, $suffix);
+    }
+
+    public function createControllerClassNameDetails(string $name, string $namespacePrefix, string $suffix = '', $Infolder, string $validationErrorMessage = ''): ClassNameDetails
+    {
+        $fullNamespacePrefix = $this->namespacePrefix.'\\'.$namespacePrefix;
+        if ('\\' === $name[0]) {
+            // class is already "absolute" - leave it alone (but strip opening \)
+            $className = substr($name, 1);
+        } else {
+            $className = ($Infolder) ? rtrim($fullNamespacePrefix, '\\') . '\\' . $suffix . '\\' . Str::asClassName($name) : rtrim($fullNamespacePrefix, '\\').'\\'.Str::asClassName($name, $suffix) ;
         }
 
         Validator::validateClassName($className, $validationErrorMessage);
@@ -195,10 +199,15 @@ class Generator
                 continue;
             }
 
-            $this->fileManager->dumpFile(
-                $targetPath,
-                $this->getFileContentsForPendingOperation($targetPath, $templateData)
-            );
+            $templatePath = $templateData['template'];
+            $parameters = $templateData['variables'];
+
+            $templateParameters = array_merge($parameters, [
+                'relative_path' => $this->fileManager->relativizePath($targetPath),
+            ]);
+
+            $fileContents = $this->fileManager->parseTemplate($templatePath, $templateParameters);
+            $this->fileManager->dumpFile($targetPath, $fileContents);
         }
 
         $this->pendingOperations = [];
@@ -207,17 +216,5 @@ class Generator
     public function getRootNamespace(): string
     {
         return $this->namespacePrefix;
-    }
-
-    public function generateController(string $controllerClassName, string $controllerTemplatePath, array $parameters = []): string
-    {
-        return $this->generateClass(
-            $controllerClassName,
-            $controllerTemplatePath,
-            $parameters +
-            [
-                'parent_class_name' => \method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
-            ]
-        );
     }
 }

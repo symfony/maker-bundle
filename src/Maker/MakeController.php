@@ -12,9 +12,11 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Common\Annotations\Annotation;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -38,31 +40,39 @@ final class MakeController extends AbstractMaker
         $command
             ->setDescription('Creates a new controller class')
             ->addArgument('controller-class', InputArgument::OPTIONAL, sprintf('Choose a name for your controller class (e.g. <fg=yellow>%sController</>)', Str::asClassName(Str::getRandomTerm())))
+            ->addOption('path', null, InputOption::VALUE_OPTIONAL, 'Choose a path for your controller (e.g. <fg=yellow>"Foo/Bar"</>)')
+            ->addOption('template', true, InputOption::VALUE_OPTIONAL, 'If this option is set to false we will skip template creation')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeController.txt'))
         ;
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $controllerClassNameDetails = $generator->createClassNameDetails(
+        $ControllerPathName = $input->getOption('path');
+        $Infolder = ($ControllerPathName) ? true : false;
+        $SuffixName = ($Infolder) ? str_replace('/',"\\",$ControllerPathName) : 'Controller';
+        $controllerClassNameDetails = $generator->createControllerClassNameDetails(
             $input->getArgument('controller-class'),
             'Controller\\',
-            'Controller'
+            $SuffixName,
+            $Infolder
         );
-
-        $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()).'/index.html.twig';
-        $controllerPath = $generator->generateController(
+        $templateName = ($Infolder) ? 
+                        Str::asFilePath($ControllerPathName).'/index.html.twig' : 
+                        Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()).'/index.html.twig';
+        $controllerPath = $generator->generateClass(
             $controllerClassNameDetails->getFullName(),
             'controller/Controller.tpl.php',
             [
-                'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
-                'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
+                'parent_class_name' => \method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
+                'route_path' => ($Infolder) ? str_replace("/controller","",Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix())) : Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
+                'route_name' => ($Infolder) ? str_replace("_controller","",Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix())) : Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'twig_installed' => $this->isTwigInstalled(),
                 'template_name' => $templateName,
             ]
         );
 
-        if ($this->isTwigInstalled()) {
+        if ($input->getOption('template') != false && $this->isTwigInstalled()) {
             $generator->generateFile(
                 'templates/'.$templateName,
                 'controller/twig_template.tpl.php',
