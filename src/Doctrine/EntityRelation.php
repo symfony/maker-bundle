@@ -16,10 +16,10 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
  */
 final class EntityRelation
 {
-    const MANY_TO_ONE = 'ManyToOne';
-    const ONE_TO_MANY = 'OneToMany';
-    const MANY_TO_MANY = 'ManyToMany';
-    const ONE_TO_ONE = 'OneToOne';
+    const MANY_TO_ONE = 'manytoone';
+    const ONE_TO_MANY = 'onetomany';
+    const MANY_TO_MANY = 'manytomany';
+    const ONE_TO_ONE = 'onetoone';
 
     private $type;
 
@@ -41,15 +41,15 @@ final class EntityRelation
 
     public function __construct(string $type, string $owningClass, string $inverseClass)
     {
-        if (!\in_array($type, self::getValidRelationTypes())) {
+        if (!\in_array(strtolower($type), self::getValidRelationTypes())) {
             throw new \Exception(sprintf('Invalid relation type "%s"', $type));
         }
 
-        if (self::ONE_TO_MANY === $type) {
+        if (self::ONE_TO_MANY === strtolower($type)) {
             throw new \Exception('Use ManyToOne instead of OneToMany');
         }
 
-        $this->type = $type;
+        $this->type = strtolower($type);
         $this->owningClass = $owningClass;
         $this->inverseClass = $inverseClass;
         $this->isSelfReferencing = $owningClass === $inverseClass;
