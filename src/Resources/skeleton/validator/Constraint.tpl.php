@@ -1,13 +1,12 @@
-<?= "<?php\n" ?>
+<?= "<?php" . PHP_EOL ?>
 
-namespace <?= $namespace; ?>;
+namespace <?= $namespace ?>;
 
 use Symfony\Component\Validator\Constraint;
 
 /**
- * Class <?= $class_name ?>
+ * Class <?= $class_name . PHP_EOL ?>
  * @Annotation
- * @package <?= $namespace; ?>
  */
 class <?= $class_name ?> extends Constraint
 {

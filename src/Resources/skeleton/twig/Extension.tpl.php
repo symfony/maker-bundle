@@ -1,21 +1,15 @@
-<?= "<?php\n" ?>
+<?= "<?php" . PHP_EOL ?>
 
-namespace <?= $namespace; ?>;
+namespace <?= $namespace ?>;
 
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-/**
-* Class <?= $class_name ?>
-* @package <?= $namespace; ?>
-*/
 class <?= $class_name ?> extends AbstractExtension
 {
     /**
-     * Returns a list of filters to add to the existing list.
-     *
-     * @return Twig_Filter[]
+     * {@inheritdoc}
      */
     public function getFilters(): array
     {
@@ -28,9 +22,7 @@ class <?= $class_name ?> extends AbstractExtension
     }
 
     /**
-     * Returns a list of functions to add to the existing list.
-     *
-     * @return Twig_Function[]
+     * {@inheritdoc}
      */
     public function getFunctions(): array
     {

@@ -1,4 +1,4 @@
-<?= "<?php\n"; ?>
+<?= '<?php' . PHP_EOL; ?>
 
 namespace <?= $namespace; ?>;
 
@@ -9,23 +9,13 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-/**
-* Class <?= $class_name; ?>
-* @package <?= $namespace; ?>
-*/
 class <?= $class_name; ?> extends Command
 {
-    /**
-     * Command name
-     *
-     * @var string
-     */
+    /** @var string */
     protected static $defaultName = '<?= $command_name; ?>';
 
     /**
-     * Setup command configuration
-     *
-     * @return void
+     * {@inheritdoc}
      */
     protected function configure()
     {
@@ -37,25 +27,21 @@ class <?= $class_name; ?> extends Command
     }
 
     /**
-     * Command execution
-     *
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return void
+     * {@inheritdoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $io = new SymfonyStyle($input, $output);
+        $symfonyStyle = new SymfonyStyle($input, $output);
         $arg1 = $input->getArgument('arg1');
 
         if ($arg1) {
-            $io->note(sprintf('You passed an argument: %s', $arg1));
+            $symfonyStyle->note(sprintf('You passed an argument: %s', $arg1));
         }
 
         if ($input->getOption('option1')) {
             // TODO: Do something if option1 is set
         }
 
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        $symfonyStyle->success('You have a new command! Now make it your own! Pass --help to see your options.');
     }
 }

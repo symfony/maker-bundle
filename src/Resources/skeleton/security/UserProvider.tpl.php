@@ -1,4 +1,4 @@
-<?= "<?php\n" ?>
+<?= "<?php" . PHP_EOL ?>
 
 namespace <?= $namespace; ?>;
 
@@ -7,22 +7,12 @@ use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
-/**
- * Class <?= $class_name ?>
- * @package <?= $namespace; ?>
- */
 class <?= $class_name ?> implements UserProviderInterface
 {
     /**
-     * Symfony calls this method if you use features like switch_user
-     * or remember_me.
-     *
-     * If you're not using these features, you do not need to implement
-     * this method.
-     *
-     * @return UserInterface
+     * {@inheritdoc}
      */
-    public function loadUserByUsername($username)
+    public function loadUserByUsername($username): UserInterface
     {
         // Load a User object from your data source or throw UsernameNotFoundException.
         // The $username argument may not actually be a username:
@@ -32,19 +22,9 @@ class <?= $class_name ?> implements UserProviderInterface
     }
 
     /**
-     * Refreshes the user after being reloaded from the session.
-     *
-     * When a user is logged in, at the beginning of each request, the
-     * User object is loaded from the session and then this method is
-     * called. Your job is to make sure the user's data is still fresh by,
-     * for example, re-querying for fresh User data.
-     *
-     * If your firewall is "stateless: false" (for a pure API), this
-     * method is not called.
-     *
-     * @return UserInterface
+     * {@inheritdoc}
      */
-    public function refreshUser(UserInterface $user)
+    public function refreshUser(UserInterface $user): UserInterface
     {
         if (!$user instanceof User) {
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
@@ -58,9 +38,9 @@ class <?= $class_name ?> implements UserProviderInterface
     }
 
     /**
-     * Tells Symfony to use this provider for this User class.
+     * {@inheritdoc}
      */
-    public function supportsClass($class)
+    public function supportsClass($class): bool
     {
         return User::class === $class;
     }

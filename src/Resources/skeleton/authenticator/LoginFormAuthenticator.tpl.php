@@ -1,14 +1,16 @@
-<?= "<?php\n" ?>
+<?= "<?php" . PHP_EOL ?>
 
 namespace <?= $namespace ?>;
 
-<?= $user_is_entity ? "use $user_fully_qualified_class_name;\n" : null ?>
-<?= $user_is_entity ? "use Doctrine\\ORM\\EntityManagerInterface;\n" : null ?>
+<?php if($user_is_entity): ?>
+use <?= $user_fully_qualified_class_name ?>;
+use Doctrine\ORM\EntityManagerInterface;
+<? endif ?>
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-<?= $user_needs_encoder ? "use Symfony\\Component\\Security\\Core\\Encoder\\UserPasswordEncoderInterface;\n" : null ?>
+<?= $user_needs_encoder ? "use Symfony\\Component\\Security\\Core\\Encoder\\UserPasswordEncoderInterface;" . PHP_EOL : null ?>
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -18,55 +20,44 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
-/**
- * Class <?= $class_name ?>
- * @package <?= $namespace ?>
- */
 class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
 {
-<?= $user_is_entity ? "    /** @var EntityManagerInterface */\n    private \$entityManager;\n\n" : null ?>
+<?= $user_is_entity ? "    /** @var EntityManagerInterface */" . PHP_EOL . "    private \$entityManager;" . PHP_EOL . PHP_EOL : null ?>
     /** @var RouterInterface */
     private $router;
 
     /** @var CsrfTokenManagerInterface */
     private $csrfTokenManager;
 
-<?= $user_needs_encoder ? "    /** @var UserPasswordEncoderInterface */\n    private \$passwordEncoder;\n" : null ?>
+<?= $user_needs_encoder ? "    /** @var UserPasswordEncoderInterface */" . PHP_EOL . "    private \$passwordEncoder;" . PHP_EOL : null ?>
 
     /**
      * <?= $class_name; ?> constructor.
      *
-     * @param EntityManagerInterface       $entityManager
+<?= $user_is_entity ? "     * @param EntityManagerInterface       \$entityManager" . PHP_EOL : null ?>
      * @param RouterInterface              $router
      * @param CsrfTokenManagerInterface    $csrfTokenManager
-     * @param UserPasswordEncoderInterface $passwordEncoder
+<?= $user_needs_encoder ? "     * @param UserPasswordEncoderInterface \$passwordEncoder" . PHP_EOL : null ?>
      */
     public function __construct(<?= $user_is_entity ? 'EntityManagerInterface $entityManager, ' : null ?>RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager<?= $user_needs_encoder ? ', UserPasswordEncoderInterface $passwordEncoder' : null ?>)
     {
-<?= $user_is_entity ? "        \$this->entityManager = \$entityManager;\n" : null ?>
+<?= $user_is_entity ? "        \$this->entityManager = \$entityManager;" . PHP_EOL : null ?>
         $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
-<?= $user_needs_encoder ? "        \$this->passwordEncoder = \$passwordEncoder;\n" : null ?>
+<?= $user_needs_encoder ? "        \$this->passwordEncoder = \$passwordEncoder;" . PHP_EOL : null ?>
     }
 
     /**
-     * Does the authenticator support the given Request?
-     *
-     * @param Request $request
-     * @return bool
+     * {@inheritdoc}
      */
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
         return 'app_login' === $request->attributes->get('_route')
             && $request->isMethod('POST');
     }
 
     /**
-     * Get the authentication credentials from the request and return them as any type (e.g. an associate array).
-     *
-     * @param Request $request
-     * @return mixed Any non-null value
-     * @throws \UnexpectedValueException If null is returned
+     * {@inheritdoc}
      */
     public function getCredentials(Request $request)
     {
@@ -84,13 +75,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
     }
 
     /**
-     * Return a UserInterface object based on the credentials.
-     *
-     * @param mixed                 $credentials
-     * @param UserProviderInterface $userProvider
-     * @return null|UserInterface
-     * @throws \Exception
-     * @throws InvalidCsrfTokenException
+     * {@inheritdoc}
      */
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
@@ -99,35 +84,25 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
             throw new InvalidCsrfTokenException();
         }
 
-        <?= $user_is_entity ? "return \$this->entityManager->getRepository($user_class_name::class)->findOneBy(['$username_field' => \$credentials['$username_field']]);\n"
+        <?= $user_is_entity ? "return \$this->entityManager->getRepository($user_class_name::class)->findOneBy(['$username_field' => \$credentials['$username_field']]);" . PHP_EOL
         : "// Load / create our user however you need.
         // You can do this by calling the user provider, or with custom logic here.
-        return \$userProvider->loadUserByUsername(\$credentials['$username_field']);\n"; ?>
+        return \$userProvider->loadUserByUsername(\$credentials['$username_field']);" . PHP_EOL; ?>
     }
 
     /**
-     * Returns true if the credentials are valid.
-     *
-     * @param mixed         $credentials
-     * @param UserInterface $user
-     * @return bool
-     * @throws AuthenticationException
+     * {@inheritdoc}
      */
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
-        <?= $user_needs_encoder ? "return \$this->passwordEncoder->isPasswordValid(\$user, \$credentials['password']);\n"
+        <?= $user_needs_encoder ? "return \$this->passwordEncoder->isPasswordValid(\$user, \$credentials['password']);" . PHP_EOL
         : "// Check the user's password or other credentials and return true or false
         // If there are no credentials to check, you can just return true
-        throw new \Exception('TODO: check the credentials inside '.__FILE__);\n" ?>
+        throw new \Exception('TODO: check the credentials inside '.__FILE__);" . PHP_EOL ?>
     }
 
     /**
-     * Called when authentication executed and was successful!
-     *
-     * @param Request        $request
-     * @param TokenInterface $token
-     * @param string         $providerKey The provider (i.e. firewall) key
-     * @return Response|null
+     * {@inheritdoc}
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
@@ -140,11 +115,9 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
     }
 
     /**
-     * Return the URL to the login page.
-     *
      * @return string
      */
-    protected function getLoginUrl()
+    protected function getLoginUrl(): string
     {
         return $this->router->generate('app_login');
     }

@@ -1,20 +1,16 @@
-<?= "<?php\n" ?>
+<?= "<?php" . PHP_EOL ?>
 
-namespace <?= $namespace; ?>;
+namespace <?= $namespace ?>;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-<?= $event_full_class_name ? "use $event_full_class_name;\n" : '' ?>
+<?= $event_full_class_name ? "use $event_full_class_name;" . PHP_EOL : null ?>
 
-/**
- * Class <?= $class_name ?>
- * @package <?= $namespace; ?>
- */
 class <?= $class_name ?> implements EventSubscriberInterface
 {
     /**
      * <?= $method_name ?> description
      *
-     * @param <?= $event_arg ?>
+     * @param <?= $event_arg . PHP_EOL ?>
      */
     public function <?= $method_name ?>(<?= $event_arg ?>)
     {
@@ -22,9 +18,9 @@ class <?= $class_name ?> implements EventSubscriberInterface
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
            '<?= $event ?>' => '<?= $method_name ?>',

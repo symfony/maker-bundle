@@ -1,13 +1,9 @@
-<?= "<?php\n" ?>
+<?= "<?php" . PHP_EOL ?>
 
 namespace <?= $namespace; ?>;
 
 use PHPUnit\Framework\TestCase;
 
-/**
-* Class <?= $class_name ?>
-* @package <?= $namespace; ?>
-*/
 class <?= $class_name ?> extends TestCase
 {
     public function testSomething()

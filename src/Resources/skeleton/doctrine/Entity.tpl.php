@@ -1,19 +1,16 @@
-<?= "<?php\n" ?>
+<?= "<?php" . PHP_EOL ?>
 
 namespace <?= $namespace ?>;
 
-<?php if ($api_resource): ?>use ApiPlatform\Core\Annotation\ApiResource;
-<?php endif ?>
+<?= $api_resource ? "use ApiPlatform\Core\Annotation\ApiResource;" . PHP_EOL : null ?>
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Class <?= $class_name."\n" ?>
- * @package <?= $namespace ?>
-<?php if ($api_resource): ?> * @ApiResource()
-<?php endif ?>
+ * Class <?= $class_name . PHP_EOL ?>
+<?= $api_resource ? " * @ApiResource()" . PHP_EOL : null ?>
  * @ORM\Entity(repositoryClass="<?= $repository_full_class_name ?>")
  */
-class <?= $class_name."\n" ?>
+class <?= $class_name . PHP_EOL ?>
 {
     /**
      * @var int
@@ -26,7 +23,7 @@ class <?= $class_name."\n" ?>
     /**
      * @return int|null
      */
-    public function getId(): ?int
+    public function getId()
     {
         return $this->id;
     }

@@ -1,10 +1,10 @@
-<?= "<?php\n" ?>
+<?= "<?php" . PHP_EOL ?>
 
 namespace <?= $namespace ?>;
 
 use <?= $entity_full_class_name ?>;
 use <?= $form_full_class_name ?>;
-<?php if (isset($repository_full_class_name)): ?>
+<?php if (!empty($repository_full_class_name)): ?>
 use <?= $repository_full_class_name ?>;
 <?php endif ?>
 use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name ?>;
@@ -13,14 +13,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class <?= $class_name ?>
- * @package <?= $namespace ?>
+ * <?= $class_name ?> class
  * @Route("<?= $route_path ?>")
  */
-class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
+class <?= $class_name ?> extends <?= $parent_class_name; ?><?= PHP_EOL ?>
 {
     /**
-     * Index page
+     * <?= ucwords($route_name) ?> index page
      *
 <?php if (isset($repository_full_class_name)): ?>
      * @param <?= $repository_class_name ?> $<?= $repository_var ?>
@@ -45,7 +44,7 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 <?php endif ?>
 
     /**
-     * Add page
+     * New page
      *
      * @param Request $request
      * @return Response
@@ -96,7 +95,7 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
      * Show page
      *
      * @param Request<?= ($requestClassNameLen >= $entityClassNameLen ? ' ' : $spaces) ?>$request
-     * @param <?= $entity_class_name ?><?= ($entityClassNameLen >= $requestClassNameLen ? ' ' : $spaces) ?>$<?= $entity_var_singular ?>
+     * @param <?= $entity_class_name ?><?= ($entityClassNameLen >= $requestClassNameLen ? ' ' : $spaces) ?>$<?= $entity_var_singular . PHP_EOL ?>
      * @return Response
      * @Route("/{<?= $entity_identifier ?>}/edit", name="<?= $route_name ?>_edit", methods="GET|POST")
      */
@@ -121,7 +120,7 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
      * Remove page
      *
      * @param Request<?= ($requestClassNameLen >= $entityClassNameLen ? ' ' : $spaces) ?>$request
-     * @param <?= $entity_class_name ?><?= ($entityClassNameLen >= $requestClassNameLen ? ' ' : $spaces) ?>$<?= $entity_var_singular ?>
+     * @param <?= $entity_class_name ?><?= ($entityClassNameLen >= $requestClassNameLen ? ' ' : $spaces) ?>$<?= $entity_var_singular . PHP_EOL ?>
      * @return Response
      * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_delete", methods="DELETE")
      */

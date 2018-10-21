@@ -1,26 +1,18 @@
-<?= "<?php\n" ?>
+<?= "<?php" . PHP_EOL ?>
 
-namespace <?= $namespace; ?>;
+namespace <?= $namespace ?>;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
-/**
-* Class <?= $class_name ?>
-* @package <?= $namespace; ?>
-*/
 class <?= $class_name ?> extends ConstraintValidator
 {
     /**
-     * Checks if the passed value is valid.
-     *
-     * @param mixed      $value      The value that should be validated
-     * @param Constraint $constraint The constraint for the validation
+     * {@inheritdoc}
      */
     public function validate($value, Constraint $constraint)
     {
-        /* @var $constraint <?= $constraint_class_name ?> */
-
+        /* @var <?= str_replace('Validator', '', $class_name) ?> $constraint */
         $this->context->buildViolation($constraint->message)
             ->setParameter('{{ value }}', $value)
             ->addViolation();

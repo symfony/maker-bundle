@@ -1,26 +1,16 @@
-<?= "<?php\n" ?>
+<?= "<?php" . PHP_EOL ?>
 
 namespace <?= $namespace; ?>;
 
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
-/**
- * Class <?= $class_name ?>
- * @package <?= $namespace; ?>
- */
 class <?= $class_name ?> implements EncoderInterface, DecoderInterface
 {
     const FORMAT = '<?= $format ?>';
 
     /**
-     * Encodes data into the given format.
-     *
-     * @param mixed  $data    Data to encode
-     * @param string $format  Format name
-     * @param array  $context Options that normalizers/encoders have access to
-     * @return string|int|float|bool
-     * @throws UnexpectedValueException
+     * {@inheritdoc}
      */
     public function encode($data, $format, array $context = [])
     {
@@ -29,10 +19,7 @@ class <?= $class_name ?> implements EncoderInterface, DecoderInterface
     }
 
     /**
-     * Checks whether the serializer can encode to given format.
-     *
-     * @param string $format Format name
-     * @return bool
+     * {@inheritdoc}
      */
     public function supportsEncoding($format): bool
     {
@@ -40,13 +27,7 @@ class <?= $class_name ?> implements EncoderInterface, DecoderInterface
     }
 
     /**
-     * Decodes a string into PHP data.
-     *
-     * @param string $data    Data to decode
-     * @param string $format  Format name
-     * @param array  $context Options that decoders have access to
-     * @return mixed
-     * @throws UnexpectedValueException
+     * {@inheritdoc}
      */
     public function decode($data, $format, array $context = [])
     {
@@ -55,10 +36,7 @@ class <?= $class_name ?> implements EncoderInterface, DecoderInterface
     }
 
     /**
-     * Checks whether the deserializer can decode from given format.
-     *
-     * @param string $format Format name
-     * @return bool
+     * {@inheritdoc}
      */
     public function supportsDecoding($format): bool
     {

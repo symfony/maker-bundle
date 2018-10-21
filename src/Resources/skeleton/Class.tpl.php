@@ -1,11 +1,7 @@
-<?= "<?php\n" ?>
+<?= "<?php" . PHP_EOL ?>
 
-namespace <?= $namespace; ?>;
+namespace <?= $namespace ?>;
 
-/**
- * Class <?= $class_name ?>
- * @package <?= $namespace; ?>
- */
-class <?= $class_name."\n" ?>
+class <?= $class_name . PHP_EOL ?>
 {
 }
