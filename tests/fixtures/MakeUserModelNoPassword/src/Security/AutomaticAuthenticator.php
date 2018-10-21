@@ -32,7 +32,7 @@ class AutomaticAuthenticator extends AbstractGuardAuthenticator
 
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
-        $user = new User();
+        $user = new FunUser();
         $user->setUsername($credentials);
 
         return $user;

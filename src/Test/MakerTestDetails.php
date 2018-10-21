@@ -24,8 +24,6 @@ final class MakerTestDetails
 
     private $deletedFiles = [];
 
-    private $filesToRevert = [];
-
     private $replacements = [];
 
     private $postMakeReplacements = [];
@@ -42,7 +40,7 @@ final class MakerTestDetails
 
     private $commandAllowedToFail = false;
 
-    private $snapshotSuffix = '';
+    private $rootNamespace = 'App';
 
     private $requiredPhpVersion;
 
@@ -72,44 +70,16 @@ final class MakerTestDetails
         return $this;
     }
 
+    public function getRootNamespace()
+    {
+        return $this->rootNamespace;
+    }
+
     public function changeRootNamespace(string $rootNamespace): self
     {
-        $rootNamespace = trim($rootNamespace, '\\');
+        $this->rootNamespace = trim($rootNamespace, '\\');
 
-        // to bypass read before flush issue
-        $this->snapshotSuffix = $rootNamespace;
-
-        return $this
-            ->addReplacement(
-                'composer.json',
-                '"App\\\\": "src/"',
-                '"'.$rootNamespace.'\\\\": "src/"'
-            )
-            ->addReplacement(
-                'src/Kernel.php',
-                'namespace App',
-                'namespace '.$rootNamespace
-            )
-            ->addReplacement(
-                'bin/console',
-                'use App\\Kernel',
-                'use '.$rootNamespace.'\\Kernel'
-            )
-            ->addReplacement(
-                'public/index.php',
-                'use App\\Kernel',
-                'use '.$rootNamespace.'\\Kernel'
-            )
-            ->addReplacement(
-                'config/services.yaml',
-                'App\\',
-                $rootNamespace.'\\'
-            )
-            ->addReplacement(
-                'phpunit.xml.dist',
-                '<env name="KERNEL_CLASS" value="App\\Kernel" />',
-                '<env name="KERNEL_CLASS" value="'.$rootNamespace.'\\Kernel" />'
-            );
+        return $this;
     }
 
     public function addPreMakeCommand(string $preMakeCommand): self
@@ -136,18 +106,6 @@ final class MakerTestDetails
     public function getFilesToDelete(): array
     {
         return $this->deletedFiles;
-    }
-
-    public function revertFileAfterFinish(string $filename): self
-    {
-        $this->filesToRevert[] = $filename;
-
-        return $this;
-    }
-
-    public function getFilesToRevert(): array
-    {
-        return $this->filesToRevert;
     }
 
     public function addReplacement(string $filename, string $find, string $replace): self
@@ -269,7 +227,6 @@ final class MakerTestDetails
     public function setGuardAuthenticator(string $firewallName, string $id): self
     {
         $this->guardAuthenticators[$firewallName] = $id;
-        $this->revertFileAfterFinish('config/packages/security.yaml');
 
         return $this;
     }
@@ -286,9 +243,9 @@ final class MakerTestDetails
 
     public function getUniqueCacheDirectoryName(): string
     {
-        // for cache purposes, only the dependencies are important
-        // shortened to avoid long paths on Windows
-        return 'maker_'.substr(md5(serialize($this->getDependencies()).$this->snapshotSuffix), 0, 10);
+        // for cache purposes, only the dependencies are important!
+        // You can change it ONLY if you don't have another way to implement it
+        return 'maker_'.strtolower($this->getRootNamespace()).'_'.md5(serialize($this->getDependencies()));
     }
 
     public function getPreMakeCommands(): array

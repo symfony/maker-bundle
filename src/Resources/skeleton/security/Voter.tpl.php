@@ -15,7 +15,7 @@ class <?= $class_name ?> extends Voter
     {
         // replace with your own logic
         // https://symfony.com/doc/current/security/voters.html
-        return in_array($attribute, ['EDIT', 'VIEW'])
+        return in_array($attribute, ['POST_EDIT', 'POST_VIEW'])
             && $subject instanceof App\Entity\BlogPost;
     }
 
@@ -32,11 +32,11 @@ class <?= $class_name ?> extends Voter
 
         // ... (check conditions and return true to grant permission) ...
         switch ($attribute) {
-            case 'EDIT':
+            case 'POST_EDIT':
                 // logic to determine if the user can EDIT
                 // return true or false
                 break;
-            case 'VIEW':
+            case 'POST_VIEW':
                 // logic to determine if the user can VIEW
                 // return true or false
                 break;

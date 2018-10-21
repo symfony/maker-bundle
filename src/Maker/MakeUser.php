@@ -26,12 +26,12 @@ use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Security\Core\Encoder\Argon2iPasswordEncoder;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -159,7 +159,10 @@ final class MakeUser extends AbstractMaker
             $userClassConfiguration->setUserProviderClass('App\\Security\\UserProvider');
             $customProviderPath = $generator->generateClass(
                 $userClassConfiguration->getUserProviderClass(),
-                'security/UserProvider.tpl.php'
+                'security/UserProvider.tpl.php',
+                [
+                    'user_short_name' => $userClassNameDetails->getShortName(),
+                ]
             );
         }
 
@@ -220,8 +223,9 @@ final class MakeUser extends AbstractMaker
     {
         $dependencies->requirePHP71();
 
+        // checking for SecurityBundle guarantees security.yaml is present
         $dependencies->addClassDependency(
-            UserInterface::class,
+            SecurityBundle::class,
             'security'
         );
 
