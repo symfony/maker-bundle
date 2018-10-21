@@ -35,18 +35,18 @@ class <?= $class_name ?> implements UserProviderInterface
      * called. Your job is to make sure the user's data is still fresh by,
      * for example, re-querying for fresh User data.
      *
-     * If your firewall is "stateless: false" (for a pure API), this
+     * If your firewall is "stateless: true" (for a pure API), this
      * method is not called.
      *
      * @return UserInterface
      */
     public function refreshUser(UserInterface $user)
     {
-        if (!$user instanceof User) {
+        if (!$user instanceof <?= $user_short_name ?>) {
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
 
-        /* @var User $user */
+        /* @var <?= $user_short_name ?> $user */
 
         // Return a User object after making sure its data is "fresh".
         // Or throw a UsernameNotFoundException if the user no longer exists.
@@ -58,6 +58,6 @@ class <?= $class_name ?> implements UserProviderInterface
      */
     public function supportsClass($class)
     {
-        return User::class === $class;
+        return <?= $user_short_name ?>::class === $class;
     }
 }

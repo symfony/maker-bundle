@@ -21,6 +21,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
+use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
@@ -70,7 +71,7 @@ final class MakeAuthenticator extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig)
     {
         $command
-            ->setDescription('Creates an empty Guard authenticator')
+            ->setDescription('Creates a Guard authenticator of different flavors')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeAuth.txt'));
     }
 
@@ -237,6 +238,7 @@ final class MakeAuthenticator extends AbstractMaker
                 'user_fully_qualified_class_name' => trim($userClassNameDetails->getFullName(), '\\'),
                 'user_class_name' => $userClassNameDetails->getShortName(),
                 'username_field' => $userNameField,
+                'username_field_label' => Str::asHumanWords($userNameField),
                 'user_needs_encoder' => $this->userClassHasEncoder($securityData, $userClass),
                 'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($userClass),
             ]
@@ -281,7 +283,7 @@ final class MakeAuthenticator extends AbstractMaker
             [
                 'username_field' => $userNameField,
                 'username_is_email' => false !== stripos($userNameField, 'email'),
-                'username_label' => ucfirst(implode(' ', preg_split('/(?=[A-Z])/', $userNameField))),
+                'username_label' => ucfirst(Str::asHumanWords($userNameField)),
             ]
         );
     }
