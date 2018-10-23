@@ -188,6 +188,16 @@ class FunctionalTest extends MakerTestCase
             ])
             ->addExtraDependencies('orm')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFormForEntity')
+		];
+
+        yield 'form_for_non_entity_dto' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeForm::class),
+            [
+                // Entity name
+                'TaskType',
+                '\\App\\Form\\Data\\TaskData',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFormForNonEntityDto')
         ];
 
         yield 'form_for_sti_entity' => [MakerTestDetails::createTest(
