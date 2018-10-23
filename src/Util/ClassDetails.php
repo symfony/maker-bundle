@@ -11,8 +11,9 @@
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
-use Symfony\Bundle\MakerBundle\Str;
-
+/**
+ * @internal
+ */
 final class ClassDetails
 {
     private $fullClassName;
@@ -22,7 +23,19 @@ final class ClassDetails
         $this->fullClassName = $fullClassName;
     }
 
-    public function getProperties():? array
+	/**
+	 * Get list of property names except "id" for use in a make:form context
+	 *
+	 * @return array|null
+	 */
+	public function getFormFields(): array
+    {
+        $properties = $this->getProperties();
+
+        return array_diff($properties, ['id']);
+	}
+
+	private function getProperties(): array
     {
         $reflect = new \ReflectionClass($this->fullClassName);
         $props = $reflect->getProperties();
@@ -34,12 +47,5 @@ final class ClassDetails
         }
 
         return $propertiesList;
-    }
-
-    public function getFormFields()
-    {
-        $properties = $this->getProperties();
-
-        return array_diff($properties, ['id']);
     }
 }
