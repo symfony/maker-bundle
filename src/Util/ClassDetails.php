@@ -40,6 +40,6 @@ final class ClassDetails
     {
         $properties = $this->getProperties();
 
-        return array_diff($properties,['id']);
+        return array_diff($properties, ['id']);
     }
 }
