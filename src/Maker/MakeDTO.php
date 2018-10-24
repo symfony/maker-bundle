@@ -11,25 +11,23 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\DTOClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
-use Symfony\Component\Validator\Validation;
-use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
-use Symfony\Bundle\MakerBundle\FileManager;
-use Symfony\Bundle\MakerBundle\Util\DTOClassSourceManipulator;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\Validation;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -144,7 +142,7 @@ final class MakeDTO extends AbstractMaker
                 [
                     'fields' => $fields,
                     'addHelpers' => $addHelpers,
-                    'addGettersSetters' => $addGettersSetters
+                    'addGettersSetters' => $addGettersSetters,
                 ],
                 $boundClassVars
             )
@@ -179,7 +177,7 @@ final class MakeDTO extends AbstractMaker
 
             foreach ($propertyAnnotations as $annotation) {
                 // we want to copy the asserts, so look for their interface
-                if($annotation instanceof Constraint) {
+                if ($annotation instanceof Constraint) {
                     $assertionsImported = true;
                     $comments[] = $manipulator->buildAnnotationLine('@Assert\\'.(new \ReflectionClass($annotation))->getShortName(), (array) $annotation);
                 }

@@ -11,16 +11,15 @@
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
+use PhpParser\Builder;
 use PhpParser\BuilderHelpers;
 use PhpParser\Lexer;
 use PhpParser\Node;
-use PhpParser\Parser;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
-use PhpParser\Builder;
+use PhpParser\Parser;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Util\PrettyPrinter;
 
 /**
  * @internal
