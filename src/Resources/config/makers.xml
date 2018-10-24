@@ -7,6 +7,12 @@
         <services>
             <defaults public="false" />
 
+            <service id="maker.maker.make_dto" class="Symfony\Bundle\MakerBundle\Maker\MakeDTO">
+                <argument type="service" id="maker.doctrine_helper" />
+                <argument type="service" id="maker.file_manager" />
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_authenticator" class="Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator">
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.security_config_updater" />
