@@ -37,7 +37,7 @@ class <?= $class_name ?>
      */
     public function fill(<?= $bounded_class_name ?> $<?= lcfirst($bounded_class_name) ?>): <?= $bounded_class_name ?>
     {
-<?php if ($addGettersSetters): ?>
+<?php if ($omitGettersSetters): ?>
 
         $<?= lcfirst($bounded_class_name) ?>
 
@@ -65,7 +65,7 @@ class <?= $class_name ?>
      */
     public function extract(<?= $bounded_class_name ?> $<?= lcfirst($bounded_class_name) ?>): self
     {
-<?php if ($addGettersSetters): ?>
+<?php if ($omitGettersSetters): ?>
 <?php foreach($fields as $propertyName => $mapping): ?>
         $this->set<?= Str::asCamelCase($propertyName) ?>($<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>());
 <?php endforeach; ?>

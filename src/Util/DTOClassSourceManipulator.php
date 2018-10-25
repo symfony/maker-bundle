@@ -46,11 +46,11 @@ final class DTOClassSourceManipulator
 
     private $pendingComments = [];
 
-    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true, bool $addGettersSetters = true)
+    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true, bool $omitGettersSetters = false)
     {
         $this->overwrite = $overwrite;
         $this->useAnnotations = $useAnnotations;
-        $this->addGettersSetters = $addGettersSetters;
+        $this->omitGettersSetters = $omitGettersSetters;
         $this->fluentMutators = $fluentMutators;
         $this->lexer = new Lexer\Emulative([
             'usedAttributes' => [
@@ -87,7 +87,7 @@ final class DTOClassSourceManipulator
         $this->addProperty($propertyName, $comments, $defaultValue);
 
         // return early when setters/getters should not be added.
-        if (false === $this->addGettersSetters) {
+        if (true === $this->omitGettersSetters) {
             return;
         }
 
@@ -165,7 +165,7 @@ final class DTOClassSourceManipulator
         $newPropertyBuilder = new Builder\Property($name);
 
         // if we do not add getters/setters, the fields must be public
-        if (false === $this->addGettersSetters) {
+        if (true === $this->omitGettersSetters) {
             $newPropertyBuilder->makePublic();
         } else {
             $newPropertyBuilder->makePrivate();
