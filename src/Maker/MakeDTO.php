@@ -82,7 +82,7 @@ final class MakeDTO extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $formClassNameDetails = $generator->createClassNameDetails(
+        $dataClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
             'Form\\',
             'Data'
@@ -140,7 +140,7 @@ final class MakeDTO extends AbstractMaker
         // Skeleton?
 
         $DTOClassPath = $generator->generateClass(
-            $formClassNameDetails->getFullName(),
+            $dataClassNameDetails->getFullName(),
             __DIR__.'/../Resources/skeleton/dto/Data.tpl.php',
             array_merge(
                 [
