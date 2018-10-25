@@ -98,15 +98,19 @@ final class MakeDTO extends AbstractMaker
         // get some doctrine details
         $doctrineEntityDetails = $this->entityHelper->createDoctrineDetails($boundClassDetails->getFullName());
 
+        if (null === $doctrineEntityDetails) {
+            $io->error([
+                'The bound class is not a valid doctrine entity.',
+            ]);
+
+            return;
+        }
+
         // get class metadata (used by regenerate)
         $metaData = $this->entityHelper->getMetadata($boundClassDetails->getFullName());
 
         // list of fields
         $fields = $metaData->fieldMappings;
-
-        if (null !== $doctrineEntityDetails) {
-            $formFields = $doctrineEntityDetails->getFormFields();
-        }
 
         $boundClassVars = [
             'bounded_full_class_name' => $boundClassDetails->getFullName(),
