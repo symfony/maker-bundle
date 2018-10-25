@@ -23,19 +23,19 @@ final class ClassDetails
         $this->fullClassName = $fullClassName;
     }
 
-	/**
-	 * Get list of property names except "id" for use in a make:form context
-	 *
-	 * @return array|null
-	 */
-	public function getFormFields(): array
+    /**
+     * Get list of property names except "id" for use in a make:form context.
+     *
+     * @return array|null
+     */
+    public function getFormFields(): array
     {
         $properties = $this->getProperties();
 
         return array_diff($properties, ['id']);
-	}
+    }
 
-	private function getProperties(): array
+    private function getProperties(): array
     {
         $reflect = new \ReflectionClass($this->fullClassName);
         $props = $reflect->getProperties();
