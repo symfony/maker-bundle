@@ -49,4 +49,17 @@ class ValidatorTest extends TestCase
 
         Validator::validateScale(31);
     }
+
+    public function testValidateClassName()
+    {
+        $this->assertSame('\App\Service\Foo', Validator::validateClassName('\App\Service\Foo'));
+        $this->assertSame('Foo', Validator::validateClassName('Foo'));
+    }
+
+    public function testInvalidClassName()
+    {
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage('"class" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)');
+        Validator::validateClassName('class');
+    }
 }

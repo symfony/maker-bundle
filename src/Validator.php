@@ -29,7 +29,7 @@ final class Validator
         $pieces = explode('\\', ltrim($className, '\\'));
 
         foreach ($pieces as $piece) {
-            if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $piece)) {
+            if (!Str::isValidPhpClassName($piece)) {
                 $errorMessage = $errorMessage ?: sprintf('"%s" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)', $className);
 
                 throw new RuntimeCommandException($errorMessage);
