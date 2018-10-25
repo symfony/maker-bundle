@@ -1,5 +1,7 @@
 <?= "<?php\n" ?>
-<?php use Symfony\Bundle\MakerBundle\Str; ?>
+<?php use Symfony\Bundle\MakerBundle\Str;
+
+?>
 
 namespace <?= $namespace ?>;
 
@@ -36,19 +38,20 @@ class <?= $class_name ?>
 
      */
     public function fill(<?= $bounded_class_name ?> $<?= lcfirst($bounded_class_name) ?>): <?= $bounded_class_name ?>
+
     {
 <?php if ($omitGettersSetters): ?>
 
         $<?= lcfirst($bounded_class_name) ?>
 
-<?php foreach($fields as $propertyName => $mapping): ?>
+<?php foreach ($fields as $propertyName => $mapping): ?>
             ->set<?= Str::asCamelCase($propertyName) ?>($this->get<?= Str::asCamelCase($propertyName) ?>())
 <?php endforeach; ?>
         ;
 <?php else : ?>
         $<?= lcfirst($bounded_class_name) ?>
 
-<?php foreach($fields as $propertyName => $mapping): ?>
+<?php foreach ($fields as $propertyName => $mapping): ?>
             ->set<?= Str::asCamelCase($propertyName) ?>($this-><?= $propertyName ?>)
 <?php endforeach; ?>
         ;
@@ -66,11 +69,11 @@ class <?= $class_name ?>
     public function extract(<?= $bounded_class_name ?> $<?= lcfirst($bounded_class_name) ?>): self
     {
 <?php if ($omitGettersSetters): ?>
-<?php foreach($fields as $propertyName => $mapping): ?>
+<?php foreach ($fields as $propertyName => $mapping): ?>
         $this->set<?= Str::asCamelCase($propertyName) ?>($<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>());
 <?php endforeach; ?>
 <?php else : ?>
-<?php foreach($fields as $propertyName => $mapping): ?>
+<?php foreach ($fields as $propertyName => $mapping): ?>
         $this-><?= $propertyName ?> = $<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>();
 <?php endforeach; ?>
 <?php endif; ?>
