@@ -41,7 +41,6 @@ class <?= $class_name ?>
 
     {
 <?php if ($omitGettersSetters): ?>
-
         $<?= lcfirst($bounded_class_name) ?>
 
 <?php foreach ($fields as $propertyName => $mapping): ?>
