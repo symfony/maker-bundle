@@ -26,10 +26,12 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
+use Symfony\Component\BrowserKit\Client;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\CssSelector\CssSelectorConverter;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -181,6 +183,25 @@ final class MakeCrud extends AbstractMaker
             )
         );
 
+        $testClassDetails = $generator->createClassNameDetails(
+            $entityClassDetails->getRelativeNameWithoutSuffix(),
+            'Test\\Controller\\',
+            'ControllerTest'
+        );
+
+        $generator->generateFile(
+            'tests/Controller/'.$testClassDetails->getShortName().'.php',
+            'crud/test/Test.tpl.php',
+            [
+                'bounded_full_class_name' => $entityClassDetails->getFullName(),
+                'bounded_class_name' => $entityClassDetails->getShortName(),
+                'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
+                'route_name' => $routeName,
+                'class_name' => Str::getShortClassName($testClassDetails->getFullName()),
+                'namespace' => Str::getNamespace($testClassDetails->getFullName()),
+            ]
+        );
+
         $this->formTypeRenderer->render(
             $formClassDetails,
             $entityDoctrineDetails->getFormFields(),
@@ -274,6 +295,16 @@ final class MakeCrud extends AbstractMaker
         $dependencies->addClassDependency(
             ParamConverter::class,
             'annotations'
+        );
+
+        $dependencies->addClassDependency(
+            CssSelectorConverter::class,
+            'css-selector'
+        );
+
+        $dependencies->addClassDependency(
+            Client::class,
+            'browser-kit'
         );
     }
 }
