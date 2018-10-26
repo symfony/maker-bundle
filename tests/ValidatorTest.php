@@ -59,7 +59,7 @@ class ValidatorTest extends TestCase
     public function testInvalidClassName()
     {
         $this->expectException(RuntimeCommandException::class);
-        $this->expectExceptionMessage('"class" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)');
-        Validator::validateClassName('class');
+        $this->expectExceptionMessage('"Class" is a reserved keyword and thus cannot be used as class name in PHP.');
+        Validator::validateClassName('App\Entity\Class');
     }
 }

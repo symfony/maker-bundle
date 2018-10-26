@@ -197,29 +197,6 @@ final class Str
         return (bool) preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $name, $matches);
     }
 
-    public static function isValidPhpClassName(string $className): bool
-    {
-        $reservedKeywords = ['__halt_compiler', 'abstract', 'and', 'array',
-            'as', 'break', 'callable', 'case', 'catch', 'class',
-            'clone', 'const', 'continue', 'declare', 'default', 'die', 'do',
-            'echo', 'else', 'elseif', 'empty', 'enddeclare', 'endfor',
-            'endforeach', 'endif', 'endswitch', 'endwhile', 'eval',
-            'exit', 'extends', 'final', 'for', 'foreach', 'function',
-            'global', 'goto', 'if', 'implements', 'include',
-            'include_once', 'instanceof', 'insteadof', 'interface', 'isset',
-            'list', 'namespace', 'new', 'or', 'print', 'private',
-            'protected', 'public', 'require', 'require_once', 'return',
-            'static', 'switch', 'throw', 'trait', 'try', 'unset',
-            'use', 'var', 'while', 'xor', '__CLASS__', '__DIR__', '__FILE__',
-            '__FUNCTION__', '__LINE__', '__METHOD__', '__NAMESPACE__', '__TRAIT__',
-            'int', 'float', 'bool', 'string', 'true', 'false', 'null', 'void',
-            'iterable', 'object',
-        ];
-
-        return !\in_array(strtolower($className), $reservedKeywords, true) &&
-            preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $className);
-    }
-
     public static function areClassesAlphabetical(string $class1, string $class2)
     {
         $arr1 = [$class1, $class2];
