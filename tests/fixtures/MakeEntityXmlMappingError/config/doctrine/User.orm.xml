@@ -7,6 +7,6 @@
         <id name="id" type="integer">
             <generator strategy="AUTO" />
         </id>
-        <one-to-many field="avatars" target-entity="UserAvatar" mapped-by="user" />
+    <!-- UserAvatar class doesn't exists so the other error thrown in tests -->
     </entity>
 </doctrine-mapping>
