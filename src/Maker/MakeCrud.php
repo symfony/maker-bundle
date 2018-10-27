@@ -193,8 +193,7 @@ final class MakeCrud extends AbstractMaker
             'tests/Controller/'.$testClassDetails->getShortName().'.php',
             'crud/test/Test.tpl.php',
             [
-                'bounded_full_class_name' => $entityClassDetails->getFullName(),
-                'bounded_class_name' => $entityClassDetails->getShortName(),
+                'entity_class_name' => $entityClassDetails->getShortName(),
                 'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => $routeName,
                 'class_name' => Str::getShortClassName($testClassDetails->getFullName()),
