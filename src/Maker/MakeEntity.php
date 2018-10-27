@@ -99,24 +99,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             return;
         }
 
-        $entityFinder = $this->fileManager->createFinder('src/Entity/')
-            // remove if/when we allow entities in subdirectories
-            ->depth('<1')
-            ->name('*.php');
-        $classes = [];
-        /** @var SplFileInfo $item */
-        foreach ($entityFinder as $item) {
-            if (!$item->getRelativePathname()) {
-                continue;
-            }
-
-            $classes[] = str_replace(['.php', '/'], ['', '\\'], $item->getRelativePathname());
-        }
-
         $argument = $command->getDefinition()->getArgument('name');
         $question = $this->createEntityClassQuestion($argument->getDescription());
         $value = $io->askQuestion($question);
-
         $input->setArgument('name', $value);
 
         if (
@@ -466,20 +451,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function createEntityClassQuestion(string $questionText): Question
     {
-        $entityFinder = $this->fileManager->createFinder('src/Entity/')
-            // remove if/when we allow entities in subdirectories
-            ->depth('<1')
-            ->name('*.php');
-        $classes = [];
-        /** @var SplFileInfo $item */
-        foreach ($entityFinder as $item) {
-            if (!$item->getRelativePathname()) {
-                continue;
-            }
-
-            $classes[] = str_replace('/', '\\', str_replace('.php', '', $item->getRelativePathname()));
-        }
-
+        $classes = $this->doctrineHelper->getEntitiesForAutocomplete();
         $question = new Question($questionText);
         $question->setValidator([Validator::class, 'notBlank']);
         $question->setAutocompleterValues($classes);
