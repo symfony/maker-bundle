@@ -26,7 +26,7 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
         $form = $crawler->selectButton('Save')->form();
 
         // @TODO add your fields
-        $form['formname[fieldname]']->setValue('Lorem ipsum');
+        //$form['formname[fieldname]']->setValue('Lorem ipsum');
 
         $crawler = $client->submit($form);
         $response = $client->getResponse();
