@@ -21,6 +21,7 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
     }
 
     /**
+     * @TODO implement new test
      * @depends testIndex
      */
     public function testNew($newLink)
@@ -36,7 +37,7 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
 
         // @TODO Set valid values for your fields
 <?php foreach ($form_fields as $form_field): ?>
-		// $form['<?= $route_name ?>[<?= $form_field ?>]']->setValue('Lorem ipsum');
+        // $form['<?= $route_name ?>[<?= $form_field ?>]']->setValue('Lorem ipsum');
 <?php endforeach; ?>
         // $client->submit($form);
 
@@ -49,82 +50,85 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
         // $this->assertContains('<td>Lorem ipsum</td>', $client->getResponse()->getContent());
     }
 
-    // @TODO implement edit test
     // /**
+    //  * @TODO implement edit test
     //  * @depends testNew
     //  */
     // public function testEdit()
     // {
-    //      $client = static::createClient();
-    //      $crawler = $client->request('GET', '<?= $route_path ?>/');
+    //     $client = static::createClient();
+    //     $crawler = $client->request('GET', '<?= $route_path ?>/');
     //
-    //      $this->assertSame(200, $client->getResponse()->getStatusCode());
-    //      $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
-    //      $this->assertContains('<?= $entity_class_name ?> index', $crawler->filter('h1')->text());
+    //     $this->assertSame(200, $client->getResponse()->getStatusCode());
+    //     $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
+    //     $this->assertContains('<?= $entity_class_name ?> index', $crawler->filter('h1')->text());
     //
-    //      $editLink = $crawler->filter('a:contains("edit")')->eq(0)->link();
+    //     $editLink = $crawler->filter('a:contains("edit")')->eq(0)->link();
     //
-    //      $crawler = $client->click($editLink);
-    //      $this->assertSame(200, $client->getResponse()->getStatusCode());
-    //      $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
-    //      $this->assertContains('Edit <?= $entity_class_name ?>', $crawler->filter('h1')->text());
-    //      $this->assertGreaterThan(0, $crawler->filter('input[type=text]')->count());
+    //     $crawler = $client->click($editLink);
+    //     $this->assertSame(200, $client->getResponse()->getStatusCode());
+    //     $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
+    //     $this->assertContains('Edit <?= $entity_class_name ?>', $crawler->filter('h1')->text());
+    //     $this->assertGreaterThan(0, $crawler->filter('input[type=text]')->count());
     //
-    //      $editForm = $crawler->selectButton('Update')->form();
-	// 		@TODO Set valid values for your fields
+    //     $form = $crawler->selectButton('Update')->form();
+    //     // @TODO Set valid values for your fields
 <?php foreach ($form_fields as $form_field): ?>
-	// 		$form['<?= $route_name ?>[<?= $form_field ?>]']->setValue('Lorem ipsum edited');
+    //     $form['<?= $route_name ?>[<?= $form_field ?>]']->setValue('Lorem ipsum edited');
 <?php endforeach; ?>
-    // 		$client->submit($form);
-    //      $this->assertTrue($client->getResponse()->isRedirect());
+    //     $client->submit($form);
+    //     $this->assertTrue($client->getResponse()->isRedirect());
     //
-    //      $crawler = $client->followRedirect();
-    //      $this->assertTrue($client->getResponse()->isSuccessful());
-    //      $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
-    //      $this->assertContains('<?= $entity_class_name ?> index', $crawler->filter('h1')->text());
-    //      $this->assertContains('Lorem ipsum edited', $client->getResponse()->getContent());
-    //
-    //      $showLink = $crawler->filter('a:contains("show")')->eq(0)->link();
-    //      return $showLink;
+    //     $crawler = $client->followRedirect();
+    //     $this->assertTrue($client->getResponse()->isSuccessful());
+    //     $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
     // }
 
-    // @TODO implement show test
     // /**
+    //  * @TODO implement show test
     //  * @depends testEdit
     //  */
-    // public function testShow($showLink)
+    // public function testShow()
     // {
-    //      $client = static::createClient();
-    //      $crawler = $client->click($showLink);
-    //      $this->assertSame(200, $client->getResponse()->getStatusCode());
-    //      $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
-    //      $this->assertContains('<?= $entity_class_name ?>', $crawler->filter('h1')->text());
-    //      $this->assertContains('Lorem ipsum edited', $crawler->filter('body')->text());
+    //     $client = static::createClient();
+    //     $crawler = $client->request('GET', '/task/');
+
+    //     $this->assertSame(200, $client->getResponse()->getStatusCode());
+    //     $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
+    //     $this->assertContains('Task index', $crawler->filter('h1')->text());
+
+    //     $showLink = $crawler->filter('a:contains("show")')->eq(0)->link();
+
+    //     $crawler = $client->click($showLink);
+    //     $this->assertSame(200, $client->getResponse()->getStatusCode());
+    //     $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
+    //     $this->assertContains('<?= $entity_class_name ?>', $crawler->filter('h1')->text());
+    //     $this->assertContains('Lorem ipsum edited', $crawler->filter('body')->text());
     //
-    //      return $showLink;
+    //     return $showLink;
     // }
 
-    // @TODO implement delete test
     // /**
+    //  * @TODO implement delete test
     //  * @depends testShow
     //  */
     // public function testDelete($showLink)
     // {
-    //      $client = static::createClient();
-    //      $crawler = $client->click($showLink);
-    //      $this->assertSame(200, $client->getResponse()->getStatusCode());
-    //      $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
-    //      $this->assertContains('<?= $entity_class_name ?>', $crawler->filter('h1')->text());
-    //      $this->assertContains('Lorem ipsum edited', $crawler->filter('body')->text());
+    //     $client = static::createClient();
+    //     $crawler = $client->click($showLink);
+    //     $this->assertSame(200, $client->getResponse()->getStatusCode());
+    //     $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
+    //     $this->assertContains('<?= $entity_class_name ?>', $crawler->filter('h1')->text());
+    //     $this->assertContains('Lorem ipsum edited', $crawler->filter('body')->text());
     //
-    //      $deleteForm = $crawler->selectButton('Delete')->form();
-    //      $client->submit($deleteForm);
-    //      $this->assertTrue($client->getResponse()->isRedirect());
+    //     $form = $crawler->selectButton('Delete')->form();
+    //     $client->submit($form);
+    //     $this->assertTrue($client->getResponse()->isRedirect());
     //
-    //      $client->followRedirect();
-    //      $this->assertTrue($client->getResponse()->isSuccessful());
-    //      $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
-    //      $this->assertContains('<?= $entity_class_name ?> index', $crawler->filter('h1')->text());
-    //      $this->assertContains('no records found', $client->getResponse()->getContent());
+    //     $crawler = $client->followRedirect();
+    //     $this->assertTrue($client->getResponse()->isSuccessful());
+    //     $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
+    //     $this->assertContains('<?= $entity_class_name ?> index', $crawler->filter('h1')->text());
+    //     $this->assertContains('no records found', $client->getResponse()->getContent());
     // }
 }
