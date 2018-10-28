@@ -99,20 +99,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             return;
         }
 
-        $entityFinder = $this->fileManager->createFinder('src/Entity/')
-            // remove if/when we allow entities in subdirectories
-            ->depth('<1')
-            ->name('*.php');
-        $classes = [];
-        /** @var SplFileInfo $item */
-        foreach ($entityFinder as $item) {
-            if (!$item->getRelativePathname()) {
-                continue;
-            }
-
-            $classes[] = str_replace(['.php', '/'], ['', '\\'], $item->getRelativePathname());
-        }
-
         $argument = $command->getDefinition()->getArgument('name');
         $question = $this->createEntityClassQuestion($argument->getDescription());
         $value = $io->askQuestion($question);
@@ -464,25 +450,39 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $printSection($allTypes);
     }
 
-    private function createEntityClassQuestion(string $questionText): Question
+    private function getEntityClasses(): array
     {
-        $entityFinder = $this->fileManager->createFinder('src/Entity/')
-            // remove if/when we allow entities in subdirectories
-            ->depth('<1')
-            ->name('*.php');
-        $classes = [];
-        /** @var SplFileInfo $item */
-        foreach ($entityFinder as $item) {
-            if (!$item->getRelativePathname()) {
-                continue;
-            }
+        $entityPath = $this->generator->getRootNamespace() ?
+            'src/'.$this->generator->getRootNamespace().'/Entity/' :
+            'src/Entity/';
 
-            $classes[] = str_replace('/', '\\', str_replace('.php', '', $item->getRelativePathname()));
+        $classes = [];
+        try {
+            $entityFinder = $this->fileManager->createFinder($entityPath)
+                // remove if/when we allow entities in subdirectories
+                ->depth('<1')
+                ->name('*.php');
+
+            /** @var SplFileInfo $item */
+            foreach ($entityFinder as $item) {
+                if (!$item->getRelativePathname()) {
+                    continue;
+                }
+
+                $classes[] = str_replace('/', '\\', str_replace('.php', '', $item->getRelativePathname()));
+            }
+        } catch (\InvalidArgumentException $e) {
+            // no entity directory exists nothing to auto-complete
         }
 
+        return $classes;
+    }
+
+    private function createEntityClassQuestion(string $questionText): Question
+    {
         $question = new Question($questionText);
         $question->setValidator([Validator::class, 'notBlank']);
-        $question->setAutocompleterValues($classes);
+        $question->setAutocompleterValues($this->getEntityClasses());
 
         return $question;
     }
