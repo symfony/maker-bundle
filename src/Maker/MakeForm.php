@@ -96,7 +96,7 @@ final class MakeForm extends AbstractMaker
 
             if (null !== $doctrineEntityDetails) {
                 $formFields = $doctrineEntityDetails->getFormFields();
-			} else {
+            } else {
                 $classDetails = new ClassDetails($boundClassDetails->getFullName());
                 $formFields = $classDetails->getFormFields();
             }
