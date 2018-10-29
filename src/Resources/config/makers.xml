@@ -7,7 +7,7 @@
         <services>
             <defaults public="false" />
 
-            <service id="maker.maker.make_dto" class="Symfony\Bundle\MakerBundle\Maker\MakeDTO">
+            <service id="maker.maker.make_dto" class="Symfony\Bundle\MakerBundle\Maker\MakeDto">
                 <argument type="service" id="maker.doctrine_helper" />
                 <argument type="service" id="maker.file_manager" />
                 <tag name="maker.command" />

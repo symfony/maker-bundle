@@ -34,7 +34,7 @@ use Symfony\Component\Validator\Validation;
  * @author Ryan Weaver <weaverryan@gmail.com>
  * @author Clemens Krack <info@clemenskrack.com>
  */
-final class MakeDTO extends AbstractMaker
+final class MakeDto extends AbstractMaker
 {
     private $entityHelper;
     private $fileManager;
@@ -58,7 +58,7 @@ final class MakeDTO extends AbstractMaker
             ->setDescription('Creates a new DTO class')
             ->addArgument('name', InputArgument::REQUIRED, sprintf('The name of the DTO class (e.g. <fg=yellow>%sData</>)', Str::asClassName(Str::getRandomTerm())))
             ->addArgument('bound-class', InputArgument::REQUIRED, 'The name of Entity that the DTO will be bound to')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeDTO.txt'))
+            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeDto.txt'))
         ;
 
         $inputConf->setArgumentAsNonInteractive('bound-class');
