@@ -17,6 +17,9 @@ use App\Form\Data\TaskData;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
+/**
+ * @requires PHP 7.1
+ */
 class GeneratedDtoTest extends KernelTestCase
 {
     public function testGeneratedDto()
