@@ -210,7 +210,9 @@ final class MakeDto extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies)
     {
-        $dependencies->addClassDependency(
+        $dependencies->requirePHP71();
+
+		$dependencies->addClassDependency(
             Validation::class,
             'validator',
             // add as an optional dependency: the user *probably* wants validation

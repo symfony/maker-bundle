@@ -65,7 +65,7 @@ final class MakerCommand extends Command
             $this->maker->configureDependencies($dependencies, $input);
 
             if (!$dependencies->isPhpVersionSatisfied()) {
-                throw new RuntimeCommandException('The make:entity command requires that you use PHP 7.1 or higher.');
+                throw new RuntimeCommandException('This maker command requires that you use PHP 7.1 or higher.');
             }
 
             if ($missingPackagesMessage = $dependencies->getMissingPackagesMessage($this->getName())) {
