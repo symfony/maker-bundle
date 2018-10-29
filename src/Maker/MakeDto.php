@@ -124,17 +124,14 @@ final class MakeDto extends AbstractMaker
         $omitGettersSetters = $io->confirm('Omit generation of getters/setters?');
 
         // filter id from fields
-            $fields = array_filter($fields, function ($field) {
-				// mapping includes id field when property is an id
-				if (!empty($field['id'])) {
-					return false;
-				}
+        $fields = array_filter($fields, function ($field) {
+            // mapping includes id field when property is an id
+            if (!empty($field['id'])) {
+                return false;
+            }
 
-				return true;
-			});
-
-
-        // Skeleton?
+            return true;
+        });
 
         $DTOClassPath = $generator->generateClass(
             $dataClassNameDetails->getFullName(),
