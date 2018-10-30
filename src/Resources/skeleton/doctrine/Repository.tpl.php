@@ -19,9 +19,9 @@ class <?= $class_name; ?> extends ServiceEntityRepository
         parent::__construct($registry, <?= $entity_class_name; ?>::class);
     }
 
-//    /**
-//     * @return <?= $entity_class_name ?>[] Returns an array of <?= $entity_class_name ?> objects
-//     */
+    // /**
+    //  * @return <?= $entity_class_name ?>[] Returns an array of <?= $entity_class_name ?> objects
+    //  */
     /*
     public function findByExampleField($value)
     {
