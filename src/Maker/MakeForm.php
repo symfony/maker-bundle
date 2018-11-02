@@ -18,6 +18,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -95,6 +96,9 @@ final class MakeForm extends AbstractMaker
 
             if (null !== $doctrineEntityDetails) {
                 $formFields = $doctrineEntityDetails->getFormFields();
+            } else {
+                $classDetails = new ClassDetails($boundClassDetails->getFullName());
+                $formFields = $classDetails->getFormFields();
             }
 
             $boundClassVars = [
