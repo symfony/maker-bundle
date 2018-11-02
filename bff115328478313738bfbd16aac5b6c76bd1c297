@@ -1,0 +1,48 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-10-23T18:42:13Z
+
+Quick question: what was wrong with redirecting back to edit? Was it just not what people are normally expecting?
+
+---------------------------------------------------------------------------
+
+by ckrack at 2018-10-23T21:26:11Z
+
+> Quick question: what was wrong with redirecting back to edit? Was it just not what people are normally expecting?
+
+It's not what you'd expect after editing - especially not without a flash message indicating a successful edit.
+Workflow-wise I think it's best to go back to the index, at least that's what I do in most client work.
+
+It was reported by someone and @javiereguiluz tagged it as a bug and I stumbled over it when testing other stuff today, too.
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-10-26T07:38:09Z
+
+I disagree 👎 .
+
+Redirect to `edit` action was here from the beginning. We can see it in symfony demo app and in SensioGeneratorBundle, and even in very old symfony 1.4 admin generator.
+
+After all it's not admin generator it's just crud skeleton and every user should configure it as he wants
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-10-26T17:29:22Z
+
+I can see it both ways. After creating a new "item", we redirect back to the index page. This PR would make that consistent. I lightly lean towards YES let's merge this.
+
+---------------------------------------------------------------------------
+
+by ckrack at 2018-10-26T17:46:47Z
+
+> Redirect to `edit` action was here from the beginning. We can see it in symfony demo app and in SensioGeneratorBundle, and even in very old symfony 1.4 admin generator.
+
+I don't think that it's the status quo is an argument for keeping it.
+
+> After all it's not admin generator it's just crud skeleton and every user should configure it as he wants
+
+The crud is often used for quick examples, especially when learning things from the docs.
+The current behaviour with redirecting to the edit page after successfully editing, without any success message is confusing and people (including me) think that something is broken.
+
+I'm against adding flash messages to the generated controller, as it's out of scope.
+But redirecting back to the index could be seen as the least viable replacement for a success message.
