@@ -25,8 +25,6 @@ final class ClassDetails
 
     /**
      * Get list of property names except "id" for use in a make:form context.
-     *
-     * @return array|null
      */
     public function getFormFields(): array
     {
