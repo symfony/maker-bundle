@@ -19,9 +19,9 @@ class XOtherRepository extends ServiceEntityRepository
         parent::__construct($registry, XOther::class);
     }
 
-//    /**
-//     * @return XOther[] Returns an array of XOther objects
-//     */
+    // /**
+    //  * @return XOther[] Returns an array of XOther objects
+    //  */
     /*
     public function findByExampleField($value)
     {
