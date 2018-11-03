@@ -23,7 +23,7 @@ env:
         - SYMFONY_PHPUNIT_DIR=.phpunit
 
 before_install:
-    - phpenv config-rm xdebug.ini
+    - phpenv config-rm xdebug.ini || echo "xdebug not available"
 
 install:
     - composer update --no-suggest
