@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\Common\Persistence\Mapping\AbstractClassMetadataFactory;
+use Doctrine\Common\Persistence\Mapping\Driver\AnnotationDriver;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\ORM\EntityManagerInterface;
@@ -144,6 +145,19 @@ final class DoctrineHelper
 
                 foreach ($loaded as $m) {
                     $cmf->setMetadataFor($m->getName(), $m);
+                }
+
+                // Invalidating the cached AnnotationDriver::$classNames to find new Entity classes
+                $metadataDriver = $em->getConfiguration()->getMetadataDriverImpl();
+                if ($metadataDriver instanceof MappingDriverChain) {
+                    foreach ($metadataDriver->getDrivers() as $driver) {
+                        if ($driver instanceof AnnotationDriver) {
+                            $classNames = (new \ReflectionObject($driver))->getProperty('classNames');
+                            $classNames->setAccessible(true);
+                            $classNames->setValue($driver, null);
+                            $classNames->setAccessible(false);
+                        }
+                    }
                 }
             }
 
