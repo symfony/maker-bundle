@@ -1,6 +1,6 @@
 <?= "<?php\n" ?>
 
-namespace App\Controller;
+namespace <?= $namespace ?>;
 
 use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name; ?>;
 use Symfony\Component\Routing\Annotation\Route;
