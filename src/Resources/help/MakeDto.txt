@@ -1,10 +1,5 @@
 The <info>%command.name%</info> command generates a new data transfer object class.
 
-<info>php %command.full_name% Name Entity</info>
+<info>php %command.full_name% DtoClassName TargetEntityClassName</info>
 
 If the argument is missing, the command will ask for the classname and entity interactively.
-
-The command will further ask for:
- - the generation of helper methods to extract/fill data from entities into DTO
- - the generation of getters and setters for the properties
- - whether the id field should be omitted in the DTO
