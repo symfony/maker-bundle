@@ -1,3 +1,8 @@
+1.9
+===
+
+* Allow make:form to work with non-entities - #301 thanks to @ckrack
+
 1.8
 ===
 
