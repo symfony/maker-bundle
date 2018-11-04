@@ -36,14 +36,14 @@ use Symfony\Component\Validator\Validation;
  */
 final class MakeDto extends AbstractMaker
 {
-    private $entityHelper;
+    private $doctrineHelper;
     private $fileManager;
 
     public function __construct(
-        DoctrineHelper $entityHelper,
+        DoctrineHelper $doctrineHelper,
         FileManager $fileManager
     ) {
-        $this->entityHelper = $entityHelper;
+        $this->doctrineHelper = $doctrineHelper;
         $this->fileManager = $fileManager;
     }
 
@@ -55,7 +55,7 @@ final class MakeDto extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new DTO class')
+            ->setDescription('Creates a new "data transfer object" (DTO) class from a Doctrine entity')
             ->addArgument('name', InputArgument::REQUIRED, sprintf('The name of the DTO class (e.g. <fg=yellow>%sData</>)', Str::asClassName(Str::getRandomTerm())))
             ->addArgument('bound-class', InputArgument::REQUIRED, 'The name of Entity that the DTO will be bound to')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeDto.txt'))
@@ -69,7 +69,7 @@ final class MakeDto extends AbstractMaker
         if (null === $input->getArgument('bound-class')) {
             $argument = $command->getDefinition()->getArgument('bound-class');
 
-            $entities = $this->entityHelper->getEntitiesForAutocomplete();
+            $entities = $this->doctrineHelper->getEntitiesForAutocomplete();
 
             $question = new Question($argument->getDescription());
             $question->setValidator(function ($answer) use ($entities) {return Validator::existsOrNull($answer, $entities); });
@@ -96,14 +96,14 @@ final class MakeDto extends AbstractMaker
         );
 
         // get some doctrine details
-        $doctrineEntityDetails = $this->entityHelper->createDoctrineDetails($boundClassDetails->getFullName());
+        $doctrineEntityDetails = $this->doctrineHelper->createDoctrineDetails($boundClassDetails->getFullName());
 
         if (null === $doctrineEntityDetails) {
             throw new RuntimeCommandException('The bound class is not a valid doctrine entity.');
         }
 
         // get class metadata (used by regenerate)
-        $metaData = $this->entityHelper->getMetadata($boundClassDetails->getFullName());
+        $metaData = $this->doctrineHelper->getMetadata($boundClassDetails->getFullName());
 
         // list of fields
         $fields = $metaData->fieldMappings;
