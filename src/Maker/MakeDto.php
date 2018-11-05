@@ -131,7 +131,7 @@ final class MakeDto extends AbstractMaker
 
         $DTOClassPath = $generator->generateClass(
             $dataClassNameDetails->getFullName(),
-            __DIR__.'/../Resources/skeleton/dto/Data.tpl.php',
+            __DIR__.'/../Resources/skeleton/dto/DTO.tpl.php',
             array_merge(
                 [
                     'fields' => $fields,
