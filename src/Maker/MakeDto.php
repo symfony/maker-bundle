@@ -96,10 +96,8 @@ final class MakeDto extends AbstractMaker
             'Entity\\'
         );
 
-        // get some doctrine details
-        $doctrineEntityDetails = $this->doctrineHelper->createDoctrineDetails($boundClassDetails->getFullName());
-
-        if (null === $doctrineEntityDetails) {
+        // verify that class is an entity
+        if (false === $this->doctrineHelper->isClassAMappedEntity($boundClassDetails->getFullName())) {
             throw new RuntimeCommandException('The bound class is not a valid doctrine entity.');
         }
 
