@@ -149,10 +149,6 @@ final class MakeDto extends AbstractMaker
         $assertionsImported = false;
 
         foreach ($fields as $fieldName => $mapping) {
-            if (!\in_array($fieldName, $mappedFields)) {
-                continue;
-            }
-
             $annotationReader = new AnnotationReader();
 
             // Lookup classname for inherited properties
