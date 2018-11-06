@@ -100,6 +100,27 @@ class MakeDtoTest extends MakerTestCase
             ->setRequiredPhpVersion(70100)
         ];
 
+        yield 'dto_mapped_super_class' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeDto::class),
+            [
+                'Task',
+                'Task',
+				// generate helpers
+				'yes',
+				// omit getters
+				'yes',
+            ])
+            ->addExtraDependencies('orm')
+            ->addExtraDependencies('validator')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeDtoMappedSuperClass')
+            ->assert(function (string $output, string $directory) {
+                $this->assertContains('created: src/Form/Data/TaskData.php', $output);
+				$this->assertContains('updated: src/Form/Data/TaskData.php', $output);
+				$this->assertContains('\\App\\Form\\Data\\TaskData', $output);
+            })
+            ->setRequiredPhpVersion(70100)
+        ];
+
         yield 'dto_composite_id' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeDto::class),
             [
