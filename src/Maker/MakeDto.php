@@ -232,9 +232,6 @@ final class MakeDto extends AbstractMaker
 
     private function getMappedFieldsInEntity(ClassMetadata $classMetadata)
     {
-        /* @var $classReflection \ReflectionClass */
-        $classReflection = $classMetadata->reflClass;
-
         $targetFields = array_merge(
             array_keys($classMetadata->fieldMappings),
             array_keys($classMetadata->associationMappings)
