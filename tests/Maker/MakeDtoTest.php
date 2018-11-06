@@ -19,7 +19,7 @@ class MakeDtoTest extends MakerTestCase
 {
     public function getTestDetails()
     {
-		yield 'dto' => [MakerTestDetails::createTest(
+        yield 'dto' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeDto::class),
             [
                 'Task',
@@ -37,6 +37,7 @@ class MakeDtoTest extends MakerTestCase
 				$this->assertContains('updated: src/Form/Data/TaskData.php', $output);
 				$this->assertContains('\\App\\Form\\Data\\TaskData', $output);
             })
+            ->setRequiredPhpVersion(70100)
 		];
 
         yield 'dto_getters_setters' => [MakerTestDetails::createTest(
@@ -56,6 +57,7 @@ class MakeDtoTest extends MakerTestCase
                 $this->assertContains('created: src/Form/Data/TaskData.php', $output);
                 $this->assertContains('updated: src/Form/Data/TaskData.php', $output);
             })
+            ->setRequiredPhpVersion(70100)
 		];
 
         yield 'dto_without_helpers' => [MakerTestDetails::createTest(
@@ -75,6 +77,7 @@ class MakeDtoTest extends MakerTestCase
                 $this->assertContains('created: src/Form/Data/TaskData.php', $output);
                 $this->assertContains('updated: src/Form/Data/TaskData.php', $output);
             })
+            ->setRequiredPhpVersion(70100)
 		];
 
         yield 'dto_invalid_entity' => [MakerTestDetails::createTest(
@@ -89,10 +92,12 @@ class MakeDtoTest extends MakerTestCase
 				'yes',
             ])
             ->addExtraDependencies('orm')
+            ->setCommandAllowedToFail(true)
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeDtoInvalidEntity')
             ->assert(function (string $output, string $directory) {
                 $this->assertContains('The bound class is not a valid doctrine entity.', $output);
             })
+            ->setRequiredPhpVersion(70100)
         ];
     }
 }
