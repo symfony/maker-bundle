@@ -107,11 +107,6 @@ final class MakeDto extends AbstractMaker
         // list of fields
         $fields = $metaData->fieldMappings;
 
-        $boundClassVars = [
-            'bounded_full_class_name' => $boundClassDetails->getFullName(),
-            'bounded_class_name' => $boundClassDetails->getShortName(),
-        ];
-
         // the result is passed to the template
         $addHelpers = $io->confirm('Add helper extract/fill methods?');
 
@@ -127,6 +122,11 @@ final class MakeDto extends AbstractMaker
 
             return true;
         });
+
+        $boundClassVars = [
+            'bounded_full_class_name' => $boundClassDetails->getFullName(),
+            'bounded_class_name' => $boundClassDetails->getShortName(),
+        ];
 
         $DTOClassPath = $generator->generateClass(
             $dataClassNameDetails->getFullName(),
