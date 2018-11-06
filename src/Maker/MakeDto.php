@@ -101,19 +101,17 @@ final class MakeDto extends AbstractMaker
             throw new RuntimeCommandException('The bound class is not a valid doctrine entity.');
         }
 
-        // get class metadata (used by regenerate)
+        // get class metadata (used to copy annotations and generate properties)
         $metaData = $this->doctrineHelper->getMetadata($boundClassDetails->getFullName());
 
-        // list of fields
+        // get list of fields
         $fields = $metaData->fieldMappings;
 
-        // the result is passed to the template
+        // The result is passed to the template
         $addHelpers = $io->confirm('Add helper extract/fill methods?');
-
-        // Generate getters/setters
         $omitGettersSetters = $io->confirm('Omit generation of getters/setters?');
 
-        // filter id from fields
+        // Filter id from fields
         $fields = array_filter($fields, function ($field) {
             // mapping includes id field when property is an id
             if (!empty($field['id'])) {
