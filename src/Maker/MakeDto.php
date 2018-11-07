@@ -161,7 +161,7 @@ final class MakeDto extends AbstractMaker
                 // we want to copy the asserts, so look for their interface
                 if ($annotation instanceof Constraint) {
                     $assertionsImported = true;
-                    $comments[] = $manipulator->buildAnnotationLine('@Assert\\'.(new \ReflectionClass($annotation))->getShortName(), (array) $annotation);
+                    $comments[] = $manipulator->buildAnnotationLine('@Assert\\'.(new \ReflectionClass($annotation))->getShortName(), $this->getAnnotationAsString($annotation));
                 }
             }
 
@@ -227,5 +227,11 @@ final class MakeDto extends AbstractMaker
         );
 
         return $targetFields;
+    }
+
+    private function getAnnotationAsString(Constraint $annotation)
+    {
+        // We typecast, because array_diff expects arrays and both functions can return null.
+        return (array_diff((array) get_object_vars($annotation), (array) get_class_vars(get_class($annotation))));
     }
 }
