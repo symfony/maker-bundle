@@ -111,14 +111,9 @@ final class MakeDto extends AbstractMaker
         $addHelpers = $io->confirm('Add helper extract/fill methods?');
         $omitGettersSetters = $io->confirm('Omit generation of getters/setters?');
 
-        // Filter id from fields
-        $fields = array_filter($fields, function ($field) {
-            // mapping includes id field when property is an id
-            if (!empty($field['id'])) {
-                return false;
-            }
-
-            return true;
+        // Filter identifiers from generated fields
+        $fields = array_filter($fields, function ($field) use ($metaData) {
+            return !$metaData->isIdentifier($field['fieldName']);
         });
 
         $boundClassVars = [
