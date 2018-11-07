@@ -1,4 +1,4 @@
-<?= "<?php" . PHP_EOL ?>
+<?= '<?php'.PHP_EOL ?>
 <?php use Symfony\Bundle\MakerBundle\Str;
 
 ?>
