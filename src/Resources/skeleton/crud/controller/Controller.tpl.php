@@ -46,9 +46,9 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($<?= $entity_var_singular ?>);
-            $em->flush();
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($<?= $entity_var_singular ?>);
+            $entityManager->flush();
 
             return $this->redirectToRoute('<?= $route_name ?>_index');
         }
@@ -93,9 +93,9 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
     public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
         if ($this->isCsrfTokenValid('delete'.$<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(), $request->request->get('_token'))) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($<?= $entity_var_singular ?>);
-            $em->flush();
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($<?= $entity_var_singular ?>);
+            $entityManager->flush();
         }
 
         return $this->redirectToRoute('<?= $route_name ?>_index');
