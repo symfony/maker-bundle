@@ -205,12 +205,12 @@ final class MakeDto extends AbstractMaker
         }
 
         $io->text([
-            'Next: Create your form with this DTO and start using it:',
-            '$ php bin/console make:form '.$boundClassDetails->getShortName(),
-            '<fg=green>Enter fully qualified data class name to bind to the form:</>',
-            '> \\'.$dataClassNameDetails->getFullName(),
+            sprintf('Next: Review the new DTO <info>%s</info>', $DTOClassPath),
+            'Then: Create a form for this DTO by running:',
+            sprintf('<info>$ php bin/console make:form %s</>', $boundClassDetails->getShortName()),
+            sprintf('and enter <info>\\%s</>', $dataClassNameDetails->getFullName()),
             '',
-            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/forms.html</>',
+            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/forms/data_transfer_objects.html</>',
         ]);
     }
 
