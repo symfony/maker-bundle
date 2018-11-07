@@ -159,6 +159,7 @@ class MakeDtoTest extends MakerTestCase
                 $this->assertContains('created: src/Form/Data/TaskData.php', $output);
                 $this->assertContains('updated: src/Form/Data/TaskData.php', $output);
                 $this->assertContains('\\App\\Form\\Data\\TaskData', $output);
+                $this->assertContains('The maker found missing getters/setters for properties in the entity.', $output);
             })
             ->setRequiredPhpVersion(70100),
         ];
