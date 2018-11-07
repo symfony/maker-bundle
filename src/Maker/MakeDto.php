@@ -96,15 +96,19 @@ final class MakeDto extends AbstractMaker
             'Entity\\'
         );
 
-        // verify that class is an entity
+        // Verify that class is an entity
         if (false === $this->doctrineHelper->isClassAMappedEntity($boundClassDetails->getFullName())) {
             throw new RuntimeCommandException('The bound class is not a valid doctrine entity.');
         }
 
-        // get class metadata (used to copy annotations and generate properties)
+        /**
+         * Get class metadata (used to copy annotations and generate properties).
+         *
+         * @var ClassMetaData
+         */
         $metaData = $this->doctrineHelper->getMetadata($boundClassDetails->getFullName());
 
-        // get list of fields
+        // Get list of fields
         $fields = $metaData->fieldMappings;
 
         // The result is passed to the template
@@ -115,6 +119,17 @@ final class MakeDto extends AbstractMaker
         $fields = array_filter($fields, function ($field) use ($metaData) {
             return !$metaData->isIdentifier($field['fieldName']);
         });
+
+        // See, whether there are missing methods
+        $missingGettersSetters = false;
+        foreach ($fields as $fieldName => $mapping) {
+            $fields[$fieldName]['hasSetter'] = $this->entityHasSetter($boundClassDetails->getFullName(), $fieldName);
+            $fields[$fieldName]['hasGetter'] = $this->entityHasGetter($boundClassDetails->getFullName(), $fieldName);
+
+            if (!$fields[$fieldName]['hasGetter'] || !$fields[$fieldName]['hasSetter']) {
+                $missingGettersSetters = true;
+            }
+        }
 
         $boundClassVars = [
             'bounded_full_class_name' => $boundClassDetails->getFullName(),
@@ -182,6 +197,13 @@ final class MakeDto extends AbstractMaker
             ]);
         }
 
+        if (true === $missingGettersSetters) {
+            $io->note([
+                'The maker found missing getters/setters for properties in the entity.',
+                'Please review the generated DTO for @todo comments.',
+            ]);
+        }
+
         $io->text([
             'Next: Create your form with this DTO and start using it:',
             '$ php bin/console make:form '.$boundClassDetails->getShortName(),
@@ -232,6 +254,16 @@ final class MakeDto extends AbstractMaker
     private function getAnnotationAsString(Constraint $annotation)
     {
         // We typecast, because array_diff expects arrays and both functions can return null.
-        return (array_diff((array) get_object_vars($annotation), (array) get_class_vars(get_class($annotation))));
+        return array_diff((array) get_object_vars($annotation), (array) get_class_vars(\get_class($annotation)));
+    }
+
+    private function entityHasGetter($entityClassName, $propertyName)
+    {
+        return method_exists($entityClassName, sprintf('get%s', Str::asCamelCase($propertyName)));
+    }
+
+    private function entityHasSetter($entityClassName, $propertyName)
+    {
+        return method_exists($entityClassName, sprintf('set%s', Str::asCamelCase($propertyName)));
     }
 }
