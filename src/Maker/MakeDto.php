@@ -188,7 +188,7 @@ final class MakeDto extends AbstractMaker
                 if ($annotation instanceof Constraint) {
                     // Set flag for use in result message
                     $assertionsImported = true;
-                    $constraintCount++;
+                    ++$constraintCount;
                     $comments[] = $manipulator->buildAnnotationLine('@Assert\\'.(new \ReflectionClass($annotation))->getShortName(), $this->getAnnotationAsString($annotation));
                 }
             }
@@ -287,10 +287,11 @@ final class MakeDto extends AbstractMaker
         $metadataConstraintCount = 0;
         foreach ($propertyMetadata as $metadata) {
             if (isset($metadata->constraints)) {
-                $metadataConstraintCount = $metadataConstraintCount + count($metadata->constraints);
+                $metadataConstraintCount = $metadataConstraintCount + \count($metadata->constraints);
             }
         }
-        return ($metadataConstraintCount == $constraintCount);
+
+        return $metadataConstraintCount == $constraintCount;
     }
 
     private function entityHasGetter($entityClassName, $propertyName)
