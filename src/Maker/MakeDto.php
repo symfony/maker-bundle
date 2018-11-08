@@ -29,6 +29,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -39,13 +40,16 @@ final class MakeDto extends AbstractMaker
 {
     private $doctrineHelper;
     private $fileManager;
+    private $validator;
 
     public function __construct(
         DoctrineHelper $doctrineHelper,
-        FileManager $fileManager
+        FileManager $fileManager,
+        ValidatorInterface $validator
     ) {
         $this->doctrineHelper = $doctrineHelper;
         $this->fileManager = $fileManager;
+        $this->validator = $validator;
     }
 
     public static function getCommandName(): string
@@ -156,6 +160,10 @@ final class MakeDto extends AbstractMaker
         // Did we import assert annotations?
         $assertionsImported = false;
 
+        // Are there differences in the validation constraints between metadata (includes annotations, xml, yaml) and annotations?
+        $suspectYamlXmlValidations = false;
+        $validatorClassMetadata = $this->validator->getMetadataFor($boundClassDetails->getFullName());
+
         foreach ($fields as $fieldName => $mapping) {
             $annotationReader = new AnnotationReader();
 
@@ -170,14 +178,24 @@ final class MakeDto extends AbstractMaker
             $reflectionProperty = new \ReflectionProperty($fullClassName, $fieldName);
             $propertyAnnotations = $annotationReader->getPropertyAnnotations($reflectionProperty);
 
+            // passed to the ClassManipulator
             $comments = [];
+            // Count the Constraints for comparison with the Validator
+            $constraintCount = 0;
 
             foreach ($propertyAnnotations as $annotation) {
-                // we want to copy the asserts, so look for their interface
+                // We want to copy the asserts, so look for their interface
                 if ($annotation instanceof Constraint) {
+                    // Set flag for use in result message
                     $assertionsImported = true;
+                    $constraintCount++;
                     $comments[] = $manipulator->buildAnnotationLine('@Assert\\'.(new \ReflectionClass($annotation))->getShortName(), $this->getAnnotationAsString($annotation));
                 }
+            }
+
+            // Compare the amount of constraints in annotations with those in the complete validator-metadata for the entity
+            if (false === $this->hasAsManyValidations($validatorClassMetadata->getPropertyMetadata($fieldName), $constraintCount)) {
+                $suspectYamlXmlValidations = true;
             }
 
             $manipulator->addEntityField($fieldName, $mapping, $comments);
@@ -194,6 +212,13 @@ final class MakeDto extends AbstractMaker
             $io->note([
                 'The maker imported assertion annotations.',
                 'Consider removing them from the entity or make sure to keep them updated in both places.',
+            ]);
+        }
+
+        if (true === $suspectYamlXmlValidations) {
+            $io->note([
+                'The entity possibly uses Yaml/Xml validators.',
+                'Make sure to update the validations to include the new DTO class.',
             ]);
         }
 
@@ -255,6 +280,17 @@ final class MakeDto extends AbstractMaker
     {
         // We typecast, because array_diff expects arrays and both functions can return null.
         return array_diff((array) get_object_vars($annotation), (array) get_class_vars(\get_class($annotation)));
+    }
+
+    private function hasAsManyValidations($propertyMetadata, $constraintCount)
+    {
+        $metadataConstraintCount = 0;
+        foreach ($propertyMetadata as $metadata) {
+            if (isset($metadata->constraints)) {
+                $metadataConstraintCount = $metadataConstraintCount + count($metadata->constraints);
+            }
+        }
+        return ($metadataConstraintCount == $constraintCount);
     }
 
     private function entityHasGetter($entityClassName, $propertyName)

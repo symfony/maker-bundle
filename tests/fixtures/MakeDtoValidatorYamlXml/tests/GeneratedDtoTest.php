@@ -35,7 +35,6 @@ class GeneratedDtoTest extends KernelTestCase
         $taskData->dueDate = 'foo';
 
         // create validator
-
         $validator = Validation::createValidatorBuilder()
             ->enableAnnotationMapping()
             ->getValidator();
