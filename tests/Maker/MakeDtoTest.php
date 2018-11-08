@@ -60,6 +60,28 @@ class MakeDtoTest extends MakerTestCase
             ->setRequiredPhpVersion(70100),
         ];
 
+        yield 'dto_validator_yaml_xml' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeDto::class),
+            [
+                'Task',
+                'Task',
+                // generate helpers
+                'yes',
+                // omit getters
+                'yes',
+            ])
+            ->addExtraDependencies('orm')
+            ->addExtraDependencies('validator')
+            ->addExtraDependencies('yaml')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeDtoValidatorYamlXml')
+            ->assert(function (string $output, string $directory) {
+                $this->assertContains('created: src/Form/Data/TaskData.php', $output);
+                $this->assertContains('updated: src/Form/Data/TaskData.php', $output);
+                $this->assertContains('The entity possibly uses Yaml/Xml validators.', $output);
+            })
+            ->setRequiredPhpVersion(70100)
+        ];
+
         yield 'dto_without_helpers' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeDto::class),
             [

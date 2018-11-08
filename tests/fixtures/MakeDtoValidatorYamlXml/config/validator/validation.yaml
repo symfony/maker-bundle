@@ -1,0 +1,4 @@
+App\Entity\Task:
+    properties:
+        dueDate:
+            - Type: DateTime
