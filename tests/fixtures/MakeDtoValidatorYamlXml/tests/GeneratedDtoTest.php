@@ -36,10 +36,8 @@ class GeneratedDtoTest extends KernelTestCase
 
         // create validator
 
-        $validatorBuilder = Validation::createValidatorBuilder()
+        $validator = Validation::createValidatorBuilder()
             ->enableAnnotationMapping()
-            ->addXmlMapping(__DIR__.'/../config/validator/validation.xml')
-            ->addYamlMapping('config/validator/validation.yaml')
             ->getValidator();
 
         $this->assertEmpty($validator->validate($taskData));
