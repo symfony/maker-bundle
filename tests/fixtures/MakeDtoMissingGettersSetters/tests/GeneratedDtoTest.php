@@ -12,7 +12,7 @@
 namespace App\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use App\Form\Data\TaskData;
+use App\Dto\TaskData;
 use App\Entity\Task;
 
 /**

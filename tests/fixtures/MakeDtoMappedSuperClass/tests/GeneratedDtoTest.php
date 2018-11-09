@@ -13,7 +13,7 @@ namespace App\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use App\Entity\Task;
-use App\Form\Data\TaskData;
+use App\Dto\TaskData;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Validator\Constraints\NotBlank;
 

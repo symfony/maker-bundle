@@ -88,7 +88,7 @@ final class MakeDto extends AbstractMaker
     {
         $dataClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Form\\Data\\',
+            'Dto\\',
             'Data'
         );
 
