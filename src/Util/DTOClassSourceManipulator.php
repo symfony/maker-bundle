@@ -333,11 +333,13 @@ final class DTOClassSourceManipulator
     }
 
     /**
+     * Modified to public from ClassSourceManipulator.
+     *
      * @param string $class
      *
      * @return string The alias to use when referencing this class
      */
-    private function addUseStatementIfNecessary(string $class): string
+    public function addUseStatementIfNecessary(string $class): string
     {
         $shortClassName = Str::getShortClassName($class);
         if ($this->isInSameNamespace($class)) {

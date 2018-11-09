@@ -32,8 +32,6 @@ use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
- * @author Javier Eguiluz <javier.eguiluz@gmail.com>
- * @author Ryan Weaver <weaverryan@gmail.com>
  * @author Clemens Krack <info@clemenskrack.com>
  */
 final class MakeDto extends AbstractMaker
@@ -41,11 +39,12 @@ final class MakeDto extends AbstractMaker
     private $doctrineHelper;
     private $fileManager;
     private $validator;
+    private $validatorClassMetadata;
 
     public function __construct(
         DoctrineHelper $doctrineHelper,
         FileManager $fileManager,
-        ValidatorInterface $validator
+        ValidatorInterface $validator = null
     ) {
         $this->doctrineHelper = $doctrineHelper;
         $this->fileManager = $fileManager;
@@ -162,7 +161,6 @@ final class MakeDto extends AbstractMaker
 
         // Are there differences in the validation constraints between metadata (includes annotations, xml, yaml) and annotations?
         $suspectYamlXmlValidations = false;
-        $validatorClassMetadata = $this->validator->getMetadataFor($boundClassDetails->getFullName());
 
         foreach ($fields as $fieldName => $mapping) {
             $annotationReader = new AnnotationReader();
@@ -178,8 +176,9 @@ final class MakeDto extends AbstractMaker
             $reflectionProperty = new \ReflectionProperty($fullClassName, $fieldName);
             $propertyAnnotations = $annotationReader->getPropertyAnnotations($reflectionProperty);
 
-            // passed to the ClassManipulator
+            // Passed to the ClassManipulator
             $comments = [];
+
             // Count the Constraints for comparison with the Validator
             $constraintCount = 0;
 
@@ -194,11 +193,17 @@ final class MakeDto extends AbstractMaker
             }
 
             // Compare the amount of constraints in annotations with those in the complete validator-metadata for the entity
-            if (false === $this->hasAsManyValidations($validatorClassMetadata->getPropertyMetadata($fieldName), $constraintCount)) {
+            if (false === $this->hasAsManyValidations($boundClassDetails->getFullName(), $fieldName, $constraintCount)) {
                 $suspectYamlXmlValidations = true;
             }
 
             $manipulator->addEntityField($fieldName, $mapping, $comments);
+        }
+
+        // Add use statement for validation annotations if necessary
+        if (true == $assertionsImported) {
+            // The use of an alias is not supposed, but it works fine and we don't use the returned value.
+            $manipulator->addUseStatementIfNecessary('Symfony\Component\Validator\Constraints as Assert');
         }
 
         $this->fileManager->dumpFile(
@@ -282,8 +287,19 @@ final class MakeDto extends AbstractMaker
         return array_diff((array) get_object_vars($annotation), (array) get_class_vars(\get_class($annotation)));
     }
 
-    private function hasAsManyValidations($propertyMetadata, $constraintCount)
+    private function hasAsManyValidations($entityClassname, $fieldName, $constraintCount)
     {
+        if (null === $this->validator) {
+            return 0 == $constraintCount;
+        }
+
+        // lazily build validatorClassMetadata
+        if (null === $this->validatorClassMetadata) {
+            $this->validatorClassMetadata = $this->validator->getMetadataFor($entityClassname);
+        }
+
+        $propertyMetadata = $this->validatorClassMetadata->getPropertyMetadata($fieldName);
+
         $metadataConstraintCount = 0;
         foreach ($propertyMetadata as $metadata) {
             if (isset($metadata->constraints)) {

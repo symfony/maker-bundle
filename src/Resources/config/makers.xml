@@ -10,7 +10,7 @@
             <service id="maker.maker.make_dto" class="Symfony\Bundle\MakerBundle\Maker\MakeDto">
                 <argument type="service" id="maker.doctrine_helper" />
                 <argument type="service" id="maker.file_manager" />
-                <argument type="service" id="validator" />
+                <argument type="service" id="validator" on-invalid="null" />
                 <tag name="maker.command" />
             </service>
 

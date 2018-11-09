@@ -8,7 +8,6 @@ namespace <?= $namespace ?>;
 <?php if (isset($bounded_full_class_name)): ?>
 use <?= $bounded_full_class_name ?>;
 <?php endif ?>
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Data transfer object for <?= $bounded_class_name ?>.
