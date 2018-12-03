@@ -123,7 +123,7 @@ final class MakeDto extends AbstractMaker
             return !$metaData->isIdentifier($field['fieldName']);
         });
 
-        // See, whether there are missing methods
+        // Check, whether there are missing methods
         $missingGettersSetters = false;
         foreach ($fields as $fieldName => $mapping) {
             $fields[$fieldName]['hasSetter'] = $this->entityHasSetter($boundClassDetails->getFullName(), $fieldName);
