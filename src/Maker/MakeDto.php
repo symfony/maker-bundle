@@ -116,7 +116,7 @@ final class MakeDto extends AbstractMaker
 
         // The result is passed to the template
         $addHelpers = $io->confirm('Add helper extract/fill methods?');
-        $omitGettersSetters = $io->confirm('Omit generation of getters/setters?');
+        $generateGettersSetters = $io->confirm('Generate getters/setters?', false);
 
         // Filter identifiers from generated fields
         $fields = array_filter($fields, function ($field) use ($metaData) {
@@ -146,14 +146,14 @@ final class MakeDto extends AbstractMaker
                 [
                     'fields' => $fields,
                     'addHelpers' => $addHelpers,
-                    'omitGettersSetters' => $omitGettersSetters,
+                    'generateGettersSetters' => $generateGettersSetters,
                 ],
                 $boundClassVars
             )
         );
 
         $generator->writeChanges();
-        $manipulator = $this->createClassManipulator($DTOClassPath, $omitGettersSetters);
+        $manipulator = $this->createClassManipulator($DTOClassPath, $generateGettersSetters);
         $mappedFields = $this->getMappedFieldsInEntity($metaData);
 
         // Did we import assert annotations?
@@ -256,7 +256,7 @@ final class MakeDto extends AbstractMaker
         );
     }
 
-    private function createClassManipulator(string $classPath, bool $omitGettersSetters = false): DTOClassSourceManipulator
+    private function createClassManipulator(string $classPath, bool $generateGettersSetters = false): DTOClassSourceManipulator
     {
         return new DTOClassSourceManipulator(
             $this->fileManager->getFileContents($classPath),
@@ -266,8 +266,8 @@ final class MakeDto extends AbstractMaker
             true,
             // use fluent mutators
             true,
-            // omit getters setters?
-            $omitGettersSetters
+            // generate getters setters?
+            $generateGettersSetters
         );
     }
 

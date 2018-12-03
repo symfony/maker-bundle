@@ -31,22 +31,22 @@ class <?= $class_name ?>
      */
     public function fill(<?= $bounded_class_name ?> $<?= lcfirst($bounded_class_name) ?>): <?= $bounded_class_name ?><?= PHP_EOL ?>
     {
-<?php if ($omitGettersSetters): ?>
-<?php foreach ($fields as $propertyName => $mapping): ?>
-<?php if (false === $mapping['hasSetter']): ?>
-        // @todo implement setter on the Entity
-        //$<?= lcfirst($bounded_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this-><?= $propertyName ?>);
-<?php else : ?>
-        $<?= lcfirst($bounded_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this-><?= $propertyName ?>);
-<?php endif; ?>
-<?php endforeach; ?>
-<?php else : ?>
+<?php if ($generateGettersSetters): ?>
 <?php foreach ($fields as $propertyName => $mapping): ?>
 <?php if (false === $mapping['hasSetter']): ?>
         // @todo implement setter on the Entity
         //$<?= lcfirst($bounded_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this->get<?= Str::asCamelCase($propertyName) ?>());
 <?php else : ?>
         $<?= lcfirst($bounded_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this->get<?= Str::asCamelCase($propertyName) ?>());
+<?php endif; ?>
+<?php endforeach; ?>
+<?php else : ?>
+<?php foreach ($fields as $propertyName => $mapping): ?>
+<?php if (false === $mapping['hasSetter']): ?>
+        // @todo implement setter on the Entity
+        //$<?= lcfirst($bounded_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this-><?= $propertyName ?>);
+<?php else : ?>
+        $<?= lcfirst($bounded_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this-><?= $propertyName ?>);
 <?php endif; ?>
 <?php endforeach; ?>
 <?php endif; ?>
@@ -59,22 +59,22 @@ class <?= $class_name ?>
      */
     public function extract(<?= $bounded_class_name ?> $<?= lcfirst($bounded_class_name) ?>): self
     {
-<?php if ($omitGettersSetters): ?>
-<?php foreach ($fields as $propertyName => $mapping): ?>
-<?php if (false === $mapping['hasGetter']): ?>
-        // @todo implement getter on the Entity
-        //$this-><?= $propertyName ?> = $<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>();
-<?php else : ?>
-        $this-><?= $propertyName ?> = $<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>();
-<?php endif; ?>
-<?php endforeach; ?>
-<?php else : ?>
+<?php if ($generateGettersSetters): ?>
 <?php foreach ($fields as $propertyName => $mapping): ?>
 <?php if (false === $mapping['hasGetter']): ?>
         // @todo implement getter on the Entity
         //$this->set<?= Str::asCamelCase($propertyName) ?>($<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>());
 <?php else : ?>
         $this->set<?= Str::asCamelCase($propertyName) ?>($<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>());
+<?php endif; ?>
+<?php endforeach; ?>
+<?php else : ?>
+<?php foreach ($fields as $propertyName => $mapping): ?>
+<?php if (false === $mapping['hasGetter']): ?>
+        // @todo implement getter on the Entity
+        //$this-><?= $propertyName ?> = $<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>();
+<?php else : ?>
+        $this-><?= $propertyName ?> = $<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>();
 <?php endif; ?>
 <?php endforeach; ?>
 <?php endif; ?>

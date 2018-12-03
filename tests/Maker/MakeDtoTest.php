@@ -26,8 +26,8 @@ class MakeDtoTest extends MakerTestCase
                 'Task',
                 // generate helpers
                 'yes',
-                // omit getters
-                'yes',
+                // generate getters
+                'no',
             ])
             ->addExtraDependencies('orm')
             ->addExtraDependencies('validator')
@@ -47,8 +47,8 @@ class MakeDtoTest extends MakerTestCase
                 'Task',
                 // generate helpers
                 'yes',
-                // omit getters
-                'no',
+                // generate getters
+                'yes',
             ])
             ->addExtraDependencies('orm')
             ->addExtraDependencies('validator')
@@ -67,8 +67,8 @@ class MakeDtoTest extends MakerTestCase
                 'Task',
                 // generate helpers
                 'yes',
-                // omit getters
-                'yes',
+                // generate getters
+                'no',
             ])
             ->addExtraDependencies('orm')
             ->addExtraDependencies('validator')
@@ -89,8 +89,8 @@ class MakeDtoTest extends MakerTestCase
                 'Task',
                 // generate helpers
                 'no',
-                // omit getters
-                'no',
+                // generate getters
+                'yes',
             ])
             ->addExtraDependencies('orm')
             ->addExtraDependencies('validator')
@@ -109,8 +109,8 @@ class MakeDtoTest extends MakerTestCase
                 'Task',
                 // generate helpers
                 'yes',
-                // omit getters
-                'yes',
+                // generate getters
+                'no',
             ])
             ->addExtraDependencies('orm')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeDtoWithoutValidations')
@@ -129,8 +129,8 @@ class MakeDtoTest extends MakerTestCase
                 '\\App\\Entity\\Task',
                 // generate helpers
                 'yes',
-                // omit getters
-                'yes',
+                // generate getters
+                'no',
             ])
             ->addExtraDependencies('orm')
             ->setCommandAllowedToFail(true)
@@ -148,8 +148,8 @@ class MakeDtoTest extends MakerTestCase
                 'Task',
                 // generate helpers
                 'yes',
-                // omit getters
-                'yes',
+                // generate getters
+                'no',
             ])
             ->addExtraDependencies('orm')
             ->addExtraDependencies('validator')
@@ -169,8 +169,8 @@ class MakeDtoTest extends MakerTestCase
                 'Task',
                 // generate helpers
                 'yes',
-                // omit getters
-                'yes',
+                // generate getters
+                'no',
             ])
             ->addExtraDependencies('orm')
             ->addExtraDependencies('validator')
@@ -190,8 +190,8 @@ class MakeDtoTest extends MakerTestCase
                 'Task',
                 // generate helpers
                 'yes',
-                // omit getters
-                'no',
+                // generate getters
+                'yes',
             ])
             ->addExtraDependencies('orm')
             ->addExtraDependencies('validator')
