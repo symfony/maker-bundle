@@ -162,10 +162,10 @@ class FunctionalTest extends MakerTestCase
         yield 'fixtures' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeFixtures::class),
             [
-                'AppFixtures',
+                'FooFixtures',
             ])
             ->assert(function (string $output, string $directory) {
-                $this->assertContains('created: src/DataFixtures/AppFixtures.php', $output);
+                $this->assertContains('created: src/DataFixtures/FooFixtures.php', $output);
             })
         ];
 
