@@ -121,6 +121,22 @@ class FunctionalTest extends MakerTestCase
             ->deleteFile('templates/base.html.twig')
         ];
 
+        yield 'controller_without_template' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeController::class),
+            [
+                // controller class name
+                'FooNoTemplate',
+            ])
+            ->setArgumentsString('--no-template')
+            ->addExtraDependencies('twig')
+            ->assert(function (string $output, string $directory) {
+                // make sure the template was not configured
+                $this->assertContainsCount('created: ', $output, 1);
+                $this->assertContains('created: src/Controller/FooNoTemplateController.php', $output);
+                $this->assertNotContains('created: templates/foo_no_template/index.html.twig', $output);
+            })
+        ];
+
         yield 'controller_sub_namespace' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeController::class),
             [
