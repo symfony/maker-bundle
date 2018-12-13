@@ -102,9 +102,9 @@ final class MakerTestEnvironment
                 'replace' => $rootNamespace.'\\',
             ],
             [
-                'filename' => 'phpunit.xml.dist',
-                'find' => '<env name="KERNEL_CLASS" value="App\\Kernel" />',
-                'replace' => '<env name="KERNEL_CLASS" value="'.$rootNamespace.'\\Kernel" />',
+                'filename' => '.env.test',
+                'find' => 'KERNEL_CLASS=\'App\Kernel\'',
+                'replace' => 'KERNEL_CLASS=\''.$rootNamespace.'\Kernel\'',
             ],
         ];
 
@@ -337,9 +337,9 @@ final class MakerTestEnvironment
         // temporarily ignoring indirect deprecations - see #237
         $replacements = [
             [
-                'filename' => 'phpunit.xml.dist',
-                'find' => '</php>',
-                'replace' => '    <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak_vendors" />'."\n".'    </php>',
+                'filename' => '.env.test',
+                'find' => 'SYMFONY_DEPRECATIONS_HELPER=999999',
+                'replace' => 'SYMFONY_DEPRECATIONS_HELPER=weak_vendors',
             ],
         ];
         $this->processReplacements($replacements, $this->flexPath);
