@@ -1,26 +1,26 @@
 <?php
 
-namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Repository;
+namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Repository;
 
-use Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity\User;
+use Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity\UserXml;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
- * @method User|null find($id, $lockMode = null, $lockVersion = null)
- * @method User|null findOneBy(array $criteria, array $orderBy = null)
- * @method User[]    findAll()
- * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method UserXml|null find($id, $lockMode = null, $lockVersion = null)
+ * @method UserXml|null findOneBy(array $criteria, array $orderBy = null)
+ * @method UserXml[]    findAll()
+ * @method UserXml[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class UserRepository extends ServiceEntityRepository
 {
     public function __construct(RegistryInterface $registry)
     {
-        parent::__construct($registry, User::class);
+        parent::__construct($registry, UserXml::class);
     }
 
     // /**
-    //  * @return User[] Returns an array of User objects
+    //  * @return UserXml[] Returns an array of UserXml objects
     //  */
     /*
     public function findByExampleField($value)
@@ -37,7 +37,7 @@ class UserRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?User
+    public function findOneBySomeField($value): ?UserXml
     {
         return $this->createQueryBuilder('u')
             ->andWhere('u.exampleField = :val')

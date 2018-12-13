@@ -1,6 +1,6 @@
 <?php
 
-namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity;
+namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity;
 
 class UserAvatar
 {
@@ -13,12 +13,12 @@ class UserAvatar
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getUser(): ?UserXml
     {
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?UserXml $user): self
     {
         $this->user = $user;
 
