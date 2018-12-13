@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
         http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity\User" repository-class="Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Repository\UserRepository">
+    <entity name="Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity\UserXml" repository-class="Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Repository\UserRepository">
         <id name="id" type="integer">
             <generator strategy="AUTO" />
         </id>

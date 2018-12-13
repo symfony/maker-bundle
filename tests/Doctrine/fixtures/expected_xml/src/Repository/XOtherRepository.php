@@ -1,8 +1,8 @@
 <?php
 
-namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Repository;
+namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Repository;
 
-use Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity\XOther;
+use Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity\XOther;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity;
+namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
-class User
+class UserXml
 {
     private $id;
 
