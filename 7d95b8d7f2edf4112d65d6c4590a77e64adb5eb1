@@ -1,0 +1,117 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-10-01T15:43:48Z
+
+Hey @welcoMattic!
+
+In general, I want to be careful about adding customizations like this. But, this one seems reasonable.
+
+It looks like some of the existing controller tests broke. Can you check those out? I'm not sure what's going on - I'd try to run those test cases locally if you can.
+
+Cheers!
+
+---------------------------------------------------------------------------
+
+by welcoMattic at 2018-10-01T15:48:28Z
+
+Yes, existing tests broke. It seems to be because of `addOption` method, but it looks weird that this method broke tests 🤔
+
+If you can run those tests locally to help, that would be nice 😉
+
+Thanks
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-10-05T14:17:47Z
+
+Hey! Would you mind running the tests locally? I’m happy to review or debug (especially if the test suite doesn’t has any issues running on your machine), but I’d prefer you to finish this feature if you’d like it :)
+
+---------------------------------------------------------------------------
+
+by welcoMattic at 2018-10-09T12:22:46Z
+
+Hi @weaverryan! I just ran tests locally with `vendor/bin/simple-phpunit --group functional_group1 --stop-on-failure` command, this is the output:
+
+<details><summary>Output</summary>
+<p>
+
+```
+PHPUnit 6.5.13 by Sebastian Bergmann and contributors.
+
+Testing Project Test Suite
+..F
+
+Time: 11.46 seconds, Memory: 18.00MB
+
+There was 1 failure:
+
+1) Symfony\Bundle\MakerBundle\Tests\Maker\FunctionalTest::testCommands with data set "controller_basic" (Symfony\Bundle\MakerBundle\Test\MakerTestDetails Object (...))
+Error while running the PHPUnit tests *in* the project:
+
+ PHPUnit 6.5.13 by Sebastian Bergmann and contributors.
+
+Testing Project Test Suite
+E                                                                   1 / 1 (100%)
+
+Time: 296 ms, Memory: 14.00MB
+
+There was 1 error:
+
+1) App\Tests\GeneratedControllerTest::testController
+Symfony\Component\HttpKernel\Exception\NotFoundHttpException: No route found for "GET /foo/bar"
+
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/http-kernel/EventListener/RouterListener.php:139
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/event-dispatcher/EventDispatcher.php:212
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/event-dispatcher/EventDispatcher.php:44
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/http-kernel/HttpKernel.php:125
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/http-kernel/HttpKernel.php:66
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/http-kernel/Kernel.php:188
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/http-kernel/Client.php:68
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/framework-bundle/Client.php:131
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/browser-kit/Client.php:351
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/tests/GeneratedControllerTest.php:12
+
+Caused by
+Symfony\Component\Routing\Exception\ResourceNotFoundException:
+
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/var/cache/test/srcTestDebugProjectContainerUrlMatcher.php:50
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/routing/Matcher/UrlMatcher.php:107
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/routing/Router.php:262
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/http-kernel/EventListener/RouterListener.php:115
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/event-dispatcher/EventDispatcher.php:212
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/event-dispatcher/EventDispatcher.php:44
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/http-kernel/HttpKernel.php:125
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/http-kernel/HttpKernel.php:66
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/http-kernel/Kernel.php:188
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/http-kernel/Client.php:68
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/framework-bundle/Client.php:131
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/vendor/symfony/browser-kit/Client.php:351
+/Users/welcomattic/workspace/maker-bundle/tests/tmp/cache/maker_app_265e327031f4b892727adb68251be627/tests/GeneratedControllerTest.php:12
+
+ERRORS!
+Tests: 1, Assertions: 0, Errors: 1.
+
+ Command Output:
+Failed asserting that false is true.
+
+/Users/welcomattic/workspace/maker-bundle/src/Test/MakerTestCase.php:52
+/Users/welcomattic/workspace/maker-bundle/tests/Maker/FunctionalTest.php:54
+
+FAILURES!
+Tests: 3, Assertions: 9, Failures: 1.
+```
+
+</p>
+</details>
+
+If I well understand, PHPUnit runs another PHPUnit to test generated code? I guess failure is in this sub-PHPUnit test suite
+
+---------------------------------------------------------------------------
+
+by welcoMattic at 2018-10-19T15:27:17Z
+
+Tests are green 🎉
+
+The error was my shortcut of `--no-template` was `-n`, so `-n` is already taken by symfony/console for `--no-interactive` option.
+
+Feel free to merge if it is ok for you.
