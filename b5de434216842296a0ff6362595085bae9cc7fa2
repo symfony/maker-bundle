@@ -1,0 +1,35 @@
+---------------------------------------------------------------------------
+
+by BackEndTea at 2018-08-24T10:22:58Z
+
+How about adding new test cases to make sure these behave as intended?
+It should be easy enough to add them right here: https://github.com/symfony/maker-bundle/blob/a1b0d9ff35219ec36c44fcc6213056cc339a1cf8/tests/GeneratorTwigHelperTest.php#L31
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-08-29T15:23:00Z
+
+> How about adding new test cases to make sure these behave as intended?
+It should be easy enough to add them right here:
+
+I agree! And actually, this test could be even a little bit cooler if we actually "rendered" the result through Twig (passing in some real `entity` object) and asserted the final *output* (instead of or in addition to asserting the Twig code that should be printed). But... that's not a requirement :).
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-09-27T08:07:03Z
+
+[c769605](https://github.com/symfony/maker-bundle/pull/241/commits/c769605d55d7dafb1b174e828da16848fd357069) will close #277
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-10-13T18:41:01Z
+
+@sadikoff Can you rebase this? I want to make sure the tests pass with the latest changes on master. Also, there are 2 changes in this PR to `.travis.yml` - do we want those?
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-10-13T19:08:39Z
+
+@weaverryan ok, I'll rebase it
+
+P.S. I think travis will be more stable with this changes
