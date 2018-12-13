@@ -104,7 +104,7 @@ final class MakeCrud extends AbstractMaker
         }
 
         $controllerClassDetails = $generator->createClassNameDetails(
-            $entityClassDetails->getRelativeNameWithoutSuffix(),
+            $entityClassDetails->getRelativeNameWithoutSuffix().'Controller',
             'Controller\\',
             'Controller'
         );
@@ -112,7 +112,7 @@ final class MakeCrud extends AbstractMaker
         $iter = 0;
         do {
             $formClassDetails = $generator->createClassNameDetails(
-                $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: ''),
+                $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'Type',
                 'Form\\',
                 'Type'
             );
