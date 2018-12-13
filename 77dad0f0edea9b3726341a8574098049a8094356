@@ -1,0 +1,18 @@
+---------------------------------------------------------------------------
+
+by lyrixx at 2018-10-24T08:36:46Z
+
+Hello,
+
+> But if you're decoding, you'll need the denormalizer as well.
+
+This is not true. de-normalization is build'in. In looked at my application, and I never had to create a de-normalizer. However, I have many normalizers.
+
+So, I'm not sure it's a goo idea to add this option
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2018-12-05T14:33:00Z
+
+Hello, Could we merge this PR? It's really helpful during training an real life.
+Regarding the deserialize option, since my last comment, I did not have to create a denormalizer ... So I'm still against this option
