@@ -1,0 +1,57 @@
+---------------------------------------------------------------------------
+
+by SerkanYildiz at 2018-10-26T11:27:24Z
+
+@sadikoff Thanks for your review! Wdyt about my current fix?
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2018-10-26T11:45:45Z
+
+@SerkanYildiz It's great that you have done it so fast, but I was talking about something else. I suggested not to split namespace and class validator, but leave old validation in place and add new one which will validate reserved words
+ex:
+```php
+foreach ($pieces as $piece) {
+    if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $piece)) {
+        $errorMessage = $errorMessage ?: sprintf('"%s" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)', $className);
+        throw new RuntimeCommandException($errorMessage);
+    }
+    if (Str::isPhpReservedWord($piece)) {
+        throw new RuntimeCommandException(sprintf('"%s" is a reserved keyword and thus cannot be used as class name in PHP.', $className));
+    }
+}
+```
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-10-26T17:26:23Z
+
+Yea... I think I agree. So remove `Str::isValidPhpClassName()` and just move that logic into `Validator:: validateClassName()` as @sadikoff.
+
+But otherwise, this is awesome! I like tightening things up :)
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-11-03T18:30:09Z
+
+Ping @SerkanYildiz! I think we need just one more small change. Does my description above make sense?
+
+Cheers!
+
+---------------------------------------------------------------------------
+
+by SerkanYildiz at 2018-11-05T11:26:01Z
+
+Pong @weaverryan! Will fix this today, thanks for helping!
+
+---------------------------------------------------------------------------
+
+by SerkanYildiz at 2018-11-05T16:06:33Z
+
+@weaverryan Pushed the requested changes. Does it look good now?
+
+---------------------------------------------------------------------------
+
+by SerkanYildiz at 2018-11-06T10:23:18Z
+
+@weaverryan Tests are failing due another error. Should I do something?
