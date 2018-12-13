@@ -136,11 +136,6 @@ final class MakerTestDetails
         // run bin/console commands
         $this
             ->addReplacement(
-                'phpunit.xml.dist',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
-                getenv('TEST_DATABASE_DSN')
-            )
-            ->addReplacement(
                 '.env',
                 'mysql://db_user:db_password@127.0.0.1:3306/db_name',
                 getenv('TEST_DATABASE_DSN')
