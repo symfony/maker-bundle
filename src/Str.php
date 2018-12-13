@@ -11,8 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
-use Symfony\Component\DependencyInjection\Container;
 use Doctrine\Common\Inflector\Inflector;
+use Symfony\Component\DependencyInjection\Container;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>

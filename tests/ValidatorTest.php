@@ -49,4 +49,17 @@ class ValidatorTest extends TestCase
 
         Validator::validateScale(31);
     }
+
+    public function testValidateClassName()
+    {
+        $this->assertSame('\App\Service\Foo', Validator::validateClassName('\App\Service\Foo'));
+        $this->assertSame('Foo', Validator::validateClassName('Foo'));
+    }
+
+    public function testInvalidClassName()
+    {
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage('"Class" is a reserved keyword and thus cannot be used as class name in PHP.');
+        Validator::validateClassName('App\Entity\Class');
+    }
 }

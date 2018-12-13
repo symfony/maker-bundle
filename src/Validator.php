@@ -27,12 +27,34 @@ final class Validator
     {
         // remove potential opening slash so we don't match on it
         $pieces = explode('\\', ltrim($className, '\\'));
+        $shortClassName = Str::getShortClassName($className);
+
+        $reservedKeywords = ['__halt_compiler', 'abstract', 'and', 'array',
+            'as', 'break', 'callable', 'case', 'catch', 'class',
+            'clone', 'const', 'continue', 'declare', 'default', 'die', 'do',
+            'echo', 'else', 'elseif', 'empty', 'enddeclare', 'endfor',
+            'endforeach', 'endif', 'endswitch', 'endwhile', 'eval',
+            'exit', 'extends', 'final', 'for', 'foreach', 'function',
+            'global', 'goto', 'if', 'implements', 'include',
+            'include_once', 'instanceof', 'insteadof', 'interface', 'isset',
+            'list', 'namespace', 'new', 'or', 'print', 'private',
+            'protected', 'public', 'require', 'require_once', 'return',
+            'static', 'switch', 'throw', 'trait', 'try', 'unset',
+            'use', 'var', 'while', 'xor',
+            'int', 'float', 'bool', 'string', 'true', 'false', 'null', 'void',
+            'iterable', 'object', '__FILE__', '__LINE__', '__DIR__', '__FUNCTION__', '__CLASS__',
+            '__METHOD__', '__NAMESPACE__', '__TRAIT__',
+        ];
 
         foreach ($pieces as $piece) {
             if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $piece)) {
                 $errorMessage = $errorMessage ?: sprintf('"%s" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)', $className);
 
                 throw new RuntimeCommandException($errorMessage);
+            }
+
+            if (\in_array(strtolower($shortClassName), $reservedKeywords, true)) {
+                throw new RuntimeCommandException(sprintf('"%s" is a reserved keyword and thus cannot be used as class name in PHP.', $shortClassName));
             }
         }
 
