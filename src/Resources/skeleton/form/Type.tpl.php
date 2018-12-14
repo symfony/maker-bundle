@@ -2,10 +2,13 @@
 
 namespace <?= $namespace ?>;
 
-<?php if (isset($bounded_full_class_name)): ?>
+<?php if ($bounded_full_class_name): ?>
 use <?= $bounded_full_class_name ?>;
 <?php endif ?>
 use Symfony\Component\Form\AbstractType;
+<?php foreach ($field_type_use_statements as $className): ?>
+use <?= $className ?>;
+<?php endforeach; ?>
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -14,8 +17,18 @@ class <?= $class_name ?> extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-<?php foreach ($form_fields as $form_field): ?>
+<?php foreach ($form_fields as $form_field => $typeOptions): ?>
+<?php if (null === $typeOptions['type'] && empty($typeOptions['options'])): ?>
             ->add('<?= $form_field ?>')
+<?php elseif (null !== $typeOptions['type'] && empty($typeOptions['options'])): ?>
+            ->add('<?= $form_field ?>', <?= $typeOptions['type'] ?>::class)
+<?php else: ?>
+            ->add('<?= $form_field ?>', <?= $typeOptions['type'] ? ($typeOptions['type'].'::class') : 'null' ?>, [
+<?php foreach ($typeOptions['options'] as $key => $val): ?>
+                '<?= $key; ?>' => <?= var_export($val, true) ?>,
+<?php endforeach; ?>
+            ])
+<?php endif; ?>
 <?php endforeach; ?>
         ;
     }
@@ -23,7 +36,7 @@ class <?= $class_name ?> extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-<?php if (isset($bounded_full_class_name)): ?>
+<?php if ($bounded_full_class_name): ?>
             'data_class' => <?= $bounded_class_name ?>::class,
 <?php else: ?>
             // Configure your form options here

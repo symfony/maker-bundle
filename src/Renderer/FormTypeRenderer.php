@@ -27,6 +27,7 @@ final class FormTypeRenderer
 
             if (isset($fieldTypeOptions['type'])) {
                 $fieldTypeUseStatements[] = $fieldTypeOptions['type'];
+                $fieldTypeOptions['type'] = Str::getShortClassName($fieldTypeOptions['type']);
             }
 
             $fields[$name] = $fieldTypeOptions;

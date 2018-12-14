@@ -1,0 +1,3 @@
+app_homepage:
+    path: /
+    controller: App\Controller\TestingController::homepage

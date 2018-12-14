@@ -21,7 +21,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class InteractiveSecurityHelper
 {
-    public function guessFirewallName(SymfonyStyle $io, array $securityData): string
+    public function guessFirewallName(SymfonyStyle $io, array $securityData, string $questionText = null): string
     {
         $realFirewalls = array_filter(
             $securityData['security']['firewalls'] ?? [],
@@ -38,7 +38,11 @@ final class InteractiveSecurityHelper
             return key($realFirewalls);
         }
 
-        return $io->choice('Which firewall do you want to update ?', array_keys($realFirewalls), key($realFirewalls));
+        return $io->choice(
+            $questionText ?? 'Which firewall do you want to update?',
+            array_keys($realFirewalls),
+            key($realFirewalls)
+        );
     }
 
     public function guessEntryPoint(SymfonyStyle $io, array $securityData, string $authenticatorClass, string $firewallName)
@@ -78,7 +82,7 @@ authenticators will be ignored, and can be blank.',
         );
     }
 
-    public function guessUserClass(SymfonyStyle $io, array $providers): string
+    public function guessUserClass(SymfonyStyle $io, array $providers, string $questionText = null): string
     {
         if (1 === \count($providers) && isset(current($providers)['entity'])) {
             $entityProvider = current($providers);
@@ -87,7 +91,7 @@ authenticators will be ignored, and can be blank.',
         }
 
         $userClass = $io->ask(
-            'Enter the User class that you want to authenticate (e.g. <fg=yellow>App\\Entity\\User</>)',
+            $questionText ?? 'Enter the User class that you want to authenticate (e.g. <fg=yellow>App\\Entity\\User</>)',
             $this->guessUserClassDefault(),
             [Validator::class, 'classIsUserInterface']
         );
@@ -135,5 +139,45 @@ authenticators will be ignored, and can be blank.',
             $classProperties,
             property_exists($userClass, 'username') ? 'username' : (property_exists($userClass, 'email') ? 'email' : null)
         );
+    }
+
+    public function guessPasswordField(SymfonyStyle $io, string $userClass): string
+    {
+        if (property_exists($userClass, 'password')) {
+            return 'password';
+        }
+
+        $classProperties = [];
+        $reflectionClass = new \ReflectionClass($userClass);
+        foreach ($reflectionClass->getProperties() as $property) {
+            $classProperties[] = $property->name;
+        }
+
+        return $io->choice(
+            sprintf('Which field on your <fg=yellow>%s</> class holds the encoded password?', $userClass),
+            $classProperties
+        );
+    }
+
+    public function getAuthenticatorClasses(array $firewallData): array
+    {
+        $authenticatorClasses = [];
+
+        if (!isset($firewallData['guard'])) {
+            return [];
+        }
+
+        if (!isset($firewallData['guard']['authenticators'])) {
+            return [];
+        }
+
+        foreach ($firewallData['guard']['authenticators'] as $authenticator) {
+            // skip service id's - as they won't work for autowiring
+            if (class_exists($authenticator)) {
+                $authenticatorClasses[] = $authenticator;
+            }
+        }
+
+        return $authenticatorClasses;
     }
 }

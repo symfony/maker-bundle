@@ -17,6 +17,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeFixtures;
 use Symfony\Bundle\MakerBundle\Maker\MakeForm;
 use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest;
 use Symfony\Bundle\MakerBundle\Maker\MakeMigration;
+use Symfony\Bundle\MakerBundle\Maker\MakeRegistrationForm;
 use Symfony\Bundle\MakerBundle\Maker\MakeSerializerEncoder;
 use Symfony\Bundle\MakerBundle\Maker\MakeSubscriber;
 use Symfony\Bundle\MakerBundle\Maker\MakeTwigExtension;
@@ -686,6 +687,26 @@ class FunctionalTest extends MakerTestCase
                 $this->assertContains('created: src/Form/SweetFoodType.php', $output);
             })
         ];
+
+        yield 'registration_form_entity_guard_authenticate' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeRegistrationForm::class),
+            [
+                // user class guessed,
+                // username field guessed
+                // password guessed
+                // firewall name guessed
+                '', // yes authenticate after
+                // 1 authenticator will be guessed
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormEntity')
+            ->configureDatabase()
+            ->setGuardAuthenticator('main', 'App\\Security\\StubAuthenticator')
+            ->updateSchemaAfterCommand()
+        ];
+
+        // non-standard email & password field
+        // no authenticators
+        // saying no to auto-login
     }
 
     public function getCommandEntityTests()
