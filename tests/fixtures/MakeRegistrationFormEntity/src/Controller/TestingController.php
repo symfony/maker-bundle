@@ -11,6 +11,11 @@ class TestingController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        return new Response('Homepage Success');
+        return new Response('Page Success');
+    }
+
+    public function anonymous()
+    {
+        return new Response('Page Success');
     }
 }

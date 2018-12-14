@@ -1,0 +1,14 @@
+security:
+    encoders:
+        App\Entity\User: bcrypt
+
+    firewalls:
+        main_other:
+            anonymous: true
+        main:
+            anonymous: true
+            guard:
+                entry_point: App\Security\AuthenticatorFirst
+                authenticators:
+                    - App\Security\AuthenticatorFirst
+                    - App\Security\AuthenticatorSecond

@@ -29,6 +29,6 @@ class RegistrationFormTest extends WebTestCase
         $this->assertSame(302, $client->getResponse()->getStatusCode());
         $client->followRedirect();
         $this->assertSame(200, $client->getResponse()->getStatusCode());
-        $this->assertSame('Homepage Success', $client->getResponse()->getContent());
+        $this->assertSame('Page Success', $client->getResponse()->getContent());
     }
 }

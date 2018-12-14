@@ -32,6 +32,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Validation;
 
@@ -44,10 +45,13 @@ final class MakeRegistrationForm extends AbstractMaker
 
     private $formTypeRenderer;
 
-    public function __construct(FileManager $fileManager, FormTypeRenderer $formTypeRenderer)
+    private $router;
+
+    public function __construct(FileManager $fileManager, FormTypeRenderer $formTypeRenderer, RouterInterface $router)
     {
         $this->fileManager = $fileManager;
         $this->formTypeRenderer = $formTypeRenderer;
+        $this->router = $router;
     }
 
     public static function getCommandName(): string
@@ -64,6 +68,7 @@ final class MakeRegistrationForm extends AbstractMaker
             ->addArgument('password-field', InputArgument::OPTIONAL, 'Field on your User class that stores the hashed password')
             ->addOption('auto-login-authenticator', null, InputOption::VALUE_REQUIRED, 'Authenticator class to use for logging in')
             ->addOption('firewall-name', null, InputOption::VALUE_REQUIRED, 'Firewall key used for authentication')
+            ->addOption('redirect-route-name', null, InputOption::VALUE_REQUIRED, 'Route for redirecting if not authenticating')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeRegistrationForm.txt'))
         ;
 
@@ -82,7 +87,7 @@ final class MakeRegistrationForm extends AbstractMaker
 
         $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents($path));
         $securityData = $manipulator->getData();
-        $providersData = $securityData['security']['providers'];
+        $providersData = $securityData['security']['providers'] ?? [];
 
         $input->setArgument(
             'user-class',
@@ -111,6 +116,15 @@ final class MakeRegistrationForm extends AbstractMaker
                 $interactiveSecurityHelper,
                 $securityData,
                 $command
+            );
+        } else {
+            $routeNames = array_keys($this->router->getRouteCollection()->all());
+            $input->setOption(
+                'redirect-route-name',
+                $io->choice(
+                    'What route should the user be redirected to after registration?',
+                    $routeNames
+                )
             );
         }
     }
@@ -182,6 +196,7 @@ final class MakeRegistrationForm extends AbstractMaker
                 'authenticator_class_name' => $authenticatorClassName ? Str::getShortClassName($authenticatorClassName) : null,
                 'authenticator_full_class_name' => $authenticatorClassName,
                 'firewall_name' => $input->getOption('firewall-name'),
+                'redirect_route_name' => $input->getOption('redirect-route-name'),
             ]
         );
 

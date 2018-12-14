@@ -55,6 +55,7 @@
             <service id="maker.maker.make_registration_form" class="Symfony\Bundle\MakerBundle\Maker\MakeRegistrationForm">
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.renderer.form_type_renderer" />
+                <argument type="service" id="router" />
                 <tag name="maker.command" />
             </service>
 

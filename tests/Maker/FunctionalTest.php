@@ -700,13 +700,34 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormEntity')
             ->configureDatabase()
-            ->setGuardAuthenticator('main', 'App\\Security\\StubAuthenticator')
             ->updateSchemaAfterCommand()
         ];
 
-        // non-standard email & password field
-        // no authenticators
-        // saying no to auto-login
+        // sanity check on all the interactive questions
+        yield 'registration_form_no_guessing' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeRegistrationForm::class),
+            [
+                'App\\Entity\\User',
+                'emailAlt', // username field
+                'passwordAlt', // password field
+                '', // yes authenticate after
+                'main', // firewall
+                '1' // authenticator
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormNoGuessing')
+        ];
+
+        yield 'registration_form_entity_no_authenticate' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeRegistrationForm::class),
+            [
+                // all basic data guessed
+                'n', // no authenticate after
+                'app_anonymous', // route name to redirect to
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormEntity')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+        ];
     }
 
     public function getCommandEntityTests()

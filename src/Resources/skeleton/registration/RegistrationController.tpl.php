@@ -52,9 +52,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
                 '<?= $firewall_name; ?>' // firewall name in security.yaml
             );
 <?php else: ?>
-            throw new \Exception('TODO - in RegistrationController, decide where to redirect the user');
-
-            return $this->redirectToRoute('<?= $route_name ?>_index');
+            return $this->redirectToRoute('<?= $redirect_route_name ?>');
 <?php endif; ?>
         }
 
