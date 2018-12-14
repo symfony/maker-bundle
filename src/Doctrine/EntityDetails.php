@@ -68,6 +68,11 @@ final class EntityDetails
             }
         }
 
-        return $fields;
+        $fieldsWithTypes = [];
+        foreach ($fields as $field) {
+            $fieldsWithTypes[$field] = null;
+        }
+
+        return $fieldsWithTypes;
     }
 }

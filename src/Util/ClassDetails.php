@@ -30,7 +30,14 @@ final class ClassDetails
     {
         $properties = $this->getProperties();
 
-        return array_diff($properties, ['id']);
+        $fields = array_diff($properties, ['id']);
+
+        $fieldsWithTypes = [];
+        foreach ($fields as $field) {
+            $fieldsWithTypes[$field] = null;
+        }
+
+        return $fieldsWithTypes;
     }
 
     private function getProperties(): array
