@@ -565,4 +565,136 @@ CODE
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
+
+    /**
+     * @dataProvider getTestsForAddAnnotationToClass
+     */
+    public function testAddAnnotationToClass(string $source, string $expectedSource)
+    {
+        $manipulator = new ClassSourceManipulator($source);
+        $manipulator->addAnnotationToClass('Bar\\SomeAnnotation', [
+            'message' => 'Foo'
+        ]);
+
+        $this->assertEquals($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function getTestsForAddAnnotationToClass()
+    {
+        yield 'no_doc_block' => [
+            <<<EOF
+<?php
+
+namespace Acme;
+
+class Foo
+{
+}
+EOF
+            ,
+            <<<EOF
+<?php
+
+namespace Acme;
+
+use Bar\SomeAnnotation;
+
+/**
+ * @SomeAnnotation(message="Foo")
+ */
+class Foo
+{
+}
+EOF
+        ];
+
+        yield 'normal_doc_block' => [
+            <<<EOF
+<?php
+
+namespace Acme;
+
+/**
+ * I'm a class!
+ */
+class Foo
+{
+}
+EOF
+            ,
+            <<<EOF
+<?php
+
+namespace Acme;
+
+use Bar\SomeAnnotation;
+
+/**
+ * I'm a class!
+ * @SomeAnnotation(message="Foo")
+ */
+class Foo
+{
+}
+EOF
+        ];
+
+        yield 'simple_inline_doc_block' => [
+            <<<EOF
+<?php
+
+namespace Acme;
+
+/** I'm a class! */
+class Foo
+{
+}
+EOF
+            ,
+            <<<EOF
+<?php
+
+namespace Acme;
+
+use Bar\SomeAnnotation;
+
+/**
+ * I'm a class!
+ * @SomeAnnotation(message="Foo")
+ */
+class Foo
+{
+}
+EOF
+        ];
+
+        yield 'weird_inline_doc_block' => [
+            <<<EOF
+<?php
+
+namespace Acme;
+
+/** **I'm a class!** ***/
+class Foo
+{
+}
+EOF
+            ,
+            <<<EOF
+<?php
+
+namespace Acme;
+
+use Bar\SomeAnnotation;
+
+/**
+ * **I'm a class!**
+ * @SomeAnnotation(message="Foo")
+ ***/
+class Foo
+{
+}
+EOF
+        ];
+    }
 }

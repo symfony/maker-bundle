@@ -51,16 +51,17 @@ class RegistrationFormTest extends WebTestCase
         $crawler = $client->request('GET', '/register');
         $form = $crawler->selectButton('Register')->form();
         $form['registration_form[email]'] = 'ryan@symfonycasts.com';
-        $form['registration_form[password]'] = 'foo';
+        $form['registration_form[plainPassword]'] = 'foo';
         $client->submit($form);
 
         $this->assertSame(200, $client->getResponse()->getStatusCode());
         $this->assertContains(
+            'There is already an account with this email',
+            $client->getResponse()->getContent()
+        );
+        $this->assertContains(
             'Your password should be at least 6 characters',
             $client->getResponse()->getContent()
         );
-        $client->followRedirect();
-        $this->assertSame(200, $client->getResponse()->getStatusCode());
-        $this->assertSame('Page Success', $client->getResponse()->getContent());
     }
 }

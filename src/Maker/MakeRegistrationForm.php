@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Common\Annotations\Annotation;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
@@ -22,7 +23,9 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -80,6 +83,7 @@ final class MakeRegistrationForm extends AbstractMaker
             ->addOption('auto-login-authenticator')
             ->addOption('firewall-name')
             ->addOption('redirect-route-name')
+            ->addOption('add-unique-entity-constraint')
         ;
 
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
@@ -110,6 +114,17 @@ final class MakeRegistrationForm extends AbstractMaker
         $input->setArgument(
             'password-field',
             $interactiveSecurityHelper->guessPasswordField($io, $userClass)
+        );
+
+        // see if it makes sense to add the UniqueEntity constraint
+        $userClassDetails = new ClassDetails($userClass);
+        $addAnnotation = false;
+        if (!$userClassDetails->doesDocBlockContainAnnotation('@UniqueEntity')) {
+            $addAnnotation = $io->confirm(sprintf('Do you want to add a <comment>@UniqueEntity</comment> validation annotation on your <comment>%s</comment> class to make sure duplicate accounts aren\'t created?', Str::getShortClassName($userClass)));
+        }
+        $input->setOption(
+            'add-unique-entity-constraint',
+            $addAnnotation
         );
 
         if ($io->confirm('Do you want to automatically authenticate the user after registration?')) {
@@ -172,6 +187,7 @@ final class MakeRegistrationForm extends AbstractMaker
             'Entity\\'
         );
 
+        // 1) Generate the form class
         $usernameField = $input->getArgument('username-field');
         $formClassDetails = $this->generateFormClass(
             $userClassNameDetails,
@@ -179,6 +195,7 @@ final class MakeRegistrationForm extends AbstractMaker
             $usernameField
         );
 
+        // 2) Generate the controller
         $controllerClassNameDetails = $generator->createClassNameDetails(
             'RegistrationController',
             'Controller\\'
@@ -203,6 +220,7 @@ final class MakeRegistrationForm extends AbstractMaker
             ]
         );
 
+        // 3) Generate the template
         $generator->generateFile(
             'templates/registration/register.html.twig',
             'registration/twig_template.tpl.php',
@@ -211,11 +229,29 @@ final class MakeRegistrationForm extends AbstractMaker
             ]
         );
 
+        // 4) Update the User class if necessary
+        if ($input->getOption('add-unique-entity-constraint')) {
+            $classDetails = new ClassDetails($userClass);
+            $userManipulator = new ClassSourceManipulator(
+                file_get_contents($classDetails->getPath())
+            );
+            $userManipulator->setIo($io);
+
+            $userManipulator->addAnnotationToClass(
+                UniqueEntity::class,
+                [
+                    'fields' => [$usernameField],
+                    'message' => sprintf('There is already an account with this '.$usernameField),
+                ]
+            );
+            $this->fileManager->dumpFile($classDetails->getPath(), $userManipulator->getSourceCode());
+        }
+
         $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
         $io->text('Next: Go to /register to check out your new form!');
-        $io->text('Then, make any changes you need to the form, controller & template.');
+        $io->text('Make any changes you need to the form, controller & template.');
     }
 
     public function configureDependencies(DependencyBuilder $dependencies)
