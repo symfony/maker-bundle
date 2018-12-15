@@ -67,10 +67,6 @@ final class MakeRegistrationForm extends AbstractMaker
             ->setDescription('Creates a new registration form system')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeRegistrationForm.txt'))
         ;
-
-        $inputConf->setArgumentAsNonInteractive('user-class');
-        $inputConf->setArgumentAsNonInteractive('username-field');
-        $inputConf->setArgumentAsNonInteractive('password-field');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
