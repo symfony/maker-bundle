@@ -11,6 +11,9 @@ use <?= $className ?>;
 <?php endforeach; ?>
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+<?php foreach ($constraint_use_statements as $className): ?>
+use <?= $className ?>;
+<?php endforeach; ?>
 
 class <?= $class_name ?> extends AbstractType
 {
@@ -18,15 +21,13 @@ class <?= $class_name ?> extends AbstractType
     {
         $builder
 <?php foreach ($form_fields as $form_field => $typeOptions): ?>
-<?php if (null === $typeOptions['type'] && empty($typeOptions['options'])): ?>
+<?php if (null === $typeOptions['type'] && !$typeOptions['options_code']): ?>
             ->add('<?= $form_field ?>')
-<?php elseif (null !== $typeOptions['type'] && empty($typeOptions['options'])): ?>
+<?php elseif (null !== $typeOptions['type'] && !$typeOptions['options_code']): ?>
             ->add('<?= $form_field ?>', <?= $typeOptions['type'] ?>::class)
 <?php else: ?>
             ->add('<?= $form_field ?>', <?= $typeOptions['type'] ? ($typeOptions['type'].'::class') : 'null' ?>, [
-<?php foreach ($typeOptions['options'] as $key => $val): ?>
-                '<?= $key; ?>' => <?= var_export($val, true) ?>,
-<?php endforeach; ?>
+<?= $typeOptions['options_code'] ?>
             ])
 <?php endif; ?>
 <?php endforeach; ?>

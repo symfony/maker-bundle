@@ -27,17 +27,16 @@ use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Validation;
 
 /**
  * @author Ryan Weaver <ryan@symfonycasts.com>
+ *
+ * @internal
  */
 final class MakeRegistrationForm extends AbstractMaker
 {
@@ -63,12 +62,6 @@ final class MakeRegistrationForm extends AbstractMaker
     {
         $command
             ->setDescription('Creates a new registration form system')
-            ->addArgument('user-class', InputArgument::OPTIONAL, 'Full user class')
-            ->addArgument('username-field', InputArgument::OPTIONAL, 'Field on your User class used to login')
-            ->addArgument('password-field', InputArgument::OPTIONAL, 'Field on your User class that stores the hashed password')
-            ->addOption('auto-login-authenticator', null, InputOption::VALUE_REQUIRED, 'Authenticator class to use for logging in')
-            ->addOption('firewall-name', null, InputOption::VALUE_REQUIRED, 'Firewall key used for authentication')
-            ->addOption('redirect-route-name', null, InputOption::VALUE_REQUIRED, 'Route for redirecting if not authenticating')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeRegistrationForm.txt'))
         ;
 
@@ -79,6 +72,16 @@ final class MakeRegistrationForm extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
+        // initialize arguments & commands that are internal (i.e. meant only to be asked)
+        $command
+            ->addArgument('user-class')
+            ->addArgument('username-field')
+            ->addArgument('password-field')
+            ->addOption('auto-login-authenticator')
+            ->addOption('firewall-name')
+            ->addOption('redirect-route-name')
+        ;
+
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
 
         if (!$this->fileManager->fileExists($path = 'config/packages/security.yaml')) {
@@ -154,7 +157,7 @@ final class MakeRegistrationForm extends AbstractMaker
 
         $input->setOption(
             'auto-login-authenticator',
-            count($authenticatorClasses) === 1 ? $authenticatorClasses[0] : $io->choice(
+            1 === \count($authenticatorClasses) ? $authenticatorClasses[0] : $io->choice(
                 'Which authenticator\'s onAuthenticationSuccess() should be used after logging in?',
                 $authenticatorClasses
             )
@@ -261,17 +264,31 @@ final class MakeRegistrationForm extends AbstractMaker
             $usernameField => null,
             'plainPassword' => [
                 'type' => PasswordType::class,
-                'options' => [
-                    'mapped' => false,
-                    // TODO - NotBlank constraint
-                ]
+                'options_code' => <<<EOF
+                // instead of being set onto the object directly,
+                // this is read and encoded in the controller
+                'mapped' => false,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please enter a password',
+                    ]),
+                    new Length([
+                        'min' => 6,
+                        'minMessage' => 'Your password should be at least {{ limit }} characters',
+                    ]),
+                ],
+EOF
             ],
         ];
 
         $this->formTypeRenderer->render(
             $formClassDetails,
             $formFields,
-            $userClassDetails
+            $userClassDetails,
+            [
+                'Symfony\Component\Validator\Constraints\NotBlank',
+                'Symfony\Component\Validator\Constraints\Length',
+            ]
         );
 
         return $formClassDetails;
