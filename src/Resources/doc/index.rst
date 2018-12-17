@@ -1,4 +1,4 @@
-The MakerBundle
+The Symfony MakerBundle
 =======================
 
 Symfony Maker helps you create empty commands, controllers, form classes,
