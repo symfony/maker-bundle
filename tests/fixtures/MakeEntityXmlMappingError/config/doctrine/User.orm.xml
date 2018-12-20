@@ -7,6 +7,5 @@
         <id name="id" type="integer">
             <generator strategy="AUTO" />
         </id>
-        <one-to-many field="avatars" target-entity="UserAvatar" mapped-by="user" />
     </entity>
 </doctrine-mapping>

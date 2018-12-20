@@ -36,7 +36,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
-use Symfony\Component\Finder\SplFileInfo;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -98,20 +97,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $input->setArgument('name', $classOrNamespace);
 
             return;
-        }
-
-        $entityFinder = $this->fileManager->createFinder('src/Entity/')
-            // remove if/when we allow entities in subdirectories
-            ->depth('<1')
-            ->name('*.php');
-        $classes = [];
-        /** @var SplFileInfo $item */
-        foreach ($entityFinder as $item) {
-            if (!$item->getRelativePathname()) {
-                continue;
-            }
-
-            $classes[] = str_replace(['.php', '/'], ['', '\\'], $item->getRelativePathname());
         }
 
         $argument = $command->getDefinition()->getArgument('name');
@@ -363,7 +348,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         // this is a normal field
         $data = ['fieldName' => $fieldName, 'type' => $type];
-        if ('string' == $type) {
+        if ('string' === $type) {
             // default to 255, avoid the question
             $data['length'] = $io->ask('Field length', 255, [Validator::class, 'validateLength']);
         } elseif ('decimal' === $type) {
@@ -467,23 +452,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function createEntityClassQuestion(string $questionText): Question
     {
-        $entityFinder = $this->fileManager->createFinder('src/Entity/')
-            // remove if/when we allow entities in subdirectories
-            ->depth('<1')
-            ->name('*.php');
-        $classes = [];
-        /** @var SplFileInfo $item */
-        foreach ($entityFinder as $item) {
-            if (!$item->getRelativePathname()) {
-                continue;
-            }
-
-            $classes[] = str_replace('/', '\\', str_replace('.php', '', $item->getRelativePathname()));
-        }
-
         $question = new Question($questionText);
         $question->setValidator([Validator::class, 'notBlank']);
-        $question->setAutocompleterValues($classes);
+        $question->setAutocompleterValues($this->doctrineHelper->getEntitiesForAutocomplete());
 
         return $question;
     }
