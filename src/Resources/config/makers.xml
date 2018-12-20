@@ -26,6 +26,7 @@
 
             <service id="maker.maker.make_crud" class="Symfony\Bundle\MakerBundle\Maker\MakeCrud">
                 <argument type="service" id="maker.doctrine_helper" />
+                <argument type="service" id="maker.renderer.form_type_renderer" />
                 <tag name="maker.command" />
             </service>
 
@@ -43,10 +44,18 @@
 
             <service id="maker.maker.make_form" class="Symfony\Bundle\MakerBundle\Maker\MakeForm">
                 <argument type="service" id="maker.doctrine_helper" />
+                <argument type="service" id="maker.renderer.form_type_renderer" />
                 <tag name="maker.command" />
             </service>
 
             <service id="maker.maker.make_functional_test" class="Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest">
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_registration_form" class="Symfony\Bundle\MakerBundle\Maker\MakeRegistrationForm">
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.renderer.form_type_renderer" />
+                <argument type="service" id="router" />
                 <tag name="maker.command" />
             </service>
 

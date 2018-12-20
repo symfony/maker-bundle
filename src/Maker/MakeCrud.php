@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -38,9 +39,12 @@ final class MakeCrud extends AbstractMaker
 {
     private $doctrineHelper;
 
-    public function __construct(DoctrineHelper $doctrineHelper)
+    private $formTypeRenderer;
+
+    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer)
     {
         $this->doctrineHelper = $doctrineHelper;
+        $this->formTypeRenderer = $formTypeRenderer;
     }
 
     public static function getCommandName(): string
@@ -149,14 +153,10 @@ final class MakeCrud extends AbstractMaker
             )
         );
 
-        $generator->generateClass(
-            $formClassDetails->getFullName(),
-            'form/Type.tpl.php',
-            [
-                'bounded_full_class_name' => $entityClassDetails->getFullName(),
-                'bounded_class_name' => $entityClassDetails->getShortName(),
-                'form_fields' => $entityDoctrineDetails->getFormFields(),
-            ]
+        $this->formTypeRenderer->render(
+            $formClassDetails,
+            $entityDoctrineDetails->getFormFields(),
+            $entityClassDetails
         );
 
         $templates = [

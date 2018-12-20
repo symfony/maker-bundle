@@ -1,0 +1,7 @@
+app_homepage:
+    path: /
+    controller: App\Controller\TestingController::homepage
+
+app_anonymous:
+    path: /anonymous
+    controller: App\Controller\TestingController::anonymous

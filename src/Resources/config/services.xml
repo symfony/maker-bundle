@@ -50,5 +50,9 @@
             <service id="maker.user_class_builder" class="Symfony\Bundle\MakerBundle\Security\UserClassBuilder" />
 
             <service id="maker.security_config_updater" class="Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater" />
+
+            <service id="maker.renderer.form_type_renderer" class="Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer">
+                <argument type="service" id="maker.generator" />
+            </service>
         </services>
 </container>

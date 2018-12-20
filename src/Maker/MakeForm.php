@@ -17,6 +17,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -34,10 +35,12 @@ use Symfony\Component\Validator\Validation;
 final class MakeForm extends AbstractMaker
 {
     private $entityHelper;
+    private $formTypeRenderer;
 
-    public function __construct(DoctrineHelper $entityHelper)
+    public function __construct(DoctrineHelper $entityHelper, FormTypeRenderer $formTypeRenderer)
     {
         $this->entityHelper = $entityHelper;
+        $this->formTypeRenderer = $formTypeRenderer;
     }
 
     public static function getCommandName(): string
@@ -81,10 +84,10 @@ final class MakeForm extends AbstractMaker
             'Type'
         );
 
-        $formFields = ['field_name'];
-        $boundClassVars = [];
+        $formFields = ['field_name' => null];
 
         $boundClass = $input->getArgument('bound-class');
+        $boundClassDetails = null;
 
         if (null !== $boundClass) {
             $boundClassDetails = $generator->createClassNameDetails(
@@ -100,17 +103,12 @@ final class MakeForm extends AbstractMaker
                 $classDetails = new ClassDetails($boundClassDetails->getFullName());
                 $formFields = $classDetails->getFormFields();
             }
-
-            $boundClassVars = [
-                'bounded_full_class_name' => $boundClassDetails->getFullName(),
-                'bounded_class_name' => $boundClassDetails->getShortName(),
-            ];
         }
 
-        $generator->generateClass(
-            $formClassNameDetails->getFullName(),
-            'form/Type.tpl.php',
-            array_merge(['form_fields' => $formFields], $boundClassVars)
+        $this->formTypeRenderer->render(
+            $formClassNameDetails,
+            $formFields,
+            $boundClassDetails
         );
 
         $generator->writeChanges();

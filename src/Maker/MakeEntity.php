@@ -26,6 +26,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
 use Symfony\Bundle\MakerBundle\FileManager;
+use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityRelation;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -774,7 +775,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function getPathOfClass(string $class): string
     {
-        return (new \ReflectionClass($class))->getFileName();
+        $classDetails = new ClassDetails($class);
+
+        return $classDetails->getPath();
     }
 
     private function isClassInVendor(string $class): bool

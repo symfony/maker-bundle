@@ -30,7 +30,14 @@ final class ClassDetails
     {
         $properties = $this->getProperties();
 
-        return array_diff($properties, ['id']);
+        $fields = array_diff($properties, ['id']);
+
+        $fieldsWithTypes = [];
+        foreach ($fields as $field) {
+            $fieldsWithTypes[$field] = null;
+        }
+
+        return $fieldsWithTypes;
     }
 
     private function getProperties(): array
@@ -45,5 +52,26 @@ final class ClassDetails
         }
 
         return $propertiesList;
+    }
+
+    public function getPath(): string
+    {
+        return (new \ReflectionClass($this->fullClassName))->getFileName();
+    }
+
+    /**
+     * An imperfect, but simple way to check for the presence of an annotation.
+     *
+     * @param string $annotation The annotation - e.g. @UniqueEntity
+     */
+    public function doesDocBlockContainAnnotation(string $annotation): bool
+    {
+        $docComment = (new \ReflectionClass($this->fullClassName))->getDocComment();
+
+        if (false === $docComment) {
+            return false;
+        }
+
+        return false !== strpos($docComment, $annotation);
     }
 }

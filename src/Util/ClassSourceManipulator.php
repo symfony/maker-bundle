@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Util;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use PhpParser\BuilderHelpers;
+use PhpParser\Comment\Doc;
 use PhpParser\Lexer;
 use PhpParser\Node;
 use PhpParser\Parser;
@@ -268,6 +269,44 @@ final class ClassSourceManipulator
         $newPropertyNode = $newPropertyBuilder->getNode();
 
         $this->addNodeAfterProperties($newPropertyNode);
+    }
+
+    public function addAnnotationToClass(string $annotationClass, array $options)
+    {
+        $annotationClassAlias = $this->addUseStatementIfNecessary($annotationClass);
+        $docComment = $this->getClassNode()->getDocComment();
+
+        $docLines = $docComment ? explode("\n", $docComment->getText()) : [];
+        if (0 === \count($docLines)) {
+            $docLines = ['/**', ' */'];
+        } elseif (1 === \count($docLines)) {
+            // /** inline doc syntax */
+            // imperfect way to try to find where to split the lines
+            $endOfOpening = strpos($docLines[0], '* ');
+            $endingPosition = strrpos($docLines[0], ' *', $endOfOpening);
+            $extraComments = trim(substr($docLines[0], $endOfOpening + 2, $endingPosition - $endOfOpening - 2));
+            $newDocLines = [
+                substr($docLines[0], 0, $endOfOpening + 1),
+            ];
+
+            if ($extraComments) {
+                $newDocLines[] = ' * '.$extraComments;
+            }
+
+            $newDocLines[] = substr($docLines[0], $endingPosition);
+            $docLines = $newDocLines;
+        }
+
+        array_splice(
+            $docLines,
+            \count($docLines) - 1,
+            0,
+            ' * '.$this->buildAnnotationLine('@'.$annotationClassAlias, $options)
+        );
+
+        $docComment = new Doc(implode("\n", $docLines));
+        $this->getClassNode()->setDocComment($docComment);
+        $this->updateSourceCodeFromNewStmts();
     }
 
     private function addCustomGetter(string $propertyName, string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = [], $typeCast = null)
