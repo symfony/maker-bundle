@@ -1,0 +1,37 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-11-02T19:43:37Z
+
+OMG - finally! So happy to see this PR! And, it was even simpler than I expected!
+
+We do have test failures, unfortunately. @yceruto could you take a look at them? They could be false failures. But it might also be an indication that using the new way may cause an unintended exception to be thrown in some cases.
+
+Thanks!
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-11-02T19:46:47Z
+
+Also, see #310 - I think the other PR may have "hit" the same issue that's causing the tests to fail here 🤔
+
+---------------------------------------------------------------------------
+
+by yceruto at 2018-11-03T13:29:27Z
+
+Yep, (in the same life time of the script) the first time that `$this->doctrineHelper->getEntitiesForAutocomplete()` -> `$cmf->getAllMetadata()` is called with no entities some protected Doctrine properties are cached (e.g. `AnnotationDriver::$classNames`) and there is no way to invalidate it without force it and discover the metadatas of the new generated Entity.
+
+Even if the last commit resolves part of the problem I guess there are still other cached properties related to the mapping type that need to be invalidated for the same reason.
+
+So I think we should go back to the `Finder` version and use `AnnotationDriver::getPaths()` to discover the mapping Entity directory, wdyt?
+
+---------------------------------------------------------------------------
+
+by yceruto at 2018-11-03T14:04:23Z
+
+Also we could re-think the way this Annotation Mapping requirement is validated, because currently it's checked after the entity was already generated.
+
+---------------------------------------------------------------------------
+
+by yceruto at 2018-11-05T03:54:20Z
+
+Well, I've fixed an invalid mapping from the fixture of the two remaining fails and all green again.
