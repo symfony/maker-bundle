@@ -1,3 +1,8 @@
+1.11
+====
+
+* Add `make:registration-form` command - #333 thanks to @weaverryan
+
 1.10
 ====
 
