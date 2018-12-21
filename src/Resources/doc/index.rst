@@ -4,9 +4,9 @@ The Symfony MakerBundle
 Symfony Maker helps you create empty commands, controllers, form classes,
 tests and more so you can forget about writing boilerplate code. This
 bundle is an alternative to `SensioGeneratorBundle`_ for modern Symfony
-applications and requires using Symfony 3.4 or newer. This bundle
-assumes you're using a standard Symfony 4 directory structure, but many
-commands can generate code into any application.
+applications and requires using Symfony 3.4 or newer and PHP 7.1.* (use maker-bundle 1.6.0 for PHP 7.0.X).
+This bundle assumes you're using a standard Symfony 4 directory structure,
+but many commands can generate code into any application.
 
 Installation
 ------------
