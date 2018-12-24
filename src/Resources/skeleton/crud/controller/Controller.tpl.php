@@ -23,7 +23,9 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 <?php if (isset($repository_full_class_name)): ?>
     public function index(<?= $repository_class_name ?> $<?= $repository_var ?>): Response
     {
-        return $this->render('<?= $templates_path ?>/index.html.twig', ['<?= $entity_twig_var_plural ?>' => $<?= $repository_var ?>->findAll()]);
+        return $this->render('<?= $templates_path ?>/index.html.twig', [
+            '<?= $entity_twig_var_plural ?>' => $<?= $repository_var ?>->findAll(),
+        ]);
     }
 <?php else: ?>
     public function index(): Response
@@ -32,7 +34,9 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
             ->getRepository(<?= $entity_class_name ?>::class)
             ->findAll();
 
-        return $this->render('<?= $templates_path ?>/index.html.twig', ['<?= $entity_twig_var_plural ?>' => $<?= $entity_var_plural ?>]);
+        return $this->render('<?= $templates_path ?>/index.html.twig', [
+            '<?= $entity_twig_var_plural ?>' => $<?= $entity_var_plural ?>,
+        ]);
     }
 <?php endif ?>
 
@@ -64,7 +68,9 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
      */
     public function show(<?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
-        return $this->render('<?= $templates_path ?>/show.html.twig', ['<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>]);
+        return $this->render('<?= $templates_path ?>/show.html.twig', [
+            '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
+        ]);
     }
 
     /**
@@ -78,7 +84,9 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('<?= $route_name ?>_index', ['<?= $entity_identifier ?>' => $<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>()]);
+            return $this->redirectToRoute('<?= $route_name ?>_index', [
+                '<?= $entity_identifier ?>' => $<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(),
+            ]);
         }
 
         return $this->render('<?= $templates_path ?>/edit.html.twig', [
