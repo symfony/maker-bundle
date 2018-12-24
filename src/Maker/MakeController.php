@@ -71,6 +71,8 @@ final class MakeController extends AbstractMaker
                 'controller/twig_template.tpl.php',
                 [
                     'controller_path' => $controllerPath,
+                    'root_directory' => $generator->getRootDirectory(),
+                    'class_name' => $controllerClassNameDetails->getShortName(),
                 ]
             );
         }
