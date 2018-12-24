@@ -23,13 +23,11 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
      */
     public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder<?= $authenticator_full_class_name ? sprintf(', GuardAuthenticatorHandler $guardHandler, %s $authenticator', $authenticator_class_name) : '' ?>): Response
     {
-        $form = $this->createForm(<?= $form_class_name ?>::class);
+        $user = new <?= $user_class_name ?>();
+        $form = $this->createForm(<?= $form_class_name ?>::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var <?= $user_class_name ?> */
-            $user = $form->getData();
-
             // encode the plain password
             $user->set<?= ucfirst($password_field) ?>(
                 $passwordEncoder->encodePassword(
