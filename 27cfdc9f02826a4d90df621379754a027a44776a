@@ -1,0 +1,74 @@
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2018-06-14T06:30:41Z
+
+(tests failing :) )
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2018-06-14T07:55:49Z
+
+Demo:
+
+![image](https://user-images.githubusercontent.com/408368/41398877-10348abe-6fb9-11e8-93c5-616b6a1fdfca.png)
+
+```php
+<?php
+
+namespace App\Controller;
+
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+
+class HelloController extends Controller
+{
+    /**
+     * @Route("/hello", name="hello")
+     */
+    public function index()
+    {
+        return $this->render('hello/index.html.twig');
+    }
+}
+```
+
+```twig
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello HelloController!{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+
+<div class="example-wrapper">
+    <h1>Hello HelloController! ✅</h1>
+
+    This friendly message is coming from:
+    <ul>
+        <li>Your controller at <code><a href="{{ '/home/gregoire/dev/trainings/2018-06-12/application/src/Controller/HelloController.php'|file_link(15) }}">src/Controller/HelloController.php</a></code></li>
+        <li>Your template at <code><a href="{{ '/home/gregoire/dev/trainings/2018-06-12/application/templates/hello/index.html.twig'|file_link(0) }}">templates/hello/index.html.twig</a></code></li>
+    </ul>
+</div>
+{% endblock %}
+```
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2018-10-19T15:45:34Z
+
+Hello.
+
+I'm really late on this one. I finally took time to finish it.
+
+I think it's OK now.
+
+Thanks for the review.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2018-12-05T14:31:18Z
+
+Hello. Gentle reminder :)
