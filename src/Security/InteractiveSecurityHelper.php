@@ -112,7 +112,7 @@ authenticators will be ignored, and can be blank.',
 
             return 'App\\Security\\User';
         }
-        
+
         return $io->error('This value cannot be blank and no default class found');
     }
 
