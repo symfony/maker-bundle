@@ -278,7 +278,7 @@ final class MakeAuthenticator extends AbstractMaker
 
         // create login form template
         $this->generator->generateFile(
-            'templates/security/login.html.twig',
+            $this->fileManager->getTemplatesFolder().'security/login.html.twig',
             'authenticator/login_form.tpl.php',
             [
                 'username_field' => $userNameField,
@@ -314,7 +314,7 @@ final class MakeAuthenticator extends AbstractMaker
                 $nextTexts[] = sprintf('- Check the user\'s password in <info>%s::checkCredentials()</info>.', $authenticatorClass);
             }
 
-            $nextTexts[] = '- Review & adapt the login template: <info>templates/security/login.html.twig</info>.';
+            $nextTexts[] = '- Review & adapt the login template: <info>'.$this->fileManager->getTemplatesFolder().'security/login.html.twig</info>.';
         }
 
         return $nextTexts;

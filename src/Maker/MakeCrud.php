@@ -17,6 +17,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
@@ -41,10 +42,13 @@ final class MakeCrud extends AbstractMaker
 
     private $formTypeRenderer;
 
-    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer)
+    private $fileManager;
+
+    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer, FileManager $fileManager)
     {
         $this->doctrineHelper = $doctrineHelper;
         $this->formTypeRenderer = $formTypeRenderer;
+        $this->fileManager = $fileManager;
     }
 
     public static function getCommandName(): string
@@ -195,7 +199,7 @@ final class MakeCrud extends AbstractMaker
 
         foreach ($templates as $template => $variables) {
             $generator->generateFile(
-                'templates/'.$templatesPath.'/'.$template.'.html.twig',
+                $this->fileManager->getTemplatesFolder().$templatesPath.'/'.$template.'.html.twig',
                 'crud/templates/'.$template.'.tpl.php',
                 $variables
             );

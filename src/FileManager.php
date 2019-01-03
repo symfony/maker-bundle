@@ -29,14 +29,16 @@ class FileManager
     private $rootDirectory;
     /** @var SymfonyStyle */
     private $io;
+    private $twigDefaultPath;
 
-    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory)
+    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory, string $twigDefaultPath)
     {
         // move FileManagerTest stuff
         // update EntityRegeneratorTest to mock the autoloader
         $this->fs = $fs;
         $this->autoloaderUtil = $autoloaderUtil;
         $this->rootDirectory = rtrim($this->realPath($this->normalizeSlashes($rootDirectory)), '/');
+        $this->twigDefaultPath = $twigDefaultPath;
     }
 
     public function setIO(SymfonyStyle $io)
@@ -172,6 +174,11 @@ class FileManager
     public function getRootDirectory(): string
     {
         return $this->rootDirectory;
+    }
+
+    public function getTemplatesFolder(): string
+    {
+        return $this->twigDefaultPath.'/';
     }
 
     /**

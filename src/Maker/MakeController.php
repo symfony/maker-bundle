@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Common\Annotations\Annotation;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
@@ -29,6 +30,14 @@ use Symfony\Component\Console\Input\InputOption;
  */
 final class MakeController extends AbstractMaker
 {
+
+    private $fileManager;
+
+    public function __construct(FileManager $fileManager)
+    {
+        $this->fileManager = $fileManager;
+    }
+
     public static function getCommandName(): string
     {
         return 'make:controller';
@@ -67,7 +76,7 @@ final class MakeController extends AbstractMaker
 
         if ($this->isTwigInstalled() && !$noTemplate) {
             $generator->generateFile(
-                'templates/'.$templateName,
+                $this->fileManager->getTemplatesFolder().$templateName,
                 'controller/twig_template.tpl.php',
                 [
                     'controller_path' => $controllerPath,
