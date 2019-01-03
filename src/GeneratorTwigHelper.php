@@ -67,7 +67,7 @@ final class GeneratorTwigHelper
 
     public function getHeadPrintCode($title): string
     {
-        if ($this->fileManager->fileExists($this->fileManager->getTemplatesFolder().'base.html.twig')) {
+        if ($this->fileManager->fileExists($this->fileManager->getTemplatesDir().'base.html.twig')) {
             return <<<TWIG
 {% extends 'base.html.twig' %}
 

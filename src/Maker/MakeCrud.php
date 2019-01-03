@@ -199,7 +199,7 @@ final class MakeCrud extends AbstractMaker
 
         foreach ($templates as $template => $variables) {
             $generator->generateFile(
-                $this->fileManager->getTemplatesFolder().$templatesPath.'/'.$template.'.html.twig',
+                $this->fileManager->getTemplatesDir().$templatesPath.'/'.$template.'.html.twig',
                 'crud/templates/'.$template.'.tpl.php',
                 $variables
             );

@@ -176,7 +176,7 @@ class FileManager
         return $this->rootDirectory;
     }
 
-    public function getTemplatesFolder(): string
+    public function getTemplatesDir(): string
     {
         return $this->twigDefaultPath.'/';
     }

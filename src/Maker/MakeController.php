@@ -75,7 +75,7 @@ final class MakeController extends AbstractMaker
 
         if ($this->isTwigInstalled() && !$noTemplate) {
             $generator->generateFile(
-                $this->fileManager->getTemplatesFolder().$templateName,
+                $this->fileManager->getTemplatesDir().$templateName,
                 'controller/twig_template.tpl.php',
                 [
                     'controller_path' => $controllerPath,

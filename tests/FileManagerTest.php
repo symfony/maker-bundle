@@ -157,7 +157,7 @@ class FileManagerTest extends TestCase
     public function testTemplatesFolder(string $rootDir, string $twigDefaultPath, string $expectedTemplatesFolder)
     {
         $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, $twigDefaultPath);
-        $this->assertSame($expectedTemplatesFolder, $fileManager->getTemplatesFolder());
+        $this->assertSame($expectedTemplatesFolder, $fileManager->getTemplatesDir());
     }
 
     public function getTestTemplatesFolder()
