@@ -30,7 +30,6 @@ use Symfony\Component\Console\Input\InputOption;
  */
 final class MakeController extends AbstractMaker
 {
-
     private $fileManager;
 
     public function __construct(FileManager $fileManager)
