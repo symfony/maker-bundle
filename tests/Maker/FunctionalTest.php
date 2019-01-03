@@ -1376,6 +1376,7 @@ class FunctionalTestKernel extends Kernel implements CompilerPassInterface
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
         $c->setParameter('kernel.secret', 123);
+        $c->setParameter('twig.default_path', 'templates');
     }
 
     public function getProjectDir()
