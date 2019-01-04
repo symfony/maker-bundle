@@ -13,6 +13,7 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
@@ -88,7 +89,11 @@ class EntityRegeneratorTest extends TestCase
                 return $tmpDir.'/src/'.str_replace('\\', '/', $shortClassName).'.php';
             });
 
-        $fileManager = new FileManager($fs, $autoloaderUtil, $tmpDir, 'templates');
+        $mockBag = $this->createMock(ParameterBagInterface::class);
+        $mockBag->expects($this->once())
+            ->method('get')
+            ->willReturn('templates');
+        $fileManager = new FileManager($fs, $autoloaderUtil, $tmpDir, $mockBag);
         $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
         $regenerator = new EntityRegenerator(
             $doctrineHelper,
