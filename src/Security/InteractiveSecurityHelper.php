@@ -99,7 +99,7 @@ authenticators will be ignored, and can be blank.',
         return $userClass;
     }
 
-    private function guessUserClassDefault()
+    private function guessUserClassDefault(): string
     {
         if (class_exists('App\\Entity\\User') && isset(class_implements('App\\Entity\\User')[UserInterface::class])) {
             return 'App\\Entity\\User';
@@ -109,7 +109,7 @@ authenticators will be ignored, and can be blank.',
             return 'App\\Security\\User';
         }
 
-        return null;
+        return '';
     }
 
     public function guessUserNameField(SymfonyStyle $io, string $userClass, array $providers): string
