@@ -92,28 +92,24 @@ authenticators will be ignored, and can be blank.',
 
         $userClass = $io->ask(
             $questionText ?? 'Enter the User class that you want to authenticate (e.g. <fg=yellow>App\\Entity\\User</>)',
-            $this->guessUserClassDefault($io),
+            $this->guessUserClassDefault(),
             [Validator::class, 'classIsUserInterface']
         );
 
         return $userClass;
     }
 
-    private function guessUserClassDefault(SymfonyStyle $io)
+    private function guessUserClassDefault(): string
     {
         if (class_exists('App\\Entity\\User') && isset(class_implements('App\\Entity\\User')[UserInterface::class])) {
-            $io->note('Found a default class App\\Entity\\User');
-
             return 'App\\Entity\\User';
         }
 
         if (class_exists('App\\Security\\User') && isset(class_implements('App\\Security\\User')[UserInterface::class])) {
-            $io->note('Found a default class App\\Security\\User');
-
             return 'App\\Security\\User';
         }
 
-        return $io->error('This value cannot be blank and no default class found');
+        return '';
     }
 
     public function guessUserNameField(SymfonyStyle $io, string $userClass, array $providers): string
