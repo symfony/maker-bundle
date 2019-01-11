@@ -13,7 +13,6 @@ namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
@@ -30,16 +29,16 @@ class FileManager
     private $rootDirectory;
     /** @var SymfonyStyle */
     private $io;
-    private $params;
+    private $twigDefaultPath;
 
-    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory, ParameterBagInterface $params)
+    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory, string $twigDefaultPath)
     {
         // move FileManagerTest stuff
         // update EntityRegeneratorTest to mock the autoloader
         $this->fs = $fs;
         $this->autoloaderUtil = $autoloaderUtil;
         $this->rootDirectory = rtrim($this->realPath($this->normalizeSlashes($rootDirectory)), '/');
-        $this->params = $params;
+        $this->twigDefaultPath = $twigDefaultPath;
     }
 
     public function setIO(SymfonyStyle $io)
@@ -121,7 +120,7 @@ class FileManager
         return file_get_contents($this->absolutizePath($path));
     }
 
-    public function createFinder(string $in)
+    public function createFinder(string $in): Finder
     {
         $finder = new Finder();
         $finder->in($this->absolutizePath($in));
@@ -177,9 +176,9 @@ class FileManager
         return $this->rootDirectory;
     }
 
-    public function getTemplatesDir(): string
+    public function getPathForTemplate(string $filename): string
     {
-        return $this->params->get('twig.default_path').'/';
+        return $this->twigDefaultPath.'/'.$filename;
     }
 
     /**

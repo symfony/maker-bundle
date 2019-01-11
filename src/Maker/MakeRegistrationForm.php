@@ -218,8 +218,8 @@ final class MakeRegistrationForm extends AbstractMaker
         );
 
         // 3) Generate the template
-        $generator->generateFile(
-            $this->fileManager->getTemplatesDir().'registration/register.html.twig',
+        $generator->generateTemplate(
+            'registration/register.html.twig',
             'registration/twig_template.tpl.php',
             [
                 'username_field' => $usernameField,

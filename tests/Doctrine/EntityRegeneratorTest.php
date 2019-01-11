@@ -89,11 +89,7 @@ class EntityRegeneratorTest extends TestCase
                 return $tmpDir.'/src/'.str_replace('\\', '/', $shortClassName).'.php';
             });
 
-        $mockBag = $this->createMock(ParameterBagInterface::class);
-        $mockBag->expects($this->once())
-            ->method('get')
-            ->willReturn('templates');
-        $fileManager = new FileManager($fs, $autoloaderUtil, $tmpDir, $mockBag);
+        $fileManager = new FileManager($fs, $autoloaderUtil, $tmpDir, 'templates');
         $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
         $regenerator = new EntityRegenerator(
             $doctrineHelper,

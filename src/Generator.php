@@ -225,4 +225,20 @@ class Generator
             ]
         );
     }
+
+    /**
+     * Generate a template file.
+     *
+     * @param string $targetPath
+     * @param string $templateName
+     * @param array  $variables
+     */
+    public function generateTemplate(string $targetPath, string $templateName, array $variables)
+    {
+        $this->generateFile(
+            $this->fileManager->getPathForTemplate($targetPath),
+            $templateName,
+            $variables
+        );
+    }
 }

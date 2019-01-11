@@ -15,7 +15,7 @@ class FileManagerTest extends TestCase
      */
     public function testRelativizePath(string $rootDir, string $absolutePath, string $expectedPath)
     {
-        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, $this->createMock(ParameterBagInterface::class));
+        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, 'templates');
 
         $this->assertSame($expectedPath, $fileManager->relativizePath($absolutePath));
     }
@@ -64,7 +64,7 @@ class FileManagerTest extends TestCase
      */
     public function testAbsolutizePath(string $rootDir, string $path, string $expectedPath)
     {
-        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, $this->createMock(ParameterBagInterface::class));
+        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, 'templates');
         $this->assertSame($expectedPath, $fileManager->absolutizePath($path));
     }
 
@@ -100,7 +100,7 @@ class FileManagerTest extends TestCase
      */
     public function testIsPathInVendor(string $rootDir, string $path, bool $expectedIsInVendor)
     {
-        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, $this->createMock(ParameterBagInterface::class));
+        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, 'templates');
         $this->assertSame($expectedIsInVendor, $fileManager->isPathInVendor($path));
     }
 
@@ -142,19 +142,15 @@ class FileManagerTest extends TestCase
      */
     public function testTemplatesFolder(string $rootDir, string $expectedTemplatesFolder)
     {
-        $mock = $this->createMock(ParameterBagInterface::class);
-        $mock->expects($this->once())
-            ->method('get')
-            ->willReturn('templates');
-        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, $mock);
-        $this->assertSame($expectedTemplatesFolder, $fileManager->getTemplatesDir());
+        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, 'templates');
+        $this->assertSame($expectedTemplatesFolder, $fileManager->getPathForTemplate('template.html.twig'));
     }
 
     public function getTestTemplatesFolder()
     {
         yield 'its_a_folder' => [
             '/home/project/',
-            'templates/',
+            'templates/template.html.twig',
         ];
     }
 }
