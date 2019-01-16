@@ -1310,6 +1310,15 @@ class FunctionalTestKernel extends Kernel implements CompilerPassInterface
 {
     use MicroKernelTrait;
 
+    private $testRootDir;
+
+    public function __construct(string $environment, bool $debug)
+    {
+        $this->testRootDir = sys_get_temp_dir().'/'.uniqid('sf_maker_', true);
+
+        parent::__construct($environment, $debug);
+    }
+
     public function registerBundles()
     {
         return [
@@ -1327,9 +1336,14 @@ class FunctionalTestKernel extends Kernel implements CompilerPassInterface
         $c->setParameter('kernel.secret', 123);
     }
 
+    public function getProjectDir()
+    {
+        return $this->getRootDir();
+    }
+
     public function getRootDir()
     {
-        return sys_get_temp_dir().'/'.uniqid('sf_maker_', true);
+        return $this->testRootDir;
     }
 
     public function process(ContainerBuilder $container)
