@@ -102,7 +102,8 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         ]);
     }
 
-    private function noChangesMessage(ConsoleStyle $io) {
+    private function noChangesMessage(ConsoleStyle $io)
+    {
         $io->warning([
             'No database changes were detected.',
         ]);
