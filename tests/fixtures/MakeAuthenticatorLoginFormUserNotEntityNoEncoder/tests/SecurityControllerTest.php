@@ -11,7 +11,7 @@ class SecurityControllerTest extends WebTestCase
     {
         $authenticatorReflection = new \ReflectionClass(AppCustomAuthenticator::class);
         $constructorParameters = $authenticatorReflection->getConstructor()->getParameters();
-        $this->assertSame('router', $constructorParameters[0]->getName());
+        $this->assertSame('urlGenerator', $constructorParameters[0]->getName());
 
         // assert authenticator is *not* injected
         $this->assertEquals(2, \count($constructorParameters));
