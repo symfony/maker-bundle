@@ -221,7 +221,7 @@ class Generator
             $controllerTemplatePath,
             $parameters +
             [
-                'parent_class_name' => \method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
+                'parent_class_name' => method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
             ]
         );
     }
