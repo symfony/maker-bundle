@@ -162,6 +162,11 @@ class TestEntityRegeneratorKernel extends Kernel
         ]);
     }
 
+    public function getProjectDir()
+    {
+        return $this->getRootDir();
+    }
+
     public function getRootDir()
     {
         return __DIR__.'/../tmp/current_project';
@@ -205,6 +210,11 @@ class TestXmlEntityRegeneratorKernel extends Kernel
                 ]
             ]
         ]);
+    }
+
+    public function getProjectDir()
+    {
+        return $this->getRootDir();
     }
 
     public function getRootDir()

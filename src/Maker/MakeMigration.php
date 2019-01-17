@@ -75,17 +75,18 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         $generateMigrationCommand = $this->application->find('doctrine:migrations:diff');
 
         $commandOutput = new BufferedOutput($io->getVerbosity());
-        $generateMigrationCommand->run(new ArgvInput($options), $commandOutput);
-        $migrationOutput = $commandOutput->fetch();
+        try {
+            $generateMigrationCommand->run(new ArgvInput($options), $commandOutput);
 
-        if (false !== strpos($migrationOutput, 'No changes detected')) {
-            $io->warning([
-                'No database changes were detected.',
-            ]);
-            $io->text([
-                'The database schema and the application mapping information are already in sync.',
-                '',
-            ]);
+            $migrationOutput = $commandOutput->fetch();
+
+            if (false !== strpos($migrationOutput, 'No changes detected')) {
+                $this->noChangesMessage($io);
+
+                return;
+            }
+        } catch (\Doctrine\Migrations\Generator\Exception\NoChangesDetected $exception) {
+            $this->noChangesMessage($io);
 
             return;
         }
@@ -98,6 +99,17 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
             sprintf('Next: Review the new migration <info>%s</info>', $migrationName),
             'Then: Run the migration with <info>php bin/console doctrine:migrations:migrate</info>',
             'See <fg=yellow>https://symfony.com/doc/current/bundles/DoctrineMigrationsBundle/index.html</>',
+        ]);
+    }
+
+    private function noChangesMessage(ConsoleStyle $io)
+    {
+        $io->warning([
+            'No database changes were detected.',
+        ]);
+        $io->text([
+            'The database schema and the application mapping information are already in sync.',
+            '',
         ]);
     }
 
