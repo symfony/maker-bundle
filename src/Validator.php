@@ -43,7 +43,7 @@ final class Validator
             'use', 'var', 'while', 'xor',
             'int', 'float', 'bool', 'string', 'true', 'false', 'null', 'void',
             'iterable', 'object', '__file__', '__line__', '__dir__', '__function__', '__class__',
-            '__method__', '__namespace__', '__trait__', 'self', 'parent', 'file', 'line', 'dir', 'method', 
+            '__method__', '__namespace__', '__trait__', 'self', 'parent', 'file', 'line', 'dir', 'method',
         ];
 
         foreach ($pieces as $piece) {
