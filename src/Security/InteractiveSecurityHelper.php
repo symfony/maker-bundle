@@ -134,6 +134,10 @@ authenticators will be ignored, and can be blank.',
             $classProperties[] = $property->name;
         }
 
+        if (empty($classProperties)) {
+            throw new \LogicException(sprintf('No properties were found in "%s" entity', $userClass));
+        }
+
         return $io->choice(
             sprintf('Which field on your <fg=yellow>%s</> class will people enter when logging in?', $userClass),
             $classProperties,
