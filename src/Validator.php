@@ -42,8 +42,8 @@ final class Validator
             'static', 'switch', 'throw', 'trait', 'try', 'unset',
             'use', 'var', 'while', 'xor',
             'int', 'float', 'bool', 'string', 'true', 'false', 'null', 'void',
-            'iterable', 'object', '__FILE__', '__LINE__', '__DIR__', '__FUNCTION__', '__CLASS__',
-            '__METHOD__', '__NAMESPACE__', '__TRAIT__',
+            'iterable', 'object', '__file__', '__line__', '__dir__', '__function__', '__class__',
+            '__method__', '__namespace__', '__trait__', 'self', 'parent',
         ];
 
         foreach ($pieces as $piece) {
