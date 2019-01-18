@@ -161,16 +161,32 @@ final class DoctrineHelper
                 }
             }
 
-            foreach ($cmf->getAllMetadata() as $m) {
-                if (null === $classOrNamespace) {
-                    $metadata[$m->getName()] = $m;
-                } else {
-                    if ($m->getName() === $classOrNamespace) {
-                        return $m;
-                    }
-
-                    if (0 === strpos($m->getName(), $classOrNamespace)) {
+            try {
+                foreach ($cmf->getAllMetadata() as $m) {
+                    if (null === $classOrNamespace) {
                         $metadata[$m->getName()] = $m;
+                    } else {
+                        if ($m->getName() === $classOrNamespace) {
+                            return $m;
+                        }
+
+                        if (0 === strpos($m->getName(), $classOrNamespace)) {
+                            $metadata[$m->getName()] = $m;
+                        }
+                    }
+                }
+            } catch (\ReflectionException $exception) {
+                foreach ($cmf->getLoadedMetadata() as $m) {
+                    if (null === $classOrNamespace) {
+                        $metadata[$m->getName()] = $m;
+                    } else {
+                        if ($m->getName() === $classOrNamespace) {
+                            return $m;
+                        }
+
+                        if (0 === strpos($m->getName(), $classOrNamespace)) {
+                            $metadata[$m->getName()] = $m;
+                        }
                     }
                 }
             }
