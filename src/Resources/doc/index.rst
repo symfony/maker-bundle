@@ -51,7 +51,7 @@ the root namespace that is used to "guess" what classes you want to generate:
 
 .. code-block:: yaml
 
-    # config/packages/maker.yaml
+    # config/packages/dev/maker.yaml
     # create this file if you need to configure anything
     maker:
         # tell MakerBundle that all of your classes lives in an
