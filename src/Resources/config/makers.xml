@@ -42,6 +42,13 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_forgotten_password" class="Symfony\Bundle\MakerBundle\Maker\MakeForgottenPassword">
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.renderer.form_type_renderer" />
+                <argument type="service" id="router" />
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_form" class="Symfony\Bundle\MakerBundle\Maker\MakeForm">
                 <argument type="service" id="maker.doctrine_helper" />
                 <argument type="service" id="maker.renderer.form_type_renderer" />

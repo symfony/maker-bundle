@@ -23,6 +23,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeController;
 use Symfony\Bundle\MakerBundle\Maker\MakeCrud;
 use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Maker\MakeFixtures;
+use Symfony\Bundle\MakerBundle\Maker\MakeForgottenPassword;
 use Symfony\Bundle\MakerBundle\Maker\MakeForm;
 use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest;
 use Symfony\Bundle\MakerBundle\Maker\MakeMigration;
@@ -796,6 +797,19 @@ class FunctionalTest extends MakerTestCase
                         );
                     }
                 ),
+        ];
+
+        yield 'forgotten_password' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeForgottenPassword::class),
+            [
+                'App\\Entity\\User',
+                // email field guessed
+                // email getter guessed
+                // password setter guessed
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeForgottenPassword')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
         ];
     }
 
