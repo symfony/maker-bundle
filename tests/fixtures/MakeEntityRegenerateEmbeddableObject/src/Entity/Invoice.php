@@ -22,7 +22,7 @@ class Invoice
     private $title;
 
     /**
-     * @ORM\Embedded(class="Money\Money")
+     * @ORM\Embedded(class="App\Entity\Money")
      */
     private $total;
 }
