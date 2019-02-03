@@ -10,6 +10,6 @@
 
         <field name="street" type="string" />
 
-        <embedded name="total" class="Money\\Money"/>
+        <embedded name="total" class="Money\Money"/>
     </entity>
 </doctrine-mapping>
