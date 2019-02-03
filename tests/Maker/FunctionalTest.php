@@ -1144,6 +1144,16 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setArgumentsString('--regenerate')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateEmbeddableObject')
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                'type: annotation',
+                'type: xml'
+            )
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                "dir: '%kernel.project_dir%/src/Entity'",
+                "dir: '%kernel.project_dir%/config/doctrine'"
+            )
             ->configureDatabase()
             ->setRequiredPhpVersion(70100)
         ];

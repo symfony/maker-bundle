@@ -7,8 +7,6 @@ use Money\Currency;
 use Money\Money;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Doctrine\ORM\EntityManager;
-use App\Entity\Food;
-use App\Entity\Recipe;
 
 class GeneratedEntityTest extends KernelTestCase
 {
