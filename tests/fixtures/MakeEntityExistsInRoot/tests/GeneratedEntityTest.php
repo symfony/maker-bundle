@@ -21,7 +21,7 @@ class GeneratedEntityTest extends KernelTestCase
 
         $directory = new Directory();
         // check that the constructor was instantiated properly
-        $this->assertInstanceOf(ArrayCollection::class, $directory->getChildUsers());
+        $this->assertInstanceOf(ArrayCollection::class, $directory->getChildDirectories());
         // set existing field
         $directory->setName('root');
         $em->persist($directory);
@@ -34,7 +34,7 @@ class GeneratedEntityTest extends KernelTestCase
         // set via the inverse side
         $subDir2 = new Directory();
         $subDir2->setName('fixtures');
-        $directory->addChildUser($subDir2);
+        $directory->addChildDirectory($subDir2);
         $em->persist($subDir2);
 
         $em->flush();
