@@ -92,13 +92,12 @@ class FileManager
     public function relativizePath($absolutePath): string
     {
         $absolutePath = $this->normalizeSlashes($absolutePath);
-
+        $absolutePath = $this->realPath($absolutePath);
+        
         // see if the path is even in the root
         if (false === strpos($absolutePath, $this->rootDirectory)) {
             return $absolutePath;
         }
-
-        $absolutePath = $this->realPath($absolutePath);
 
         // str_replace but only the first occurrence
         $relativePath = ltrim(implode('', explode($this->rootDirectory, $absolutePath, 2)), '/');
