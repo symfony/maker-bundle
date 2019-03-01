@@ -16,7 +16,7 @@ class Currency
      */
     private $currency;
 
-    public function __construct($currency)
+    public function __construct($currency = null)
     {
         $this->currency = $currency;
     }
@@ -36,6 +36,7 @@ class Currency
     public function setCurrency($currency)
     {
         $this->currency = $currency;
+
         return $this;
     }
 

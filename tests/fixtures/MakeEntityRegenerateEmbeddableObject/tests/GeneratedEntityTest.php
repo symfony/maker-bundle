@@ -3,8 +3,8 @@
 namespace App\Tests;
 
 use App\Entity\Invoice;
-use Money\Currency;
-use Money\Money;
+use App\Entity\Currency;
+use App\Entity\Money;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Doctrine\ORM\EntityManager;
 

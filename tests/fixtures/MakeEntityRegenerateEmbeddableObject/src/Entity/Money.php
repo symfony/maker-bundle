@@ -4,6 +4,9 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @ORM\Embeddable
+ */
 class Money
 {
     /**
@@ -20,9 +23,9 @@ class Money
      */
     private $amount;
 
-    public function __construct($amount, Currency $currency)
+    public function __construct($amount = null, Currency $currency = null)
     {
         $this->amount = $amount;
-        $this->currency = $currency;
+        $this->currency = $currency ?? new Currency();
     }
 }
