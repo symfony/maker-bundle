@@ -10,6 +10,7 @@ php:
   - 7.0
   - 7.1
   - 7.2
+  - 7.3
 
 cache:
     directories:
@@ -22,7 +23,7 @@ env:
         - SYMFONY_PHPUNIT_DIR=.phpunit
 
 before_install:
-    - phpenv config-rm xdebug.ini
+    - phpenv config-rm xdebug.ini || echo "xdebug not available"
 
 install:
     - composer update --no-suggest
