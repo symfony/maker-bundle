@@ -158,6 +158,6 @@ final class SecurityConfigUpdater
 
         $firstProviderConfig = array_values($providersConfig)[0];
 
-        return array_key_exists('memory', $firstProviderConfig);
+        return \array_key_exists('memory', $firstProviderConfig);
     }
 }

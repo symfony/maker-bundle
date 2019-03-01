@@ -153,7 +153,7 @@ class YamlSourceManipulator
             $this->log('START key', true);
 
             // 1) was this key removed from the new data?
-            if (!array_key_exists($key, $newData)) {
+            if (!\array_key_exists($key, $newData)) {
                 $this->log('Removing key');
                 $this->removeKeyFromYaml($key, $currentData[$key]);
 
@@ -682,7 +682,7 @@ class YamlSourceManipulator
         $depth = $limitLevels;
         $path = \array_slice($this->currentPath, 0, \count($this->currentPath) - $limitLevels);
         foreach ($path as $key) {
-            if (!array_key_exists($key, $dataRef)) {
+            if (!\array_key_exists($key, $dataRef)) {
                 throw new \LogicException(sprintf('Could not find the key "%s" from the current path "%s" in data "%s"', $key, implode(', ', $path), var_export($data, true)));
             }
 
@@ -731,7 +731,7 @@ class YamlSourceManipulator
         $data = $this->currentData;
         $path = \array_slice($this->currentPath, 0, \count($this->currentPath) - $limitLevels);
         foreach ($path as $key) {
-            if (!array_key_exists($key, $data)) {
+            if (!\array_key_exists($key, $data)) {
                 throw new \LogicException(sprintf('Could not find the key "%s" from the current path "%s" in data "%s"', $key, implode(', ', $path), var_export($this->currentData, true)));
             }
 
