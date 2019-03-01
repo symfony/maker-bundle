@@ -906,6 +906,36 @@ class FunctionalTest extends MakerTestCase
            ->setRequiredPhpVersion(70100)
         ];
 
+        yield 'entity_exists_in_root' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'Directory',
+                // field name
+                'parentDirectory',
+                // add a relationship field
+                'relation',
+                // the target entity
+                'Directory',
+                // relation type
+                'ManyToOne',
+                // nullable
+                'y',
+                // do you want to generate an inverse relation? (default to yes)
+                '',
+                // field name on opposite side
+                'childDirectories',
+                // orphanRemoval (default to no)
+                '',
+                // finish adding fields
+                '',
+            ])
+           ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityExistsInRoot')
+           ->configureDatabase()
+           ->updateSchemaAfterCommand()
+           ->setRequiredPhpVersion(70100)
+        ];
+
         yield 'entity_one_to_many_simple' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),
             [
