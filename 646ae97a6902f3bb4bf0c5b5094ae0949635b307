@@ -1,0 +1,9 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2018-12-13T18:58:37Z
+
+Hey @cedricziel!
+
+This is an excellent change! But could you add a test for it? There are a lot of test cases already in the `FunctionalTest` class - we just need to duplicate an existing one, use an embeddable, and make sure the generated code doesn't explode (because a property named `$total.currency` will definitely make things explode).
+
+Thanks!
