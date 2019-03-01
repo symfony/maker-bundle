@@ -468,16 +468,16 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
             $targetEntityClass = $io->askQuestion($question);
 
-            if (!class_exists($targetEntityClass)) {
-                if (!class_exists($this->getEntityNamespace().'\\'.$targetEntityClass)) {
+            if (!class_exists($designatedTargetClass = $this->getEntityNamespace().'\\'.$targetEntityClass)) {
+                if (!class_exists($designatedTargetClass = $targetEntityClass)) {
                     $io->error(sprintf('Unknown class "%s"', $targetEntityClass));
                     $targetEntityClass = null;
 
                     continue;
                 }
-
-                $targetEntityClass = $this->getEntityNamespace().'\\'.$targetEntityClass;
             }
+
+            $targetEntityClass = $designatedTargetClass;
         }
 
         // help the user select the type
