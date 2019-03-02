@@ -138,18 +138,19 @@ class FileManagerTest extends TestCase
     }
 
     /**
-     * @dataProvider getTestTemplatesFolder
+     * @dataProvider getPathForTemplateTests
      */
-    public function testTemplatesFolder(string $rootDir, string $expectedTemplatesFolder)
+    public function testPathForTemplate(string $rootDir, string $twigDefaultPath, string $expectedTemplatesFolder)
     {
-        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, 'templates');
+        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, $twigDefaultPath);
         $this->assertSame($expectedTemplatesFolder, $fileManager->getPathForTemplate('template.html.twig'));
     }
 
-    public function getTestTemplatesFolder()
+    public function getPathForTemplateTests()
     {
         yield 'its_a_folder' => [
             '/home/project/',
+            '/home/project/templates',
             'templates/template.html.twig',
         ];
     }

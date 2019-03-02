@@ -38,7 +38,7 @@ class FileManager
         $this->fs = $fs;
         $this->autoloaderUtil = $autoloaderUtil;
         $this->rootDirectory = rtrim($this->realPath($this->normalizeSlashes($rootDirectory)), '/');
-        $this->twigDefaultPath = $twigDefaultPath;
+        $this->twigDefaultPath = $this->relativizePath($twigDefaultPath);
     }
 
     public function setIO(SymfonyStyle $io)
