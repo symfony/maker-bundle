@@ -237,6 +237,17 @@ class ClassSourceManipulatorTest extends TestCase
             ],
             'User_simple_prop_already_exists.php'
         ];
+
+        yield 'entity_field_property_zero' => [
+            'User_simple.php',
+            'decimal',
+            [
+                'type' => 'decimal',
+                'precision' => 6,
+                'scale' => 0,
+            ],
+            'User_simple_prop_zero.php'
+        ];
     }
 
     /**
