@@ -2,10 +2,11 @@
 
 namespace <?= $namespace; ?>;
 
+use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-class <?= $class_name ?> implements NormalizerInterface
+class <?= $class_name ?> implements NormalizerInterface, CacheableSupportsMethodInterface
 {
     private $normalizer;
 
@@ -26,5 +27,10 @@ class <?= $class_name ?> implements NormalizerInterface
     public function supportsNormalization($data, $format = null): bool
     {
         return $data instanceof \App\Entity\BlogPost;
+    }
+
+    public function hasCacheableSupportsMethod(): bool
+    {
+        return true;
     }
 }
