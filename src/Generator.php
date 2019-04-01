@@ -170,10 +170,14 @@ class Generator
 
         $templatePath = $templateName;
         if (!file_exists($templatePath)) {
-            $templatePath = __DIR__.'/Resources/skeleton/'.$templateName;
+            $templatePath = $this->getRootDirectory()."/src/Maker/Resources/skeleton/".$templateName;
 
             if (!file_exists($templatePath)) {
-                throw new \Exception(sprintf('Cannot find template "%s"', $templateName));
+                $templatePath = __DIR__.'/Resources/skeleton/'.$templateName;
+                
+                if (!file_exists($templatePath)) {
+                    throw new \Exception(sprintf('Cannot find template "%s"', $templateName));
+                }
             }
         }
 
