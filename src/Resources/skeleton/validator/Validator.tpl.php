@@ -11,6 +11,10 @@ class <?= $class_name ?> extends ConstraintValidator
     {
         /* @var $constraint \<?= $constraint_class_name ?> */
 
+        if (null === $value || '' === $value) {
+            return;
+        }
+
         $this->context->buildViolation($constraint->message)
             ->setParameter('{{ value }}', $value)
             ->addViolation();
