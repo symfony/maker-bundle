@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
-use function trim;
-
 final class NamespacesHelper
 {
     /** @var string */
