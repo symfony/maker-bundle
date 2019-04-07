@@ -41,7 +41,7 @@ class MakerExtension extends Extension
         'subscriber_namespace',
         'twig_namespace',
         'unit_test_namespace',
-        'validator_namespace'
+        'validator_namespace',
     ];
 
     /**
@@ -74,7 +74,7 @@ class MakerExtension extends Extension
 
         $namespacesHelperDefinition = $container->getDefinition('maker.namespaces_helper');
         foreach (static::$namespaces as $index => $namespace) {
-            $namespacesHelperDefinition->replaceArgument($index, \trim($config[$namespace], '\\'));
+            $namespacesHelperDefinition->replaceArgument($index, trim($config[$namespace], '\\'));
         }
 
         $container->registerForAutoconfiguration(MakerInterface::class)

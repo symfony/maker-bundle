@@ -1,5 +1,15 @@
 <?php
+
 declare(strict_types=1);
+
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
@@ -79,71 +89,141 @@ final class NamespacesHelper
         $this->validator = $validator ?? 'Validator\\';
     }
 
+    /**
+     * Get command namespace.
+     *
+     * @return string
+     */
     public function getCommandNamespace(): string
     {
         return $this->trim($this->command);
     }
 
+    /**
+     * Get controller namespace.
+     *
+     * @return string
+     */
     public function getControllerNamespace(): string
     {
         return $this->trim($this->controller);
     }
 
+    /**
+     * Get entity namespace.
+     *
+     * @return string
+     */
     public function getEntityNamespace(): string
     {
         return $this->trim($this->entity);
     }
 
+    /**
+     * Get fixtures namespace.
+     *
+     * @return string
+     */
     public function getFixturesNamespace(): string
     {
         return $this->trim($this->fixtures);
     }
 
+    /**
+     * Get form namespace.
+     *
+     * @return string
+     */
     public function getFormNamespace(): string
     {
         return $this->trim($this->form);
     }
 
+    /**
+     * Get functional_test namespace.
+     *
+     * @return string
+     */
     public function getFunctionalTestNamespace(): string
     {
         return $this->trim($this->functionalTest);
     }
 
+    /**
+     * Get repository namespace.
+     *
+     * @return string
+     */
     public function getRepositoryNamespace(): string
     {
         return $this->trim($this->repository);
     }
 
+    /**
+     * Get root namespace.
+     *
+     * @return string
+     */
     public function getRootNamespace(): string
     {
         return $this->trim($this->root);
     }
 
+    /**
+     * Get security namespace.
+     *
+     * @return string
+     */
     public function getSecurityNamespace(): string
     {
         return $this->trim($this->security);
     }
 
+    /**
+     * Get serializer namespace.
+     *
+     * @return string
+     */
     public function getSerializerNamespace(): string
     {
         return $this->trim($this->serializer);
     }
 
+    /**
+     * Get subscriber namespace.
+     *
+     * @return string
+     */
     public function getSubscriberNamespace(): string
     {
         return $this->trim($this->subscriber);
     }
 
+    /**
+     * Get twig namespace.
+     *
+     * @return string
+     */
     public function getTwigNamespace(): string
     {
         return $this->trim($this->twig);
     }
 
+    /**
+     * Get unit_test namespace.
+     *
+     * @return string
+     */
     public function getUnitTestNamespace(): string
     {
         return $this->trim($this->unitTest);
     }
 
+    /**
+     * Get validator namespace.
+     *
+     * @return string
+     */
     public function getValidatorNamespace(): string
     {
         return $this->trim($this->validator);
@@ -158,6 +238,6 @@ final class NamespacesHelper
      */
     private function trim(string $namespace): string
     {
-        return \trim($namespace, '\\');
+        return trim($namespace, '\\');
     }
 }

@@ -163,7 +163,7 @@ final class MakeUser extends AbstractMaker
 
         // C) Generate a custom user provider, if necessary
         if (!$userClassConfiguration->isEntity()) {
-            $userProviderClass = \sprintf(
+            $userProviderClass = sprintf(
                 '%s\\%s\\UserProvider',
                 $namespacesHelper->getRootNamespace(),
                 $namespacesHelper->getSecurityNamespace()

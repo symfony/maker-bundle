@@ -63,7 +63,7 @@ final class DoctrineHelper
 
     public function getEntityNamespace(): string
     {
-        return \sprintf(
+        return sprintf(
             '%s\\%s',
             $this->namespacesHelper->getRootNamespace(),
             $this->namespacesHelper->getEntityNamespace()
