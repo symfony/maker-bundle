@@ -10,6 +10,8 @@ class ComposerAutoloaderFinderTest extends TestCase
 {
     public static $getSplAutoloadFunctions = 'spl_autoload_functions';
 
+    private static $rootNamespace = 'Symfony\\Bundle\\MakerBundle\\';
+
     /**
      * @after
      */
@@ -20,7 +22,7 @@ class ComposerAutoloaderFinderTest extends TestCase
 
     public function testGetClassLoader()
     {
-        $loader = (new ComposerAutoloaderFinder())->getClassLoader();
+        $loader = (new ComposerAutoloaderFinder(static::$rootNamespace))->getClassLoader();
 
         $this->assertInstanceOf(ClassLoader::class, $loader, 'Wrong ClassLoader found');
     }
@@ -35,7 +37,7 @@ class ComposerAutoloaderFinderTest extends TestCase
         };
 
         // throws \Exception
-        (new ComposerAutoloaderFinder())->getClassLoader();
+        (new ComposerAutoloaderFinder(static::$rootNamespace))->getClassLoader();
     }
 }
 

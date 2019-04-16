@@ -20,9 +20,19 @@ use Symfony\Component\Debug\DebugClassLoader;
 class ComposerAutoloaderFinder
 {
     /**
+     * @var string
+     */
+    private $rootNamespace;
+
+    /**
      * @var ClassLoader|null
      */
     private $classLoader = null;
+
+    public function __construct(string $rootNamespace = 'App\\')
+    {
+        $this->rootNamespace = rtrim($rootNamespace, '\\').'\\';
+    }
 
     public function getClassLoader(): ClassLoader
     {
@@ -46,13 +56,15 @@ class ComposerAutoloaderFinder
 
         foreach ($autoloadFunctions as $autoloader) {
             if (\is_array($autoloader) && isset($autoloader[0]) && \is_object($autoloader[0])) {
-                if ($autoloader[0] instanceof ClassLoader) {
+                if ($autoloader[0] instanceof ClassLoader
+                    && isset($autoloader[0]->getPrefixesPsr4()[$this->rootNamespace])) {
                     return $autoloader[0];
                 }
 
                 if ($autoloader[0] instanceof DebugClassLoader
                     && \is_array($autoloader[0]->getClassLoader())
-                    && $autoloader[0]->getClassLoader()[0] instanceof ClassLoader) {
+                    && $autoloader[0]->getClassLoader()[0] instanceof ClassLoader
+                    && isset($autoloader[0]->getClassLoader()[0]->getPrefixesPsr4()[$this->rootNamespace])) {
                     return $autoloader[0]->getClassLoader()[0];
                 }
             }
