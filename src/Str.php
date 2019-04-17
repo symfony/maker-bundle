@@ -65,21 +65,6 @@ final class Str
         return $value;
     }
 
-    /**
-     * Transforms the given string into the format commonly used by Twig variables
-     * (e.g. `BlogPostType` -> `blog_post_type`).
-     */
-    public static function asTwigVariable(string $value): string
-    {
-        $value = trim($value);
-        $value = preg_replace('/[^a-zA-Z0-9_]/', '_', $value);
-        $value = preg_replace('/(?<=\\w)([A-Z])/', '_$1', $value);
-        $value = preg_replace('/_{2,}/', '_', $value);
-        $value = strtolower($value);
-
-        return $value;
-    }
-
     public static function asLowerCamelCase(string $str): string
     {
         return lcfirst(self::asCamelCase($str));
@@ -92,17 +77,26 @@ final class Str
 
     public static function asRoutePath(string $value): string
     {
-        return '/'.str_replace('_', '/', self::asTwigVariable($value));
+        return '/'.str_replace('_', '/', self::asRouteName($value));
     }
 
     public static function asRouteName(string $value): string
     {
-        return self::asTwigVariable($value);
+        return self::asSnakeCase($value);
     }
 
+    /**
+     * (e.g. `BlogPostType` -> `blog_post_type`).
+     */
     public static function asSnakeCase(string $value): string
     {
-        return self::asTwigVariable($value);
+        $value = trim($value);
+        $value = preg_replace('/[^a-zA-Z0-9_]/', '_', $value);
+        $value = preg_replace('/(?<=\\w)([A-Z])/', '_$1', $value);
+        $value = preg_replace('/_{2,}/', '_', $value);
+        $value = strtolower($value);
+
+        return $value;
     }
 
     public static function asCommand(string $value): string

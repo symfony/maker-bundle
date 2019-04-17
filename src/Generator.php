@@ -22,14 +22,12 @@ use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 class Generator
 {
     private $fileManager;
-    private $twigHelper;
     private $pendingOperations = [];
     private $namespacePrefix;
 
     public function __construct(FileManager $fileManager, string $namespacePrefix)
     {
         $this->fileManager = $fileManager;
-        $this->twigHelper = new GeneratorTwigHelper($fileManager);
         $this->namespacePrefix = trim($namespacePrefix, '\\');
     }
 
@@ -60,22 +58,6 @@ class Generator
         $this->addOperation($targetPath, $templateName, $variables);
 
         return $targetPath;
-    }
-
-    /**
-     * Generate a normal file from a template.
-     *
-     * @param string $targetPath
-     * @param string $templateName
-     * @param array  $variables
-     */
-    public function generateFile(string $targetPath, string $templateName, array $variables)
-    {
-        $variables = array_merge($variables, [
-            'helper' => $this->twigHelper,
-        ]);
-
-        $this->addOperation($targetPath, $templateName, $variables);
     }
 
     public function dumpFile(string $targetPath, string $contents)
