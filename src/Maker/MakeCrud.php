@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the Symfony MakerBundle package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
@@ -22,18 +13,15 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
-use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Csrf\CsrfTokenManager;
-use Symfony\Component\Validator\Validation;
 
 /**
- * @author Sadicov Vladimir <sadikoff@gmail.com>
+ * @author Salomon Dion <dev.mrdion@gmail.com>
  */
 final class MakeCrud extends AbstractMaker
 {
@@ -126,28 +114,23 @@ final class MakeCrud extends AbstractMaker
         $entityVarPlural = lcfirst(Inflector::pluralize($entityClassDetails->getShortName()));
         $entityVarSingular = lcfirst(Inflector::singularize($entityClassDetails->getShortName()));
 
-        $entityTwigVarPlural = Str::asTwigVariable($entityVarPlural);
-        $entityTwigVarSingular = Str::asTwigVariable($entityVarSingular);
-
         $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
-        $templatesPath = Str::asFilePath($controllerClassDetails->getRelativeNameWithoutSuffix());
 
         $generator->generateController(
             $controllerClassDetails->getFullName(),
-            'crud/controller/Controller.tpl.php',
+            'crud/controller/FOSRestController.tpl.php',
             array_merge([
                     'entity_full_class_name' => $entityClassDetails->getFullName(),
                     'entity_class_name' => $entityClassDetails->getShortName(),
+                    'route_path' => Str::asRoutePath($entityVarPlural),
+                    'route_name' => $routeName,
                     'form_full_class_name' => $formClassDetails->getFullName(),
                     'form_class_name' => $formClassDetails->getShortName(),
-                    'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
-                    'route_name' => $routeName,
-                    'templates_path' => $templatesPath,
                     'entity_var_plural' => $entityVarPlural,
-                    'entity_twig_var_plural' => $entityTwigVarPlural,
                     'entity_var_singular' => $entityVarSingular,
-                    'entity_twig_var_singular' => $entityTwigVarSingular,
                     'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
+                    'parent_full_class_name' => 'FOS\RestBundle\Controller\FOSRestController',
+                    'parent_class_name' => 'FOSRestController'
                 ],
                 $repositoryVars
             )
@@ -158,48 +141,6 @@ final class MakeCrud extends AbstractMaker
             $entityDoctrineDetails->getFormFields(),
             $entityClassDetails
         );
-
-        $templates = [
-            '_delete_form' => [
-                'route_name' => $routeName,
-                'entity_twig_var_singular' => $entityTwigVarSingular,
-                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
-            ],
-            '_form' => [],
-            'edit' => [
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'entity_twig_var_singular' => $entityTwigVarSingular,
-                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
-                'route_name' => $routeName,
-            ],
-            'index' => [
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'entity_twig_var_plural' => $entityTwigVarPlural,
-                'entity_twig_var_singular' => $entityTwigVarSingular,
-                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
-                'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
-                'route_name' => $routeName,
-            ],
-            'new' => [
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'route_name' => $routeName,
-            ],
-            'show' => [
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'entity_twig_var_singular' => $entityTwigVarSingular,
-                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
-                'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
-                'route_name' => $routeName,
-            ],
-        ];
-
-        foreach ($templates as $template => $variables) {
-            $generator->generateFile(
-                'templates/'.$templatesPath.'/'.$template.'.html.twig',
-                'crud/templates/'.$template.'.tpl.php',
-                $variables
-            );
-        }
 
         $generator->writeChanges();
 
@@ -229,18 +170,8 @@ final class MakeCrud extends AbstractMaker
         );
 
         $dependencies->addClassDependency(
-            TwigBundle::class,
-            'twig-bundle'
-        );
-
-        $dependencies->addClassDependency(
             DoctrineBundle::class,
             'orm-pack'
-        );
-
-        $dependencies->addClassDependency(
-            CsrfTokenManager::class,
-            'security-csrf'
         );
 
         $dependencies->addClassDependency(

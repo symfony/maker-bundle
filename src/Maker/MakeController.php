@@ -52,30 +52,14 @@ final class MakeController extends AbstractMaker
             'Controller'
         );
 
-        $noTemplate = $input->getOption('no-template');
-        $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()).'/index.html.twig';
         $controllerPath = $generator->generateController(
             $controllerClassNameDetails->getFullName(),
-            'controller/Controller.tpl.php',
+            'controller/FOSRestController.tpl.php',
             [
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
-                'with_template' => $this->isTwigInstalled() && !$noTemplate,
-                'template_name' => $templateName,
             ]
         );
-
-        if ($this->isTwigInstalled() && !$noTemplate) {
-            $generator->generateFile(
-                'templates/'.$templateName,
-                'controller/twig_template.tpl.php',
-                [
-                    'controller_path' => $controllerPath,
-                    'root_directory' => $generator->getRootDirectory(),
-                    'class_name' => $controllerClassNameDetails->getShortName(),
-                ]
-            );
-        }
 
         $generator->writeChanges();
 
@@ -91,10 +75,5 @@ final class MakeController extends AbstractMaker
             Annotation::class,
             'annotations'
         );
-    }
-
-    private function isTwigInstalled()
-    {
-        return class_exists(TwigBundle::class);
     }
 }
