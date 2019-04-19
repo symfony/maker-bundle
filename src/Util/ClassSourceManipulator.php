@@ -404,7 +404,7 @@ final class ClassSourceManipulator
             return 'null';
         }
 
-        if (\is_int($value)) {
+        if (\is_int($value) || '0' === $value) {
             return $value;
         }
 
