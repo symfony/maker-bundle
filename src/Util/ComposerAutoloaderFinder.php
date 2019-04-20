@@ -19,9 +19,6 @@ use Symfony\Component\Debug\DebugClassLoader;
  */
 class ComposerAutoloaderFinder
 {
-    /**
-     * @var string
-     */
     private $rootNamespace;
 
     /**
@@ -29,47 +26,80 @@ class ComposerAutoloaderFinder
      */
     private $classLoader = null;
 
-    public function __construct(string $rootNamespace = 'App\\')
+    public function __construct(string $rootNamespace)
     {
-        $this->rootNamespace = rtrim($rootNamespace, '\\').'\\';
+        $this->rootNamespace = [
+            'psr0' => rtrim($rootNamespace, '\\'),
+            'psr4' => rtrim($rootNamespace, '\\').'\\',
+        ];
     }
 
     public function getClassLoader(): ClassLoader
     {
         if (null === $this->classLoader) {
-            $this->classLoader = $this->findComposerClassLoader();
+            $this->findComposerClassLoader();
         }
 
         if (null === $this->classLoader) {
-            throw new \Exception('Composer ClassLoader not found!');
+            throw new \Exception("Could not find a Composer autoloader that autoloads from '{$this->rootNamespace['psr4']}'");
         }
 
         return $this->classLoader;
     }
 
-    /**
-     * @return ClassLoader|null
-     */
     private function findComposerClassLoader()
     {
         $autoloadFunctions = spl_autoload_functions();
 
         foreach ($autoloadFunctions as $autoloader) {
-            if (\is_array($autoloader) && isset($autoloader[0]) && \is_object($autoloader[0])) {
-                if ($autoloader[0] instanceof ClassLoader
-                    && isset($autoloader[0]->getPrefixesPsr4()[$this->rootNamespace])) {
-                    return $autoloader[0];
-                }
+            $classLoader = $this->extractComposerClassLoader($autoloader);
+            if ($classLoader && $this->locateMatchingClassLoader($classLoader)) {
+                return;
+            }
+        }
+    }
 
-                if ($autoloader[0] instanceof DebugClassLoader
-                    && \is_array($autoloader[0]->getClassLoader())
-                    && $autoloader[0]->getClassLoader()[0] instanceof ClassLoader
-                    && isset($autoloader[0]->getClassLoader()[0]->getPrefixesPsr4()[$this->rootNamespace])) {
-                    return $autoloader[0]->getClassLoader()[0];
-                }
+    /**
+     * @return ClassLoader|null
+     */
+    private function extractComposerClassLoader(array $autoloader)
+    {
+        if (isset($autoloader[0]) && \is_object($autoloader[0])) {
+            if ($autoloader[0] instanceof ClassLoader) {
+                return $autoloader[0];
+            }
+            if ($autoloader[0] instanceof DebugClassLoader
+                && \is_array($autoloader[0]->getClassLoader())
+                && $autoloader[0]->getClassLoader()[0] instanceof ClassLoader) {
+                return $autoloader[0]->getClassLoader()[0];
             }
         }
 
         return null;
+    }
+
+    private function locateMatchingClassLoader(ClassLoader $classLoader): bool
+    {
+        foreach ($classLoader->getPrefixesPsr4() as $prefix => $paths) {
+            // We can default to using the autoloader containing this component if none are matching.
+            if ('Symfony\\Bundle\\MakerBundle\\' === $prefix) {
+                $this->classLoader = $classLoader;
+            }
+            if (0 === strpos($this->rootNamespace['psr4'], $prefix)) {
+                $this->classLoader = $classLoader;
+
+                return true;
+            }
+        }
+
+        foreach ($classLoader->getPrefixes() as $prefix => $paths) {
+            if (0 === strpos($this->rootNamespace['psr0'], $prefix)) {
+                $this->classLoader = $classLoader;
+
+                return true;
+            }
+        }
+
+        return false;
     }
 }
