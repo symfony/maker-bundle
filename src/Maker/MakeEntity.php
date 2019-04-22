@@ -363,6 +363,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $data['nullable'] = true;
         }
 
+        if ($io->confirm('Is this field unique in the database (unique)', false)) {
+            $data['unique'] = true;
+        }
+
         return $data;
     }
 
