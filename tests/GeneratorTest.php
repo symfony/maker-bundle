@@ -28,7 +28,7 @@ class GeneratorTest extends TestCase
             ->method('getNamespacePrefixForClass')
             ->willReturn('Foo');
 
-        $generator = new Generator($fileManager, new NamespacesHelper('App\\'));
+        $generator = new Generator($fileManager, new NamespacesHelper());
         $classNameDetails = $generator->createClassNameDetails($name, $prefix, $suffix);
 
         $this->assertSame($expectedFullClassName, $classNameDetails->getFullName());

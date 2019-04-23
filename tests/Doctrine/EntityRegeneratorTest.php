@@ -97,7 +97,7 @@ class EntityRegeneratorTest extends TestCase
                 return $tmpDir.'/src/'.str_replace('\\', '/', $shortClassName).'.php';
             });
 
-        $namespacesHelper = new NamespacesHelper('App\\');
+        $namespacesHelper = new NamespacesHelper();
         $fileManager = new FileManager($fs, $autoloaderUtil, new MakerFileLinkFormatter(null), $tmpDir);
         $doctrineHelper = new DoctrineHelper($namespacesHelper, $container->get('doctrine'));
         $generator = new Generator($fileManager, $namespacesHelper);

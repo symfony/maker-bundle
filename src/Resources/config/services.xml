@@ -41,20 +41,7 @@
             </service>
 
             <service id="maker.namespaces_helper" class="Symfony\Bundle\MakerBundle\Util\NamespacesHelper">
-                <argument /> <!-- root namespace -->
-                <argument /> <!-- command namespace -->
-                <argument /> <!-- controller namespace -->
-                <argument /> <!-- entity namespace -->
-                <argument /> <!-- fixtures namespace -->
-                <argument /> <!-- form namespace -->
-                <argument /> <!-- functional_test namespace -->
-                <argument /> <!-- repository namespace -->
-                <argument /> <!-- security namespace -->
-                <argument /> <!-- serializer namespace -->
-                <argument /> <!-- subscriber namespace -->
-                <argument /> <!-- twig namespace -->
-                <argument /> <!-- unit_test namespace -->
-                <argument /> <!-- validator namespace -->
+                <argument type="collection" /> <!-- namespaces -->
             </service>
 
             <service id="maker.auto_command.abstract" class="Symfony\Bundle\MakerBundle\Command\MakerCommand" abstract="true">
