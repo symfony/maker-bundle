@@ -65,7 +65,7 @@ final class Validator
     public static function notBlank(string $value = null): string
     {
         if (null === $value || '' === $value) {
-            throw new RuntimeCommandException('This value cannot be blank');
+            throw new RuntimeCommandException('This value cannot be blank.');
         }
 
         return $value;
@@ -181,7 +181,7 @@ final class Validator
         self::notBlank($className);
 
         if (!class_exists($className)) {
-            $errorMessage = $errorMessage ?: sprintf('Class "%s" doesn\'t exists. Please enter existing full class name', $className);
+            $errorMessage = $errorMessage ?: sprintf('Class "%s" doesn\'t exist; please enter an existing full class name.', $className);
 
             throw new RuntimeCommandException($errorMessage);
         }
@@ -194,15 +194,15 @@ final class Validator
         self::notBlank($className);
 
         if (empty($entities)) {
-            throw new RuntimeCommandException('There is no registered entities. Please create entity before use this command');
+            throw new RuntimeCommandException('There is no registered entities; please create entity before use this command.');
         }
 
         if (0 === strpos($className, '\\')) {
-            self::classExists($className, sprintf('Entity "%s" doesn\'t exists. Please enter existing one or create new', $className));
+            self::classExists($className, sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
         }
 
         if (!\in_array($className, $entities)) {
-            throw new RuntimeCommandException(sprintf('Entity "%s" doesn\'t exists. Please enter existing one or create new', $className));
+            throw new RuntimeCommandException(sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
         }
 
         return $className;
@@ -213,7 +213,7 @@ final class Validator
         self::notBlank($className);
 
         if (class_exists($className)) {
-            throw new RuntimeCommandException(sprintf('Class "%s" already exists', $className));
+            throw new RuntimeCommandException(sprintf('Class "%s" already exists.', $className));
         }
 
         return $className;
