@@ -33,6 +33,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Security\Core\Encoder\Argon2iPasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -107,7 +108,6 @@ final class MakeUser extends AbstractMaker
         $userWillHavePassword = $io->confirm('Does this app need to hash/check user passwords?');
         $input->setOption('with-password', $userWillHavePassword);
 
-        $useArgon2Encoder = false;
         if ($userWillHavePassword && !class_exists(NativePasswordEncoder::class) && Argon2iPasswordEncoder::isSupported()) {
             $io->writeln('The newer <comment>Argon2i</comment> password hasher requires PHP 7.2, libsodium or paragonie/sodium_compat. Your system DOES support this algorithm.');
             $io->writeln('You should use <comment>Argon2i</comment> unless your production system will not support it.');
@@ -138,7 +138,8 @@ final class MakeUser extends AbstractMaker
             $entityClassGenerator = new EntityClassGenerator($generator);
             $classPath = $entityClassGenerator->generateEntityClass(
                 $userClassNameDetails,
-                false // api resource
+                false, // api resource
+                $userClassConfiguration->hasPassword() && interface_exists(PasswordUpgraderInterface::class) // security user
             );
         } else {
             $classPath = $generator->generateClass($userClassNameDetails->getFullName(), 'Class.tpl.php');
