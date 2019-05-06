@@ -47,6 +47,12 @@ final class Validator
         ];
 
         foreach ($pieces as $piece) {
+            if (!mb_check_encoding($piece, 'UTF-8')) {
+                $errorMessage = $errorMessage ?: sprintf('"%s" is not a UTF-8-encoded string.', $piece);
+
+                throw new RuntimeCommandException($errorMessage);
+            }
+
             if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $piece)) {
                 $errorMessage = $errorMessage ?: sprintf('"%s" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)', $className);
 
