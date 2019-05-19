@@ -32,6 +32,7 @@ use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Validator\Validation;
@@ -313,6 +314,17 @@ final class MakeRegistrationForm extends AbstractMaker
                 ],
 EOF
             ],
+            'agreeTerms' => [
+                'type' => CheckboxType::class,
+                'options_code' => <<<EOF
+                'mapped' => false,
+                'constraints' => [
+                    new IsTrue([
+                        'message' => 'You should agree to our terms.',
+                    ]),
+                ],
+EOF
+            ],
         ];
 
         $this->formTypeRenderer->render(
@@ -322,6 +334,7 @@ EOF
             [
                 'Symfony\Component\Validator\Constraints\NotBlank',
                 'Symfony\Component\Validator\Constraints\Length',
+                'Symfony\Component\Validator\Constraints\IsTrue',
             ]
         );
 
