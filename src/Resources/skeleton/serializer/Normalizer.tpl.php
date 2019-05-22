@@ -2,11 +2,11 @@
 
 namespace <?= $namespace; ?>;
 
-<?= $cacheable_interface? "use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;\n": '' ?>
+<?= ($cacheable_interface = interface_exists('Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface')) ? "use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;\n": '' ?>
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-class <?= $class_name ?> implements NormalizerInterface<?= $cacheable_interface? ", CacheableSupportsMethodInterface\n" : "\n" ?>
+class <?= $class_name ?> implements NormalizerInterface<?= $cacheable_interface ? ', CacheableSupportsMethodInterface' : '' ?><?= "\n" ?>
 {
     private $normalizer;
 
@@ -28,5 +28,11 @@ class <?= $class_name ?> implements NormalizerInterface<?= $cacheable_interface?
     {
         return $data instanceof \App\Entity\BlogPost;
     }
-    <?= ($cacheable_interface)? "\npublic function hasCacheableSupportsMethod(): bool\n    {\n        return true;\n    }\n" : "\n"  ?>
+<?php if($cacheable_interface): ?>
+
+    public function hasCacheableSupportsMethod(): bool
+    {
+        return true;
+    }
+<?php endif; ?>
 }
