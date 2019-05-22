@@ -55,6 +55,7 @@ class Generator
         $variables = array_merge($variables, [
             'class_name' => Str::getShortClassName($className),
             'namespace' => Str::getNamespace($className),
+            'cacheable_interface' => interface_exists('Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface')
         ]);
 
         $this->addOperation($targetPath, $templateName, $variables);
