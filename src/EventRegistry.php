@@ -23,6 +23,13 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
+use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\ViewEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\Security\Core\Event\AuthenticationEvent;
 use Symfony\Component\Security\Core\Event\AuthenticationFailureEvent;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
@@ -52,11 +59,30 @@ class EventRegistry
         'security.switch_user' => SwitchUserEvent::class,
     ];
 
+    private static $newEventsMap = [
+        'kernel.controller_arguments' => ControllerArgumentsEvent::class,
+        'kernel.controller' => ControllerEvent::class,
+        'kernel.response' => ResponseEvent::class,
+        'kernel.request' => RequestEvent::class,
+        'kernel.view' => ViewEvent::class,
+        'kernel.exception' => ExceptionEvent::class,
+        'kernel.terminate' => TerminateEvent::class,
+    ];
+
     private $eventDispatcher;
 
     public function __construct(EventDispatcherInterface $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
+
+        // Loop through the new event classes
+        foreach (self::$newEventsMap as $oldEventName => $newEventClass) {
+            //Check if the new event classes exist, if so replace the old one with the new.
+            if (class_exists($newEventClass)) {
+                unset(self::$eventsMap[$oldEventName]);
+                self::$eventsMap[$newEventClass] = $newEventClass;
+            }
+        }
     }
 
     /**
