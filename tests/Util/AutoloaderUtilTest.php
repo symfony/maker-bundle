@@ -87,6 +87,7 @@ class AutoloaderUtilTest extends TestCase
         /** @var \PHPUnit_Framework_MockObject_MockObject|ComposerAutoloaderFinder $finder */
         $finder = $this
             ->getMockBuilder(ComposerAutoloaderFinder::class)
+            ->setConstructorArgs(['App\\'])
             ->getMock();
 
         $finder

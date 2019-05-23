@@ -39,6 +39,9 @@ class MakerExtension extends Extension
 
         $rootNamespace = trim($config['root_namespace'], '\\');
 
+        $autoloaderFinderDefinition = $container->getDefinition('maker.autoloader_finder');
+        $autoloaderFinderDefinition->replaceArgument(0, $rootNamespace);
+
         $makeCommandDefinition = $container->getDefinition('maker.generator');
         $makeCommandDefinition->replaceArgument(1, $rootNamespace);
 

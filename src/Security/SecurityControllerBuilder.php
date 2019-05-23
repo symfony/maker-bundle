@@ -35,6 +35,14 @@ final class SecurityControllerBuilder
 
         $manipulator->addMethodBody($loginMethodBuilder, <<<'CODE'
 <?php
+// if ($this->getUser()) {
+//    $this->redirectToRoute('target_path');
+// }
+CODE
+        );
+        $loginMethodBuilder->addStmt($manipulator->createMethodLevelBlankLine());
+        $manipulator->addMethodBody($loginMethodBuilder, <<<'CODE'
+<?php
 // get the login error if there is one
 $error = $authenticationUtils->getLastAuthenticationError();
 // last username entered by the user
@@ -54,5 +62,18 @@ return $this->render(
 CODE
         );
         $manipulator->addMethodBuilder($loginMethodBuilder);
+    }
+
+    public function addLogoutMethod(ClassSourceManipulator $manipulator)
+    {
+        $logoutMethodBuilder = $manipulator->createMethodBuilder('logout', null, false, ['@Route("/logout", name="app_logout")']);
+
+        $manipulator->addUseStatementIfNecessary(Route::class);
+        $manipulator->addMethodBody($logoutMethodBuilder, <<<'CODE'
+<?php
+throw new \Exception('This method can be blank - it will be intercepted by the logout key on your firewall');
+CODE
+        );
+        $manipulator->addMethodBuilder($logoutMethodBuilder);
     }
 }
