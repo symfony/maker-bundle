@@ -35,6 +35,14 @@ final class SecurityControllerBuilder
 
         $manipulator->addMethodBody($loginMethodBuilder, <<<'CODE'
 <?php
+// if ($this->getUser()) {
+//    $this->redirectToRoute('target_path');
+// }
+CODE
+        );
+        $loginMethodBuilder->addStmt($manipulator->createMethodLevelBlankLine());
+        $manipulator->addMethodBody($loginMethodBuilder, <<<'CODE'
+<?php
 // get the login error if there is one
 $error = $authenticationUtils->getLastAuthenticationError();
 // last username entered by the user
@@ -54,5 +62,20 @@ return $this->render(
 CODE
         );
         $manipulator->addMethodBuilder($loginMethodBuilder);
+    }
+
+    public function addLogoutMethod(ClassSourceManipulator $manipulator)
+    {
+        $logoutMethodBuilder = $manipulator->createMethodBuilder('logout', null, false, ['@Route("/logout", name="app_logout" , methods={"GET"})']);
+
+        $manipulator->addUseStatementIfNecessary(Response::class);
+        $manipulator->addUseStatementIfNecessary(Route::class);
+        $manipulator->addUseStatementIfNecessary(AuthenticationUtils::class);
+        $manipulator->addMethodBody($logoutMethodBuilder, <<<'CODE'
+<?php
+// controller can be blank: it will never be executed!
+CODE
+        );
+        $manipulator->addMethodBuilder($logoutMethodBuilder);
     }
 }
