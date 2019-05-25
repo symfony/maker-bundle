@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Test;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\InputStream;
 
@@ -26,14 +27,12 @@ use Symfony\Component\Process\InputStream;
 final class MakerTestEnvironment
 {
     private $testDetails;
-
     private $fs;
-
     private $rootPath;
     private $cachePath;
     private $flexPath;
-
     private $path;
+    private $targetFlexVersion;
 
     /**
      * @var MakerTestProcess
@@ -54,9 +53,10 @@ final class MakerTestEnvironment
         }
 
         $this->cachePath = realpath($cachePath);
-        $this->flexPath = $this->cachePath.'/flex_project';
+        $targetVersion = $this->getTargetFlexVersion();
+        $this->flexPath = $this->cachePath.'/flex_project'.$targetVersion;
 
-        $this->path = $this->cachePath.\DIRECTORY_SEPARATOR.$testDetails->getUniqueCacheDirectoryName();
+        $this->path = $this->cachePath.\DIRECTORY_SEPARATOR.$testDetails->getUniqueCacheDirectoryName().$targetVersion;
     }
 
     public static function create(MakerTestDetails $testDetails): self
@@ -128,7 +128,14 @@ final class MakerTestEnvironment
         if (!$this->fs->exists($this->path)) {
             try {
                 // lets do some magic here git is faster than copy
-                MakerTestProcess::create(sprintf('git clone "%s" "%s"', $this->flexPath, $this->path), \dirname($this->flexPath))
+                MakerTestProcess::create(
+                    'git clone "$FLEX_PATH" "$APP_PATH"',
+                    \dirname($this->flexPath),
+                    [
+                        'FLEX_PATH' => $this->flexPath,
+                        'APP_PATH' => $this->path,
+                    ]
+                )
                     ->run();
 
                 // install any missing dependencies
@@ -201,12 +208,11 @@ final class MakerTestEnvironment
         $testProcess = MakerTestProcess::create(
             sprintf('php bin/console %s %s --no-ansi', $this->testDetails->getMaker()::getCommandName(), $this->testDetails->getArgumentsString()),
             $this->path,
+            [
+                'SHELL_INTERACTIVE' => '1',
+            ],
             10
         );
-
-        $testProcess->setEnv([
-            'SHELL_INTERACTIVE' => '1',
-        ]);
 
         if ($userInputs = $this->testDetails->getInputs()) {
             $inputStream = new InputStream();
@@ -304,10 +310,21 @@ final class MakerTestEnvironment
 
     private function buildFlexSkeleton()
     {
-        MakerTestProcess::create('composer create-project symfony/skeleton flex_project --prefer-dist --no-progress', $this->cachePath)
-                        ->run();
+        $targetVersion = $this->getTargetFlexVersion();
+        $versionString = $targetVersion ? sprintf(':%s', $targetVersion) : '';
+
+        MakerTestProcess::create(
+            sprintf('composer create-project symfony/skeleton%s flex_project%s --prefer-dist --no-progress', $versionString, $targetVersion),
+            $this->cachePath
+        )->run();
 
         $rootPath = str_replace('\\', '\\\\', realpath(__DIR__.'/../..'));
+
+        // allow dev dependencies
+        if (false !== strpos($targetVersion, 'dev')) {
+            MakerTestProcess::create('composer config minimum-stability dev', $this->flexPath)
+                ->run();
+        }
 
         // processes any changes needed to the Flex project
         $replacements = [
@@ -400,5 +417,39 @@ echo json_encode($missingDependencies);
         unlink($this->path.'/dep_runner.php');
 
         return array_merge($data, $this->testDetails->getExtraDependencies());
+    }
+
+    private function getTargetFlexVersion(): string
+    {
+        if (null === $this->targetFlexVersion) {
+            $targetVersion = $_SERVER['MAKER_TEST_VERSION'] ?? 'stable';
+
+            if ('stable' === $targetVersion) {
+                $this->targetFlexVersion = '';
+
+                return $this->targetFlexVersion;
+            }
+
+            $httpClient = HttpClient::create();
+            $response = $httpClient->request('GET', 'https://symfony.com/versions.json');
+            $data = $response->toArray();
+
+            switch ($targetVersion) {
+                case 'stable-dev':
+                    $version = $data['latest'];
+                    $parts = explode('.', $version);
+
+                    return sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
+                case 'dev':
+                    $version = $data['dev'];
+                    $parts = explode('.', $version);
+
+                    return sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
+                default:
+                    throw new \Exception('Invalid target version');
+            }
+        }
+
+        return $this->targetFlexVersion;
     }
 }

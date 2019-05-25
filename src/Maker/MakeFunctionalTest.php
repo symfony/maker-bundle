@@ -20,6 +20,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\CssSelector\CssSelectorConverter;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestAssertionsTrait;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -52,7 +53,9 @@ class MakeFunctionalTest extends AbstractMaker
         $generator->generateClass(
             $testClassNameDetails->getFullName(),
             'test/Functional.tpl.php',
-            []
+            [
+                'web_assertions_are_available' => trait_exists(WebTestAssertionsTrait::class),
+            ]
         );
 
         $generator->writeChanges();
