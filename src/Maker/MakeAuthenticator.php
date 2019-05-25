@@ -301,7 +301,7 @@ final class MakeAuthenticator extends AbstractMaker
                 'username_field' => $userNameField,
                 'username_is_email' => false !== stripos($userNameField, 'email'),
                 'username_label' => ucfirst(Str::asHumanWords($userNameField)),
-                'logout_setup' => $logoutSetup
+                'logout_setup' => $logoutSetup,
             ]
         );
     }
