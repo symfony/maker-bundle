@@ -20,6 +20,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository
     }
 
     // /**
+    //  * @param $value
     //  * @return <?= $entity_class_name ?>[] Returns an array of <?= $entity_class_name ?> objects
     //  */
     /*
