@@ -21,6 +21,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository
 
     // /**
     //  * @return <?= $entity_class_name ?>[] Returns an array of <?= $entity_class_name ?> objects
+    //  * @param $value
     //  */
     /*
     public function findByExampleField($value)
@@ -36,6 +37,9 @@ class <?= $class_name; ?> extends ServiceEntityRepository
     }
     */
 
+    // /**
+    //  * @param $value
+    //  */
     /*
     public function findOneBySomeField($value): ?<?= $entity_class_name."\n" ?>
     {

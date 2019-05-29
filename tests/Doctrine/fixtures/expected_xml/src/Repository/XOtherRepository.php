@@ -21,6 +21,7 @@ class XOtherRepository extends ServiceEntityRepository
 
     // /**
     //  * @return XOther[] Returns an array of XOther objects
+    //  * @param $value
     //  */
     /*
     public function findByExampleField($value)
@@ -36,6 +37,9 @@ class XOtherRepository extends ServiceEntityRepository
     }
     */
 
+    // /**
+    //  * @param $value
+    //  */
     /*
     public function findOneBySomeField($value): ?XOther
     {

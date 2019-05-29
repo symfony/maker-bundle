@@ -21,6 +21,7 @@ class UserRepository extends ServiceEntityRepository
 
     // /**
     //  * @return UserXml[] Returns an array of UserXml objects
+    //  * @param $value
     //  */
     /*
     public function findByExampleField($value)
@@ -36,6 +37,9 @@ class UserRepository extends ServiceEntityRepository
     }
     */
 
+    // /**
+    //  * @param $value
+    //  */
     /*
     public function findOneBySomeField($value): ?UserXml
     {
