@@ -1,0 +1,42 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-04-19T17:54:28Z
+
+Hey @adrienlucas!
+
+Thank you for this! So, let's look at the 2 commits independently:
+
+1) `self::` vs `$this->` for the assert functions. For this, we should be consistent with Symfony's core and what's recommended in Symfony's docs, which is `$this->` currently. We could discuss that on an issue on `symfony/symfony-docs`. I don't feel too strongly, but MakerBundle will follow that lead.
+
+2) About using the new assertion API in WebTestCase. I <3 this idea. However, as this feature is only available in Symfony 4.3 or higher, we need to make the generated code smart: it needs to use the *old* code if the user doesn't have the new `WebTestAssertions` trait and *new* code if they do. We could determine that in the maker and pass it in as a variable. Could you make that change?
+
+Thanks!
+
+---------------------------------------------------------------------------
+
+by adrienlucas at 2019-04-23T07:57:05Z
+
+@weaverryan
+
+ 1. I get it, while being a little disappointed about it... Is there an explanation for using a non-statc call on a static method here ? I will fix it anyway, to keep consistency.
+ 2. Will do !
+
+To go further : should i try to assess Panther installation too, and make the generated test extends the `PantherTestCase` when possible ?
+
+---------------------------------------------------------------------------
+
+by B-Galati at 2019-04-26T15:23:40Z
+
+For the 1st one, see https://github.com/sebastianbergmann/phpunit/issues/1914
+
+---------------------------------------------------------------------------
+
+by adrienlucas at 2019-05-06T12:52:33Z
+
+@B-Galati thank you !
+
+@weaverryan does the new version of this PR suits more the needs ?
+
+should we try to use travis to test against the `symfony/framework-bundle:dev-master` dependency, or something else to ensure the two versions of the possibly generated functional tests are working ?
+
+(i renamed the PR to reflect the new intent)
