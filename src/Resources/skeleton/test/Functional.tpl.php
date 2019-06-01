@@ -11,7 +11,12 @@ class <?= $class_name ?> extends WebTestCase
         $client = static::createClient();
         $crawler = $client->request('GET', '/');
 
+<?php if($web_assertions_are_available) { ?>
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('h1', 'Hello World');
+<?php } else { ?>
         $this->assertSame(200, $client->getResponse()->getStatusCode());
         $this->assertContains('Hello World', $crawler->filter('h1')->text());
+<?php } ?>
     }
 }
