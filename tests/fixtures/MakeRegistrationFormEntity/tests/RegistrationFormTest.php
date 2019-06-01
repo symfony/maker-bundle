@@ -5,7 +5,6 @@ namespace App\Tests;
 use Doctrine\ORM\EntityManager;
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoder;
 
 class RegistrationFormTest extends WebTestCase
 {
@@ -24,6 +23,7 @@ class RegistrationFormTest extends WebTestCase
         $form = $crawler->selectButton('Register')->form();
         $form['registration_form[email]'] = 'ryan@symfonycasts.com';
         $form['registration_form[plainPassword]'] = '1234yaaay';
+        $form['registration_form[agreeTerms]'] = true;
         $client->submit($form);
 
         $this->assertSame(302, $client->getResponse()->getStatusCode());
@@ -61,6 +61,10 @@ class RegistrationFormTest extends WebTestCase
         );
         $this->assertContains(
             'Your password should be at least 6 characters',
+            $client->getResponse()->getContent()
+        );
+        $this->assertContains(
+            'You should agree to our terms.',
             $client->getResponse()->getContent()
         );
     }
