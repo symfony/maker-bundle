@@ -1,34 +1,46 @@
 language: php
-
-dist: trusty
 sudo: false
-
-git:
-    depth: 1
-
-php:
-  - 7.0
-  - 7.1
-  - 7.2
-  - 7.3
-
 cache:
     directories:
         - $HOME/.composer/cache/files
-        - .phpunit
-        - vendor
+        - $HOME/symfony-bridge/.phpunit
 
 env:
     global:
-        - SYMFONY_PHPUNIT_DIR=.phpunit
+        - PHPUNIT_FLAGS="-v"
+        - SYMFONY_PHPUNIT_DIR="$HOME/symfony-bridge/.phpunit"
+
+matrix:
+    fast_finish: true
+    include:
+        - php: 7.1
+          env: SYMFONY_PHPUNIT_VERSION=7.4
+        - php: 7.1
+          env: deps=high SYMFONY_PHPUNIT_VERSION=7.4
+        - php: 7.2
+          env: deps=low
+        - php: 7.3
+
+    allow_failures:
+          # Dev-master is allowed to fail.
+        - env: STABILITY="dev"
 
 before_install:
-    - phpenv config-rm xdebug.ini || echo "xdebug not available"
+    - if [[ $COVERAGE != true ]]; then phpenv config-rm xdebug.ini || true; fi
+    - if ! [ -z "$STABILITY" ]; then composer config minimum-stability ${STABILITY}; fi;
+    - if ! [ -v "$DEPENDENCIES" ]; then composer require --no-update ${DEPENDENCIES}; fi;
+    - composer install
 
 install:
-    - composer update --no-suggest
+    - |
+      # Install symfony/flex
+      if [[ $deps = low ]]; then
+          export SYMFONY_REQUIRE='>=2.8'
+      fi
+      composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-master
     - ./vendor/bin/simple-phpunit install
 
 script:
-    - ./vendor/bin/simple-phpunit
+    - composer validate --strict --no-check-lock
+    - ./vendor/bin/simple-phpunit $PHPUNIT_FLAGS
     - ./vendor/bin/php-cs-fixer fix --dry-run --diff
