@@ -54,7 +54,7 @@ class MakeFunctionalTest extends AbstractMaker
             $testClassNameDetails->getFullName(),
             'test/Functional.tpl.php',
             [
-                'web_assertions_are_available' => class_exists(WebTestAssertionsTrait::class),
+                'web_assertions_are_available' => trait_exists(WebTestAssertionsTrait::class),
             ]
         );
 
