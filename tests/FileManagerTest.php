@@ -5,7 +5,6 @@ namespace Symfony\Bundle\MakerBundle\Tests;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
 class FileManagerTest extends TestCase
@@ -15,7 +14,7 @@ class FileManagerTest extends TestCase
      */
     public function testRelativizePath(string $rootDir, string $absolutePath, string $expectedPath)
     {
-        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, 'templates');
+        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir);
 
         $this->assertSame($expectedPath, $fileManager->relativizePath($absolutePath));
     }
@@ -64,7 +63,7 @@ class FileManagerTest extends TestCase
      */
     public function testAbsolutizePath(string $rootDir, string $path, string $expectedPath)
     {
-        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, 'templates');
+        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir);
         $this->assertSame($expectedPath, $fileManager->absolutizePath($path));
     }
 
@@ -100,7 +99,7 @@ class FileManagerTest extends TestCase
      */
     public function testIsPathInVendor(string $rootDir, string $path, bool $expectedIsInVendor)
     {
-        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, 'templates');
+        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir);
         $this->assertSame($expectedIsInVendor, $fileManager->isPathInVendor($path));
     }
 

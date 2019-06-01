@@ -31,14 +31,14 @@ class FileManager
     private $io;
     private $twigDefaultPath;
 
-    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory, string $twigDefaultPath)
+    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory, string $twigDefaultPath = null)
     {
         // move FileManagerTest stuff
         // update EntityRegeneratorTest to mock the autoloader
         $this->fs = $fs;
         $this->autoloaderUtil = $autoloaderUtil;
         $this->rootDirectory = rtrim($this->realPath($this->normalizeSlashes($rootDirectory)), '/');
-        $this->twigDefaultPath = $this->relativizePath($twigDefaultPath);
+        $this->twigDefaultPath = $twigDefaultPath ? $this->relativizePath($twigDefaultPath) : null;
     }
 
     public function setIO(SymfonyStyle $io)
@@ -178,6 +178,10 @@ class FileManager
 
     public function getPathForTemplate(string $filename): string
     {
+        if (null === $this->twigDefaultPath) {
+            throw new \RuntimeException('Cannot get path for template: is Twig installed?');
+        }
+
         return $this->twigDefaultPath.'/'.$filename;
     }
 

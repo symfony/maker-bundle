@@ -29,7 +29,6 @@ use Symfony\Component\Console\Input\InputOption;
  */
 final class MakeController extends AbstractMaker
 {
-
     public static function getCommandName(): string
     {
         return 'make:controller';
