@@ -194,7 +194,7 @@ final class Validator
         self::notBlank($className);
 
         if (empty($entities)) {
-            throw new RuntimeCommandException('There is no registered entities; please create entity before use this command.');
+            throw new RuntimeCommandException('There are no registered entities; please create an entity before using this command.');
         }
 
         if (0 === strpos($className, '\\')) {
