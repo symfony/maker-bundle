@@ -37,7 +37,7 @@ class ComposerAutoloaderFinder
     public function getClassLoader(): ClassLoader
     {
         if (null === $this->classLoader) {
-            $this->findComposerClassLoader();
+            $this->classLoader = $this->findComposerClassLoader();
         }
 
         if (null === $this->classLoader) {
@@ -47,16 +47,26 @@ class ComposerAutoloaderFinder
         return $this->classLoader;
     }
 
+    /**
+     * @return ClassLoader|null
+     */
     private function findComposerClassLoader()
     {
         $autoloadFunctions = spl_autoload_functions();
 
         foreach ($autoloadFunctions as $autoloader) {
             $classLoader = $this->extractComposerClassLoader($autoloader);
-            if ($classLoader && $this->locateMatchingClassLoader($classLoader)) {
-                return;
+            if (null === $classLoader) {
+                continue;
+            }
+
+            $finalClassLoader = $this->locateMatchingClassLoader($classLoader);
+            if (null !== $finalClassLoader) {
+                return $finalClassLoader;
             }
         }
+
+        return null;
     }
 
     /**
@@ -78,28 +88,28 @@ class ComposerAutoloaderFinder
         return null;
     }
 
-    private function locateMatchingClassLoader(ClassLoader $classLoader): bool
+    /**
+     * @return ClassLoader|null
+     */
+    private function locateMatchingClassLoader(ClassLoader $classLoader)
     {
+        $makerClassLoader = null;
         foreach ($classLoader->getPrefixesPsr4() as $prefix => $paths) {
-            // We can default to using the autoloader containing this component if none are matching.
             if ('Symfony\\Bundle\\MakerBundle\\' === $prefix) {
-                $this->classLoader = $classLoader;
+                $makerClassLoader = $classLoader;
             }
             if (0 === strpos($this->rootNamespace['psr4'], $prefix)) {
-                $this->classLoader = $classLoader;
-
-                return true;
+                return $classLoader;
             }
         }
 
         foreach ($classLoader->getPrefixes() as $prefix => $paths) {
             if (0 === strpos($this->rootNamespace['psr0'], $prefix)) {
-                $this->classLoader = $classLoader;
-
-                return true;
+                return $classLoader;
             }
         }
 
-        return false;
+        // We can default to using the autoloader containing this component if none are matching.
+        return $makerClassLoader ?: null;
     }
 }
