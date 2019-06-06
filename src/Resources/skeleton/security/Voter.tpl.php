@@ -10,10 +10,13 @@ class <?= $class_name ?> extends Voter
 {
     protected function supports($attribute, $subject)
     {
-        // replace with your own logic
-        // https://symfony.com/doc/current/security/voters.html
-        return in_array($attribute, ['POST_EDIT', 'POST_VIEW'])
-            && $subject instanceof \App\Entity\BlogPost;
+        // Replace with your own logic
+        // See https://symfony.com/doc/current/security/voters.html
+        //
+        // return in_array($attribute, ['POST_EDIT', 'POST_VIEW'])
+        //     && $subject instanceof \App\Entity\YourEntity;
+
+        return false;
     }
 
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
