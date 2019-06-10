@@ -25,6 +25,11 @@ class <?= $class_name ?> implements NormalizerInterface
 
     public function supportsNormalization($data, $format = null): bool
     {
-        return $data instanceof \App\Entity\BlogPost;
+        // Replace with your own logic
+        // See https://symfony.com/doc/current/serializer/custom_normalizer.html
+        //
+        // return $data instanceof \App\Entity\YourEntity;
+
+        return false;
     }
 }
