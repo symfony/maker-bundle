@@ -66,7 +66,7 @@ class ValidatorTest extends TestCase
     public function testInvalidEncodingInClassName()
     {
         $this->expectException(RuntimeCommandException::class);
-        $this->expectExceptionMessage('"�Controller" is not a UTF-8-encoded string.');
-        Validator::validateClassName(mb_convert_encoding('Ś', 'ISO-8859-2', 'UTF-8'));
+        $this->expectExceptionMessage(sprintf('"%sController" is not a UTF-8-encoded string.', chr(0xA6)));
+        Validator::validateClassName(mb_convert_encoding('ŚController', 'ISO-8859-2', 'UTF-8'));
     }
 }
