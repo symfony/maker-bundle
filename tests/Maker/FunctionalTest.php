@@ -432,6 +432,7 @@ class FunctionalTest extends MakerTestCase
             ->addExtraDependencies('doctrine')
             ->addExtraDependencies('twig')
             ->addExtraDependencies('symfony/form')
+            ->addExtraDependencies('symfony/translation')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntity')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
@@ -544,6 +545,7 @@ class FunctionalTest extends MakerTestCase
             ->addExtraDependencies('doctrine')
             ->addExtraDependencies('twig')
             ->addExtraDependencies('symfony/form')
+            ->addExtraDependencies('symfony/translation')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormExistingController')
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
