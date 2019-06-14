@@ -5,6 +5,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Security;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
+use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 
 class SecurityConfigUpdaterTest extends TestCase
 {
@@ -22,6 +23,9 @@ class SecurityConfigUpdaterTest extends TestCase
         $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
         $actualSource = $updater->updateForUserClass($source, $userConfig, $userClass);
         $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_user_class/'.$expectedSourceFilename);
+
+        $bcryptOrAuto = class_exists(NativePasswordEncoder::class) ? 'auto' : 'bcrypt';
+        $expectedSource = str_replace('{BCRYPT_OR_AUTO}', $bcryptOrAuto, $expectedSource);
 
         $this->assertSame($expectedSource, $actualSource);
     }
@@ -46,13 +50,6 @@ class SecurityConfigUpdaterTest extends TestCase
         yield 'model_username_no_password' => [
             new UserClassConfiguration(false, 'username', false),
             'model_username_no_password.yaml',
-        ];
-
-        $config = new UserClassConfiguration(false, 'email', true);
-        $config->useArgon2(false);
-        yield 'model_email_password_bcrypt' => [
-            $config,
-            'model_email_password_bcrypt.yaml',
         ];
 
         yield 'model_email_password_existing_providers' => [
