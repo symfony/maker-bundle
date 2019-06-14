@@ -128,7 +128,14 @@ final class MakerTestEnvironment
         if (!$this->fs->exists($this->path)) {
             try {
                 // lets do some magic here git is faster than copy
-                MakerTestProcess::create(sprintf('git clone "%s" "%s"', $this->flexPath, $this->path), \dirname($this->flexPath))
+                MakerTestProcess::create(
+                    'git clone "$FLEX_PATH" "$APP_PATH"',
+                    \dirname($this->flexPath),
+                    [
+                        'FLEX_PATH' => $this->flexPath,
+                        'APP_PATH' => $this->path
+                    ]
+                )
                     ->run();
 
                 // install any missing dependencies
@@ -201,12 +208,11 @@ final class MakerTestEnvironment
         $testProcess = MakerTestProcess::create(
             sprintf('php bin/console %s %s --no-ansi', $this->testDetails->getMaker()::getCommandName(), $this->testDetails->getArgumentsString()),
             $this->path,
+            [
+                'SHELL_INTERACTIVE' => '1',
+            ],
             10
         );
-
-        $testProcess->setEnv([
-            'SHELL_INTERACTIVE' => '1',
-        ]);
 
         if ($userInputs = $this->testDetails->getInputs()) {
             $inputStream = new InputStream();
