@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-06-01T12:59:29Z
+
+Tests waiting on https://github.com/symfony/recipes/pull/602
+
+---------------------------------------------------------------------------
+
+by pluseg at 2019-06-08T12:26:20Z
+
+@weaverryan Ryan, the symfony/recipes#602 is merged, but tests here aren't passed. We should fix it further, right? Or do you have another plan already?
