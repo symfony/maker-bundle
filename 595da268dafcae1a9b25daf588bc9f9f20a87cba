@@ -1,0 +1,29 @@
+---------------------------------------------------------------------------
+
+by mdeletter at 2019-06-07T18:49:43Z
+
+PR verified. This  small change can be merged.
+
+---------------------------------------------------------------------------
+
+by wesselvanderlinden at 2019-06-07T18:56:31Z
+
+I agree with @mdeletter, but I wonder why the code style checker didn't complain about the missing space before. Maybe you should also add a phpcs rule?
+
+---------------------------------------------------------------------------
+
+by mikelerch at 2019-06-07T18:56:31Z
+
+I completely agree with @mdeletter. I also verify this PR.
+
+---------------------------------------------------------------------------
+
+by huib0029 at 2019-06-07T18:59:06Z
+
+I completely disagree, because I had too much beer, but nevermind
+
+---------------------------------------------------------------------------
+
+by nesk at 2019-06-14T08:04:20Z
+
+Is there anything missing which prevents this PR from being merged?
