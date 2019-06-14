@@ -104,13 +104,6 @@ class SecurityConfigUpdaterTest extends TestCase
             'simple_security_with_firewalls.yaml'
         ];
 
-        yield 'simple_security_with_firewalls' => [
-            'main',
-            null,
-            'simple_security_with_firewalls.yaml',
-            'simple_security_with_firewalls.yaml'
-        ];
-
         yield 'simple_security_with_firewalls_and_authenticator' => [
             'main',
             'App\\Security\\AppCustomAuthenticator',
