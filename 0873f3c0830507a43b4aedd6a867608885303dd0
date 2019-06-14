@@ -1,0 +1,22 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-04-19T17:17:42Z
+
+Hey @LeJeanbono!
+
+This is impressive. Seriously, that class is a BEAST, so nice job getting into it. The fix works on all versions *except* for PHP 7.3 (see the build failure). Can you check into it?
+
+Thanks!
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-06-01T10:35:28Z
+
+Ping! Still a failure on 7.3 🤔
+
+---------------------------------------------------------------------------
+
+by LeJeanbono at 2019-06-01T11:48:57Z
+
+I think it's a problem with PCRE with preg_match in 7.3
+I saw something with comments : https://www.php.net/manual/en/regexp.reference.comments.php
