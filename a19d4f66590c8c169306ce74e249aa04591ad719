@@ -1,0 +1,37 @@
+---------------------------------------------------------------------------
+
+by pluseg at 2019-06-12T15:45:57Z
+
+@adrienlucas Please be aware of code style rule of Symfony about concatination in exceptions:
+https://symfony.com/doc/current/contributing/code/standards.html#structure
+> Exception and error message strings must be concatenated using sprintf;
+
+You could check it in my PR — https://github.com/symfony/maker-bundle/pull/416/files#diff-a85bb5d7b405aafe9836ee24c6aee6f7R70
+
+---------------------------------------------------------------------------
+
+by adrienlucas at 2019-06-12T17:00:19Z
+
+@pluseg thanks for your review !
+
+I did not see that your PR was solving this issue as its title was not mentioning it.
+
+About the coding style, I think the standard applies only for exception construction in production code, not for `expectExceptionMessage` in test code, am I right ?
+
+---------------------------------------------------------------------------
+
+by pluseg at 2019-06-12T17:05:53Z
+
+@adrienlucas Added that into PR title. Thanks for the comment.
+
+Regarding the standard — it relates to all code that goes to public, I guess. Imho, it should be implemented in a unified way for all code. It eases finding code line by exception message at least.
+
+Cheers!
+
+---------------------------------------------------------------------------
+
+by adrienlucas at 2019-06-12T17:54:30Z
+
+@pluseg ok about searching the message (while it's not really relevant for full text search, as the concatenation was used in the variant part of the message, not the "hard coded" part of it, ie. `is not a UTF-8-encoded string.`), I fixed the code to follow your advice.
+
+@weaverryan should I close this PR and let the fix be embedded in @pluseg 's ?
