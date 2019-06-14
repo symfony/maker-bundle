@@ -13,7 +13,9 @@
                 <argument>%kernel.project_dir%</argument>
             </service>
 
-            <service id="maker.autoloader_finder" class="Symfony\Bundle\MakerBundle\Util\ComposerAutoloaderFinder" />
+            <service id="maker.autoloader_finder" class="Symfony\Bundle\MakerBundle\Util\ComposerAutoloaderFinder" >
+                <argument /> <!-- root namespace -->
+            </service>
 
             <service id="maker.autoloader_util" class="Symfony\Bundle\MakerBundle\Util\AutoloaderUtil">
                 <argument type="service" id="maker.autoloader_finder" />
