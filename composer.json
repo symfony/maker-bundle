@@ -31,6 +31,7 @@
         "symfony/http-client": "^4.3",
         "symfony/phpunit-bridge": "^3.4|^4.0",
         "symfony/process": "^3.4|^4.0",
+        "symfony/security-core": "^3.4|^4.0",
         "symfony/yaml": "^3.4|^4.0"
     },
     "config": {
