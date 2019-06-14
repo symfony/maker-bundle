@@ -17,6 +17,10 @@ matrix:
           env: SYMFONY_PHPUNIT_VERSION=7.4
         - php: 7.1
           env: deps=high SYMFONY_PHPUNIT_VERSION=7.4
+        - php: 7.1
+          env: MAKER_TEST_VERSION=stable-dev
+        - php: 7.1
+          env: MAKER_TEST_VERSION=dev
         - php: 7.2
           env: deps=low
         - php: 7.3
