@@ -24,7 +24,7 @@
         "symfony/http-kernel": "^3.4|^4.0"
     },
     "require-dev": {
-        "allocine/twigcs": "^3.0",
+        "friendsoftwig/twigcs": "^3.0",
         "doctrine/doctrine-bundle": "^1.8",
         "doctrine/orm": "^2.3",
         "friendsofphp/php-cs-fixer": "^2.8",
