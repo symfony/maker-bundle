@@ -109,7 +109,7 @@ class ComposerAutoloaderFinder
             }
         }
 
-        // We can default to using the autoloader containing this component if none are matching.
-        return $makerClassLoader ?: null;
+        // Nothing found? Try the class loader where we found MakerBundle
+        return $makerClassLoader;
     }
 }
