@@ -29,14 +29,16 @@ class FileManager
     private $rootDirectory;
     /** @var SymfonyStyle */
     private $io;
+    private $twigDefaultPath;
 
-    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory)
+    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory, string $twigDefaultPath = null)
     {
         // move FileManagerTest stuff
         // update EntityRegeneratorTest to mock the autoloader
         $this->fs = $fs;
         $this->autoloaderUtil = $autoloaderUtil;
         $this->rootDirectory = rtrim($this->realPath($this->normalizeSlashes($rootDirectory)), '/');
+        $this->twigDefaultPath = $twigDefaultPath ? rtrim($this->relativizePath($twigDefaultPath), '/') : null;
     }
 
     public function setIO(SymfonyStyle $io)
@@ -118,7 +120,7 @@ class FileManager
         return file_get_contents($this->absolutizePath($path));
     }
 
-    public function createFinder(string $in)
+    public function createFinder(string $in): Finder
     {
         $finder = new Finder();
         $finder->in($this->absolutizePath($in));
@@ -172,6 +174,15 @@ class FileManager
     public function getRootDirectory(): string
     {
         return $this->rootDirectory;
+    }
+
+    public function getPathForTemplate(string $filename): string
+    {
+        if (null === $this->twigDefaultPath) {
+            throw new \RuntimeException('Cannot get path for template: is Twig installed?');
+        }
+
+        return $this->twigDefaultPath.'/'.$filename;
     }
 
     /**

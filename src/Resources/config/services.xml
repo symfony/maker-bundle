@@ -11,6 +11,7 @@
                 <argument type="service" id="filesystem" />
                 <argument type="service" id="maker.autoloader_util" />
                 <argument>%kernel.project_dir%</argument>
+                <argument>%twig.default_path%</argument>
             </service>
 
             <service id="maker.autoloader_finder" class="Symfony\Bundle\MakerBundle\Util\ComposerAutoloaderFinder" >
