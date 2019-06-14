@@ -133,7 +133,7 @@ final class MakerTestEnvironment
                     \dirname($this->flexPath),
                     [
                         'FLEX_PATH' => $this->flexPath,
-                        'APP_PATH' => $this->path
+                        'APP_PATH' => $this->path,
                     ]
                 )
                     ->run();
