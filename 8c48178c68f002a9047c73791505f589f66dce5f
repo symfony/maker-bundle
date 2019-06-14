@@ -1,0 +1,24 @@
+---------------------------------------------------------------------------
+
+by GawainLynch at 2019-04-20T10:19:19Z
+
+OK, so while I am not happy with my choice of method naming nor elegance — ideas/suggestions very welcome! — I think I've addressed your concerns.
+
+I started with a baseline of a fresh `composer create-project symfony/website-skeleton`, which already has two autoloaders. So I figured the best approach now is to "remember" the autoloader that contains the component, and should the match still not be found, using that as the fallback.
+
+Also, I've slightly expanded the tests to cover PSR-0, PSR-4 & fallback.
+
+---------------------------------------------------------------------------
+
+by GawainLynch at 2019-06-02T08:41:39Z
+
+> 1. What's the edge case that we're trying to solve by falling back to the autoloader that contains this bundle's namespace? I'd prefer to not do this, but I might be missing some legitimate use-case.
+
+Specifically for the fallback option, and _assuming_ `symfony/maker-bundle` is installed via Composer:
+  - It is a namespace we know will be in the Composer autoloader
+  - The end-project root namespace is a config setting, so could be wrong, or missing
+  - The end-project `composer.json` is not guaranteed to have its own `psr-4` or `psr-0` defined and loading, or not 'dumped' by Composer yet
+
+> 2. If we don't need that, we can return from all the methods, instead of setting the property directly.
+
+Done :grinning:
