@@ -51,14 +51,7 @@ class SecurityConfigUpdaterTest extends TestCase
             new UserClassConfiguration(false, 'username', false),
             'model_username_no_password.yaml',
         ];
-
-        $config = new UserClassConfiguration(false, 'email', true);
-        $config->useArgon2(false);
-        yield 'model_email_password_bcrypt' => [
-            $config,
-            'model_email_password_bcrypt.yaml',
-        ];
-
+        
         yield 'model_email_password_existing_providers' => [
             new UserClassConfiguration(false, 'email', true),
             'model_email_password_existing_providers.yaml',
