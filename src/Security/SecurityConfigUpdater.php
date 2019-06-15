@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
+use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 
 /**
  * @internal
@@ -147,7 +148,7 @@ final class SecurityConfigUpdater
         }
 
         $newData['security']['encoders'][$userClass] = [
-            'algorithm' => $userConfig->shouldUseArgon2() ? 'argon2i' : 'bcrypt',
+            'algorithm' => $userConfig->shouldUseArgon2() ? 'argon2i' : (class_exists(NativePasswordEncoder::class) ? 'auto' : 'bcrypt'),
         ];
         $newData['security']['encoders']['_'] = $this->manipulator->createEmptyLine();
 

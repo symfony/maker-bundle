@@ -760,7 +760,7 @@ class YamlSourceManipulator
             } elseif (null === $value) {
                 $pattern = '(~|NULL|null|\n)';
             } else {
-                $pattern = sprintf('\'?"?%s\'?"?', preg_quote($value));
+                $pattern = sprintf('\'?"?%s\'?"?', preg_quote($value, '#'));
             }
 
             $offset = null === $offset ? $this->currentPosition : $offset;

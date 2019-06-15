@@ -84,9 +84,7 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('<?= $route_name ?>_index', [
-                '<?= $entity_identifier ?>' => $<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(),
-            ]);
+            return $this->redirectToRoute('<?= $route_name ?>_index');
         }
 
         return $this->render('<?= $templates_path ?>/edit.html.twig', [
