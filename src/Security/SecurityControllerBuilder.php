@@ -66,14 +66,12 @@ CODE
 
     public function addLogoutMethod(ClassSourceManipulator $manipulator)
     {
-        $logoutMethodBuilder = $manipulator->createMethodBuilder('logout', null, false, ['@Route("/logout", name="app_logout" , methods={"GET"})']);
+        $logoutMethodBuilder = $manipulator->createMethodBuilder('logout', null, false, ['@Route("/logout", name="app_logout")']);
 
-        $manipulator->addUseStatementIfNecessary(Response::class);
         $manipulator->addUseStatementIfNecessary(Route::class);
-        $manipulator->addUseStatementIfNecessary(AuthenticationUtils::class);
         $manipulator->addMethodBody($logoutMethodBuilder, <<<'CODE'
 <?php
-// controller can be blank: it will never be executed!
+throw new \Exception('This method can be blank - it will be intercepted by the logout key on your firewall');
 CODE
         );
         $manipulator->addMethodBuilder($logoutMethodBuilder);
