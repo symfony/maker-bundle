@@ -10,6 +10,8 @@ class ComposerAutoloaderFinderTest extends TestCase
 {
     public static $getSplAutoloadFunctions = 'spl_autoload_functions';
 
+    private static $rootNamespace = 'Fake\\It\\Till\\You\\Make\\It\\';
+
     /**
      * @after
      */
@@ -18,9 +20,20 @@ class ComposerAutoloaderFinderTest extends TestCase
         self::$getSplAutoloadFunctions = 'spl_autoload_functions';
     }
 
-    public function testGetClassLoader()
+    public function providerNamespaces(): \Generator
     {
-        $loader = (new ComposerAutoloaderFinder())->getClassLoader();
+        yield 'Configured PSR-0' => [rtrim(static::$rootNamespace, '\\'), null];
+        yield 'Configured PSR-4' => [null, static::$rootNamespace];
+        yield 'Fallback default' => [null, 'Symfony\\Bundle\\MakerBundle\\'];
+    }
+
+    /**
+     * @dataProvider providerNamespaces
+     */
+    public function testGetClassLoader($psr0, $psr4)
+    {
+        $this->setupAutoloadFunctions($psr0, $psr4);
+        $loader = (new ComposerAutoloaderFinder(static::$rootNamespace))->getClassLoader();
 
         $this->assertInstanceOf(ClassLoader::class, $loader, 'Wrong ClassLoader found');
     }
@@ -35,7 +48,26 @@ class ComposerAutoloaderFinderTest extends TestCase
         };
 
         // throws \Exception
-        (new ComposerAutoloaderFinder())->getClassLoader();
+        (new ComposerAutoloaderFinder(static::$rootNamespace))->getClassLoader();
+    }
+
+    /**
+     * @param string|null $psr0
+     * @param string|null $psr4
+     */
+    private function setupAutoloadFunctions($psr0, $psr4)
+    {
+        self::$getSplAutoloadFunctions = function () use ($psr0, $psr4) {
+            $loader = new ClassLoader();
+            if ($psr0) {
+                $loader->add($psr0, __DIR__);
+            }
+            if ($psr4) {
+                $loader->addPsr4($psr4, __DIR__);
+            }
+
+            return [[$loader, 'loadClass']];
+        };
     }
 }
 

@@ -32,6 +32,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Security\Core\Encoder\Argon2iPasswordEncoder;
+use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -67,7 +68,7 @@ final class MakeUser extends AbstractMaker
             ->addOption('is-entity', null, InputOption::VALUE_NONE, 'Do you want to store user data in the database (via Doctrine)?')
             ->addOption('identity-property-name', null, InputOption::VALUE_REQUIRED, 'Enter a property name that will be the unique "display" name for the user (e.g. <comment>email, username, uuid</comment>)')
             ->addOption('with-password', null, InputOption::VALUE_NONE, 'Will this app be responsible for checking the password? Choose <comment>No</comment> if the password is actually checked by some other system (e.g. a single sign-on server)')
-            ->addOption('use-argon2', null, InputOption::VALUE_NONE, 'Use the Argon2i password encoder?')
+            ->addOption('use-argon2', null, InputOption::VALUE_NONE, 'Use the Argon2i password encoder? (deprecated)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeUser.txt'))
         ;
 
@@ -107,12 +108,12 @@ final class MakeUser extends AbstractMaker
         $input->setOption('with-password', $userWillHavePassword);
 
         $useArgon2Encoder = false;
-        if ($userWillHavePassword && Argon2iPasswordEncoder::isSupported()) {
+        if ($userWillHavePassword && !class_exists(NativePasswordEncoder::class) && Argon2iPasswordEncoder::isSupported()) {
             $io->writeln('The newer <comment>Argon2i</comment> password hasher requires PHP 7.2, libsodium or paragonie/sodium_compat. Your system DOES support this algorithm.');
             $io->writeln('You should use <comment>Argon2i</comment> unless your production system will not support it.');
             $useArgon2Encoder = $io->confirm('Use <comment>Argon2i</comment> as your password hasher (bcrypt will be used otherwise)?');
+            $input->setOption('use-argon2', $useArgon2Encoder);
         }
-        $input->setOption('use-argon2', $useArgon2Encoder);
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -122,7 +123,10 @@ final class MakeUser extends AbstractMaker
             $input->getOption('identity-property-name'),
             $input->getOption('with-password')
         );
-        $userClassConfiguration->useArgon2($input->getOption('use-argon2'));
+        if ($input->getOption('use-argon2')) {
+            @trigger_error('The "--use-argon2" option is deprecated since MakerBundle 1.12.', E_USER_DEPRECATED);
+            $userClassConfiguration->useArgon2(true);
+        }
 
         $userClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),

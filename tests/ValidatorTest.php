@@ -62,4 +62,11 @@ class ValidatorTest extends TestCase
         $this->expectExceptionMessage('"Class" is a reserved keyword and thus cannot be used as class name in PHP.');
         Validator::validateClassName('App\Entity\Class');
     }
+
+    public function testInvalidEncodingInClassName()
+    {
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage(sprintf('"%sController" is not a UTF-8-encoded string.', chr(0xA6)));
+        Validator::validateClassName(mb_convert_encoding('ŚController', 'ISO-8859-2', 'UTF-8'));
+    }
 }

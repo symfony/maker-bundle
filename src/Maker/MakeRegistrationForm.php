@@ -32,6 +32,7 @@ use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Validator\Validation;
@@ -164,15 +165,15 @@ final class MakeRegistrationForm extends AbstractMaker
         $authenticatorClasses = $interactiveSecurityHelper->getAuthenticatorClasses($firewallsData[$firewallName]);
         if (empty($authenticatorClasses)) {
             $io->note('No Guard authenticators found - so your user won\'t be automatically authenticated after registering.');
+        } else {
+            $input->setOption(
+                'auto-login-authenticator',
+                1 === \count($authenticatorClasses) ? $authenticatorClasses[0] : $io->choice(
+                    'Which authenticator\'s onAuthenticationSuccess() should be used after logging in?',
+                    $authenticatorClasses
+                )
+            );
         }
-
-        $input->setOption(
-            'auto-login-authenticator',
-            1 === \count($authenticatorClasses) ? $authenticatorClasses[0] : $io->choice(
-                'Which authenticator\'s onAuthenticationSuccess() should be used after logging in?',
-                $authenticatorClasses
-            )
-        );
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -217,8 +218,8 @@ final class MakeRegistrationForm extends AbstractMaker
         );
 
         // 3) Generate the template
-        $generator->generateFile(
-            'templates/registration/register.html.twig',
+        $generator->generateTemplate(
+            'registration/register.html.twig',
             'registration/twig_template.tpl.php',
             [
                 'username_field' => $usernameField,
@@ -313,6 +314,17 @@ final class MakeRegistrationForm extends AbstractMaker
                 ],
 EOF
             ],
+            'agreeTerms' => [
+                'type' => CheckboxType::class,
+                'options_code' => <<<EOF
+                'mapped' => false,
+                'constraints' => [
+                    new IsTrue([
+                        'message' => 'You should agree to our terms.',
+                    ]),
+                ],
+EOF
+            ],
         ];
 
         $this->formTypeRenderer->render(
@@ -322,6 +334,7 @@ EOF
             [
                 'Symfony\Component\Validator\Constraints\NotBlank',
                 'Symfony\Component\Validator\Constraints\Length',
+                'Symfony\Component\Validator\Constraints\IsTrue',
             ]
         );
 

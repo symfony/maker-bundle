@@ -20,4 +20,31 @@ class SecurityControllerBuilderTest extends TestCase
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
+
+    public function testLogoutMethod()
+    {
+        $source         = file_get_contents(__DIR__.'/fixtures/source/SecurityController.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/expected/SecurityController_logout.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $securityControllerBuilder = new SecurityControllerBuilder();
+        $securityControllerBuilder->addLogoutMethod($manipulator);
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testLoginAndLogoutMethod()
+    {
+        $source         = file_get_contents(__DIR__.'/fixtures/source/SecurityController.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/expected/SecurityController_login_logout.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $securityControllerBuilder = new SecurityControllerBuilder();
+        $securityControllerBuilder->addLoginMethod($manipulator);
+        $securityControllerBuilder->addLogoutMethod($manipulator);
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
 }
