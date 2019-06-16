@@ -4,9 +4,10 @@ namespace Symfony\Bundle\MakerBundle\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\EventRegistry;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 class EventRegistryTest extends TestCase
 {
@@ -45,14 +46,24 @@ class EventRegistryTest extends TestCase
         $this->assertNull($registry->getEventClassName('foo.bar'));
     }
 
-    public function testGetEventClassNameFromStandardList()
+    public function testGetOldEventClassNameFromStandardList()
     {
         $dispatcher = $this->createMock(EventDispatcherInterface::class);
         $dispatcher->expects($this->never())
             ->method('getListeners');
 
         $registry = new EventRegistry($dispatcher);
-        $this->assertSame(GetResponseForExceptionEvent::class, $registry->getEventClassName('kernel.exception'));
+        $this->assertSame(ConsoleCommandEvent::class, $registry->getEventClassName('console.command'));
+    }
+
+    public function testGetNewEventClassNameFromStandardList()
+    {
+        $dispatcher = $this->createMock(EventDispatcherInterface::class);
+        $dispatcher->expects($this->never())
+                   ->method('getListeners');
+
+        $registry = new EventRegistry($dispatcher);
+        $this->assertSame(ExceptionEvent::class, $registry->getEventClassName(ExceptionEvent::class));
     }
 }
 

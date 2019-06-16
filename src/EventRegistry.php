@@ -41,6 +41,16 @@ use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 class EventRegistry
 {
     // list of *known* events to always include (if they exist)
+    private static $newEventsMap = [
+        'kernel.exception' => ExceptionEvent::class,
+        'kernel.request' => RequestEvent::class,
+        'kernel.response' => ResponseEvent::class,
+        'kernel.view' => ViewEvent::class,
+        'kernel.controller_arguments' => ControllerArgumentsEvent::class,
+        'kernel.controller' => ControllerEvent::class,
+        'kernel.terminate' => TerminateEvent::class,
+    ];
+
     private static $eventsMap = [
         'console.command' => ConsoleCommandEvent::class,
         'console.terminate' => ConsoleTerminateEvent::class,
@@ -59,16 +69,6 @@ class EventRegistry
         'security.switch_user' => SwitchUserEvent::class,
     ];
 
-    private static $newEventsMap = [
-        'kernel.controller_arguments' => ControllerArgumentsEvent::class,
-        'kernel.controller' => ControllerEvent::class,
-        'kernel.response' => ResponseEvent::class,
-        'kernel.request' => RequestEvent::class,
-        'kernel.view' => ViewEvent::class,
-        'kernel.exception' => ExceptionEvent::class,
-        'kernel.terminate' => TerminateEvent::class,
-    ];
-
     private $eventDispatcher;
 
     public function __construct(EventDispatcherInterface $eventDispatcher)
@@ -78,7 +78,7 @@ class EventRegistry
         // Loop through the new event classes
         foreach (self::$newEventsMap as $oldEventName => $newEventClass) {
             //Check if the new event classes exist, if so replace the old one with the new.
-            if (class_exists($newEventClass)) {
+            if (isset(self::$eventsMap[$oldEventName]) && class_exists($newEventClass)) {
                 unset(self::$eventsMap[$oldEventName]);
                 self::$eventsMap[$newEventClass] = $newEventClass;
             }
@@ -100,6 +100,14 @@ class EventRegistry
         }
 
         $listeners = $this->eventDispatcher->getListeners();
+
+        // Check if these listeners are part of the new events.
+        foreach (array_keys($listeners) as $listenerKey) {
+            if (isset(self::$newEventsMap[$listenerKey])) {
+                unset($listeners[$listenerKey]);
+            }
+        }
+
         $activeEvents = array_unique(array_merge($activeEvents, array_keys($listeners)));
 
         asort($activeEvents);
