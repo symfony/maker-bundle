@@ -427,6 +427,7 @@ class FunctionalTest extends MakerTestCase
                     'AppCustomAuthenticator',
                     // controller name
                     'SecurityController',
+                    "no"
                 ]
             )
             ->addExtraDependencies('doctrine')
@@ -460,7 +461,8 @@ class FunctionalTest extends MakerTestCase
                     // user class
                     'App\\Security\\User',
                     // username field => userEmail
-                    0
+                    0,
+                    "no"
                 ]
             )
             ->addExtraDependencies('doctrine/annotations')
@@ -479,6 +481,7 @@ class FunctionalTest extends MakerTestCase
                     'AppCustomAuthenticator',
                     // controller name
                     'SecurityController',
+                    "no"
                 ]
             )
             ->addExtraDependencies('doctrine')
@@ -501,6 +504,7 @@ class FunctionalTest extends MakerTestCase
                     'SecurityController',
                     // user class
                     'App\Security\User',
+                    "no"
                 ]
             )
             ->addExtraDependencies('twig')
@@ -521,6 +525,7 @@ class FunctionalTest extends MakerTestCase
                     'SecurityController',
                     // user class
                     'App\Security\User',
+                    "no"
                 ]
             )
             ->addExtraDependencies('twig')
@@ -539,6 +544,7 @@ class FunctionalTest extends MakerTestCase
                     'AppCustomAuthenticator',
                     // controller name
                     'SecurityController',
+                    "no"
                 ]
             )
             ->addExtraDependencies('doctrine')
@@ -731,6 +737,45 @@ class FunctionalTest extends MakerTestCase
             ->configureDatabase()
             ->updateSchemaAfterCommand()
         ];
+
+        yield 'auth_login_form_user_entity_with_encoder_logout' => [
+            MakerTestDetails::createTest(
+                $this->getMakerInstance(MakeAuthenticator::class),
+                [
+                    // authenticator type => login-form
+                    1,
+                    // class name
+                    'AppCustomAuthenticator',
+                    // controller name
+                    'SecurityController',
+                    // logout support
+                    "yes"
+                ]
+            )
+                ->addExtraDependencies('doctrine')
+                ->addExtraDependencies('twig')
+                ->addExtraDependencies('symfony/form')
+                ->setFixtureFilesPath(__DIR__ . '/../fixtures/MakeAuthenticatorLoginFormUserEntityLogout')
+                ->configureDatabase()
+                ->updateSchemaAfterCommand()
+                ->assert(
+                    function (string $output, string $directory) {
+                        $this->assertContains('Success', $output);
+
+                        $fs = new Filesystem();
+                        $this->assertTrue($fs->exists(sprintf('%s/src/Controller/SecurityController.php', $directory)));
+                        $this->assertTrue($fs->exists(sprintf('%s/templates/security/login.html.twig', $directory)));
+                        $this->assertTrue($fs->exists(sprintf('%s/src/Security/AppCustomAuthenticator.php', $directory)));
+
+                        $securityConfig = Yaml::parse(file_get_contents(sprintf("%s/config/packages/security.yaml", $directory)));
+                        $this->assertEquals(
+                            'app_logout',
+                            $securityConfig['security']['firewalls']['main']['logout']['path']
+                        );
+                    }
+                ),
+        ];
+
     }
 
     public function getCommandEntityTests()

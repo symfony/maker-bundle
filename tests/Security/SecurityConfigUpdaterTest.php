@@ -68,11 +68,11 @@ class SecurityConfigUpdaterTest extends TestCase
     /**
      * @dataProvider getAuthenticatorTests
      */
-    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename)
+    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename, bool $logoutSetup)
     {
         $updater = new SecurityConfigUpdater();
         $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
-        $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator');
+        $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator', $logoutSetup);
         $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_authenticator/'.$expectedSourceFilename);
 
         $this->assertSame($expectedSource, $actualSource);
@@ -84,28 +84,40 @@ class SecurityConfigUpdaterTest extends TestCase
             'main',
             null,
             'empty_source.yaml',
-            'empty_security.yaml'
+            'empty_security.yaml',
+            false
         ];
 
         yield 'simple_security' => [
             'main',
             null,
             'simple_security_source.yaml',
-            'simple_security.yaml'
+            'simple_security.yaml',
+            false
         ];
 
         yield 'simple_security_with_firewalls' => [
             'main',
             null,
             'simple_security_with_firewalls.yaml',
-            'simple_security_with_firewalls.yaml'
+            'simple_security_with_firewalls.yaml',
+            false
         ];
 
         yield 'simple_security_with_firewalls_and_authenticator' => [
             'main',
             'App\\Security\\AppCustomAuthenticator',
             'simple_security_with_firewalls_and_authenticator.yaml',
-            'simple_security_with_firewalls_and_authenticator.yaml'
+            'simple_security_with_firewalls_and_authenticator.yaml',
+            false
+        ];
+
+        yield 'simple_security_with_firewalls_and_logout' => [
+            'main',
+            'App\\Security\\AppCustomAuthenticator',
+            'simple_security_with_firewalls_and_logout.yaml',
+            'simple_security_with_firewalls_and_logout.yaml',
+            true
         ];
     }
 }
