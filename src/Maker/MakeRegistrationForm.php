@@ -165,15 +165,15 @@ final class MakeRegistrationForm extends AbstractMaker
         $authenticatorClasses = $interactiveSecurityHelper->getAuthenticatorClasses($firewallsData[$firewallName]);
         if (empty($authenticatorClasses)) {
             $io->note('No Guard authenticators found - so your user won\'t be automatically authenticated after registering.');
+        } else {
+            $input->setOption(
+                'auto-login-authenticator',
+                1 === \count($authenticatorClasses) ? $authenticatorClasses[0] : $io->choice(
+                    'Which authenticator\'s onAuthenticationSuccess() should be used after logging in?',
+                    $authenticatorClasses
+                )
+            );
         }
-
-        $input->setOption(
-            'auto-login-authenticator',
-            1 === \count($authenticatorClasses) ? $authenticatorClasses[0] : $io->choice(
-                'Which authenticator\'s onAuthenticationSuccess() should be used after logging in?',
-                $authenticatorClasses
-            )
-        );
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
