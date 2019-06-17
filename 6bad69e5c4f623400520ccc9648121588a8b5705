@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by jojotjebaby at 2019-05-25T22:38:59Z
+
+You are right, I will do an update tomorrow with the following changes:
+
+Remove the changed events from the default array and add them in the constructor by checking wether the new class exists. If not assign the old one. That could be done with a ternary comparator.
+
+Do you think that would be a good way to approach this ?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-05-26T17:30:24Z
+
+> @jojotjebaby Won't there be an error with non-found old classes as they were renamed?
+
+I don't see the problem? It *is* ok to reference `NonExistentClassName::class`, even if that class doesn't exist.
