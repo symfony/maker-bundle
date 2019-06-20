@@ -42,6 +42,22 @@ class DependencyBuilderTest extends TestCase
         $this->assertSame([], $actualDeps);
     }
 
+    public function testGetMissingDependenciesBasedOnTraitsAndInterfaces()
+    {
+        $depBuilder = new DependencyBuilder();
+        $depBuilder->addClassDependency('DummyInterface', 'dummy-interface-package');
+        $depBuilder->addClassDependency('DummyTrait', 'dummy-trait-package');
+
+        $actualDeps = $depBuilder->getMissingDependencies();
+        $this->assertSame(['dummy-interface-package', 'dummy-trait-package'], $actualDeps);
+
+        eval('interface DummyInterface{}');
+        eval('trait DummyTrait{}');
+
+        $actualDeps = $depBuilder->getMissingDependencies();
+        $this->assertSame([], $actualDeps);
+    }
+
     /**
      * @dataProvider getMissingPackagesMessageTests
      */

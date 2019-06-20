@@ -136,7 +136,7 @@ final class DependencyBuilder
         $missingPackages = [];
         $missingOptionalPackages = [];
         foreach ($dependencies as $package) {
-            if (class_exists($package['class']) || interface_exists($package['class'])) {
+            if (class_exists($package['class']) || interface_exists($package['class']) || trait_exists($package['class'])) {
                 continue;
             }
             if (true === $package['required']) {
