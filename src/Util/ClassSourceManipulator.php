@@ -1003,6 +1003,7 @@ final class ClassSourceManipulator
             case 'text':
             case 'guid':
             case 'bigint':
+            case 'decimal':
                 return 'string';
 
             case 'array':
@@ -1037,7 +1038,6 @@ final class ClassSourceManipulator
                 return '\\'.\DateInterval::class;
 
             case 'object':
-            case 'decimal':
             case 'binary':
             case 'blob':
             default:
