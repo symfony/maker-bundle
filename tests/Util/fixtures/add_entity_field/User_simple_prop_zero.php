@@ -26,12 +26,12 @@ class User
         return $this->id;
     }
 
-    public function getDecimal()
+    public function getDecimal(): ?string
     {
         return $this->decimal;
     }
 
-    public function setDecimal($decimal): self
+    public function setDecimal(string $decimal): self
     {
         $this->decimal = $decimal;
 
