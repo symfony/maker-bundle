@@ -1002,11 +1002,13 @@ final class ClassSourceManipulator
             case 'string':
             case 'text':
             case 'guid':
+            case 'bigint':
                 return 'string';
 
             case 'array':
             case 'simple_array':
             case 'json':
+            case 'json_array':
                 return 'array';
 
             case 'boolean':
@@ -1014,7 +1016,6 @@ final class ClassSourceManipulator
 
             case 'integer':
             case 'smallint':
-            case 'bigint':
                 return 'int';
 
             case 'float':
