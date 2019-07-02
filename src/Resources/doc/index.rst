@@ -46,7 +46,7 @@ optional arguments and options. Check them out with the ``--help`` option:
 Configuration
 -------------
 
-This bundles doesn't require any configuration. But, you *can* configure
+This bundle doesn't require any configuration. But, you *can* configure
 the root namespace that is used to "guess" what classes you want to generate:
 
 .. code-block:: yaml
