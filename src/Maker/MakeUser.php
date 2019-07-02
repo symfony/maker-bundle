@@ -48,11 +48,14 @@ final class MakeUser extends AbstractMaker
 
     private $configUpdater;
 
-    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater)
+    private $generator;
+
+    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, Generator $generator)
     {
         $this->fileManager = $fileManager;
         $this->userClassBuilder = $userClassBuilder;
         $this->configUpdater = $configUpdater;
+        $this->generator = $generator;
     }
 
     public static function getCommandName(): string
@@ -149,7 +152,9 @@ final class MakeUser extends AbstractMaker
         // B) Implement UserInterface
         $manipulator = new ClassSourceManipulator(
             $this->fileManager->getFileContents($classPath),
-            true
+            true,
+            true,
+            $this->generator->getFluentSetters()
         );
         $manipulator->setIo($io);
         $this->userClassBuilder->addUserInterfaceImplementation(
