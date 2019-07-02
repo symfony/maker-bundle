@@ -44,6 +44,7 @@
             <service id="maker.generator" class="Symfony\Bundle\MakerBundle\Generator">
                 <argument type="service" id="maker.file_manager" />
                 <argument /> <!-- root namespace -->
+                <argument /> <!-- fluent setters -->
             </service>
 
             <service id="maker.entity_class_generator" class="Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator">

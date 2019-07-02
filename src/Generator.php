@@ -25,12 +25,14 @@ class Generator
     private $twigHelper;
     private $pendingOperations = [];
     private $namespacePrefix;
+    private $fluentSetters;
 
-    public function __construct(FileManager $fileManager, string $namespacePrefix)
+    public function __construct(FileManager $fileManager, string $namespacePrefix, bool $fluentSetters)
     {
         $this->fileManager = $fileManager;
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
         $this->namespacePrefix = trim($namespacePrefix, '\\');
+        $this->fluentSetters = $fluentSetters;
     }
 
     /**
@@ -212,6 +214,11 @@ class Generator
     public function getRootNamespace(): string
     {
         return $this->namespacePrefix;
+    }
+
+    public function getFluentSetters(): bool
+    {
+        return $this->fluentSetters;
     }
 
     public function generateController(string $controllerClassName, string $controllerTemplatePath, array $parameters = []): string

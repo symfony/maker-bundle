@@ -1350,6 +1350,36 @@ class FunctionalTest extends MakerTestCase
             ->updateSchemaAfterCommand()
             ->setRequiredPhpVersion(70100)
         ];
+
+        yield 'entity_with_not_fluent_setters' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // add not additional fields
+                'name',
+                'string',
+                '255', // length
+                // nullable
+                'y',
+                'email',
+                'string',
+                '255', // length
+                // nullable
+                'y',
+                'createdAt',
+                // use default datetime
+                '',
+                // nullable
+                'y',
+                // finish adding fields
+                '',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityWithNotFluentSetters')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
+        ];
     }
 
     /**

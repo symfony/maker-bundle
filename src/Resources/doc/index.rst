@@ -58,6 +58,9 @@ the root namespace that is used to "guess" what classes you want to generate:
         # Acme namespace, instead of the default App
         # (e.g. Acme\Entity\Article, Acme\Command\MyCommand, etc)
         root_namespace: 'Acme'
+        # tell MakerBundle that all created setters will not return ``$this``
+        # default value is true and setters return ``$this``
+        fluent_setters: false
 
 Creating your Own Makers
 ------------------------

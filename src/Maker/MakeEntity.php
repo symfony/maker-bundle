@@ -56,7 +56,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         if (null === $generator) {
             @trigger_error(sprintf('Passing a "%s" instance as 4th argument is mandatory since version 1.5.', Generator::class), E_USER_DEPRECATED);
-            $this->generator = new Generator($fileManager, 'App\\');
+            $this->generator = new Generator($fileManager, 'App\\', true);
         } else {
             $this->generator = $generator;
         }
@@ -740,7 +740,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite): ClassSourceManipulator
     {
-        $manipulator = new ClassSourceManipulator($this->fileManager->getFileContents($path), $overwrite);
+        $manipulator = new ClassSourceManipulator(
+            $this->fileManager->getFileContents($path),
+            $overwrite,
+            true,
+            $this->generator->getFluentSetters()
+        );
         $manipulator->setIo($io);
 
         return $manipulator;

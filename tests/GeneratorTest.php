@@ -17,7 +17,7 @@ class GeneratorTest extends TestCase
         $fileManager->expects($this->any())
             ->method('getNamespacePrefixForClass')
             ->willReturn('Foo');
-        $generator = new Generator($fileManager, 'App\\');
+        $generator = new Generator($fileManager, 'App\\', true);
         $classNameDetails = $generator->createClassNameDetails($name, $prefix, $suffix);
 
         $this->assertSame($expectedFullClassName, $classNameDetails->getFullName());
