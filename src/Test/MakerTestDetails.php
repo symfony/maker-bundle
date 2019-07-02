@@ -42,6 +42,8 @@ final class MakerTestDetails
 
     private $rootNamespace = 'App';
 
+    private $fluentSetters = true;
+
     private $requiredPhpVersion;
 
     private $guardAuthenticators = [];
@@ -78,6 +80,18 @@ final class MakerTestDetails
     public function changeRootNamespace(string $rootNamespace): self
     {
         $this->rootNamespace = trim($rootNamespace, '\\');
+
+        return $this;
+    }
+
+    public function getFluentSetters()
+    {
+        return $this->fluentSetters;
+    }
+
+    public function changeFluentSetters(bool $fluentSetters): self
+    {
+        $this->fluentSetters = $fluentSetters;
 
         return $this;
     }
