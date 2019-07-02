@@ -93,7 +93,7 @@ class EntityRegeneratorTest extends TestCase
         $regenerator = new EntityRegenerator(
             $doctrineHelper,
             $fileManager,
-            new Generator($fileManager, 'App\\'),
+            new Generator($fileManager, 'App\\', true),
             $overwrite
         );
 
