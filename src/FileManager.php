@@ -61,16 +61,16 @@ class FileManager
         $newFile = !$this->fileExists($filename);
         $existingContent = $newFile ? '' : file_get_contents($absolutePath);
 
-        $comment = $newFile ? 'created' : 'updated';
+        $comment = $newFile ? '<fg=blue>created</>' : '<fg=yellow>updated</>';
         if ($existingContent === $content) {
-            $comment = 'no change';
+            $comment = '<fg=green>no change</>';
         }
 
         $this->fs->dumpFile($absolutePath, $content);
 
         if ($this->io) {
             $this->io->comment(sprintf(
-                '<fg=green>%s</>: %s',
+                '%s: %s',
                 $comment,
                 $this->relativizePath($filename)
             ));
