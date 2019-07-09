@@ -129,7 +129,7 @@ final class MakerTestEnvironment
             try {
                 // lets do some magic here git is faster than copy
                 MakerTestProcess::create(
-                    'git clone "$FLEX_PATH" "$APP_PATH"',
+                    '\\' === \DIRECTORY_SEPARATOR ? 'git clone %FLEX_PATH% %APP_PATH%' : 'git clone "$FLEX_PATH" "$APP_PATH"',
                     \dirname($this->flexPath),
                     [
                         'FLEX_PATH' => $this->flexPath,
