@@ -20,7 +20,7 @@
   in #406 thanks to @St0iK
 
 * Use new event class names instead of strings in `make:event-subscriber` -
-  in #403 thanks to jojotjebaby
+  in #403 thanks to @jojotjebaby
 
 1.11
 ====
