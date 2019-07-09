@@ -87,7 +87,7 @@ final class MakeSubscriber extends AbstractMaker
                 'event' => class_exists($event) ? sprintf('%s::class', $eventClassName) : sprintf('\'%s\'', $event),
                 'event_full_class_name' => $eventFullClassName,
                 'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
-                'method_name' => class_exists($event) ?  Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
+                'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
             ]
         );
 

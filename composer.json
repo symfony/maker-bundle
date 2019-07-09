@@ -27,9 +27,9 @@
         "doctrine/doctrine-bundle": "^1.8",
         "doctrine/orm": "^2.3",
         "friendsofphp/php-cs-fixer": "^2.8",
-        "friendsoftwig/twigcs": "^3.0",
+        "friendsoftwig/twigcs": "^3.1.2",
         "symfony/http-client": "^4.3",
-        "symfony/phpunit-bridge": "^3.4|^4.0",
+        "symfony/phpunit-bridge": "^3.4.19|^4.0",
         "symfony/process": "^3.4|^4.0",
         "symfony/security-core": "^3.4|^4.0",
         "symfony/yaml": "^3.4|^4.0"

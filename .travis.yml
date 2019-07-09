@@ -14,32 +14,33 @@ matrix:
     fast_finish: true
     include:
         - php: 7.1
-          env: SYMFONY_PHPUNIT_VERSION=7.4
-        - php: 7.1
-          env: deps=high SYMFONY_PHPUNIT_VERSION=7.4
+        - php: 7.2
+        - php: 7.3
         - php: 7.1
           env: MAKER_TEST_VERSION=stable-dev
         - php: 7.1
           env: MAKER_TEST_VERSION=dev
-        - php: 7.2
+        - php: 7.1
           env: deps=low
-        - php: 7.3
 
     allow_failures:
           # Dev-master is allowed to fail.
         - env: STABILITY="dev"
 
 before_install:
-    - if [[ $COVERAGE != true ]]; then phpenv config-rm xdebug.ini || true; fi
     - if ! [ -z "$STABILITY" ]; then composer config minimum-stability ${STABILITY}; fi;
-    - if ! [ -v "$DEPENDENCIES" ]; then composer require --no-update ${DEPENDENCIES}; fi;
-    - composer install
+    - |
+      if [[ $deps = low ]]; then
+          composer update --prefer-lowest
+      else
+          composer update
+      fi
 
 install:
     - |
       # Install symfony/flex
       if [[ $deps = low ]]; then
-          export SYMFONY_REQUIRE='>=2.8'
+          export SYMFONY_REQUIRE='>=3.4'
       fi
       composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-master
     - ./vendor/bin/simple-phpunit install
