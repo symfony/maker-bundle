@@ -37,12 +37,6 @@ before_install:
       fi
 
 install:
-    - |
-      # Install symfony/flex
-      if [[ $deps = low ]]; then
-          export SYMFONY_REQUIRE='>=3.4'
-      fi
-      composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-master
     - ./vendor/bin/simple-phpunit install
 
 script:
