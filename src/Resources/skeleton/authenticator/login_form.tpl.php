@@ -10,7 +10,9 @@
 
 <?php if ($logout_setup): ?>
     {% if app.user %}
-        <div class="checkbox mb-3">You are logged in as {{ app.user.username }}, <a href="{{ path('app_logout') }}">Logout</a>
+        <div class="mb-3">
+            You are logged in as {{ app.user.username }}, <a href="{{ path('app_logout') }}">Logout</a>
+        </div>
     {% endif %}
 <?php endif; ?>
 
