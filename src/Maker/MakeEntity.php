@@ -373,6 +373,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         unset($input[Type::JSON_ARRAY]);
         // Put JSON_ARRAY at the end
         $input[Type::JSON_ARRAY] = $json_array;
+
         return $input;
     }
 
