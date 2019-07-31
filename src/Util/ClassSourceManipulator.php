@@ -545,12 +545,14 @@ final class ClassSourceManipulator
             [sprintf('@return %s|%s[]', $collectionTypeHint, $typeHint)]
         );
 
-        $argName = Str::pluralCamelCaseToSingular($relation->getPropertyName());
+        $argName = $relation->getPropertyName();
+        $foreachItemName = Str::pluralCamelCaseToSingular($relation->getPropertyName());
 
         // adder method
         $adderNodeBuilder = (new Builder\Method($relation->getAdderMethodName()))->makePublic();
 
         $paramBuilder = new Builder\Param($argName);
+        $paramBuilder->makeVariadic();
         $paramBuilder->setTypeHint($typeHint);
         $adderNodeBuilder->addParam($paramBuilder->getNode());
 
@@ -558,12 +560,21 @@ final class ClassSourceManipulator
         $containsMethodCallNode = new Node\Expr\MethodCall(
             new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $relation->getPropertyName()),
             'contains',
-            [new Node\Expr\Variable($argName)]
+            [new Node\Expr\Variable($foreachItemName)]
         );
         $ifNotContainsStmt = new Node\Stmt\If_(
             new Node\Expr\BooleanNot($containsMethodCallNode)
         );
-        $adderNodeBuilder->addStmt($ifNotContainsStmt);
+
+        // foreach ($avatars as $avatar)
+        $foreachVariadicArgStmt = new Node\Stmt\Foreach_(
+            new Node\Expr\Variable($argName),
+            new Node\Expr\Variable($foreachItemName)
+        );
+
+        $foreachVariadicArgStmt->stmts[] = $ifNotContainsStmt;
+
+        $adderNodeBuilder->addStmt($foreachVariadicArgStmt);
 
         // append the item
         $ifNotContainsStmt->stmts[] = new Node\Stmt\Expression(
@@ -571,7 +582,7 @@ final class ClassSourceManipulator
                 new Node\Expr\ArrayDimFetch(
                     new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $relation->getPropertyName())
                 ),
-                new Node\Expr\Variable($argName)
+                new Node\Expr\Variable($foreachItemName)
             ))
         ;
 
@@ -579,7 +590,7 @@ final class ClassSourceManipulator
         if (!$relation->isOwning()) {
             $ifNotContainsStmt->stmts[] = new Node\Stmt\Expression(
                 new Node\Expr\MethodCall(
-                    new Node\Expr\Variable($argName),
+                    new Node\Expr\Variable($foreachItemName),
                     $relation->getTargetSetterMethodName(),
                     [new Node\Expr\Variable('this')]
                 )
@@ -595,19 +606,23 @@ final class ClassSourceManipulator
         $removerNodeBuilder = (new Builder\Method($relation->getRemoverMethodName()))->makePublic();
 
         $paramBuilder = new Builder\Param($argName);
+        $paramBuilder->makeVariadic();
         $paramBuilder->setTypeHint($typeHint);
         $removerNodeBuilder->addParam($paramBuilder->getNode());
 
         // add if check to see if item actually exists
         //if ($this->avatars->contains($avatar))
         $ifContainsStmt = new Node\Stmt\If_($containsMethodCallNode);
-        $removerNodeBuilder->addStmt($ifContainsStmt);
+
+        $foreachVariadicArgStmt->stmts = [$ifContainsStmt];
+
+        $removerNodeBuilder->addStmt($foreachVariadicArgStmt);
 
         // call removeElement
         $ifContainsStmt->stmts[] = BuilderHelpers::normalizeStmt(new Node\Expr\MethodCall(
             new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $relation->getPropertyName()),
             'removeElement',
-            [new Node\Expr\Variable($argName)]
+            [new Node\Expr\Variable($foreachItemName)]
         ));
 
         // set the owning side of the relationship
@@ -629,7 +644,7 @@ final class ClassSourceManipulator
                 // if ($student->getCourse() === $this) {
                 $ifNode = new Node\Stmt\If_(new Node\Expr\BinaryOp\Identical(
                     new Node\Expr\MethodCall(
-                        new Node\Expr\Variable($argName),
+                        new Node\Expr\Variable($foreachItemName),
                         $relation->getTargetGetterMethodName()
                     ),
                     new Node\Expr\Variable('this')
@@ -638,7 +653,7 @@ final class ClassSourceManipulator
                 // $student->setCourse(null);
                 $ifNode->stmts = [
                     new Node\Stmt\Expression(new Node\Expr\MethodCall(
-                        new Node\Expr\Variable($argName),
+                        new Node\Expr\Variable($foreachItemName),
                         $relation->getTargetSetterMethodName(),
                         [new Node\Arg($this->createNullConstant())]
                     )),
@@ -648,7 +663,7 @@ final class ClassSourceManipulator
             } elseif ($relation instanceof RelationManyToMany) {
                 // ManyToMany: $student->removeCourse($this);
                 $ifContainsStmt->stmts[] = new Node\Stmt\Expression(new Node\Expr\MethodCall(
-                    new Node\Expr\Variable($argName),
+                    new Node\Expr\Variable($foreachItemName),
                     $relation->getTargetRemoverMethodName(),
                     [new Node\Expr\Variable('this')]
                 ));
