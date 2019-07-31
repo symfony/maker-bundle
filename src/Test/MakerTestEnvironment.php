@@ -356,7 +356,7 @@ final class MakerTestEnvironment
             [
                 'filename' => '.env.test',
                 'find' => 'SYMFONY_DEPRECATIONS_HELPER=999999',
-                'replace' => 'SYMFONY_DEPRECATIONS_HELPER=weak_vendors',
+                'replace' => 'SYMFONY_DEPRECATIONS_HELPER=max[total]=999999',
             ],
         ];
         $this->processReplacements($replacements, $this->flexPath);
