@@ -63,23 +63,27 @@ class User
         return $this->avatars;
     }
 
-    public function addAvatar(UserAvatar $avatar): self
+    public function addAvatar(UserAvatar ...$avatars): self
     {
-        if (!$this->avatars->contains($avatar)) {
-            $this->avatars[] = $avatar;
-            $avatar->setUser($this);
+        foreach ($avatars as $avatar) {
+            if (!$this->avatars->contains($avatar)) {
+                $this->avatars[] = $avatar;
+                $avatar->setUser($this);
+            }
         }
 
         return $this;
     }
 
-    public function removeAvatar(UserAvatar $avatar): self
+    public function removeAvatar(UserAvatar ...$avatars): self
     {
-        if ($this->avatars->contains($avatar)) {
-            $this->avatars->removeElement($avatar);
-            // set the owning side to null (unless already changed)
-            if ($avatar->getUser() === $this) {
-                $avatar->setUser(null);
+        foreach ($avatars as $avatar) {
+            if ($this->avatars->contains($avatar)) {
+                $this->avatars->removeElement($avatar);
+                // set the owning side to null (unless already changed)
+                if ($avatar->getUser() === $this) {
+                    $avatar->setUser(null);
+                }
             }
         }
 
@@ -99,19 +103,23 @@ class User
         return $this->tags;
     }
 
-    public function addTag(Tag $tag): self
+    public function addTag(Tag ...$tags): self
     {
-        if (!$this->tags->contains($tag)) {
-            $this->tags[] = $tag;
+        foreach ($tags as $tag) {
+            if (!$this->tags->contains($tag)) {
+                $this->tags[] = $tag;
+            }
         }
 
         return $this;
     }
 
-    public function removeTag(Tag $tag): self
+    public function removeTag(Tag ...$tags): self
     {
-        if ($this->tags->contains($tag)) {
-            $this->tags->removeElement($tag);
+        foreach ($tags as $tag) {
+            if ($this->tags->contains($tag)) {
+                $this->tags->removeElement($tag);
+            }
         }
 
         return $this;

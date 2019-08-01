@@ -68,19 +68,23 @@ class Client extends BaseClient
         return $this->tags;
     }
 
-    public function addTag(Tag $tag): self
+    public function addTag(Tag ...$tags): self
     {
-        if (!$this->tags->contains($tag)) {
-            $this->tags[] = $tag;
+        foreach ($tags as $tag) {
+            if (!$this->tags->contains($tag)) {
+                $this->tags[] = $tag;
+            }
         }
 
         return $this;
     }
 
-    public function removeTag(Tag $tag): self
+    public function removeTag(Tag ...$tags): self
     {
-        if ($this->tags->contains($tag)) {
-            $this->tags->removeElement($tag);
+        foreach ($tags as $tag) {
+            if ($this->tags->contains($tag)) {
+                $this->tags->removeElement($tag);
+            }
         }
 
         return $this;

@@ -44,23 +44,27 @@ class UserXml
         return $this->avatars;
     }
 
-    public function addAvatar(UserAvatar $avatar): self
+    public function addAvatar(UserAvatar ...$avatars): self
     {
-        if (!$this->avatars->contains($avatar)) {
-            $this->avatars[] = $avatar;
-            $avatar->setUser($this);
+        foreach ($avatars as $avatar) {
+            if (!$this->avatars->contains($avatar)) {
+                $this->avatars[] = $avatar;
+                $avatar->setUser($this);
+            }
         }
 
         return $this;
     }
 
-    public function removeAvatar(UserAvatar $avatar): self
+    public function removeAvatar(UserAvatar ...$avatars): self
     {
-        if ($this->avatars->contains($avatar)) {
-            $this->avatars->removeElement($avatar);
-            // set the owning side to null (unless already changed)
-            if ($avatar->getUser() === $this) {
-                $avatar->setUser(null);
+        foreach ($avatars as $avatar) {
+            if ($this->avatars->contains($avatar)) {
+                $this->avatars->removeElement($avatar);
+                // set the owning side to null (unless already changed)
+                if ($avatar->getUser() === $this) {
+                    $avatar->setUser(null);
+                }
             }
         }
 
