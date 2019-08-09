@@ -55,6 +55,10 @@ class ComposerAutoloaderFinder
         $autoloadFunctions = spl_autoload_functions();
 
         foreach ($autoloadFunctions as $autoloader) {
+            if (!\is_array($autoloader)) {
+                continue;
+            }
+
             $classLoader = $this->extractComposerClassLoader($autoloader);
             if (null === $classLoader) {
                 continue;
