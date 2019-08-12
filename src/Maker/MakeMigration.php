@@ -65,13 +65,17 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $options = [
-            'db' => $input->getOption('db'),
-            'em' => $input->getOption('em'),
-            'shard' => $input->getOption('shard'),
-        ];
+        $options = ['doctrine:migrations:diff'];
+        if (null !== $input->getOption('db')) {
+            $options[] = '--db'.$input->getOption('db');
+        }
+        if (null !== $input->getOption('em')) {
+            $options[] = '--em='.$input->getOption('em');
+        }
+        if (null !== $input->getOption('shard')) {
+            $options[] = '--shard'.$input->getOption('shard');
+        }
 
-        $options['command'] = 'doctrine:migrations:diff';
         $generateMigrationCommand = $this->application->find('doctrine:migrations:diff');
 
         $commandOutput = new BufferedOutput($io->getVerbosity());
