@@ -1002,11 +1002,14 @@ final class ClassSourceManipulator
             case 'string':
             case 'text':
             case 'guid':
+            case 'bigint':
+            case 'decimal':
                 return 'string';
 
             case 'array':
             case 'simple_array':
             case 'json':
+            case 'json_array':
                 return 'array';
 
             case 'boolean':
@@ -1014,7 +1017,6 @@ final class ClassSourceManipulator
 
             case 'integer':
             case 'smallint':
-            case 'bigint':
                 return 'int';
 
             case 'float':
@@ -1036,7 +1038,6 @@ final class ClassSourceManipulator
                 return '\\'.\DateInterval::class;
 
             case 'object':
-            case 'decimal':
             case 'binary':
             case 'blob':
             default:
