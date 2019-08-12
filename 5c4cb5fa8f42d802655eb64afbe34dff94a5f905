@@ -1,0 +1,5 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-08-12T21:18:34Z
+
+And because the `ManagerRegistry` has "always" (since the days of autowiring) been a working alias to the `doctrine` service, this should work everywhere immediately.
