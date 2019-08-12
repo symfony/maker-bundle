@@ -86,10 +86,8 @@ final class MakeController extends AbstractMaker
     public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
-            // we only need doctrine/annotations, which contains
-            // the recipe that loads annotation routes
             Annotation::class,
-            'annotations'
+            'doctrine/annotations'
         );
     }
 
