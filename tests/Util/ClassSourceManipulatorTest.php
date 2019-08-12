@@ -554,6 +554,17 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
+    public function testAddInterfaceToClassWithOtherInterface()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple_with_interface.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/implements_interface/User_simple_with_interface.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+        $manipulator->addInterface(UserInterface::class);
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
     public function testAddMethodWithBody()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/EmptyController.php');
