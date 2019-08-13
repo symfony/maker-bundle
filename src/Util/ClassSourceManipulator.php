@@ -253,7 +253,7 @@ final class ClassSourceManipulator
 
     public function addGetter(string $propertyName, $returnType, bool $isReturnTypeNullable, array $commentLines = []): void
     {
-        $methodName = 'get'.Str::asCamelCase($propertyName);
+        $methodName = ('bool' === $returnType ? 'is' : 'get').Str::asCamelCase($propertyName);
 
         $this->addCustomGetter($propertyName, $methodName, $returnType, $isReturnTypeNullable, $commentLines);
     }
