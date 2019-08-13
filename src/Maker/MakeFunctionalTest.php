@@ -21,6 +21,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\CssSelector\CssSelectorConverter;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestAssertionsTrait;
+use Symfony\Component\Panther\PantherTestCaseTrait;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -55,6 +56,7 @@ class MakeFunctionalTest extends AbstractMaker
             'test/Functional.tpl.php',
             [
                 'web_assertions_are_available' => trait_exists(WebTestAssertionsTrait::class),
+                'panther_is_available' => trait_exists(PantherTestCaseTrait::class),
             ]
         );
 
@@ -80,6 +82,12 @@ class MakeFunctionalTest extends AbstractMaker
             CssSelectorConverter::class,
             'css-selector',
             true,
+            true
+        );
+        $dependencies->addClassDependency(
+            PantherTestCaseTrait::class,
+            'panther',
+            false,
             true
         );
     }
