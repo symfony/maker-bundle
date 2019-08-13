@@ -439,12 +439,16 @@ echo json_encode($missingDependencies);
                     $version = $data['latest'];
                     $parts = explode('.', $version);
 
-                    return sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
+                    $this->targetFlexVersion = sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
+
+                    break;
                 case 'dev':
                     $version = $data['dev'];
                     $parts = explode('.', $version);
 
-                    return sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
+                    $this->targetFlexVersion = sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
+
+                    break;
                 default:
                     throw new \Exception('Invalid target version');
             }

@@ -4,7 +4,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Repositor
 
 use Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity\XOther;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Common\Persistence\ManagerRegistry;
 
 /**
  * @method XOther|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,7 +14,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class XOtherRepository extends ServiceEntityRepository
 {
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, XOther::class);
     }
