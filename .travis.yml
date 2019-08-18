@@ -12,6 +12,7 @@ env:
     global:
         - PHPUNIT_FLAGS="-v"
         - SYMFONY_PHPUNIT_DIR="$HOME/symfony-bridge/.phpunit"
+        - SYMFONY_REQUIRE='>=3.4'
 
 matrix:
     fast_finish: true
@@ -23,6 +24,8 @@ matrix:
           env: MAKER_TEST_VERSION=dev
 
 before_install:
+    - find ~/.phpenv -name xdebug.ini -delete
+    - composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-master
     - composer update
 
 install:

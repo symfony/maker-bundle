@@ -26,7 +26,7 @@ final class EntityClassGenerator
         $this->generator = $generator;
     }
 
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource): string
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false): string
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -51,6 +51,7 @@ final class EntityClassGenerator
                 'entity_full_class_name' => $entityClassDetails->getFullName(),
                 'entity_class_name' => $entityClassDetails->getShortName(),
                 'entity_alias' => $entityAlias,
+                'with_password_upgrade' => $withPasswordUpgrade,
             ]
         );
 

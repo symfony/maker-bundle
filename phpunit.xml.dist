@@ -10,8 +10,6 @@
     <php>
         <ini name="error_reporting" value="-1" />
         <env name="TEST_DATABASE_DSN" value="mysql://root:@127.0.0.1:3306/test_maker" />
-        <!-- See #237 -->
-        <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak_vendors" />
     </php>
 
     <testsuites>
