@@ -100,6 +100,22 @@ class ClassSourceManipulatorTest extends TestCase
             'User_simple.php',
         ];
 
+        yield 'normal_getter_add_bool' => [
+            'User_simple.php',
+            'fooProp',
+            'bool',
+            [],
+            'User_simple_bool.php'
+        ];
+
+        yield 'normal_getter_add_bool_prefixed' => [
+            'User_simple.php',
+            'isFooProp',
+            'bool',
+            [],
+            'User_simple_bool_prefixed.php'
+        ];
+
         yield 'getter_no_props_comments' => [
             'User_no_props.php',
             'fooProp',
