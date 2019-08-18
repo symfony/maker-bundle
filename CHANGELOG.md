@@ -1,3 +1,12 @@
+1.13
+====
+
+* [make:functional-test] Use Panther when available - #417
+  thanks to @adrienlucas
+
+* Allow rehashing passwords when possible and needed - #389
+  thanks to @nicolas-grekas
+
 1.12
 ====
 
