@@ -8,6 +8,17 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 
 class ValidatorTest extends TestCase
 {
+    /**
+     * @return array
+     */
+    public function inValidNotBlankDataProvider(): array
+    {
+        return [
+            [null],
+            [''],
+        ];
+    }
+
     public function testValidateLength()
     {
         $this->assertSame(100, Validator::validateLength('100'));
@@ -68,5 +79,22 @@ class ValidatorTest extends TestCase
         $this->expectException(RuntimeCommandException::class);
         $this->expectExceptionMessage(sprintf('"%sController" is not a UTF-8-encoded string.', chr(0xA6)));
         Validator::validateClassName(mb_convert_encoding('ŚController', 'ISO-8859-2', 'UTF-8'));
+    }
+
+    public function testValidateNotBlank()
+    {
+        $this->assertEquals('testString', Validator::notBlank('testString'));
+    }
+
+    /**
+     * @dataProvider inValidNotBlankDataProvider
+     *
+     * @param string|null $string
+     */
+    public function testInvalidNotBlank($string)
+    {
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage('This value cannot be blank.');
+        Validator::notBlank($string);
     }
 }
