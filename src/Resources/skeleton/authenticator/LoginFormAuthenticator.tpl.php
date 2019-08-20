@@ -95,7 +95,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator
         throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
     }
 
-    protected function getLoginUrl()
+    protected function getLoginUrl(): string
     {
         return $this->urlGenerator->generate('app_login');
     }
