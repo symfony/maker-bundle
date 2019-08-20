@@ -20,7 +20,7 @@ class StubAuthenticator extends AbstractGuardAuthenticator
         $this->router = $router;
     }
 
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
         return false;
     }

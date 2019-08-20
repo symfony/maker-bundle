@@ -11,7 +11,7 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
 class Authenticator extends AbstractGuardAuthenticator
 {
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
         // todo
     }

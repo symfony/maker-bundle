@@ -20,7 +20,7 @@ class AutomaticAuthenticator extends AbstractGuardAuthenticator
         $this->router = $router;
     }
 
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
         return $request->getPathInfo() === '/login' && $request->query->has('username');
     }
