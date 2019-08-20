@@ -26,7 +26,7 @@ class <?= $class_name ?> extends AbstractGuardAuthenticator
         // todo
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
         // todo
     }

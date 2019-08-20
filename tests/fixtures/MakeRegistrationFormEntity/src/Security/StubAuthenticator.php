@@ -33,7 +33,7 @@ class StubAuthenticator extends AbstractGuardAuthenticator
     {
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
     }
 

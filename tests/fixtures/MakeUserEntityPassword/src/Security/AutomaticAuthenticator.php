@@ -39,7 +39,7 @@ class AutomaticAuthenticator extends AbstractGuardAuthenticator
         return $this->em->getRepository(User::class)->findOneBy(['email' => $credentials]);
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
         return true;
     }

@@ -38,7 +38,7 @@ class AutomaticAuthenticator extends AbstractGuardAuthenticator
         return $user;
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
         return true;
     }
