@@ -225,7 +225,7 @@ final class UserClassBuilder
         // add getSalt(): always empty
         $builder = $manipulator->createMethodBuilder(
             'getSalt',
-            null,
+            '?string',
             false,
             ['@see UserInterface']
         );
