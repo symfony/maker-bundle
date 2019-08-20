@@ -99,7 +99,7 @@ class User implements UserInterface
         return $this->passwordAlt;
     }
 
-    public function getSalt()
+    public function getSalt(): ?string
     {
     }
 
