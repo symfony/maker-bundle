@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Util;
 
 use Composer\Autoload\ClassLoader;
 use Symfony\Component\Debug\DebugClassLoader;
+use Symfony\Component\ErrorHandler\DebugClassLoader as ErrorHandlerDebugClassLoader;
 
 /**
  * @internal
@@ -55,6 +56,10 @@ class ComposerAutoloaderFinder
         $autoloadFunctions = spl_autoload_functions();
 
         foreach ($autoloadFunctions as $autoloader) {
+            if (!\is_array($autoloader)) {
+                continue;
+            }
+
             $classLoader = $this->extractComposerClassLoader($autoloader);
             if (null === $classLoader) {
                 continue;
@@ -78,7 +83,9 @@ class ComposerAutoloaderFinder
             if ($autoloader[0] instanceof ClassLoader) {
                 return $autoloader[0];
             }
-            if ($autoloader[0] instanceof DebugClassLoader
+            if (
+                ($autoloader[0] instanceof DebugClassLoader
+                    || $autoloader[0] instanceof ErrorHandlerDebugClassLoader)
                 && \is_array($autoloader[0]->getClassLoader())
                 && $autoloader[0]->getClassLoader()[0] instanceof ClassLoader) {
                 return $autoloader[0]->getClassLoader()[0];

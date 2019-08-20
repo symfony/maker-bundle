@@ -36,7 +36,12 @@ class MakerTestCase extends TestCase
             if ('.php' === substr($file, -4)) {
                 $csProcess = $testEnv->runPhpCSFixer($file);
 
-                $this->assertTrue($csProcess->isSuccessful(), sprintf('File "%s" has a php-cs problem: %s', $file, $csProcess->getOutput()));
+                $this->assertTrue($csProcess->isSuccessful(), sprintf(
+                    "File '%s' has a php-cs problem: %s\n\n%s",
+                    $file,
+                    $csProcess->getErrorOutput(),
+                    file_get_contents($testEnv->getPath().'/'.$file)
+                ));
             }
 
             if ('.twig' === substr($file, -5)) {

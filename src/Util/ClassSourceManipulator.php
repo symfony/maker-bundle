@@ -174,24 +174,8 @@ final class ClassSourceManipulator
     {
         $this->addUseStatementIfNecessary($interfaceName);
 
-        /*
-         * Changing the interface with this method, causes a problem
-         * with the "diff" pretty printer: it appears to rewrite
-         * all the internal class source, which removes line breaks.
-         *
-         * For that reason, we work around:
-         *  See: https://github.com/nikic/PHP-Parser/pull/527
-         */
-        //$this->getClassNode()->implements[] = new Node\Name(Str::getShortClassName($interfaceName));
-        //$this->updateSourceCodeFromNewStmts();
-
-        // purposely only works in simple cases: no extends or implements
-        $newCode = str_replace(
-            sprintf('class %s', $this->getClassNode()->name->toString()),
-            sprintf('class %s implements %s', $this->getClassNode()->name->toString(), Str::getShortClassName($interfaceName)),
-            $this->sourceCode
-        );
-        $this->setSourceCode($newCode);
+        $this->getClassNode()->implements[] = new Node\Name(Str::getShortClassName($interfaceName));
+        $this->updateSourceCodeFromNewStmts();
     }
 
     public function addAccessorMethod(string $propertyName, string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = [], $typeCast = null)
@@ -1002,11 +986,14 @@ final class ClassSourceManipulator
             case 'string':
             case 'text':
             case 'guid':
+            case 'bigint':
+            case 'decimal':
                 return 'string';
 
             case 'array':
             case 'simple_array':
             case 'json':
+            case 'json_array':
                 return 'array';
 
             case 'boolean':
@@ -1014,7 +1001,6 @@ final class ClassSourceManipulator
 
             case 'integer':
             case 'smallint':
-            case 'bigint':
                 return 'int';
 
             case 'float':
@@ -1036,7 +1022,6 @@ final class ClassSourceManipulator
                 return '\\'.\DateInterval::class;
 
             case 'object':
-            case 'decimal':
             case 'binary':
             case 'blob':
             default:

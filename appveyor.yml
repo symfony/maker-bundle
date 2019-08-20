@@ -49,6 +49,7 @@ install:
     - IF %PHP%==0 echo @php %%~dp0composer.phar %%* > composer.bat
     - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer.phar
     - cd C:\projects\maker-bundle
+    - composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-master
     - IF %dependencies%==highest appveyor-retry composer update --no-progress --no-suggest --ansi
     - vendor/bin/simple-phpunit install
 

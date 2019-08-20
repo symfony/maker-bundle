@@ -248,6 +248,17 @@ class FunctionalTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
         ];
 
+        yield 'functional_with_panther' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeFunctionalTest::class),
+            [
+                // functional test class name
+                'FooBar',
+            ])
+            ->addExtraDependencies('panther')
+            ->setRequiredPhpVersion(70100)
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
+        ];
+
         yield 'subscriber' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeSubscriber::class),
             [

@@ -5,38 +5,28 @@ cache:
         - $HOME/.composer/cache/files
         - $HOME/symfony-bridge/.phpunit
 
+services:
+    - mysql
+
 env:
     global:
         - PHPUNIT_FLAGS="-v"
         - SYMFONY_PHPUNIT_DIR="$HOME/symfony-bridge/.phpunit"
+        - SYMFONY_REQUIRE='>=3.4'
 
 matrix:
     fast_finish: true
     include:
-        - php: 7.1
-        - php: 7.2
         - php: 7.3
         - php: 7.1
           env: MAKER_TEST_VERSION=stable-dev
         - php: 7.1
           env: MAKER_TEST_VERSION=dev
 
-# the following need to be refactored properly into allow_failures
-#        allow_failures:
-#        # low deps is still a WIP
-#        - php: 7.1
-#          env: deps=low
-#          # Dev-master is allowed to fail.
-#        - env: STABILITY="dev"
-
 before_install:
-    - if ! [ -z "$STABILITY" ]; then composer config minimum-stability ${STABILITY}; fi;
-    - |
-      if [[ $deps = low ]]; then
-          composer update --prefer-lowest
-      else
-          composer update
-      fi
+    - find ~/.phpenv -name xdebug.ini -delete
+    - composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-master
+    - composer update
 
 install:
     - ./vendor/bin/simple-phpunit install
