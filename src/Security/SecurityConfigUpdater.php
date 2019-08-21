@@ -59,7 +59,7 @@ final class SecurityConfigUpdater
         return $contents;
     }
 
-    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup, bool $useSecurity52): string
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup, bool $useSecurity52, bool $addAccessControlRule = false): string
     {
         $this->manipulator = new YamlSourceManipulator($yamlSource);
 
@@ -133,6 +133,20 @@ final class SecurityConfigUpdater
         }
 
         $newData['security']['firewalls'][$firewallName] = $firewall;
+
+        $accessControlRules = $newData['security']['access_control'] ?? [];
+
+        foreach ($accessControlRules as $rule) {
+            if ('^/login$' === $rule['path']) {
+                $addAccessControlRule = false;
+                break;
+            }
+        }
+
+        if ($addAccessControlRule) {
+            array_unshift($accessControlRules, ['path' => '^/login$', 'roles' => 'IS_AUTHENTICATED_ANONYMOUSLY']);
+            $newData['security']['access_control'] = $accessControlRules;
+        }
 
         $this->manipulator->setData($newData);
 

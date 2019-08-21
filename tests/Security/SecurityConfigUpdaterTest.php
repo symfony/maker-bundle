@@ -100,13 +100,13 @@ class SecurityConfigUpdaterTest extends TestCase
     /**
      * @dataProvider getAuthenticatorTests
      */
-    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename, bool $logoutSetup, bool $useSecurity51)
+    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename, bool $logoutSetup, bool $useSecurity51, bool $addAccessControl = false)
     {
         $this->createLogger();
 
         $updater = new SecurityConfigUpdater($this->ysmLogger);
         $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
-        $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator', $logoutSetup, $useSecurity51);
+        $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator', $logoutSetup, $useSecurity51, $addAccessControl);
         $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_authenticator/'.$expectedSourceFilename);
 
         $this->assertSame($expectedSource, $actualSource);
@@ -184,6 +184,26 @@ class SecurityConfigUpdaterTest extends TestCase
             'security_52_with_multiple_authenticators.yaml',
             false,
             true,
+        ];
+
+        yield 'simple_security_with_access_control' => [
+            'main',
+            null,
+            'simple_security_with_access_control.yaml',
+            'simple_security_with_access_control.yaml',
+            false,
+            false,
+            true
+        ];
+
+        yield 'simple_security_without_access_control' => [
+            'main',
+            null,
+            'simple_security_with_added_access_control.yaml',
+            'simple_security.yaml',
+            false,
+            false,
+            true
         ];
     }
 
