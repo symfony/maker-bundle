@@ -60,6 +60,7 @@ class User implements UserInterface
     public function getSalt(): ?string
     {
         // not needed for apps that do not check user passwords
+        return null;
     }
 
     /**

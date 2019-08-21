@@ -101,6 +101,7 @@ class User implements UserInterface
 
     public function getSalt(): ?string
     {
+        return null;
     }
 
     public function eraseCredentials()

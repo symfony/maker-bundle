@@ -223,27 +223,33 @@ final class UserClassBuilder
     private function addGetSalt(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig)
     {
         // add getSalt(): always empty
-        $builder = $manipulator->createMethodBuilder(
+        $getSaltMethodBuilder = $manipulator->createMethodBuilder(
             'getSalt',
             '?string',
             false,
             ['@see UserInterface']
         );
         if ($userClassConfig->hasPassword()) {
-            $builder->addStmt(
+            $getSaltMethodBuilder->addStmt(
                 $manipulator->createMethodLevelCommentNode(
                     'not needed when using the "bcrypt" algorithm in security.yaml'
                 )
             );
         } else {
-            $builder->addStmt(
+            $getSaltMethodBuilder->addStmt(
                 $manipulator->createMethodLevelCommentNode(
                     'not needed for apps that do not check user passwords'
                 )
             );
         }
 
-        $manipulator->addMethodBuilder($builder);
+        $manipulator->addMethodBody($getSaltMethodBuilder, <<<'CODE'
+<?php
+return null;
+CODE
+        );
+
+        $manipulator->addMethodBuilder($getSaltMethodBuilder);
     }
 
     private function addEraseCredentials(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig)
