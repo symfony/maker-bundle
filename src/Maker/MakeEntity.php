@@ -15,6 +15,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\ConstraintRegistry;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
@@ -36,6 +37,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Validator\Validation;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -273,6 +275,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         ORMDependencyBuilder::buildDependencies($dependencies);
+
+        $dependencies->addClassDependency(
+            Validation::class,
+            'validator',
+            false
+        );
     }
 
     private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField)
@@ -361,6 +369,21 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {
             $data['nullable'] = true;
+        }
+
+        if ($io->confirm('Do you want to add validation constraints to the field', false)) {
+            $isFirstConstraint = true;
+
+            while (true) {
+                $constraint = $this->askValidationConstraint($io, $isFirstConstraint);
+                $isFirstConstraint = false;
+
+                if (null === $constraint) {
+                    break;
+                }
+
+                $data['validation'][] = $constraint;
+            }
         }
 
         return $data;
@@ -736,6 +759,63 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         });
 
         return $io->askQuestion($question);
+    }
+
+    private function askValidationConstraint(ConsoleStyle $io, bool $isFirstConstraint)
+    {
+        if ($isFirstConstraint) {
+            $questionText = 'Which constraint do you want to add?';
+        } else {
+            $questionText = 'Add another constraint?';
+        }
+
+        $question = new Question("$questionText Enter the constraint name (enter <comment>?</comment> to see available constraints or press <return> to stop adding constraints)");
+        $constraintsMap = ConstraintRegistry::getValidationConstraintsMap();
+        $question->setAutocompleterValues($constraintsMap);
+
+        $constraint = $io->askQuestion($question);
+
+        if ('?' === $constraint) {
+            $io->listing(array_keys($constraintsMap));
+
+            return $this->askValidationConstraint($io, $isFirstConstraint);
+        }
+
+        $constraintClass = $constraintsMap[$constraint] ?? $constraint;
+
+        if ($constraintClass) {
+            $options = [];
+
+            $option = null;
+
+            while (true) {
+                if (!$options) {
+                    $option = $io->ask('Do you want to add options to the constraint? Enter the value in key=value format (e.g min=3 or press <return> to stop adding options)');
+                } else {
+                    $option = $io->ask('Add another option? Enter the value in key=value format (e.g min=3 or press <return> to stop adding options)');
+                }
+
+                if (null === $option) {
+                    break;
+                }
+
+                $parts = explode('=', $option);
+
+                if (2 !== count($parts)) {
+                    $io->error('Attribute format is not correct. Please add options in the format key=value (e.g min=3)');
+                    continue;
+                }
+
+                $options[trim($parts[0])] = trim($parts[1]);
+            }
+
+            return [
+                'constraint' => $constraintClass,
+                'options' => $options
+            ];
+        }
+
+        return $constraintClass;
     }
 
     private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite): ClassSourceManipulator
