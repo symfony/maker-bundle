@@ -318,8 +318,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         $type = null;
+        $types = Type::getTypesMap();
+        arsort($types);
         $allValidTypes = array_merge(
-            array_keys($this->reOrderJsonArray(Type::getTypesMap())),
+            array_keys($types),
             EntityRelation::getValidRelationTypes(),
             ['relation']
         );
@@ -364,17 +366,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         return $data;
-    }
-
-    private function reOrderJsonArray($input)
-    {
-        // JSON must before JSON_ARRAY for autocomplete
-        $json_array = $input[Type::JSON_ARRAY];
-        unset($input[Type::JSON_ARRAY]);
-        // Put JSON_ARRAY at the end
-        $input[Type::JSON_ARRAY] = $json_array;
-
-        return $input;
     }
 
     private function printAvailableTypes(ConsoleStyle $io)
