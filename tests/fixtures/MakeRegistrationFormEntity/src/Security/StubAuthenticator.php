@@ -30,7 +30,7 @@ class StubAuthenticator extends AbstractGuardAuthenticator
     {
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
     {
     }
 

@@ -35,7 +35,7 @@ class AutomaticAuthenticator extends AbstractGuardAuthenticator
         return $request->query->get('email');
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
     {
         return $this->em->getRepository(User::class)->findOneBy(['email' => $credentials]);
     }

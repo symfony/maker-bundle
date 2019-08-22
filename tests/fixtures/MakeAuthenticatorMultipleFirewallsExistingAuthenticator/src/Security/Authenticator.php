@@ -22,7 +22,7 @@ class Authenticator extends AbstractGuardAuthenticator
         // todo
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
     {
         // todo
     }

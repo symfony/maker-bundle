@@ -31,7 +31,7 @@ class AutomaticAuthenticator extends AbstractGuardAuthenticator
         return $request->query->get('username');
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
     {
         $user = new FunUser();
         $user->setUsername($credentials);
