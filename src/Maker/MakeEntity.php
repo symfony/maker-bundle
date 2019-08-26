@@ -811,7 +811,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
             return [
                 'constraint' => $constraintClass,
-                'options' => $options
+                'options' => $options,
             ];
         }
 
