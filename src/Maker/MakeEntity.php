@@ -801,7 +801,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
                 $parts = explode('=', $option);
 
-                if (2 !== count($parts)) {
+                if (2 !== \count($parts)) {
                     $io->error('Attribute format is not correct. Please add options in the format key=value (e.g min=3)');
                     continue;
                 }

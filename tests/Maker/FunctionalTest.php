@@ -867,10 +867,62 @@ class FunctionalTest extends MakerTestCase
                 '', // length (default 255)
                 // nullable
                 'y',
+                // add validation
+                'n',
                 // finish adding fields
                 '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityUpdate')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->setRequiredPhpVersion(70100)
+        ];
+
+        yield 'entity_with_constraints' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // add not additional fields
+                'name',
+                'string',
+                '255', // length
+                // nullable
+                'y',
+                // add validation
+                'y',
+                // constraint class
+                'Length',
+                // constraint options
+                'min=3',
+                // additional constraint options
+                '',
+                // finish adding constraints
+                '',
+                // additional field
+                'email',
+                'string',
+                '255', // length
+                // nullable
+                'y',
+                // add Validation
+                'y',
+                // constraint class
+                'NotBlank',
+                // constraint option
+                '',
+                // additional constraint
+                'Email',
+                // constraint options
+                'strict=true',
+                // finish adding options
+                '',
+                // finish adding constraints
+                '',
+                // finish adding fields
+                '',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityValidation')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
             ->setRequiredPhpVersion(70100)
@@ -1338,6 +1390,8 @@ class FunctionalTest extends MakerTestCase
                 'string',
                 '', // length (default 255)
                 // nullable
+                '',
+                // add validation
                 '',
                 // finish adding fields
                 '',
