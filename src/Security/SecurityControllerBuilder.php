@@ -36,7 +36,7 @@ final class SecurityControllerBuilder
         $manipulator->addMethodBody($loginMethodBuilder, <<<'CODE'
 <?php
 // if ($this->getUser()) {
-//    $this->redirectToRoute('target_path');
+//     return $this->redirectToRoute('target_path');
 // }
 CODE
         );
