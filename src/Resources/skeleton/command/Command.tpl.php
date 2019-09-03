@@ -13,6 +13,11 @@ class <?= $class_name; ?> extends Command
 {
     protected static $defaultName = '<?= $command_name; ?>';
 
+    /**
+    * @var SymfonyStyle
+    */
+    private $io;
+
     protected function configure()
     {
         $this
@@ -22,19 +27,23 @@ class <?= $class_name; ?> extends Command
         ;
     }
 
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        $this->io = new SymfonyStyle($input, $output);
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $io = new SymfonyStyle($input, $output);
         $arg1 = $input->getArgument('arg1');
 
         if ($arg1) {
-            $io->note(sprintf('You passed an argument: %s', $arg1));
+            $this->io->note(sprintf('You passed an argument: %s', $arg1));
         }
 
         if ($input->getOption('option1')) {
             // ...
         }
 
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        $this->io->success('You have a new command! Now make it your own! Pass --help to see your options.');
     }
 }
