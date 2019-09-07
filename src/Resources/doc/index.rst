@@ -87,3 +87,4 @@ is some extension point that you'd like, please open an issue so we can discuss!
 .. _`SensioGeneratorBundle`: https://github.com/sensiolabs/SensioGeneratorBundle
 .. _`AbstractMaker`: https://github.com/symfony/maker-bundle/blob/master/src/Maker/AbstractMaker.php
 .. _`core maker commands`: https://github.com/symfony/maker-bundle/tree/master/src/Maker
+ 
