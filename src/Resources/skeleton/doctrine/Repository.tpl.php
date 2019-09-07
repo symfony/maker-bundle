@@ -27,7 +27,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
      * without loading that entity from the database.
      * @see https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/advanced-configuration.html#reference-proxies
      * @param mixed $id
-     * @return <?= $entity_class_name . "\n"; ?>
+     * @return <?= $entity_class_name."\n"; ?>
      * @throws \Doctrine\ORM\ORMException
      */
     public function getReference($id)
