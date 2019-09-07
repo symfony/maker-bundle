@@ -19,6 +19,19 @@ class XOtherRepository extends ServiceEntityRepository
         parent::__construct($registry, XOther::class);
     }
 
+    /**
+     * Obtain a reference to an entity for which the identifier is known,
+     * without loading that entity from the database.
+     * @see https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/advanced-configuration.html#reference-proxies
+     * @param mixed $id
+     * @return XOther
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function getReference($id)
+    {
+        return $this->getEntityManager()->getReference(XOther::class, $id);
+    }
+
     // /**
     //  * @return XOther[] Returns an array of XOther objects
     //  */

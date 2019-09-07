@@ -23,7 +23,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
     }
 
     /**
-     * Obtain a reference to an entity for which the identifier is known, 
+     * Obtain a reference to an entity for which the identifier is known,
      * without loading that entity from the database.
      * @see https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/advanced-configuration.html#reference-proxies
      * @param mixed $id
