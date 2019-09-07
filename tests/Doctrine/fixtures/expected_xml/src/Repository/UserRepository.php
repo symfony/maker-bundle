@@ -19,6 +19,19 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, UserXml::class);
     }
 
+    /**
+     * Obtain a reference to an entity for which the identifier is known,
+     * without loading that entity from the database.
+     * @see https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/advanced-configuration.html#reference-proxies
+     * @param mixed $id
+     * @return UserXml
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function getReference($id)
+    {
+        return $this->getEntityManager()->getReference(UserXml::class, $id);
+    }
+
     // /**
     //  * @return UserXml[] Returns an array of UserXml objects
     //  */
