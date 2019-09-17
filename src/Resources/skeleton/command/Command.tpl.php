@@ -14,8 +14,8 @@ class <?= $class_name; ?> extends Command
     protected static $defaultName = '<?= $command_name; ?>';
 
     /**
-    * @var SymfonyStyle
-    */
+     * @var SymfonyStyle
+     */
     private $io;
 
     protected function configure()
