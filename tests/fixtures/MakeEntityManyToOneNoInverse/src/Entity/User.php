@@ -26,6 +26,11 @@ class User
      */
     private $firstName;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $createdAt;
+
     public function getId()
     {
         return $this->id;
@@ -51,5 +56,15 @@ class User
         $this->firstName = $firstName;
 
         return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTimeInterface $createdAt)
+    {
+        $this->createdAt = $createdAt;
     }
 }

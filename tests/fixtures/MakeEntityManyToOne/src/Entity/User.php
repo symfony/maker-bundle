@@ -24,9 +24,12 @@ class User
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $name;
+    private $lastName;
 
-    private $userAvatarPhotos = [];
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $name;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -48,6 +51,18 @@ class User
         $this->firstName = $firstName;
     }
 
+    public function getLastName()
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName($lastName): self
+    {
+        $this->lastName = $lastName;
+
+        return $this;
+    }
+
     public function getName(): string
     {
         return $this->name;
@@ -56,18 +71,6 @@ class User
     public function setName(?string $name)
     {
         $this->name = $name;
-    }
-
-    public function getUserAvatarPhotos(): array
-    {
-        return $this->userAvatarPhotos;
-    }
-
-    public function setUserAvatarPhotos(array $userAvatarPhotos): self
-    {
-        $this->userAvatarPhotos = $userAvatarPhotos;
-
-        return $this;
     }
 
     public function getCreatedAt(): ?\DateTimeInterface

@@ -16,8 +16,24 @@ class UserAvatarPhoto
      */
     private $id;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="photos", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
+
     public function getId()
     {
         return $this->id;
+    }
+
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    public function setUser($user)
+    {
+        $this->user = $user;
     }
 }

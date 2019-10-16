@@ -24,6 +24,11 @@ class User
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
+    private $lastName;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
     private $name;
 
     /**
@@ -46,6 +51,16 @@ class User
         $this->firstName = $firstName;
 
         return $this;
+    }
+
+    public function getLastName()
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName($lastName)
+    {
+        $this->lastName = $lastName;
     }
 
     public function getName(): string

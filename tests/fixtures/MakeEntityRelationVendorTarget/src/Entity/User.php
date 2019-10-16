@@ -16,6 +16,9 @@ class User
      */
     private $id;
 
+    /**
+     * @ORM\OneToMany(targetEntity="UserAvatarPhoto", mappedBy="user")
+     */
     private $photos = [];
 
     public function getId()

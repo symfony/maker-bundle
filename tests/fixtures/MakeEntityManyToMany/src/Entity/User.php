@@ -21,6 +21,9 @@ class User
      */
     private $firstName;
 
+    /**
+     * @ORM\OneToMany(targetEntity="UserAvatarPhoto", mappedBy="user")
+     */
     private $photos = [];
 
     /**
