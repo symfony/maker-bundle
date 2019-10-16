@@ -22,6 +22,11 @@ class User
     private $firstName;
 
     /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $name;
+
+    /**
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $createdAt;
@@ -39,6 +44,16 @@ class User
     public function setFirstName(?string $firstName)
     {
         $this->firstName = $firstName;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(?string $name)
+    {
+        $this->name = $name;
     }
 
     public function getCreatedAt(): ?\DateTimeInterface

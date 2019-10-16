@@ -21,6 +21,8 @@ class User
      */
     private $firstName;
 
+    private $photos = [];
+
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
@@ -39,6 +41,18 @@ class User
     public function getFirstName()
     {
         return $this->firstName;
+    }
+
+    public function getPhotos(): array
+    {
+        return $this->photos;
+    }
+
+    public function setPhotos(array $photos): self
+    {
+        $this->photos = $photos;
+
+        return $this;
     }
 
     public function getCreatedAt(): ?\DateTimeInterface

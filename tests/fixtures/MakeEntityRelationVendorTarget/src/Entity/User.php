@@ -16,8 +16,22 @@ class User
      */
     private $id;
 
+    private $photos = [];
+
     public function getId()
     {
         return $this->id;
+    }
+
+    public function getPhotos(): array
+    {
+        return $this->photos;
+    }
+
+    public function setPhotos(array $photos): self
+    {
+        $this->photos = $photos;
+
+        return $this;
     }
 }

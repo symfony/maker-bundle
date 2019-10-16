@@ -33,6 +33,8 @@ class User implements UserInterface
      */
     private $password;
 
+    private $userEmail;
+
     public function getId()
     {
         return $this->id;
@@ -100,6 +102,21 @@ class User implements UserInterface
     public function getSalt()
     {
         // not needed when using the "bcrypt" algorithm in security.yaml
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserEmail(): string
+    {
+        return $this->userEmail;
+    }
+
+    public function setUserEmail(string $userEmail): self
+    {
+        $this->userEmail = $userEmail;
+
+        return $this;
     }
 
     /**
