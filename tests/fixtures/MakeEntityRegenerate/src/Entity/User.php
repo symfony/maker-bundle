@@ -23,6 +23,8 @@ class User
 
     private $photos = [];
 
+    private $courses;
+
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
@@ -43,6 +45,14 @@ class User
         return $this->firstName;
     }
 
+    /**
+     * @param mixed $firstName
+     */
+    public function setFirstName($firstName)
+    {
+        $this->firstName = $firstName;
+    }
+
     public function getPhotos(): array
     {
         return $this->photos;
@@ -55,8 +65,44 @@ class User
         return $this;
     }
 
+    public function getCourses()
+    {
+        return $this->courses;
+    }
+
+    public function setCourses($courses)
+    {
+        $this->courses = $courses;
+
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
+    }
+
+    /**
+     * @param mixed $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAvatars()
+    {
+        return $this->avatars;
+    }
+
+    /**
+     * @param mixed $avatars
+     */
+    public function setAvatars($avatars)
+    {
+        $this->avatars = $avatars;
     }
 }

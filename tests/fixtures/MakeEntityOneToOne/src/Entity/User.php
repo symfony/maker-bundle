@@ -21,6 +21,8 @@ class User
      */
     private $firstName;
 
+    private $courses;
+
     private $photos = [];
 
     /**
@@ -51,6 +53,18 @@ class User
     public function setPhotos(array $photos): self
     {
         $this->photos = $photos;
+
+        return $this;
+    }
+
+    public function getCourses()
+    {
+        return $this->courses;
+    }
+
+    public function setCourses($courses): self
+    {
+        $this->courses = $courses;
 
         return $this;
     }
