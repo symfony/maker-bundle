@@ -21,6 +21,11 @@ class User
      */
     private $name;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $firstName;
+
     public function getId()
     {
         return $this->id;
@@ -34,5 +39,17 @@ class User
     public function setName(?string $name)
     {
         $this->name = $name;
+    }
+
+    public function getFirstName()
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(?string $firstName): self
+    {
+        $this->firstName = $firstName;
+
+        return $this;
     }
 }

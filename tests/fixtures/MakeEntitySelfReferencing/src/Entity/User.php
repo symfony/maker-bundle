@@ -41,9 +41,11 @@ class User
         return $this->firstName;
     }
 
-    public function setFirstName(?string $firstName)
+    public function setFirstName(?string $firstName): self
     {
         $this->firstName = $firstName;
+
+        return $this;
     }
 
     public function getName(): string

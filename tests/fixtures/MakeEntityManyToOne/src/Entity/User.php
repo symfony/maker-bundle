@@ -26,6 +26,8 @@ class User
      */
     private $name;
 
+    private $userAvatarPhotos = [];
+
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
@@ -54,6 +56,18 @@ class User
     public function setName(?string $name)
     {
         $this->name = $name;
+    }
+
+    public function getUserAvatarPhotos(): array
+    {
+        return $this->userAvatarPhotos;
+    }
+
+    public function setUserAvatarPhotos(array $userAvatarPhotos): self
+    {
+        $this->userAvatarPhotos = $userAvatarPhotos;
+
+        return $this;
     }
 
     public function getCreatedAt(): ?\DateTimeInterface

@@ -22,6 +22,8 @@ class User implements UserInterface
      */
     private $userEmail;
 
+    private $email;
+
     /**
      * @ORM\Column(type="array")
      */
@@ -46,6 +48,18 @@ class User implements UserInterface
     public function setUserEmail(string $userEmail): self
     {
         $this->userEmail = $userEmail;
+
+        return $this;
+    }
+
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
 
         return $this;
     }
