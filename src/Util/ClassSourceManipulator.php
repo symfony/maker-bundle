@@ -89,7 +89,15 @@ final class ClassSourceManipulator
         $nullable = $columnOptions['nullable'] ?? false;
         $isId = (bool) ($columnOptions['id'] ?? false);
 
+        foreach ($columnOptions['validation'] ?? [] as $validation) {
+            $constraint = $this->addUseStatementIfNecessary($validation['constraint']);
+            $comments[] = $this->buildAnnotationLine('@'.$constraint, $validation['options']);
+        }
+
+        unset($columnOptions['validation']);
+
         $comments[] = $this->buildAnnotationLine('@ORM\Column', $columnOptions);
+
         $defaultValue = null;
         if ('array' === $typeHint) {
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
