@@ -438,6 +438,8 @@ class FunctionalTest extends MakerTestCase
                     'AppCustomAuthenticator',
                     // controller name
                     'SecurityController',
+                    // field name
+                    'userEmail',
                     "no"
                 ]
             )

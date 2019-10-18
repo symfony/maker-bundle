@@ -114,7 +114,7 @@ authenticators will be ignored, and can be blank.',
 
     public function guessUserNameField(SymfonyStyle $io, string $userClass, array $providers): string
     {
-        if (1 === \count($providers) && isset(current($providers)['entity'])) {
+        if (1 === \count($providers) && isset(current($providers)['entity']) && isset(current($providers)['entity']['property'])) {
             $entityProvider = current($providers);
 
             return $entityProvider['entity']['property'];

@@ -187,6 +187,13 @@ class InteractiveSecurityHelperTest extends TestCase
             true
         ];
 
+        yield 'guess_with_providers_and_custom_repository_method' => [
+            'providers' => ['app_provider' => ['entity' => null]],
+            'expectedUsernameField' => 'email',
+            true,
+            FixtureClass::class
+        ];
+
         yield 'guess_fixture_class' => [
             'providers' => [],
             'expectedUsernameField' => 'email',
