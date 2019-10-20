@@ -2,11 +2,11 @@
 
 namespace App\Tests;
 
-use App\Entity\Invoice;
 use App\Entity\Currency;
+use App\Entity\Invoice;
 use App\Entity\Money;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Doctrine\ORM\EntityManager;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class GeneratedEntityTest extends KernelTestCase
 {

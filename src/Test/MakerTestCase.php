@@ -37,29 +37,28 @@ class MakerTestCase extends TestCase
                 $csProcess = $testEnv->runPhpCSFixer($file);
 
                 $this->assertTrue($csProcess->isSuccessful(), sprintf(
-                    "File '%s' has a php-cs problem: %s\n\n%s",
+                    "File '%s' has a php-cs problem: %s\n",
                     $file,
-                    $csProcess->getErrorOutput(),
-                    file_get_contents($testEnv->getPath().'/'.$file)
+                    $csProcess->getErrorOutput()."\n".$csProcess->getOutput()
                 ));
             }
 
             if ('.twig' === substr($file, -5)) {
                 $csProcess = $testEnv->runTwigCSLint($file);
 
-                $this->assertTrue($csProcess->isSuccessful(), sprintf('File "%s" has a twig-cs problem: %s', $file, $csProcess->getOutput()));
+                $this->assertTrue($csProcess->isSuccessful(), sprintf('File "%s" has a twig-cs problem: %s', $file, $csProcess->getErrorOutput()."\n".$csProcess->getOutput()));
             }
         }
 
         // run internal tests
         $internalTestProcess = $testEnv->runInternalTests();
         if (null !== $internalTestProcess) {
-            $this->assertTrue($internalTestProcess->isSuccessful(), sprintf("Error while running the PHPUnit tests *in* the project: \n\n %s \n\n Command Output: %s", $internalTestProcess->getOutput(), $makerTestProcess->getOutput()));
+            $this->assertTrue($internalTestProcess->isSuccessful(), sprintf("Error while running the PHPUnit tests *in* the project: \n\n %s \n\n Command Output: %s", $internalTestProcess->getErrorOutput()."\n".$internalTestProcess->getOutput(), $makerTestProcess->getErrorOutput()."\n".$makerTestProcess->getOutput()));
         }
 
         // checkout user asserts
         if (null === $testDetails->getAssert()) {
-            $this->assertContains('Success', $makerTestProcess->getOutput(), $makerTestProcess->getErrorOutput());
+            $this->assertStringContainsString('Success', $makerTestProcess->getOutput(), $makerTestProcess->getErrorOutput());
         } else {
             ($testDetails->getAssert())($makerTestProcess->getOutput(), $testEnv->getPath());
         }

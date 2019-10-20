@@ -36,7 +36,7 @@ class UserProfile
         $this->user = $user;
 
         // set the owning side of the relation if necessary
-        if ($this !== $user->getUserProfile()) {
+        if ($user->getUserProfile() !== $this) {
             $user->setUserProfile($this);
         }
 

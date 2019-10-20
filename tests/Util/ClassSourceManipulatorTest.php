@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use PHPUnit\Framework\TestCase;
@@ -34,7 +43,7 @@ class ClassSourceManipulatorTest extends TestCase
             'User_simple.php',
             'fooProp',
             [],
-            'User_simple.php'
+            'User_simple.php',
         ];
 
         yield 'with_no_properties_and_comment' => [
@@ -42,23 +51,23 @@ class ClassSourceManipulatorTest extends TestCase
             'fooProp',
             [
                 '@var string',
-                '@internal'
+                '@internal',
             ],
-            'User_no_props.php'
+            'User_no_props.php',
         ];
 
         yield 'no_properties_and_constants' => [
             'User_no_props_constants.php',
             'fooProp',
             [],
-            'User_no_props_constants.php'
+            'User_no_props_constants.php',
         ];
 
         yield 'property_empty_class' => [
             'User_empty.php',
             'fooProp',
             [],
-            'User_empty.php'
+            'User_empty.php',
         ];
     }
 
@@ -85,7 +94,7 @@ class ClassSourceManipulatorTest extends TestCase
             'fooProp',
             'string',
             [],
-            'User_simple.php'
+            'User_simple.php',
         ];
 
         yield 'getter_no_props_comments' => [
@@ -94,9 +103,9 @@ class ClassSourceManipulatorTest extends TestCase
             'string',
             [
                 '@return string',
-                '@internal'
+                '@internal',
             ],
-            'User_no_props.php'
+            'User_no_props.php',
         ];
 
         yield 'getter_empty_class' => [
@@ -104,7 +113,7 @@ class ClassSourceManipulatorTest extends TestCase
             'fooProp',
             'string',
             [],
-            'User_empty.php'
+            'User_empty.php',
         ];
     }
 
@@ -132,7 +141,7 @@ class ClassSourceManipulatorTest extends TestCase
             'string',
             false,
             [],
-            'User_simple.php'
+            'User_simple.php',
         ];
 
         yield 'setter_no_props_comments' => [
@@ -142,9 +151,9 @@ class ClassSourceManipulatorTest extends TestCase
             true,
             [
                 '@param string $fooProp',
-                '@internal'
+                '@internal',
             ],
-            'User_no_props.php'
+            'User_no_props.php',
         ];
 
         yield 'setter_empty_class' => [
@@ -153,7 +162,7 @@ class ClassSourceManipulatorTest extends TestCase
             'string',
             false,
             [],
-            'User_empty.php'
+            'User_empty.php',
         ];
     }
 
@@ -175,7 +184,7 @@ class ClassSourceManipulatorTest extends TestCase
         yield 'empty_annotation' => [
             '@ORM\Column',
             [],
-            '@ORM\Column()'
+            '@ORM\Column()',
         ];
 
         yield 'complex_annotation' => [
@@ -185,7 +194,7 @@ class ClassSourceManipulatorTest extends TestCase
                 'length' => 10,
                 'nullable' => false,
             ],
-            '@ORM\Column(name="firstName", length=10, nullable=false)'
+            '@ORM\Column(name="firstName", length=10, nullable=false)',
         ];
     }
 
@@ -212,9 +221,9 @@ class ClassSourceManipulatorTest extends TestCase
                 'type' => 'string',
                 'length' => 255,
                 'nullable' => false,
-                'options' => ['comment' => 'new field']
+                'options' => ['comment' => 'new field'],
             ],
-            'User_simple.php'
+            'User_simple.php',
         ];
 
         yield 'entity_add_datetime' => [
@@ -224,7 +233,7 @@ class ClassSourceManipulatorTest extends TestCase
                 'type' => 'datetime',
                 'nullable' => true,
             ],
-            'User_simple_datetime.php'
+            'User_simple_datetime.php',
         ];
 
         yield 'entity_field_property_already_exists' => [
@@ -235,7 +244,7 @@ class ClassSourceManipulatorTest extends TestCase
                 'length' => 255,
                 'nullable' => false,
             ],
-            'User_simple_prop_already_exists.php'
+            'User_simple_prop_already_exists.php',
         ];
 
         yield 'entity_field_property_zero' => [
@@ -246,7 +255,7 @@ class ClassSourceManipulatorTest extends TestCase
                 'precision' => 6,
                 'scale' => 0,
             ],
-            'User_simple_prop_zero.php'
+            'User_simple_prop_zero.php',
         ];
     }
 
@@ -273,7 +282,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('category')
                 ->setTargetClassName('App\Entity\Category')
                 ->setTargetPropertyName('foods')
-                ->setIsNullable(false)
+                ->setIsNullable(false),
         ];
 
         yield 'many_to_one_nullable' => [
@@ -283,7 +292,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('category')
                 ->setTargetClassName('App\Entity\Category')
                 ->setTargetPropertyName('foods')
-                ->setIsNullable(true)
+                ->setIsNullable(true),
         ];
 
         yield 'many_to_one_other_namespace' => [
@@ -293,7 +302,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('category')
                 ->setTargetClassName('Foo\Entity\Category')
                 ->setTargetPropertyName('foods')
-                ->setIsNullable(true)
+                ->setIsNullable(true),
         ];
 
         yield 'many_to_one_empty_other_namespace' => [
@@ -303,7 +312,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('category')
                 ->setTargetClassName('Foo\Entity\Category')
                 ->setTargetPropertyName('foods')
-                ->setIsNullable(true)
+                ->setIsNullable(true),
         ];
 
         yield 'many_to_one_no_inverse' => [
@@ -314,7 +323,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\Entity\Category')
                 ->setTargetPropertyName('foods')
                 ->setIsNullable(true)
-                ->setMapInverseRelation(false)
+                ->setMapInverseRelation(false),
         ];
     }
 
@@ -341,7 +350,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('avatarPhotos')
                 ->setTargetClassName('App\Entity\UserAvatarPhoto')
                 ->setTargetPropertyName('user')
-                ->setOrphanRemoval(false)
+                ->setOrphanRemoval(false),
         ];
 
         // interesting also because the source file has its
@@ -353,7 +362,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('avatarPhotos')
                 ->setTargetClassName('App\Entity\UserAvatarPhoto')
                 ->setTargetPropertyName('user')
-                ->setOrphanRemoval(false)
+                ->setOrphanRemoval(false),
         ];
 
         yield 'one_to_many_orphan_removal' => [
@@ -363,7 +372,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('avatarPhotos')
                 ->setTargetClassName('App\Entity\UserAvatarPhoto')
                 ->setTargetPropertyName('user')
-                ->setOrphanRemoval(true)
+                ->setOrphanRemoval(true),
         ];
 
         // todo test existing constructor
@@ -392,7 +401,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('recipes')
                 ->setTargetClassName('App\Entity\Recipe')
                 ->setTargetPropertyName('foods')
-                ->setIsOwning(true)
+                ->setIsOwning(true),
         ];
 
         yield 'many_to_many_inverse' => [
@@ -402,10 +411,10 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('recipes')
                 ->setTargetClassName('App\Entity\Recipe')
                 ->setTargetPropertyName('foods')
-                ->setIsOwning(false)
+                ->setIsOwning(false),
         ];
 
-        yield 'many_to_many_owning' => [
+        yield 'many_to_many_owning_inverse' => [
             'User_simple.php',
             'User_simple_no_inverse.php',
             (new RelationManyToMany())
@@ -413,7 +422,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\Entity\Recipe')
                 ->setTargetPropertyName('foods')
                 ->setIsOwning(true)
-                ->setMapInverseRelation(false)
+                ->setMapInverseRelation(false),
         ];
     }
 
@@ -441,7 +450,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\Entity\UserProfile')
                 ->setTargetPropertyName('user')
                 ->setIsNullable(true)
-                ->setIsOwning(true)
+                ->setIsOwning(true),
         ];
 
         // a relationship to yourself - return type is self
@@ -453,7 +462,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\Entity\User')
                 ->setTargetPropertyName('user')
                 ->setIsNullable(true)
-                ->setIsOwning(true)
+                ->setIsOwning(true),
         ];
 
         yield 'one_to_one_inverse' => [
@@ -464,7 +473,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\Entity\User')
                 ->setTargetPropertyName('userProfile')
                 ->setIsNullable(true)
-                ->setIsOwning(false)
+                ->setIsOwning(false),
         ];
 
         yield 'one_to_one_inverse_not_nullable' => [
@@ -475,7 +484,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\Entity\User')
                 ->setTargetPropertyName('userProfile')
                 ->setIsNullable(false)
-                ->setIsOwning(false)
+                ->setIsOwning(false),
         ];
 
         yield 'one_to_one_no_inverse' => [
@@ -487,7 +496,7 @@ class ClassSourceManipulatorTest extends TestCase
                 //->setTargetPropertyName('user')
                 ->setIsNullable(true)
                 ->setIsOwning(true)
-                ->setMapInverseRelation(false)
+                ->setMapInverseRelation(false),
         ];
 
         yield 'one_to_one_no_inverse_not_nullable' => [
@@ -499,7 +508,7 @@ class ClassSourceManipulatorTest extends TestCase
                 //->setTargetPropertyName('user')
                 ->setIsNullable(false)
                 ->setIsOwning(true)
-                ->setMapInverseRelation(false)
+                ->setMapInverseRelation(false),
         ];
 
         yield 'avoid_duplicate_use_statement' => [
@@ -510,7 +519,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\OtherEntity\UserProfile')
                 ->setTargetPropertyName('user')
                 ->setIsNullable(true)
-                ->setIsOwning(true)
+                ->setIsOwning(true),
         ];
 
         yield 'avoid_duplicate_use_statement_with_alias' => [
@@ -521,7 +530,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\OtherEntity\Category')
                 ->setTargetPropertyName('user')
                 ->setIsNullable(true)
-                ->setIsOwning(true)
+                ->setIsOwning(true),
         ];
     }
 
@@ -595,7 +604,7 @@ CODE
     {
         $manipulator = new ClassSourceManipulator($source);
         $manipulator->addAnnotationToClass('Bar\\SomeAnnotation', [
-            'message' => 'Foo'
+            'message' => 'Foo',
         ]);
 
         $this->assertEquals($expectedSource, $manipulator->getSourceCode());

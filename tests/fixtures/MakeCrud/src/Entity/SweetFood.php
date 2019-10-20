@@ -41,5 +41,4 @@ class SweetFood
     {
         $this->title = $title;
     }
-
 }

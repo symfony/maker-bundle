@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
@@ -36,37 +45,37 @@ class UserClassBuilderTest extends TestCase
     {
         yield 'entity_email_password' => [
             new UserClassConfiguration(true, 'email', true),
-            'UserEntityEmailWithPassword.php'
+            'UserEntityEmailWithPassword.php',
         ];
 
         yield 'entity_username_password' => [
             new UserClassConfiguration(true, 'username', true),
-            'UserEntityUsernameWithPassword.php'
+            'UserEntityUsernameWithPassword.php',
         ];
 
         yield 'entity_user_name_password' => [
             new UserClassConfiguration(true, 'user_name', true),
-            'UserEntityUser_nameWithPassword.php'
+            'UserEntityUser_nameWithPassword.php',
         ];
 
         yield 'entity_username_no_password' => [
             new UserClassConfiguration(true, 'username', false),
-            'UserEntityUsernameNoPassword.php'
+            'UserEntityUsernameNoPassword.php',
         ];
 
         yield 'model_email_password' => [
             new UserClassConfiguration(false, 'email', true),
-            'UserModelEmailWithPassword.php'
+            'UserModelEmailWithPassword.php',
         ];
 
         yield 'model_username_password' => [
             new UserClassConfiguration(false, 'username', true),
-            'UserModelUsernameWithPassword.php'
+            'UserModelUsernameWithPassword.php',
         ];
 
         yield 'model_username_no_password' => [
             new UserClassConfiguration(false, 'username', false),
-            'UserModelUsernameNoPassword.php'
+            'UserModelUsernameNoPassword.php',
         ];
     }
 }

@@ -11,8 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
-use PhpParser\PrettyPrinter\Standard;
 use PhpParser\Node\Stmt;
+use PhpParser\PrettyPrinter\Standard;
 
 /**
  * @internal

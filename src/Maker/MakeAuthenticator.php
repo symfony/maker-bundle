@@ -33,9 +33,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Form\Form;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Yaml\Yaml;
-use Symfony\Component\Form\Form;
 
 /**
  * @author Ryan Weaver <ryan@knpuniversity.com>

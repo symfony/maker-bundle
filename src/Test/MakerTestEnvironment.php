@@ -350,13 +350,20 @@ final class MakerTestEnvironment
         // fetch a few packages needed for testing
         MakerTestProcess::create('composer require phpunit browser-kit symfony/css-selector --prefer-dist --no-progress --no-suggest', $this->flexPath)
                         ->run();
+        $this->fs->remove($this->flexPath.'/vendor/symfony/phpunit-bridge');
+
+        if ('\\' !== \DIRECTORY_SEPARATOR) {
+            $this->fs->symlink('../../../../../../vendor/symfony/phpunit-bridge', './vendor/symfony/phpunit-bridge');
+        } else {
+            $this->fs->mirror(\dirname(__DIR__, 2).'/vendor/symfony/phpunit-bridge', $this->flexPath.'/vendor/symfony/phpunit-bridge');
+        }
 
         // temporarily ignoring indirect deprecations - see #237
         $replacements = [
             [
                 'filename' => '.env.test',
                 'find' => 'SYMFONY_DEPRECATIONS_HELPER=999999',
-                'replace' => 'SYMFONY_DEPRECATIONS_HELPER=weak_vendors',
+                'replace' => 'SYMFONY_DEPRECATIONS_HELPER=max[self]=0',
             ],
         ];
         $this->processReplacements($replacements, $this->flexPath);

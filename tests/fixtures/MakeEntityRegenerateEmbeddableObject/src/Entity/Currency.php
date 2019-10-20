@@ -31,6 +31,7 @@ class Currency
 
     /**
      * @param string $currency
+     *
      * @return Currency
      */
     public function setCurrency($currency)
@@ -39,6 +40,4 @@ class Currency
 
         return $this;
     }
-
-
 }

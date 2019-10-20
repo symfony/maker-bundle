@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use PHPUnit\Framework\TestCase;
@@ -55,7 +64,7 @@ class YamlSourceManipulatorTest extends TestCase
             yield $file->getFilename() => [
                 'source' => rtrim($source, "\n"),
                 'newData' => $data,
-                'expectedSource' => ltrim($expected, "\n")
+                'expectedSource' => ltrim($expected, "\n"),
             ];
         }
 
@@ -87,13 +96,13 @@ class YamlSourceManipulatorTest extends TestCase
 
     private function createLogger(): Logger
     {
-        return new Logger(LogLevel::DEBUG, 'php://stdout', function(string $level, string $message, array $context) {
+        return new Logger(LogLevel::DEBUG, 'php://stdout', function (string $level, string $message, array $context) {
             $maxLen = max(array_map('strlen', array_keys($context)));
 
             foreach ($context as $key => $val) {
                 $message .= sprintf(sprintf(
                     "\n    %s%s: %s",
-                    str_repeat(' ', $maxLen - strlen($key)),
+                    str_repeat(' ', $maxLen - \strlen($key)),
                     $key,
                     $val
                 ));

@@ -2,9 +2,9 @@
 
 namespace App\Tests;
 
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use App\Entity\User;
 use App\Entity\UserAvatar;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class GeneratedEntityTest extends KernelTestCase
 {

@@ -22,7 +22,7 @@ class <?= $class_name; ?> extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $arg1 = $input->getArgument('arg1');
@@ -36,5 +36,7 @@ class <?= $class_name; ?> extends Command
         }
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+
+        return 0;
     }
 }

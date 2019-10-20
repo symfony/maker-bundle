@@ -1,11 +1,19 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\EventRegistry;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
-use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
@@ -67,7 +75,7 @@ class EventRegistryTest extends TestCase
     }
 }
 
-class DummyEvent extends Event
+class DummyEvent
 {
     public function methodNoArg()
     {

@@ -2,9 +2,9 @@
 
 namespace App\Tests;
 
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Doctrine\ORM\EntityManager;
 use App\Entity\Product\Category;
+use Doctrine\ORM\EntityManager;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class GeneratedEntityTest extends KernelTestCase
 {

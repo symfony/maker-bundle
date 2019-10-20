@@ -2,10 +2,7 @@
 
 namespace App\Tests;
 
-use Doctrine\ORM\EntityManager;
-use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoder;
 
 class GeneratedEntityTest extends WebTestCase
 {

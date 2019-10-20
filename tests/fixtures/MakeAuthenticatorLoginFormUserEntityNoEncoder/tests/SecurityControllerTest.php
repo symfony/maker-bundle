@@ -16,9 +16,9 @@ class SecurityControllerTest extends WebTestCase
         $this->assertSame('entityManager', $constructorParameters[0]->getName());
 
         // assert authenticator is *not* injected
-        $this->assertEquals(3, \count($constructorParameters));
+        $this->assertCount(3, $constructorParameters);
 
-        $client  = self::createClient();
+        $client = self::createClient();
         $crawler = $client->request('GET', '/login');
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
@@ -36,13 +36,13 @@ class SecurityControllerTest extends WebTestCase
         $form = $crawler->filter('form')->form();
         $form->setValues(
             [
-                'email'    => 'test@symfony.com',
+                'email' => 'test@symfony.com',
                 'password' => 'foo',
             ]
         );
 
         $client->submit($form);
 
-        $this->assertContains('TODO: check the credentials', $client->getResponse()->getContent());
+        $this->assertStringContainsString('TODO: check the credentials', $client->getResponse()->getContent());
     }
 }
