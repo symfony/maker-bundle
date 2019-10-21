@@ -26,7 +26,7 @@ class AutomaticAuthenticator extends AbstractGuardAuthenticator
 
     public function supports(Request $request)
     {
-        return $request->getPathInfo() === '/login' && $request->query->has('email');
+        return '/login' === $request->getPathInfo() && $request->query->has('email');
     }
 
     public function getCredentials(Request $request)
@@ -46,7 +46,6 @@ class AutomaticAuthenticator extends AbstractGuardAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)

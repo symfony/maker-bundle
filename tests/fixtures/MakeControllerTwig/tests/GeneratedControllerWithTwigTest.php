@@ -12,7 +12,7 @@ class GeneratedControllerWithTwigTest extends WebTestCase
         $client->request('GET', '/foo/twig');
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $this->assertContains('<!DOCTYPE html>', $client->getResponse()->getContent());
-        $this->assertContains('Hello FooTwigController', $client->getResponse()->getContent());
+        $this->assertStringContainsString('<!DOCTYPE html>', $client->getResponse()->getContent());
+        $this->assertStringContainsString('Hello FooTwigController', $client->getResponse()->getContent());
     }
 }

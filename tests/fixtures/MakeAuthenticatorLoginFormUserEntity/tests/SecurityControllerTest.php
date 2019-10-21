@@ -16,9 +16,9 @@ class SecurityControllerTest extends WebTestCase
         $this->assertSame('entityManager', $constructorParameters[0]->getName());
 
         // assert authenticator is injected
-        $this->assertEquals(4, \count($constructorParameters));
+        $this->assertCount(4, $constructorParameters);
 
-        $client  = self::createClient();
+        $client = self::createClient();
         $crawler = $client->request('GET', '/login');
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
@@ -42,24 +42,24 @@ class SecurityControllerTest extends WebTestCase
         );
         $crawler = $client->submit($form);
 
-        if ($client->getResponse()->getStatusCode() === 500) {
+        if (500 === $client->getResponse()->getStatusCode()) {
             $this->assertEquals('', $crawler->filter('h1.exception-message')->text());
         }
 
         $this->assertEquals(302, $client->getResponse()->getStatusCode());
         $client->followRedirect();
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $this->assertContains('Invalid credentials.', $client->getResponse()->getContent());
+        $this->assertStringContainsString('Invalid credentials.', $client->getResponse()->getContent());
 
         $form->setValues(
             [
-                'userEmail'    => 'test@symfony.com',
+                'userEmail' => 'test@symfony.com',
                 'password' => 'password',
             ]
         );
         $client->submit($form);
 
-        $this->assertContains('TODO: provide a valid redirect', $client->getResponse()->getContent());
+        $this->assertStringContainsString('TODO: provide a valid redirect', $client->getResponse()->getContent());
         $this->assertNotNull($token = $client->getContainer()->get('security.token_storage')->getToken());
         $this->assertInstanceOf(User::class, $token->getUser());
     }

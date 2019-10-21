@@ -15,11 +15,11 @@ class GeneratedCommandTest extends KernelTestCase
 
         $command = $application->find('app:foo');
 
-        $this->assertStringStartsWith('Custom\\', get_class($command));
+        $this->assertStringStartsWith('Custom\\', \get_class($command));
 
         $tester = new CommandTester($command);
-        $tester->execute(array());
+        $tester->execute([]);
 
-        $this->assertContains('You have a new command', $tester->getDisplay());
+        $this->assertStringContainsString('You have a new command', $tester->getDisplay());
     }
 }

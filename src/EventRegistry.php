@@ -14,7 +14,11 @@ namespace Symfony\Bundle\MakerBundle;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
+use Symfony\Component\EventDispatcher\Event as LegacyEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\FilterControllerArgumentsEvent;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
@@ -23,17 +27,15 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
-use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
-use Symfony\Component\HttpKernel\Event\ControllerEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Event\ViewEvent;
-use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
+use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\Security\Core\Event\AuthenticationEvent;
 use Symfony\Component\Security\Core\Event\AuthenticationFailureEvent;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * @internal
@@ -76,10 +78,10 @@ class EventRegistry
         $this->eventDispatcher = $eventDispatcher;
 
         // Loop through the new event classes
-        foreach (self::$newEventsMap as $oldEventName => $newEventClass) {
+        foreach (self::$newEventsMap as $eventName => $newEventClass) {
             //Check if the new event classes exist, if so replace the old one with the new.
-            if (isset(self::$eventsMap[$oldEventName]) && class_exists($newEventClass)) {
-                unset(self::$eventsMap[$oldEventName]);
+            if (isset(self::$eventsMap[$eventName]) && class_exists($newEventClass)) {
+                unset(self::$eventsMap[$eventName]);
                 self::$eventsMap[$newEventClass] = $newEventClass;
             }
         }
@@ -141,7 +143,13 @@ class EventRegistry
             }
 
             if (null !== $type = $args[0]->getType()) {
-                return (string) $type;
+                $type = $type instanceof \ReflectionNamedType ? $type->getName() : $type->__toString();
+
+                if (LegacyEvent::class === $type && class_exists(Event::class)) {
+                    return Event::class;
+                }
+
+                return $type;
             }
         }
 

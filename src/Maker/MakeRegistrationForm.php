@@ -293,6 +293,17 @@ final class MakeRegistrationForm extends AbstractMaker
 
         $formFields = [
             $usernameField => null,
+            'agreeTerms' => [
+                'type' => CheckboxType::class,
+                'options_code' => <<<EOF
+                'mapped' => false,
+                'constraints' => [
+                    new IsTrue([
+                        'message' => 'You should agree to our terms.',
+                    ]),
+                ],
+EOF
+            ],
             'plainPassword' => [
                 'type' => PasswordType::class,
                 'options_code' => <<<EOF
@@ -312,17 +323,6 @@ final class MakeRegistrationForm extends AbstractMaker
                 ],
 EOF
             ],
-            'agreeTerms' => [
-                'type' => CheckboxType::class,
-                'options_code' => <<<EOF
-                'mapped' => false,
-                'constraints' => [
-                    new IsTrue([
-                        'message' => 'You should agree to our terms.',
-                    ]),
-                ],
-EOF
-            ],
         ];
 
         $this->formTypeRenderer->render(
@@ -330,9 +330,9 @@ EOF
             $formFields,
             $userClassDetails,
             [
-                'Symfony\Component\Validator\Constraints\NotBlank',
-                'Symfony\Component\Validator\Constraints\Length',
                 'Symfony\Component\Validator\Constraints\IsTrue',
+                'Symfony\Component\Validator\Constraints\Length',
+                'Symfony\Component\Validator\Constraints\NotBlank',
             ]
         );
 

@@ -19,6 +19,7 @@ return PhpCsFixer\Config::create()
     ->setRules(array(
         '@Symfony' => true,
         '@Symfony:risky' => true,
+        '@PHPUnit75Migration:risky' => true,
         'array_syntax' => ['syntax' => 'short'],
         'protected_to_private' => false,
         'semicolon_after_instruction' => false,

@@ -17,9 +17,10 @@ class Property
     private $id;
 
     /**
-    * Many Features have One Product.
-    * @ORM\ManyToOne(targetEntity="App\Entity\SourFood", inversedBy="properties")
-    * @ORM\JoinColumn(name="sour_food_id", referencedColumnName="id")
-    */
+     * Many Features have One Product.
+     *
+     * @ORM\ManyToOne(targetEntity="App\Entity\SourFood", inversedBy="properties")
+     * @ORM\JoinColumn(name="sour_food_id", referencedColumnName="id")
+     */
     private $sourFood;
 }

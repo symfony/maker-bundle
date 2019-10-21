@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
@@ -66,11 +75,10 @@ class InteractiveSecurityHelperTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException
-     */
     public function testGuessEntryPointWithNonExistingFirewallThrowsException()
     {
+        $this->expectException(\Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException::class);
+
         /** @var SymfonyStyle|\PHPUnit_Framework_MockObject_MockObject $io */
         $io = $this->createMock(SymfonyStyle::class);
 
@@ -115,7 +123,7 @@ class InteractiveSecurityHelperTest extends TestCase
             true,
         ];
 
-        yield 'one_authenticator' => [
+        yield 'one_authenticator_entry_point' => [
             ['security' => ['firewalls' => ['main' => ['guard' => ['entry_point' => 'App\\Security\\Authenticator', 'authenticators' => ['App\\Security\\Authenticator']]]]]],
             'main',
         ];
@@ -184,28 +192,28 @@ class InteractiveSecurityHelperTest extends TestCase
         yield 'guess_with_providers' => [
             'providers' => ['app_provider' => ['entity' => ['property' => 'userEmail']]],
             'expectedUsernameField' => 'userEmail',
-            true
+            true,
         ];
 
         yield 'guess_with_providers_and_custom_repository_method' => [
             'providers' => ['app_provider' => ['entity' => null]],
             'expectedUsernameField' => 'email',
             true,
-            FixtureClass::class
+            FixtureClass::class,
         ];
 
         yield 'guess_fixture_class' => [
             'providers' => [],
             'expectedUsernameField' => 'email',
             true,
-            FixtureClass::class
+            FixtureClass::class,
         ];
 
         yield 'guess_fixture_class_2' => [
             'providers' => [],
             'expectedUsernameField' => 'username',
             true,
-            FixtureClass2::class
+            FixtureClass2::class,
         ];
 
         yield 'guess_fixture_class_3' => [
@@ -213,7 +221,7 @@ class InteractiveSecurityHelperTest extends TestCase
             'expectedUsernameField' => 'username',
             false,
             FixtureClass3::class,
-            ['username', 'email']
+            ['username', 'email'],
         ];
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Tests;
 
-use Doctrine\ORM\EntityManager;
 use App\Entity\User;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class RegistrationFormTest extends WebTestCase
@@ -55,15 +55,15 @@ class RegistrationFormTest extends WebTestCase
         $client->submit($form);
 
         $this->assertSame(200, $client->getResponse()->getStatusCode());
-        $this->assertContains(
+        $this->assertStringContainsString(
             'There is already an account with this email',
             $client->getResponse()->getContent()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Your password should be at least 6 characters',
             $client->getResponse()->getContent()
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'You should agree to our terms.',
             $client->getResponse()->getContent()
         );

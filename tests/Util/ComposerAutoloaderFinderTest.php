@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use Composer\Autoload\ClassLoader;
@@ -38,11 +47,10 @@ class ComposerAutoloaderFinderTest extends TestCase
         $this->assertInstanceOf(ClassLoader::class, $loader, 'Wrong ClassLoader found');
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testGetClassLoaderWhenItIsEmpty()
     {
+        $this->expectException(\Exception::class);
+
         self::$getSplAutoloadFunctions = function () {
             return [];
         };
@@ -77,5 +85,5 @@ use Symfony\Bundle\MakerBundle\Tests\Util\ComposerAutoloaderFinderTest;
 
 function spl_autoload_functions()
 {
-    return call_user_func_array(ComposerAutoloaderFinderTest::$getSplAutoloadFunctions, func_get_args());
+    return \call_user_func_array(ComposerAutoloaderFinderTest::$getSplAutoloadFunctions, \func_get_args());
 }

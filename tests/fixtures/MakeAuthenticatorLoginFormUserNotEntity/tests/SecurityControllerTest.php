@@ -14,7 +14,7 @@ class SecurityControllerTest extends WebTestCase
         $this->assertSame('urlGenerator', $constructorParameters[0]->getName());
 
         // assert authenticator is injected
-        $this->assertEquals(3, \count($constructorParameters));
+        $this->assertCount(3, $constructorParameters);
 
         $client = self::createClient();
         $crawler = $client->request('GET', '/login');
@@ -24,7 +24,7 @@ class SecurityControllerTest extends WebTestCase
         $form = $crawler->filter('form')->form();
         $form->setValues(
             [
-                'email'    => 'bar',
+                'email' => 'bar',
                 'password' => 'foo',
             ]
         );
@@ -32,15 +32,15 @@ class SecurityControllerTest extends WebTestCase
 
         $this->assertEquals(302, $client->getResponse()->getStatusCode());
         $client->followRedirect();
-        $this->assertContains('Invalid credentials.', $client->getResponse()->getContent());
+        $this->assertStringContainsString('Invalid credentials.', $client->getResponse()->getContent());
         $form->setValues(
             [
-                'email'    => 'test@symfony.com',
+                'email' => 'test@symfony.com',
                 'password' => 'test@symfony.com',
             ]
         );
         $client->submit($form);
 
-        $this->assertContains('TODO: provide a valid redirect', $client->getResponse()->getContent());
+        $this->assertStringContainsString('TODO: provide a valid redirect', $client->getResponse()->getContent());
     }
 }
