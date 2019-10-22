@@ -6,10 +6,11 @@ security:
     firewalls:
         dev: ~
         main:
-            anonymous: true
+            anonymous: lazy
             guard:
                 authenticators:
                     - App\Security\AppCustomAuthenticator
+
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used

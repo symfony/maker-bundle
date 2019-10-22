@@ -137,7 +137,7 @@ final class SecurityConfigUpdater
         $accessControlRules = $newData['security']['access_control'] ?? [];
 
         foreach ($accessControlRules as $rule) {
-            if ('^/login$' === $rule['path']) {
+            if (0 === strpos($rule['path'], '^/login')) {
                 $addAccessControlRule = false;
                 break;
             }
