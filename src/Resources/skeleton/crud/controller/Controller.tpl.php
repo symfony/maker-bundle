@@ -74,11 +74,13 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
     }
 
     /**
-     * @Route("/{<?= $entity_identifier ?>}/edit", name="<?= $route_name ?>_edit", methods={"GET","POST"})
+     * @Route("/{<?= $entity_identifier ?>}/edit", name="<?= $route_name ?>_edit", methods={"GET","PUT"})
      */
     public function edit(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
-        $form = $this->createForm(<?= $form_class_name ?>::class, $<?= $entity_var_singular ?>);
+        $form = $this->createForm(<?= $form_class_name ?>::class, $<?= $entity_var_singular ?>, array(
+            'method' => 'PUT',
+        ));
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
