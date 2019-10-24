@@ -232,7 +232,7 @@ final class UserClassBuilder
         if ($userClassConfig->hasPassword()) {
             $getSaltMethodBuilder->addStmt(
                 $manipulator->createMethodLevelCommentNode(
-                    'not needed when using the "bcrypt" algorithm in security.yaml'
+                    'not needed when using modern algorithms in security.yaml'
                 )
             );
         } else {
