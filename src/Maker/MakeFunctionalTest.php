@@ -84,11 +84,5 @@ class MakeFunctionalTest extends AbstractMaker
             true,
             true
         );
-        $dependencies->addClassDependency(
-            PantherTestCaseTrait::class,
-            'panther',
-            false,
-            true
-        );
     }
 }
