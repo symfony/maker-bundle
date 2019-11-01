@@ -217,7 +217,7 @@ class YamlSourceManipulator
             }
 
             // 3b) value DID change
-            $this->log('updating value');
+            $this->log(sprintf('updating value to {%s}', is_array($newVal) ? '<array>' : $newVal));
             $this->changeValueInYaml($newVal);
         }
 
@@ -764,6 +764,12 @@ class YamlSourceManipulator
             }
 
             $offset = null === $offset ? $this->currentPosition : $offset;
+
+            // a value like "foo:" can simply end a file
+            // this means the value is null
+            if ($offset === strlen($this->contents)) {
+                return $offset;
+            }
 
             preg_match(sprintf('#%s#', $pattern), $this->contents, $matches, PREG_OFFSET_CAPTURE, $offset);
             if (empty($matches)) {
