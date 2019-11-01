@@ -318,8 +318,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         $type = null;
+        $types = Type::getTypesMap();
+        // remove deprecated json_array
+        unset($types[Type::JSON_ARRAY]);
+
         $allValidTypes = array_merge(
-            array_keys(Type::getTypesMap()),
+            array_keys($types),
             EntityRelation::getValidRelationTypes(),
             ['relation']
         );

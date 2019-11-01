@@ -51,7 +51,6 @@ final class GeneratorTwigHelper
                 $printCode .= ' ? '.$printCode.'|date(\'H:i:s\') : \'\'';
                 break;
             case 'json':
-            case 'json_array':
                 $printCode .= ' ? '.$printCode.'|json_encode : \'\'';
                 break;
             case 'array':
