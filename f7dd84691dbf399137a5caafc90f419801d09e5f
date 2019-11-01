@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-10-27T13:22:12Z
+
+Hello,
+Thanks for the feedback and the PR.
+I'm having mixed feelings, because we still had a `<label>` for screen reader, so it was IMO it was OK regarding accessibility. Only thing is that `sr-only` class require Bootstrap ; so maybe we should make default theme less Bootstrap dependant? Really, I don't know.
+
+---------------------------------------------------------------------------
+
+by ThomasLandauer at 2019-10-30T12:02:08Z
+
+Just some quick links why placeholders should be avoided:
+
+https://uxdesign.cc/alternatives-to-placeholder-text-13f430abc56f
+https://joshuawinn.com/ux-input-placeholders-are-not-labels/
+https://uxplanet.org/10-rules-for-efficient-form-design-e13dc1fb0e03
