@@ -17,6 +17,7 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\InputStream;
+use vendor\project\StatusTest;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
@@ -350,12 +351,11 @@ final class MakerTestEnvironment
         // fetch a few packages needed for testing
         MakerTestProcess::create('composer require phpunit browser-kit symfony/css-selector --prefer-dist --no-progress --no-suggest', $this->flexPath)
                         ->run();
-        $this->fs->remove($this->flexPath.'/vendor/symfony/phpunit-bridge');
 
         if ('\\' !== \DIRECTORY_SEPARATOR) {
-            $this->fs->symlink('../../../../../../vendor/symfony/phpunit-bridge', './vendor/symfony/phpunit-bridge');
-        } else {
-            $this->fs->mirror(\dirname(__DIR__, 2).'/vendor/symfony/phpunit-bridge', $this->flexPath.'/vendor/symfony/phpunit-bridge');
+            $this->fs->remove($this->flexPath.'/vendor/symfony/phpunit-bridge');
+
+            $this->fs->symlink($rootPath.'/vendor/symfony/phpunit-bridge', $this->flexPath.'/vendor/symfony/phpunit-bridge');
         }
 
         // temporarily ignoring indirect deprecations - see #237
