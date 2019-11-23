@@ -17,7 +17,6 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\InputStream;
-use vendor\project\StatusTest;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
