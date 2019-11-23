@@ -217,7 +217,7 @@ class YamlSourceManipulator
             }
 
             // 3b) value DID change
-            $this->log(sprintf('updating value to {%s}', is_array($newVal) ? '<array>' : $newVal));
+            $this->log(sprintf('updating value to {%s}', \is_array($newVal) ? '<array>' : $newVal));
             $this->changeValueInYaml($newVal);
         }
 
@@ -465,7 +465,7 @@ class YamlSourceManipulator
         $newPosition = $this->currentPosition + \strlen($newYamlValue);
         $isNextContentComment = $this->isPreviousLineComment($newPosition);
         if ($isNextContentComment) {
-            $newPosition++;
+            ++$newPosition;
         }
 
         $newContents = substr($this->contents, 0, $this->currentPosition)
@@ -785,7 +785,7 @@ class YamlSourceManipulator
 
             // a value like "foo:" can simply end a file
             // this means the value is null
-            if ($offset === strlen($this->contents)) {
+            if ($offset === \strlen($this->contents)) {
                 return $offset;
             }
 

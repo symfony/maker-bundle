@@ -665,7 +665,9 @@ class FunctionalTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
-            }),
+            })
+            // workaround for segfault in PHP 7.1 CI :/
+            ->setRequiredPhpVersion(70200)
         ];
 
         yield 'crud_basic_in_custom_root_namespace' => [MakerTestDetails::createTest(
@@ -681,7 +683,9 @@ class FunctionalTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
-            }),
+            })
+            // workaround for segfault in PHP 7.1 CI :/
+            ->setRequiredPhpVersion(70200)
         ];
 
         yield 'crud_repository' => [MakerTestDetails::createTest(
@@ -713,7 +717,9 @@ class FunctionalTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
-            }),
+            })
+            // workaround for segfault in PHP 7.1 CI :/
+            ->setRequiredPhpVersion(70200)
         ];
 
         yield 'registration_form_entity_guard_authenticate' => [MakerTestDetails::createTest(
@@ -729,7 +735,12 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormEntity')
             ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+            ->updateSchemaAfterCommand()
+            // workaround for a strange behavior where, every other
+            // test run, the UniqueEntity would not be seen, because
+            // the the validation cache was out of date. The cause
+            // is currently unknown, so this workaround was added
+            ->addPostMakeCommand('php bin/console cache:clear --env=test')
         ];
 
         // sanity check on all the interactive questions
@@ -757,7 +768,10 @@ class FunctionalTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormEntity')
             ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+            ->updateSchemaAfterCommand()
+            // workaround for strange failure - see test case
+            // registration_form_entity_guard_authenticate for details
+            ->addPostMakeCommand('php bin/console cache:clear --env=test')
         ];
 
         yield 'auth_login_form_user_entity_with_encoder_logout' => [
