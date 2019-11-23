@@ -199,10 +199,10 @@ final class MakerTestEnvironment
 
     public function runMaker()
     {
-        $this->preMake();
-
         // Lets remove cache
         $this->fs->remove($this->path.'/var/cache');
+
+        $this->preMake();
 
         // We don't need ansi coloring in tests!
         $testProcess = MakerTestProcess::create(
@@ -350,12 +350,11 @@ final class MakerTestEnvironment
         // fetch a few packages needed for testing
         MakerTestProcess::create('composer require phpunit browser-kit symfony/css-selector --prefer-dist --no-progress --no-suggest', $this->flexPath)
                         ->run();
-        $this->fs->remove($this->flexPath.'/vendor/symfony/phpunit-bridge');
 
         if ('\\' !== \DIRECTORY_SEPARATOR) {
-            $this->fs->symlink('../../../../../../vendor/symfony/phpunit-bridge', './vendor/symfony/phpunit-bridge');
-        } else {
-            $this->fs->mirror(\dirname(__DIR__, 2).'/vendor/symfony/phpunit-bridge', $this->flexPath.'/vendor/symfony/phpunit-bridge');
+            $this->fs->remove($this->flexPath.'/vendor/symfony/phpunit-bridge');
+
+            $this->fs->symlink($rootPath.'/vendor/symfony/phpunit-bridge', $this->flexPath.'/vendor/symfony/phpunit-bridge');
         }
 
         // temporarily ignoring indirect deprecations - see #237

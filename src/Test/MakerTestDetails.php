@@ -47,9 +47,6 @@ final class MakerTestDetails
     private $guardAuthenticators = [];
 
     /**
-     * @param MakerInterface $maker
-     * @param array          $inputs
-     *
      * @return static
      */
     public static function createTest(MakerInterface $maker, array $inputs)
