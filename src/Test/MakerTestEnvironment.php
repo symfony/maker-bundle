@@ -199,10 +199,10 @@ final class MakerTestEnvironment
 
     public function runMaker()
     {
-        $this->preMake();
-
         // Lets remove cache
         $this->fs->remove($this->path.'/var/cache');
+
+        $this->preMake();
 
         // We don't need ansi coloring in tests!
         $testProcess = MakerTestProcess::create(
