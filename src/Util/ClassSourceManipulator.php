@@ -730,6 +730,9 @@ final class ClassSourceManipulator
 
                 $lastUseStmtIndex = $index;
             } elseif ($stmt instanceof Node\Stmt\GroupUse) {
+                // cezar77: this if-case should handle group use statements
+                // TO-DO: it is repeating a lot of parts of the previous if-statement
+                // to be refactored later
                 foreach ($stmt->uses as $use) {
                     $alias = $use->alias ? $use->alias->name : $use->name->getLast();
 
