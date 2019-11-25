@@ -24,12 +24,6 @@ final class SecurityConfigUpdater
 
     /**
      * Updates security.yaml contents based on a new User class.
-     *
-     * @param string                 $yamlSource
-     * @param UserClassConfiguration $userConfig
-     * @param string                 $userClass
-     *
-     * @return string
      */
     public function updateForUserClass(string $yamlSource, UserClassConfiguration $userConfig, string $userClass): string
     {

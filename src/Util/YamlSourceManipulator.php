@@ -904,8 +904,6 @@ class YamlSourceManipulator
 
     /**
      * Advance until you find *one* of the characters in $chars.
-     *
-     * @param array $chars
      */
     private function findPositionOfNextCharacter(array $chars)
     {

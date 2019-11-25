@@ -22,8 +22,6 @@ final class ORMDependencyBuilder
 {
     /**
      * Central method to add dependencies needed for Doctrine ORM.
-     *
-     * @param DependencyBuilder $dependencies
      */
     public static function buildDependencies(DependencyBuilder $dependencies)
     {

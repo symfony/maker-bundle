@@ -87,8 +87,6 @@ class FileManager
      *
      * @param string $absolutePath
      *
-     * @return string
-     *
      * @throws \Exception
      */
     public function relativizePath($absolutePath): string
@@ -148,8 +146,6 @@ class FileManager
     }
 
     /**
-     * @param string $className
-     *
      * @return string|null
      *
      * @throws \Exception
@@ -189,8 +185,6 @@ class FileManager
      * Resolve '../' in paths (like real_path), but for non-existent files.
      *
      * @param string $absolutePath
-     *
-     * @return string
      */
     private function realPath($absolutePath): string
     {

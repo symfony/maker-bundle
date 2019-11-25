@@ -48,12 +48,7 @@ final class MakerTestProcess
         $this->process->run(null, $envVars);
 
         if (!$allowToFail && !$this->process->isSuccessful()) {
-            throw new \Exception(sprintf(
-                'Error running command: "%s". Output: "%s". Error: "%s"',
-                $this->process->getCommandLine(),
-                $this->process->getOutput(),
-                $this->process->getErrorOutput()
-            ));
+            throw new \Exception(sprintf('Error running command: "%s". Output: "%s". Error: "%s"', $this->process->getCommandLine(), $this->process->getOutput(), $this->process->getErrorOutput()));
         }
 
         return $this;
