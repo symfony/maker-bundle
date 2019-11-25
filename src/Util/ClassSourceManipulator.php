@@ -687,8 +687,6 @@ final class ClassSourceManipulator
     }
 
     /**
-     * @param string $class
-     *
      * @return string The alias to use when referencing this class
      */
     public function addUseStatementIfNecessary(string $class): string
@@ -837,8 +835,6 @@ final class ClassSourceManipulator
     }
 
     /**
-     * @param callable $filterCallback
-     *
      * @return Node|null
      */
     private function findFirstNode(callable $filterCallback)
@@ -852,9 +848,6 @@ final class ClassSourceManipulator
     }
 
     /**
-     * @param callable $filterCallback
-     * @param array    $ast
-     *
      * @return Node|null
      */
     private function findLastNode(callable $filterCallback, array $ast)
@@ -1045,8 +1038,6 @@ final class ClassSourceManipulator
      * Adds this new node where a new property should go.
      *
      * Useful for adding properties, or adding a constructor.
-     *
-     * @param Node $newNode
      */
     private function addNodeAfterProperties(Node $newNode)
     {

@@ -70,8 +70,6 @@ final class DoctrineHelper
     }
 
     /**
-     * @param string $className
-     *
      * @return MappingDriver|null
      *
      * @throws \Exception
@@ -118,9 +116,6 @@ final class DoctrineHelper
     }
 
     /**
-     * @param string|null $classOrNamespace
-     * @param bool        $disconnected
-     *
      * @return array|ClassMetadata
      */
     public function getMetadata(string $classOrNamespace = null, bool $disconnected = false)
@@ -180,8 +175,6 @@ final class DoctrineHelper
     }
 
     /**
-     * @param string $entityClassName
-     *
      * @return EntityDetails|null
      */
     public function createDoctrineDetails(string $entityClassName)

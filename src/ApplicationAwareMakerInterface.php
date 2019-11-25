@@ -20,8 +20,5 @@ use Symfony\Component\Console\Application;
  */
 interface ApplicationAwareMakerInterface
 {
-    /**
-     * @param Application $application
-     */
     public function setApplication(Application $application);
 }
