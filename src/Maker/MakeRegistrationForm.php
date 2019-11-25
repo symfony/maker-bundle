@@ -35,6 +35,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Validator\Constraints\DisableAutoMapping;
 use Symfony\Component\Validator\Validation;
 
 /**
@@ -240,6 +241,20 @@ final class MakeRegistrationForm extends AbstractMaker
                     'fields' => [$usernameField],
                     'message' => sprintf('There is already an account with this '.$usernameField),
                 ]
+            );
+            $this->fileManager->dumpFile($classDetails->getPath(), $userManipulator->getSourceCode());
+        }
+
+        if (class_exists(DisableAutoMapping::class)) {
+            $classDetails = new ClassDetails($userClass);
+            $userManipulator = new ClassSourceManipulator(
+                file_get_contents($classDetails->getPath())
+            );
+            $userManipulator->setIo($io);
+
+            $userManipulator->addAnnotationToClass(
+                DisableAutoMapping::class,
+                []
             );
             $this->fileManager->dumpFile($classDetails->getPath(), $userManipulator->getSourceCode());
         }
