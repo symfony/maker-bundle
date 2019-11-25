@@ -1,0 +1,18 @@
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-11-14T15:26:47Z
+
+Thank you for taking time to create a PR.
+Could you please explain the difference, and eventually the issue you had?
+
+---------------------------------------------------------------------------
+
+by nicolas-grekas at 2019-11-14T15:36:04Z
+
+`Symfony\Bridge\Doctrine\ManagerRegistry` has been removed from SF5 :)
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-11-14T16:02:13Z
+
+Great, thanks for the explanation :)
