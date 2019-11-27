@@ -81,8 +81,9 @@ class EventRegistry
         foreach (self::$newEventsMap as $eventName => $newEventClass) {
             //Check if the new event classes exist, if so replace the old one with the new.
             if (isset(self::$eventsMap[$eventName]) && class_exists($newEventClass)) {
-                unset(self::$eventsMap[$eventName]);
-                self::$eventsMap[$newEventClass] = $newEventClass;
+                self::$eventsMap[$eventName] = $newEventClass;
+//                unset(self::$eventsMap[$eventName]);
+//                self::$eventsMap[Str::getShortClassName($newEventClass)] = $newEventClass;
             }
         }
     }
@@ -159,5 +160,14 @@ class EventRegistry
         }
 
         return null;
+    }
+
+    public function listActiveEvents(array $events)
+    {
+        foreach ($events as &$event) {
+            $event .= sprintf(' (<fg=yellow>%s</>)', self::$eventsMap[$event]);
+        }
+
+        return $events;
     }
 }

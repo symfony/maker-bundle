@@ -59,7 +59,7 @@ final class MakeSubscriber extends AbstractMaker
             $events = $this->eventRegistry->getAllActiveEvents();
 
             $io->writeln(' <fg=green>Suggested Events:</>');
-            $io->listing($events);
+            $io->listing($this->eventRegistry->listActiveEvents($events));
             $question = new Question(sprintf(' <fg=green>%s</>', $command->getDefinition()->getArgument('event')->getDescription()));
             $question->setAutocompleterValues($events);
             $question->setValidator([Validator::class, 'notBlank']);

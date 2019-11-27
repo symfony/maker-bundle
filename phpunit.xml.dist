@@ -17,8 +17,12 @@
     <testsuites>
         <testsuite name="Project Test Suite">
             <directory>tests/</directory>
+            <exclude>tests/Maker</exclude>
             <exclude>tests/fixtures</exclude>
             <exclude>tests/tmp</exclude>
+        </testsuite>
+        <testsuite name="Maker Test Suite">
+            <directory>tests/Maker</directory>
         </testsuite>
     </testsuites>
 
