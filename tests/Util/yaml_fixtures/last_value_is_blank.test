@@ -1,0 +1,7 @@
+security:
+    access_control:
+===
+$data['security']['access_control'] = 'foo';
+===
+security:
+    access_control: foo
