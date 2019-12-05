@@ -22,7 +22,9 @@ class MakeCrudTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
-            }),
+            })
+            // workaround for segfault in PHP 7.1 CI :/
+            ->setRequiredPhpVersion(70200),
         ];
 
         yield 'crud_basic_in_custom_root_namespace' => [MakerTestDetails::createTest(
@@ -38,7 +40,9 @@ class MakeCrudTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
-            }),
+            })
+            // workaround for segfault in PHP 7.1 CI :/
+            ->setRequiredPhpVersion(70200),
         ];
 
         yield 'crud_repository' => [MakerTestDetails::createTest(
@@ -53,7 +57,9 @@ class MakeCrudTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
-            }),
+            })
+            // workaround for segfault in PHP 7.1 CI :/
+            ->setRequiredPhpVersion(70200),
         ];
 
         yield 'crud_with_no_base' => [MakerTestDetails::createTest(
@@ -70,7 +76,9 @@ class MakeCrudTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
-            }),
+            })
+            // workaround for segfault in PHP 7.1 CI :/
+            ->setRequiredPhpVersion(70200),
         ];
     }
 }
