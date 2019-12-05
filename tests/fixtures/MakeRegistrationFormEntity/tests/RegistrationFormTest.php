@@ -10,7 +10,8 @@ class RegistrationFormTest extends WebTestCase
 {
     public function testRegistrationSuccessful()
     {
-        self::bootKernel();
+        $client = static::createClient();
+
         /** @var EntityManager $em */
         $em = self::$kernel->getContainer()
             ->get('doctrine')
@@ -18,7 +19,6 @@ class RegistrationFormTest extends WebTestCase
         $em->createQuery('DELETE FROM App\\Entity\\User u')
             ->execute();
 
-        $client = static::createClient();
         $crawler = $client->request('GET', '/register');
         $form = $crawler->selectButton('Register')->form();
         $form['registration_form[email]'] = 'ryan@symfonycasts.com';
@@ -34,7 +34,8 @@ class RegistrationFormTest extends WebTestCase
 
     public function testRegistrationValidationError()
     {
-        self::bootKernel();
+        $client = static::createClient();
+
         /** @var EntityManager $em */
         $em = self::$kernel->getContainer()
             ->get('doctrine')
@@ -47,7 +48,6 @@ class RegistrationFormTest extends WebTestCase
         $em->persist($user);
         $em->flush();
 
-        $client = static::createClient();
         $crawler = $client->request('GET', '/register');
         $form = $crawler->selectButton('Register')->form();
         $form['registration_form[email]'] = 'ryan@symfonycasts.com';

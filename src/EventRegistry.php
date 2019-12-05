@@ -149,6 +149,11 @@ class EventRegistry
                     return Event::class;
                 }
 
+                // ignore an "object" type-hint
+                if ('object' === $type) {
+                    continue;
+                }
+
                 return $type;
             }
         }
