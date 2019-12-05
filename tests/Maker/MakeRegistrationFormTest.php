@@ -23,7 +23,12 @@ class MakeRegistrationFormTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormEntity')
             ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+            ->updateSchemaAfterCommand()
+            // workaround for a strange behavior where, every other
+            // test run, the UniqueEntity would not be seen, because
+            // the the validation cache was out of date. The cause
+            // is currently unknown, so this workaround was added
+            ->addPostMakeCommand('php bin/console cache:clear --env=test')
         ];
 
         // sanity check on all the interactive questions
@@ -51,7 +56,10 @@ class MakeRegistrationFormTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormEntity')
             ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+            ->updateSchemaAfterCommand()
+            // workaround for strange failure - see test case
+            // registration_form_entity_guard_authenticate for details
+            ->addPostMakeCommand('php bin/console cache:clear --env=test')
         ];
     }
 }
