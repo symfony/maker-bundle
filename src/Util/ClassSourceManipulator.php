@@ -260,7 +260,66 @@ final class ClassSourceManipulator
         $annotationClassAlias = $this->addUseStatementIfNecessary($annotationClass);
         $docComment = $this->getClassNode()->getDocComment();
 
-        $docLines = $docComment ? explode("\n", $docComment->getText()) : [];
+        $commentText = $docComment ? $docComment->getText() : '';
+        $docComment = $this->addNewLineToComments(
+            $commentText,
+            $this->buildAnnotationLine('@'.$annotationClassAlias, $options)
+        );
+
+        $this->getClassNode()->setDocComment($docComment);
+        $this->updateSourceCodeFromNewStmts();
+    }
+
+    /**
+     * @param string $annotationClass Fully-qualified class name of annotation
+     * @param bool   $preferNamespaceUse    If true, then the system will prefer to
+     *                                      add a use statement not specifically for
+     *                                      this annotation class, but for the namespace
+     *                                      that this annotation is in.
+     * @param string|null $preferredAlias   Special alias to use for the use statement
+     * @throws \Exception
+     */
+    public function addAnnotationToProperty(string $propertyName, string $annotationClass, array $options, bool $preferNamespaceUse = false, string $preferredAlias = null)
+    {
+        // look at only the namespace of the annotation
+        // check if that's already a use statement. If it is,
+        // use that with the \annotation
+        // else, add we need to add the use statement
+        //      1) Need a way to say if you prefer a use statement
+        //          that is one level up, and what alias to use
+        //      2) else use the class name
+
+        if ($preferNamespaceUse) {
+            $namespacePieces = explode("\\", $annotationClass);
+            array_pop($namespacePieces); // remove last item
+            $targetUse = implode("\\", $namespacePieces);
+        } else {
+            $targetUse = $annotationClass;
+        }
+
+        $this->addUseStatementIfNecessary($targetUse, $preferredAlias);
+        // figure out which alias is now available thanks to the added use
+        $annotationClassAlias = $this->findUseableClassAlias($annotationClass);
+
+        $propertyNode = $this->findProperty($propertyName);
+
+        if (null === $propertyNode) {
+            throw new \Exception(sprintf('Property "%s" does not exist.', $propertyName));
+        }
+
+        $commentText = $propertyNode->getDocComment() ? $propertyNode->getDocComment()->getText() : '';
+        $docComment = $this->addNewLineToComments(
+            $commentText,
+            $this->buildAnnotationLine('@'.$annotationClassAlias, $options)
+        );
+
+        $propertyNode->setDocComment($docComment);
+        $this->updateSourceCodeFromNewStmts();
+    }
+
+    private function addNewLineToComments(string $existingCommentsText, string $newDocLine): Doc
+    {
+        $docLines = $existingCommentsText ? explode("\n", $existingCommentsText) : [];
         if (0 === \count($docLines)) {
             $docLines = ['/**', ' */'];
         } elseif (1 === \count($docLines)) {
@@ -285,12 +344,10 @@ final class ClassSourceManipulator
             $docLines,
             \count($docLines) - 1,
             0,
-            ' * '.$this->buildAnnotationLine('@'.$annotationClassAlias, $options)
+            ' * '.$newDocLine
         );
 
-        $docComment = new Doc(implode("\n", $docLines));
-        $this->getClassNode()->setDocComment($docComment);
-        $this->updateSourceCodeFromNewStmts();
+        return new Doc(implode("\n", $docLines));
     }
 
     private function addCustomGetter(string $propertyName, string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = [], $typeCast = null)
@@ -700,6 +757,82 @@ final class ClassSourceManipulator
 
         $targetIndex = null;
         $addLineBreak = false;
+        if (null !== $alias = $this->getAliasForExistingUseStatement($class, $targetIndex, $addLineBreak)) {
+            return $alias;
+        }
+
+        if (null === $targetIndex) {
+            throw new \Exception('Could not find a class!');
+        }
+
+        $newUserBuilder = (new Builder\Use_($class, Node\Stmt\Use_::TYPE_NORMAL));
+        $newAlias = $shortClassName;
+        if (null !== $desiredAlias) {
+            $newUserBuilder->as($desiredAlias);
+            $newAlias = $desiredAlias;
+        }
+
+        $newUseNode = $newUserBuilder->getNode();
+        array_splice(
+            $namespaceNode->stmts,
+            $targetIndex,
+            0,
+            $addLineBreak ? [$newUseNode, $this->createBlankLineNode(self::CONTEXT_OUTSIDE_CLASS)] : [$newUseNode]
+        );
+
+        $this->updateSourceCodeFromNewStmts();
+
+        return $newAlias;
+    }
+
+    /**
+     * Given a FQCN, this returns how that class should be referenced
+     * in the code based on an assumed "use" statement that already
+     * exists for it.
+     *
+     * This is primarily for supporting when there is a use statement
+     * for a namespace already, instead of a class:
+     *
+     *      use Symfony\Component\Validator\Constraints as Assert;
+     *
+     * In this case, if we want to reference Symfony\...\Constraints\NotBlank,
+     * then this function would return Assert\NotBlank.
+     */
+    private function findUseableClassAlias(string $targetClass)
+    {
+        $pieces = explode("\\", $targetClass);
+        $partsNeededForClassAlias = [];
+        while (count($pieces) > 0) {
+            $alias = $this->getAliasForExistingUseStatement(implode("\\", $pieces));
+
+            if (null !== $alias) {
+                $partsNeededForClassAlias[] = $alias;
+
+                return implode("\\", array_reverse($partsNeededForClassAlias));
+            }
+
+            // remove last item
+            $partsNeededForClassAlias[] = array_pop($pieces);
+        }
+
+        throw new \Exception(sprintf('Could not find any use statements that alias to any part of the class "%s"', $targetClass));
+    }
+
+    /**
+     * @param string $class         Class or namespace to check for a use
+     * @param int|null $targetIndex   Returns index where this use statement *should* be placed alphabetically
+     * @param bool   $addLineBreak  If a line break should be added after a new use statement
+     * @return string|null          Null if the class/namespace has no use statement
+     */
+    private function getAliasForExistingUseStatement(string $class, &$targetIndex = null, bool &$addLineBreak = false)
+    {
+        $shortClassName = Str::getShortClassName($class);
+        if ($this->isInSameNamespace($class)) {
+            return $shortClassName;
+        }
+
+        $namespaceNode = $this->getNamespaceNode();
+
         $lastUseStmtIndex = null;
         foreach ($namespaceNode->stmts as $index => $stmt) {
             if ($stmt instanceof Node\Stmt\Use_) {
@@ -747,28 +880,7 @@ final class ClassSourceManipulator
             }
         }
 
-        if (null === $targetIndex) {
-            throw new \Exception('Could not find a class!');
-        }
-
-        $newUserBuilder = (new Builder\Use_($class, Node\Stmt\Use_::TYPE_NORMAL));
-        $newAlias = $shortClassName;
-        if (null !== $desiredAlias) {
-            $newUserBuilder->as($desiredAlias);
-            $newAlias = $desiredAlias;
-        }
-
-        $newUseNode = $newUserBuilder->getNode();
-        array_splice(
-            $namespaceNode->stmts,
-            $targetIndex,
-            0,
-            $addLineBreak ? [$newUseNode, $this->createBlankLineNode(self::CONTEXT_OUTSIDE_CLASS)] : [$newUseNode]
-        );
-
-        $this->updateSourceCodeFromNewStmts();
-
-        return $newAlias;
+        return null;
     }
 
     private function updateSourceCodeFromNewStmts()
@@ -1182,13 +1294,21 @@ final class ClassSourceManipulator
 
     private function propertyExists(string $propertyName)
     {
+        return null !== $this->findProperty($propertyName);
+    }
+
+    /**
+     * @return Node\Stmt\Property|null
+     */
+    private function findProperty(string $propertyName)
+    {
         foreach ($this->getClassNode()->stmts as $i => $node) {
             if ($node instanceof Node\Stmt\Property && $node->props[0]->name->toString() === $propertyName) {
-                return true;
+                return $node;
             }
         }
 
-        return false;
+        return null;
     }
 
     private function writeNote(string $note)
