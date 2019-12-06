@@ -77,18 +77,13 @@ class ComposerAutoloaderFinder
     /**
      * @return ClassLoader|null
      */
-    private function extractComposerClassLoader(array $autoloader)
+    private function extractComposerClassLoader(array $autoloaders)
     {
-        if (isset($autoloader[0]) && \is_object($autoloader[0])) {
-            if ($autoloader[0] instanceof ClassLoader) {
-                return $autoloader[0];
-            }
-            if (
-                ($autoloader[0] instanceof DebugClassLoader
-                    || $autoloader[0] instanceof ErrorHandlerDebugClassLoader)
-                && \is_array($autoloader[0]->getClassLoader())
-                && $autoloader[0]->getClassLoader()[0] instanceof ClassLoader) {
-                return $autoloader[0]->getClassLoader()[0];
+        foreach ($autoloaders as $autoloader) {
+            if (($autoloader instanceof DebugClassLoader || $autoloader instanceof ErrorHandlerDebugClassLoader) && \is_array($autoloader->getClassLoader())) {
+                return $this->extractComposerClassLoader($autoloader->getClassLoader());
+            } elseif ($autoloader instanceof ClassLoader) {
+                return $autoloader;
             }
         }
 
