@@ -317,6 +317,18 @@ final class ClassSourceManipulator
         $this->updateSourceCodeFromNewStmts();
     }
 
+    /**
+     * Helper to add a validation annotation that is aware of the preferred "as Assert" alias
+     */
+    public function addValidationAnnotation(string $propertyName, string $annotationClass, array $options)
+    {
+        if (strpos($annotationClass, 'Symfony\Component\Validator\Constraints') !== 0) {
+            throw new \Exception('addValidationAnnotation is meant only for use with constraints in the Symfony\Component\Validator\Constraints namespace. Use addAnnotationToProperty() instead.');
+        }
+
+        $this->addAnnotationToProperty($propertyName, $annotationClass, $options, true, 'Assert');
+    }
+
     private function addNewLineToComments(string $existingCommentsText, string $newDocLine): Doc
     {
         $docLines = $existingCommentsText ? explode("\n", $existingCommentsText) : [];

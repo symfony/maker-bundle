@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Security;
 use PhpParser\Node;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints\DisableAutoMapping;
 
 /**
  * Adds logic to implement UserInterface to an existing User class.
@@ -190,6 +191,13 @@ final class UserClassBuilder
                 ],
                 [$propertyDocs]
             );
+
+            if (class_exists(DisableAutoMapping::class)) {
+                $manipulator->addValidationAnnotation(
+                    'password',
+                    DisableAutoMapping::class
+                );
+            }
         } else {
             // add normal property
             $manipulator->addProperty('password', [$propertyDocs]);
