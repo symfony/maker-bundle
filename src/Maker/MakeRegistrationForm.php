@@ -252,7 +252,8 @@ final class MakeRegistrationForm extends AbstractMaker
             );
             $userManipulator->setIo($io);
 
-            $userManipulator->addAnnotationToClass(
+            $userManipulator->addValidationAnnotation(
+                'password',
                 DisableAutoMapping::class,
                 []
             );

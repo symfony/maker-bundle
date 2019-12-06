@@ -195,7 +195,8 @@ final class UserClassBuilder
             if (class_exists(DisableAutoMapping::class)) {
                 $manipulator->addValidationAnnotation(
                     'password',
-                    DisableAutoMapping::class
+                    DisableAutoMapping::class,
+                    []
                 );
             }
         } else {
