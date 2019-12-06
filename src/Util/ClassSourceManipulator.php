@@ -689,7 +689,7 @@ final class ClassSourceManipulator
     /**
      * @return string The alias to use when referencing this class
      */
-    public function addUseStatementIfNecessary(string $class): string
+    public function addUseStatementIfNecessary(string $class, string $desiredAlias = null): string
     {
         $shortClassName = Str::getShortClassName($class);
         if ($this->isInSameNamespace($class)) {
@@ -751,7 +751,14 @@ final class ClassSourceManipulator
             throw new \Exception('Could not find a class!');
         }
 
-        $newUseNode = (new Builder\Use_($class, Node\Stmt\Use_::TYPE_NORMAL))->getNode();
+        $newUserBuilder = (new Builder\Use_($class, Node\Stmt\Use_::TYPE_NORMAL));
+        $newAlias = $shortClassName;
+        if (null !== $desiredAlias) {
+            $newUserBuilder->as($desiredAlias);
+            $newAlias = $desiredAlias;
+        }
+
+        $newUseNode = $newUserBuilder->getNode();
         array_splice(
             $namespaceNode->stmts,
             $targetIndex,
@@ -761,7 +768,7 @@ final class ClassSourceManipulator
 
         $this->updateSourceCodeFromNewStmts();
 
-        return $shortClassName;
+        return $newAlias;
     }
 
     private function updateSourceCodeFromNewStmts()

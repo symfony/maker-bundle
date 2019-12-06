@@ -728,4 +728,59 @@ class Foo
 EOF
         ];
     }
+
+    public function testAddUseStatementIfNecessaryRespectsAliasedUseStatements()
+    {
+        $source = <<<EOF
+<?php
+
+namespace Acme;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class Foo
+{
+}
+EOF
+        ;
+
+        $manipulator = new ClassSourceManipulator($source);
+        $alias = $manipulator->addUseStatementIfNecessary('Symfony\Component\Validator\Constraints');
+
+        $this->assertSame('Assert', $alias);
+        $this->assertEquals($source, $manipulator->getSourceCode());
+    }
+
+    public function testAddUseStatementIfNecessaryWithAlias()
+    {
+        $source = <<<EOF
+<?php
+
+namespace Acme;
+
+class Foo
+{
+}
+EOF
+        ;
+
+        $expected = <<<EOF
+<?php
+
+namespace Acme;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class Foo
+{
+}
+EOF
+        ;
+
+        $manipulator = new ClassSourceManipulator($source);
+        $alias = $manipulator->addUseStatementIfNecessary('Symfony\Component\Validator\Constraints', 'Assert');
+
+        $this->assertSame('Assert', $alias);
+        $this->assertEquals($expected, $manipulator->getSourceCode());
+    }
 }
