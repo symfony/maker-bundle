@@ -24,6 +24,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
  * @author Amrouche Hamza <hamza.simperfit@gmail.com>
@@ -72,6 +73,13 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
                 ->addOption('shard', null, InputOption::VALUE_REQUIRED, 'The shard connection name')
             ;
         }
+            ->setDescription('Creates a new migration based on database changes')
+            ->addOption('db', null, InputOption::VALUE_REQUIRED, 'The database connection name')
+            ->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager name')
+            ->addOption('shard', null, InputOption::VALUE_REQUIRED, 'The shard connection name')
+            ->addOption('configuration', null, InputOption::VALUE_OPTIONAL, 'The path of doctrine configuration file')
+            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeMigration.txt'))
+        ;
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -89,6 +97,9 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
             $options[] = '--shard='.$input->getOption('shard');
         }
         // end 2.x support
+        if (null !== $input->getOption('configuration')) {
+            $options[] = '--configuration='.$input->getOption('configuration');
+        }
 
         $generateMigrationCommand = $this->application->find('doctrine:migrations:diff');
         $generateMigrationCommandInput = new ArgvInput($options);
