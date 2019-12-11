@@ -1,0 +1,5 @@
+services:
+    _defaults:
+        public: true
+
+    test.message_bus: '@messenger.bus.default'
