@@ -24,6 +24,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
  * @author Ryan Weaver <ryan@symfonycasts.com>
+ * @author Nicolas Philippe <nikophil@gmail.com>
  *
  * @internal
  */
