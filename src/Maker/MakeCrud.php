@@ -131,8 +131,7 @@ final class MakeCrud extends AbstractMaker
 
         $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
         $templatesPath = Str::asFilePath($controllerClassDetails->getRelativeNameWithoutSuffix());
-        $customSkeletonDir=(file_exists(getcwd()."/templates/bundles/MakerBundle/skeleton/")?getcwd()."/templates/bundles/MakerBundle/skeleton/":"");
-
+        $customSkeletonDir = (file_exists(getcwd().'/templates/bundles/MakerBundle/skeleton/') ? getcwd().'/templates/bundles/MakerBundle/skeleton/' : '');
         $generator->generateController(
             $controllerClassDetails->getFullName(),
             $customSkeletonDir.'crud/controller/Controller.tpl.php',
