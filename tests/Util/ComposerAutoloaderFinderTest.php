@@ -59,10 +59,15 @@ class ComposerAutoloaderFinderTest extends TestCase
         (new ComposerAutoloaderFinder(static::$rootNamespace))->getClassLoader();
     }
 
-    public function testGetClassLoaderAfterEnabledDebug()
+    public function testGetClassLoaderAfterEnabledSymfonyDebug()
     {
-        \Symfony\Component\Debug\Debug::enable();
-        \Symfony\Component\ErrorHandler\DebugClassLoader::enable();
+        if (\class_exists('Symfony\Component\Debug\Debug')) {
+            \Symfony\Component\Debug\Debug::enable();
+        }
+
+        if (\class_exists('Symfony\Component\ErrorHandler\DebugClassLoader')) {
+            \Symfony\Component\ErrorHandler\DebugClassLoader::enable();
+        }
 
         $loader = (new ComposerAutoloaderFinder(static::$rootNamespace))->getClassLoader();
 
