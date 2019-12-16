@@ -59,6 +59,16 @@ class ComposerAutoloaderFinderTest extends TestCase
         (new ComposerAutoloaderFinder(static::$rootNamespace))->getClassLoader();
     }
 
+    public function testGetClassLoaderAfterEnabledDebug()
+    {
+        \Symfony\Component\Debug\Debug::enable();
+        \Symfony\Component\ErrorHandler\DebugClassLoader::enable();
+
+        $loader = (new ComposerAutoloaderFinder(static::$rootNamespace))->getClassLoader();
+
+        $this->assertInstanceOf(ClassLoader::class, $loader, 'Wrong ClassLoader found');
+    }
+
     /**
      * @param string|null $psr0
      * @param string|null $psr4
