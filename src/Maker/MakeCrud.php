@@ -131,24 +131,25 @@ final class MakeCrud extends AbstractMaker
 
         $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
         $templatesPath = Str::asFilePath($controllerClassDetails->getRelativeNameWithoutSuffix());
+        $customSkeletonDir=(file_exists(getcwd()."/templates/bundles/MakerBundle/skeleton/")?getcwd()."/templates/bundles/MakerBundle/skeleton/":"");
 
         $generator->generateController(
             $controllerClassDetails->getFullName(),
-            'crud/controller/Controller.tpl.php',
+            $customSkeletonDir.'crud/controller/Controller.tpl.php',
             array_merge([
-                    'entity_full_class_name' => $entityClassDetails->getFullName(),
-                    'entity_class_name' => $entityClassDetails->getShortName(),
-                    'form_full_class_name' => $formClassDetails->getFullName(),
-                    'form_class_name' => $formClassDetails->getShortName(),
-                    'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
-                    'route_name' => $routeName,
-                    'templates_path' => $templatesPath,
-                    'entity_var_plural' => $entityVarPlural,
-                    'entity_twig_var_plural' => $entityTwigVarPlural,
-                    'entity_var_singular' => $entityVarSingular,
-                    'entity_twig_var_singular' => $entityTwigVarSingular,
-                    'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
-                ],
+                'entity_full_class_name' => $entityClassDetails->getFullName(),
+                'entity_class_name' => $entityClassDetails->getShortName(),
+                'form_full_class_name' => $formClassDetails->getFullName(),
+                'form_class_name' => $formClassDetails->getShortName(),
+                'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
+                'route_name' => $routeName,
+                'templates_path' => $templatesPath,
+                'entity_var_plural' => $entityVarPlural,
+                'entity_twig_var_plural' => $entityTwigVarPlural,
+                'entity_var_singular' => $entityVarSingular,
+                'entity_twig_var_singular' => $entityTwigVarSingular,
+                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
+            ],
                 $repositoryVars
             )
         );
@@ -196,7 +197,7 @@ final class MakeCrud extends AbstractMaker
         foreach ($templates as $template => $variables) {
             $generator->generateTemplate(
                 $templatesPath.'/'.$template.'.html.twig',
-                'crud/templates/'.$template.'.tpl.php',
+                $customSkeletonDir.'crud/templates/'.$template.'.tpl.php',
                 $variables
             );
         }
