@@ -83,7 +83,7 @@ class ComposerAutoloaderFinder
             if (($autoloader instanceof DebugClassLoader || $autoloader instanceof ErrorHandlerDebugClassLoader) && \is_array($autoloader->getClassLoader())) {
                 return $this->extractComposerClassLoader($autoloader->getClassLoader());
             }
-            
+
             if ($autoloader instanceof ClassLoader) {
                 return $autoloader;
             }

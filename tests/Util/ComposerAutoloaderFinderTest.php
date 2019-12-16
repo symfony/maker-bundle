@@ -59,6 +59,9 @@ class ComposerAutoloaderFinderTest extends TestCase
         (new ComposerAutoloaderFinder(static::$rootNamespace))->getClassLoader();
     }
 
+    /**
+     * @group legacy
+     */
     public function testGetClassLoaderAfterEnabledSymfonyDebug()
     {
         if (\class_exists('Symfony\Component\Debug\Debug')) {

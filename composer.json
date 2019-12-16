@@ -33,7 +33,9 @@
         "symfony/phpunit-bridge": "^4.3|^5.0",
         "symfony/process": "^3.4|^4.0|^5.0",
         "symfony/security-core": "^3.4|^4.0|^5.0",
-        "symfony/yaml": "^3.4|^4.0|^5.0"
+        "symfony/yaml": "^3.4|^4.0|^5.0",
+        "symfony/debug": "^3.4|^4.0",
+        "symfony/error-handler": "^4.4|^5.0"
     },
     "config": {
         "preferred-install": "dist",
