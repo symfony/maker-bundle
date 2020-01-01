@@ -64,6 +64,9 @@ class ComposerAutoloaderFinderTest extends TestCase
      */
     public function testGetClassLoaderAfterEnabledSymfonyDebug()
     {
+        // Backup of actual error handler
+        $handler = set_error_handler(static function ($errno, $errstr, $errfile, $errline){});
+
         if (\class_exists('Symfony\Component\Debug\Debug')) {
             \Symfony\Component\Debug\Debug::enable();
         }
@@ -75,6 +78,9 @@ class ComposerAutoloaderFinderTest extends TestCase
         $loader = (new ComposerAutoloaderFinder(static::$rootNamespace))->getClassLoader();
 
         $this->assertInstanceOf(ClassLoader::class, $loader, 'Wrong ClassLoader found');
+
+        // Restore of previous error handler
+        set_error_handler($handler);
     }
 
     /**
