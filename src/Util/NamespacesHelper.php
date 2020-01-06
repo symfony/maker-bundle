@@ -93,13 +93,6 @@ final class NamespacesHelper
         return $this->trim($this->namespaces['validator_namespace'] ?? 'Validator\\');
     }
 
-    /**
-     * Trim backslashes in given namespace.
-     *
-     * @param string $namespace
-     *
-     * @return string
-     */
     private function trim(string $namespace): string
     {
         return trim($namespace, '\\');
