@@ -15,6 +15,7 @@ use Composer\Autoload\ClassLoader;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Bundle\MakerBundle\Util\ComposerAutoloaderFinder;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Component\Filesystem\Filesystem;
 
 class AutoloaderUtilTest extends TestCase
@@ -96,7 +97,7 @@ class AutoloaderUtilTest extends TestCase
         /** @var \PHPUnit_Framework_MockObject_MockObject|ComposerAutoloaderFinder $finder */
         $finder = $this
             ->getMockBuilder(ComposerAutoloaderFinder::class)
-            ->setConstructorArgs(['App\\'])
+            ->setConstructorArgs([new NamespacesHelper([])])
             ->getMock();
 
         $finder
