@@ -73,7 +73,7 @@ class MakerExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $namespacesHelperDefinition = $container->getDefinition('maker.namespaces_helper');
-        $namespacesHelperDefinition->replaceArgument(0, $config);
+        $namespacesHelperDefinition->replaceArgument(0, $config['namespaces']);
 
         $container->registerForAutoconfiguration(MakerInterface::class)
             ->addTag(MakeCommandRegistrationPass::MAKER_TAG);

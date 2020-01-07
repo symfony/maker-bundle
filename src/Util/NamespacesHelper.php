@@ -23,72 +23,72 @@ final class NamespacesHelper
 
     public function getCommandNamespace(): string
     {
-        return $this->trim($this->namespaces['command_namespace'] ?? 'Command\\');
+        return $this->trim($this->namespaces['command'] ?? 'Command\\');
     }
 
     public function getControllerNamespace(): string
     {
-        return $this->trim($this->namespaces['controller_namespace'] ?? 'Controller\\');
+        return $this->trim($this->namespaces['controller'] ?? 'Controller\\');
     }
 
     public function getEntityNamespace(): string
     {
-        return $this->trim($this->namespaces['entity_namespace'] ?? 'Entity\\');
+        return $this->trim($this->namespaces['entity'] ?? 'Entity\\');
     }
 
     public function getFixturesNamespace(): string
     {
-        return $this->trim($this->namespaces['fixtures_namespace'] ?? 'DataFixtures\\');
+        return $this->trim($this->namespaces['fixtures'] ?? 'DataFixtures\\');
     }
 
     public function getFormNamespace(): string
     {
-        return $this->trim($this->namespaces['form_namespace'] ?? 'Form\\');
+        return $this->trim($this->namespaces['form'] ?? 'Form\\');
     }
 
     public function getFunctionalTestNamespace(): string
     {
-        return $this->trim($this->namespaces['functional_test_namespace'] ?? 'Tests\\');
+        return $this->trim($this->namespaces['functional_test'] ?? 'Tests\\');
     }
 
     public function getRepositoryNamespace(): string
     {
-        return $this->trim($this->namespaces['repository_namespace'] ?? 'Repository\\');
+        return $this->trim($this->namespaces['repository'] ?? 'Repository\\');
     }
 
     public function getRootNamespace(): string
     {
-        return $this->trim($this->namespaces['root_namespace'] ?? 'App\\');
+        return $this->trim($this->namespaces['root'] ?? 'App\\');
     }
 
     public function getSecurityNamespace(): string
     {
-        return $this->trim($this->namespaces['security_namespace'] ?? 'Security\\');
+        return $this->trim($this->namespaces['security'] ?? 'Security\\');
     }
 
     public function getSerializerNamespace(): string
     {
-        return $this->trim($this->namespaces['serializer_namespace'] ?? 'Serializer\\');
+        return $this->trim($this->namespaces['serializer'] ?? 'Serializer\\');
     }
 
     public function getSubscriberNamespace(): string
     {
-        return $this->trim($this->namespaces['subscriber_namespace'] ?? 'EventSubscriber\\');
+        return $this->trim($this->namespaces['subscriber'] ?? 'EventSubscriber\\');
     }
 
     public function getTwigNamespace(): string
     {
-        return $this->trim($this->namespaces['twig_namespace'] ?? 'Twig\\');
+        return $this->trim($this->namespaces['twig'] ?? 'Twig\\');
     }
 
     public function getUnitTestNamespace(): string
     {
-        return $this->trim($this->namespaces['unit_test_namespace'] ?? 'Tests\\');
+        return $this->trim($this->namespaces['unit_test'] ?? 'Tests\\');
     }
 
     public function getValidatorNamespace(): string
     {
-        return $this->trim($this->namespaces['validator_namespace'] ?? 'Validator\\');
+        return $this->trim($this->namespaces['validator'] ?? 'Validator\\');
     }
 
     private function trim(string $namespace): string
