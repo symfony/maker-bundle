@@ -62,7 +62,7 @@ class ComposerAutoloaderFinderTest extends TestCase
 
     private function getNamespacesHelper(): NamespacesHelper
     {
-        return new NamespacesHelper(['root_namespace' => static::$rootNamespace]);
+        return new NamespacesHelper(['root' => static::$rootNamespace]);
     }
 
     /**
