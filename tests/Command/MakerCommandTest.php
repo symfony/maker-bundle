@@ -55,7 +55,7 @@ class MakerCommandTest extends TestCase
 
         $fileManager = $this->createMock(FileManager::class);
 
-        $namespacesHelper = new NamespacesHelper(['root_namespace' => 'Unknown']);
+        $namespacesHelper = new NamespacesHelper(['root' => 'Unknown']);
 
         $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, $namespacesHelper));
         // needed because it's normally set by the Application
