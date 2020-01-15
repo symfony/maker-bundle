@@ -28,7 +28,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
      */
     public function upgradePassword(UserInterface $user, string $newEncodedPassword): void
     {
-        if (!$user instanceof User) {
+        if (!$user instanceof <?= $entity_class_name ?>) {
             throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
         }
 
