@@ -145,6 +145,24 @@ authenticators will be ignored, and can be blank.',
         );
     }
 
+    public function guessEmailField(SymfonyStyle $io, string $userClass): string
+    {
+        if (property_exists($userClass, 'email')) {
+            return 'email';
+        }
+
+        $classProperties = [];
+        $reflectionClass = new \ReflectionClass($userClass);
+        foreach ($reflectionClass->getProperties() as $property) {
+            $classProperties[] = $property->name;
+        }
+
+        return $io->choice(
+            sprintf('Which field on your <fg=yellow>%s</> class holds the email address?', $userClass),
+            $classProperties
+        );
+    }
+
     public function guessPasswordField(SymfonyStyle $io, string $userClass): string
     {
         if (property_exists($userClass, 'password')) {
@@ -183,5 +201,43 @@ authenticators will be ignored, and can be blank.',
         }
 
         return $authenticatorClasses;
+    }
+
+    public function guessPasswordSetter(SymfonyStyle $io, string $userClass): string
+    {
+        $reflectionClass = new \ReflectionClass($userClass);
+
+        if ($reflectionClass->hasMethod('setPassword')) {
+            return 'setPassword';
+        }
+
+        $classMethods = [];
+        foreach ($reflectionClass->getMethods() as $method) {
+            $classMethods[] = $method->name;
+        }
+
+        return $io->choice(
+            sprintf('Which method on your <fg=yellow>%s</> class can be used to set the encoded password (e.g. setPassword())?', $userClass),
+            $classMethods
+        );
+    }
+
+    public function guessEmailGetter(SymfonyStyle $io, string $userClass): string
+    {
+        $reflectionClass = new \ReflectionClass($userClass);
+
+        if ($reflectionClass->hasMethod('getEmail')) {
+            return 'getEmail';
+        }
+
+        $classMethods = [];
+        foreach ($reflectionClass->getMethods() as $method) {
+            $classMethods[] = $method->name;
+        }
+
+        return $io->choice(
+            sprintf('Which method on your <fg=yellow>%s</> class can be used to get the email address (e.g. getEmail())?', $userClass),
+            $classMethods
+        );
     }
 }
