@@ -12,9 +12,23 @@
 namespace Symfony\Bundle\MakerBundle\Test;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\MakerBundle\MakerInterface;
+use Symfony\Bundle\MakerBundle\Str;
 
-class MakerTestCase extends TestCase
+abstract class MakerTestCase extends TestCase
 {
+    private $kernel;
+
+    /**
+     * @dataProvider getTestDetails
+     */
+    public function testExecute(MakerTestDetails $makerTestDetails)
+    {
+        $this->executeMakerCommand($makerTestDetails);
+    }
+
+    abstract public function getTestDetails();
+
     protected function executeMakerCommand(MakerTestDetails $testDetails)
     {
         if (!$testDetails->isSupportedByCurrentPhpVersion()) {
@@ -67,5 +81,18 @@ class MakerTestCase extends TestCase
     protected function assertContainsCount(string $needle, string $haystack, int $count)
     {
         $this->assertEquals(1, substr_count($haystack, $needle), sprintf('Found more than %d occurrences of "%s" in "%s"', $count, $needle, $haystack));
+    }
+
+    protected function getMakerInstance(string $makerClass): MakerInterface
+    {
+        if (null === $this->kernel) {
+            $this->kernel = new MakerTestKernel('dev', true);
+            $this->kernel->boot();
+        }
+
+        // a cheap way to guess the service id
+        $serviceId = $serviceId ?? sprintf('maker.maker.%s', Str::asRouteName((new \ReflectionClass($makerClass))->getShortName()));
+
+        return $this->kernel->getContainer()->get($serviceId);
     }
 }

@@ -16,6 +16,7 @@ use Symfony\Bundle\MakerBundle\EventRegistry;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 class EventRegistryTest extends TestCase
 {
@@ -81,7 +82,7 @@ class EventRegistryTest extends TestCase
                    ->method('getListeners');
 
         $registry = new EventRegistry($dispatcher);
-        $this->assertSame(ExceptionEvent::class, $registry->getEventClassName(ExceptionEvent::class));
+        $this->assertSame(ExceptionEvent::class, $registry->getEventClassName(KernelEvents::EXCEPTION));
     }
 }
 
