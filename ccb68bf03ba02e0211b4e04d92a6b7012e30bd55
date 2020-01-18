@@ -1,0 +1,468 @@
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-02-01T10:19:08Z
+
+Views were added, and the POC if fully functional (manually tested).
+From now on I will stop amending my first commit, if people want to review/comment code.
+I'm considering making the "request password" form (first screenshot) work only by e-mail address, as recommended [here](https://www.troyhunt.com/everything-you-ever-wanted-to-know/).
+
+---------------------------------------------------------------------------
+
+by sstok at 2019-02-01T12:12:42Z
+
+I strongly suggest you read this 👍 https://paragonie.com/blog/2016/09/untangling-forget-me-knot-secure-account-recovery-made-simple
+
+Almost all password reset systems are "horrible" insecure, tld;dr explanation: by using a single token (basically a random username) it's possible for an attack to guess the existing token by using a timing attack. When you provide a token, the database will use the index to look for an existing record, each character is checked against a binary-tree until it finds a record. When a character has a hit this means the time takes longer (because it continues the traversing of the tree), when there is no hit the time takes shorter because it bails out. Now using this technique an attack can use this information to try as many combinations as possible until all characters matches!
+
+This is similar to a brute-force attack to guess a username/ID, but with a major difference. There is no password, and therefor access is directly granted.
+
+By using the SplitToken you have selector (random username) and a verifier (random password in a hashed format), meaning that an attacker first needs to guess the selector, and then when there is a positive match, try to guess the verifier. BUT! Once you provide a wrong verifier for the selector, you simple revoke the token and no further tries are possible, even then guessing the verifier is nearly impossible as you compare the hashes in constant time (always takes the same amount of time) which leaks no timing information, making guessing nearly impossible.
+
+I actually created a library that uses this technique https://github.com/rollerworks/split-token (MPLv2.0 licensed because it depends on HiddenString) but for most applications using the technique descried in the linked article is already a good step.
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-02-01T12:26:45Z
+
+@sstok thank you for the article, but I'm not sure implementing the suggestions from the article would be useful for most users The goal is to offer a basic feature, done right, for beginners. I'm pretty sure developers having tighter security requirements won't be using a maker command.
+Hence I'm re-using a process from FOSUserBundle, which proved since a few years good enough for most, and follow some reasonable best practices (https://www.troyhunt.com/everything-you-ever-wanted-to-know/).
+
+I like your approach, though. Did you consider make a "SplitTokenBundle"?
+
+---------------------------------------------------------------------------
+
+by gsylvestre at 2019-02-07T07:35:00Z
+
+This PR is a really good idea, and would be very usefull. I tried it and I love very much the generated code.
+
+Some really small problems:
+
+- The generated twig files and folders do not follow coding stardards in their camelCased form (they should be snake_cased).
+- In the controller, method `request()`, is there any reason that you inject `Twig_Environment ` instead of using the simpler approch of `$this->renderView()` ?
+- The suffix Action should be removed on controller's method `checkEmailAction()`.
+
+Also, I understand completely that you want to keep things simple and basic, and I agree. I just wonder if we could kinda incorporate some of @sstok suggestions by passing along the user email in the reset link. _That would allow us to hash the reset token in the database_, without adding much generated code and no other field in the entity. We even already use the `UserPasswordEncoderInterface ` in the `reset()` method...
+
+---------------------------------------------------------------------------
+
+by gsylvestre at 2019-02-07T07:54:04Z
+
+In fact, maybe that those should be command options:
+
+The reset password system need to store random tokens for your user. Do you want to store those:
+1. In your User entity
+2. In a separate entity
+
+Would you like to hash the stored tokens (more secure)?
+1. Yes
+2. No
+
+Would you like to add an extra "selector" field to protect against timed attack (more secure)?
+1. Yes
+2. No
+
+Obviously, that is a lot of work to imlement, but that keep things simple for the end user.
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-02-07T10:51:24Z
+
+Thank you for the review @gsylvestre
+I fixed the small problems, regarding `\Twig_Environment` at some point I wanted to render blocks independently, but I dropped this approach as it uses internal methods.
+
+Regarding going further, I'm indecisive for now. I would like to get more feedbacks on this PR before going further regarding advanced features, about if and how it can integrates Maker bundle.
+
+---------------------------------------------------------------------------
+
+by sstok at 2019-02-07T14:24:50Z
+
+FYI. I don't have any plans for a bundle to integrate SplitToken, in practice you can register as many SplitToken factories as you want.
+
+The only thing that might be interesting is a FormType to handle this format native, I actually did this for [Park-Manager](https://github.com/park-manager/park-manager/blob/333808b5d0e1eb495ab8b0be380eec432503b389/src/Module/CoreModule/Infrastructure/UserInterface/Web/Form/Type/Security/SplitTokenType.php) . But that's something for later as it's still experimental.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-02-25T14:28:08Z
+
+Sorry for the delay. I really want this - and it's on my list to review - but haven't had time yet. Thanks for getting it started!
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-03-01T20:27:29Z
+
+@gsylvestre I was interested in getting more info from your above comments:
+
+> In fact, maybe that those should be command options:
+
+> The reset password system need to store random tokens for your user. Do you want to store those:
+> 1. In your User entity
+> 2. In a separate entity
+
+I don't think we should do this - that's a level of customization that you can do if you want to, but I don't see any advantage to adding this flexibility (or is there a security implication?)
+
+> Would you like to hash the stored tokens (more secure)?
+> 1. Yes
+> 2. No
+
+I saw your other comment before this, but can you explain this a bit more? If we only had 1 field in the database, how is the token hashed and how does that improve security?
+
+> Would you like to add an extra "selector" field to protect against timed attack (more secure)?
+> 1. Yes
+> 2. No
+
+Maybe ;). I do think this is something to keep in mind as we get closer - it's probably not *that* much more work to implement, if indeed this is an industry-standard way of making more secure reset passwords.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-03-01T20:55:21Z
+
+Oh, I understand now about the hashed tokens: if we passed the email address in the reset URL, then we could look up the User by that email address, and then do a timing-safe check to see if the hash in the URL matches what we expect in the database.
+
+Of course, then this *also* in theory allows for a timing attack on that "reset" URL, because you could use it to detect timing differences in return to determine if the email you entered is an email in the system :).
+
+In general, I think we should be looking at other popular implementations (including FOSUserBundle, Laravel, Rails, whatever) and making sure we have the same safeguards at least as they do.
+
+---------------------------------------------------------------------------
+
+by gsylvestre at 2019-03-02T13:11:59Z
+
+@weaverryan yes that's what I meant: if we hash the token in the database, we then need some kind of identifier to retrieve it. As you say, if we use the email, then an attacker can use timed attacks to find out if it's in the db... Really not a big concern imo, but still.
+
+I was not proposing the "separate entity" option for security implication, not directly. But now that I have looked around and thought about it, I believe that we should always store the token in a new entity, instead of inside properties in the user class. See below...
+
+Something like :
+```
+class PasswordResetToken
+{
+    $id
+    $selector //(crypto secure string, shorter)
+    $token //(crypto secure string, longer)
+    $requestedAt //(datetime)
+    $user //(OneToOne unidir relation)
+}
+```
+
+Pros:
+- We do not mess with User class by adding new properties and methods. It is often already clogged, and I feel it is intrusive.
+- We can then more freely add more fields and methods to our Token entity, like the generated "selector", or ie. if the developper want, he/she can add an expireAt field easily, or maybe use this entity for email confirmation purposes.
+- Indirectly more secure because we can now add the "selector" field
+- Until a password reset request is made, no token are generated. And no fields are sitting there being NULL and sad in the user table.
+- Better model structure, added flexibility
+
+Cons:
+- Extra entity and database table are generated
+- more complicated?
+
+In fact, is it really more complicated for the developper to understand what is going on? I believe even beginners will get this new entity easily.
+And we are doing a really secure password reset. Why settle for less? We expect Symfony to provide top secure features.
+
+BTW, Laravel is storing reset tokens in a new table, but use the email as the selector.
+
+I can implement these changes next week, if the coding work is a problem.
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-03-02T14:54:34Z
+
+Thank you for your inputs both of you, and for your review @weaverryan, that's great to see things moving. Let's make this maker happen!
+
+@gsylvestre I like that last idea you had, having a separate entity. It is not making things overly complex, but it both adds some security from what I got & code is a little bit cleaner in my opinion (it prevents `User` entity from growing too big...). I can work on it while fixing the other comments, but I would appreciate your review.
+
+---------------------------------------------------------------------------
+
+by sstok at 2019-03-04T15:39:56Z
+
+> Of course, then this also in theory allows for a timing attack on that "reset" URL, because you could use it to detect timing differences in return to determine if the email you entered is an email in the system :).
+
+See the linked article for full details ;) https://paragonie.com/blog/2016/09/untangling-forget-me-knot-secure-account-recovery-made-simple
+
+The main focus is that you have two factors for authenticating, a selector (like a username, email address or random token) and a verifier that acts like a password (with the same security requirements for verifying). Using only a random value (token) as-is (as the FOSUserBundle is doing) makes that your token is nothing more then a random id that can be guessed, I can't make it more clear than this 👍
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-03-05T10:17:57Z
+
+I pushed commits regarding the first review comments.
+On top of that, I prefixed both form classes names by `Password`, I find `PasswordRequestFormType` and `PasswordResettingFormType` to be more explicit.
+
+Now I will work on having a separate entity, and then on testing everything.
+
+---------------------------------------------------------------------------
+
+by stof at 2019-03-05T19:59:57Z
+
+Note that if I were building FOSUserBundle today, I would probably use a separate table to store the reset tokens instead of putting things in the User class.
+
+@sstok the issue of using the email address as the selector is that it allows using a timing attack to identify whether the email exists in the DB, allowing to leak the user base. That's why using a random selector instead is better if you try to protect the system against timing attacks.
+Another option is to use the primary key of the user table...
+
+---------------------------------------------------------------------------
+
+by gsylvestre at 2019-03-05T20:25:18Z
+
+@stof, would you rather go with the random selector or the primary key?
+I feel like the id would _seem_ unsafe (for users and developpers to see the easily guessable user id in the url), even if it's mostly the same security level... It is one less field to generate on the other hand.
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-03-07T10:57:54Z
+
+I feel like having an extra "selector" field is not that bad, so for now I'm going with a selector separate from the ID.
+One issue I'm having though: how to hash "token" without hardcoding a reference to the hash algorithm & without adding a dependency to an extra library?
+For now, I'm considering getting the "UserPasswordEncoder", it feels a little bit hacky though.
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-03-12T15:13:44Z
+
+Hello all,
+I could make some good progress on the code today, the feature is finished & some unit tests were added.
+I'm now working on functional tests, those are pretty hard to get started on. @weaverryan I get you bootstrapped everything, do you have any tips on how to run those locally?
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-03-13T15:45:10Z
+
+CI is green 🎉
+I added half a dozen functional tests on major cases (password reset email is sent, wrong token, expired token...). I'm waiting to hear from you now now, ping @weaverryan :)
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-04-04T19:50:26Z
+
+Thank you @bocharsky-bw for the review! I addressed most of your comments, and I would like to discuss some more on some.
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-04-05T09:05:52Z
+
+Hmm, that's problematic indeed. Definitely we should have no limits there, because a user can request password several times (well, within discussed "retry TTL" limit). And there's no way not to leak any account information with such a feature. So I will modify the relationship to `ManytoOne`, and consider a test covering that scenario.
+
+---------------------------------------------------------------------------
+
+by bocharsky-bw at 2019-04-05T09:11:47Z
+
+Yeah, looks like so... sounds good tome, but probably we need `ManyToOne` in this case, but probably you meant it 👍
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-04-05T09:14:51Z
+
+Exactly, I pushed the modification ;)
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-04-08T08:18:06Z
+
+Thanks for the recap, I will try to work on those next week.
+Once those are done, are we getting closer to a merge? This PR has been going for a while already, with quite some time of "sleep".
+
+---------------------------------------------------------------------------
+
+by bocharsky-bw at 2019-04-08T08:51:49Z
+
+I bet yes! @weaverryan is _really_ want to merge this - just busy enough right now! Well, at least if we're talking about the "Forgotten password" feature in general, but probably he would request more minor code tweaks after all these new features, but it's going to be merged anyway.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-04-08T22:28:51Z
+
+Yes, Victor has been keeping me up to date :). I should have time to play with this later in the week!
+
+---------------------------------------------------------------------------
+
+by stof at 2019-04-18T17:20:52Z
+
+I'm wondering whether this should actually be implemented as a maker generating the whole feature in the project. If we ever find a flaw in the generated code, we will have no way to ship a patched code to all the projects which used the maker before the fix. At least I don't see a way for that.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-04-18T17:28:37Z
+
+I’ve had that same thought... and of course you can try to think “does this contain sensitive code paths”, but trying to predict security flaws is of course impossible.
+
+I had discussed this with @bocharsky-be originally as a bundle. We decided generation was better for DX - needing to override templates and configure stuff vs just changing the generated code is much harder.
+
+Anyways, some more opinions on this would be great.
+
+---------------------------------------------------------------------------
+
+by stof at 2019-04-18T17:31:29Z
+
+Well, maybe the email template itself should be configurable (with a maker to generate one you can customize). But I'm not sure other stuff needs to be overwritten (or even should be)
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-04-18T21:00:32Z
+
+As a developer, I actually prefer generated code versus a bundle. I prefer to deal with code rather than with configuration.
+In a few years (2,3?) FOSUserBundle password reset feature did not change at all. I have the impression changes are unlikely. And in case we happen to have a fix to ship to all generated code, I wonder if something like an "updater" would be doable, given that most developers won't rename anything.
+
+---------------------------------------------------------------------------
+
+by bocharsky-bw at 2019-04-19T08:20:47Z
+
+"Updater" sounds interesting, then along with `git diff` it would be possible to review changes. But how to know that you have to run the updater in case you don't watch changes in MakerBundle?
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-04-19T10:57:58Z
+
+That raises a good question: if we discover a security issue in code generated by MakerBundle, I guess we should open a CVE for MakerBundle? So security-advisory could warn users if they did not update.
+For the case where they update regularly, but a symfony.com blogpost, I don't quite see any way to warn them.
+
+---------------------------------------------------------------------------
+
+by stof at 2019-04-19T11:02:39Z
+
+@romaricdrigon no, that would not work. Updating MakerBundle will not fix the vulnerability in their own project if they already generated the code before.
+
+A vulnerability in the generated code would actually require a CVE for MakerBundle (so that projects stop generating insecure code) and a CVE for each project containing the existing insecure code. That's not something we can do for the second part. And that's why I think we should be careful about bring this whole password-recovery feature as a maker.
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-05-07T12:17:24Z
+
+@stof agreed, but how many times did we have such a vulnerability in FOSUserBundle reset password feature? My point is not that it is impossible, but that it is unlikely, plus the current code is already to some pretty high standards compared to what developers would do on their own. That's a (relative) progress?
+
+I'm back from holidays, should I resume working on that?
+It is not clear to me whether the features is OK with everybody or if it is on hold.
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-06-03T21:14:18Z
+
+Thank you for the feedback @weaverryan
+I will work on all your comments very soon to finish this PR :)
+
+---------------------------------------------------------------------------
+
+by bocharsky-bw at 2019-08-05T07:35:07Z
+
+Hey @romaricdrigon , will you have time to finish this soon?
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-08-05T14:02:31Z
+
+I will! I just rebased my branch.
+
+---------------------------------------------------------------------------
+
+by Pierstoval at 2019-09-02T13:46:16Z
+
+@romaricdrigon Do you need some help? I might fix the reviews and PR them to your repo if you like, it's less work for you 😄
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-09-04T07:26:13Z
+
+Thanks for your offer, I've been kinda swamped last days due to personal reasons + flight issues which got me wandering in the airport instead of being at home :D
+
+Right now, the biggest blocker is Travis failing. I don't understand why. And it's kinda a blocker. If you can help me with that, that would be immensely helpful!
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-09-05T08:00:14Z
+
+I opened another PR (#469), and it looks like Travis is just crashing on every MakerBundle build (even on `master`). So I will mostly ignore it :(
+
+---------------------------------------------------------------------------
+
+by Pierstoval at 2019-09-05T14:57:30Z
+
+Let's try to figure it out, I'll open a PR and work on that tonight :smiley:
+
+---------------------------------------------------------------------------
+
+by Pierstoval at 2019-09-06T06:29:27Z
+
+Well I spent a part of the night, and... All I could find was that the PHP commands take very very long to execute, so I think linking their output to PHPUnit's one could be a good start, and separate some tests in "groups" in order to execute phpunit once for each group could be a second start, but it might be more than that :confused:
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-09-06T11:49:22Z
+
+Damn, that's complex :(
+Functional tests take a very long time to start. I suspect loading "fixtures" to disk is too heavy or suboptimal.
+
+---------------------------------------------------------------------------
+
+by Pierstoval at 2019-09-06T16:25:08Z
+
+I investigated, it's not the fixtures, it's the maker commands. A symfony/skeleton project is created, and functional tests consists in copy/pasting the default skeleton, alter it a little for the sake of the test, and execute maker commands in order to check the generated output is the right one.
+
+I wonder whether we could make this "enhanced unit tests" instead to make them a bit faster...
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-09-16T15:04:35Z
+
+Yea, the tests are super slow... I wish we could make them faster (and maybe we can), but they're meant to be realistic - creating a fresh Flex project, running `composer require` on dependencies, and actually running the commands. Indeed, better output on failure might help debugging this stuff easier. Btw, I usually run `./vendor/bin/simple-phpunit --filter=` and then the name of the test case in `FunctionalTest` that I specifically want to run.
+
+> Travis is just crashing on every MakerBundle build (even on master)
+
+That's another issue (feature!) about the test suite. Because they're so realistic, if something changes upstream (e.g. a recipe change) it could break our tests. That's actually what we *want*... because it means that some assumption that MakerBundle was making might now be incorrect... but it also causes more frequent "sudden" test failures.
+
+---------------------------------------------------------------------------
+
+by Pierstoval at 2019-09-17T11:52:18Z
+
+A solution to make the tests faster would be to execute them in parallel instead. Since each test relies on a specific directory, it could be achieved by using the Process component or something similar. Implementation might be a bit complex, but to me it's probably the best option to make it faster.
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-09-19T12:10:38Z
+
+About making tests faster, we could install a "full" Symfony app with Flex only at the beginning of the test suite, and then copy/reset it after each it. It should be faster than having as many `composer require` / Flex install as there are tests (those 2 take about 50% of test time, and a lot of memory).
+Anyhow, that requires further investigation, and likely an issue/a PR to discuss it.
+
+I'm resuming my work on this PR, and I will finish it this afternoon. Sorry for the long time it took!
+Since I implemented several similar tokens systems, *à la* @sstok, I may also improve a little bit interfaces.
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-09-20T07:46:32Z
+
+The PR is now good regarding feedback from @bocharsky-bw and @weaverryan !
+I added a few tests regarding new features (retry TTL...), test are green on Travis / 7.3 and AppVeyor. I tested the Maker on a fresh Symfony project, I like the generated code, and I believe it will improve many applications :)
+
+Also thank you @stof for your comments and @Pierstoval for your help.
+There are still 2 comments open for discussion, which are either personal preference either to be done later I think.
+
+---------------------------------------------------------------------------
+
+by Pierstoval at 2019-09-20T13:23:36Z
+
+🚢 ❕
+
+😄
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-09-30T07:10:10Z
+
+@bocharsky-bw and @weaverryan  could you please check how I implemented modifications you requested?
+I still hope it can get merged soon :)
+
+---------------------------------------------------------------------------
+
+by FBL-dev at 2019-11-21T15:25:34Z
+
+Do you know when your changes will be available? I would like to use them
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-11-23T15:29:27Z
+
+> Do you know when your changes will be available? I would like to use them
+
+@FBL-dev we had a chat over the feature today at SymfonyCon hack day, I rebased and fixed some small issues, hopefully @bocharsky-bw should review it soon, and I believe we are good for release :)
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-11-26T12:52:30Z
+
+@rbaarsma you have a point, but right now we don't quite have the infrastructure in MakerBundle to handle that (ie., have 2 different templates, switching according to installed dependency, test that...). I think SF5 is a topic we should treat "globally" in Maker bundle, maybe with some infrastructure refactor.
+
+So I would prefer that PR to be merged, as @bocharsky-bw says, and then I will help with setting up that infrastructure + supporting Mailer. It does not degrade Maker as a whole, Maker won't work on SF5, but `make:functional-test` does not work too.
