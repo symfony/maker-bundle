@@ -21,6 +21,7 @@ class MakeForgottenPasswordTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeForgottenPassword')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
+            ->addExtraDependencies('symfony/swiftmailer-bundle')
         ];
     }
 }
