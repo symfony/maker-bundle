@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
 use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
+use Symfony\Bundle\MakerBundle\Maker\MakeForgottenPassword;
 use Symfony\Bundle\MakerBundle\Test\MakerTestKernel;
 use Symfony\Component\Finder\Finder;
 
@@ -36,6 +37,11 @@ class FunctionalTest extends TestCase
             $class = 'Symfony\Bundle\MakerBundle\Maker\\'.$file->getBasename('.php');
 
             if (AbstractMaker::class === $class) {
+                continue;
+            }
+
+            /** Skip make forgotten password as it is temp. disabled (tkt#537) */
+            if (MakeForgottenPassword::class === $class) {
                 continue;
             }
 

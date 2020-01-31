@@ -106,15 +106,15 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
             throw $this->createNotFoundException();
         }
 
-        $passwordResetToken = $this->getDoctrine()->getRepository(PasswordResetToken::class)->findOneBy([
-            'selector' => substr($tokenAndSelector, 0, PasswordResetToken::SELECTOR_LENGTH),
+        $passwordResetToken = $this->getDoctrine()->getRepository(<?= $token_class_name ?>::class)->findOneBy([
+            'selector' => substr($tokenAndSelector, 0, <?= $token_class_name ?>::SELECTOR_LENGTH),
         ]);
 
         if (!$passwordResetToken) {
             throw $this->createNotFoundException();
         }
 
-        if ($passwordResetToken->isExpired() || !$passwordResetToken->isTokenEquals(substr($tokenAndSelector, PasswordResetToken::SELECTOR_LENGTH))) {
+        if ($passwordResetToken->isExpired() || !$passwordResetToken->isTokenEquals(substr($tokenAndSelector, <?= $token_class_name ?>::SELECTOR_LENGTH))) {
             $this->getDoctrine()->getManager()->remove($passwordResetToken);
             $this->getDoctrine()->getManager()->flush();
 
@@ -125,7 +125,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // A PasswordResetToken should be used only once, remove it.
+            // A <?= $token_class_name ?> should be used only once, remove it.
             $this->getDoctrine()->getManager()->remove($passwordResetToken);
 
             // Encode the plain password, and set it.
