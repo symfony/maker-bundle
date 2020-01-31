@@ -1,0 +1,54 @@
+---------------------------------------------------------------------------
+
+by jrushlow at 2020-01-27T07:02:51Z
+
+With the above commits applied, all tests pass. However, the following direct deprecation notice is failing the CI test:
+
+```
+Remaining direct deprecation notices (1)
+
+  1x: The Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain class is deprecated since doctrine/persistence 1.3 and will be removed in 2.0. Use \Doctrine\Persistence\Mapping\Driver\MappingDriverChain instead.
+
+    1x in EntityRegeneratorTest::testRegenerateEntities from Symfony\Bundle\MakerBundle\Tests\Doctrine
+
+```
+
+May be related to:
+PR #518 Fixing deprecation
+Issue #528 make:fixtures : Doctrine\Persistence\ObjectManager is deprecated
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2020-01-27T07:02:52Z
+
+Hey, I'm not sure that `symfony/swiftmailer` should be used here. And once again this test fail not related to #496 it's related to the feature added by #359
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2020-01-27T07:11:42Z
+
+> Hey, I'm not sure that `symfony/swiftmailer` should be used here. And once again this test fail not related to #496 it's related to the feature added by #359
+
+Wouldn't swiftmailer be appropriate in the test as its a dependency of the maker?
+
+```
+//MakeForgottenPassword
+
+public function configureDependencies(DependencyBuilder $dependencies)
+    {
+       .................
+        $dependencies->addClassDependency(
+            SwiftmailerBundle::class,
+            'mail'
+        );
+    }
+
+```
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2020-01-27T07:25:38Z
+
+> Wouldn't swiftmailer be appropriate in the test as its a dependency of the maker?
+
+Honestly, I haven't discussed anything in this feature, and it was just my thoughts. I think we should use `symfony/mailer` component instead of `swiftmailer`
