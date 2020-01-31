@@ -1,0 +1,35 @@
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-10-12T10:08:07Z
+
+Hello,
+
+I have some mixed feelings about using a `BadMethodCallException`.
+From PHP manual, `Exception thrown if a callback refers to an undefined method or if some arguments are missing.`, I feel like we don't quite have the same semantic.
+Is there any reason why this exception is better?
+Personally, I would prefer a `LogicException`.
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-10-14T18:01:33Z
+
+Anyway, just exception is not cool
+
+---------------------------------------------------------------------------
+
+by romaricdrigon at 2019-10-16T07:03:59Z
+
+Sure. Then could you please modify with `LogicException`, and fix failing test?
+Thank you
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2019-11-26T18:42:28Z
+
+I fixed it, but it seems that tests are broken
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2020-01-30T10:59:35Z
+
+ping @romaricdrigon
