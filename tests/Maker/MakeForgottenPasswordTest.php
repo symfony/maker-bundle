@@ -8,8 +8,14 @@ use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 
 class MakeForgottenPasswordTest extends MakerTestCase
 {
+    /**
+     * Test skipped until make forgotten password is enabled again.
+     * @see https://github.com/symfony/maker-bundle/issues/537
+     */
     public function getTestDetails()
     {
+        $this->markTestSkipped('Temp. Disabled make forgotten password. See ');
+
         yield 'forgotten_password' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeForgottenPassword::class),
             [
