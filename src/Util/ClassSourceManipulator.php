@@ -730,6 +730,8 @@ final class ClassSourceManipulator
 
     private function addStatementToConstructor(Node\Stmt $stmt): void
     {
+        $this->removeEmptyConstructorIfNecessary();
+
         if (!$this->getConstructorNode()) {
             $constructorNode = (new Builder\Method('__construct'))->makePublic()->getNode();
 
@@ -1314,6 +1316,42 @@ final class ClassSourceManipulator
     {
         foreach ($params as $param) {
             $methodBuilder->addParam($param);
+    }
+
+    /**
+     * A workaround for bug: https://github.com/symfony/maker-bundle/issues/535.
+     *
+     * When a constructor (probably any method?) exists but only has
+     * a comment (Nop Stmt), if we try to add a new statement to that
+     * method, it is not printed correctly by php-parser. This method
+     * detects for that case and completely removes the constructor node
+     * so that a new one can be created.
+     */
+    private function removeEmptyConstructorIfNecessary()
+    {
+        if (null === $constructor = $this->getConstructorNode()) {
+            return;
+        }
+
+        // an empty constructor is ok
+        if (0 === \count($constructor->stmts)) {
+            return;
+        }
+
+        foreach ($constructor->stmts as $stmt) {
+            // if we find even *one* statement *other* than Nop, we are ok
+            if (!$stmt instanceof Node\Stmt\Nop) {
+                return;
+            }
+        }
+
+        // the constructor consists of *only* Nop. Remove it entirely.
+        foreach ($this->getClassNode()->stmts as $key => $classNode) {
+            if ($classNode === $constructor) {
+                unset($this->getClassNode()->stmts[$key]);
+
+                return;
+            }
         }
     }
 }

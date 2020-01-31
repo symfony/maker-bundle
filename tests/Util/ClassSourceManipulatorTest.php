@@ -386,7 +386,15 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setOrphanRemoval(true),
         ];
 
-        // todo test existing constructor
+        yield 'one_to_many_simple_existing_constructor' => [
+            'User_with_empty_constructor.php',
+            'User_with_empty_constructor.php',
+            (new RelationOneToMany())
+                ->setPropertyName('avatarPhotos')
+                ->setTargetClassName('App\Entity\UserAvatarPhoto')
+                ->setTargetPropertyName('user')
+                ->setOrphanRemoval(false),
+        ];
     }
 
     /**
