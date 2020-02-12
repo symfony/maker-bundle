@@ -208,6 +208,6 @@ final class Str
 
     public static function asHumanWords(string $variableName): string
     {
-        return implode(' ', preg_split('/(?=[A-Z])/', $variableName));
+        return ucfirst(trim(implode(' ', array_map('lcfirst', preg_split('/(?=[A-Z])/', $variableName)))));
     }
 }
