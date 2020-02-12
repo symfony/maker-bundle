@@ -31,7 +31,7 @@ class GeneratedCrudControllerTest extends WebTestCase
         $this->assertStringContainsString('SweetFood index', $client->getResponse()->getContent());
         $this->assertStringContainsString('<td>Candy</td>', $client->getResponse()->getContent());
 
-        $editLink = $crawler->filter('a:contains("edit")')->eq(0)->link();
+        $editLink = $crawler->filter('a:contains("Edit")')->eq(0)->link();
         $crawler = $client->click($editLink);
         $this->assertStringContainsString('<!DOCTYPE html>', $client->getResponse()->getContent());
         $this->assertStringContainsString('Edit SweetFood', $client->getResponse()->getContent());
@@ -47,7 +47,7 @@ class GeneratedCrudControllerTest extends WebTestCase
         $this->assertStringContainsString('SweetFood index', $client->getResponse()->getContent());
         $this->assertStringContainsString('Candy edited', $client->getResponse()->getContent());
 
-        $showLink = $crawler->filter('a:contains("show")')->eq(0)->link();
+        $showLink = $crawler->filter('a:contains("Show")')->eq(0)->link();
 
         $crawler = $client->click($showLink);
         $this->assertTrue($client->getResponse()->isSuccessful());
@@ -63,6 +63,6 @@ class GeneratedCrudControllerTest extends WebTestCase
         $this->assertTrue($client->getResponse()->isSuccessful());
         $this->assertStringContainsString('<!DOCTYPE html>', $client->getResponse()->getContent());
         $this->assertStringContainsString('SweetFood index', $client->getResponse()->getContent());
-        $this->assertStringContainsString('no records found', $client->getResponse()->getContent());
+        $this->assertStringContainsString('No records found', $client->getResponse()->getContent());
     }
 }
