@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
@@ -49,11 +50,14 @@ final class MakeUser extends AbstractMaker
 
     private $configUpdater;
 
-    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater)
+    private $doctrineHelper;
+
+    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, DoctrineHelper $doctrineHelper)
     {
         $this->fileManager = $fileManager;
         $this->userClassBuilder = $userClassBuilder;
         $this->configUpdater = $configUpdater;
+        $this->doctrineHelper = $doctrineHelper;
     }
 
     public static function getCommandName(): string
@@ -98,6 +102,15 @@ final class MakeUser extends AbstractMaker
             if ($missingPackagesMessage) {
                 throw new RuntimeCommandException($missingPackagesMessage);
             }
+
+            $question = 'Enter the entity\'s table name. (<comment>It will be auto-escaped.</comment>)';
+            $entityTableName = $io->ask(
+                $question, 'user', function ($name) {
+                return Validator::validateDoctrineTableName($name, $this->doctrineHelper->getRegistry());
+            });
+
+            $command->addOption('entity-table-name', $entityTableName);
+            $input->setOption('entity-table-name', $entityTableName);
         }
         $input->setOption('is-entity', $userIsEntity);
 
@@ -157,9 +170,20 @@ final class MakeUser extends AbstractMaker
             $manipulator,
             $userClassConfiguration
         );
+
+        // C) Add @ORM\Table annotation
+        if ($userClassConfiguration->isEntity()) {
+            $manipulator->addAnnotationToClass(
+                'ORM\\Table',
+                [
+                    'name' => $this->doctrineHelper->escapeTableNameIfNeeded($input->getOption('entity-table-name'))
+                ]
+            );
+        }
+
         $generator->dumpFile($classPath, $manipulator->getSourceCode());
 
-        // C) Generate a custom user provider, if necessary
+        // D) Generate a custom user provider, if necessary
         if (!$userClassConfiguration->isEntity()) {
             $userClassConfiguration->setUserProviderClass($generator->getRootNamespace().'\\Security\\UserProvider');
             $customProviderPath = $generator->generateClass(
@@ -171,7 +195,7 @@ final class MakeUser extends AbstractMaker
             );
         }
 
-        // D) Update security.yaml
+        // E) Update security.yaml
         $securityYamlUpdated = false;
         $path = 'config/packages/security.yaml';
         if ($this->fileManager->fileExists($path)) {

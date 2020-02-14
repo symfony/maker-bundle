@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\DBAL\Connection;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -163,6 +164,21 @@ final class Validator
         }
 
         self::validatePropertyName($name);
+
+        return $name;
+    }
+
+    public static function validateDoctrineTableName(string $name, ManagerRegistry $registry)
+    {
+        /** @var Connection $connection */
+        $connection = $registry->getConnection();
+        if ($connection->getSchemaManager()->tablesExist($name)) {
+            throw new \InvalidArgumentException(sprintf('Table "%s" already exists.', $name));
+        }
+
+        if (!preg_match('/^([0-9a-zA-Z_$])+$/', $name)) {
+            throw new \InvalidArgumentException(sprintf('"%s" is not a valid table name.', $name));
+        }
 
         return $name;
     }

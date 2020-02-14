@@ -15,6 +15,7 @@ use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata as LegacyClassMetadata;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver as LegacyMappingDriver;
 use Doctrine\Common\Persistence\Mapping\MappingException as LegacyPersistenceMappingException;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException as ORMMappingException;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
@@ -218,5 +219,22 @@ final class DoctrineHelper
         $legacyClass = str_replace('Doctrine\\Persistence\\', 'Doctrine\\Common\\Persistence\\', $class);
 
         return $object instanceof $class || $object instanceof $legacyClass;
+    }
+
+    public function escapeTableNameIfNeeded(string $tableName): string
+    {
+        if (!$this->isKeyword($tableName)) {
+            return $tableName;
+        }
+
+        return sprintf('`%s`', $tableName);
+    }
+
+    private function isKeyword(string $name): bool
+    {
+        /** @var Connection $connection */
+        $connection = $this->getRegistry()->getConnection();
+
+        return $connection->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name);
     }
 }

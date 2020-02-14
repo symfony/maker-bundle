@@ -727,5 +727,34 @@ class Foo
 }
 EOF
         ];
+
+        yield 'directory_namespace' => [
+            <<<EOF
+<?php
+
+namespace Acme;
+
+use Bar;
+
+class Foo
+{
+}
+EOF
+            ,
+            <<<EOF
+<?php
+
+namespace Acme;
+
+use Bar;
+
+/**
+ * @Bar\SomeAnnotation(message="Foo")
+ */
+class Foo
+{
+}
+EOF
+        ];
     }
 }
