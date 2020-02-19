@@ -2,14 +2,11 @@
 
 namespace <?= $namespace ?>;
 
-<?= $user_is_entity ? "use $user_fully_qualified_class_name;\n" : null ?>
-<?= $user_is_entity ? "use Doctrine\\ORM\\EntityManagerInterface;\n" : null ?>
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 <?= $user_needs_encoder ? "use Symfony\\Component\\Security\\Core\\Encoder\\UserPasswordEncoderInterface;\n" : null ?>
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -24,14 +21,12 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
 {
     use TargetPathTrait;
 
-<?= $user_is_entity ? "    private \$entityManager;\n" : null ?>
     private $urlGenerator;
     private $csrfTokenManager;
 <?= $user_needs_encoder ? "    private \$passwordEncoder;\n" : null ?>
 
-    public function __construct(<?= $user_is_entity ? 'EntityManagerInterface $entityManager, ' : null ?>UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager<?= $user_needs_encoder ? ', UserPasswordEncoderInterface $passwordEncoder' : null ?>)
+    public function __construct(UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager<?= $user_needs_encoder ? ', UserPasswordEncoderInterface $passwordEncoder' : null ?>)
     {
-<?= $user_is_entity ? "        \$this->entityManager = \$entityManager;\n" : null ?>
         $this->urlGenerator = $urlGenerator;
         $this->csrfTokenManager = $csrfTokenManager;
 <?= $user_needs_encoder ? "        \$this->passwordEncoder = \$passwordEncoder;\n" : null ?>
@@ -65,17 +60,9 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
             throw new InvalidCsrfTokenException();
         }
 
-        <?= $user_is_entity ? "\$user = \$this->entityManager->getRepository($user_class_name::class)->findOneBy(['$username_field' => \$credentials['$username_field']]);\n"
-        : "// Load / create our user however you need.
+        // Load / create our user however you need.
         // You can do this by calling the user provider, or with custom logic here.
-        \$user = \$userProvider->loadUserByUsername(\$credentials['$username_field']);\n"; ?>
-
-        if (!$user) {
-            // fail authentication with a custom error
-            throw new CustomUserMessageAuthenticationException('<?= ucfirst($username_field_label) ?> could not be found.');
-        }
-
-        return $user;
+        return $userProvider->loadUserByUsername($credentials['$username_field']);
     }
 
     public function checkCredentials($credentials, UserInterface $user)
