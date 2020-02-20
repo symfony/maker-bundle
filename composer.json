@@ -22,7 +22,8 @@
         "symfony/filesystem": "^3.4|^4.0|^5.0",
         "symfony/finder": "^3.4|^4.0|^5.0",
         "symfony/framework-bundle": "^3.4|^4.0|^5.0",
-        "symfony/http-kernel": "^3.4|^4.0|^5.0"
+        "symfony/http-kernel": "^3.4|^4.0|^5.0",
+        "symfony/string": "^5.0"
     },
     "require-dev": {
         "doctrine/doctrine-bundle": "^1.8|^2.0",
