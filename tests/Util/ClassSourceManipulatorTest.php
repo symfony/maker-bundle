@@ -257,6 +257,15 @@ class ClassSourceManipulatorTest extends TestCase
             ],
             'User_simple_prop_zero.php',
         ];
+
+        yield 'snake_case_property' => [
+            'User_simple.php',
+            'foo_prop',
+            [
+                'type' => 'string',
+            ],
+            'User_simple_snake_cased.php',
+        ];
     }
 
     /**
