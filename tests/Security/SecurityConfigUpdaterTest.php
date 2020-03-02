@@ -72,6 +72,12 @@ class SecurityConfigUpdaterTest extends TestCase
             'empty_source_model_email_with_password.yaml',
             'empty_security.yaml',
         ];
+
+        yield 'simple_security_with_single_memory_provider_configured' => [
+            new UserClassConfiguration(true, 'email', true),
+            'simple_security_with_single_memory_provider_configured.yaml',
+            'simple_security_with_single_memory_provider_configured.yaml',
+        ];
     }
 
     /**
