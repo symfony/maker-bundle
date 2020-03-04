@@ -125,6 +125,11 @@ class EventRegistry
      */
     public function getEventClassName(string $event)
     {
+        // if the event is already a class name, use it
+        if (class_exists($event)) {
+            return $event;
+        }
+
         if (isset(self::$eventsMap[$event])) {
             return self::$eventsMap[$event];
         }
