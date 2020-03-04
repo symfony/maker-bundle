@@ -40,7 +40,7 @@ class FunctionalTest extends TestCase
                 continue;
             }
 
-            /** Skip make forgotten password as it is temp. disabled (tkt#537) */
+            /* Skip make forgotten password as it is temp. disabled (tkt#537) */
             if (MakeForgottenPassword::class === $class) {
                 continue;
             }

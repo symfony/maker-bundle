@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeRegistrationForm;
@@ -28,7 +37,7 @@ class MakeRegistrationFormTest extends MakerTestCase
             // test run, the UniqueEntity would not be seen, because
             // the the validation cache was out of date. The cause
             // is currently unknown, so this workaround was added
-            ->addPostMakeCommand('php bin/console cache:clear --env=test')
+            ->addPostMakeCommand('php bin/console cache:clear --env=test'),
         ];
 
         // sanity check on all the interactive questions
@@ -59,7 +68,7 @@ class MakeRegistrationFormTest extends MakerTestCase
             ->updateSchemaAfterCommand()
             // workaround for strange failure - see test case
             // registration_form_entity_guard_authenticate for details
-            ->addPostMakeCommand('php bin/console cache:clear --env=test')
+            ->addPostMakeCommand('php bin/console cache:clear --env=test'),
         ];
     }
 }

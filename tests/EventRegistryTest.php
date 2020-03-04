@@ -35,7 +35,7 @@ class EventRegistryTest extends TestCase
 
         // less than PHP 7.2, unset object type-hint example
         // otherwise, it looks like a class in this namespace
-        if (PHP_VERSION_ID < 70200) {
+        if (\PHP_VERSION_ID < 70200) {
             unset($listenersMap[3]);
         }
 
