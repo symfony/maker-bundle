@@ -249,7 +249,7 @@ class InteractiveSecurityHelperTest extends TestCase
         yield 'guess_fixture_class' => [
             'expectedEmailField' => 'email',
             true,
-            FixtureClass::class
+            FixtureClass::class,
         ];
 
         yield 'guess_fixture_class_2' => [
@@ -284,7 +284,7 @@ class InteractiveSecurityHelperTest extends TestCase
         yield 'guess_fixture_class' => [
             'expectedPasswordSetter' => 'setPassword',
             true,
-            FixtureClass5::class
+            FixtureClass5::class,
         ];
 
         yield 'guess_fixture_class_2' => [
@@ -319,7 +319,7 @@ class InteractiveSecurityHelperTest extends TestCase
         yield 'guess_fixture_class' => [
             'expectedPasswordSetter' => 'getEmail',
             true,
-            FixtureClass7::class
+            FixtureClass7::class,
         ];
 
         yield 'guess_fixture_class_2' => [
@@ -354,20 +354,28 @@ class FixtureClass4
 
 class FixtureClass5
 {
-    public function setPassword() {}
+    public function setPassword()
+    {
+    }
 }
 
 class FixtureClass6
 {
-    public function setEncodedPassword() {}
+    public function setEncodedPassword()
+    {
+    }
 }
 
 class FixtureClass7
 {
-    public function getEmail() {}
+    public function getEmail()
+    {
+    }
 }
 
 class FixtureClass8
 {
-    public function getMyEmail() {}
+    public function getMyEmail()
+    {
+    }
 }

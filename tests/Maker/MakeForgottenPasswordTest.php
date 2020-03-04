@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeForgottenPassword;
@@ -10,6 +19,7 @@ class MakeForgottenPasswordTest extends MakerTestCase
 {
     /**
      * Test skipped until make forgotten password is enabled again.
+     *
      * @see https://github.com/symfony/maker-bundle/issues/537
      */
     public function getTestDetails()
@@ -27,7 +37,7 @@ class MakeForgottenPasswordTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeForgottenPassword')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
-            ->addExtraDependencies('symfony/swiftmailer-bundle')
+            ->addExtraDependencies('symfony/swiftmailer-bundle'),
         ];
     }
 }

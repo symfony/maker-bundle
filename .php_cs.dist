@@ -5,7 +5,10 @@ if (!file_exists(__DIR__.'/src')) {
 }
 
 $finder = PhpCsFixer\Finder::create()
-    ->in(__DIR__.'/src')
+    ->in(__DIR__)
+    ->exclude('vendor')
+    ->exclude('tests/tmp')
+    ->exclude('fixtures')
     // the PHP template files are a bit special
     ->notName('*.tpl.php')
 ;

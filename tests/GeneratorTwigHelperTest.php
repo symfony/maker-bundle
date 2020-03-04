@@ -19,11 +19,6 @@ class GeneratorTwigHelperTest extends TestCase
 {
     /**
      * @dataProvider getEntityFieldPrintCodeTests
-     *
-     * @param string $entity
-     * @param string $fieldName
-     * @param string $fieldType
-     * @param string $expect
      */
     public function testGetEntityFieldPrintCode(string $entity, string $fieldName, string $fieldType, string $expect)
     {
