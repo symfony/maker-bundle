@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\EventRegistry;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -83,6 +84,14 @@ class EventRegistryTest extends TestCase
 
         $registry = new EventRegistry($dispatcher);
         $this->assertSame(ExceptionEvent::class, $registry->getEventClassName(KernelEvents::EXCEPTION));
+    }
+
+    public function testGetEventClassNameGivenEventAsClass()
+    {
+        $dispatcher = $this->createMock(EventDispatcherInterface::class);
+
+        $registry = new EventRegistry($dispatcher);
+        $this->assertSame(ControllerEvent::class, $registry->getEventClassName(ControllerEvent::class));
     }
 }
 
