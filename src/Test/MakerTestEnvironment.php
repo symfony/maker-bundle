@@ -127,9 +127,14 @@ final class MakerTestEnvironment
 
         if (!$this->fs->exists($this->path)) {
             try {
+                $copyCommand = '\\' === \DIRECTORY_SEPARATOR
+                    ? 'Xcopy /E /I "%FLEX_PATH%" "%APP_PATH%"'
+                    : 'git clone "$FLEX_PATH" "$APP_PATH"'
+                ;
+
                 // lets do some magic here git is faster than copy
                 MakerTestProcess::create(
-                    '\\' === \DIRECTORY_SEPARATOR ? 'git clone %FLEX_PATH% %APP_PATH%' : 'git clone "$FLEX_PATH" "$APP_PATH"',
+                    $copyCommand,
                     \dirname($this->flexPath),
                     [
                         'FLEX_PATH' => $this->flexPath,
