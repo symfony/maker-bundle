@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Doctrine\ORM\Mapping\Table;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
@@ -186,6 +187,15 @@ final class MakeUser extends AbstractMaker
             } catch (YamlManipulationFailedException $e) {
             }
         }
+
+        // E) Change table name to eliminate database-keyword error
+        $manipulator->addAnnotationToClass(
+            Table::class,
+            [
+                'name' => 'users',
+            ]
+        );
+        $generator->dumpFile($classPath, $manipulator->getSourceCode());
 
         $generator->writeChanges();
 
