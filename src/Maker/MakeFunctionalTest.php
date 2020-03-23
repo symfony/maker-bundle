@@ -47,7 +47,7 @@ class MakeFunctionalTest extends AbstractMaker
     {
         $testClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Tests\\',
+            $generator->getNamespacesHelper()->getFunctionalTestNamespace(),
             'Test'
         );
 

@@ -15,7 +15,7 @@
             </service>
 
             <service id="maker.autoloader_finder" class="Symfony\Bundle\MakerBundle\Util\ComposerAutoloaderFinder" >
-                <argument /> <!-- root namespace -->
+                <argument type="service" id="maker.namespaces_helper" />
             </service>
 
             <service id="maker.autoloader_util" class="Symfony\Bundle\MakerBundle\Util\AutoloaderUtil">
@@ -31,8 +31,12 @@
             </service>
 
             <service id="maker.doctrine_helper" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper">
-                <argument /> <!-- entity namespace -->
+                <argument type="service" id="maker.namespaces_helper" />
                 <argument type="service" id="doctrine" on-invalid="ignore" />
+            </service>
+
+            <service id="maker.namespaces_helper" class="Symfony\Bundle\MakerBundle\Util\NamespacesHelper">
+                <argument type="collection" /> <!-- namespaces -->
             </service>
 
             <service id="maker.auto_command.abstract" class="Symfony\Bundle\MakerBundle\Command\MakerCommand" abstract="true">
@@ -43,7 +47,7 @@
 
             <service id="maker.generator" class="Symfony\Bundle\MakerBundle\Generator">
                 <argument type="service" id="maker.file_manager" />
-                <argument /> <!-- root namespace -->
+                <argument type="service" id="maker.namespaces_helper" />
             </service>
 
             <service id="maker.entity_class_generator" class="Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator">

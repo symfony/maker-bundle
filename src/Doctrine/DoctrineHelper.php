@@ -22,6 +22,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException as ORMMappingException;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
@@ -33,18 +34,18 @@ use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 final class DoctrineHelper
 {
     /**
-     * @var string
+     * @var \Symfony\Bundle\MakerBundle\Util\NamespacesHelper
      */
-    private $entityNamespace;
+    private $namespacesHelper;
 
     /**
      * @var ManagerRegistry
      */
     private $registry;
 
-    public function __construct(string $entityNamespace, ManagerRegistry $registry = null)
+    public function __construct(NamespacesHelper $namespacesHelper, ManagerRegistry $registry = null)
     {
-        $this->entityNamespace = trim($entityNamespace, '\\');
+        $this->namespacesHelper = $namespacesHelper;
         $this->registry = $registry;
     }
 
@@ -66,7 +67,11 @@ final class DoctrineHelper
 
     public function getEntityNamespace(): string
     {
-        return $this->entityNamespace;
+        return sprintf(
+            '%s\\%s',
+            $this->namespacesHelper->getRootNamespace(),
+            $this->namespacesHelper->getEntityNamespace()
+        );
     }
 
     /**
@@ -107,7 +112,7 @@ final class DoctrineHelper
 
             /* @var ClassMetadata $metadata */
             foreach (array_keys($allMetadata) as $classname) {
-                $entityClassDetails = new ClassNameDetails($classname, $this->entityNamespace);
+                $entityClassDetails = new ClassNameDetails($classname, $this->getEntityNamespace());
                 $entities[] = $entityClassDetails->getRelativeName();
             }
         }

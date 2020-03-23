@@ -29,6 +29,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -56,7 +57,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         if (null === $generator) {
             @trigger_error(sprintf('Passing a "%s" instance as 4th argument is mandatory since version 1.5.', Generator::class), E_USER_DEPRECATED);
-            $this->generator = new Generator($fileManager, 'App\\');
+            $this->generator = new Generator($fileManager, new NamespacesHelper());
         } else {
             $this->generator = $generator;
         }
@@ -105,10 +106,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $input->setArgument('name', $value);
 
+        $entityNamespace = $this->doctrineHelper->getEntityNamespace();
+
         if (
             !$input->getOption('api-resource') &&
             class_exists(ApiResource::class) &&
-            !class_exists($this->generator->createClassNameDetails($value, 'Entity\\')->getFullName())
+            !class_exists($this->generator->createClassNameDetails($value, $entityNamespace)->getFullName())
         ) {
             $description = $command->getDefinition()->getOption('api-resource')->getDescription();
             $question = new ConfirmationQuestion($description, false);
@@ -132,7 +135,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $entityClassDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Entity\\'
+            $generator->getNamespacesHelper()->getEntityNamespace()
         );
 
         $classExists = class_exists($entityClassDetails->getFullName());

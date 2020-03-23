@@ -44,7 +44,7 @@ final class MakeVoter extends AbstractMaker
     {
         $voterClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Security\\Voter\\',
+            sprintf('%s\\Voter\\', $generator->getNamespacesHelper()->getSecurityNamespace()),
             'Voter'
         );
 

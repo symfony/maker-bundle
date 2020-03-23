@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -24,13 +25,23 @@ class Generator
     private $fileManager;
     private $twigHelper;
     private $pendingOperations = [];
-    private $namespacePrefix;
+    private $namespacesHelper;
 
-    public function __construct(FileManager $fileManager, string $namespacePrefix)
+    public function __construct(FileManager $fileManager, $namespacesHelper)
     {
         $this->fileManager = $fileManager;
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
-        $this->namespacePrefix = trim($namespacePrefix, '\\');
+
+        if (!$namespacesHelper instanceof NamespacesHelper && !\is_string($namespacesHelper)) {
+            throw new \InvalidArgumentException(sprintf('$namespacesHelper must be either a "string" or an instance of "%s", "%s" given', NamespacesHelper::class, \gettype($namespacesHelper)));
+        }
+
+        if (\is_string($namespacesHelper)) {
+            @trigger_error('Passing a "string" as 2nd argument is deprecated since version 1.11.7.', E_USER_DEPRECATED);
+            $this->namespacesHelper = new NamespacesHelper(['root_namespace' => $namespacesHelper]);
+        } else {
+            $this->namespacesHelper = $namespacesHelper;
+        }
     }
 
     /**
@@ -126,7 +137,7 @@ class Generator
      */
     public function createClassNameDetails(string $name, string $namespacePrefix, string $suffix = '', string $validationErrorMessage = ''): ClassNameDetails
     {
-        $fullNamespacePrefix = $this->namespacePrefix.'\\'.$namespacePrefix;
+        $fullNamespacePrefix = $this->namespacesHelper->getRootNamespace().'\\'.$namespacePrefix;
         if ('\\' === $name[0]) {
             // class is already "absolute" - leave it alone (but strip opening \)
             $className = substr($name, 1);
@@ -199,9 +210,14 @@ class Generator
         $this->pendingOperations = [];
     }
 
+    public function getNamespacesHelper(): NamespacesHelper
+    {
+        return $this->namespacesHelper;
+    }
+
     public function getRootNamespace(): string
     {
-        return $this->namespacePrefix;
+        return $this->namespacesHelper->getRootNamespace();
     }
 
     public function generateController(string $controllerClassName, string $controllerTemplatePath, array $parameters = []): string

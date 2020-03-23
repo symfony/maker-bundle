@@ -43,7 +43,7 @@ final class MakeSerializerNormalizer extends AbstractMaker
     {
         $normalizerClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Serializer\\Normalizer\\',
+            sprintf('%s\\Normalizer\\', $generator->getNamespacesHelper()->getSerializerNamespace()),
             'Normalizer'
         );
 

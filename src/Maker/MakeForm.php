@@ -80,7 +80,7 @@ final class MakeForm extends AbstractMaker
     {
         $formClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Form\\',
+            $generator->getNamespacesHelper()->getFormNamespace(),
             'Type'
         );
 
@@ -92,7 +92,7 @@ final class MakeForm extends AbstractMaker
         if (null !== $boundClass) {
             $boundClassDetails = $generator->createClassNameDetails(
                 $boundClass,
-                'Entity\\'
+                $generator->getNamespacesHelper()->getEntityNamespace()
             );
 
             $doctrineEntityDetails = $this->entityHelper->createDoctrineDetails($boundClassDetails->getFullName());

@@ -45,7 +45,7 @@ final class MakeValidator extends AbstractMaker
     {
         $validatorClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Validator\\',
+            $generator->getNamespacesHelper()->getValidatorNamespace(),
             'Validator'
         );
 

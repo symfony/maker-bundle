@@ -43,7 +43,7 @@ final class MakeUnitTest extends AbstractMaker
     {
         $testClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Tests\\',
+            $generator->getNamespacesHelper()->getUnitTestNamespace(),
             'Test'
         );
 

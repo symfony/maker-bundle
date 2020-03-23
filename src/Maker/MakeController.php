@@ -48,7 +48,7 @@ final class MakeController extends AbstractMaker
     {
         $controllerClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('controller-class'),
-            'Controller\\',
+            $generator->getNamespacesHelper()->getControllerNamespace(),
             'Controller'
         );
 
