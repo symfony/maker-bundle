@@ -18,6 +18,7 @@ use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
+ * @editor jonathan Kablan <jonathan.kablan@gmail.com>
  */
 class Generator
 {
@@ -25,12 +26,24 @@ class Generator
     private $twigHelper;
     private $pendingOperations = [];
     private $namespacePrefix;
+    private $templateNameEntity;
+    private $templateNameRepository;
+    private $rootTemplateName;
 
+    /**
+     * Generator constructor.
+     * @param FileManager $fileManager
+     * @param string $namespacePrefix
+     */
     public function __construct(FileManager $fileManager, string $namespacePrefix)
     {
         $this->fileManager = $fileManager;
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
         $this->namespacePrefix = trim($namespacePrefix, '\\');
+
+        $this->rootTemplateName = __DIR__.'/Resources/skeleton/';
+        $this->templateNameEntity = 'doctrine/Entity.tpl.php';
+        $this->templateNameRepository = 'doctrine/Repository.tpl.php';
     }
 
     /**
@@ -64,6 +77,11 @@ class Generator
 
     /**
      * Generate a normal file from a template.
+     *
+     * @param string $targetPath
+     * @param string $templateName
+     * @param array $variables
+     * @throws \Exception
      */
     public function generateFile(string $targetPath, string $templateName, array $variables)
     {
@@ -120,9 +138,12 @@ class Generator
      *      // Cool\Stuff\BalloonController
      *      $gen->createClassNameDetails('Cool\\Stuff\\Balloon', 'Controller', 'Controller');
      *
-     * @param string $name            The short "name" that will be turned into the class name
-     * @param string $namespacePrefix Recommended namespace where this class should live, but *without* the "App\\" part
-     * @param string $suffix          Optional suffix to guarantee is on the end of the class
+     * @param string $name                   The short "name" that will be turned into the class name
+     * @param string $namespacePrefix        Recommended namespace where this class should live, but *without* the "App\\" part
+     * @param string $suffix                 Optional suffix to guarantee is on the end of the class
+     * @param string $validationErrorMessage
+     *
+     * @return ClassNameDetails
      */
     public function createClassNameDetails(string $name, string $namespacePrefix, string $suffix = '', string $validationErrorMessage = ''): ClassNameDetails
     {
@@ -145,22 +166,34 @@ class Generator
         return new ClassNameDetails($className, $fullNamespacePrefix, $suffix);
     }
 
+    /**
+     * @return string
+     */
     public function getRootDirectory(): string
     {
         return $this->fileManager->getRootDirectory();
     }
 
+    /**
+     * @param string $targetPath
+     * @param string $templateName
+     * @param array $variables
+     * @throws \Exception
+     */
     private function addOperation(string $targetPath, string $templateName, array $variables)
     {
         if ($this->fileManager->fileExists($targetPath)) {
-            throw new RuntimeCommandException(sprintf('The file "%s" can\'t be generated because it already exists.', $this->fileManager->relativizePath($targetPath)));
+            throw new RuntimeCommandException(sprintf(
+                'The file "%s" can\'t be generated because it already exists.',
+                $this->fileManager->relativizePath($targetPath)
+            ));
         }
 
         $variables['relative_path'] = $this->fileManager->relativizePath($targetPath);
 
         $templatePath = $templateName;
         if (!file_exists($templatePath)) {
-            $templatePath = __DIR__.'/Resources/skeleton/'.$templateName;
+            $templatePath = $this->rootTemplateName.$templateName;
 
             if (!file_exists($templatePath)) {
                 throw new \Exception(sprintf('Cannot find template "%s"', $templateName));
@@ -173,6 +206,9 @@ class Generator
         ];
     }
 
+    /**
+     * @return bool
+     */
     public function hasPendingOperations(): bool
     {
         return !empty($this->pendingOperations);
@@ -199,11 +235,21 @@ class Generator
         $this->pendingOperations = [];
     }
 
+    /**
+     * @return string
+     */
     public function getRootNamespace(): string
     {
         return $this->namespacePrefix;
     }
 
+    /**
+     * @param string $controllerClassName
+     * @param string $controllerTemplatePath
+     * @param array $parameters
+     * @return string
+     * @throws \Exception
+     */
     public function generateController(string $controllerClassName, string $controllerTemplatePath, array $parameters = []): string
     {
         return $this->generateClass(
@@ -218,6 +264,10 @@ class Generator
 
     /**
      * Generate a template file.
+     *
+     * @param string $targetPath
+     * @param string $templateName
+     * @param array  $variables
      */
     public function generateTemplate(string $targetPath, string $templateName, array $variables)
     {
@@ -226,5 +276,53 @@ class Generator
             $templateName,
             $variables
         );
+    }
+
+    /**
+     * @return string
+     */
+    public function getTemplateNameEntity(): string
+    {
+        return $this->templateNameEntity;
+    }
+
+    /**
+     * @param string $templateNameEntity
+     */
+    public function setTemplateNameEntity(string $templateNameEntity)
+    {
+        $this->templateNameEntity = $templateNameEntity;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTemplateNameRepository(): string
+    {
+        return $this->templateNameRepository;
+    }
+
+    /**
+     * @param string $templateNameRepository
+     */
+    public function setTemplateNameRepository(string $templateNameRepository)
+    {
+        $this->templateNameRepository = $templateNameRepository;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRootTemplateName(): string
+    {
+        return $this->rootTemplateName;
+    }
+
+    /**
+     * @param string $rootTemplateName
+     */
+    public function setRootTemplateName(string $rootTemplateName)
+    {
+        $this->rootTemplateName = $rootTemplateName;
     }
 }
