@@ -1,0 +1,13 @@
+---------------------------------------------------------------------------
+
+by nikophil at 2019-12-12T16:28:24Z
+
+Actually the problem was a little more tricky: we need to fix the deprecation to have the CI green, but we still need to support the version the bundles pretends to support. So, the object `\Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper` needs to work with both new and deprecated dependencies
+
+---------------------------------------------------------------------------
+
+by LeJeanbono at 2020-01-12T17:28:43Z
+
+Hi @nikophil , can you had `Doctrine\Common\Persistence\ObjectManager` please ?
+From #528
+Thanks
