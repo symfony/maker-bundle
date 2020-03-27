@@ -151,7 +151,13 @@ class TestEntityRegeneratorKernel extends Kernel
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
-        $c->setParameter('kernel.secret', 123);
+        $c->loadFromExtension('framework', [
+            'secret' => 123,
+            'router' => [
+                'utf8' => true,
+            ],
+        ]);
+
         $c->prependExtensionConfig('doctrine', [
             'dbal' => [
                 'driver' => 'pdo_sqlite',
@@ -200,7 +206,13 @@ class TestXmlEntityRegeneratorKernel extends Kernel
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
-        $c->setParameter('kernel.secret', 123);
+        $c->loadFromExtension('framework', [
+            'secret' => 123,
+            'router' => [
+                'utf8' => true,
+            ],
+        ]);
+
         $c->prependExtensionConfig('doctrine', [
             'dbal' => [
                 'driver' => 'pdo_sqlite',
