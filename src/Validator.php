@@ -167,6 +167,15 @@ final class Validator
         return $name;
     }
 
+    public static function validateEmailAddress(string $email): string
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new RuntimeCommandException(sprintf('"%s" is not a valid email address.', $email));
+        }
+
+        return $email;
+    }
+
     public static function existsOrNull(string $className = null, array $entities = [])
     {
         if (null !== $className) {
