@@ -130,7 +130,7 @@ class YamlSourceManipulator
         $this->arrayTypeForDepths[$this->depth] = $this->isHash($currentData) ? self::ARRAY_TYPE_HASH : self::ARRAY_TYPE_SEQUENCE;
 
         $this->log(sprintf(
-            'Changing array type & format via updateData()',
+            'Changing array type & format via updateData() (type=%s, format=%s)',
             $this->arrayTypeForDepths[$this->depth],
             $this->arrayFormatForDepths[$this->depth]
         ));
