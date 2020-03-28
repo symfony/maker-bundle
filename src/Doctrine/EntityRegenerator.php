@@ -11,9 +11,11 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
+use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\MappingException as CommonMappingException;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -235,6 +237,7 @@ final class EntityRegenerator
                 'entity_class_name' => $entityClassName,
                 'entity_alias' => strtolower($entityClassName[0]),
                 'with_password_upgrade' => false,
+                'doctrine_registry_class' => interface_exists(ManagerRegistry::class) ? ManagerRegistry::class : LegacyManagerRegistry::class,
             ]
         );
 

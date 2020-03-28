@@ -38,6 +38,17 @@ class EntityRegeneratorTest extends TestCase
      */
     public function testRegenerateEntities(string $expectedDirName, bool $overwrite)
     {
+        /*
+         * Prior to symfony/doctrine-bridge 5.0 (which require
+         * PHP 7.3), the deprecated Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain
+         * is used when our test container. This shows up as a *direct*
+         * deprecation. We're choosing to silence it here, instead of
+         * ignoring all direct deprecations.
+         */
+        if (\PHP_VERSION_ID < 70300) {
+            $this->setGroups(['@legacy']);
+        }
+
         $kernel = new TestEntityRegeneratorKernel('dev', true);
         $this->doTestRegeneration(
             __DIR__.'/fixtures/source_project',
@@ -151,7 +162,13 @@ class TestEntityRegeneratorKernel extends Kernel
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
-        $c->setParameter('kernel.secret', 123);
+        $c->loadFromExtension('framework', [
+            'secret' => 123,
+            'router' => [
+                'utf8' => true,
+            ],
+        ]);
+
         $c->prependExtensionConfig('doctrine', [
             'dbal' => [
                 'driver' => 'pdo_sqlite',
@@ -200,7 +217,13 @@ class TestXmlEntityRegeneratorKernel extends Kernel
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
-        $c->setParameter('kernel.secret', 123);
+        $c->loadFromExtension('framework', [
+            'secret' => 123,
+            'router' => [
+                'utf8' => true,
+            ],
+        ]);
+
         $c->prependExtensionConfig('doctrine', [
             'dbal' => [
                 'driver' => 'pdo_sqlite',

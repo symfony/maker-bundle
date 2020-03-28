@@ -53,7 +53,12 @@ class MakerTestKernel extends Kernel implements CompilerPassInterface
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
-        $c->setParameter('kernel.secret', 123);
+        $c->loadFromExtension('framework', [
+            'secret' => 123,
+            'router' => [
+                'utf8' => true,
+            ],
+        ]);
     }
 
     public function getProjectDir()

@@ -130,7 +130,7 @@ class YamlSourceManipulator
         $this->arrayTypeForDepths[$this->depth] = $this->isHash($currentData) ? self::ARRAY_TYPE_HASH : self::ARRAY_TYPE_SEQUENCE;
 
         $this->log(sprintf(
-            'Changing array type & format via updateData()',
+            'Changing array type & format via updateData() (type=%s, format=%s)',
             $this->arrayTypeForDepths[$this->depth],
             $this->arrayFormatForDepths[$this->depth]
         ));
@@ -638,7 +638,6 @@ class YamlSourceManipulator
             $parsedContentsData = $this->normalizeSequences($parsedContentsData);
             $newData = $this->normalizeSequences($newData);
             if ($parsedContentsData !== $newData) {
-                //var_dump(Yaml::parse($newContents), $newData, $newContents);die;
                 throw new YamlManipulationFailedException(sprintf('Content was updated, but updated content does not match expected data. Original source: "%s", updated source: "%s", updated data: %s', $this->contents, $newContents, var_export($newData, true)));
             }
         } catch (ParseException $e) {
@@ -1102,7 +1101,6 @@ class YamlSourceManipulator
 
     private function getPreviousLine(int $position)
     {
-        //var_dump(substr($this->contents, $position, 10), $this->contents);die;
         // find the previous \n by finding the last one in the content up to the position
         $endPos = strrpos(substr($this->contents, 0, $position), "\n");
         if (false === $endPos) {

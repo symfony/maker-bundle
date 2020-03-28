@@ -83,7 +83,7 @@ class Generator
      * @param array $variables
      * @throws \Exception
      */
-    public function generateFile(string $targetPath, string $templateName, array $variables)
+    public function generateFile(string $targetPath, string $templateName, array $variables = [])
     {
         $variables = array_merge($variables, [
             'helper' => $this->twigHelper,
@@ -269,7 +269,7 @@ class Generator
      * @param string $templateName
      * @param array  $variables
      */
-    public function generateTemplate(string $targetPath, string $templateName, array $variables)
+    public function generateTemplate(string $targetPath, string $templateName, array $variables = [])
     {
         $this->generateFile(
             $this->fileManager->getPathForTemplate($targetPath),
