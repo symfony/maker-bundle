@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
+use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 
@@ -52,6 +54,7 @@ final class EntityClassGenerator
                 'entity_class_name' => $entityClassDetails->getShortName(),
                 'entity_alias' => $entityAlias,
                 'with_password_upgrade' => $withPasswordUpgrade,
+                'doctrine_registry_class' => interface_exists(ManagerRegistry::class) ? ManagerRegistry::class : LegacyManagerRegistry::class,
             ]
         );
 
