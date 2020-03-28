@@ -1,0 +1,29 @@
+---------------------------------------------------------------------------
+
+by nikophil at 2019-12-11T16:54:01Z
+
+Hi,
+
+according to a chat i had with @weaverryan i've completed this maker in order to allow the user to route the message to a transport
+
+![Capture du 2019-12-11 17-53-23](https://user-images.githubusercontent.com/10139766/70642259-2fe0cb00-1c3f-11ea-80b0-a63ec498402f.png)
+
+---------------------------------------------------------------------------
+
+by OskarStark at 2019-12-12T06:43:15Z
+
+I am routing my Messages based on an „AsyncMessage“-Marker Interface, is it worth to add such an option instead of manipulating the messenger.yaml file?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2019-12-12T13:35:18Z
+
+It’s a very interesting idea... but I don’t think it’s standard enough yet to put into maker. Better to show them where/how routing happens
+
+---------------------------------------------------------------------------
+
+by nikophil at 2019-12-12T14:44:00Z
+
+i kinda agree with @weaverryan. Although it is a nice trick, it may involve too much complexity and different cases to handle in the maker.
+
+BTW, the CI is failing because of some deprecation i fixed here: https://github.com/symfony/maker-bundle/pull/518
