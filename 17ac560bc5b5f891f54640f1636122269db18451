@@ -1,0 +1,7 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-03-28T13:12:09Z
+
+Once we get this all handled, we could use an approach like Symfony's: https://github.com/symfony/symfony/blob/eb0e47b40c6524b51b1d33338f19bc2ac1355538/phpunit#L25-L32
+
+Basically, we might isolate the tests that have these `Doctrine\Common` deprecations into a separate test suite (or give them all a tag) and then run the tests in two passes. For one of the passes, we can change the `SYMFONY_DEPRECATIONS_HELPER` to some version of `max[indirect]=7`
