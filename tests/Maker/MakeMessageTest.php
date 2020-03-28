@@ -23,11 +23,11 @@ class MakeMessageTest extends MakerTestCase
         yield 'message_basic' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeMessage::class),
             [
-                'SendWelcomeEmail'
+                'SendWelcomeEmail',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMessageBasic')
             // because there is no version compatible with 7.0
-            ->setRequiredPhpVersion(70100)
+            ->setRequiredPhpVersion(70100),
         ];
 
         yield 'message_with_transport' => [
@@ -35,7 +35,7 @@ class MakeMessageTest extends MakerTestCase
                 $this->getMakerInstance(MakeMessage::class),
                 [
                     'SendWelcomeEmail',
-                    1
+                    1,
                 ]
             )
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMessageWithTransport')
@@ -61,7 +61,7 @@ class MakeMessageTest extends MakerTestCase
                 $this->getMakerInstance(MakeMessage::class),
                 [
                     'SendWelcomeEmail',
-                    0
+                    0,
                 ]
             )
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMessageWithTransport')
