@@ -102,15 +102,6 @@ final class MakeUser extends AbstractMaker
             if ($missingPackagesMessage) {
                 throw new RuntimeCommandException($missingPackagesMessage);
             }
-
-            $question = 'Enter the entity\'s table name. (<comment>It will be auto-escaped.</comment>)';
-            $entityTableName = $io->ask(
-                $question, 'user', function ($name) {
-                return Validator::validateDoctrineTableName($name, $this->doctrineHelper->getRegistry());
-            });
-
-            $command->addOption('entity-table-name', $entityTableName);
-            $input->setOption('entity-table-name', $entityTableName);
         }
         $input->setOption('is-entity', $userIsEntity);
 
@@ -148,7 +139,7 @@ final class MakeUser extends AbstractMaker
 
         // A) Generate the User class
         if ($userClassConfiguration->isEntity()) {
-            $entityClassGenerator = new EntityClassGenerator($generator);
+            $entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
             $classPath = $entityClassGenerator->generateEntityClass(
                 $userClassNameDetails,
                 false, // api resource
@@ -171,19 +162,9 @@ final class MakeUser extends AbstractMaker
             $userClassConfiguration
         );
 
-        // C) Add @ORM\Table annotation
-        if ($userClassConfiguration->isEntity()) {
-            $manipulator->addAnnotationToClass(
-                'ORM\\Table',
-                [
-                    'name' => $this->doctrineHelper->escapeTableNameIfNeeded($input->getOption('entity-table-name'))
-                ]
-            );
-        }
-
         $generator->dumpFile($classPath, $manipulator->getSourceCode());
 
-        // D) Generate a custom user provider, if necessary
+        // C) Generate a custom user provider, if necessary
         if (!$userClassConfiguration->isEntity()) {
             $userClassConfiguration->setUserProviderClass($generator->getRootNamespace().'\\Security\\UserProvider');
             $customProviderPath = $generator->generateClass(
@@ -195,7 +176,7 @@ final class MakeUser extends AbstractMaker
             );
         }
 
-        // E) Update security.yaml
+        // D) Update security.yaml
         $securityYamlUpdated = false;
         $path = 'config/packages/security.yaml';
         if ($this->fileManager->fileExists($path)) {

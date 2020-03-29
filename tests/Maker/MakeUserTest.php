@@ -25,7 +25,6 @@ class MakeUserTest extends MakerTestCase
                 // user class name
                 'User',
                 'y', // entity
-                'user', // table name
                 'email', // identity property
                 'y', // with password
                 'y', // argon

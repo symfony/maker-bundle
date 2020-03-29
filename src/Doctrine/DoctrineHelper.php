@@ -16,8 +16,10 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata as LegacyClassMetadata;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver as LegacyMappingDriver;
 use Doctrine\Common\Persistence\Mapping\MappingException as LegacyPersistenceMappingException;
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException as ORMMappingException;
+use Doctrine\ORM\Mapping\NamingStrategy;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\AbstractClassMetadataFactory;
@@ -221,16 +223,21 @@ final class DoctrineHelper
         return $object instanceof $class || $object instanceof $legacyClass;
     }
 
-    public function escapeTableNameIfNeeded(string $tableName): string
+    public function getPotentialTableName(string $className): string
     {
-        if (!$this->isKeyword($tableName)) {
-            return $tableName;
+        $entityManager = $this->registry->getManager();
+
+        if (!$entityManager instanceof EntityManagerInterface) {
+            throw new \RuntimeException('ObjectManager is not an EntityManagerInterface.');
         }
 
-        return sprintf('`%s`', $tableName);
+        /** @var NamingStrategy $namingStrategy */
+        $namingStrategy = $entityManager->getConfiguration()->getNamingStrategy();
+
+        return $namingStrategy->classToTableName($className);
     }
 
-    private function isKeyword(string $name): bool
+    public function isKeyword(string $name): bool
     {
         /** @var Connection $connection */
         $connection = $this->getRegistry()->getConnection();

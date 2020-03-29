@@ -718,12 +718,6 @@ final class ClassSourceManipulator
                         // everywhere and do not add another use statement
                         return '\\'.$class;
                     }
-
-                    // we're dealing with a "directory" namespace (ie: Assert, ORM)
-                    // we should use entire given class as alias
-                    if (0 === strpos($class, $alias)) {
-                        return $class;
-                    }
                 }
 
                 // if $class is alphabetically before this use statement, place it before

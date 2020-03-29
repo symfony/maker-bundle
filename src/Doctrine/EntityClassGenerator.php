@@ -22,10 +22,12 @@ use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 final class EntityClassGenerator
 {
     private $generator;
+    private $doctrineHelper;
 
-    public function __construct(Generator $generator)
+    public function __construct(Generator $generator, DoctrineHelper $doctrineHelper)
     {
         $this->generator = $generator;
+        $this->doctrineHelper = $doctrineHelper;
     }
 
     public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false): string
@@ -36,12 +38,16 @@ final class EntityClassGenerator
             'Repository'
         );
 
+        $tableName = $this->doctrineHelper->getPotentialTableName($entityClassDetails->getFullName());
+
         $entityPath = $this->generator->generateClass(
             $entityClassDetails->getFullName(),
             'doctrine/Entity.tpl.php',
             [
                 'repository_full_class_name' => $repoClassDetails->getFullName(),
                 'api_resource' => $apiResource,
+                'should_escape_table_name' => $this->doctrineHelper->isKeyword($tableName),
+                'table_name' => $tableName,
             ]
         );
 
