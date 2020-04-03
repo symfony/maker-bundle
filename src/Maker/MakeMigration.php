@@ -67,13 +67,13 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
     {
         $options = ['doctrine:migrations:diff'];
         if (null !== $input->getOption('db')) {
-            $options[] = '--db'.$input->getOption('db');
+            $options[] = '--db='.$input->getOption('db');
         }
         if (null !== $input->getOption('em')) {
             $options[] = '--em='.$input->getOption('em');
         }
         if (null !== $input->getOption('shard')) {
-            $options[] = '--shard'.$input->getOption('shard');
+            $options[] = '--shard='.$input->getOption('shard');
         }
 
         $generateMigrationCommand = $this->application->find('doctrine:migrations:diff');
