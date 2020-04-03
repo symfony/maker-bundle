@@ -137,7 +137,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {
-            $entityClassGenerator = new EntityClassGenerator($generator);
+            $entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
             $entityPath = $entityClassGenerator->generateEntityClass(
                 $entityClassDetails,
                 $input->getOption('api-resource')

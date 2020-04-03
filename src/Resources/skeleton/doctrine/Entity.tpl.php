@@ -10,6 +10,8 @@ use Doctrine\ORM\Mapping as ORM;
 <?php if ($api_resource): ?> * @ApiResource()
 <?php endif ?>
  * @ORM\Entity(repositoryClass="<?= $repository_full_class_name ?>")
+<?php if ($should_escape_table_name): ?> * @ORM\Table(name="`<?= $table_name ?>`")
+<?php endif ?>
  */
 class <?= $class_name."\n" ?>
 {

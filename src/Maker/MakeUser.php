@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
@@ -49,11 +50,14 @@ final class MakeUser extends AbstractMaker
 
     private $configUpdater;
 
-    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater)
+    private $doctrineHelper;
+
+    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, DoctrineHelper $doctrineHelper)
     {
         $this->fileManager = $fileManager;
         $this->userClassBuilder = $userClassBuilder;
         $this->configUpdater = $configUpdater;
+        $this->doctrineHelper = $doctrineHelper;
     }
 
     public static function getCommandName(): string
@@ -135,7 +139,7 @@ final class MakeUser extends AbstractMaker
 
         // A) Generate the User class
         if ($userClassConfiguration->isEntity()) {
-            $entityClassGenerator = new EntityClassGenerator($generator);
+            $entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
             $classPath = $entityClassGenerator->generateEntityClass(
                 $userClassNameDetails,
                 false, // api resource
@@ -157,6 +161,7 @@ final class MakeUser extends AbstractMaker
             $manipulator,
             $userClassConfiguration
         );
+
         $generator->dumpFile($classPath, $manipulator->getSourceCode());
 
         // C) Generate a custom user provider, if necessary
