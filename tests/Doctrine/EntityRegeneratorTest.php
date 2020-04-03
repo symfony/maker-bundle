@@ -110,6 +110,9 @@ class EntityRegeneratorTest extends TestCase
 
         $fileManager = new FileManager($fs, $autoloaderUtil, $tmpDir);
         $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
+        // triggers a cache warmup, which puts old mapping metadata in cache
+
+        $doctrineHelper->getMetadata($namespace);
         $regenerator = new EntityRegenerator(
             $doctrineHelper,
             $fileManager,
