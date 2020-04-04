@@ -16,7 +16,6 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata as LegacyClassMetadata;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver as LegacyMappingDriver;
 use Doctrine\Common\Persistence\Mapping\MappingException as LegacyPersistenceMappingException;
 use Doctrine\DBAL\Connection;
-use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException as ORMMappingException;
 use Doctrine\ORM\Mapping\NamingStrategy;
