@@ -118,12 +118,12 @@ class MakeResetPassword extends AbstractMaker
         )
         );
 
-        $io->section('- Email Templates -');
+        $io->section('- Email -');
         $emailText[] = 'These are used to generate the email code. Don\'t worry, you can change them in the code later!';
         $io->text($emailText);
 
         $input->setArgument('from-email-address', $io->ask(
-            'What email address will be used to send reset confirmations? e.g. admin@your-domain.com',
+            'What email address will be used to send reset confirmations? e.g. mailer@your-domain.com',
             null,
             [Validator::class, 'validateEmailAddress']
         ));
