@@ -68,6 +68,11 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_reset_password" class="Symfony\Bundle\MakerBundle\Maker\MakeResetPassword">
+                <argument type="service" id="maker.file_manager" />
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_serializer_encoder" class="Symfony\Bundle\MakerBundle\Maker\MakeSerializerEncoder">
                 <tag name="maker.command" />
             </service>
