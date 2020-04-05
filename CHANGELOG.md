@@ -1,3 +1,21 @@
+1.15
+====
+
+* [make:reset-password] New `make:reset-password` to generate an
+  entire "reset password" controller, forms, template setup - #567
+  thanks to @jrushlow and @romaricdrigon
+
+* [make:message] New `make:message` command to generate a
+  Messenger messaage & handler class - #338 thanks to @nikophil
+
+* [make:messenger-middleware] New `make:messenger-middleware`
+  command to generate a middleware for Messenger
+
+1.14
+====
+
+* Added support for Symfony 5
+
 1.13
 ====
 
