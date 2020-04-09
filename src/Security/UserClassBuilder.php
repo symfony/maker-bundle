@@ -232,7 +232,7 @@ final class UserClassBuilder
         if ($userClassConfig->hasPassword()) {
             $builder->addStmt(
                 $manipulator->createMethodLevelCommentNode(
-                    'not needed when using the "bcrypt" algorithm in security.yaml'
+                    'not needed when using the "bcrypt/sodium" algorithm in security.yaml'
                 )
             );
         } else {
