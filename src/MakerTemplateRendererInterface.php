@@ -10,13 +10,14 @@ interface MakerTemplateRendererInterface
 {
     /**
      * @param string $templateName
-     * @return string
+     * @return bool
      */
-    public function supports(string $templateName): string;
+    public function supports(string $templateName): bool;
 
     /**
      * @param string $templateName
+     * @param array $variables
      * @return string
      */
-    public function render(string $templateName = null): string;
+    public function render(string $templateName, array $variables): string;
 }

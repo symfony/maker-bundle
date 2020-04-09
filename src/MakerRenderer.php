@@ -1,21 +1,36 @@
 <?php
 
-
 namespace Symfony\Bundle\MakerBundle;
 
-class MakerRenderer implements MakerTemplateRendererInterface
+class MakerRenderer
 {
-    public function supports(string $templateName = null): string
+    /**
+     * @var MakerTemplateRendererInterface[]
+     */
+    private $templateRenderers;
+
+    /**
+     * @param array $templateRenderers
+     */
+    public function __construct(array $templateRenderers)
     {
-        return $templateName;
+        $this->templateRenderers = $templateRenderers;
     }
 
-    public function render(string $templateName = null): string
+    /**
+     * @param string $templateName
+     * @param array $variables
+     * @return string
+     * @throws \Exception
+     */
+    public function renderTemplate(string $templateName, array $variables)
     {
-        if (null === $templateName) {
-            return __DIR__.'/Resources/skeleton/';
+        foreach ($this->templateRenderers as $templateRenderer) {
+            if ($templateRenderer->supports($templateName)) {
+                return $templateRenderer->render($templateName, $variables);
+            }
         }
 
-        return $this->supports($templateName);
+        throw new \Exception(sprintf('No template renderers for template "%s"', $templateName));
     }
 }
