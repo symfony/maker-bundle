@@ -256,7 +256,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $this->writeSuccessMessage($io);
         $io->text([
-            'Next: When you\'re ready, create a migration with <comment>make:migration</comment>',
+            'Next: When you\'re ready, create a migration with <info>php bin/console make:migration</info>',
             '',
         ]);
     }

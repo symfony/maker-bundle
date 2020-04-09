@@ -4,7 +4,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Repositor
 
 use Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity\UserXml;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method UserXml|null find($id, $lockMode = null, $lockVersion = null)
