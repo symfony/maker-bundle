@@ -52,6 +52,7 @@ class MakeResetPassword extends AbstractMaker
     {
         $command
             ->setDescription('Create controller, entity, and repositories for use with symfonycasts/reset-password-bundle.')
+            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeResetPassword.txt'))
         ;
     }
 
