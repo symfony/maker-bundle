@@ -12,6 +12,12 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Component\Yaml\Yaml;
+use Doctrine\Common\Annotations\Annotation;
+use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Doctrine\Common\Annotations\Annotation;
