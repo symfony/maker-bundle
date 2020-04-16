@@ -1,26 +1,26 @@
-<?= "<?php\n" ?>
+<?php echo "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?php echo $namespace; ?>;
 
-<?php if ($panther_is_available): ?>
+<?php if ($panther_is_available) { ?>
 use Symfony\Component\Panther\PantherTestCase;
-<?php else: ?>
+<?php } else { ?>
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-<?php endif ?>
+<?php } ?>
 
-class <?= $class_name ?> extends <?= $panther_is_available ? 'PantherTestCase' : 'WebTestCase' ?><?= "\n" ?>
+class <?php echo $class_name ?> extends <?php echo $panther_is_available ? 'PantherTestCase' : 'WebTestCase' ?><?php echo "\n" ?>
 {
     public function testSomething()
     {
         $client = static::createClient();
         $crawler = $client->request('GET', '/');
 
-<?php if ($web_assertions_are_available): ?>
+<?php if ($web_assertions_are_available) { ?>
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('h1', 'Hello World');
-<?php else: ?>
+<?php } else { ?>
         $this->assertSame(200, $client->getResponse()->getStatusCode());
         $this->assertStringContainsString('Hello World', $crawler->filter('h1')->text());
-<?php endif ?>
+<?php } ?>
     }
 }

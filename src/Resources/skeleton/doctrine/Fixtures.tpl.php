@@ -1,11 +1,11 @@
-<?= "<?php\n" ?>
+<?php echo "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?php echo $namespace; ?>;
 
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use <?= $object_manager_class; ?>;
+use <?php echo $object_manager_class; ?>;
 
-class <?= $class_name ?> extends Fixture
+class <?php echo $class_name ?> extends Fixture
 {
     public function load(ObjectManager $manager)
     {

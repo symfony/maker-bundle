@@ -1,13 +1,13 @@
-<?= "<?php\n" ?>
+<?php echo "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?php echo $namespace; ?>;
 
-use <?= $message_full_class_name ?>;
+use <?php echo $message_full_class_name ?>;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
-final class <?= $class_name ?> implements MessageHandlerInterface
+final class <?php echo $class_name ?> implements MessageHandlerInterface
 {
-    public function __invoke(<?= $message_class_name ?> $message)
+    public function __invoke(<?php echo $message_class_name ?> $message)
     {
         // do something with your message
     }

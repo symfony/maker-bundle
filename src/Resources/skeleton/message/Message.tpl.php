@@ -1,8 +1,8 @@
-<?= "<?php\n" ?>
+<?php echo "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?php echo $namespace; ?>;
 
-final class <?= $class_name."\n" ?>
+final class <?php echo $class_name."\n" ?>
 {
     /*
      * Add whatever properties & methods you need to hold the

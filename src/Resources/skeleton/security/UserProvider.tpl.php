@@ -1,14 +1,14 @@
-<?= "<?php\n" ?>
+<?php echo "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?php echo $namespace; ?>;
 
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
-<?= ($password_upgrader = interface_exists('Symfony\Component\Security\Core\User\PasswordUpgraderInterface')) ? "use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;\n" : '' ?>
+<?php echo ($password_upgrader = interface_exists('Symfony\Component\Security\Core\User\PasswordUpgraderInterface')) ? "use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;\n" : '' ?>
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
-class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader ? ", PasswordUpgraderInterface\n" : "\n" ?>
+class <?php echo $class_name ?> implements UserProviderInterface<?php echo $password_upgrader ? ", PasswordUpgraderInterface\n" : "\n" ?>
 {
     /**
      * Symfony calls this method if you use features like switch_user
@@ -45,7 +45,7 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
      */
     public function refreshUser(UserInterface $user)
     {
-        if (!$user instanceof <?= $user_short_name ?>) {
+        if (!$user instanceof <?php echo $user_short_name ?>) {
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
 
@@ -59,9 +59,9 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
      */
     public function supportsClass($class)
     {
-        return <?= $user_short_name ?>::class === $class;
+        return <?php echo $user_short_name ?>::class === $class;
     }
-<?php if ($password_upgrader): ?>
+<?php if ($password_upgrader) { ?>
 
     /**
      * Upgrades the encoded password of a user, typically for using a better hash algorithm.
@@ -72,5 +72,5 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
         // 1. persist the new password in the user storage
         // 2. update the $user object with $user->setPassword($newEncodedPassword);
     }
-<?php endif ?>
+<?php } ?>
 }

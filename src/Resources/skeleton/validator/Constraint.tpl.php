@@ -1,13 +1,13 @@
-<?= "<?php\n" ?>
+<?php echo "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?php echo $namespace; ?>;
 
 use Symfony\Component\Validator\Constraint;
 
 /**
  * @Annotation
  */
-class <?= $class_name ?> extends Constraint
+class <?php echo $class_name ?> extends Constraint
 {
     /*
      * Any public properties become valid options for the annotation.
