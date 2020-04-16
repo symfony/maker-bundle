@@ -578,7 +578,7 @@ class ClassSourceManipulatorTest extends TestCase
     public function testAddMethodBuilder()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_method/UserEmpty_with_newMethod.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_method/UserEmpty_with_new_method.php');
 
         $manipulator = new ClassSourceManipulator($source);
 
@@ -845,7 +845,7 @@ EOF
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddConstructorInClassContainsConstant()
+    public function testAddConstructorInClassContainsConstants()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_no_props_constants.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/User_with_constructor_constant.php');
