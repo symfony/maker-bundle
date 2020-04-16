@@ -85,6 +85,12 @@ final class ClassSourceManipulator
         return $this->sourceCode;
     }
 
+    public function clearClassNodeStmts()
+    {
+        $this->getClassNode()->stmts = [];
+        $this->updateSourceCodeFromNewStmts();
+    }
+
     public function addEntityField(string $propertyName, array $columnOptions, array $comments = [])
     {
         $typeHint = $this->getEntityTypeHint($columnOptions['type']);
@@ -209,26 +215,8 @@ final class ClassSourceManipulator
                 array_unshift($classNode->stmts, new Node\Name("use " . $name . ";\n"));
             }
         }
+
         $this->updateSourceCodeFromNewStmts();
-    }
-
-    public function addAccessorMethod(string $propertyName, string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = [], $typeCast = null)
-    {
-        $this->addCustomGetter($propertyName, $methodName, $returnType, $isReturnTypeNullable, $commentLines, $typeCast);
-    }
-
-    public function addGetter(string $propertyName, $returnType, bool $isReturnTypeNullable, array $commentLines = [])
-    {
-        $methodName = 'get'.Str::asCamelCase($propertyName);
-
-        $this->addCustomGetter($propertyName, $methodName, $returnType, $isReturnTypeNullable, $commentLines);
-    }
-
-    public function addSetter(string $propertyName, $type, bool $isNullable, array $commentLines = [])
-    {
-        $builder = $this->createSetterNodeBuilder($propertyName, $type, $isNullable, $commentLines);
-        $this->makeMethodFluent($builder);
-        $this->addMethod($builder->getNode());
     }
 
     public function addConstructor(array $params = [], string $methodBody = null)
@@ -249,6 +237,26 @@ final class ClassSourceManipulator
         
         $this->addNodeAfterProperties($methodBuilder->getNode());        
         $this->updateSourceCodeFromNewStmts();
+    }
+
+    public function addAccessorMethod(string $propertyName, string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = [], $typeCast = null)
+    {
+        $this->addCustomGetter($propertyName, $methodName, $returnType, $isReturnTypeNullable, $commentLines, $typeCast);
+    }
+
+    public function addGetter(string $propertyName, $returnType, bool $isReturnTypeNullable, array $commentLines = [])
+    {
+        $methodName = 'get'.Str::asCamelCase($propertyName);
+
+        $this->addCustomGetter($propertyName, $methodName, $returnType, $isReturnTypeNullable, $commentLines);
+    }
+
+    public function addSetter(string $propertyName, $type, bool $isNullable, array $commentLines = [])
+    {
+        $builder = $this->createSetterNodeBuilder($propertyName, $type, $isNullable, $commentLines);
+
+        $this->makeMethodFluent($builder);
+        $this->addMethod($builder->getNode());
     }
 
     public function addMethodBuilder(Builder\Method $methodBuilder, array $params = [], string $methodBody = null)
@@ -285,7 +293,7 @@ final class ClassSourceManipulator
     {
         $methodNodeBuilder = (new Builder\Method($methodName))
             ->makePublic()
-        ;    
+        ;
 
         if (null !== $returnType) {
             $methodNodeBuilder->setReturnType($isReturnTypeNullable ? new Node\NullableType($returnType) : $returnType);
@@ -293,7 +301,7 @@ final class ClassSourceManipulator
 
         if ($commentLines) {
             $methodNodeBuilder->setDocComment($this->createDocBlock($commentLines));
-        }  
+        }
 
         return $methodNodeBuilder;
     }
@@ -363,12 +371,6 @@ final class ClassSourceManipulator
 
         $docComment = new Doc(implode("\n", $docLines));
         $this->getClassNode()->setDocComment($docComment);
-        $this->updateSourceCodeFromNewStmts();
-    }
-
-    public function clearClassNodeStmts()
-    {
-        $this->getClassNode()->stmts = [];
         $this->updateSourceCodeFromNewStmts();
     }
 

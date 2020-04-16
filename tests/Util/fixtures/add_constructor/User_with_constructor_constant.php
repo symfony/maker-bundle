@@ -9,14 +9,16 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class User
 {
-    use TestTrait;
-
     const FOO = 'bar';
 
     /**
      * Hi!
      */
     const BAR = 'bar';
+
+    public function __construct()
+    {
+    }
 
     /**
      * @return string

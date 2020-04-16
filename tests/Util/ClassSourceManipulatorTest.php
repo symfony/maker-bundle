@@ -638,118 +638,118 @@ class ClassSourceManipulatorTest extends TestCase
     {
         yield 'no_doc_block' => [
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            class Foo
-            {
-            }
-            EOF
+class Foo
+{
+}
+EOF
             ,
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            use Bar\SomeAnnotation;
+use Bar\SomeAnnotation;
 
-            /**
-             * @SomeAnnotation(message="Foo")
-             */
-            class Foo
-            {
-            }
-            EOF
+/**
+ * @SomeAnnotation(message="Foo")
+ */
+class Foo
+{
+}
+EOF
         ];
 
         yield 'normal_doc_block' => [
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            /**
-             * I'm a class!
-             */
-            class Foo
-            {
-            }
-            EOF
+/**
+ * I'm a class!
+ */
+class Foo
+{
+}
+EOF
             ,
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            use Bar\SomeAnnotation;
+use Bar\SomeAnnotation;
 
-            /**
-             * I'm a class!
-             * @SomeAnnotation(message="Foo")
-             */
-            class Foo
-            {
-            }
-            EOF
+/**
+ * I'm a class!
+ * @SomeAnnotation(message="Foo")
+ */
+class Foo
+{
+}
+EOF
         ];
 
         yield 'simple_inline_doc_block' => [
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            /** I'm a class! */
-            class Foo
-            {
-            }
-            EOF
+/** I'm a class! */
+class Foo
+{
+}
+EOF
             ,
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            use Bar\SomeAnnotation;
+use Bar\SomeAnnotation;
 
-            /**
-             * I'm a class!
-             * @SomeAnnotation(message="Foo")
-             */
-            class Foo
-            {
-            }
-            EOF
+/**
+ * I'm a class!
+ * @SomeAnnotation(message="Foo")
+ */
+class Foo
+{
+}
+EOF
         ];
 
         yield 'weird_inline_doc_block' => [
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            /** **I'm a class!** ***/
-            class Foo
-            {
-            }
-            EOF
+/** **I'm a class!** ***/
+class Foo
+{
+}
+EOF
             ,
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            use Bar\SomeAnnotation;
+use Bar\SomeAnnotation;
 
-            /**
-             * **I'm a class!**
-             * @SomeAnnotation(message="Foo")
-             ***/
-            class Foo
-            {
-            }
-            EOF
+/**
+ * **I'm a class!**
+ * @SomeAnnotation(message="Foo")
+ ***/
+class Foo
+{
+}
+EOF
         ];
     }
 
@@ -789,9 +789,9 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddTraitWithConstant()
+    public function testAddTraitWithConstants()
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_no_props_constants.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_const_trait.php');
 
         $manipulator = new ClassSourceManipulator($source);
@@ -823,7 +823,7 @@ class ClassSourceManipulatorTest extends TestCase
         $manipulator->addConstructor([
                     ['someObjectParam', null, 'object'],
                     ['someStringParam', null, 'string'],
-                ], <<<'CODE'
+                ],  <<<'CODE'
                 <?php
                 $this->someObjectParam = $someObjectParam;
                 $this->someMethod($someStringParam);
@@ -845,10 +845,10 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddConstructorInClassContainsOnlyConstants()
+    public function testAddConstructorInClassContainsConstant()
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/User_with_constructorConst.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_no_props_constants.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/User_with_constructor_constant.php');
 
         $manipulator = new ClassSourceManipulator($source);
 
