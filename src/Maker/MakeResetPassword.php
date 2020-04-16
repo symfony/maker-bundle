@@ -11,28 +11,28 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
-use Symfony\Component\Yaml\Yaml;
-use Symfony\Bundle\MakerBundle\Generator;
-use Symfony\Bundle\MakerBundle\Validator;
-use Symfony\Bundle\MakerBundle\FileManager;
-use Symfony\Bundle\MakerBundle\ConsoleStyle;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
-use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
-use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\FileManager;
+use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
-use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestTrait;
-use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
+use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
+use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Yaml\Yaml;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestInterface;
-use SymfonyCasts\Bundle\ResetPassword\Persistence\ResetPasswordRequestRepositoryInterface;
+use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestTrait;
 use SymfonyCasts\Bundle\ResetPassword\Persistence\Repository\ResetPasswordRequestRepositoryTrait;
+use SymfonyCasts\Bundle\ResetPassword\Persistence\ResetPasswordRequestRepositoryInterface;
+use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
 
 /**
  * @author Romaric Drigon <romaric.drigon@gmail.com>
@@ -68,10 +68,10 @@ class MakeResetPassword extends AbstractMaker
     public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
-            SymfonyCastsResetPasswordBundle::class, 
+            SymfonyCastsResetPasswordBundle::class,
             'symfonycasts/reset-password-bundle'
         );
-        
+
         $dependencies->addClassDependency(
             DoctrineBundle::class,
             'orm-pack'
@@ -206,7 +206,7 @@ class MakeResetPassword extends AbstractMaker
         );
 
         $entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
-        
+
         $pathRequestEntity = $entityClassGenerator->generateEntityClass($requestClassNameDetails, false);
 
         $generator->writeChanges();
@@ -229,28 +229,28 @@ class MakeResetPassword extends AbstractMaker
                 ['user', null, 'object'],
                 ['expiresAt', null, '\DateTimeInterface'],
                 ['selector', null, 'string'],
-                ['hashedToken', null, 'string']
+                ['hashedToken', null, 'string'],
             ], <<<'CODE'
             <?php
             $this->user = $user;
             $this->initialize($expiresAt, $selector, $hashedToken);
             CODE
-        );    
+        );
 
         $manipulator->addProperty('id', [
             '@ORM\Id()',
-            '@ORM\GeneratedValue()', 
-            '@ORM\Column(type="integer")'
+            '@ORM\GeneratedValue()',
+            '@ORM\Column(type="integer")',
         ]);
 
         $manipulator->addProperty('user', [
-            '@ORM\ManyToOne(targetEntity="App\Entity\User")'
+            '@ORM\ManyToOne(targetEntity="App\Entity\User")',
         ]);
 
         $manipulator->addGetter('user', 'object', false);
 
         $this->fileManager->dumpFile(
-            $pathRequestEntity, 
+            $pathRequestEntity,
             $manipulator->getSourceCode()
         );
 
@@ -259,7 +259,7 @@ class MakeResetPassword extends AbstractMaker
         );
 
         $manipulator = new ClassSourceManipulator(
-            $this->fileManager->getFileContents($pathRequestRepository), 
+            $this->fileManager->getFileContents($pathRequestRepository),
         );
 
         $manipulator->clearClassNodeStmts();
@@ -275,12 +275,12 @@ class MakeResetPassword extends AbstractMaker
         $manipulator->addTrait('ResetPasswordRequestRepositoryTrait');
 
         $manipulator->addConstructor([
-                ['registry', null, 'ManagerRegistry']
+                ['registry', null, 'ManagerRegistry'],
             ], <<<'CODE'
             <?php
             parent::__construct($registry, ResetPasswordRequest::class);
             CODE
-        );  
+        );
 
         $methodBuilder = $manipulator->createMethodBuilder('createResetPasswordRequest', 'ResetPasswordRequestInterface', false);
 
@@ -288,12 +288,12 @@ class MakeResetPassword extends AbstractMaker
                 ['user', null, 'object'],
                 ['expiresAt', null, '\DateTimeInterface'],
                 ['selector', null, 'string'],
-                ['hashedToken', null, 'string']
+                ['hashedToken', null, 'string'],
             ], <<<'CODE'
             <?php
             return new ResetPasswordRequest($user, $expiresAt, $selector, $hashedToken);
             CODE
-        );    
+        );
 
         $this->fileManager->dumpFile($pathRequestRepository, $manipulator->getSourceCode());
 
