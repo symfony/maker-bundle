@@ -193,7 +193,6 @@ final class ClassSourceManipulator
         if (empty($classNode->stmts)) {
             $classNode->stmts[0] = new Node\Name("use " . $name . ";");
         } else {
-
             $traitNode = $this->findFirstNode(function ($node) {
                 return $node instanceof Node\Stmt\Class_
                     && !empty($node->stmts[0])
@@ -254,7 +253,6 @@ final class ClassSourceManipulator
     public function addSetter(string $propertyName, $type, bool $isNullable, array $commentLines = [])
     {
         $builder = $this->createSetterNodeBuilder($propertyName, $type, $isNullable, $commentLines);
-
         $this->makeMethodFluent($builder);
         $this->addMethod($builder->getNode());
     }
