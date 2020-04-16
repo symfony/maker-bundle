@@ -62,7 +62,7 @@ final class EntityClassGenerator
                 'with_password_upgrade' => $withPasswordUpgrade,
                 'doctrine_registry_class' => interface_exists(ManagerRegistry::class) ? ManagerRegistry::class : LegacyManagerRegistry::class,
             ]
-        );
+            );
 
         return $entityPath;
     }

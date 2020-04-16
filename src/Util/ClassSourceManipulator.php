@@ -11,24 +11,26 @@
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use PhpParser\Builder;
-use PhpParser\BuilderHelpers;
-use PhpParser\Comment\Doc;
-use PhpParser\Lexer;
 use PhpParser\Node;
-use PhpParser\NodeTraverser;
-use PhpParser\NodeVisitor;
+use PhpParser\Lexer;
 use PhpParser\Parser;
+use PhpParser\Builder;
+use PhpParser\Node\Param;
+use PhpParser\Comment\Doc;
+use PhpParser\NodeVisitor;
+use PhpParser\NodeTraverser;
+use PhpParser\BuilderHelpers;
+use PhpParser\Node\Expr\Variable;
+use Symfony\Bundle\MakerBundle\Str;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
-use Symfony\Bundle\MakerBundle\Doctrine\BaseCollectionRelation;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\MakerBundle\Doctrine\BaseRelation;
-use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
+use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
-use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
-use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
+use Symfony\Bundle\MakerBundle\Doctrine\BaseCollectionRelation;
 
 /**
  * @internal
@@ -178,6 +180,38 @@ final class ClassSourceManipulator
         $this->updateSourceCodeFromNewStmts();
     }
 
+    public function addTrait($name) {
+        
+        $classNode = $this->getClassNode();
+
+        if (empty($classNode->stmts)) {
+            $classNode->stmts[0] = new Node\Name("use " . $name . ";");
+        } else {
+
+            $traitNode = $this->findFirstNode(function ($node) {
+                return $node instanceof Node\Stmt\Class_
+                    && !empty($node->stmts[0])
+                    && $node->stmts[0] instanceof Node\Stmt\TraitUse;
+            });
+    
+            if($traitNode) {
+                foreach ($classNode->stmts as $value) {
+                    if(!$value instanceof Node\Stmt\TraitUse) {
+                        break;
+                    }
+                    // if trait already exists
+                    if(strstr($value->traits[0]->parts[0], $name)) {
+                        return;
+                    }
+                }
+                array_unshift($classNode->stmts, new Node\Name("use " . $name . ";"));
+            } else {
+                array_unshift($classNode->stmts, new Node\Name("use " . $name . ";\n"));
+            }
+        }
+        $this->updateSourceCodeFromNewStmts();
+    }
+
     public function addAccessorMethod(string $propertyName, string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = [], $typeCast = null)
     {
         $this->addCustomGetter($propertyName, $methodName, $returnType, $isReturnTypeNullable, $commentLines, $typeCast);
@@ -197,8 +231,36 @@ final class ClassSourceManipulator
         $this->addMethod($builder->getNode());
     }
 
-    public function addMethodBuilder(Builder\Method $methodBuilder)
+    public function addConstructor(array $params = [], string $methodBody = null)
     {
+        if($this->getConstructorNode()) {
+            throw new \LogicException("Constructor already exists.", 1);
+        }        
+
+        $methodBuilder = $this->createMethodBuilder('__construct', null, false, []); 
+
+        if(!empty($params)) {
+            $this->addMethodParams($methodBuilder, $params);
+        }
+
+        if($methodBody) {
+            $this->addMethodBody($methodBuilder, $methodBody);
+        }
+        
+        $this->addNodeAfterProperties($methodBuilder->getNode());        
+        $this->updateSourceCodeFromNewStmts();
+    }
+
+    public function addMethodBuilder(Builder\Method $methodBuilder, array $params = [], string $methodBody = null)
+    {
+        if(!empty($params)) {
+            $this->addMethodParams($methodBuilder, $params);
+        }
+
+        if($methodBody) {
+            $this->addMethodBody($methodBuilder, $methodBody);
+        }
+
         $this->addMethod($methodBuilder->getNode());
     }
 
@@ -208,11 +270,22 @@ final class ClassSourceManipulator
         $methodBuilder->addStmts($nodes);
     }
 
+    public function addMethodParams(Builder\Method $methodBuilder, array $params) {
+        foreach ($params as $param) {
+            $methodBuilder->addParam(
+                new Param(
+                    new Variable($param[0]), 
+                    $param[1] ?? null, $param[2] ?? null, $param[3] ?? false, $param[4] ?? false, $param[5] ?? []
+                )
+            );            
+        } 
+    }
+
     public function createMethodBuilder(string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = []): Builder\Method
     {
         $methodNodeBuilder = (new Builder\Method($methodName))
             ->makePublic()
-        ;
+        ;    
 
         if (null !== $returnType) {
             $methodNodeBuilder->setReturnType($isReturnTypeNullable ? new Node\NullableType($returnType) : $returnType);
@@ -220,7 +293,7 @@ final class ClassSourceManipulator
 
         if ($commentLines) {
             $methodNodeBuilder->setDocComment($this->createDocBlock($commentLines));
-        }
+        }  
 
         return $methodNodeBuilder;
     }
@@ -290,6 +363,12 @@ final class ClassSourceManipulator
 
         $docComment = new Doc(implode("\n", $docLines));
         $this->getClassNode()->setDocComment($docComment);
+        $this->updateSourceCodeFromNewStmts();
+    }
+
+    public function clearClassNodeStmts()
+    {
+        $this->getClassNode()->stmts = [];
         $this->updateSourceCodeFromNewStmts();
     }
 
@@ -434,6 +513,7 @@ final class ClassSourceManipulator
                 'nullable' => false,
             ]);
         }
+
         $this->addProperty($relation->getPropertyName(), $annotations);
 
         $this->addGetter(
@@ -1052,6 +1132,13 @@ final class ClassSourceManipulator
         if (!$targetNode) {
             $targetNode = $this->findLastNode(function ($node) {
                 return $node instanceof Node\Stmt\ClassConst;
+            }, [$classNode]);
+        }
+
+        // otherwise, try to add after the last trait
+        if (!$targetNode) {
+            $targetNode = $this->findLastNode(function ($node) {
+                return $node instanceof Node\Stmt\TraitUse;
             }, [$classNode]);
         }
 
