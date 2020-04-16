@@ -1,10 +1,10 @@
-<?= "<?php\n" ?>
+<?php echo "<?php\n" ?>
 
-namespace <?= $namespace ?>;
+namespace <?php echo $namespace ?>;
 
-use <?= $user_full_class_name ?>;
-use <?= $reset_form_type_full_class_name ?>;
-use <?= $request_form_type_full_class_name ?>;
+use <?php echo $user_full_class_name ?>;
+use <?php echo $reset_form_type_full_class_name ?>;
+use <?php echo $request_form_type_full_class_name ?>;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -21,7 +21,7 @@ use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 /**
  * @Route("/reset-password")
  */
-class <?= $class_name ?> extends AbstractController
+class <?php echo $class_name ?> extends AbstractController
 {
     use ResetPasswordControllerTrait;
 
@@ -39,7 +39,7 @@ class <?= $class_name ?> extends AbstractController
      */
     public function request(Request $request, MailerInterface $mailer): Response
     {
-        $form = $this->createForm(<?= $request_form_type_class_name ?>::class);
+        $form = $this->createForm(<?php echo $request_form_type_class_name ?>::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -103,7 +103,7 @@ class <?= $class_name ?> extends AbstractController
         }
 
         // The token is valid; allow the user to change their password.
-        $form = $this->createForm(<?= $reset_form_type_class_name ?>::class);
+        $form = $this->createForm(<?php echo $reset_form_type_class_name ?>::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -116,13 +116,13 @@ class <?= $class_name ?> extends AbstractController
                 $form->get('plainPassword')->getData()
             );
 
-            $user-><?= $password_setter ?>($encodedPassword);
+            $user-><?php echo $password_setter ?>($encodedPassword);
             $this->getDoctrine()->getManager()->flush();
 
             // The session is cleaned up after the password has been changed.
             $this->cleanSessionAfterReset();
 
-            return $this->redirectToRoute('<?= $success_redirect_route ?>');
+            return $this->redirectToRoute('<?php echo $success_redirect_route ?>');
         }
 
         return $this->render('reset_password/reset.html.twig', [
@@ -132,7 +132,7 @@ class <?= $class_name ?> extends AbstractController
 
     private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer): RedirectResponse
     {
-        $user = $this->getDoctrine()->getRepository(<?= $user_class_name ?>::class)->findOneBy([
+        $user = $this->getDoctrine()->getRepository(<?php echo $user_class_name ?>::class)->findOneBy([
             'email' => $emailFormData,
         ]);
 
@@ -156,8 +156,8 @@ class <?= $class_name ?> extends AbstractController
         }
 
         $email = (new TemplatedEmail())
-            ->from(new Address('<?= $from_email ?>', '<?= $from_email_name ?>'))
-            ->to($user-><?= $email_getter ?>())
+            ->from(new Address('<?php echo $from_email ?>', '<?php echo $from_email_name ?>'))
+            ->to($user-><?php echo $email_getter ?>())
             ->subject('Your password reset request')
             ->htmlTemplate('reset_password/email.html.twig')
             ->context([

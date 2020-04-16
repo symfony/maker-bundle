@@ -1,13 +1,13 @@
-<?= "<?php\n" ?>
+<?php echo "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?php echo $namespace; ?>;
 
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
-class <?= $class_name ?> implements EncoderInterface, DecoderInterface
+class <?php echo $class_name ?> implements EncoderInterface, DecoderInterface
 {
-    const FORMAT = '<?= $format ?>';
+    const FORMAT = '<?php echo $format ?>';
 
     public function encode($data, $format, array $context = [])
     {

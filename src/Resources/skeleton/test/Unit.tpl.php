@@ -1,10 +1,10 @@
-<?= "<?php\n" ?>
+<?php echo "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?php echo $namespace; ?>;
 
 use PHPUnit\Framework\TestCase;
 
-class <?= $class_name ?> extends TestCase
+class <?php echo $class_name ?> extends TestCase
 {
     public function testSomething()
     {

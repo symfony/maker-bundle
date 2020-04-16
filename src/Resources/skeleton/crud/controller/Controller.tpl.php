@@ -1,109 +1,109 @@
-<?= "<?php\n" ?>
+<?php echo "<?php\n" ?>
 
-namespace <?= $namespace ?>;
+namespace <?php echo $namespace ?>;
 
-use <?= $entity_full_class_name ?>;
-use <?= $form_full_class_name ?>;
-<?php if (isset($repository_full_class_name)): ?>
-use <?= $repository_full_class_name ?>;
-<?php endif ?>
-use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name ?>;
+use <?php echo $entity_full_class_name ?>;
+use <?php echo $form_full_class_name ?>;
+<?php if (isset($repository_full_class_name)) { ?>
+use <?php echo $repository_full_class_name ?>;
+<?php } ?>
+use Symfony\Bundle\FrameworkBundle\Controller\<?php echo $parent_class_name ?>;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("<?= $route_path ?>")
+ * @Route("<?php echo $route_path ?>")
  */
-class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
+class <?php echo $class_name ?> extends <?php echo $parent_class_name; ?><?php echo "\n" ?>
 {
     /**
-     * @Route("/", name="<?= $route_name ?>_index", methods={"GET"})
+     * @Route("/", name="<?php echo $route_name ?>_index", methods={"GET"})
      */
-<?php if (isset($repository_full_class_name)): ?>
-    public function index(<?= $repository_class_name ?> $<?= $repository_var ?>): Response
+<?php if (isset($repository_full_class_name)) { ?>
+    public function index(<?php echo $repository_class_name ?> $<?php echo $repository_var ?>): Response
     {
-        return $this->render('<?= $templates_path ?>/index.html.twig', [
-            '<?= $entity_twig_var_plural ?>' => $<?= $repository_var ?>->findAll(),
+        return $this->render('<?php echo $templates_path ?>/index.html.twig', [
+            '<?php echo $entity_twig_var_plural ?>' => $<?php echo $repository_var ?>->findAll(),
         ]);
     }
-<?php else: ?>
+<?php } else { ?>
     public function index(): Response
     {
-        $<?= $entity_var_plural ?> = $this->getDoctrine()
-            ->getRepository(<?= $entity_class_name ?>::class)
+        $<?php echo $entity_var_plural ?> = $this->getDoctrine()
+            ->getRepository(<?php echo $entity_class_name ?>::class)
             ->findAll();
 
-        return $this->render('<?= $templates_path ?>/index.html.twig', [
-            '<?= $entity_twig_var_plural ?>' => $<?= $entity_var_plural ?>,
+        return $this->render('<?php echo $templates_path ?>/index.html.twig', [
+            '<?php echo $entity_twig_var_plural ?>' => $<?php echo $entity_var_plural ?>,
         ]);
     }
-<?php endif ?>
+<?php } ?>
 
     /**
-     * @Route("/new", name="<?= $route_name ?>_new", methods={"GET","POST"})
+     * @Route("/new", name="<?php echo $route_name ?>_new", methods={"GET","POST"})
      */
     public function new(Request $request): Response
     {
-        $<?= $entity_var_singular ?> = new <?= $entity_class_name ?>();
-        $form = $this->createForm(<?= $form_class_name ?>::class, $<?= $entity_var_singular ?>);
+        $<?php echo $entity_var_singular ?> = new <?php echo $entity_class_name ?>();
+        $form = $this->createForm(<?php echo $form_class_name ?>::class, $<?php echo $entity_var_singular ?>);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($<?= $entity_var_singular ?>);
+            $entityManager->persist($<?php echo $entity_var_singular ?>);
             $entityManager->flush();
 
-            return $this->redirectToRoute('<?= $route_name ?>_index');
+            return $this->redirectToRoute('<?php echo $route_name ?>_index');
         }
 
-        return $this->render('<?= $templates_path ?>/new.html.twig', [
-            '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
+        return $this->render('<?php echo $templates_path ?>/new.html.twig', [
+            '<?php echo $entity_twig_var_singular ?>' => $<?php echo $entity_var_singular ?>,
             'form' => $form->createView(),
         ]);
     }
 
     /**
-     * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_show", methods={"GET"})
+     * @Route("/{<?php echo $entity_identifier ?>}", name="<?php echo $route_name ?>_show", methods={"GET"})
      */
-    public function show(<?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
+    public function show(<?php echo $entity_class_name ?> $<?php echo $entity_var_singular ?>): Response
     {
-        return $this->render('<?= $templates_path ?>/show.html.twig', [
-            '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
+        return $this->render('<?php echo $templates_path ?>/show.html.twig', [
+            '<?php echo $entity_twig_var_singular ?>' => $<?php echo $entity_var_singular ?>,
         ]);
     }
 
     /**
-     * @Route("/{<?= $entity_identifier ?>}/edit", name="<?= $route_name ?>_edit", methods={"GET","POST"})
+     * @Route("/{<?php echo $entity_identifier ?>}/edit", name="<?php echo $route_name ?>_edit", methods={"GET","POST"})
      */
-    public function edit(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
+    public function edit(Request $request, <?php echo $entity_class_name ?> $<?php echo $entity_var_singular ?>): Response
     {
-        $form = $this->createForm(<?= $form_class_name ?>::class, $<?= $entity_var_singular ?>);
+        $form = $this->createForm(<?php echo $form_class_name ?>::class, $<?php echo $entity_var_singular ?>);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('<?= $route_name ?>_index');
+            return $this->redirectToRoute('<?php echo $route_name ?>_index');
         }
 
-        return $this->render('<?= $templates_path ?>/edit.html.twig', [
-            '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
+        return $this->render('<?php echo $templates_path ?>/edit.html.twig', [
+            '<?php echo $entity_twig_var_singular ?>' => $<?php echo $entity_var_singular ?>,
             'form' => $form->createView(),
         ]);
     }
 
     /**
-     * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_delete", methods={"DELETE"})
+     * @Route("/{<?php echo $entity_identifier ?>}", name="<?php echo $route_name ?>_delete", methods={"DELETE"})
      */
-    public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
+    public function delete(Request $request, <?php echo $entity_class_name ?> $<?php echo $entity_var_singular ?>): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$<?php echo $entity_var_singular ?>->get<?php echo ucfirst($entity_identifier) ?>(), $request->request->get('_token'))) {
             $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($<?= $entity_var_singular ?>);
+            $entityManager->remove($<?php echo $entity_var_singular ?>);
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('<?= $route_name ?>_index');
+        return $this->redirectToRoute('<?php echo $route_name ?>_index');
     }
 }

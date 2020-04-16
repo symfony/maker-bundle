@@ -1,13 +1,13 @@
-<?= "<?php\n" ?>
+<?php echo "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?php echo $namespace; ?>;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-<?= $event_full_class_name ? "use $event_full_class_name;\n" : '' ?>
+<?php echo $event_full_class_name ? "use $event_full_class_name;\n" : '' ?>
 
-class <?= $class_name ?> implements EventSubscriberInterface
+class <?php echo $class_name ?> implements EventSubscriberInterface
 {
-    public function <?= $method_name ?>(<?= $event_arg ?>)
+    public function <?php echo $method_name ?>(<?php echo $event_arg ?>)
     {
         // ...
     }
@@ -15,7 +15,7 @@ class <?= $class_name ?> implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            <?= $event ?> => '<?= $method_name ?>',
+            <?php echo $event ?> => '<?php echo $method_name ?>',
         ];
     }
 }

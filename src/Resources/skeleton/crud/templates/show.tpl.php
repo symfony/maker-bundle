@@ -1,22 +1,22 @@
-<?= $helper->getHeadPrintCode($entity_class_name) ?>
+<?php echo $helper->getHeadPrintCode($entity_class_name) ?>
 
 {% block body %}
-    <h1><?= $entity_class_name ?></h1>
+    <h1><?php echo $entity_class_name ?></h1>
 
     <table class="table">
         <tbody>
-<?php foreach ($entity_fields as $field): ?>
+<?php foreach ($entity_fields as $field) { ?>
             <tr>
-                <th><?= ucfirst($field['fieldName']) ?></th>
-                <td>{{ <?= $helper->getEntityFieldPrintCode($entity_twig_var_singular, $field) ?> }}</td>
+                <th><?php echo ucfirst($field['fieldName']) ?></th>
+                <td>{{ <?php echo $helper->getEntityFieldPrintCode($entity_twig_var_singular, $field) ?> }}</td>
             </tr>
-<?php endforeach; ?>
+<?php } ?>
         </tbody>
     </table>
 
-    <a href="{{ path('<?= $route_name ?>_index') }}">back to list</a>
+    <a href="{{ path('<?php echo $route_name ?>_index') }}">back to list</a>
 
-    <a href="{{ path('<?= $route_name ?>_edit', {'<?= $entity_identifier ?>': <?= $entity_twig_var_singular ?>.<?= $entity_identifier ?>}) }}">edit</a>
+    <a href="{{ path('<?php echo $route_name ?>_edit', {'<?php echo $entity_identifier ?>': <?php echo $entity_twig_var_singular ?>.<?php echo $entity_identifier ?>}) }}">edit</a>
 
-    {{ include('<?= $route_name ?>/_delete_form.html.twig') }}
+    {{ include('<?php echo $route_name ?>/_delete_form.html.twig') }}
 {% endblock %}

@@ -1,11 +1,18 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace App\Entity;
 
+use App\OtherEntity\UserProfile;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Some\Other\UserProfile;
-use Some\Other\FooCategory as Category;
 
 /**
  * @ORM\Entity()
@@ -29,12 +36,12 @@ class User
         return $this->id;
     }
 
-    public function getUserProfile(): ?\App\OtherEntity\UserProfile
+    public function getUserProfile(): ?UserProfile
     {
         return $this->userProfile;
     }
 
-    public function setUserProfile(?\App\OtherEntity\UserProfile $userProfile): self
+    public function setUserProfile(?UserProfile $userProfile): self
     {
         $this->userProfile = $userProfile;
 

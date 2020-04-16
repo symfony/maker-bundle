@@ -9,7 +9,7 @@
     <h1>Reset your password</h1>
 
     {{ form_start(requestForm) }}
-        {{ form_row(requestForm.<?= $email_field ?>) }}
+        {{ form_row(requestForm.<?php echo $email_field ?>) }}
         <div>
             <small>
                 Enter your email address and we we will send you a

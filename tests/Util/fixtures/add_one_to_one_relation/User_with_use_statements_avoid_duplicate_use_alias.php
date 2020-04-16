@@ -1,11 +1,18 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace App\Entity;
 
+use App\OtherEntity\Category;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Some\Other\UserProfile;
-use Some\Other\FooCategory as Category;
 
 /**
  * @ORM\Entity()
@@ -29,12 +36,12 @@ class User
         return $this->id;
     }
 
-    public function getCategory(): ?\App\OtherEntity\Category
+    public function getCategory(): ?Category
     {
         return $this->category;
     }
 
-    public function setCategory(?\App\OtherEntity\Category $category): self
+    public function setCategory(?Category $category): self
     {
         $this->category = $category;
 
