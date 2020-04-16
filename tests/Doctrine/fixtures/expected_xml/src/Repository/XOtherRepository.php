@@ -1,19 +1,10 @@
 <?php
 
-/*
- * This file is part of the Symfony MakerBundle package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Repository;
 
+use Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity\XOther;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity\XOther;
 
 /**
  * @method XOther|null find($id, $lockMode = null, $lockVersion = null)
