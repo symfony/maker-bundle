@@ -585,13 +585,13 @@ class ClassSourceManipulatorTest extends TestCase
 
         $manipulator->addMethodBuilder(
             $methodBuilder,
-                [
-                    ['someParam', null, 'string'],
-                ], <<<'CODE'
+            [
+                ['someParam', null, 'string'],
+            ], <<<'CODE'
 <?php
 $this->someParam = $someParam;
 CODE
-            );
+        );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -827,7 +827,7 @@ EOF
 $this->someObjectParam = $someObjectParam;
 $this->someMethod($someStringParam);
 CODE
-            );
+        );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
