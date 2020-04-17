@@ -823,10 +823,10 @@ EOF
                     ['someObjectParam', null, 'object'],
                     ['someStringParam', null, 'string'],
                 ], <<<'CODE'
-                <?php
-                $this->someObjectParam = $someObjectParam;
-                $this->someMethod($someStringParam);
-                CODE
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
             );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
