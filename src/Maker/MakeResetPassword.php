@@ -36,6 +36,7 @@ use SymfonyCasts\Bundle\ResetPassword\Persistence\ResetPasswordRequestRepository
 use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
 
 /**
+ * @author Antoine Michelet <thearcheoprogressive@gmail.com>
  * @author Romaric Drigon <romaric.drigon@gmail.com>
  * @author Jesse Rushlow  <jr@rushlow.dev>
  * @author Ryan Weaver    <ryan@symfonycasts.com>
@@ -209,7 +210,7 @@ class MakeResetPassword extends AbstractMaker
         $generator->writeChanges();
 
         $manipulator = new ClassSourceManipulator(
-            $this->fileManager->getFileContents($pathRequestEntity),
+            $this->fileManager->getFileContents($pathRequestEntity)
         );
 
         $manipulator->addUseStatementIfNecessary(ResetPasswordRequestInterface::class);
