@@ -574,7 +574,6 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-
     public function testAddMethodBuilder()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
@@ -585,14 +584,14 @@ class ClassSourceManipulatorTest extends TestCase
         $methodBuilder = $manipulator->createMethodBuilder('testAddNewMethod', 'string', true, ['test comment on public method']);
 
         $manipulator->addMethodBuilder(
-            $methodBuilder, 
+            $methodBuilder,
                 [
-                    ['someParam', null, 'string']
+                    ['someParam', null, 'string'],
                 ], <<<'CODE'
                 <?php
                 $this->someParam = $someParam;
                 CODE
-            );  
+            );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -608,7 +607,7 @@ class ClassSourceManipulatorTest extends TestCase
         $methodBuilder->addParam(
             (new \PhpParser\Builder\Param('param'))->setTypeHint('string')
         );
-        $manipulator->addMethodBody($methodBuilder, 
+        $manipulator->addMethodBody($methodBuilder,
             <<<'CODE'
             <?php
             return new JsonResponse(['param' => $param]);
@@ -840,7 +839,7 @@ class ClassSourceManipulatorTest extends TestCase
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addConstructor([]);  
+        $manipulator->addConstructor([]);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -848,15 +847,15 @@ class ClassSourceManipulatorTest extends TestCase
     public function testAddConstructorInClassContainsOnlyConstants()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/User_with_constructorConst.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/User_with_constructor_constante.php');
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addConstructor([]);  
+        $manipulator->addConstructor([]);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
-    
+
     public function testAddConstructorInClassContainsConstructor()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_constructor.php');
@@ -866,7 +865,6 @@ class ClassSourceManipulatorTest extends TestCase
         $this->expectException('LogicException');
         $this->expectExceptionMessage('Constructor already exists');
 
-        $manipulator->addConstructor([]);  
+        $manipulator->addConstructor([]);
     }
 }
-
