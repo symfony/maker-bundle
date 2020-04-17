@@ -233,7 +233,6 @@ $this->user = $user;
 $this->initialize($expiresAt, $selector, $hashedToken);
 CODE
         );
-
         $manipulator->addProperty('id', [
             '@ORM\Id()',
             '@ORM\GeneratedValue()',
@@ -278,7 +277,6 @@ CODE
 parent::__construct($registry, ResetPasswordRequest::class);
 CODE
         );
-
         $methodBuilder = $manipulator->createMethodBuilder('createResetPasswordRequest', 'ResetPasswordRequestInterface', false);
 
         $manipulator->addMethodBuilder($methodBuilder, [
@@ -291,7 +289,6 @@ CODE
 return new ResetPasswordRequest($user, $expiresAt, $selector, $hashedToken);
 CODE
         );
-
         $this->fileManager->dumpFile($pathRequestRepository, $manipulator->getSourceCode());
 
         $this->setBundleConfig($io, $generator, $repositoryClassNameDetails->getFullName());
