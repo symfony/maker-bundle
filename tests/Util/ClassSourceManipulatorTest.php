@@ -588,9 +588,9 @@ class ClassSourceManipulatorTest extends TestCase
                 [
                     ['someParam', null, 'string'],
                 ], <<<'CODE'
-                <?php
-                $this->someParam = $someParam;
-                CODE
+<?php
+$this->someParam = $someParam;
+CODE
             );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
@@ -607,11 +607,10 @@ class ClassSourceManipulatorTest extends TestCase
         $methodBuilder->addParam(
             (new \PhpParser\Builder\Param('param'))->setTypeHint('string')
         );
-        $manipulator->addMethodBody($methodBuilder,
-            <<<'CODE'
-            <?php
-            return new JsonResponse(['param' => $param]);
-            CODE
+        $manipulator->addMethodBody($methodBuilder, <<<'CODE'
+<?php
+return new JsonResponse(['param' => $param]);
+CODE
         );
         $manipulator->addMethodBuilder($methodBuilder);
         $manipulator->addUseStatementIfNecessary('Symfony\\Component\\HttpFoundation\\JsonResponse');
@@ -637,118 +636,119 @@ class ClassSourceManipulatorTest extends TestCase
     {
         yield 'no_doc_block' => [
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            class Foo
-            {
-            }
-            EOF
+class Foo
+{
+}
+EOF
             ,
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            use Bar\SomeAnnotation;
+use Bar\SomeAnnotation;
 
-            /**
-             * @SomeAnnotation(message="Foo")
-             */
-            class Foo
-            {
-            }
-            EOF
+/**
+ * @SomeAnnotation(message="Foo")
+ */
+class Foo
+{
+}
+EOF
         ];
 
         yield 'normal_doc_block' => [
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            /**
-             * I'm a class!
-             */
-            class Foo
-            {
-            }
-            EOF
+/**
+ * I'm a class!
+ */
+class Foo
+{
+}
+EOF
             ,
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            use Bar\SomeAnnotation;
+use Bar\SomeAnnotation;
 
-            /**
-             * I'm a class!
-             * @SomeAnnotation(message="Foo")
-             */
-            class Foo
-            {
-            }
-            EOF
+/**
+ * I'm a class!
+ * @SomeAnnotation(message="Foo")
+ */
+class Foo
+{
+}
+EOF
         ];
 
         yield 'simple_inline_doc_block' => [
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            /** I'm a class! */
-            class Foo
-            {
-            }
-            EOF
+/** I'm a class! */
+class Foo
+{
+}
+EOF
             ,
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            use Bar\SomeAnnotation;
+use Bar\SomeAnnotation;
 
-            /**
-             * I'm a class!
-             * @SomeAnnotation(message="Foo")
-             */
-            class Foo
-            {
-            }
-            EOF
+/**
+ * I'm a class!
+ * @SomeAnnotation(message="Foo")
+ */
+class Foo
+{
+}
+EOF
         ];
 
         yield 'weird_inline_doc_block' => [
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            /** **I'm a class!** ***/
-            class Foo
-            {
-            }
-            EOF
+/** **I'm a class!** ***/
+
+class Foo
+{
+}
+EOF
             ,
             <<<EOF
-            <?php
+<?php
 
-            namespace Acme;
+namespace Acme;
 
-            use Bar\SomeAnnotation;
+use Bar\SomeAnnotation;
 
-            /**
-             * **I'm a class!**
-             * @SomeAnnotation(message="Foo")
-             ***/
-            class Foo
-            {
-            }
-            EOF
+/**
+ * **I'm a class!**
+ * @SomeAnnotation(message="Foo")
+ ***/
+class Foo
+{
+}
+EOF
         ];
     }
 

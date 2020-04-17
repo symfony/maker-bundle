@@ -228,10 +228,10 @@ class MakeResetPassword extends AbstractMaker
                 ['selector', null, 'string'],
                 ['hashedToken', null, 'string'],
             ], <<<'CODE'
-            <?php
-            $this->user = $user;
-            $this->initialize($expiresAt, $selector, $hashedToken);
-            CODE
+<?php
+$this->user = $user;
+$this->initialize($expiresAt, $selector, $hashedToken);
+CODE
         );
 
         $manipulator->addProperty('id', [
@@ -274,9 +274,9 @@ class MakeResetPassword extends AbstractMaker
         $manipulator->addConstructor([
                 ['registry', null, 'ManagerRegistry'],
             ], <<<'CODE'
-            <?php
-            parent::__construct($registry, ResetPasswordRequest::class);
-            CODE
+<?php
+parent::__construct($registry, ResetPasswordRequest::class);
+CODE
         );
 
         $methodBuilder = $manipulator->createMethodBuilder('createResetPasswordRequest', 'ResetPasswordRequestInterface', false);
@@ -287,9 +287,9 @@ class MakeResetPassword extends AbstractMaker
                 ['selector', null, 'string'],
                 ['hashedToken', null, 'string'],
             ], <<<'CODE'
-            <?php
-            return new ResetPasswordRequest($user, $expiresAt, $selector, $hashedToken);
-            CODE
+<?php
+return new ResetPasswordRequest($user, $expiresAt, $selector, $hashedToken);
+CODE
         );
 
         $this->fileManager->dumpFile($pathRequestRepository, $manipulator->getSourceCode());
