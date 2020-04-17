@@ -67,23 +67,11 @@ class MakeResetPassword extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies)
     {
-<<<<<<< HEAD
-        $dependencies->addClassDependency(
-            SymfonyCastsResetPasswordBundle::class, 
-            'symfonycasts/reset-password-bundle'
-        );
-        
-        $dependencies->addClassDependency(
-            DoctrineBundle::class,
-            'orm-pack'
-        );
-=======
         $dependencies->addClassDependency(SymfonyCastsResetPasswordBundle::class, 'symfonycasts/reset-password-bundle');
 
         ORMDependencyBuilder::buildDependencies($dependencies);
 
         $dependencies->addClassDependency(Annotation::class, 'annotations');
->>>>>>> ac73a7251ed9ab1506919aa999f3c3d7cc362b52
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
