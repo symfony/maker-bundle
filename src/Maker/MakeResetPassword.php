@@ -256,7 +256,7 @@ CODE
         );
 
         $manipulator = new ClassSourceManipulator(
-            $this->fileManager->getFileContents($pathRequestRepository),
+            $this->fileManager->getFileContents($pathRequestRepository)
         );
 
         $manipulator->clearClassNodeStmts();
