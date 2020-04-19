@@ -180,9 +180,12 @@ final class ClassSourceManipulator
         $this->updateSourceCodeFromNewStmts();
     }
 
-    public function addTrait($name)
+    public function addTrait($namespace)
     {
+        $this->addUseStatementIfNecessary($namespace);
+
         $classNode = $this->getClassNode();
+        $name = Str::getShortClassName($namespace);
 
         if (empty($classNode->stmts)) {
             $classNode->stmts[0] = new Node\Name('use '.$name.';');
@@ -288,6 +291,10 @@ final class ClassSourceManipulator
         ;
 
         if (null !== $returnType) {
+            if (class_exists($returnType) || interface_exists($returnType)) {
+                $this->addUseStatementIfNecessary($returnType);
+                $returnType = Str::getShortClassName($returnType);
+            }
             $methodNodeBuilder->setReturnType($isReturnTypeNullable ? new Node\NullableType($returnType) : $returnType);
         }
 

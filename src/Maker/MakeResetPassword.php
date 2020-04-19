@@ -213,15 +213,11 @@ class MakeResetPassword extends AbstractMaker
             $this->fileManager->getFileContents($pathRequestEntity)
         );
 
-        $manipulator->addUseStatementIfNecessary(ResetPasswordRequestInterface::class);
-
-        $manipulator->addUseStatementIfNecessary(ResetPasswordRequestTrait::class);
-
-        $manipulator->addInterface('ResetPasswordRequestInterface');
+        $manipulator->addInterface(ResetPasswordRequestInterface::class);
 
         $manipulator->clearClassNodeStmts();
 
-        $manipulator->addTrait('ResetPasswordRequestTrait');
+        $manipulator->addTrait(ResetPasswordRequestTrait::class);
 
         $manipulator->addConstructor([
                 ['user', null, 'object'],
@@ -261,15 +257,9 @@ CODE
 
         $manipulator->clearClassNodeStmts();
 
-        $manipulator->addUseStatementIfNecessary(ResetPasswordRequestInterface::class);
+        $manipulator->addInterface(ResetPasswordRequestRepositoryInterface::class);
 
-        $manipulator->addUseStatementIfNecessary(ResetPasswordRequestRepositoryTrait::class);
-
-        $manipulator->addUseStatementIfNecessary(ResetPasswordRequestRepositoryInterface::class);
-
-        $manipulator->addInterface('ResetPasswordRequestRepositoryInterface');
-
-        $manipulator->addTrait('ResetPasswordRequestRepositoryTrait');
+        $manipulator->addTrait(ResetPasswordRequestRepositoryTrait::class);
 
         $manipulator->addConstructor([
                 ['registry', null, 'ManagerRegistry'],
@@ -278,7 +268,7 @@ CODE
 parent::__construct($registry, ResetPasswordRequest::class);
 CODE
         );
-        $methodBuilder = $manipulator->createMethodBuilder('createResetPasswordRequest', 'ResetPasswordRequestInterface', false);
+        $methodBuilder = $manipulator->createMethodBuilder('createResetPasswordRequest', ResetPasswordRequestInterface::class, false);
 
         $manipulator->addMethodBuilder($methodBuilder, [
                 ['user', null, 'object'],

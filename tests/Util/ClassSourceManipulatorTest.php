@@ -771,7 +771,7 @@ EOF
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addTrait('TestTrait');
+        $manipulator->addTrait('App\TestTrait');
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -783,7 +783,7 @@ EOF
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addTrait('TestTrait');
+        $manipulator->addTrait('App\TestTrait');
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -795,7 +795,7 @@ EOF
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addTrait('TestTrait');
+        $manipulator->addTrait('App\TestTrait');
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -807,7 +807,7 @@ EOF
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addTrait('TestTrait');
+        $manipulator->addTrait('App\TestTrait');
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
