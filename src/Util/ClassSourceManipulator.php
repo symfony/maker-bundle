@@ -180,12 +180,12 @@ final class ClassSourceManipulator
         $this->updateSourceCodeFromNewStmts();
     }
 
-    public function addTrait($namespace)
+    public function addTrait($classTraitName)
     {
-        $this->addUseStatementIfNecessary($namespace);
+        $this->addUseStatementIfNecessary($classTraitName);
 
         $classNode = $this->getClassNode();
-        $name = Str::getShortClassName($namespace);
+        $name = Str::getShortClassName($classTraitName);
 
         if (empty($classNode->stmts)) {
             $classNode->stmts[0] = new Node\Name('use '.$name.';');
