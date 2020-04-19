@@ -18,8 +18,6 @@ use PhpParser\BuilderHelpers;
 use PhpParser\Comment\Doc;
 use PhpParser\Lexer;
 use PhpParser\Node;
-use PhpParser\Node\Expr\Variable;
-use PhpParser\Node\Param;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
 use PhpParser\Parser;
@@ -120,7 +118,7 @@ final class ClassSourceManipulator
             $this->buildAnnotationLine(
                 '@ORM\\Embedded',
                 [
-                    'class' => $className,
+                    'class' => new ClassNameValue($className, $typeHint),
                 ]
             ),
         ];
@@ -180,34 +178,42 @@ final class ClassSourceManipulator
         $this->updateSourceCodeFromNewStmts();
     }
 
-    public function addTrait($name)
+    /**
+     * @param string $trait the fully-qualified trait name
+     */
+    public function addTrait(string $trait)
     {
-        $classNode = $this->getClassNode();
+        $importedClassName = $this->addUseStatementIfNecessary($trait);
 
-        if (empty($classNode->stmts)) {
-            $classNode->stmts[0] = new Node\Name('use '.$name.';');
-        } else {
-            $traitNode = $this->findFirstNode(function ($node) {
-                return $node instanceof Node\Stmt\Class_
-                    && !empty($node->stmts[0])
-                    && $node->stmts[0] instanceof Node\Stmt\TraitUse;
-            });
+        /** @var Node\Stmt\TraitUse[] $traitNodes */
+        $traitNodes = $this->findAllNodes(function ($node) {
+            return $node instanceof Node\Stmt\TraitUse;
+        });
 
-            if ($traitNode) {
-                foreach ($classNode->stmts as $value) {
-                    if (!$value instanceof Node\Stmt\TraitUse) {
-                        break;
-                    }
-                    // if trait already exists
-                    if (strstr($value->traits[0]->parts[0], $name)) {
-                        return;
-                    }
-                }
-                array_unshift($classNode->stmts, new Node\Name('use '.$name.';'));
-            } else {
-                array_unshift($classNode->stmts, new Node\Name('use '.$name.";\n"));
+        foreach ($traitNodes as $node) {
+            if ($node->traits[0]->toString() === $importedClassName) {
+                return;
             }
         }
+
+        $traitNodes[] = new Node\Stmt\TraitUse([new Node\Name($importedClassName)]);
+
+        $classNode = $this->getClassNode();
+
+        if (!empty($classNode->stmts) && 1 === \count($traitNodes)) {
+            $traitNodes[] = $this->createBlankLineNode(self::CONTEXT_CLASS);
+        }
+
+        // avoid all the use traits in class for unshift all the new UseTrait
+        // in the right order.
+        foreach ($classNode->stmts as $key => $node) {
+            if ($node instanceof Node\Stmt\TraitUse) {
+                unset($classNode->stmts[$key]);
+            }
+        }
+
+        array_unshift($classNode->stmts, ...$traitNodes);
+
         $this->updateSourceCodeFromNewStmts();
     }
 
@@ -230,31 +236,31 @@ final class ClassSourceManipulator
         $this->addMethod($builder->getNode());
     }
 
-    public function addConstructor(array $params = [], string $methodBody = null)
+    /**
+     * @param Node[] $params
+     */
+    public function addConstructor(array $params, string $methodBody)
     {
-        if ($this->getConstructorNode()) {
-            throw new \LogicException('Constructor already exists.', 1);
+        if (null !== $this->getConstructorNode()) {
+            throw new \LogicException('Constructor already exists.');
         }
 
-        $methodBuilder = $this->createMethodBuilder('__construct', null, false, []);
+        $methodBuilder = $this->createMethodBuilder('__construct', null, false);
 
-        if (!empty($params)) {
-            $this->addMethodParams($methodBuilder, $params);
-        }
+        $this->addMethodParams($methodBuilder, $params);
 
-        if ($methodBody) {
-            $this->addMethodBody($methodBuilder, $methodBody);
-        }
+        $this->addMethodBody($methodBuilder, $methodBody);
 
         $this->addNodeAfterProperties($methodBuilder->getNode());
         $this->updateSourceCodeFromNewStmts();
     }
 
+    /**
+     * @param Node[] $params
+     */
     public function addMethodBuilder(Builder\Method $methodBuilder, array $params = [], string $methodBody = null)
     {
-        if (!empty($params)) {
-            $this->addMethodParams($methodBuilder, $params);
-        }
+        $this->addMethodParams($methodBuilder, $params);
 
         if ($methodBody) {
             $this->addMethodBody($methodBuilder, $methodBody);
@@ -269,18 +275,6 @@ final class ClassSourceManipulator
         $methodBuilder->addStmts($nodes);
     }
 
-    public function addMethodParams(Builder\Method $methodBuilder, array $params)
-    {
-        foreach ($params as $param) {
-            $methodBuilder->addParam(
-                new Param(
-                    new Variable($param[0]),
-                    $param[1] ?? null, $param[2] ?? null, $param[3] ?? false, $param[4] ?? false, $param[5] ?? []
-                )
-            );
-        }
-    }
-
     public function createMethodBuilder(string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = []): Builder\Method
     {
         $methodNodeBuilder = (new Builder\Method($methodName))
@@ -288,6 +282,9 @@ final class ClassSourceManipulator
         ;
 
         if (null !== $returnType) {
+            if (class_exists($returnType) || interface_exists($returnType)) {
+                $returnType = $this->addUseStatementIfNecessary($returnType);
+            }
             $methodNodeBuilder->setReturnType($isReturnTypeNullable ? new Node\NullableType($returnType) : $returnType);
         }
 
@@ -471,6 +468,10 @@ final class ClassSourceManipulator
             return $value;
         }
 
+        if ($value instanceof ClassNameValue) {
+            return sprintf('%s::class', $value->getShortName());
+        }
+
         if (\is_array($value)) {
             throw new \Exception('Invalid value: loop before quoting.');
         }
@@ -486,7 +487,7 @@ final class ClassSourceManipulator
         }
 
         $annotationOptions = [
-            'targetEntity' => $relation->getTargetClassName(),
+            'targetEntity' => new ClassNameValue($typeHint, $relation->getTargetClassName()),
         ];
         if ($relation->isOwning()) {
             // sometimes, we don't map the inverse relation
@@ -518,11 +519,15 @@ final class ClassSourceManipulator
 
         $this->addGetter(
             $relation->getPropertyName(),
-            $typeHint,
+            $relation->getCustomReturnType() ?: $typeHint,
             // getter methods always have nullable return values
-            // because even though these are required in the db, they may not be set
-            true
+            // unless this has been customized explicitly
+            $relation->getCustomReturnType() ? $relation->isCustomReturnTypeNullable() : true
         );
+
+        if ($relation->shouldAvoidSetter()) {
+            return;
+        }
 
         $setterNodeBuilder = $this->createSetterNodeBuilder(
             $relation->getPropertyName(),
@@ -556,7 +561,7 @@ final class ClassSourceManipulator
         $collectionTypeHint = $this->addUseStatementIfNecessary(Collection::class);
 
         $annotationOptions = [
-            'targetEntity' => $relation->getTargetClassName(),
+            'targetEntity' => new ClassNameValue($typeHint, $relation->getTargetClassName()),
         ];
         if ($relation->isOwning()) {
             // sometimes, we don't map the inverse relation
@@ -584,7 +589,7 @@ final class ClassSourceManipulator
         $addArrayCollection = true;
         if ($this->getConstructorNode()) {
             // We print the constructor to a string, then
-            // look for "$this->propertyName ="
+            // look for "$this->propertyName = "
 
             $constructorString = $this->printer->prettyPrint([$this->getConstructorNode()]);
             if (false !== strpos($constructorString, sprintf('$this->%s = ', $relation->getPropertyName()))) {
@@ -943,6 +948,19 @@ final class ClassSourceManipulator
         return false === $node ? null : $node;
     }
 
+    /**
+     * @return Node[]
+     */
+    private function findAllNodes(callable $filterCallback): array
+    {
+        $traverser = new NodeTraverser();
+        $visitor = new NodeVisitor\FindingVisitor($filterCallback);
+        $traverser->addVisitor($visitor);
+        $traverser->traverse($this->newStmts);
+
+        return $visitor->getFoundNodes();
+    }
+
     private function createBlankLineNode(string $context)
     {
         switch ($context) {
@@ -1275,6 +1293,13 @@ final class ClassSourceManipulator
     {
         if (null !== $this->io) {
             $this->io->text($note);
+        }
+    }
+
+    private function addMethodParams(Builder\Method $methodBuilder, array $params)
+    {
+        foreach ($params as $param) {
+            $methodBuilder->addParam($param);
         }
     }
 }

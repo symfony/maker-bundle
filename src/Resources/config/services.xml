@@ -10,6 +10,7 @@
             <service id="maker.file_manager" class="Symfony\Bundle\MakerBundle\FileManager">
                 <argument type="service" id="filesystem" />
                 <argument type="service" id="maker.autoloader_util" />
+                <argument type="service" id="maker.file_link_formatter" />
                 <argument>%kernel.project_dir%</argument>
                 <argument>%twig.default_path%</argument>
             </service>
@@ -20,6 +21,10 @@
 
             <service id="maker.autoloader_util" class="Symfony\Bundle\MakerBundle\Util\AutoloaderUtil">
                 <argument type="service" id="maker.autoloader_finder" />
+            </service>
+
+            <service id="maker.file_link_formatter" class="Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter" >
+                <argument type="service" id="debug.file_link_formatter" on-invalid="ignore" />
             </service>
 
             <service id="maker.event_registry" class="Symfony\Bundle\MakerBundle\EventRegistry">
@@ -48,6 +53,7 @@
 
             <service id="maker.entity_class_generator" class="Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator">
                 <argument type="service" id="maker.generator" />
+                <argument type="service" id="maker.doctrine_helper" />
             </service>
 
             <service id="maker.user_class_builder" class="Symfony\Bundle\MakerBundle\Security\UserClassBuilder" />

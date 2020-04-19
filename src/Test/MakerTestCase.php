@@ -45,7 +45,7 @@ abstract class MakerTestCase extends TestCase
         $files = $testEnv->getGeneratedFilesFromOutputText();
 
         foreach ($files as $file) {
-            $this->assertTrue($testEnv->fileExists($file));
+            $this->assertTrue($testEnv->fileExists($file), sprintf('The file "%s" does not exist after generation', $file));
 
             if ('.php' === substr($file, -4)) {
                 $csProcess = $testEnv->runPhpCSFixer($file);

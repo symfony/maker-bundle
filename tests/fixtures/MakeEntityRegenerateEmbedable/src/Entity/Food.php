@@ -22,7 +22,7 @@ class Food
     private $title;
 
     /**
-     * @ORM\Embedded(class="App\Entity\Recipe")
+     * @ORM\Embedded(class=Recipe::class)
      */
     private $recipe;
 }

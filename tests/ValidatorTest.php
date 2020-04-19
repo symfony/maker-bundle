@@ -68,10 +68,17 @@ class ValidatorTest extends TestCase
     public function testValidateEmailAddress()
     {
         $this->assertSame('jr@rushlow.dev', Validator::validateEmailAddress('jr@rushlow.dev'));
+    }
 
+    public function testInvalidateEmailAddress()
+    {
         $this->expectException(RuntimeCommandException::class);
         $this->expectExceptionMessage('"badEmail" is not a valid email address.');
         Validator::validateEmailAddress('badEmail');
+
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage('"" is not a valid email address.');
+        Validator::validateEmailAddress('');
     }
 
     public function testInvalidClassName()

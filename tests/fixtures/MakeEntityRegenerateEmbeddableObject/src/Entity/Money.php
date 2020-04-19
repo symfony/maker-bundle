@@ -12,7 +12,7 @@ class Money
     /**
      * @var Currency
      *
-     * @ORM\Embedded(class="App\Entity\Currency")
+     * @ORM\Embedded(class=Currency::class)
      */
     private $currency;
 

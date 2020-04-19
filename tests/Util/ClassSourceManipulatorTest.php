@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
+use PhpParser\Builder\Param;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
@@ -315,6 +316,16 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setIsNullable(true),
         ];
 
+        yield 'many_to_one_same_and_other_namespaces' => [
+            'User_with_relation.php',
+            'User_with_relation_same_and_other_namespaces.php',
+            (new RelationManyToOne())
+                ->setPropertyName('subCategory')
+                ->setTargetClassName('App\Entity\SubDirectory\Category')
+                ->setTargetPropertyName('foods')
+                ->setIsNullable(true),
+        ];
+
         yield 'many_to_one_no_inverse' => [
             'User_simple.php',
             'User_simple_no_inverse.php',
@@ -585,27 +596,15 @@ class ClassSourceManipulatorTest extends TestCase
 
         $manipulator->addMethodBuilder(
             $methodBuilder,
-<<<<<<< HEAD
-                [
-                    ['someParam', null, 'string'],
-                ], <<<'CODE'
-<<<<<<< HEAD
-<<<<<<< HEAD
-<?php
-$this->someParam = $someParam;
-CODE
-);
-=======
             [
-                ['someParam', null, 'string'],
+                (new Param('someParam'))->setType('string')->getNode(),
             ], <<<'CODE'
 <?php
 $this->someParam = $someParam;
 CODE
-        );
+    );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
->>>>>>> 4e423e8... fix compatibility php 7.1 (4) unexpected ')'
     }
 
     public function testAddMethodWithBody()
@@ -617,11 +616,10 @@ CODE
 
         $methodBuilder = $manipulator->createMethodBuilder('action', 'JsonResponse', false, ['@Route("/action", name="app_action")']);
         $methodBuilder->addParam(
-            (new \PhpParser\Builder\Param('param'))->setTypeHint('string')
+            (new Param('param'))->setTypeHint('string')
         );
         $manipulator->addMethodBody($methodBuilder, 
 <<<'CODE'
-        $manipulator->addMethodBody($methodBuilder, <<<'CODE'
 <?php
 return new JsonResponse(['param' => $param]);
 CODE
@@ -857,7 +855,7 @@ EOF
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addTrait('TestTrait');
+        $manipulator->addTrait('App\TestTrait');
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -869,7 +867,7 @@ EOF
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addTrait('TestTrait');
+        $manipulator->addTrait('App\TestTrait');
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -881,7 +879,7 @@ EOF
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addTrait('TestTrait');
+        $manipulator->addTrait('App\TestTrait');
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -893,12 +891,24 @@ EOF
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addTrait('TestTrait');
+        $manipulator->addTrait('App\TestTrait');
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddConstructorWithParamsAndStmtBody()
+    public function testAddTraitAlReadyExists()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addTrait('App\TraitAlreadyHere');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddConstructor()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserEmpty_with_constructor.php');
@@ -906,19 +916,14 @@ EOF
         $manipulator = new ClassSourceManipulator($source);
 
         $manipulator->addConstructor([
-                    ['someObjectParam', null, 'object'],
-                    ['someStringParam', null, 'string'],
+                (new Param('someObjectParam'))->setType('object')->getNode(),
+                (new Param('someStringParam'))->setType('string')->getNode(),
                 ], <<<'CODE'
 <?php
 $this->someObjectParam = $someObjectParam;
 $this->someMethod($someStringParam);
 CODE
-<<<<<<< HEAD
 );
-            );
-=======
-        );
->>>>>>> 4e423e8... fix compatibility php 7.1 (4) unexpected ')'
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -930,7 +935,15 @@ CODE
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addConstructor([]);
+        $manipulator->addConstructor([
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -942,7 +955,15 @@ CODE
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addConstructor([]);
+        $manipulator->addConstructor([
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -956,6 +977,14 @@ CODE
         $this->expectException('LogicException');
         $this->expectExceptionMessage('Constructor already exists');
 
-        $manipulator->addConstructor([]);
+        $manipulator->addConstructor([
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
     }
 }

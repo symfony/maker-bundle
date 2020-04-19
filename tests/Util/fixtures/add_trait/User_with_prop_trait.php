@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\TestTrait;
 use Doctrine\ORM\Mapping as ORM;
 
 /**

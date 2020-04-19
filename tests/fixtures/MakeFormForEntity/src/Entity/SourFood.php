@@ -23,7 +23,7 @@ class SourFood
     private $title;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Property", mappedBy="sourFood")
+     * @ORM\OneToMany(targetEntity=Property::class, mappedBy="sourFood")
      */
     private $properties;
 

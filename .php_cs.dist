@@ -13,11 +13,6 @@ $finder = PhpCsFixer\Finder::create()
     ->notName('*.tpl.php')
 ;
 
-if (\PHP_VERSION_ID < 70100) {
-    // EntityRegenerator works only with PHP 7.1+
-    $finder->notName('EntityRegenerator.php');
-}
-
 return PhpCsFixer\Config::create()
     ->setRules(array(
         '@Symfony' => true,

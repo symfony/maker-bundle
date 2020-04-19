@@ -20,7 +20,7 @@ class User
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\OtherEntity\Category", inversedBy="user", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity=\App\OtherEntity\Category::class, inversedBy="user", cascade={"persist", "remove"})
      */
     private $category;
 

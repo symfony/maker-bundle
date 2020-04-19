@@ -19,8 +19,11 @@ abstract class BaseRelation
     private $propertyName;
     private $targetClassName;
     private $targetPropertyName;
+    private $returnType;
+    private $overriddenReturnType = true;
     private $isSelfReferencing = false;
     private $mapInverseRelation = true;
+    private $avoidSetter = false;
 
     abstract public function isOwning(): bool;
 
@@ -82,5 +85,35 @@ abstract class BaseRelation
         $this->mapInverseRelation = $mapInverseRelation;
 
         return $this;
+    }
+
+    public function shouldAvoidSetter(): bool
+    {
+        return $this->avoidSetter;
+    }
+
+    public function avoidSetter(bool $avoidSetter = true)
+    {
+        $this->avoidSetter = $avoidSetter;
+
+        return $this;
+    }
+
+    public function getReturnType(): ?string
+    {
+        return $this->returnType;
+    }
+
+    public function setReturnType(string $returnType, $overriddenReturnType)
+    {
+        $this->returnType = $returnType;
+        $this->overriddenReturnType = $overriddenReturnType;
+
+        return $this;
+    }
+
+    public function isOverriddenReturnTypeNullable(): bool
+    {
+        return $this->overriddenReturnType;
     }
 }

@@ -12,8 +12,8 @@
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
-use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 
 /**
@@ -23,6 +23,7 @@ final class EntityClassGenerator
 {
     private $generator;
     private $doctrineHelper;
+    private $managerRegistryClassName = LegacyManagerRegistry::class;
 
     public function __construct(Generator $generator, DoctrineHelper $doctrineHelper)
     {
@@ -30,7 +31,11 @@ final class EntityClassGenerator
         $this->doctrineHelper = $doctrineHelper;
     }
 
+<<<<<<< HEAD
     public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false): string
+=======
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, $generateRepositoryClass = true): string
+>>>>>>> c57944f... fix last Ryan issues
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -45,25 +50,64 @@ final class EntityClassGenerator
             'doctrine/Entity.tpl.php',
             [
                 'repository_full_class_name' => $repoClassDetails->getFullName(),
+                'repository_class_name' => $repoClassDetails->getShortName(),
                 'api_resource' => $apiResource,
                 'should_escape_table_name' => $this->doctrineHelper->isKeyword($tableName),
                 'table_name' => $tableName,
             ]
         );
 
-        $entityAlias = strtolower($entityClassDetails->getShortName()[0]);
-        $this->generator->generateClass(
+<<<<<<< HEAD
+        $this->generateRepositoryClass(
             $repoClassDetails->getFullName(),
-            'doctrine/Repository.tpl.php',
-            [
-                'entity_full_class_name' => $entityClassDetails->getFullName(),
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'entity_alias' => $entityAlias,
-                'with_password_upgrade' => $withPasswordUpgrade,
-                'doctrine_registry_class' => interface_exists(ManagerRegistry::class) ? ManagerRegistry::class : LegacyManagerRegistry::class,
-            ]
-        );
+            $entityClassDetails->getFullName(),
+            $withPasswordUpgrade)
+        ;
+=======
+        if ($generateRepositoryClass) {
+            $this->generateRepositoryClass(
+                $repoClassDetails->getFullName(),
+                $entityClassDetails->getFullName(),
+                $withPasswordUpgrade,
+                true
+            );
+        }
+>>>>>>> c57944f... fix last Ryan issues
 
         return $entityPath;
+    }
+
+<<<<<<< HEAD
+    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade)
+=======
+    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade, bool $includeExampleComments = true)
+>>>>>>> c57944f... fix last Ryan issues
+    {
+        dump($repositoryClass, $entityClass);
+        $shortEntityClass = Str::getShortClassName($entityClass);
+        $entityAlias = strtolower($shortEntityClass[0]);
+        $this->generator->generateClass(
+            $repositoryClass,
+            'doctrine/Repository.tpl.php',
+            [
+                'entity_full_class_name' => $entityClass,
+                'entity_class_name' => $shortEntityClass,
+                'entity_alias' => $entityAlias,
+                'with_password_upgrade' => $withPasswordUpgrade,
+                'doctrine_registry_class' => $this->managerRegistryClassName,
+<<<<<<< HEAD
+=======
+                'include_example_comments' => $includeExampleComments,
+>>>>>>> c57944f... fix last Ryan issues
+            ]
+        );
+    }
+
+    /**
+     * Called by a compiler pass to inject the non-legacy value if available.
+     */
+    public function setMangerRegistryClassName(string $managerRegistryClassName)
+    {
+        $this->managerRegistryClassName = $managerRegistryClassName;
     }
 }
