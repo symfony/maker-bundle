@@ -48,6 +48,7 @@
 
             <service id="maker.entity_class_generator" class="Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator">
                 <argument type="service" id="maker.generator" />
+                <argument type="service" id="maker.doctrine_helper" />
             </service>
 
             <service id="maker.user_class_builder" class="Symfony\Bundle\MakerBundle\Security\UserClassBuilder" />
