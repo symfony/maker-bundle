@@ -12,10 +12,12 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Doctrine;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
+use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -110,10 +112,14 @@ class EntityRegeneratorTest extends TestCase
 
         $fileManager = new FileManager($fs, $autoloaderUtil, $tmpDir);
         $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
+        $generator = new Generator($fileManager, 'App\\');
+        $entityClassGenerator = new EntityClassGenerator($generator, $doctrineHelper);
+        $entityClassGenerator->setMangerRegistryClassName(ManagerRegistry::class);
         $regenerator = new EntityRegenerator(
             $doctrineHelper,
             $fileManager,
-            new Generator($fileManager, 'App\\'),
+            $generator,
+            $entityClassGenerator,
             $overwrite
         );
 
