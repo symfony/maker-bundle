@@ -315,6 +315,16 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setIsNullable(true),
         ];
 
+        yield 'many_to_one_same_and_other_namespaces' => [
+            'User_with_relation.php',
+            'User_with_relation_same_and_other_namespaces.php',
+            (new RelationManyToOne())
+                ->setPropertyName('subCategory')
+                ->setTargetClassName('App\Entity\SubDirectory\Category')
+                ->setTargetPropertyName('foods')
+                ->setIsNullable(true),
+        ];
+
         yield 'many_to_one_no_inverse' => [
             'User_simple.php',
             'User_simple_no_inverse.php',

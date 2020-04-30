@@ -46,6 +46,7 @@ final class EntityClassGenerator
             'doctrine/Entity.tpl.php',
             [
                 'repository_full_class_name' => $repoClassDetails->getFullName(),
+                'repository_class_name' => $repoClassDetails->getShortName(),
                 'api_resource' => $apiResource,
                 'should_escape_table_name' => $this->doctrineHelper->isKeyword($tableName),
                 'table_name' => $tableName,

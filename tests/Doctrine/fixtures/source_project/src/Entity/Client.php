@@ -18,12 +18,12 @@ class Client extends BaseClient
     private $apiKey;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag")
+     * @ORM\ManyToMany(targetEntity=Tag::class)
      */
     private $tags;
 
     /**
-     * @ORM\Embedded(class="Embed")
+     * @ORM\Embedded(class=Embed::class)
      */
     private $embed;
 }
