@@ -322,6 +322,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $defaultType = 'boolean';
         } elseif (0 === strpos($snakeCasedField, 'has_')) {
             $defaultType = 'boolean';
+        } elseif ('uuid' === $snakeCasedField) {
+            $defaultType = 'uuid';
+        } elseif ('guid' === $snakeCasedField) {
+            $defaultType = 'guid';
         }
 
         $type = null;
