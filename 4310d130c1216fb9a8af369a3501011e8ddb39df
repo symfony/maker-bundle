@@ -1,0 +1,30 @@
+---------------------------------------------------------------------------
+
+by rogeriolino at 2020-03-28T23:50:41Z
+
+It's not so easy (sorry). I'll fix it.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-03-29T23:21:24Z
+
+Haha, no problem. Yes, it's tricky. And if the target class is in a different namespace, we also need a `use` statement. If it's in the *same* namespace, then we should not add a `use` statement.
+
+---------------------------------------------------------------------------
+
+by rogeriolino at 2020-03-29T23:47:07Z
+
+@weaverryan what yout think about create a new class to wrap the string value? So we can use it in the `Embedded` annotation too.
+
+```php
+// ClassSourceManipulator::quoteAnnotationValue
+
+if ($value instanceof TargetClassName) {
+    // TargetClassName::__tostring
+    return sprintf('%s::class', $value);
+}
+```
+
+This approach will prevent to change the `ClassSourceManipulator::quoteAnnotationValue` signature to check the prop/option name to know if parse it or not as `::class`.
+
+ps: If you agree with that, please suggest me a name for this new class (and the namespace).
