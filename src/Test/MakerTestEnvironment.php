@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Test;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\InputStream;
 
@@ -437,25 +436,22 @@ echo json_encode($missingDependencies);
                 return $this->targetFlexVersion;
             }
 
+            if ('dev' === $targetVersion) {
+                $this->targetFlexVersion = 'dev-master';
+
+                return $this->targetFlexVersion;
+            }
+
+            throw new \Exception('Invalid target version');
+            /*
+             * For possible future stable-dev handling
             $httpClient = HttpClient::create();
             $response = $httpClient->request('GET', 'https://symfony.com/versions.json');
             $data = $response->toArray();
-
-            switch ($targetVersion) {
-                case 'stable-dev':
-                    $version = $data['latest'];
-                    $parts = explode('.', $version);
-
-                    $this->targetFlexVersion = sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
-
-                    break;
-                case 'dev':
-                    $this->targetFlexVersion = 'dev-master';
-
-                    break;
-                default:
-                    throw new \Exception('Invalid target version');
-            }
+            $version = $data['latest'];
+            $parts = explode('.', $version);
+            $this->targetFlexVersion = sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
+            */
         }
 
         return $this->targetFlexVersion;
