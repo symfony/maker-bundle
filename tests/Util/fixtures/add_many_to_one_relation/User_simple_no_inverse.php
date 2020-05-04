@@ -17,7 +17,7 @@ class User
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Category")
+     * @ORM\ManyToOne(targetEntity=Category::class)
      */
     private $category;
 

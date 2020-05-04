@@ -17,7 +17,7 @@ class UserAvatar
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="avatars", cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="avatars", cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $user;

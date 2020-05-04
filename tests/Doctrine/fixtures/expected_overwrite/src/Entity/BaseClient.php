@@ -24,7 +24,7 @@ class BaseClient
     private $name;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity=User::class)
      */
     private $creator;
 
