@@ -53,11 +53,14 @@ class MakerTestKernel extends Kernel implements CompilerPassInterface
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
+        $routerConfig = [];
+        if (Kernel::VERSION_ID >= 40200) {
+            $routerConfig['utf8'] = true;
+        }
+
         $c->loadFromExtension('framework', [
             'secret' => 123,
-            'router' => [
-                'utf8' => true,
-            ],
+            'router' => $routerConfig,
         ]);
     }
 

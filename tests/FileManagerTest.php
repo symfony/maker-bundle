@@ -187,7 +187,7 @@ class FileManagerTest extends TestCase
         ];
     }
 
-    public function testWithMakerFileLinkFormatter(): void
+    public function testWithMakerFileLinkFormatter()
     {
         $fileLinkFormatter = $this->createMock(FileLinkFormatter::class);
         $fileLinkFormatter
