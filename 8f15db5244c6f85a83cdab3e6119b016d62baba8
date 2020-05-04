@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by l-vo at 2020-03-28T20:55:08Z
+
+Hi @weaverryan
+
+> Sorry for the slow review
+
+No problem :)
+
+I created a new `MakerFileLinkFormatter` class and I fixed nullable typed arguments (`?string`) since the bundle is compatible with php 7.0 applications.
+
+---------------------------------------------------------------------------
+
+by l-vo at 2020-04-12T14:03:21Z
+
+Updated 🙂
