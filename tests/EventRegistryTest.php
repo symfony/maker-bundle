@@ -16,6 +16,7 @@ use Symfony\Bundle\MakerBundle\EventRegistry;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -83,11 +84,19 @@ class EventRegistryTest extends TestCase
                    ->method('getListeners');
 
         $registry = new EventRegistry($dispatcher);
-        $this->assertSame(ExceptionEvent::class, $registry->getEventClassName(KernelEvents::EXCEPTION));
+        $this->assertSame(
+            // compat for older Symfony versions
+            \class_exists(ExceptionEvent::class) ? ExceptionEvent::class : GetResponseForExceptionEvent::class,
+            $registry->getEventClassName(KernelEvents::EXCEPTION)
+        );
     }
 
     public function testGetEventClassNameGivenEventAsClass()
     {
+        if (!class_exists(ControllerEvent::class)) {
+            $this->markTestSkipped();
+        }
+
         $dispatcher = $this->createMock(EventDispatcherInterface::class);
 
         $registry = new EventRegistry($dispatcher);
