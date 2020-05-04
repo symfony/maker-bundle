@@ -22,6 +22,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
+use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Filesystem\Filesystem;
@@ -110,7 +111,7 @@ class EntityRegeneratorTest extends TestCase
                 return $tmpDir.'/src/'.str_replace('\\', '/', $shortClassName).'.php';
             });
 
-        $fileManager = new FileManager($fs, $autoloaderUtil, $tmpDir);
+        $fileManager = new FileManager($fs, $autoloaderUtil, new MakerFileLinkFormatter(null), $tmpDir);
         $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
         $generator = new Generator($fileManager, 'App\\');
         $entityClassGenerator = new EntityClassGenerator($generator, $doctrineHelper);
