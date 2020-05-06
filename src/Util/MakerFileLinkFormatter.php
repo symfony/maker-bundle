@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
 
 /**
@@ -40,14 +41,9 @@ final class MakerFileLinkFormatter
             return $relativePath;
         }
 
-        return $this->createLink(
-            $relativePath,
-            $formatted
-        );
-    }
+        $outputFormatterStyle = new OutputFormatterStyle();
+        $outputFormatterStyle->setHref($formatted);
 
-    private function createLink(string $text, string $href): string
-    {
-        return "\033]8;;{$href}\033\\{$text}\033]8;;\033\\";
+        return $outputFormatterStyle->apply($relativePath);
     }
 }
