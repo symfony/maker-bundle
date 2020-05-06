@@ -21,6 +21,7 @@ abstract class MakerTestCase extends TestCase
 
     /**
      * @dataProvider getTestDetails
+     * @group legacy
      */
     public function testExecute(MakerTestDetails $makerTestDetails)
     {

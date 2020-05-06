@@ -40,6 +40,14 @@
                 <argument type="service" id="doctrine" on-invalid="ignore" />
             </service>
 
+            <service id="maker.doctrine_inflector_factory" class="Doctrine\Inflector\InflectorFactory">
+                <factory class="Doctrine\Inflector\InflectorFactory" method="create" />
+            </service>
+
+            <service id="maker.doctrine_inflector" class="Doctrine\Inflector\Inflector">
+                <factory service="maker.doctrine_inflector_factory" method="build" />
+            </service>
+
             <service id="maker.auto_command.abstract" class="Symfony\Bundle\MakerBundle\Command\MakerCommand" abstract="true">
                 <argument /> <!-- maker -->
                 <argument type="service" id="maker.file_manager" />

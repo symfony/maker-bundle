@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\DependencyInjection;
 
+use Doctrine\Inflector\InflectorFactory;
 use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\MakeCommandRegistrationPass;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Component\Config\FileLocator;
@@ -47,6 +48,10 @@ class MakerExtension extends Extension
 
         $doctrineHelperDefinition = $container->getDefinition('maker.doctrine_helper');
         $doctrineHelperDefinition->replaceArgument(0, $rootNamespace.'\\Entity');
+
+        if (!class_exists(InflectorFactory::class)) {
+            $container->removeDefinition('maker.doctrine_inflector');
+        }
 
         $container->registerForAutoconfiguration(MakerInterface::class)
             ->addTag(MakeCommandRegistrationPass::MAKER_TAG);

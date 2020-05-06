@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
+use Doctrine\Inflector\InflectorFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
@@ -24,6 +25,8 @@ class FunctionalTest extends TestCase
     /**
      * Smoke test to make sure the DI autowiring works and all makers
      * are registered and have the correct arguments.
+     *
+     * @group legacy
      */
     public function testWiring()
     {
