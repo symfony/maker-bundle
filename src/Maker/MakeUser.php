@@ -232,8 +232,6 @@ final class MakeUser extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)
     {
-        $dependencies->requirePHP71();
-
         // checking for SecurityBundle guarantees security.yaml is present
         $dependencies->addClassDependency(
             SecurityBundle::class,
