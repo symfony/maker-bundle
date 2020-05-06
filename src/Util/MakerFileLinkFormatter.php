@@ -41,6 +41,11 @@ final class MakerFileLinkFormatter
             return $relativePath;
         }
 
+        // workaround for difficulties parsing linked file paths in appveyor
+        if (getenv('MAKER_DISABLE_FILE_LINKS')) {
+            return $relativePath;
+        }
+
         $outputFormatterStyle = new OutputFormatterStyle();
         $outputFormatterStyle->setHref($formatted);
 
