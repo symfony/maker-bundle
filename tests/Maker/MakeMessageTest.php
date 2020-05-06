@@ -25,9 +25,7 @@ class MakeMessageTest extends MakerTestCase
             [
                 'SendWelcomeEmail',
             ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMessageBasic')
-            // because there is no version compatible with 7.0
-            ->setRequiredPhpVersion(70100),
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMessageBasic'),
         ];
 
         yield 'message_with_transport' => [
@@ -39,8 +37,6 @@ class MakeMessageTest extends MakerTestCase
                 ]
             )
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMessageWithTransport')
-                // because there is no version compatible with 7.0
-                ->setRequiredPhpVersion(70100)
                 ->assert(
                     function (string $output, string $directory) {
                         $this->assertStringContainsString('Success', $output);
@@ -65,8 +61,6 @@ class MakeMessageTest extends MakerTestCase
                 ]
             )
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMessageWithTransport')
-                // because there is no version compatible with 7.0
-                ->setRequiredPhpVersion(70100)
                 ->assert(
                     function (string $output, string $directory) {
                         $this->assertStringContainsString('Success', $output);

@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
 
 /**
@@ -40,14 +41,14 @@ final class MakerFileLinkFormatter
             return $relativePath;
         }
 
-        return $this->createLink(
-            $relativePath,
-            $formatted
-        );
-    }
+        // workaround for difficulties parsing linked file paths in appveyor
+        if (getenv('MAKER_DISABLE_FILE_LINKS')) {
+            return $relativePath;
+        }
 
-    private function createLink(string $text, string $href): string
-    {
-        return "\033]8;;{$href}\033\\{$text}\033]8;;\033\\";
+        $outputFormatterStyle = new OutputFormatterStyle();
+        $outputFormatterStyle->setHref($formatted);
+
+        return $outputFormatterStyle->apply($relativePath);
     }
 }

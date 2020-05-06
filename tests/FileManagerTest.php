@@ -189,6 +189,10 @@ class FileManagerTest extends TestCase
 
     public function testWithMakerFileLinkFormatter(): void
     {
+        if (getenv('MAKER_DISABLE_FILE_LINKS')) {
+            $this->markTestSkipped();
+        }
+
         $fileLinkFormatter = $this->createMock(FileLinkFormatter::class);
         $fileLinkFormatter
             ->method('format')
