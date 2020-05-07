@@ -16,7 +16,7 @@ class SecurityControllerTest extends WebTestCase
         $this->assertSame('entityManager', $constructorParameters[0]->getName());
 
         // assert authenticator is *not* injected
-        $this->assertCount(3, $constructorParameters);
+        $this->assertCount(4, $constructorParameters);
 
         $client = self::createClient();
         $crawler = $client->request('GET', '/login');

@@ -18,6 +18,7 @@ use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
 <?= ($password_authenticated = $user_needs_encoder && interface_exists('Symfony\Component\Security\Guard\PasswordAuthenticatedInterface')) ? "use Symfony\Component\Security\Guard\PasswordAuthenticatedInterface;\n" : '' ?>
+use Symfony\Component\Security\Http\HttpUtils;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_authenticated ? " implements PasswordAuthenticatedInterface\n" : "\n" ?>
@@ -27,13 +28,15 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
     public const LOGIN_ROUTE = 'app_login';
 
 <?= $user_is_entity ? "    private \$entityManager;\n" : null ?>
+    private $httpUtils;
     private $urlGenerator;
     private $csrfTokenManager;
 <?= $user_needs_encoder ? "    private \$passwordEncoder;\n" : null ?>
 
-    public function __construct(<?= $user_is_entity ? 'EntityManagerInterface $entityManager, ' : null ?>UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager<?= $user_needs_encoder ? ', UserPasswordEncoderInterface $passwordEncoder' : null ?>)
+    public function __construct(<?= $user_is_entity ? 'EntityManagerInterface $entityManager, ' : null ?>HttpUtils $httpUtils, UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager<?= $user_needs_encoder ? ', UserPasswordEncoderInterface $passwordEncoder' : null ?>)
     {
 <?= $user_is_entity ? "        \$this->entityManager = \$entityManager;\n" : null ?>
+        $this->httpUtils = $httpUtils;
         $this->urlGenerator = $urlGenerator;
         $this->csrfTokenManager = $csrfTokenManager;
 <?= $user_needs_encoder ? "        \$this->passwordEncoder = \$passwordEncoder;\n" : null ?>
@@ -101,7 +104,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
         if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
-            return new RedirectResponse($targetPath);
+            return $this->httpUtils->createRedirectResponse($request, $targetPath);
         }
 
         // For example : return new RedirectResponse($this->urlGenerator->generate('some_route'));

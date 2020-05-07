@@ -11,10 +11,11 @@ class SecurityControllerTest extends WebTestCase
     {
         $authenticatorReflection = new \ReflectionClass(AppCustomAuthenticator::class);
         $constructorParameters = $authenticatorReflection->getConstructor()->getParameters();
-        $this->assertSame('urlGenerator', $constructorParameters[0]->getName());
+        $this->assertSame('httpUtils', $constructorParameters[0]->getName());
+        $this->assertSame('urlGenerator', $constructorParameters[1]->getName());
 
         // assert authenticator is injected
-        $this->assertCount(3, $constructorParameters);
+        $this->assertCount(4, $constructorParameters);
 
         $client = self::createClient();
         $crawler = $client->request('GET', '/login');
