@@ -13,7 +13,6 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Common\Inflector\Inflector as LegacyInflector;
-use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -43,21 +42,15 @@ final class MakeCrud extends AbstractMaker
 
     private $formTypeRenderer;
 
-    /** @var Inflector|null */
     private $inflector;
 
-    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer, Inflector $inflector = null)
+    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer)
     {
         $this->doctrineHelper = $doctrineHelper;
         $this->formTypeRenderer = $formTypeRenderer;
-        $this->inflector = $inflector;
 
-        if (null === $inflector) {
-            @trigger_error(sprintf('"%s" will require a value for the $inflector argument in 2.0.', __METHOD__), E_USER_DEPRECATED);
-
-            if (class_exists(InflectorFactory::class)) {
-                $this->inflector = InflectorFactory::create()->build();
-            }
+        if (class_exists(InflectorFactory::class)) {
+            $this->inflector = InflectorFactory::create()->build();
         }
     }
 

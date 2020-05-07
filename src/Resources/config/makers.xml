@@ -27,7 +27,6 @@
             <service id="maker.maker.make_crud" class="Symfony\Bundle\MakerBundle\Maker\MakeCrud">
                 <argument type="service" id="maker.doctrine_helper" />
                 <argument type="service" id="maker.renderer.form_type_renderer" />
-                <argument type="service" id="maker.doctrine_inflector" on-invalid="null" />
                 <tag name="maker.command" />
             </service>
 
