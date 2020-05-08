@@ -1,0 +1,64 @@
+---------------------------------------------------------------------------
+
+by jrushlow at 2020-04-12T22:19:27Z
+
+I'll look deeper into this tonight, but as I recall, the email address & name questions are not intended to accept `null` or be `empty` as those values are required to properly generate the mailer template.
+https://github.com/symfony/maker-bundle/blob/a9909bc23c89c3d29a4319d050bd27047cc6d435/src/Resources/skeleton/resetPassword/ResetPasswordController.tpl.php#L158
+
+the actual values provided to those questions can be changed later in the controller.
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2020-04-13T01:30:03Z
+
+> 2. make the validateEmailAddress argument nullable
+
+I personally am in favor of option 2. Setting the default value to `''` results in -
+`What email address will be used to send reset confirmations? e.g. mailer@your-domain.com []:`
+That could be interpreted as the value _could_ be null.
+
+But keeping the default `null` and allowing `validateEmailAddress(?string $email)` keeps the question formatting the same (no `... []:`) while throwing the validator error, as intended. Thoughts?
+
+@IndraGunawan thanks for catching this, I must has looked at that invalid argument error a dozen + times and it never clicked that I was seeing the wrong error message.
+
+---------------------------------------------------------------------------
+
+by IndraGunawan at 2020-04-15T10:15:33Z
+
+I also push option 2, which option will be selected later then i will revert another commit
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-04-17T11:26:39Z
+
+Yes, we want option 2. We want the prompt to not include the `[]` at the end. And if the user enters nothing, we want it to continue asking the question. Can you revert the extra code from option (1)?
+
+Thanks!
+
+---------------------------------------------------------------------------
+
+by IndraGunawan at 2020-04-17T13:58:47Z
+
+done. @weaverryan
+
+---------------------------------------------------------------------------
+
+by IndraGunawan at 2020-04-19T08:35:03Z
+
+nullable types is in PHP 7.1 (https://www.php.net/manual/en/migration71.new-features.php) but this bundle require PHP 7.0. is it ok? cc: @weaverryan
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-05-04T14:09:08Z
+
+> nullable types is in php 7.1 (https://www.php.net/manual/en/migration71.new-features.php) but this bundle require php 7.0. is it ok? cc: @weaverryan
+
+Good catch! It's actually not ok. We should make the argument `string $email = null` to allow a null value to be passed in PHP 7.0. You could add a check like this - https://github.com/symfony/maker-bundle/blob/10200754ce88a795c6933d4be7ac0c936c443e86/src/Util/MakerFileLinkFormatter.php#L25-L28 - so that we could easily make the argument nullable later without breaking backwards compatibility.
+
+Thanks!
+
+---------------------------------------------------------------------------
+
+by IndraGunawan at 2020-05-08T06:42:29Z
+
+this PR doesn't need any change because of this #598 has been merged. ready for merge. cc: @weaverryan
