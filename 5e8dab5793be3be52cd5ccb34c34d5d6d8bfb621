@@ -1,0 +1,27 @@
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2020-05-07T11:12:06Z
+
+For your consideration, Symfony Inflector component was deprecated and moved into the amazing String component (https://github.com/symfony/symfony/pull/35092).
+
+Given that we should start using String sooner than later, we may also consider replacing Doctrine inflector by Symfony String inflector. Or we may not. I'm just commenting things, not recommending changes. Thanks!
+
+---------------------------------------------------------------------------
+
+by alcaeus at 2020-05-07T11:32:42Z
+
+@javiereguiluz no worries. I'll leave that to someone else - I'm just offering this work to avoid breaking your CI build due to deprecations when I release 1.4 soon. If you'd rather drop doctrine/inflector in favour of symfony/string, that's for someone else to take care of.
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2020-05-07T11:38:16Z
+
+Sure! This PR probably needs to be merged without much discussion to fix the issues you mentioned. So, thanks for it!  I was just commenting about what to do in the future ... in case we decide to replace our `Str` class by the Symfony String component.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-05-07T23:52:34Z
+
+Updated, let's try this version :)
+
+I agree with using String, just from a "let's eat our own dog food" standpoint (though I have zero issues with the Doctrine library). If someone makes a PR for it, that would be great.
