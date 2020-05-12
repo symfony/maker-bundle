@@ -1,0 +1,9 @@
+services:
+  Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassService: '@fake.simple_class'
+
+  Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassServiceTwo $variable: '@App\Fake\Class'
+
+  fake.simple_class_two:
+    public: false
+    alias: Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassTwo
+    deprecated: 'The "%alias_id%" alias is deprecated. Do not use it anymore.'

@@ -1,0 +1,29 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+  # the parameter name is an arbitrary string (the 'app.' prefix is recommended
+  # to better differentiate your parameters from Symfony parameters).
+  app.admin_email: 'something@example.com'
+
+  # boolean parameters
+  app.enable_v2_protocol: true
+
+  #global.constant.value: !php/const _MAKER_TEST_GLOBAL_CONSTANT
+  #my_class.constant.value: !php/const Symfony\Bundle\MakerBundle\Tests\Util\PhpServicesCreatorTest::CONSTANT_NAME
+
+  # array/collection parameters
+  app.supported_locales: ['en', 'es', 'fr']
+
+  # binary content parameters (encode the contents with base64_encode())
+  app.some_parameter: !!binary VGhpcyBpcyBhIEJlbGwgY2hhciAH
+
+  my_multilang.language_fallback:
+    en:
+      - en
+      - fr
+    fr:
+      - fr
+      - en

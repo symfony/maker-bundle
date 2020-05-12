@@ -24,6 +24,7 @@ class Generator
     private $fileManager;
     private $twigHelper;
     private $pendingOperations = [];
+    private $pendingFileDeletions = [];
     private $namespacePrefix;
 
     public function __construct(FileManager $fileManager, string $namespacePrefix)
@@ -196,6 +197,10 @@ class Generator
             );
         }
 
+        foreach ($this->pendingFileDeletions as $targetPath) {
+            $this->fileManager->removeFile($targetPath);
+        }
+
         $this->pendingOperations = [];
     }
 
@@ -226,5 +231,10 @@ class Generator
             $templateName,
             $variables
         );
+    }
+
+    public function removeFile(string $path)
+    {
+        $this->pendingFileDeletions[] = $path;
     }
 }

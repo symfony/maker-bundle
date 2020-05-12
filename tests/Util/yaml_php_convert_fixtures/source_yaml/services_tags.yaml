@@ -1,0 +1,9 @@
+services:
+
+  Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassTwo:
+    tags: ['app.mail_transport']
+
+  Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassService:
+    tags:
+      - { name: 'app.mail_transport', alias: 'sendmail' }
+      - { name: 'app.mail_sender', alias: 'sender', priority: 512 }

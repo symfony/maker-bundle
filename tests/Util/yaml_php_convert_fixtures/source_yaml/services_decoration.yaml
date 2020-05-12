@@ -1,0 +1,14 @@
+services:
+
+  Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClass:
+    decorates: App\Mailer
+
+  Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassTwo:
+    decorates: App\Mailer
+    decoration_inner_name: App\DecoratingMailer.wooz
+    decoration_priority: 5
+    decoration_on_invalid: exception
+
+  Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassService:
+    decorates: App\Mailer
+    decoration_on_invalid: ignore

@@ -1,0 +1,10 @@
+services:
+
+  _instanceof:
+    Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassService:
+      public: true
+      tags: ['app.domain_loader']
+
+    Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassServiceTwo:
+      public: false
+      tags: ['app.domain_loader']

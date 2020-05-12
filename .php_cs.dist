@@ -9,6 +9,7 @@ $finder = PhpCsFixer\Finder::create()
     ->exclude('vendor')
     ->exclude('tests/tmp')
     ->exclude('fixtures')
+    ->exclude('yaml_php_convert_fixtures')
     // the PHP template files are a bit special
     ->notName('*.tpl.php')
 ;

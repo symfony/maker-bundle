@@ -1,0 +1,27 @@
+services:
+
+  Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassServiceTwo $shoutyTransformer: '@App\Util\UppercaseTransformer'
+
+  Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassService:
+    arguments:
+      - '@string'
+      - ['isaevsgdbfhhnth', 1234561456545, 'jean@vgbsetgil.com']
+      - 456
+      -
+        App\FooCommand: '@app.command_handler.foo'
+        App\BarCommand: '@app.command_handler.bar'
+      - !tagged_locator { tag: 'app.handler', index_by: 'key' }
+      - !tagged_iterator app.handler
+
+  Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassTwo:
+    arguments: [!tagged_locator { index_by: 'key', tag: 'app.handler', default_index_method: 'myOwnMethodName' }]
+
+  Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassServiceThree:
+    arguments:
+      $fake1: '@id.fake.service'
+      $fake2: ['fake_argument', 123, 'jean@mail.com']
+
+  site_update_manager.normal_users:
+    class: Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassThree
+    arguments: ['@=service("App\Mail\MailerConfiguration").getMailerMethod()']
+

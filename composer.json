@@ -22,7 +22,8 @@
         "symfony/filesystem": "^3.4|^4.0|^5.0",
         "symfony/finder": "^3.4|^4.0|^5.0",
         "symfony/framework-bundle": "^3.4|^4.0|^5.0",
-        "symfony/http-kernel": "^3.4|^4.0|^5.0"
+        "symfony/http-kernel": "^3.4|^4.0|^5.0",
+        "symfony/polyfill-php80": "^1.15.0"
     },
     "require-dev": {
         "composer/semver": "^3.0@dev",
@@ -30,6 +31,7 @@
         "doctrine/orm": "^2.3",
         "friendsofphp/php-cs-fixer": "^2.8",
         "friendsoftwig/twigcs": "^3.1.2",
+        "symfony/expression-language": "^4.4|^5.0",
         "symfony/http-client": "^4.3|^5.0",
         "symfony/phpunit-bridge": "^4.3|^5.0",
         "symfony/process": "^3.4|^4.0|^5.0",

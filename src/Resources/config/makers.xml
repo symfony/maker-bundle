@@ -117,5 +117,10 @@
                 <argument>%kernel.project_dir%</argument>
                 <tag name="maker.command" />
             </service>
+
+            <service id="maker.maker.make_convert_php_services" class="Symfony\Bundle\MakerBundle\Maker\MakeConvertPhpServices">
+                <argument type="service" id="maker.file_manager" />
+                <tag name="maker.command" />
+            </service>
         </services>
 </container>

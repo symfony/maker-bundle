@@ -190,6 +190,17 @@ class FileManager
         return $this->twigDefaultPath.'/'.$filename;
     }
 
+    public function removeFile(string $path): void
+    {
+        $this->fs->remove($path);
+
+        $this->io->comment(sprintf(
+            '%s: %s',
+            '<fg=blue>deleted</>',
+            $this->relativizePath($path)
+        ));
+    }
+
     /**
      * Resolve '../' in paths (like real_path), but for non-existent files.
      *
