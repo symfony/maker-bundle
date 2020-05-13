@@ -298,7 +298,7 @@ class InteractiveSecurityHelperTest extends TestCase
     /**
      * @dataProvider guessEmailGetterTest
      */
-    public function testGuessEmailGetter(string $expectedEmailGetter, bool $automaticallyGuessed, string $class = '', array $choices = [])
+    public function testGuessEmailGetter(string $expectedEmailGetter, string $emailAttribute, bool $automaticallyGuessed, string $class = '', array $choices = [])
     {
         /** @var SymfonyStyle|\PHPUnit_Framework_MockObject_MockObject $io */
         $io = $this->createMock(SymfonyStyle::class);
@@ -310,7 +310,7 @@ class InteractiveSecurityHelperTest extends TestCase
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
         $this->assertEquals(
             $expectedEmailGetter,
-            $interactiveSecurityHelper->guessEmailGetter($io, $class)
+            $interactiveSecurityHelper->guessEmailGetter($io, $class, $emailAttribute)
         );
     }
 
@@ -318,12 +318,22 @@ class InteractiveSecurityHelperTest extends TestCase
     {
         yield 'guess_fixture_class' => [
             'expectedPasswordSetter' => 'getEmail',
+            'email',
             true,
             FixtureClass7::class,
         ];
 
+        yield 'guess_fixture_class_different_property' => [
+            'expectedPasswordSetter' => 'getEmail',
+            'myEmail',
+            false,
+            FixtureClass7::class,
+            ['getEmail'],
+        ];
+
         yield 'guess_fixture_class_2' => [
             'expectedPasswordSetter' => 'getMyEmail',
+            '',
             false,
             FixtureClass8::class,
             ['getMyEmail'],

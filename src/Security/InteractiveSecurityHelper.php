@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -222,12 +223,14 @@ authenticators will be ignored, and can be blank.',
         );
     }
 
-    public function guessEmailGetter(SymfonyStyle $io, string $userClass): string
+    public function guessEmailGetter(SymfonyStyle $io, string $userClass, string $emailPropertyName): string
     {
         $reflectionClass = new \ReflectionClass($userClass);
 
-        if ($reflectionClass->hasMethod('getEmail')) {
-            return 'getEmail';
+        $supposedEmailMethodName = 'get'.Str::asCamelCase($emailPropertyName);
+
+        if ($reflectionClass->hasMethod($supposedEmailMethodName)) {
+            return $supposedEmailMethodName;
         }
 
         $classMethods = [];

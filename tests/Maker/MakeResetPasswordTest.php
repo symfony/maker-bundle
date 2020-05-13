@@ -143,5 +143,42 @@ class MakeResetPasswordTest extends MakerTestCase
             ->addExtraDependencies('twig')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeResetPasswordFunctionalTest'),
         ];
+
+        yield 'reset_password_custom_user' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeResetPassword::class),
+            [
+                'App\Entity\UserCustom',
+                'emailAddress',
+                'setMyPassword',
+                'app_home',
+                'jr@rushlow.dev',
+                'SymfonyCasts',
+            ])
+            ->setRequiredPhpVersion(70200)
+            ->addExtraDependencies('security-bundle')
+            ->addExtraDependencies('twig')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeResetPasswordCustomUserAttribute')
+            ->assert(
+                function (string $output, string $directory) {
+                    $this->assertStringContainsString('Success', $output);
+
+                    // check ResetPasswordController
+                    $contentResetPasswordController = file_get_contents($directory.'/src/Controller/ResetPasswordController.php');
+                    $this->assertStringContainsString('$form->get(\'emailAddress\')->getData()', $contentResetPasswordController);
+                    $this->assertStringContainsString('\'emailAddress\' => $emailFormData,', $contentResetPasswordController);
+                    $this->assertStringContainsString('$user->setMyPassword($encodedPassword);', $contentResetPasswordController);
+                    $this->assertStringContainsString('->to($user->getEmailAddress())', $contentResetPasswordController);
+                    // check ResetPasswordRequest
+                    $contentResetPasswordRequest = file_get_contents($directory.'/src/Entity/ResetPasswordRequest.php');
+                    $this->assertStringContainsString('@ORM\ManyToOne(targetEntity="App\Entity\UserCustom")', $contentResetPasswordRequest);
+                    // check ResetPasswordRequestFormType
+                    $contentResetPasswordRequestFormType = file_get_contents($directory.'/src/Form/ResetPasswordRequestFormType.php');
+                    $this->assertStringContainsString('->add(\'emailAddress\', EmailType::class, [', $contentResetPasswordRequestFormType);
+                    // check request.html.twig
+                    $contentRequestHtml = file_get_contents($directory.'/templates/reset_password/request.html.twig');
+                    $this->assertStringContainsString('{{ form_row(requestForm.emailAddress) }}', $contentRequestHtml);
+                }
+            ),
+        ];
     }
 }

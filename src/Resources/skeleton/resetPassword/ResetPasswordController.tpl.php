@@ -44,7 +44,7 @@ class <?= $class_name ?> extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             return $this->processSendingPasswordResetEmail(
-                $form->get('email')->getData(),
+                $form->get('<?= $email_field ?>')->getData(),
                 $mailer
             );
         }
@@ -133,7 +133,7 @@ class <?= $class_name ?> extends AbstractController
     private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer): RedirectResponse
     {
         $user = $this->getDoctrine()->getRepository(<?= $user_class_name ?>::class)->findOneBy([
-            'email' => $emailFormData,
+            '<?= $email_field ?>' => $emailFormData,
         ]);
 
         // Marks that you are allowed to see the app_check_email page.

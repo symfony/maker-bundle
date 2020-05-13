@@ -107,7 +107,7 @@ class MakeResetPassword extends AbstractMaker
         );
         $input->setArgument(
             'email-getter',
-            $interactiveSecurityHelper->guessEmailGetter($io, $userClass)
+            $interactiveSecurityHelper->guessEmailGetter($io, $userClass, $input->getArgument('email-property-name'))
         );
         $input->setArgument(
             'password-setter',
@@ -191,6 +191,7 @@ class MakeResetPassword extends AbstractMaker
                 'from_email' => $input->getArgument('from-email-address'),
                 'from_email_name' => $input->getArgument('from-email-name'),
                 'email_getter' => $input->getArgument('email-getter'),
+                'email_field' => $input->getArgument('email-property-name'),
             ]
         );
 
