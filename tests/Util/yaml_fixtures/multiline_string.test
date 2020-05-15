@@ -1,0 +1,16 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            description: |
+                Multiline string
+                Second line
+===
+$data['nelmio_api_doc']['documentation']['info']['description'] = "Multiline string\nSecond line\nThird line";
+===
+nelmio_api_doc:
+    documentation:
+        info:
+            description: |
+                Multiline string
+                Second line
+                Third line

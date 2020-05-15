@@ -58,7 +58,8 @@ class YamlSourceManipulatorTest extends TestCase
         foreach ($finder as $file) {
             list($source, $changeCode, $expected) = explode('===', $file->getContents());
 
-            $data = Yaml::parse($source);
+            // Multiline string ends with an \n
+            $data = Yaml::parse(trim($source, "\n"));
             eval($changeCode);
 
             yield $file->getFilename() => [
