@@ -1,3 +1,8 @@
+1.18
+====
+
+* Reverted support for `doctrine/inflector` 2.0 - #611 thanks to @weaverryan
+
 1.17
 ====
 
