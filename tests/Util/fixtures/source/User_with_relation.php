@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use Foo\Entity\Category;
+use App\Entity\Category;
 
 class User
 {

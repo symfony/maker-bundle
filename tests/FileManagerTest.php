@@ -14,7 +14,10 @@ namespace Symfony\Bundle\MakerBundle\Tests;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
+use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
 
 class FileManagerTest extends TestCase
 {
@@ -23,7 +26,12 @@ class FileManagerTest extends TestCase
      */
     public function testRelativizePath(string $rootDir, string $absolutePath, string $expectedPath)
     {
-        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir);
+        $fileManager = new FileManager(
+            new Filesystem(),
+            $this->createMock(AutoloaderUtil::class),
+            new MakerFileLinkFormatter(null),
+            $rootDir
+        );
 
         $this->assertSame($expectedPath, $fileManager->relativizePath($absolutePath));
     }
@@ -72,7 +80,12 @@ class FileManagerTest extends TestCase
      */
     public function testAbsolutizePath(string $rootDir, string $path, string $expectedPath)
     {
-        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir);
+        $fileManager = new FileManager(
+            new Filesystem(),
+            $this->createMock(AutoloaderUtil::class),
+            new MakerFileLinkFormatter(null),
+            $rootDir
+        );
         $this->assertSame($expectedPath, $fileManager->absolutizePath($path));
     }
 
@@ -108,7 +121,12 @@ class FileManagerTest extends TestCase
      */
     public function testIsPathInVendor(string $rootDir, string $path, bool $expectedIsInVendor)
     {
-        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir);
+        $fileManager = new FileManager(
+            new Filesystem(),
+            $this->createMock(AutoloaderUtil::class),
+            new MakerFileLinkFormatter(null),
+            $rootDir
+        );
         $this->assertSame($expectedIsInVendor, $fileManager->isPathInVendor($path));
     }
 
@@ -150,7 +168,13 @@ class FileManagerTest extends TestCase
      */
     public function testPathForTemplate(string $rootDir, string $twigDefaultPath, string $expectedTemplatesFolder)
     {
-        $fileManager = new FileManager(new Filesystem(), $this->createMock(AutoloaderUtil::class), $rootDir, $twigDefaultPath);
+        $fileManager = new FileManager(
+            new Filesystem(),
+            $this->createMock(AutoloaderUtil::class),
+            new MakerFileLinkFormatter(null),
+            $rootDir,
+            $twigDefaultPath
+        );
         $this->assertSame($expectedTemplatesFolder, $fileManager->getPathForTemplate('template.html.twig'));
     }
 
@@ -161,5 +185,36 @@ class FileManagerTest extends TestCase
             '/home/project/templates',
             'templates/template.html.twig',
         ];
+    }
+
+    public function testWithMakerFileLinkFormatter(): void
+    {
+        if (getenv('MAKER_DISABLE_FILE_LINKS')) {
+            $this->markTestSkipped();
+        }
+
+        $fileLinkFormatter = $this->createMock(FileLinkFormatter::class);
+        $fileLinkFormatter
+            ->method('format')
+            ->willReturnCallback(function ($path, $line) {
+                return sprintf('subl://open?url=file://%s&line=%d', $path, $line);
+            });
+
+        $fileManager = new FileManager(
+            $this->createMock(Filesystem::class),
+            $this->createMock(AutoloaderUtil::class),
+            new MakerFileLinkFormatter($fileLinkFormatter),
+            '/app'
+        );
+
+        $io = $this->createMock(SymfonyStyle::class);
+        $io
+            ->expects($this->once())
+            ->method('comment')
+            ->with("<fg=green>no change</>: \033]8;;subl://open?url=file:///app/myfile&line=1\033\\myfile\033]8;;\033\\");
+
+        $fileManager->setIO($io);
+
+        $fileManager->dumpFile('myfile', '');
     }
 }
