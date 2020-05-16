@@ -87,28 +87,33 @@ abstract class BaseRelation
         return $this;
     }
 
-    public function isAvoidSetter() {
+    public function isAvoidSetter()
+    {
         return $this->avoidSetter;
     }
 
-    public function avoidSetter(bool $avoidSetter = true) {
+    public function avoidSetter(bool $avoidSetter = true)
+    {
         $this->avoidSetter = $avoidSetter;
 
         return $this;
     }
 
-    public function getReturnType() {
+    public function getReturnType()
+    {
         return $this->returnType;
     }
 
-    public function setReturnType(string $returnType, $returnTypeIsNullable = true) {
+    public function setReturnType(string $returnType, $returnTypeIsNullable = true)
+    {
         $this->returnType = $returnType;
         $this->returnTypeIsNullable = $returnTypeIsNullable;
 
         return $this;
     }
 
-    public function isReturnTypeNullable() {
+    public function isReturnTypeNullable()
+    {
         return $this->returnTypeIsNullable;
     }
 }
