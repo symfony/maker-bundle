@@ -31,7 +31,10 @@ final class Str
      */
     public static function hasSuffix(string $value, string $suffix): bool
     {
-        return 0 === strcasecmp($suffix, substr($value, -\strlen($suffix)));
+        if ($value === $suffix) {
+            return true;
+        }
+        return u($value)->ignoreCase()->endsWith(u($suffix)->ignoreCase());
     }
 
     /**
@@ -149,9 +152,9 @@ final class Str
     public static function singularCamelCaseToPluralCamelCase(string $camelCase): string
     {
         $snake = self::asSnakeCase($camelCase);
-        $words = explode('_', $snake);
+        $words = u($snake)->split('_');
         $words[\count($words) - 1] = self::pluralize($words[\count($words) - 1]);
-        $reSnaked = implode('_', $words);
+        $reSnaked = u('_')->join($words);
 
         return self::asLowerCamelCase($reSnaked);
     }
@@ -159,9 +162,9 @@ final class Str
     public static function pluralCamelCaseToSingular(string $camelCase): string
     {
         $snake = self::asSnakeCase($camelCase);
-        $words = explode('_', $snake);
+        $words = u($snake)->split('_');
         $words[\count($words) - 1] = self::singularize($words[\count($words) - 1]);
-        $reSnaked = implode('_', $words);
+        $reSnaked = u('_')->join($words);
 
         return self::asLowerCamelCase($reSnaked);
     }
@@ -217,7 +220,7 @@ final class Str
 
     public static function asHumanWords(string $variableName): string
     {
-        return implode(' ', preg_split('/(?=[A-Z])/', $variableName));
+        return u(' ')->join(preg_split('/(?=[A-Z])/', $variableName));
     }
 
     private static function pluralize(string $word): string
