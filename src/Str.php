@@ -64,15 +64,7 @@ final class Str
      */
     public static function asClassName(string $value, string $suffix = ''): string
     {
-        $value = u($value)
-            ->trim()
-            ->replace('-', ' ')
-            ->replace('_', ' ')
-            ->replace('.', ' ')
-            ->replace(':', ' ')
-            ->title(true)
-            ->replace(' ', '')
-            ->title();
+        $value = u($value)->camel()->title();
         $value = self::addSuffix($value, $suffix);
 
         return $value;
@@ -84,12 +76,7 @@ final class Str
      */
     public static function asTwigVariable(string $value): string
     {
-        return u($value)
-            ->trim()
-            ->replaceMatches('/[^a-zA-Z0-9_]/', '_')
-            ->replaceMatches('/(?<=\\w)([A-Z])/', '_$1')
-            ->replaceMatches('/_{2,}/', '_')
-            ->lower();
+        return u($value)->snake();
     }
 
     public static function asLowerCamelCase(string $str): string
