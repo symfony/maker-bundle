@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
+use PhpParser\Builder\Param;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
@@ -586,7 +587,7 @@ class ClassSourceManipulatorTest extends TestCase
         $manipulator->addMethodBuilder(
             $methodBuilder,
             [
-                ['someParam', null, 'string'],
+                (new Param('someParam'))->setType('string')->getNode(),
             ], <<<'CODE'
 <?php
 $this->someParam = $someParam;
@@ -605,7 +606,7 @@ CODE
 
         $methodBuilder = $manipulator->createMethodBuilder('action', 'JsonResponse', false, ['@Route("/action", name="app_action")']);
         $methodBuilder->addParam(
-            (new \PhpParser\Builder\Param('param'))->setTypeHint('string')
+            (new Param('param'))->setTypeHint('string')
         );
         $manipulator->addMethodBody($methodBuilder, <<<'CODE'
 <?php
@@ -812,7 +813,19 @@ EOF
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddConstructorWithParamsAndStmtBody()
+    public function testAddTraitAlReadyExists()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addTrait('App\TraitAlreadyHere');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddConstructor()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserEmpty_with_constructor.php');
@@ -820,8 +833,8 @@ EOF
         $manipulator = new ClassSourceManipulator($source);
 
         $manipulator->addConstructor([
-                    ['someObjectParam', null, 'object'],
-                    ['someStringParam', null, 'string'],
+                (new Param('someObjectParam'))->setType('object')->getNode(),
+                (new Param('someStringParam'))->setType('string')->getNode(),
                 ], <<<'CODE'
 <?php
 $this->someObjectParam = $someObjectParam;
@@ -839,7 +852,15 @@ CODE
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addConstructor([]);
+        $manipulator->addConstructor([
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -851,7 +872,15 @@ CODE
 
         $manipulator = new ClassSourceManipulator($source);
 
-        $manipulator->addConstructor([]);
+        $manipulator->addConstructor([
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -865,6 +894,14 @@ CODE
         $this->expectException('LogicException');
         $this->expectExceptionMessage('Constructor already exists');
 
-        $manipulator->addConstructor([]);
+        $manipulator->addConstructor([
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
     }
 }

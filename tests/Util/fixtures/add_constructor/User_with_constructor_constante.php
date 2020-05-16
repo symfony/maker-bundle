@@ -6,7 +6,9 @@ class User
 {
     const CONSTANTE = "testConst";
 
-    public function __construct()
+    public function __construct(object $someObjectParam, string $someStringParam)
     {
+        $this->someObjectParam = $someObjectParam;
+        $this->someMethod($someStringParam);
     }
 }
