@@ -467,8 +467,6 @@ final class ClassSourceManipulator
     private function addSingularRelation(BaseRelation $relation)
     {
         $typeHint = $this->addUseStatementIfNecessary($relation->getTargetClassName());
-        $typeHint = null !== $relation->getReturnType() ? $relation->getReturnType() : $typeHint;
-
         if ($relation->getTargetClassName() == $this->getThisFullClassName()) {
             $typeHint = 'self';
         }
@@ -506,7 +504,7 @@ final class ClassSourceManipulator
 
         $this->addGetter(
             $relation->getPropertyName(),
-            $typeHint,
+            null !== $relation->getReturnType() ? $relation->getReturnType() : $typeHint,
             // getter methods always have nullable return values
             // because even though these are required in the db, they may not be set
             $relation->isReturnTypeNullable()
