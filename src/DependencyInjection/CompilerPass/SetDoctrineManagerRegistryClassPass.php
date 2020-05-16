@@ -11,21 +11,20 @@
 
 namespace Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * Removes injected parameter arguments if they don't exist in this app.
- *
- * @author Ryan Weaver <ryan@symfonycasts.com>
+ * Helps determine which "ManagerRegistry" autowiring alias is available.
  */
-class RemoveMissingParametersPass implements CompilerPassInterface
+class SetDoctrineManagerRegistryClassPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        if (!$container->hasParameter('twig.default_path')) {
-            $container->getDefinition('maker.file_manager')
-                ->replaceArgument(4, null);
+        if ($container->hasAlias(ManagerRegistry::class)) {
+            $definition = $container->getDefinition('maker.entity_class_generator');
+            $definition->addMethodCall('setMangerRegistryClassName', [ManagerRegistry::class]);
         }
     }
 }

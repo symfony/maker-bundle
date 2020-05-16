@@ -1,3 +1,29 @@
+1.18
+====
+
+* Reverted support for `doctrine/inflector` 2.0 - #611 thanks to @weaverryan
+
+1.17
+====
+
+* PHP 7.1 is now the required minimum version - #598 thanks to @weaverryan
+
+* MakerBundle now allows `doctrine/inflector` 2.0 - #600 thanks to @alcaeus
+
+1.16
+====
+
+* [make:entity] Generated entities will now use the RelationName::class
+  syntax when generating relationships (e.g.
+  `targetEntity=RelationName::class`) - #573 thanks to @rogeriolino.
+
+* When listing generated files in the console, if a file link formatter
+  is configured, the links will now be clickable - #559 thanks to @l-vo.
+
+* [make:entity] Added UUID and GUID default type to entity maker - if you name a
+  field `uuid` or `guid`, the Maker will guess those types by default - #593
+  thanks to @thomas-miceli.
+
 1.15
 ====
 

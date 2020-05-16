@@ -11,7 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
-use Doctrine\Bundle\MigrationsBundle\Command\DoctrineCommand;
+use Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle;
 use Symfony\Bundle\MakerBundle\ApplicationAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -120,7 +120,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
     public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
-            DoctrineCommand::class,
+            DoctrineMigrationsBundle::class,
             'migrations'
         );
     }
