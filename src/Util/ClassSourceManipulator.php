@@ -470,7 +470,7 @@ final class ClassSourceManipulator
         }
 
         $annotationOptions = [
-            'targetEntity' => $relation->getTargetClassName(),
+            'targetEntity' => new ClassNameValue($shortClassName, $relation->getTargetClassName()),
         ];
         if ($relation->isOwning()) {
             // sometimes, we don't map the inverse relation

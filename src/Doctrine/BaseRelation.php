@@ -19,7 +19,7 @@ abstract class BaseRelation
     private $propertyName;
     private $targetClassName;
     private $targetPropertyName;
-    private $returnType = null;
+    private $returnType;
     private $returnTypeIsNullable = true;
     private $isSelfReferencing = false;
     private $mapInverseRelation = true;

@@ -352,7 +352,8 @@ CODE
         $manipulator->addManyToOneRelation((new RelationManyToOne())
             ->setPropertyName('user')
             ->setTargetClassName("App\Entity\User")
-            ->setIsNullable(true)->setMapInverseRelation(false)
+            ->setIsNullable(true)
+            ->setMapInverseRelation(false)
             ->setReturnType('object', false)
             ->avoidSetter()
         );
