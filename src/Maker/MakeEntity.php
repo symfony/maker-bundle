@@ -41,6 +41,7 @@ use Symfony\Component\Console\Question\Question;
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  * @author Kévin Dunglas <dunglas@gmail.com>
+ * @author Antoine Michelet <jean.marcel.michelet@gmail.com>
  */
 final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 {
@@ -159,6 +160,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         if ($classExists) {
             $entityPath = $this->getPathOfClass($entityClassDetails->getFullName());
+
             $io->text([
                 'Your entity already exists! So let\'s add some new fields!',
             ]);
@@ -175,7 +177,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $isFirstField = true;
         while (true) {
-            $newField = $this->askForNextField($io, $currentFields, $entityClassDetails->getFullName(), $isFirstField);
+            $newField = $this->askForNextField($io, $currentFields, $entityClassDetails->getFullName(), $isFirstField, $input->getOption('api-resource'));
             $isFirstField = false;
 
             if (null === $newField) {
@@ -187,8 +189,18 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
             if (\is_array($newField)) {
                 $annotationOptions = $newField;
-                unset($annotationOptions['fieldName']);
-                $manipulator->addEntityField($newField['fieldName'], $annotationOptions);
+                unset($annotationOptions['fieldName'], $annotationOptions['apiFilter']);
+                if (null !== $newField['apiFilter']) {
+                    $manipulator->addUseStatementIfNecessary('ApiPlatform\\Core\\Annotation\\ApiFilter');
+                    if ('TermFilter' === $newField['apiFilter'] || 'MatchFilter' === $newField['apiFilter']) {
+                        $manipulator->addUseStatementIfNecessary('ApiPlatform\Core\Bridge\Elasticsearch\DataProvider\Filter\\'.$newField['apiFilter']);
+                    } else {
+                        $manipulator->addUseStatementIfNecessary('ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\\'.$newField['apiFilter']);
+                    }
+                    $manipulator->addEntityField($newField['fieldName'], $annotationOptions, ['@ApiFilter('.$newField['apiFilter'].'::class)']);
+                } else {
+                    $manipulator->addEntityField($newField['fieldName'], $annotationOptions);
+                }
 
                 $currentFields[] = $newField['fieldName'];
             } elseif ($newField instanceof EntityRelation) {
@@ -280,7 +292,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         ORMDependencyBuilder::buildDependencies($dependencies);
     }
 
-    private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField)
+    private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField, bool $apiOptions)
     {
         $io->writeln('');
 
@@ -374,6 +386,67 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {
             $data['nullable'] = true;
+        }
+
+        $data['apiFilter'] = null;
+        if (true === $apiOptions) {
+            $availableFilters = [
+                'SearchFilter',
+                'DateFilter',
+                'BooleanFilter',
+                'NumericFilter',
+                'RangeFilter',
+                'ExistsFilter',
+                'OrderFilter',
+                'MatchFilter',
+                'TermFilter',
+            ];
+
+            $filter = null;
+            while (null === $filter) {
+                $question = new Question('Do you want add a filter for you api resource? (enter <comment>?</comment> to see all filters)', 'No');
+                $question->setAutocompleterValues($availableFilters);
+                $filter = $io->askQuestion($question);
+
+                if ('No' === $filter) {
+                    return $data;
+                }
+
+                if ('?' === $filter) {
+                    foreach ($availableFilters as $filter) {
+                        $io->writeln(sprintf('  * <comment>%s</comment>', $filter));
+                    }
+
+                    $filter = null;
+                    continue;
+                }
+
+                if (!\in_array($filter, $availableFilters)) {
+                    $this->printAvailableTypes($io);
+                    $io->error(sprintf('Invalid filter "%s".', $filter));
+                    $io->writeln('');
+
+                    $filter = null;
+                    continue;
+                }
+
+                if (!$this->isTypeCompatibleWithApiFilter($data, $filter)) {
+                    $io->error(sprintf('The field type "%s" is not compatible with the api filter "%s"', $data['type'], $filter));
+
+                    $filter = null;
+                    continue;
+                }
+
+                if ('TermFilter' === $filter || 'MatchFilter' === $filter) {
+                    $io->note(
+                        'ElasticSearch is required for this Filter'
+                    );
+                    $io->writeln(' see: <href=https://api-platform.com/docs/core/elasticsearch/>Elasticsearch Support ApiPlatform</>');
+                    $io->writeln('');
+                }
+
+                $data['apiFilter'] = $filter;
+            }
         }
 
         return $data;
@@ -813,5 +886,60 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     private function getEntityNamespace(): string
     {
         return $this->doctrineHelper->getEntityNamespace();
+    }
+
+    private function isTypeCompatibleWithApiFilter($data, $apiFilter): bool
+    {
+        $numerics = [
+            'integer',
+            'smallint',
+            'bigint',
+            'guid',
+        ];
+
+        $dates = [
+            'datetime',
+            'datetime_immutable',
+            'datetimetz',
+            'datetimetz_immutable',
+            'date',
+            'date_immutable',
+            'time',
+            'time_immutable',
+            'dateinterval',
+        ];
+
+        $type = $data['type'];
+        switch ($apiFilter) {
+            case 'SearchFilter':
+                return \in_array($type, $numerics) || 'string' === $type || 'text' ? true : false;
+                break;
+            case 'DateFilter':
+                return \in_array($type, $dates) ? true : false;
+            break;
+            case 'BooleanFilter':
+                return 'boolean' === $type ? true : false;
+            break;
+            case 'NumericFilter':
+                return \in_array($type, $numerics) ? true : false;
+                break;
+            case 'RangeFilter':
+                return \in_array($type, $numerics) ? true : false;
+                break;
+            case 'ExistsFilter':
+                return isset($data['nullable']) ? true : false;
+            case 'OrderFilter':
+                return \in_array($type, $numerics) || 'string' === $type || 'text' ? true : false;
+                break;
+            case 'MatchFilter':
+                return 'string' === $type || 'text' ? true : false;
+                break;
+            case 'TermFilter':
+                return \in_array($type, $numerics) || 'string' === $type || 'text' ? true : false;
+                break;
+            default:
+                return false;
+                break;
+        }
     }
 }
