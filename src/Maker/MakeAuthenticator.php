@@ -126,7 +126,7 @@ final class MakeAuthenticator extends AbstractMaker
                 Validator::notBlank($answer);
 
                 return Validator::classDoesNotExist(
-                    $this->generator->createClassNameDetails($answer, 'Security\\', 'Authenticator')->getFullName()
+                    $this->generator->createClassNameDetails($answer, 'Security\\Authenticator\\', 'Authenticator')->getFullName()
                 );
             }
         );
