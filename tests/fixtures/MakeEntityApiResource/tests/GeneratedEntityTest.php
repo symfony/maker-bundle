@@ -23,7 +23,6 @@ class GeneratedEntityTest extends KernelTestCase
             ->execute();
 
         $user = new User();
-        $user->setName('125');
         $em->persist($user);
         $em->flush();
         $em->refresh($user);

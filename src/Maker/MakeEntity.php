@@ -399,7 +399,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
             $apiFilter = null;
             while (null === $apiFilter) {
-                $question = new Question('Do you want add a filter for you api resource? (enter <comment>?</comment> to see all filters)', 'No');
+                $question = new Question('Do you want to add a filter for your api resource? (enter <comment>?</comment> to see all filters)', 'No');
                 $question->setAutocompleterValues($availableFilters);
                 $apiFilter = $io->askQuestion($question);
 
@@ -426,13 +426,13 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 }
 
                 if (!$this->isTypeCompatibleWithApiFilter($data, $apiFilter)) {
-                    $io->error(sprintf('The field type "%s" is not compatible with the api filter "%s"', $data['type'], $apiFilter));
+                    $io->error(sprintf('The type "%s" is not compatible with the filter "%s"', $data['type'], $apiFilter));
 
                     $apiFilter = null;
                     continue;
                 }
 
-                if ('TermFilter' === $apiFilter || 'MatchFilter') {
+                if ('TermFilter' === $apiFilter || 'MatchFilter' === $apiFilter) {
                     $io->note('Elasticsearch is required for this Filter');
                     $io->writeln(' see: <href=https://api-platform.com/docs/core/elasticsearch/>Elasticsearch Support ApiPlatform</>');
                     $io->writeln('');
