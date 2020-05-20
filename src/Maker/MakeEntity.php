@@ -191,13 +191,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 $annotationOptions = $newField;
                 unset($annotationOptions['fieldName'], $annotationOptions['apiFilter']);
                 if (null !== $newField['apiFilter']) {
-                    $manipulator->addUseStatementIfNecessary('ApiPlatform\\Core\\Annotation\\ApiFilter');
-                    if ('TermFilter' === $newField['apiFilter'] || 'MatchFilter' === $newField['apiFilter']) {
-                        $manipulator->addUseStatementIfNecessary('ApiPlatform\Core\Bridge\Elasticsearch\DataProvider\Filter\\'.$newField['apiFilter']);
-                    } else {
-                        $manipulator->addUseStatementIfNecessary('ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\\'.$newField['apiFilter']);
-                    }
-                    $manipulator->addEntityField($newField['fieldName'], $annotationOptions, ['@ApiFilter('.$newField['apiFilter'].'::class)']);
+                    $this->addEntityFieldWithApiFilters($manipulator, $annotationOptions, $newField['apiFilter']);
                 } else {
                     $manipulator->addEntityField($newField['fieldName'], $annotationOptions);
                 }
@@ -389,6 +383,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         $data['apiFilter'] = null;
+
         if (true === $apiOptions) {
             $availableFilters = [
                 'SearchFilter',
@@ -402,50 +397,48 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 'TermFilter',
             ];
 
-            $filter = null;
-            while (null === $filter) {
+            $apiFilter = null;
+            while (null === $apiFilter) {
                 $question = new Question('Do you want add a filter for you api resource? (enter <comment>?</comment> to see all filters)', 'No');
                 $question->setAutocompleterValues($availableFilters);
-                $filter = $io->askQuestion($question);
+                $apiFilter = $io->askQuestion($question);
 
-                if ('No' === $filter) {
+                if ('No' === $apiFilter) {
                     return $data;
                 }
 
-                if ('?' === $filter) {
+                if ('?' === $apiFilter) {
                     foreach ($availableFilters as $filter) {
                         $io->writeln(sprintf('  * <comment>%s</comment>', $filter));
                     }
 
-                    $filter = null;
+                    $apiFilter = null;
                     continue;
                 }
 
-                if (!\in_array($filter, $availableFilters)) {
+                if (!\in_array($apiFilter, $availableFilters)) {
                     $this->printAvailableTypes($io);
-                    $io->error(sprintf('Invalid filter "%s".', $filter));
+                    $io->error(sprintf('Invalid filter "%s".', $apiFilter));
                     $io->writeln('');
 
-                    $filter = null;
+                    $apiFilter = null;
                     continue;
                 }
 
-                if (!$this->isTypeCompatibleWithApiFilter($data, $filter)) {
-                    $io->error(sprintf('The field type "%s" is not compatible with the api filter "%s"', $data['type'], $filter));
+                if (!$this->isTypeCompatibleWithApiFilter($data, $apiFilter)) {
+                    $io->error(sprintf('The field type "%s" is not compatible with the api filter "%s"', $data['type'], $apiFilter));
 
-                    $filter = null;
+                    $apiFilter = null;
                     continue;
                 }
 
-                if ('TermFilter' === $filter || 'MatchFilter' === $filter) {
-                    $io->note(
-                        'ElasticSearch is required for this Filter'
-                    );
+                if ('TermFilter' === $apiFilter || 'MatchFilter') {
+                    $io->note('Elasticsearch is required for this Filter');
                     $io->writeln(' see: <href=https://api-platform.com/docs/core/elasticsearch/>Elasticsearch Support ApiPlatform</>');
                     $io->writeln('');
                 }
 
-                $data['apiFilter'] = $filter;
+                $data['apiFilter'] = $apiFilter;
             }
         }
 
@@ -886,6 +879,19 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     private function getEntityNamespace(): string
     {
         return $this->doctrineHelper->getEntityNamespace();
+    }
+
+    private function addEntityFieldWithApiFilters(ClassSourceManipulator $manipulator, array $annotationOptions, string $filter)
+    {
+        $manipulator->addUseStatementIfNecessary('ApiPlatform\\Core\\Annotation\\ApiFilter');
+
+        if ('TermFilter' === $filter || 'MatchFilter' === $filter) {
+            $manipulator->addUseStatementIfNecessary('ApiPlatform\Core\Bridge\Elasticsearch\DataProvider\Filter\\'.$filter);
+        } else {
+            $manipulator->addUseStatementIfNecessary('ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\\'.$filter);
+        }
+
+        $manipulator->addEntityField($filter, $annotationOptions, ['@ApiFilter('.$filter.'::class)']);
     }
 
     private function isTypeCompatibleWithApiFilter($data, $apiFilter): bool
