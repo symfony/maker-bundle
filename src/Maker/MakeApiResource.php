@@ -29,7 +29,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -37,11 +36,9 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
  * @author Kévin Dunglas <dunglas@gmail.com>
  * @author Antoine Michelet <jean.marcel.michelet@gmail.com>
  */
-final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
+final class MakeApiResource extends AbstractMaker implements InputAwareMakerInterface
 {
-    private $fileManager;
     private $doctrineHelper;
-    private $generator;
     private $entityClassGenerator;
     private $entityHelper;
 
@@ -69,15 +66,14 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public static function getCommandName(): string
     {
-        return 'make:entity';
+        return 'make:api:resource';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates or updates a Doctrine entity class, and optionally an API Platform resource')
+            ->setDescription('Creates or updates a Doctrine entity class as an API Platform resource')
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('Class name of the entity to create or update (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
-            ->addOption('api-resource', 'a', InputOption::VALUE_NONE, 'Mark this class as an API Platform resource (expose a CRUD API for it)')
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
@@ -109,22 +105,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $value = $io->askQuestion($question);
 
         $input->setArgument('name', $value);
-
-        if ($input->getOption('api-resource')) {
-            @trigger_error(sprintf('The "%s" comand option is deprecated since Symfony 5.2 use the command "%s" instead.', 'api-resource', 'make:api:resource'), E_USER_DEPRECATED);
-        }
-
-        if (
-            !$input->getOption('api-resource') &&
-            class_exists(ApiResource::class) &&
-            !class_exists($this->generator->createClassNameDetails($value, 'Entity\\')->getFullName())
-        ) {
-            $description = $command->getDefinition()->getOption('api-resource')->getDescription();
-            $question = new ConfirmationQuestion($description, false);
-            $value = $io->askQuestion($question);
-
-            $input->setOption('api-resource', $value);
-        }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -148,36 +128,36 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         if (!$classExists) {
             $entityPath = $this->entityClassGenerator->generateEntityClass(
                 $entityClassDetails,
-                $input->getOption('api-resource')
+                true
             );
 
             $generator->writeChanges();
         }
 
         if (!$this->entityHelper->doesEntityUseAnnotationMapping($entityClassDetails->getFullName())) {
-            throw new RuntimeCommandException(sprintf('Only annotation mapping is supported by make:entity, but the <info>%s</info> class uses a different format. If you would like this command to generate the properties & getter/setter methods, add your mapping configuration, and then re-run this command with the <info>--regenerate</info> flag.', $entityClassDetails->getFullName()));
+            throw new RuntimeCommandException(sprintf('Only annotation mapping is supported by make:api:resource, but the <info>%s</info> class uses a different format. If you would like this command to generate the properties & getter/setter methods, add your mapping configuration, and then re-run this command with the <info>--regenerate</info> flag.', $entityClassDetails->getFullName()));
         }
 
         if ($classExists) {
             $entityPath = $this->entityHelper->getPathOfClass($entityClassDetails->getFullName());
 
             $io->text([
-                'Your entity already exists! So let\'s add some new fields!',
+                'Your api resource already exists! So let\'s add some new fields!',
             ]);
         } else {
             $io->text([
                 '',
-                'Entity generated! Now let\'s add some fields!',
+                'Api resource generated! Now let\'s add some fields!',
                 'You can always add more fields later manually or by re-running this command.',
             ]);
         }
 
-        $this->entityHelper->generateEntityFields($io, $entityClassDetails, $entityPath, $overwrite);
+        $this->entityHelper->generateEntityFields($io, $entityClassDetails, $entityPath, $overwrite, true);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)
     {
-        if (null !== $input && $input->getOption('api-resource')) {
+        if (null !== $input) {
             $dependencies->addClassDependency(
                 ApiResource::class,
                 'api'

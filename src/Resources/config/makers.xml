@@ -36,6 +36,17 @@
                 <argument>%kernel.project_dir%</argument>
                 <argument type="service" id="maker.generator" />
                 <argument type="service" id="maker.entity_class_generator" />
+                <argument type="service" id="maker.make_entity_helper" />
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_api_resource" class="Symfony\Bundle\MakerBundle\Maker\MakeApiResource">
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.doctrine_helper" />
+                <argument>%kernel.project_dir%</argument>
+                <argument type="service" id="maker.generator" />
+                <argument type="service" id="maker.entity_class_generator" />
+                <argument type="service" id="maker.make_entity_helper" />
                 <tag name="maker.command" />
             </service>
 
