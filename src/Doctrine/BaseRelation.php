@@ -87,7 +87,7 @@ abstract class BaseRelation
         return $this;
     }
 
-    public function isAvoidSetter()
+    public function shouldAvoidSetter(): bool
     {
         return $this->avoidSetter;
     }
