@@ -178,7 +178,10 @@ final class ClassSourceManipulator
         $this->updateSourceCodeFromNewStmts();
     }
 
-    public function addTrait($classTraitName)
+    /**
+     * @param string $trait The fully-qualified trait name.
+     */
+    public function addTrait(string $trait)
     {
         $this->addUseStatementIfNecessary($classTraitName);
 
