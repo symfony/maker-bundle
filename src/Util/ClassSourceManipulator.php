@@ -934,7 +934,10 @@ final class ClassSourceManipulator
         return false === $node ? null : $node;
     }
 
-    private function findAllNodes(callable $filterCallback)
+    /**
+     * @return Node[]
+     */
+    private function findAllNodes(callable $filterCallback): array
     {
         $traverser = new NodeTraverser();
         $visitor = new NodeVisitor\FindingVisitor($filterCallback);
