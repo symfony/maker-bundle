@@ -314,7 +314,17 @@ class YamlSourceManipulator
 
         if (\is_int($key)) {
             if ($this->isCurrentArrayMultiline()) {
-                $newYamlValue = '- '.$this->convertToYaml($value);
+                if ($this->isCurrentArraySequence()) {
+                    $newYamlValue = '- '.$this->convertToYaml($value);
+                } else {
+                    // this is an associative array, but an indexed key
+                    // is being added. We can't use the "- " format
+                    $newYamlValue = sprintf(
+                        '%s: %s',
+                        $key,
+                        $this->convertToYaml($value)
+                    );
+                }
             } else {
                 $newYamlValue = $this->convertToYaml($value);
             }
