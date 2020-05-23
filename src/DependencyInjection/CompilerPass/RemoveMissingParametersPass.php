@@ -25,7 +25,7 @@ class RemoveMissingParametersPass implements CompilerPassInterface
     {
         if (!$container->hasParameter('twig.default_path')) {
             $container->getDefinition('maker.file_manager')
-                ->replaceArgument(3, null);
+                ->replaceArgument(4, null);
         }
     }
 }

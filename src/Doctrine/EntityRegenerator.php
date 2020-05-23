@@ -11,15 +11,12 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
-use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\MappingException as CommonMappingException;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException;
-use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
-use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 
 /**
@@ -30,13 +27,15 @@ final class EntityRegenerator
     private $doctrineHelper;
     private $fileManager;
     private $generator;
+    private $entityClassGenerator;
     private $overwrite;
 
-    public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, bool $overwrite)
+    public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, EntityClassGenerator $entityClassGenerator, bool $overwrite)
     {
         $this->doctrineHelper = $doctrineHelper;
         $this->fileManager = $fileManager;
         $this->generator = $generator;
+        $this->entityClassGenerator = $entityClassGenerator;
         $this->overwrite = $overwrite;
     }
 
@@ -226,19 +225,10 @@ final class EntityRegenerator
             return;
         }
 
-        // duplication in MakeEntity
-        $entityClassName = Str::getShortClassName($metadata->name);
-
-        $this->generator->generateClass(
+        $this->entityClassGenerator->generateRepositoryClass(
             $metadata->customRepositoryClassName,
-            'doctrine/Repository.tpl.php',
-            [
-                'entity_full_class_name' => $metadata->name,
-                'entity_class_name' => $entityClassName,
-                'entity_alias' => strtolower($entityClassName[0]),
-                'with_password_upgrade' => false,
-                'doctrine_registry_class' => interface_exists(ManagerRegistry::class) ? ManagerRegistry::class : LegacyManagerRegistry::class,
-            ]
+            $metadata->name,
+            false
         );
 
         $this->generator->writeChanges();

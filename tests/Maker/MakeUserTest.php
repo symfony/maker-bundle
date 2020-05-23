@@ -34,7 +34,6 @@ class MakeUserTest extends MakerTestCase
             ->configureDatabase()
             ->addExtraDependencies('doctrine')
             ->setGuardAuthenticator('main', 'App\\Security\\AutomaticAuthenticator')
-            ->setRequiredPhpVersion(70100)
             ->updateSchemaAfterCommand(),
         ];
 
@@ -49,7 +48,6 @@ class MakeUserTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeUserModelNoPassword')
             ->setGuardAuthenticator('main', 'App\\Security\\AutomaticAuthenticator')
-            ->setRequiredPhpVersion(70100)
             ->addPostMakeReplacement(
                 'src/Security/UserProvider.php',
                 'throw new \Exception(\'TODO: fill in refreshUser() inside \'.__FILE__);',

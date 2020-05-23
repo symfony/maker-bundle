@@ -19,7 +19,7 @@ class User
     private $id;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\UserAvatarPhoto", mappedBy="user")
+     * @ORM\OneToMany(targetEntity=UserAvatarPhoto::class, mappedBy="user")
      */
     private $avatarPhotos;
 
