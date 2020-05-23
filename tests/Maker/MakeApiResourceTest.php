@@ -31,24 +31,28 @@ class MakeApiResourceTest extends MakerTestCase
                 'y', // nullable
                 'SearchFilter',
                 'partial',
+                '',
 
                 'nameText',
                 'text', // type
                 'y', // nullable
                 'SearchFilter',
                 'start',
+                '',
 
                 'nameInteger',
                 'integer', // type
                 'y', // nullable
                 'SearchFilter',
                 'end',
+                '',
 
                 'nameExact',
                 'integer', // type
                 'y', // nullable
                 'SearchFilter',
                 'exact',
+                '',
 
                 // add not additional fields
                 'inameString',
@@ -57,24 +61,29 @@ class MakeApiResourceTest extends MakerTestCase
                 'y', // nullable
                 'SearchFilter',
                 'ipartial',
+                '',
 
                 'inameText',
                 'text', // type
                 'y', // nullable
                 'SearchFilter',
                 'istart',
+                '',
 
                 'inameInteger',
                 'integer', // type
                 'y', // nullable
                 'SearchFilter',
                 'iend',
+                '',
 
                 'inameExact',
                 'integer', // type
                 'y', // nullable
                 'SearchFilter',
                 'iexact',
+                '',
+
                 '',
             ])
             ->addExtraDependencies('api')
@@ -112,6 +121,7 @@ class MakeApiResourceTest extends MakerTestCase
                 'y', // nullable
                 'DateFilter',
                 'EXCLUDE_NULL',
+                '',
 
                 // add not additional fields
                 'nameDate',
@@ -119,6 +129,7 @@ class MakeApiResourceTest extends MakerTestCase
                 'y', // nullable
                 'DateFilter',
                 'INCLUDE_NULL_BEFORE',
+                '',
 
                 // add not additional fields
                 'nameDatetimea',
@@ -126,6 +137,7 @@ class MakeApiResourceTest extends MakerTestCase
                 'y', // nullable
                 'DateFilter',
                 'INCLUDE_NULL_AFTER',
+                '',
 
                 // add not additional fields
                 'nameDateb',
@@ -133,6 +145,7 @@ class MakeApiResourceTest extends MakerTestCase
                 'y', // nullable
                 'DateFilter',
                 'INCLUDE_NULL_BEFORE_AND_AFTER',
+                '',
 
                 '',
             ])
@@ -152,6 +165,67 @@ class MakeApiResourceTest extends MakerTestCase
                 $this->assertStringContainsString('@ApiFilter(DateFilter::class, strategy=DateFilter::INCLUDE_NULL_BEFORE)', $content);
                 $this->assertStringContainsString('@ApiFilter(DateFilter::class, strategy=DateFilter::INCLUDE_NULL_AFTER)', $content);
                 $this->assertStringContainsString('@ApiFilter(DateFilter::class, strategy=DateFilter::INCLUDE_NULL_BEFORE_AND_AFTER)', $content);
+            }),
+        ];
+
+        yield 'entity_new_api_resource_filters_others' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeApiResource::class),
+            [
+                // entity class name
+                'Product',
+
+                // add not additional fields
+                'isAvailableGenericallyInMyCountry',
+                'boolean', // type
+                'y', // nullable
+                'BooleanFilter',
+                '',
+
+                // add not additional fields
+                'sold',
+                'integer', // type
+                'y', // nullable
+                'NumericFilter',
+                '',
+
+                // add not additional fields
+                'price',
+                'float', // type
+                'y', // nullable
+                'RangeFilter',
+                '',
+
+                // add not additional fields
+                'transportFees',
+                'text', // type
+                'y', // nullable
+                'ExistsFilter',
+                'OrderFilter',
+                '',
+
+                '',
+            ])
+            ->addExtraDependencies('api')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeApiResourceOtherFilters')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->assert(function (string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Entity/Product.php');
+                $content = file_get_contents($directory.'/src/Entity/Product.php');
+
+                $this->assertStringContainsString('use ApiPlatform\Core\Annotation\ApiResource;', $content);
+                $this->assertStringContainsString('use ApiPlatform\Core\Annotation\ApiFilter;', $content);
+                $this->assertStringContainsString('use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;', $content);
+                $this->assertStringContainsString('use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\NumericFilter;', $content);
+                $this->assertStringContainsString('use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;', $content);
+                $this->assertStringContainsString('use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\ExistsFilter;', $content);
+                $this->assertStringContainsString('use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter;', $content);
+                $this->assertStringContainsString('@ApiResource', $content);
+                $this->assertStringContainsString('@ApiFilter(BooleanFilter::class)', $content);
+                $this->assertStringContainsString('@ApiFilter(NumericFilter::class)', $content);
+                $this->assertStringContainsString('@ApiFilter(RangeFilter::class)', $content);
+                $this->assertStringContainsString('@ApiFilter(ExistsFilter::class)', $content);
+                $this->assertStringContainsString('@ApiFilter(OrderFilter::class)', $content);
             }),
         ];
     }

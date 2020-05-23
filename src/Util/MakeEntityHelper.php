@@ -33,6 +33,7 @@ class MakeEntityHelper
 {
     private $doctrineHelper;
     private $fileManager;
+    private $apiFilters = [];
     private $apiFilterStrategies = [];
 
     public static $availableFilters = [
@@ -72,6 +73,7 @@ class MakeEntityHelper
         'smallint',
         'bigint',
         'guid',
+        'float',
     ];
 
     const DATE_TYPES = [
@@ -107,9 +109,8 @@ class MakeEntityHelper
             if (\is_array($newField)) {
                 $annotationOptions = $newField;
                 unset($annotationOptions['fieldName']);
-                if (isset($newField['apiFilter']) && null !== $newField['apiFilter']) {
-                    unset($annotationOptions['apiFilter']);
-                    $this->addEntityFieldWithApiFilters($newField['fieldName'], $manipulator, $annotationOptions, $newField['apiFilter']);
+                if (!empty($this->apiFilters)) {
+                    $this->addEntityFieldWithApiFilters($manipulator, $newField['fieldName'], $annotationOptions);
                 } else {
                     $manipulator->addEntityField($newField['fieldName'], $annotationOptions);
                 }
@@ -331,7 +332,7 @@ class MakeEntityHelper
                 continue;
             }
 
-            $data['apiFilter'] = $apiFilter;
+            $this->apiFilters[] = $apiFilter;
 
             $classnameFilter = Str::getShortClassName($apiFilter);
 
@@ -340,44 +341,46 @@ class MakeEntityHelper
                 $io->writeln(' see: <href=https://api-platform.com/docs/core/elasticsearch/>Elasticsearch Support ApiPlatform</>');
                 $io->writeln('');
             }
-        }
 
-        if ('DateFilter' === $classnameFilter || 'SearchFilter' === $classnameFilter) {
-            $strategyChoice = null;
-            while (null === $strategyChoice) {
-                $question = new Question('Do you want to add a strategy for your filter? (enter <comment>?</comment> to see all strategies)');
+            if ('DateFilter' === $classnameFilter || 'SearchFilter' === $classnameFilter) {
+                $strategyChoice = null;
+                while (null === $strategyChoice) {
+                    $question = new Question('Do you want to add a strategy for your filter? (enter <comment>?</comment> to see all strategies)');
 
-                $availableStrategies = 'DateFilter' === $classnameFilter
-                    ? self::$availableDateFilterStrategies
-                    : self::$availableSearchFilterStrategies;
+                    $availableStrategies = 'DateFilter' === $classnameFilter
+                        ? self::$availableDateFilterStrategies
+                        : self::$availableSearchFilterStrategies;
 
-                $question->setAutocompleterValues($availableStrategies);
-                $strategy = $io->askQuestion($question);
+                    $question->setAutocompleterValues($availableStrategies);
+                    $strategy = $io->askQuestion($question);
 
-                if (null === $strategy) {
-                    return $data;
-                }
-
-                if ('?' === $strategy) {
-                    foreach ($availableStrategies as $strategy) {
-                        $io->writeln(sprintf('  * <comment>%s</comment>', $strategy));
+                    if (null === $strategy) {
+                        break;
                     }
 
-                    $strategyChoice = null;
-                    continue;
+                    if ('?' === $strategy) {
+                        foreach ($availableStrategies as $strategy) {
+                            $io->writeln(sprintf('  * <comment>%s</comment>', $strategy));
+                        }
+
+                        $strategyChoice = null;
+                        continue;
+                    }
+
+                    if (!\in_array($strategy, $availableStrategies)) {
+                        $io->error(sprintf('Invalid strategy "%s".', $strategy));
+                        $io->writeln('');
+
+                        $strategyChoice = null;
+                        continue;
+                    }
+
+                    $this->apiFilterStrategies[$data['fieldName'].$classnameFilter] = 'DateFilter' === $classnameFilter ? 'DateFilter::'.$strategy : '"'.$strategy.'"';
+                    $strategyChoice = true;
                 }
-
-                if (!\in_array($strategy, $availableStrategies)) {
-                    $io->error(sprintf('Invalid strategy "%s".', $strategy));
-                    $io->writeln('');
-
-                    $strategyChoice = null;
-                    continue;
-                }
-
-                $this->apiFilterStrategies[$classnameFilter.$data['fieldName']] = 'DateFilter' === $classnameFilter ? 'DateFilter::'.$strategy : '"'.$strategy.'"';
-                $strategyChoice = true;
             }
+
+            $apiFilter = null;
         }
 
         return $data;
@@ -802,19 +805,24 @@ class MakeEntityHelper
         return $this->doctrineHelper->getEntityNamespace();
     }
 
-    public function addEntityFieldWithApiFilters(string $fieldName, ClassSourceManipulator $manipulator, array $annotationOptions, string $filter)
+    public function addEntityFieldWithApiFilters(ClassSourceManipulator $manipulator, string $fieldName, array $annotationOptions)
     {
         $manipulator->addUseStatementIfNecessary('ApiPlatform\\Core\\Annotation\\ApiFilter');
 
-        $classnameFilter = $manipulator->addUseStatementIfNecessary($filter);
+        $filtersAnnotations = [];
+        foreach ($this->apiFilters as $filter) {
+            $classnameFilter = $manipulator->addUseStatementIfNecessary($filter);
 
-        $filterAnnotation = '@ApiFilter('.$classnameFilter.'::class';
+            $filterAnnotation = '@ApiFilter('.$classnameFilter.'::class';
 
-        if (isset($this->apiFilterStrategies[$classnameFilter.$fieldName])) {
-            $filterAnnotation .= ', strategy='.$this->apiFilterStrategies[$classnameFilter.$fieldName];
+            if (isset($this->apiFilterStrategies[$fieldName.$classnameFilter])) {
+                $filterAnnotation .= ', strategy='.$this->apiFilterStrategies[$fieldName.$classnameFilter];
+            }
+            $filtersAnnotations[] = $filterAnnotation.')';
         }
+        $this->apiFilters = [];
 
-        $manipulator->addEntityField($fieldName, $annotationOptions, [$filterAnnotation.')']);
+        $manipulator->addEntityField($fieldName, $annotationOptions, $filtersAnnotations);
     }
 
     public function createEntityClassQuestion(string $questionText): Question
