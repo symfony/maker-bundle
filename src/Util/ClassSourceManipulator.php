@@ -506,6 +506,7 @@ final class ClassSourceManipulator
             $relation->getPropertyName(),
             null !== $relation->getReturnType() ? $relation->getReturnType() : $typeHint,
             // getter methods always have nullable return values
+            // (expect getUser(): object method generated in makeResetPassword)
             // because even though these are required in the db, they may not be set
             $relation->isReturnTypeNullable()
         );
