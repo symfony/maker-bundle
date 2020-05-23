@@ -504,7 +504,7 @@ final class ClassSourceManipulator
         $addArrayCollection = true;
         if ($this->getConstructorNode()) {
             // We print the constructor to a string, then
-            // look for "$this->propertyName = "
+            // look for "$this->propertyName ="
 
             $constructorString = $this->printer->prettyPrint([$this->getConstructorNode()]);
             if (false !== strpos($constructorString, sprintf('$this->%s = ', $relation->getPropertyName()))) {
