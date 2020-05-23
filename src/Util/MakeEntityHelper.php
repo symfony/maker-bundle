@@ -866,7 +866,7 @@ class MakeEntityHelper
     {
         $filteredFilters = self::$availableFilters;
         foreach ($filteredFilters as $key => $filter) {
-            if (!$this->isTypeCompatibleWithApiFilter($data, $filter)) {
+            if (!$this->isTypeCompatibleWithApiFilter($data, $filter) || \in_array($filter, $this->apiFilters)) {
                 unset($filteredFilters[$key]);
             } else {
                 $filteredFilters[$key] = $asShortClassName ? Str::getShortClassName($filter) : $filter;
