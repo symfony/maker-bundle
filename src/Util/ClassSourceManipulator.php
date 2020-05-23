@@ -185,7 +185,8 @@ final class ClassSourceManipulator
         $classNode = $this->getClassNode();
         $name = Str::getShortClassName($classTraitName);
 
-        $traitNode = $this->findAllNodes(function ($node) {
+        /** @var Node\Stmt\TraitUse[] $traitNodes */
+        $traitNodes = $this->findAllNodes(function ($node) {
             return $node instanceof Node\Stmt\TraitUse;
         });
 
