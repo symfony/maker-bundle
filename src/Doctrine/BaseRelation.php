@@ -112,7 +112,7 @@ abstract class BaseRelation
         return $this;
     }
 
-    public function isReturnTypeNullable()
+    public function isReturnTypeNullable(): bool
     {
         return $this->returnTypeIsNullable;
     }
