@@ -25,6 +25,7 @@ use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Yaml\Yaml;
 use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
 
@@ -61,6 +62,7 @@ class MakeResetPassword extends AbstractMaker
     public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(SymfonyCastsResetPasswordBundle::class, 'symfonycasts/reset-password-bundle');
+        $dependencies->addClassDependency(MailerInterface::class, 'symfony/mailer');
 
         ORMDependencyBuilder::buildDependencies($dependencies);
 
