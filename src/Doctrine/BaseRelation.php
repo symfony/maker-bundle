@@ -99,7 +99,7 @@ abstract class BaseRelation
         return $this;
     }
 
-    public function getReturnType()
+    public function getReturnType()? :string
     {
         return $this->returnType;
     }
