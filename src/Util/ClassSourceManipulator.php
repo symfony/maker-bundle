@@ -190,7 +190,7 @@ final class ClassSourceManipulator
             return $node instanceof Node\Stmt\TraitUse;
         });
 
-        if ($traitNode) {
+        if (\count($traitNodes) > 0) {
             foreach ($traitNode as $node) {
                 if ($node->traits[0]->toString() === $name) {
                     return;
