@@ -1,0 +1,16 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-05-23T19:31:48Z
+
+Yo @LeJeanbono!
+
+Thanks for getting this started for me! It turned out, the bug was much simpler - I used your test case to find a smaller test case, which led me to the true issue. After fixing that issue, I was pleasantly surprised that the original test case now passed :).
+
+Cheers!
+
+---------------------------------------------------------------------------
+
+by LeJeanbono at 2020-05-23T19:45:26Z
+
+Thanks !
+I tried to look at `YamlSourceManipulator` but it's really hard...
