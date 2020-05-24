@@ -559,6 +559,16 @@ class YamlSourceManipulator
                 return $this->currentPosition;
             }
 
+            $cursor = $this->currentPosition;
+
+            while ('-' !== substr($this->contents, $cursor - 1, 1) && -1 !== $cursor) {
+                --$cursor;
+            }
+
+            if ($cursor >= 0) {
+                return $cursor;
+            }
+
             throw new YamlManipulationFailedException(sprintf('Cannot find the key "%s"', $key));
         }
 
