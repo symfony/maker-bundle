@@ -59,13 +59,16 @@ class YamlSourceManipulatorTest extends TestCase
             list($source, $changeCode, $expected) = explode('===', $file->getContents());
 
             // Multiline string ends with an \n
-            $data = Yaml::parse(trim($source, "\n"));
+            $source = rtrim($source, "\n");
+            $expected = ltrim($expected, "\n");
+
+            $data = Yaml::parse($source);
             eval($changeCode);
 
             yield $file->getFilename() => [
-                'source' => rtrim($source, "\n"),
+                'source' => $source,
                 'newData' => $data,
-                'expectedSource' => ltrim($expected, "\n"),
+                'expectedSource' => $expected,
             ];
         }
 

@@ -216,14 +216,6 @@ class YamlSourceManipulator
                 continue;
             }
 
-            if (
-                $this->isMultilineString($newVal)
-                && rtrim($currentVal, "\n") !== $currentVal
-                && rtrim($newVal, "\n") === $newVal
-            ) {
-                $newVal .= "\n";
-            }
-
             // 3b) value DID change
             $this->log(sprintf('updating value to {%s}', \is_array($newVal) ? '<array>' : $newVal));
             $this->changeValueInYaml($newVal);
@@ -458,7 +450,6 @@ class YamlSourceManipulator
         $endValuePosition = $this->findEndPositionOfValue($originalVal);
 
         $isMultilineValue = null !== $this->findPositionOfMultilineCharInLine($this->currentPosition);
-        $originalValEndsWithNewLine = $isMultilineValue ? rtrim($originalVal, "\n") !== $originalVal : false;
 
         // In case of multiline, $value is converted as plain string like "Foo\nBar"
         // We need to keep it "as is"
@@ -490,7 +481,7 @@ class YamlSourceManipulator
 
         $newContents = substr($this->contents, 0, $this->currentPosition)
             .($isMultilineValue ? ' |' : '')
-            .($originalValEndsWithNewLine ? rtrim($newYamlValue, ' ') : $newYamlValue)
+            .$newYamlValue
             /*
              * If the next line is a comment, this means we probably had
              * a structure that looks like this:
@@ -806,7 +797,7 @@ class YamlSourceManipulator
                 $patternValue = $quotedValue;
 
                 // Iterates until we find a new line char or we reach end of file
-                if ($this->findPositionOfMultilineCharInLine($offset)) {
+                if (null !== $this->findPositionOfMultilineCharInLine($offset)) {
                     $patternValue = str_replace(["\r\n", "\n"], '\r?\n\s*', $quotedValue);
                 }
 
