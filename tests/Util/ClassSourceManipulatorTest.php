@@ -738,4 +738,147 @@ class Foo
 EOF
         ];
     }
+
+    public function testAddUseStatementIfNecessaryRespectsAliasedUseStatements()
+    {
+        $source = <<<EOF
+<?php
+
+namespace Acme;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class Foo
+{
+}
+EOF
+        ;
+
+        $manipulator = new ClassSourceManipulator($source);
+        $alias = $manipulator->addUseStatementIfNecessary('Symfony\Component\Validator\Constraints');
+
+        $this->assertSame('Assert', $alias);
+        $this->assertEquals($source, $manipulator->getSourceCode());
+    }
+
+    public function testAddUseStatementIfNecessaryWithAlias()
+    {
+        $source = <<<EOF
+<?php
+
+namespace Acme;
+
+class Foo
+{
+}
+EOF
+        ;
+
+        $expected = <<<EOF
+<?php
+
+namespace Acme;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class Foo
+{
+}
+EOF
+        ;
+
+        $manipulator = new ClassSourceManipulator($source);
+        $alias = $manipulator->addUseStatementIfNecessary('Symfony\Component\Validator\Constraints', 'Assert');
+
+        $this->assertSame('Assert', $alias);
+        $this->assertEquals($expected, $manipulator->getSourceCode());
+    }
+
+    public function testAddAnnotationToPropertyTraditional()
+    {
+        $source = <<<EOF
+<?php
+
+namespace Acme;
+
+class Foo
+{
+    private \$bar;
+}
+EOF
+        ;
+
+        $expected = <<<EOF
+<?php
+
+namespace Acme;
+
+use Symfony\Component\Validator\Constraints\NotBlank;
+
+class Foo
+{
+    /**
+     * @NotBlank()
+     */
+    private \$bar;
+}
+EOF
+        ;
+
+        $manipulator = new ClassSourceManipulator($source);
+        $manipulator->addAnnotationToProperty(
+            'bar',
+            'Symfony\Component\Validator\Constraints\NotBlank',
+            []
+        );
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function testAddAnnotationToPropertyWithNamespaceUseAndAlias()
+    {
+        $source = <<<EOF
+<?php
+
+namespace Acme;
+
+class Foo
+{
+    /**
+     * A property!
+     */
+    private \$bar;
+}
+EOF
+        ;
+
+        $expected = <<<EOF
+<?php
+
+namespace Acme;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class Foo
+{
+    /**
+     * A property!
+     * @Assert\NotBlank()
+     */
+    private \$bar;
+}
+EOF
+        ;
+
+        $manipulator = new ClassSourceManipulator($source);
+        $manipulator->addAnnotationToProperty(
+            'bar',
+            'Symfony\Component\Validator\Constraints\NotBlank',
+            [],
+            true,
+            'Assert'
+        );
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
 }
