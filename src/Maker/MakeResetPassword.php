@@ -348,7 +348,7 @@ CODE
 
         $manipulator->addManyToOneRelation((new RelationManyToOne())
             ->setPropertyName('user')
-            ->setTargetClassName($userClass)
+            ->setTargetClassName("App\Entity\User") // customization fail in php 7.3
             ->setMapInverseRelation(false)
             ->setReturnType('object', false)
             ->avoidSetter()
