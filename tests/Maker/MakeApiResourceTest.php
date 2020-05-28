@@ -228,5 +228,48 @@ class MakeApiResourceTest extends MakerTestCase
                 $this->assertStringContainsString('@ApiFilter(OrderFilter::class)', $content);
             }),
         ];
+
+        // Need to test getting results with elastic search
+        yield 'entity_new_api_resource_filters_Elasticsearch' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeApiResource::class),
+            [
+                // entity class name
+                'Product',
+
+                // add not additional fields
+                'nameString',
+                'string', // type
+                '250', // length
+                'y', // nullable
+                'MatchFilter',
+                '',
+
+                // add not additional fields
+                'sold',
+                'integer', // type
+                'y', // nullable
+                'TermFilter',
+                '',
+
+                '',
+            ])
+            ->addExtraDependencies('api')
+            ->addExtraDependencies('elasticsearch/elasticsearch')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeApiResourceElasticsearch')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->assert(function (string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Entity/Product.php');
+                $content = file_get_contents($directory.'/src/Entity/Product.php');
+
+                $this->assertStringContainsString('use ApiPlatform\Core\Annotation\ApiResource;', $content);
+                $this->assertStringContainsString('use ApiPlatform\Core\Annotation\ApiFilter;', $content);
+                $this->assertStringContainsString('use ApiPlatform\Core\Bridge\Elasticsearch\DataProvider\Filter\MatchFilter;', $content);
+                $this->assertStringContainsString('use ApiPlatform\Core\Bridge\Elasticsearch\DataProvider\Filter\TermFilter;', $content);
+                $this->assertStringContainsString('@ApiResource', $content);
+                $this->assertStringContainsString('@ApiFilter(MatchFilter::class)', $content);
+                $this->assertStringContainsString('@ApiFilter(TermFilter::class)', $content);
+            }),
+        ];
     }
 }

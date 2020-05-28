@@ -68,7 +68,7 @@ class MakeEntityHelper
         'INCLUDE_NULL_BEFORE_AND_AFTER',
     ];
 
-    const NUMERIC_TYPES = [
+    public const NUMERIC_TYPES = [
         'integer',
         'smallint',
         'bigint',
@@ -76,7 +76,7 @@ class MakeEntityHelper
         'float',
     ];
 
-    const DATE_TYPES = [
+    public const DATE_TYPES = [
         'datetime',
         'date',
         'time',
@@ -843,8 +843,8 @@ class MakeEntityHelper
     }
 
     /**
-     * For autocompletion, we prefer shortClassName but we need
-     * fullClassName for allowing users customizing their own filters.
+     * For autocompletion, we prefer shortClassName but we need fullClassName for
+     * allowing users customizing their own filters.
      */
     public function getApiFilterFullClassNameIfExists($filter): ?string
     {
@@ -861,7 +861,9 @@ class MakeEntityHelper
         return $filter;
     }
 
-    /** @param bool $asShortClassName is for autocompletion case. */
+    /**
+     * @param bool $asShortClassName is for autocompletion case
+     */
     public function getFiltersMatchingCurrentType(array $data, bool $asShortClassName = false): array
     {
         $filteredFilters = self::$availableFilters;
