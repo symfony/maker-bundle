@@ -523,7 +523,7 @@ final class ClassSourceManipulator
             // getter methods always have nullable return values
             // (except getUser(): object method generated in MakeResetPassword)
             // because even though these are required in the db, they may not be set
-            $relation->isReturnTypeNullable()
+            $relation->isOverriddenReturnTypeNullable()
         );
 
         if ($relation->shouldAvoidSetter()) {

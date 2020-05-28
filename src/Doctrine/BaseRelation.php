@@ -20,7 +20,7 @@ abstract class BaseRelation
     private $targetClassName;
     private $targetPropertyName;
     private $returnType;
-    private $returnTypeIsNullable = true;
+    private $overriddenReturnType = true;
     private $isSelfReferencing = false;
     private $mapInverseRelation = true;
     private $avoidSetter = false;
@@ -104,16 +104,16 @@ abstract class BaseRelation
         return $this->returnType;
     }
 
-    public function setReturnType(string $returnType, $returnTypeIsNullable = true)
+    public function setReturnType(string $returnType, $overriddenReturnType)
     {
         $this->returnType = $returnType;
-        $this->returnTypeIsNullable = $returnTypeIsNullable;
+        $this->overriddenReturnType = $overriddenReturnType;
 
         return $this;
     }
 
-    public function isReturnTypeNullable(): bool
+    public function isOverriddenReturnTypeNullable(): bool
     {
-        return $this->returnTypeIsNullable;
+        return $this->overriddenReturnType;
     }
 }
