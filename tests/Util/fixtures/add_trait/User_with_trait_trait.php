@@ -7,6 +7,6 @@ use App\TraitAlreadyHere;
 
 class User
 {
-    use TestTrait;
     use TraitAlreadyHere;
+    use TestTrait;
 }
