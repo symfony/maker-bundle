@@ -1,0 +1,36 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-05-15T16:58:41Z
+
+This test case doesn't actually expose the error you're talking about. It *does* expose a formatting bug:
+
+```
+ 'nelmio_api_doc:
+     documentation:
+         info:
+-            description: |
+-                Multiline string'
++            description: "Multiline string\n"'
+```
+
+But it does not show the error you're seeing.
+
+---------------------------------------------------------------------------
+
+by jon-ht at 2020-05-15T17:31:31Z
+
+It's weird, I could reproduce the error from CI but not always. It seems to be related to file ending (CRLF)
+
+Sometime having one line of description give the expected error, sometimes not, can't understand why or what is happening
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-05-24T11:02:55Z
+
+Thanks for taking this on - I knew that I didn't cover this case when I built `YamlSourceManipulator`, and I wasn't looking forward to trying to do it - cause it's hard ;).
+
+---------------------------------------------------------------------------
+
+by jon-ht at 2020-05-24T11:51:40Z
+
+I was able to remove some useless trimming after a second pass, maybe this is less confusing now.
