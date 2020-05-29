@@ -1,3 +1,9 @@
+1.19
+====
+
+* Added "email verification/confirmation" option to `make:registration-form` - see #603
+  thanks to @jrushlow!
+
 1.18
 ====
 
