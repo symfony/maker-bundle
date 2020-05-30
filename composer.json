@@ -4,7 +4,12 @@
   "name": "symfony/maker-bundle",
   "type": "symfony-bundle",
   "license": "MIT",
-  "keywords": ["generator", "code generator", "scaffolding", "scaffold"],
+  "keywords": [
+    "generator",
+    "code generator",
+    "scaffolding",
+    "scaffold"
+  ],
   "authors": [
     {
       "name": "Symfony Community",
@@ -40,10 +45,14 @@
     "sort-packages": true
   },
   "autoload": {
-    "psr-4": { "Symfony\\Bundle\\MakerBundle\\": "src/" }
+    "psr-4": {
+      "Symfony\\Bundle\\MakerBundle\\": "src/"
+    }
   },
   "autoload-dev": {
-    "psr-4": { "Symfony\\Bundle\\MakerBundle\\Tests\\": "tests/" }
+    "psr-4": {
+      "Symfony\\Bundle\\MakerBundle\\Tests\\": "tests/"
+    }
   },
   "extra": {
     "branch-alias": {

@@ -363,12 +363,6 @@ final class ClassSourceManipulator
         $this->updateSourceCodeFromNewStmts();
     }
 
-    public function clearClassNodeStmts()
-    {
-        $this->getClassNode()->stmts = [];
-        $this->updateSourceCodeFromNewStmts();
-    }
-
     private function addCustomGetter(string $propertyName, string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = [], $typeCast = null)
     {
         $propertyFetch = new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $propertyName);
@@ -519,11 +513,10 @@ final class ClassSourceManipulator
 
         $this->addGetter(
             $relation->getPropertyName(),
-            null !== $relation->getReturnType() ? $relation->getReturnType() : $typeHint,
+            $relation->getCustomReturnType() ?: $typeHint,
             // getter methods always have nullable return values
-            // (except getUser(): object method generated in MakeResetPassword)
-            // because even though these are required in the db, they may not be set
-            $relation->isOverriddenReturnTypeNullable()
+            // unless this has been customized explicitly
+            $relation->isCustomReturnTypeNullable()
         );
 
         if ($relation->shouldAvoidSetter()) {

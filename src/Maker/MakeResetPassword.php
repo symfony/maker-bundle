@@ -322,7 +322,7 @@ class MakeResetPassword extends AbstractMaker
     {
         $entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
 
-        $requestEntityPath = $entityClassGenerator->generateEntityClass($requestClassNameDetails, false);
+        $requestEntityPath = $entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, true);
 
         $generator->writeChanges();
 
@@ -348,9 +348,9 @@ CODE
 
         $manipulator->addManyToOneRelation((new RelationManyToOne())
             ->setPropertyName('user')
-            ->setTargetClassName("App\Entity\User") // customization fail in php 7.3
+            ->setTargetClassName($userClass)
             ->setMapInverseRelation(false)
-            ->setReturnType('object', false)
+            ->setCustomReturnType('object', false)
             ->avoidSetter()
         );
 
@@ -363,20 +363,6 @@ CODE
         $manipulator = new ClassSourceManipulator(
             $this->fileManager->getFileContents($pathRequestRepository)
         );
-
-        /*
-
-        $manipulator->clearClassNodeStmts();
-
-        $manipulator->addConstructor([
-            (new Param('registry'))->setType('ManagerRegistry')->getNode(),
-        ], <<<'CODE'
-<?php
-parent::__construct($registry, ResetPasswordRequest::class);
-CODE
-        );
-
-         */
 
         $manipulator->addInterface(ResetPasswordRequestRepositoryInterface::class);
 

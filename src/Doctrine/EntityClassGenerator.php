@@ -31,7 +31,7 @@ final class EntityClassGenerator
         $this->doctrineHelper = $doctrineHelper;
     }
 
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false): string
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $avoidDefaultComments = false): string
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -56,13 +56,14 @@ final class EntityClassGenerator
         $this->generateRepositoryClass(
             $repoClassDetails->getFullName(),
             $entityClassDetails->getFullName(),
-            $withPasswordUpgrade)
+            $withPasswordUpgrade,
+            $avoidDefaultComments)
         ;
 
         return $entityPath;
     }
 
-    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade)
+    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade, bool $avoidDefaultComments = false)
     {
         $shortEntityClass = Str::getShortClassName($entityClass);
         $entityAlias = strtolower($shortEntityClass[0]);
@@ -75,6 +76,7 @@ final class EntityClassGenerator
                 'entity_alias' => $entityAlias,
                 'with_password_upgrade' => $withPasswordUpgrade,
                 'doctrine_registry_class' => $this->managerRegistryClassName,
+                'avoid_default_comments' => $avoidDefaultComments,
             ]
         );
     }

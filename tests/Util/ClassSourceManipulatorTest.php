@@ -763,18 +763,6 @@ EOF
         ];
     }
 
-    public function testClearClassNodeStmts()
-    {
-        $source = file_get_contents(__DIR__.'/fixtures/source/UserProfile_simple.php');
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/clear_classNode_stmts/UserProfile_stmts_clear.php');
-
-        $manipulator = new ClassSourceManipulator($source);
-
-        $manipulator->clearClassNodeStmts();
-
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
-    }
-
     public function testAddTraitInEmptyClass()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
