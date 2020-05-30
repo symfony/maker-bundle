@@ -4,4 +4,3 @@
 /tests/tmp/*
 /.php_cs.cache
 /.phpunit.result.cache
-
