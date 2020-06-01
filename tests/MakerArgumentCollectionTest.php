@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\MakerArgument;
 use Symfony\Bundle\MakerBundle\MakerArgumentCollection;
 
@@ -43,18 +44,34 @@ final class MakerArgumentCollectionTest extends TestCase
         self::assertSame($expected, $collection->getArgument('test-arg'));
     }
 
+    public function testAddArgumentThrowsExceptionIfArgumentAlreadyExists(): void
+    {
+        $collection = new MakerArgumentCollection();
+        $collection->createArgument('test-arg', 'value');
+
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage('A test-arg argument already exists - use the replaceArgument() method to replace it.');
+
+        $collection->addArgument(new MakerArgument('test-arg'));
+    }
+
     public function methodNameDataProvider(): \Generator
     {
-        yield ['getArgument'];
+        yield ['getArgument', ['test-arg']];
+        yield ['replaceArgument', [new MakerArgument('test-arg')]];
+        yield ['setArgumentValue', ['test-arg', 'value']];
+        yield ['getArgumentValue', ['test-arg']];
     }
 
     /**
-     * @dataProvider methodNameDataProvider
+     * @dataProvider methodNameDataProvider()
      */
-    public function testThrowsExceptionIfArgumentDoesntExist(string $methodName): void
+    public function testThrowsExceptionIfArgumentDoesntExist(string $methodName, array $arguments): void
     {
-        $this->markTestIncomplete('Figure out which exception to throw...');
-        //@TODO write test
+        $this->expectException(RuntimeCommandException::class);
+
+        $collection = new MakerArgumentCollection();
+        $collection->$methodName(...$arguments);
     }
 
     /**

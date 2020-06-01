@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+
 /**
  * A collection of arguments for Makers.
  *
@@ -30,7 +32,7 @@ class MakerArgumentCollection implements \IteratorAggregate
     public function addArgument(MakerArgument $argument): void
     {
         if (isset($this->arguments[$argument->getName()])) {
-            // @TODO Throw new ex "Argument already exists - use ArgumentCollection->replaceArgument()"
+            throw new RuntimeCommandException(sprintf('A %s argument already exists - use the replaceArgument() method to replace it.', $argument->getName()));
         }
 
         $this->arguments[$argument->getName()] = $argument;
@@ -77,7 +79,7 @@ class MakerArgumentCollection implements \IteratorAggregate
     private function argumentExists(string $name): void
     {
         if (!isset($this->arguments[$name])) {
-            // @TODO Throw arg doesnt exist exception
+            throw new RuntimeCommandException(sprintf('No such %s argument exists.', $name));
         }
     }
 }
