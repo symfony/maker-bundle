@@ -13,6 +13,8 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\MakerArgumentCollection;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,8 +24,32 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 abstract class AbstractMaker implements MakerInterface
 {
+    protected $arguments;
+
+    public function __construct()
+    {
+        $this->arguments = new MakerArgumentCollection();
+    }
+
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
+    }
+
+    /**
+     * Helper to retrieve the value from an argument within the ArgumentCollection.
+     */
+    protected function getArgumentValue(string $argumentName)
+    {
+        return $this->arguments->getArgumentValue($argumentName);
+    }
+
+    protected function checkRequiredArgumentValues(): void
+    {
+        foreach ($this->arguments as $argument) {
+            if ($argument->isRequired() && $argument->isEmpty()) {
+                throw new RuntimeCommandException(sprintf('The %s argument is required, but a value is not set.', $argument->getName()));
+            }
+        }
     }
 
     protected function writeSuccessMessage(ConsoleStyle $io)

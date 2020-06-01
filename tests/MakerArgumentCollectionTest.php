@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\MakerArgument;
 use Symfony\Bundle\MakerBundle\MakerArgumentCollection;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
@@ -95,4 +104,5 @@ final class MakerArgumentCollectionTest extends TestCase
         $collection->setArgumentValue('test-arg', 'new-value');
 
         self::assertSame($collection->getArgumentValue('test-arg'), 'new-value');
-    }}
+    }
+}
