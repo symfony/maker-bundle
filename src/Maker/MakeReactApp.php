@@ -56,10 +56,7 @@ final class MakeReactApp extends AbstractMaker
      */
     public function configureDependencies(DependencyBuilder $dependencies)
     {
-        $dependencies->addClassDependency(
-            WebpackEncoreBundle::class,
-            'webpack-encore'
-        );
+        $dependencies->addClassDependency(WebpackEncoreBundle::class, 'webpack-encore');
     }
 
     /**
@@ -138,8 +135,6 @@ final class MakeReactApp extends AbstractMaker
         $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
-
-        $io->note('You may need to rebuild your javascript with webpack (or webpack-encore)');
     }
 
     private function printSinglePageApplicationStructure(InputInterface $input, ConsoleStyle $io)
