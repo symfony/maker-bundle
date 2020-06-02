@@ -116,5 +116,10 @@
                 <argument>%kernel.project_dir%</argument>
                 <tag name="maker.command" />
             </service>
+
+            <service id="maker.maker.make_react_app" class="Symfony\Bundle\MakerBundle\Maker\MakeReactApp">
+                <argument>%kernel.project_dir%</argument>
+                <tag name="maker.command" />
+            </service>
         </services>
 </container>

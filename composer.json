@@ -33,6 +33,7 @@
         "symfony/phpunit-bridge": "^4.3|^5.0",
         "symfony/process": "^3.4|^4.0|^5.0",
         "symfony/security-core": "^3.4|^4.0|^5.0",
+        "symfony/webpack-encore-bundle": "^1.7",
         "symfony/yaml": "^3.4|^4.0|^5.0"
     },
     "config": {
