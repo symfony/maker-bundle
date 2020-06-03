@@ -28,6 +28,20 @@ class MakeApiResourceTest extends MakerTestCase
                 0,
                 'get, post, put, delete, patch', // put, delete, patch not availables
                 'get, post, put, delete, patch', // post not available
+                1,
+                'client_enabled',
+                'true',
+                'items_per_page',
+                30,
+                'client_items_per_page',
+                30,
+                'maximum_items_per_page',
+                30,
+                'partial',
+                'true',
+                'client_partial',
+                'true',
+                '',
                 'end',
 
                 '',
@@ -49,6 +63,21 @@ class MakeApiResourceTest extends MakerTestCase
 
                 $this->assertStringContainsString('collectionOperations={"get", "post"}', $content);
                 $this->assertStringContainsString('itemOperations={"get", "put", "delete", "patch"}', $content);
+
+                $paginationOptions = [
+                    'pagination_client_enabled' => 'true',
+                    'pagination_items_per_page' => 30,
+                    'pagination_client_items_per_page' => 30,
+                    'maximum_items_per_page' => 30,
+                    'pagination_partial' => 'true',
+                    'pagination_client_partial' => 'true',
+                ];
+
+                $this->assertStringContainsString('attributes={', $content);
+
+                foreach ($paginationOptions as $option => $value) {
+                    $this->assertStringContainsString(sprintf('"%s"=%s', $option, $value), $content);
+                }
             }),
         ];
 

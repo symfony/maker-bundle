@@ -116,15 +116,15 @@ class MakeEntityHelper
             $choice = $io->askQuestion($question);
 
             if ('end' === $choice) {
-                if (isset($this->apiResourceConfiguration['arguments'])) {
+                if (isset($this->apiResourceConfiguration['attributes'])) {
                     $option = "attributes={\n";
-                    foreach ($this->apiResourceConfiguration['arguments'] as $key => $value) {
+                    foreach ($this->apiResourceConfiguration['attributes'] as $key => $value) {
                         $option .= ' *        "'.$key.'"='.$value.",\n";
                     }
 
                     $option .= ' *     },';
                     $this->apiResourceConfiguration[] = $option;
-                    unset($this->apiResourceConfiguration['arguments']);
+                    unset($this->apiResourceConfiguration['attributes']);
                 }
 
                 return $this->apiResourceConfiguration;
@@ -150,10 +150,10 @@ class MakeEntityHelper
 
     private function createPaginationConfiguration(ConsoleStyle $io)
     {
-        if (false === isset($this->apiResourceConfiguration['arguments'])) {
-            $this->apiResourceConfiguration['arguments'] = [];
+        if (false === isset($this->apiResourceConfiguration['attributes'])) {
+            $this->apiResourceConfiguration['attributes'] = [];
         }
-        $arguments = $this->apiResourceConfiguration['arguments'];
+        $arguments = $this->apiResourceConfiguration['attributes'];
 
         $availablesOptions = [
             'client_enabled',
@@ -174,7 +174,7 @@ class MakeEntityHelper
             $choice = $io->askQuestion($question);
 
             if (null === $choice) {
-                $this->apiResourceConfiguration['arguments'] = $arguments;
+                $this->apiResourceConfiguration['attributes'] = $arguments;
 
                 return;
             }
