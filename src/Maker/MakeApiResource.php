@@ -77,6 +77,7 @@ final class MakeApiResource extends AbstractMaker implements InputAwareMakerInte
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
+            // think about creating help for MakeEntityResource
         ;
 
         $inputConf->setArgumentAsNonInteractive('name');
@@ -126,9 +127,13 @@ final class MakeApiResource extends AbstractMaker implements InputAwareMakerInte
 
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {
+            $configuration = $this->entityHelper->generateApiResourceConfiguration($io);
+
             $entityPath = $this->entityClassGenerator->generateEntityClass(
                 $entityClassDetails,
-                true
+                true,
+                false,
+                $configuration
             );
 
             $generator->writeChanges();
@@ -151,7 +156,6 @@ final class MakeApiResource extends AbstractMaker implements InputAwareMakerInte
                 'You can always add more fields later manually or by re-running this command.',
             ]);
         }
-
         $this->entityHelper->generateEntityFields($io, $entityClassDetails, $entityPath, $overwrite, true);
     }
 

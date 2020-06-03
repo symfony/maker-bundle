@@ -19,11 +19,47 @@ class MakeApiResourceTest extends MakerTestCase
 {
     public function getTestDetails()
     {
+        yield 'entity_new_api_resource_configuration' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeApiResource::class),
+            [
+                // entity class name
+                'Product',
+                // configuration of ApiResource()
+                0,
+                'get, post, put, delete, patch', // put, delete, patch not availables
+                'get, post, put, delete, patch', // post not available
+                'end',
+
+                '',
+            ])
+            ->addExtraDependencies('api')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeApiResource')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->assert(function (string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Entity/Product.php');
+                $content = file_get_contents($directory.'/src/Entity/Product.php');
+
+                foreach (['post', 'put', 'delete', 'patch'] as $methodNotAvailable) {
+                    $this->assertStringContainsString(sprintf(
+                        '! [NOTE] The option "%s" is not available and has been ignored.',
+                        $methodNotAvailable
+                    ), $output);
+                }
+
+                $this->assertStringContainsString('collectionOperations={"get", "post"}', $content);
+                $this->assertStringContainsString('itemOperations={"get", "put", "delete", "patch"}', $content);
+            }),
+        ];
+
         yield 'entity_new_api_resource_filters_SearchFilter' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeApiResource::class),
             [
                 // entity class name
                 'Product',
+
+                'end', // configuration of ApiResource()
+
                 // add not additional fields
                 'nameString',
                 'string', // type
@@ -44,7 +80,7 @@ class MakeApiResourceTest extends MakerTestCase
                 'integer', // type
                 'y', // nullable
                 'SearchFilter',
-                'end',
+                'end', // configuration of ApiResource()
                 '',
 
                 'nameExact',
@@ -114,6 +150,7 @@ class MakeApiResourceTest extends MakerTestCase
             [
                 // entity class name
                 'Product',
+                'end', // configuration of ApiResource()
 
                 // add not additional fields
                 'nameDatetime',
@@ -173,6 +210,7 @@ class MakeApiResourceTest extends MakerTestCase
             [
                 // entity class name
                 'Product',
+                'end', // configuration of ApiResource()
 
                 // add not additional fields
                 'isAvailableGenericallyInMyCountry',
@@ -235,6 +273,8 @@ class MakeApiResourceTest extends MakerTestCase
             [
                 // entity class name
                 'Product',
+
+                'end', // configuration of ApiResource()
 
                 // add not additional fields
                 'nameString',

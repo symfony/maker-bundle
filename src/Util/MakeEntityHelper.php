@@ -22,10 +22,14 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
 
 /**
+ * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
+ * @author Kévin Dunglas <dunglas@gmail.com>
+ * @author Antoine Michelet <jean.marcel.michelet@gmail.com>
  *
  * @internal
  */
@@ -35,6 +39,16 @@ class MakeEntityHelper
     private $fileManager;
     private $apiFilters = [];
     private $apiFilterStrategies = [];
+    private $apiResourceConfiguration = [];
+    private $availableApiResourceConfiguration = [
+        'collection/item operations',
+        'attributes (pagination etc)',
+        'normalization/denormalization',
+        'formats',
+        'filters (you can also add filters during the creation of fields)',
+        'create a custom option (e.g. messenger=true)',
+        'end',
+    ];
 
     public static $availableFilters = [
         'ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter',
@@ -89,7 +103,84 @@ class MakeEntityHelper
         $this->entityClassGenerator = $entityClassGenerator;
     }
 
-    public function generateEntityFields($io, $entityClassDetails, $entityPath, $overwrite, $apiOption = false)
+    public function generateApiResourceConfiguration(ConsoleStyle $io)
+    {
+        $configured = null;
+        while (null === $configured) {
+            $question = new ChoiceQuestion(
+                'First, configure your api resource <comment>(press enter when you have finished)</comment>',
+                $this->availableApiResourceConfiguration,
+                'end'
+            );
+
+            $choice = $io->askQuestion($question);
+
+            if ('end' === $choice) {
+                return $this->apiResourceConfiguration;
+            }
+
+            if ('collection/item operations' === $choice) {
+                $this->createApiOperations($io);
+                unset($this->availableApiResourceConfiguration[0]);
+
+                continue;
+            }
+
+            if ('collection/item operations' === $choice) {
+                $this->createPaginationConfiguration($io);
+                unset($this->availableApiResourceConfiguration[0]);
+
+                continue;
+            }
+
+            $configured = true;
+        }
+    }
+
+    private function createPaginationConfiguration(ConsoleStyle $io)
+    {
+    }
+
+    private function createApiOperations(ConsoleStyle $io)
+    {
+        $question = new Question(
+            'Enter the name of the collection operations separated by coma <comment>(e.g. get, post)</comment>', 'get'
+        );
+
+        $choices = $io->askQuestion($question);
+        $option = $this->asArray($io, 'collectionOperations', $choices, ['get', 'post']);
+        $this->apiResourceConfiguration[] = $option;
+
+        $question = new Question(
+            'Enter the name of the item operations separated by coma <comment>(e.g. get, put, delete, patch)</comment>', 'get'
+        );
+
+        $choices = $io->askQuestion($question);
+        $option = $this->asArray($io, 'itemOperations', $choices, ['get', 'put', 'delete', 'patch']);
+        $this->apiResourceConfiguration[] = $option;
+    }
+
+    public function asArray(ConsoleStyle $io, string $option, string $subOptions, array $availables = [])
+    {
+        $subOptions = str_replace(' ', '', $subOptions);
+        $subOptions = explode(',', $subOptions);
+
+        foreach ($subOptions as $key => $value) {
+            if (false === empty($availables) && false === \in_array($value, $availables)) {
+                unset($subOptions[$key]);
+                $io->note(sprintf('! [NOTE] The option "%s" is not available and has been ignored.', $value));
+            }
+        }
+
+        $option .= '={';
+        foreach ($subOptions as $value) {
+            $option .= next($subOptions) ? '"'.$value.'", ' : '"'.$value.'"';
+        }
+
+        return $option .= '},';
+    }
+
+    public function generateEntityFields(ConsoleStyle $io, ClassNameDetails $entityClassDetails, string $entityPath, $overwrite, $apiOption = false)
     {
         $currentFields = $this->getPropertyNames($entityClassDetails->getFullName());
         $manipulator = $this->createClassManipulator($entityPath, $io, $overwrite);
@@ -291,96 +382,6 @@ class MakeEntityHelper
 
         if (true === $apiOptions) {
             $data = $this->createApiFilter($io, $data);
-        }
-
-        return $data;
-    }
-
-    private function createApiFilter($io, $data)
-    {
-        $apiFilter = null;
-        while (null === $apiFilter) {
-            $question = new Question('Do you want to add a filter for your api resource? (enter <comment>?</comment> to see all filters)');
-            $question->setAutocompleterValues($this->getFiltersMatchingCurrentType($data, true));
-            $apiFilter = $this->getApiFilterFullClassNameIfExists($io->askQuestion($question));
-
-            if (null === $apiFilter) {
-                return $data;
-            }
-
-            if ('?' === $apiFilter) {
-                foreach ($this->getFiltersMatchingCurrentType($data) as $filter) {
-                    $io->writeln(sprintf('  * <comment>%s</comment>', $filter));
-                }
-
-                $apiFilter = null;
-                continue;
-            }
-
-            if (!\in_array($apiFilter, self::$availableFilters)) {
-                $io->error(sprintf('Invalid filter "%s".', $apiFilter));
-                $io->writeln('');
-
-                $apiFilter = null;
-                continue;
-            }
-
-            if (!$this->isTypeCompatibleWithApiFilter($data, $apiFilter)) {
-                $io->error(sprintf('The type "%s" is not compatible with the filter "%s"', $data['type'], $apiFilter));
-
-                $apiFilter = null;
-                continue;
-            }
-
-            $this->apiFilters[] = $apiFilter;
-
-            $classnameFilter = Str::getShortClassName($apiFilter);
-
-            if ('TermFilter' === $classnameFilter || 'MatchFilter' === $classnameFilter) {
-                $io->note('Elasticsearch is required for this Filter');
-                $io->writeln(' see: <href=https://api-platform.com/docs/core/elasticsearch/>Elasticsearch Support ApiPlatform</>');
-                $io->writeln('');
-            }
-
-            if ('DateFilter' === $classnameFilter || 'SearchFilter' === $classnameFilter) {
-                $strategyChoice = null;
-                while (null === $strategyChoice) {
-                    $question = new Question('Do you want to add a strategy for your filter? (enter <comment>?</comment> to see all strategies)');
-
-                    $availableStrategies = 'DateFilter' === $classnameFilter
-                        ? self::$availableDateFilterStrategies
-                        : self::$availableSearchFilterStrategies;
-
-                    $question->setAutocompleterValues($availableStrategies);
-                    $strategy = $io->askQuestion($question);
-
-                    if (null === $strategy) {
-                        break;
-                    }
-
-                    if ('?' === $strategy) {
-                        foreach ($availableStrategies as $strategy) {
-                            $io->writeln(sprintf('  * <comment>%s</comment>', $strategy));
-                        }
-
-                        $strategyChoice = null;
-                        continue;
-                    }
-
-                    if (!\in_array($strategy, $availableStrategies)) {
-                        $io->error(sprintf('Invalid strategy "%s".', $strategy));
-                        $io->writeln('');
-
-                        $strategyChoice = null;
-                        continue;
-                    }
-
-                    $this->apiFilterStrategies[$data['fieldName'].$classnameFilter] = 'DateFilter' === $classnameFilter ? 'DateFilter::'.$strategy : '"'.$strategy.'"';
-                    $strategyChoice = true;
-                }
-            }
-
-            $apiFilter = null;
         }
 
         return $data;
@@ -747,6 +748,96 @@ class MakeEntityHelper
             return [];
         }, $allTypes);
         $printSection($allTypes);
+    }
+
+    private function createApiFilter($io, $data)
+    {
+        $apiFilter = null;
+        while (null === $apiFilter) {
+            $question = new Question('Do you want to add a filter for your api resource? (enter <comment>?</comment> to see all filters)');
+            $question->setAutocompleterValues($this->getFiltersMatchingCurrentType($data, true));
+            $apiFilter = $this->getApiFilterFullClassNameIfExists($io->askQuestion($question));
+
+            if (null === $apiFilter) {
+                return $data;
+            }
+
+            if ('?' === $apiFilter) {
+                foreach ($this->getFiltersMatchingCurrentType($data) as $filter) {
+                    $io->writeln(sprintf('  * <comment>%s</comment>', $filter));
+                }
+
+                $apiFilter = null;
+                continue;
+            }
+
+            if (!\in_array($apiFilter, self::$availableFilters)) {
+                $io->error(sprintf('Invalid filter "%s".', $apiFilter));
+                $io->writeln('');
+
+                $apiFilter = null;
+                continue;
+            }
+
+            if (!$this->isTypeCompatibleWithApiFilter($data, $apiFilter)) {
+                $io->error(sprintf('The type "%s" is not compatible with the filter "%s"', $data['type'], $apiFilter));
+
+                $apiFilter = null;
+                continue;
+            }
+
+            $this->apiFilters[] = $apiFilter;
+
+            $classnameFilter = Str::getShortClassName($apiFilter);
+
+            if ('TermFilter' === $classnameFilter || 'MatchFilter' === $classnameFilter) {
+                $io->note('Elasticsearch is required for this Filter');
+                $io->writeln(' see: <href=https://api-platform.com/docs/core/elasticsearch/>Elasticsearch Support ApiPlatform</>');
+                $io->writeln('');
+            }
+
+            if ('DateFilter' === $classnameFilter || 'SearchFilter' === $classnameFilter) {
+                $strategyChoice = null;
+                while (null === $strategyChoice) {
+                    $question = new Question('Do you want to add a strategy for your filter? (enter <comment>?</comment> to see all strategies)');
+
+                    $availableStrategies = 'DateFilter' === $classnameFilter
+                        ? self::$availableDateFilterStrategies
+                        : self::$availableSearchFilterStrategies;
+
+                    $question->setAutocompleterValues($availableStrategies);
+                    $strategy = $io->askQuestion($question);
+
+                    if (null === $strategy) {
+                        break;
+                    }
+
+                    if ('?' === $strategy) {
+                        foreach ($availableStrategies as $strategy) {
+                            $io->writeln(sprintf('  * <comment>%s</comment>', $strategy));
+                        }
+
+                        $strategyChoice = null;
+                        continue;
+                    }
+
+                    if (!\in_array($strategy, $availableStrategies)) {
+                        $io->error(sprintf('Invalid strategy "%s".', $strategy));
+                        $io->writeln('');
+
+                        $strategyChoice = null;
+                        continue;
+                    }
+
+                    $this->apiFilterStrategies[$data['fieldName'].$classnameFilter] = 'DateFilter' === $classnameFilter ? 'DateFilter::'.$strategy : '"'.$strategy.'"';
+                    $strategyChoice = true;
+                }
+            }
+
+            $apiFilter = null;
+        }
+
+        return $data;
     }
 
     public function getPathOfClass(string $class): string
