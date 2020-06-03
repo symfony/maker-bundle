@@ -42,7 +42,7 @@ class MakeEntityHelper
     private $apiResourceConfiguration = [];
     private $availableApiResourceConfiguration = [
         'collection/item operations',
-        'attributes (pagination etc)',
+        'pagination',
         'normalization/denormalization',
         'formats',
         'filters (you can also add filters during the creation of fields)',
@@ -116,6 +116,17 @@ class MakeEntityHelper
             $choice = $io->askQuestion($question);
 
             if ('end' === $choice) {
+                if (isset($this->apiResourceConfiguration['arguments'])) {
+                    $option = "attributes={\n";
+                    foreach ($this->apiResourceConfiguration['arguments'] as $key => $value) {
+                        $option .= ' *        "'.$key.'"='.$value.",\n";
+                    }
+
+                    $option .= ' *     },';
+                    $this->apiResourceConfiguration[] = $option;
+                    unset($this->apiResourceConfiguration['arguments']);
+                }
+
                 return $this->apiResourceConfiguration;
             }
 
@@ -126,9 +137,9 @@ class MakeEntityHelper
                 continue;
             }
 
-            if ('collection/item operations' === $choice) {
+            if ('pagination' === $choice) {
                 $this->createPaginationConfiguration($io);
-                unset($this->availableApiResourceConfiguration[0]);
+                unset($this->availableApiResourceConfiguration[1]);
 
                 continue;
             }
@@ -139,6 +150,55 @@ class MakeEntityHelper
 
     private function createPaginationConfiguration(ConsoleStyle $io)
     {
+        if (false === isset($this->apiResourceConfiguration['arguments'])) {
+            $this->apiResourceConfiguration['arguments'] = [];
+        }
+        $arguments = $this->apiResourceConfiguration['arguments'];
+
+        $availablesOptions = [
+            'client_enabled',
+            'items_per_page',
+            'client_items_per_page',
+            'maximum_items_per_page',
+            'partial',
+            'client_partial',
+        ];
+
+        $configured = null;
+        while (null === $configured) {
+            $question = new Question(
+                'Let\'s configuring pagination! (enter <comment>?</comment> to see all options))',
+            );
+
+            $question->setAutocompleterValues($availablesOptions);
+            $choice = $io->askQuestion($question);
+
+            if (null === $choice) {
+                $this->apiResourceConfiguration['arguments'] = $arguments;
+
+                return;
+            }
+
+            if ('?' === $choice) {
+                foreach ($availablesOptions as $option) {
+                    $io->writeln(sprintf('  * <comment>%s</comment>', $option));
+                }
+
+                continue;
+            }
+
+            if ('maximum_items_per_page' !== $choice) {
+                $choice = 'pagination_'.$choice;
+            }
+
+            if ('pagination_client_enabled' === $choice || 'pagination_partial' === $choice || 'pagination_client_partial' === $choice) {
+                $value = $io->ask('Pass true or false');
+                $arguments[$choice] = $value;
+            } else {
+                $value = $io->ask(sprintf('Quantity %s:', $choice), 30);
+                $arguments[$choice] = $value;
+            }
+        }
     }
 
     private function createApiOperations(ConsoleStyle $io)
@@ -168,7 +228,7 @@ class MakeEntityHelper
         foreach ($subOptions as $key => $value) {
             if (false === empty($availables) && false === \in_array($value, $availables)) {
                 unset($subOptions[$key]);
-                $io->note(sprintf('! [NOTE] The option "%s" is not available and has been ignored.', $value));
+                $io->note(sprintf('The option "%s" is not available and has been ignored.', $value));
             }
         }
 
