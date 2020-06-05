@@ -21,8 +21,6 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
     {
         parent::__construct($registry, <?= $entity_class_name; ?>::class);
     }
-<?php if ($include_example_comments) { // When adding a new method without existing default comments, the blank line is automatically added.?>
-
 <?php if ($include_example_comments): // When adding a new method without existing default comments, the blank line is automatically added.?>
 
 <?php endif; ?>

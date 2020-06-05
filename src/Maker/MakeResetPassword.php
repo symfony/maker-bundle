@@ -10,12 +10,11 @@
  */
 
 namespace Symfony\Bundle\MakerBundle\Maker;
-
-use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Doctrine\Common\Annotations\Annotation;
 use PhpParser\Builder\Param;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
@@ -348,9 +347,9 @@ CODE
 
         $manipulator->addManyToOneRelation((new RelationManyToOne())
             ->setPropertyName('user')
-            ->setTargetClassName("App\Entity\User") // customization fail in php 7.3
+            ->setTargetClassName($userClass)
             ->setMapInverseRelation(false)
-            ->setReturnType('object', false)
+            ->setCustomReturnType('object', false)
             ->avoidSetter()
         );
 
@@ -373,8 +372,6 @@ CODE
             $this->fileManager->getFileContents($pathRequestRepository)
         );
 
-        /*
-
         $manipulator->clearClassNodeStmts();
 
         $manipulator->addConstructor([
@@ -384,9 +381,6 @@ CODE
 parent::__construct($registry, ResetPasswordRequest::class);
 CODE
         );
-
-         */
-
         $manipulator->addInterface(ResetPasswordRequestRepositoryInterface::class);
 
         $manipulator->addTrait(ResetPasswordRequestRepositoryTrait::class);

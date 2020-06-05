@@ -723,15 +723,6 @@ namespace Acme;
 
 use Bar\SomeAnnotation;
 
-=======
-            ,
-            <<<EOF
-<?php
-
-namespace Acme;
-
-use Bar\SomeAnnotation;
-
 /**
  * @SomeAnnotation(message="Foo")
  */
@@ -791,7 +782,6 @@ namespace Acme;
 
 use Bar\SomeAnnotation;
 
->>>>>>> ea1f358... fix compatibility php 7.1 <<<FOO
 /**
  * I'm a class!
  * @SomeAnnotation(message="Foo")
@@ -809,10 +799,6 @@ yield 'weird_inline_doc_block' => [
 namespace Acme;
 
 /** **I'm a class!** ***/
-<<<<<<< HEAD
-=======
-
->>>>>>> ea1f358... fix compatibility php 7.1 <<<FOO
 class Foo
 {
 }

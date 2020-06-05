@@ -30,12 +30,7 @@ final class EntityClassGenerator
         $this->generator = $generator;
         $this->doctrineHelper = $doctrineHelper;
     }
-
-<<<<<<< HEAD
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false): string
-=======
     public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, $generateRepositoryClass = true): string
->>>>>>> c57944f... fix last Ryan issues
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -56,14 +51,6 @@ final class EntityClassGenerator
                 'table_name' => $tableName,
             ]
         );
-
-<<<<<<< HEAD
-        $this->generateRepositoryClass(
-            $repoClassDetails->getFullName(),
-            $entityClassDetails->getFullName(),
-            $withPasswordUpgrade)
-        ;
-=======
         if ($generateRepositoryClass) {
             $this->generateRepositoryClass(
                 $repoClassDetails->getFullName(),
@@ -72,16 +59,10 @@ final class EntityClassGenerator
                 true
             );
         }
->>>>>>> c57944f... fix last Ryan issues
 
         return $entityPath;
     }
-
-<<<<<<< HEAD
-    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade)
-=======
     public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade, bool $includeExampleComments = true)
->>>>>>> c57944f... fix last Ryan issues
     {
         dump($repositoryClass, $entityClass);
         $shortEntityClass = Str::getShortClassName($entityClass);
@@ -95,10 +76,7 @@ final class EntityClassGenerator
                 'entity_alias' => $entityAlias,
                 'with_password_upgrade' => $withPasswordUpgrade,
                 'doctrine_registry_class' => $this->managerRegistryClassName,
-<<<<<<< HEAD
-=======
                 'include_example_comments' => $includeExampleComments,
->>>>>>> c57944f... fix last Ryan issues
             ]
         );
     }
