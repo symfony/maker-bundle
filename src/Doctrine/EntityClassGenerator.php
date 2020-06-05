@@ -58,7 +58,7 @@ final class EntityClassGenerator
                 $repoClassDetails->getFullName(),
                 $entityClassDetails->getFullName(),
                 $withPasswordUpgrade,
-                false
+                true
             );
         }
 
