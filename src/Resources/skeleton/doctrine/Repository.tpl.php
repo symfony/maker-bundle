@@ -21,7 +21,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
     {
         parent::__construct($registry, <?= $entity_class_name; ?>::class);
     }
-<?php if (false === $avoid_default_comments) { // When adding a new method without existing default comments, the blank line is automatically added.?>
+<?php if ($include_example_comments) { // When adding a new method without existing default comments, the blank line is automatically added.?>
 
 <?php } ?>
 <?php if ($with_password_upgrade): ?>
@@ -40,7 +40,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
     }
 
 <?php endif ?>
-<?php if (false === $avoid_default_comments) { ?>
+<?php if ($include_example_comments) { ?>
     // /**
     //  * @return <?= $entity_class_name ?>[] Returns an array of <?= $entity_class_name ?> objects
     //  */

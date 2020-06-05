@@ -31,7 +31,7 @@ final class EntityClassGenerator
         $this->doctrineHelper = $doctrineHelper;
     }
 
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $avoidDefaultComments = false): string
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, $generateRepositoryClass = true): string
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -53,18 +53,21 @@ final class EntityClassGenerator
             ]
         );
 
-        $this->generateRepositoryClass(
-            $repoClassDetails->getFullName(),
-            $entityClassDetails->getFullName(),
-            $withPasswordUpgrade,
-            $avoidDefaultComments)
-        ;
+        if ($generateRepositoryClass) {
+            $this->generateRepositoryClass(
+                $repoClassDetails->getFullName(),
+                $entityClassDetails->getFullName(),
+                $withPasswordUpgrade,
+                false
+            );
+        }
 
         return $entityPath;
     }
 
-    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade, bool $avoidDefaultComments = false)
+    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade, bool $includeExampleComments = true)
     {
+        dump($repositoryClass, $entityClass);
         $shortEntityClass = Str::getShortClassName($entityClass);
         $entityAlias = strtolower($shortEntityClass[0]);
         $this->generator->generateClass(
@@ -76,7 +79,7 @@ final class EntityClassGenerator
                 'entity_alias' => $entityAlias,
                 'with_password_upgrade' => $withPasswordUpgrade,
                 'doctrine_registry_class' => $this->managerRegistryClassName,
-                'avoid_default_comments' => $avoidDefaultComments,
+                'include_example_comments' => $includeExampleComments,
             ]
         );
     }

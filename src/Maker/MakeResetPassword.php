@@ -322,7 +322,7 @@ class MakeResetPassword extends AbstractMaker
     {
         $entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
 
-        $requestEntityPath = $entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, true);
+        $requestEntityPath = $entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, false);
 
         $generator->writeChanges();
 
@@ -355,6 +355,15 @@ CODE
         );
 
         $this->fileManager->dumpFile($requestEntityPath, $manipulator->getSourceCode());
+
+        $entityClassGenerator->generateRepositoryClass(
+            $repositoryClassNameDetails->getFullName(),
+            $requestClassNameDetails->getFullName(),
+            false,
+            false
+        );
+
+        $generator->writeChanges();
 
         $pathRequestRepository = $this->fileManager->getRelativePathForFutureClass(
             $repositoryClassNameDetails->getFullName()

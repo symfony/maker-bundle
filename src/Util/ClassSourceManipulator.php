@@ -516,7 +516,7 @@ final class ClassSourceManipulator
             $relation->getCustomReturnType() ?: $typeHint,
             // getter methods always have nullable return values
             // unless this has been customized explicitly
-            $relation->isCustomReturnTypeNullable()
+            $relation->getCustomReturnType() ? $relation->isCustomReturnTypeNullable() : true
         );
 
         if ($relation->shouldAvoidSetter()) {
