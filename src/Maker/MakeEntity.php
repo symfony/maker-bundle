@@ -290,7 +290,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $questionText = 'Add another property? Enter the property name (or press <return> to stop adding fields)';
         }
 
-        $fieldName = $io->ask($questionText, null, function ($name) use ($fields) {
+        $question = new Question($questionText, null);
+        $question->setValidator(function ($name) use ($fields) {
             // allow it to be empty
             if (!$name) {
                 return $name;
@@ -302,6 +303,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
             return Validator::validateDoctrineFieldName($name, $this->doctrineHelper->getRegistry());
         });
+        $question->setMaxAttempts(5);
+        $fieldName = $io->askQuestion($question);
 
         if (!$fieldName) {
             return null;
