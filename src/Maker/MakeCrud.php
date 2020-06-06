@@ -260,16 +260,24 @@ final class MakeCrud extends AbstractMaker
                 'ControllerTest'
             );
 
+            $entityFields = $entityDoctrineDetails->getDisplayFields();
+            $entityFields = array_filter($entityFields, function ($field) use ($entityDoctrineDetails) {
+                return $field['fieldName'] !== $entityDoctrineDetails->getIdentifier();
+            });
+
             $generator->generateFile(
                 'tests/Controller/'.$testClassDetails->getShortName().'.php',
                 'crud/test/Test.tpl.php',
                 [
+                    'entity_full_class_name' => $entityClassDetails->getFullName(),
                     'entity_class_name' => $entityClassDetails->getShortName(),
+                    'entity_var_singular' => $entityVarSingular,
                     'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
                     'route_name' => $routeName,
                     'class_name' => Str::getShortClassName($testClassDetails->getFullName()),
                     'namespace' => Str::getNamespace($testClassDetails->getFullName()),
                     'form_fields' => $entityDoctrineDetails->getFormFields(),
+                    'entity_fields' => $entityFields,
                 ]
             );
         } else {
