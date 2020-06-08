@@ -43,10 +43,10 @@ class MakeEntityHelper
     private $availableApiResourceConfiguration = [
         'collection/item operations',
         'pagination',
-        'normalization/denormalization',
+        'normalization/denormalization groups',
         'formats',
-        'filters (you can also add filters during the creation of fields)',
-        'create a custom option (e.g. messenger=true)',
+        'add custom arguments',
+        'add custom options',
         'end',
     ];
 
@@ -131,24 +131,257 @@ class MakeEntityHelper
             }
 
             if ('collection/item operations' === $choice) {
-                $this->createApiOperations($io);
+                $this->addApiOperations($io);
                 unset($this->availableApiResourceConfiguration[0]);
 
                 continue;
             }
 
             if ('pagination' === $choice) {
-                $this->createPaginationConfiguration($io);
+                $this->addcreatePaginationConfiguration($io);
                 unset($this->availableApiResourceConfiguration[1]);
 
                 continue;
             }
 
+            if ('normalization/denormalization groups' === $choice) {
+                $this->addNormalizationConfiguration($io);
+                unset($this->availableApiResourceConfiguration[2]);
+
+                continue;
+            }
+
+            if ('formats' === $choice) {
+                $this->addFormatsConfiguration($io);
+                unset($this->availableApiResourceConfiguration[3]);
+
+                continue;
+            }
+
+            if ('add custom arguments' === $choice) {
+                $this->addCustomArguments($io);
+
+                continue;
+            }
+
+            if ('add custom options' === $choice) {
+                $configured = null;
+                while (null === $configured) {
+                    $question = new Question('Custom option (e.g. messenger=true or press <return> to stop adding custom options)');
+                    $option = $io->askQuestion($question);
+
+                    if (null === $option) {
+                        break;
+                    }
+                    $this->apiResourceConfiguration[] = $option.',';
+
+                    continue;
+                }
+
+                continue;
+            }
+            $io->error(sprintf('Option "%s" is not a valid option.', $choice));
+
             $configured = true;
         }
     }
 
-    private function createPaginationConfiguration(ConsoleStyle $io)
+    private function addCustomArguments(ConsoleStyle $io)
+    {
+        if (false === isset($this->apiResourceConfiguration['attributes'])) {
+            $this->apiResourceConfiguration['attributes'] = [];
+        }
+        $attributes = $this->apiResourceConfiguration['attributes'];
+
+        $configured = null;
+        while (null === $configured) {
+            $question = new Question('Custom argument name (e.g. validation_groups or press <return> to stop adding custom options)');
+            $attribute = $io->askQuestion($question);
+
+            if (null === $attribute) {
+                $this->apiResourceConfiguration['attributes'] = $attributes;
+
+                break;
+            }
+
+            $values = '{';
+            while (null === $configured) {
+                $question = new Question('Add value to argument (press <return> to stop adding values)');
+                $value = $io->askQuestion($question);
+
+                if (null === $value) {
+                    $attributes[$attribute] = rtrim($values, ', ').'}';
+
+                    break;
+                }
+                $value = is_numeric($value) ? $value : '"'.$value.'"';
+                $values .= $value.', ';
+            }
+
+            continue;
+        }
+    }
+
+    private function addApiOperations(ConsoleStyle $io)
+    {
+        $availableCollectionOperations = ['get', 'post'];
+
+        $configured = null;
+        $operations = 'collectionOperations={';
+        while (null === $configured) {
+            if (empty($availableCollectionOperations)) {
+                $operations = rtrim($operations, ', ');
+
+                break;
+            }
+
+            $question = new Question('Collection operation (enter ? to see all operations or press <return> to stop adding collection operations)');
+            $question->setAutocompleterValues($availableCollectionOperations);
+            $operation = $io->askQuestion($question);
+
+            if (null === $operation) {
+                $operations = rtrim($operations, ', ');
+                break;
+            }
+
+            if ('?' === $operation) {
+                foreach ($availableCollectionOperations as $option) {
+                    $io->writeln(sprintf('  * <comment>%s</comment>', $option));
+                }
+
+                continue;
+            }
+
+            if (false === \in_array($operation, $availableCollectionOperations)) {
+                $io->error(sprintf('The operation "%s" is not available', $operation));
+
+                continue;
+            }
+            $operations .= sprintf('"%s", ', $operation);
+            $key = array_search($operation, $availableCollectionOperations);
+
+            unset($availableCollectionOperations[$key]);
+        }
+
+        $this->apiResourceConfiguration[] = $operations.'},';
+
+        $availableItemOperations = ['get', 'put', 'delete', 'patch'];
+
+        $configured = null;
+        $operations = 'itemOperations={';
+        while (null === $configured) {
+            if (empty($availableItemOperations)) {
+                $operations = rtrim($operations, ', ');
+
+                break;
+            }
+
+            $question = new Question('Item operation (enter ? to see all operations or press <return> to stop adding item operations)');
+            $question->setAutocompleterValues($availableItemOperations);
+            $operation = $io->askQuestion($question);
+
+            if (null === $operation) {
+                $operations = rtrim($operations, ', ');
+
+                break;
+            }
+
+            if ('?' === $operation) {
+                foreach ($availableItemOperations as $option) {
+                    $io->writeln(sprintf('  * <comment>%s</comment>', $option));
+                }
+
+                continue;
+            }
+
+            if (false === \in_array($operation, $availableItemOperations)) {
+                $io->error(sprintf('The operation "%s" is not available', $operation));
+
+                continue;
+            }
+            $operations .= sprintf('"%s", ', $operation);
+            $key = array_search($operation, $availableItemOperations);
+
+            unset($availableItemOperations[$key]);
+        }
+
+        $this->apiResourceConfiguration[] = $operations.'},';
+    }
+
+    private function addFormatsConfiguration(ConsoleStyle $io)
+    {
+        $availableFormats = [
+            'application/ld+json' => 'jsonld',
+            'n/a' => 'n/a',
+            'application/vnd.api+json' => 'jsonapi',
+            'application/hal+json' => 'jsonhal',
+            'application/x-yaml' => 'yaml',
+            'text/csv' => 'csv',
+            'text/html' => 'html',
+            'application/xml' => 'xml',
+            'application/json' => 'json',
+        ];
+
+        $configured = null;
+        $formats = "formats={\n";
+        while (null === $configured) {
+            $question = new Question(
+                'Format (enter ? to see all formats)'
+            );
+            $question->setAutocompleterValues($availableFormats);
+
+            $format = $io->askQuestion($question);
+
+            if (null === $format) {
+                break;
+            }
+
+            if ('?' === $format) {
+                foreach ($availableFormats as $option) {
+                    $io->writeln(sprintf('  * <comment>%s</comment>', $option));
+                }
+
+                continue;
+            }
+
+            if (false === \in_array($format, $availableFormats)) {
+                $io->error(sprintf('The format "%s" is not available', $format));
+
+                continue;
+            }
+            // get mime/type
+            $key = array_search($format, $availableFormats);
+            $formats .= sprintf(' *         "%s"={"%s"},'."\n", $format, $key);
+
+            unset($availableFormats[$key]);
+        }
+
+        $this->apiResourceConfiguration[] = $formats.' *     },';
+    }
+
+    private function addNormalizationConfiguration(ConsoleStyle $io)
+    {
+        $question = new Question(
+            'Enter the names of the normalization context groups separated by coma <comment>(e.g. book:read, author:read)</comment>'
+        );
+
+        $choices = $io->askQuestion($question);
+
+        $option = $this->asArray($io, 'normalizationContext={"groups"', $choices);
+        $option = str_replace('},', '}},', $option);
+        $this->apiResourceConfiguration[] = $option;
+
+        $question = new Question(
+            'Enter the names of the denormalization context groups separated by coma <comment>(e.g. book:write, author:write)</comment>'
+        );
+
+        $choices = $io->askQuestion($question);
+        $option = $this->asArray($io, 'denormalizationContext={"groups"', $choices);
+        $option = str_replace('},', '}},', $option);
+        $this->apiResourceConfiguration[] = $option;
+    }
+
+    private function addcreatePaginationConfiguration(ConsoleStyle $io)
     {
         if (false === isset($this->apiResourceConfiguration['attributes'])) {
             $this->apiResourceConfiguration['attributes'] = [];
@@ -167,7 +400,7 @@ class MakeEntityHelper
         $configured = null;
         while (null === $configured) {
             $question = new Question(
-                'Let\'s configuring pagination! (enter <comment>?</comment> to see all options))',
+                'Let\'s configuring pagination! (enter <comment>?</comment> to see all types))',
             );
 
             $question->setAutocompleterValues($availablesOptions);
@@ -187,6 +420,12 @@ class MakeEntityHelper
                 continue;
             }
 
+            if (false === \in_array($choice, $availablesOptions)) {
+                $io->error(sprintf('Invalid option "%s".', $choice));
+
+                continue;
+            }
+
             if ('maximum_items_per_page' !== $choice) {
                 $choice = 'pagination_'.$choice;
             }
@@ -198,46 +437,39 @@ class MakeEntityHelper
                 $value = $io->ask(sprintf('Quantity %s:', $choice), 30);
                 $arguments[$choice] = $value;
             }
+            $keyOption = array_search(str_replace('pagination_', '', $choice), $availablesOptions);
+
+            unset($availablesOptions[$keyOption]);
         }
     }
 
-    private function createApiOperations(ConsoleStyle $io)
-    {
-        $question = new Question(
-            'Enter the name of the collection operations separated by coma <comment>(e.g. get, post)</comment>', 'get'
-        );
-
-        $choices = $io->askQuestion($question);
-        $option = $this->asArray($io, 'collectionOperations', $choices, ['get', 'post']);
-        $this->apiResourceConfiguration[] = $option;
-
-        $question = new Question(
-            'Enter the name of the item operations separated by coma <comment>(e.g. get, put, delete, patch)</comment>', 'get'
-        );
-
-        $choices = $io->askQuestion($question);
-        $option = $this->asArray($io, 'itemOperations', $choices, ['get', 'put', 'delete', 'patch']);
-        $this->apiResourceConfiguration[] = $option;
-    }
-
-    public function asArray(ConsoleStyle $io, string $option, string $subOptions, array $availables = [])
+    public function asArray(ConsoleStyle $io, string $optionName, string $subOptions, array $availables = [])
     {
         $subOptions = str_replace(' ', '', $subOptions);
         $subOptions = explode(',', $subOptions);
 
+        $filteredOptions = [];
         foreach ($subOptions as $key => $value) {
-            if (false === empty($availables) && false === \in_array($value, $availables)) {
-                unset($subOptions[$key]);
-                $io->note(sprintf('The option "%s" is not available and has been ignored.', $value));
+            if (isset($filteredOptions[$key]) && $filteredOptions[$key] === $value) {
+                continue;
             }
+
+            if (false === empty($availables) && false === \in_array($value, $availables)) {
+                $io->note(sprintf('The option "%s" is not available and has been ignored.', $value));
+
+                continue;
+            }
+
+            $filteredOptions[$key] = $value;
         }
 
-        $option .= '={';
-        foreach ($subOptions as $value) {
-            $option .= next($subOptions) ? '"'.$value.'", ' : '"'.$value.'"';
+        $optionName .= '={';
+        foreach ($filteredOptions as $key => $value) {
+            $value = '"'.$value.'"';
+            $optionName .= next($filteredOptions) ? $value.', ' : $value;
         }
 
-        return $option .= '},';
+        return $optionName .= '},';
     }
 
     public function generateEntityFields(ConsoleStyle $io, ClassNameDetails $entityClassDetails, string $entityPath, $overwrite, $apiOption = false)

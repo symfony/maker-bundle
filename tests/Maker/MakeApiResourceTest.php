@@ -26,8 +26,12 @@ class MakeApiResourceTest extends MakerTestCase
                 'Product',
                 // configuration of ApiResource()
                 0,
-                'get, post, put, delete, patch', // put, delete, patch not availables
-                'get, post, put, delete, patch', // post not available
+                'get',
+                'post',
+                'get',
+                'put',
+                'delete',
+                'patch',
                 1,
                 'client_enabled',
                 'true',
@@ -42,6 +46,16 @@ class MakeApiResourceTest extends MakerTestCase
                 'client_partial',
                 'true',
                 '',
+
+                2,
+                'book:read, author:read',
+                'book:write, author:write',
+
+                3,
+                'jsonld',
+                'xml',
+                '',
+
                 'end',
 
                 '',
@@ -54,15 +68,14 @@ class MakeApiResourceTest extends MakerTestCase
                 $this->assertFileExists($directory.'/src/Entity/Product.php');
                 $content = file_get_contents($directory.'/src/Entity/Product.php');
 
-                foreach (['post', 'put', 'delete', 'patch'] as $methodNotAvailable) {
-                    $this->assertStringContainsString(sprintf(
-                        '! [NOTE] The option "%s" is not available and has been ignored.',
-                        $methodNotAvailable
-                    ), $output);
-                }
-
                 $this->assertStringContainsString('collectionOperations={"get", "post"}', $content);
                 $this->assertStringContainsString('itemOperations={"get", "put", "delete", "patch"}', $content);
+
+                $this->assertStringContainsString('normalizationContext={"groups"={"book:read", "author:read"}}', $content);
+                $this->assertStringContainsString('denormalizationContext={"groups"={"book:write", "author:write"}}', $content);
+
+                $this->assertStringContainsString('"jsonld"={"application/ld+json"},', $content);
+                $this->assertStringContainsString('"xml"={"application/xml"},', $content);
 
                 $paginationOptions = [
                     'pagination_client_enabled' => 'true',

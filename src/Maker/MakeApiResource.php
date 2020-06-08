@@ -162,7 +162,10 @@ final class MakeApiResource extends AbstractMaker implements InputAwareMakerInte
     public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)
     {
         if (null !== $input) {
-            $dependencies->addClassDependency(ApiResource::class, 'api');
+            $dependencies->addClassDependency(
+                ApiResource::class,
+                'api'
+            );
         }
 
         ORMDependencyBuilder::buildDependencies($dependencies);
