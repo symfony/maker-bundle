@@ -12,14 +12,20 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Common\Annotations\Annotation;
+use PhpParser\Builder\Param;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
+use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -27,12 +33,17 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Yaml\Yaml;
+use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestInterface;
+use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestTrait;
+use SymfonyCasts\Bundle\ResetPassword\Persistence\Repository\ResetPasswordRequestRepositoryTrait;
+use SymfonyCasts\Bundle\ResetPassword\Persistence\ResetPasswordRequestRepositoryInterface;
 use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
 
 /**
  * @author Romaric Drigon <romaric.drigon@gmail.com>
  * @author Jesse Rushlow  <jr@rushlow.dev>
  * @author Ryan Weaver    <ryan@symfonycasts.com>
+ * @author Antoine Michelet <jean.marcel.michelet@gmail.com>
  *
  * @internal
  * @final
@@ -40,10 +51,12 @@ use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
 class MakeResetPassword extends AbstractMaker
 {
     private $fileManager;
+    private $doctrineHelper;
 
-    public function __construct(FileManager $fileManager)
+    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper)
     {
         $this->fileManager = $fileManager;
+        $this->doctrineHelper = $doctrineHelper;
     }
 
     public static function getCommandName(): string
@@ -197,23 +210,7 @@ class MakeResetPassword extends AbstractMaker
             ]
         );
 
-        $generator->generateClass(
-            $requestClassNameDetails->getFullName(),
-            'resetPassword/ResetPasswordRequest.tpl.php',
-            [
-                'repository_class_name' => $repositoryClassNameDetails->getFullName(),
-                'user_full_class_name' => $userClassNameDetails->getFullName(),
-            ]
-        );
-
-        $generator->generateClass(
-            $repositoryClassNameDetails->getFullName(),
-            'resetPassword/ResetPasswordRequestRepository.tpl.php',
-            [
-                'request_class_full_name' => $requestClassNameDetails->getFullName(),
-                'request_class_name' => $requestClassNameDetails->getShortName(),
-            ]
-        );
+        $this->generateRequestEntity($generator, $requestClassNameDetails, $repositoryClassNameDetails, $userClass);
 
         $this->setBundleConfig($io, $generator, $repositoryClassNameDetails->getFullName());
 
@@ -322,5 +319,80 @@ class MakeResetPassword extends AbstractMaker
         $io->newLine();
         $io->text('Then open your browser, go to "/reset-password" and enjoy!');
         $io->newLine();
+    }
+
+    private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails, string $userClass): void
+    {
+        $entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
+
+        $requestEntityPath = $entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, false);
+
+        $generator->writeChanges();
+
+        $manipulator = new ClassSourceManipulator(
+            $this->fileManager->getFileContents($requestEntityPath)
+        );
+
+        $manipulator->addInterface(ResetPasswordRequestInterface::class);
+
+        $manipulator->addTrait(ResetPasswordRequestTrait::class);
+
+        $manipulator->addConstructor([
+            (new Param('user'))->setType('object')->getNode(),
+            (new Param('expiresAt'))->setType('\DateTimeInterface')->getNode(),
+            (new Param('selector'))->setType('string')->getNode(),
+            (new Param('hashedToken'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->user = $user;
+$this->initialize($expiresAt, $selector, $hashedToken);
+CODE
+        );
+
+        $manipulator->addManyToOneRelation((new RelationManyToOne())
+            ->setPropertyName('user')
+            ->setTargetClassName($userClass)
+            ->setMapInverseRelation(false)
+            ->setCustomReturnType('object', false)
+            ->avoidSetter()
+        );
+
+        $this->fileManager->dumpFile($requestEntityPath, $manipulator->getSourceCode());
+
+        $entityClassGenerator->generateRepositoryClass(
+            $repositoryClassNameDetails->getFullName(),
+            $requestClassNameDetails->getFullName(),
+            false,
+            false
+        );
+
+        $generator->writeChanges();
+
+        $pathRequestRepository = $this->fileManager->getRelativePathForFutureClass(
+            $repositoryClassNameDetails->getFullName()
+        );
+
+        $manipulator = new ClassSourceManipulator(
+            $this->fileManager->getFileContents($pathRequestRepository)
+        );
+
+        $manipulator->addInterface(ResetPasswordRequestRepositoryInterface::class);
+
+        $manipulator->addTrait(ResetPasswordRequestRepositoryTrait::class);
+
+        $methodBuilder = $manipulator->createMethodBuilder('createResetPasswordRequest', ResetPasswordRequestInterface::class, false);
+
+        $manipulator->addMethodBuilder($methodBuilder, [
+            (new Param('user'))->setType('object')->getNode(),
+            (new Param('expiresAt'))->setType('\DateTimeInterface')->getNode(),
+            (new Param('selector'))->setType('string')->getNode(),
+            (new Param('hashedToken'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+return new ResetPasswordRequest($user, $expiresAt, $selector, $hashedToken);
+CODE
+        );
+
+        $this->fileManager->dumpFile($pathRequestRepository, $manipulator->getSourceCode());
     }
 }

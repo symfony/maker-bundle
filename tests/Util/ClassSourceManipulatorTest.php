@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
+use PhpParser\Builder\Param;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
@@ -584,6 +585,28 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
+    public function testAddMethodBuilder()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_method/UserEmpty_with_newMethod.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $methodBuilder = $manipulator->createMethodBuilder('testAddNewMethod', 'string', true, ['test comment on public method']);
+
+        $manipulator->addMethodBuilder(
+            $methodBuilder,
+            [
+                (new Param('someParam'))->setType('string')->getNode(),
+            ], <<<'CODE'
+<?php
+$this->someParam = $someParam;
+CODE
+);
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
     public function testAddMethodWithBody()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/EmptyController.php');
@@ -593,9 +616,10 @@ class ClassSourceManipulatorTest extends TestCase
 
         $methodBuilder = $manipulator->createMethodBuilder('action', 'JsonResponse', false, ['@Route("/action", name="app_action")']);
         $methodBuilder->addParam(
-            (new \PhpParser\Builder\Param('param'))->setTypeHint('string')
+            (new Param('param'))->setTypeHint('string')
         );
-        $manipulator->addMethodBody($methodBuilder, <<<'CODE'
+        $manipulator->addMethodBody($methodBuilder,
+<<<'CODE'
 <?php
 return new JsonResponse(['param' => $param]);
 CODE
@@ -623,7 +647,7 @@ CODE
     public function getTestsForAddAnnotationToClass()
     {
         yield 'no_doc_block' => [
-            <<<EOF
+<<<EOF
 <?php
 
 namespace Acme;
@@ -632,8 +656,8 @@ class Foo
 {
 }
 EOF
-            ,
-            <<<EOF
+,
+<<<EOF
 <?php
 
 namespace Acme;
@@ -647,10 +671,10 @@ class Foo
 {
 }
 EOF
-        ];
+];
 
         yield 'normal_doc_block' => [
-            <<<EOF
+<<<EOF
 <?php
 
 namespace Acme;
@@ -662,8 +686,8 @@ class Foo
 {
 }
 EOF
-            ,
-            <<<EOF
+,
+<<<EOF
 <?php
 
 namespace Acme;
@@ -678,10 +702,10 @@ class Foo
 {
 }
 EOF
-        ];
+];
 
         yield 'simple_inline_doc_block' => [
-            <<<EOF
+<<<EOF
 <?php
 
 namespace Acme;
@@ -691,8 +715,8 @@ class Foo
 {
 }
 EOF
-            ,
-            <<<EOF
+,
+<<<EOF
 <?php
 
 namespace Acme;
@@ -710,7 +734,7 @@ EOF
         ];
 
         yield 'weird_inline_doc_block' => [
-            <<<EOF
+<<<EOF
 <?php
 
 namespace Acme;
@@ -720,8 +744,8 @@ class Foo
 {
 }
 EOF
-            ,
-            <<<EOF
+,
+<<<EOF
 <?php
 
 namespace Acme;
@@ -736,6 +760,146 @@ class Foo
 {
 }
 EOF
-        ];
+];
+    }
+
+    public function testAddTraitInEmptyClass()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_only_trait.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addTrait('App\TestTrait');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddTraitWithProperty()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_prop_trait.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addTrait('App\TestTrait');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddTraitWithConstant()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_const_trait.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addTrait('App\TestTrait');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddTraitWithTrait()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_with_trait.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addTrait('App\TestTrait');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddTraitAlReadyExists()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addTrait('App\TraitAlreadyHere');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddConstructor()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserEmpty_with_constructor.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addConstructor([
+                (new Param('someObjectParam'))->setType('object')->getNode(),
+                (new Param('someStringParam'))->setType('string')->getNode(),
+                ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddConstructorInClassContainsPropsAndMethods()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserSimple_with_constructor.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addConstructor([
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddConstructorInClassContainsOnlyConstants()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/User_with_constructor_constante.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addConstructor([
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddConstructorInClassContainsConstructor()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_with_constructor.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $this->expectException('LogicException');
+        $this->expectExceptionMessage('Constructor already exists');
+
+        $manipulator->addConstructor([
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
     }
 }
