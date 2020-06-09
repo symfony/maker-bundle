@@ -138,7 +138,7 @@ class MakeEntityHelper
             }
 
             if ('pagination' === $choice) {
-                $this->addcreatePaginationConfiguration($io);
+                $this->addPaginationConfiguration($io);
                 unset($this->availableApiResourceConfiguration[1]);
 
                 continue;
@@ -381,7 +381,7 @@ class MakeEntityHelper
         $this->apiResourceConfiguration[] = $option;
     }
 
-    private function addcreatePaginationConfiguration(ConsoleStyle $io)
+    private function addPaginationConfiguration(ConsoleStyle $io)
     {
         if (false === isset($this->apiResourceConfiguration['attributes'])) {
             $this->apiResourceConfiguration['attributes'] = [];
