@@ -47,6 +47,7 @@
                 <argument type="service" id="maker.generator" />
                 <argument type="service" id="maker.entity_class_generator" />
                 <argument type="service" id="maker.make_entity_helper" />
+                <argument type="service" id="maker.make_api_resource_helper" />
                 <tag name="maker.command" />
             </service>
 

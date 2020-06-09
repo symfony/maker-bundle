@@ -23,6 +23,7 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\MakeApiResourceHelper;
 use Symfony\Bundle\MakerBundle\Util\MakeEntityHelper;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -41,12 +42,14 @@ final class MakeApiResource extends AbstractMaker implements InputAwareMakerInte
     private $doctrineHelper;
     private $entityClassGenerator;
     private $entityHelper;
+    private $apiResourceHelper;
 
-    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null, EntityClassGenerator $entityClassGenerator = null, MakeEntityHelper $entityHelper)
+    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null, EntityClassGenerator $entityClassGenerator = null, MakeEntityHelper $entityHelper, MakeApiResourceHelper $apiResourceHelper)
     {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
         $this->entityHelper = $entityHelper;
+        $this->apiResourceHelper = $apiResourceHelper;
         // $projectDirectory is unused, argument kept for BC
 
         if (null === $generator) {
@@ -127,7 +130,7 @@ final class MakeApiResource extends AbstractMaker implements InputAwareMakerInte
 
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {
-            $configuration = $this->entityHelper->generateApiResourceConfiguration($io);
+            $configuration = $this->apiResourceHelper->generateApiResourceConfiguration($io);
 
             $entityPath = $this->entityClassGenerator->generateEntityClass(
                 $entityClassDetails,

@@ -68,6 +68,14 @@
                 <argument type="service" id="maker.doctrine_helper" />
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.entity_class_generator" />
+                <argument type="service" id="maker.make_api_resource_helper" />
+                <argument /> <!-- root namespace -->
+            </service>
+
+            <service id="maker.make_api_resource_helper" class="Symfony\Bundle\MakerBundle\Util\MakeApiResourceHelper" >
+                <argument type="service" id="maker.doctrine_helper" />
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.entity_class_generator" />
                 <argument /> <!-- root namespace -->
             </service>
         </services>
