@@ -400,7 +400,7 @@ class MakeEntityHelper
         $configured = null;
         while (null === $configured) {
             $question = new Question(
-                'Let\'s configuring pagination! (enter <comment>?</comment> to see all types))',
+                'Let\'s configuring pagination! (enter <comment>?</comment> to see all types))'
             );
 
             $question->setAutocompleterValues($availablesOptions);
