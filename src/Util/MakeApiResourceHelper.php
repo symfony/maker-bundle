@@ -332,21 +332,18 @@ class MakeApiResourceHelper
         $question = new Question(
             'Enter the names of the normalization context groups separated by coma <comment>(e.g. book:read, author:read)</comment>'
         );
-
         $choices = $io->askQuestion($question);
 
-        $option = $this->asArray($io, 'normalizationContext={"groups"', $choices);
-        $option = str_replace('},', '}},', $option);
-        $this->apiResourceConfiguration[] = $option;
+        $option = $this->asArray($io, $choices);
+        $this->apiResourceConfiguration[] = sprintf('normalizationContext={"groups"={%s}},', $option);
 
         $question = new Question(
             'Enter the names of the denormalization context groups separated by coma <comment>(e.g. book:write, author:write)</comment>'
         );
-
         $choices = $io->askQuestion($question);
-        $option = $this->asArray($io, 'denormalizationContext={"groups"', $choices);
-        $option = str_replace('},', '}},', $option);
-        $this->apiResourceConfiguration[] = $option;
+        $option = $this->asArray($io, $choices);
+
+        $this->apiResourceConfiguration[] = sprintf('denormalizationContext={"groups"={%s}},', $option);
     }
 
     private function addPaginationConfiguration(ConsoleStyle $io)
@@ -411,7 +408,7 @@ class MakeApiResourceHelper
         }
     }
 
-    public function asArray(ConsoleStyle $io, string $optionName, string $subOptions, array $availables = [])
+    public function asArray(ConsoleStyle $io, string $subOptions, array $availables = [])
     {
         $subOptions = str_replace(' ', '', $subOptions);
         $subOptions = explode(',', $subOptions);
@@ -431,13 +428,13 @@ class MakeApiResourceHelper
             $filteredOptions[$key] = $value;
         }
 
-        $optionName .= '={';
+        $optionName = '';
         foreach ($filteredOptions as $key => $value) {
             $value = '"'.$value.'"';
             $optionName .= next($filteredOptions) ? $value.', ' : $value;
         }
 
-        return $optionName .= '},';
+        return $optionName;
     }
 
     /**
