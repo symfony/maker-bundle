@@ -33,12 +33,12 @@ class MakeApiResourceHelper
     private $apiResourceConfiguration = [];
     private $availableApiResourceConfiguration = [
         'collection/item operations',
-        'pagination',
         'normalization/denormalization groups',
+        'pagination',
         'formats',
         'add custom arguments',
         'add custom options',
-        'end',
+        'next',
     ];
 
     public static $availableFilters = [
@@ -73,6 +73,18 @@ class MakeApiResourceHelper
         'INCLUDE_NULL_BEFORE_AND_AFTER',
     ];
 
+    public static $availableFormats = [
+        'application/ld+json' => 'jsonld',
+        'n/a' => 'n/a',
+        'application/vnd.api+json' => 'jsonapi',
+        'application/hal+json' => 'jsonhal',
+        'application/x-yaml' => 'yaml',
+        'text/csv' => 'csv',
+        'text/html' => 'html',
+        'application/xml' => 'xml',
+        'application/json' => 'json',
+    ];
+
     public const NUMERIC_TYPES = [
         'integer',
         'smallint',
@@ -101,11 +113,11 @@ class MakeApiResourceHelper
             $question = new ChoiceQuestion(
                 'First, configure your api resource <comment>(press enter when you have finished)</comment>',
                 $this->availableApiResourceConfiguration,
-                'end'
+                'next'
             );
             $choice = $io->askQuestion($question);
 
-            if ('end' === $choice) {
+            if ('next' === $choice) {
                 if (isset($this->apiResourceConfiguration['attributes'])) {
                     $option = "attributes={\n";
                     foreach ($this->apiResourceConfiguration['attributes'] as $key => $value) {
@@ -127,22 +139,15 @@ class MakeApiResourceHelper
                 continue;
             }
 
-            if ('pagination' === $choice) {
-                $this->addPaginationConfiguration($io);
+            if ('normalization/denormalization groups' === $choice) {
+                $this->addNormalizationConfiguration($io);
                 unset($this->availableApiResourceConfiguration[1]);
 
                 continue;
             }
 
-            if ('normalization groups' === $choice) {
-                $this->addNormalizationConfiguration($io);
-                unset($this->availableApiResourceConfiguration[2]);
-
-                continue;
-            }
-
-            if ('normalization/denormalization groups' === $choice) {
-                $this->addNormalizationConfiguration($io);
+            if ('pagination' === $choice) {
+                $this->addPaginationConfiguration($io);
                 unset($this->availableApiResourceConfiguration[2]);
 
                 continue;
@@ -161,6 +166,11 @@ class MakeApiResourceHelper
                 continue;
             }
 
+            /*
+             * I don't know if with we need to build a questionnaire with a question
+             * for the name of option and another questionnaire inside for options.
+             * Or just allow the user to write the entire option by himself e.g messenger=true
+             */
             if ('add custom options' === $choice) {
                 $configured = null;
                 while (null === $configured) {
@@ -170,6 +180,7 @@ class MakeApiResourceHelper
                     if (null === $option) {
                         break;
                     }
+
                     $this->apiResourceConfiguration[] = $option.',';
 
                     continue;
@@ -221,141 +232,101 @@ class MakeApiResourceHelper
 
     private function addApiOperations(ConsoleStyle $io)
     {
-        $availableCollectionOperations = ['get', 'post'];
+        $operations = $this->submitQuestionnaire(
+            $io,
+            'Collection operation (enter ? to see all operations or press <return> to stop adding collection operations)',
+            ['get', 'post']
+        );
 
+        $strOperations = 'collectionOperations={';
+
+        foreach ($operations as $operation) {
+            $strOperations .= sprintf('"%s", ', $operation);
+        }
+
+        $strOperations = rtrim($strOperations, ', ');
+
+        $this->apiResourceConfiguration[] = $strOperations.'},';
+
+        $operations = $this->submitQuestionnaire(
+            $io,
+            'Item operation (enter ? to see all operations or press <return> to stop adding collection operations)',
+            ['get', 'put', 'delete', 'patch']
+        );
+
+        $strOperations = 'itemOperations={';
+
+        foreach ($operations as $operation) {
+            $strOperations .= sprintf('"%s", ', $operation);
+        }
+
+        $strOperations = rtrim($strOperations, ', ');
+
+        $this->apiResourceConfiguration[] = $strOperations.'},';
+    }
+
+    private function submitQuestionnaire(ConsoleStyle $io, string $questionText, $availables)
+    {
+        $options = [];
         $configured = null;
-        $operations = 'collectionOperations={';
         while (null === $configured) {
-            if (empty($availableCollectionOperations)) {
-                $operations = rtrim($operations, ', ');
-
+            if (empty($availables)) {
                 break;
             }
 
-            $question = new Question('Collection operation (enter ? to see all operations or press <return> to stop adding collection operations)');
-            $question->setAutocompleterValues($availableCollectionOperations);
-            $operation = $io->askQuestion($question);
+            $question = (new Question($questionText))->setAutocompleterValues($availables);
+            $choice = $io->askQuestion($question);
 
-            if (null === $operation) {
-                $operations = rtrim($operations, ', ');
+            if (null === $choice) {
                 break;
             }
 
-            if ('?' === $operation) {
-                foreach ($availableCollectionOperations as $option) {
-                    $io->writeln(sprintf('  * <comment>%s</comment>', $option));
+            if ('?' === $choice) {
+                foreach ($availables as $available) {
+                    $io->writeln(sprintf('  * <comment>%s</comment>', $available));
                 }
 
                 continue;
             }
 
-            if (false === \in_array($operation, $availableCollectionOperations)) {
-                $io->error(sprintf('The operation "%s" is not available', $operation));
+            if (false === \in_array($choice, $availables)) {
+                $io->error(sprintf('The option "%s" is not available', $choice));
 
                 continue;
             }
-            $operations .= sprintf('"%s", ', $operation);
-            $key = array_search($operation, $availableCollectionOperations);
+            $options[] = $choice;
+            $key = array_search($choice, $availables);
 
-            unset($availableCollectionOperations[$key]);
+            unset($availables[$key]);
         }
 
-        $this->apiResourceConfiguration[] = $operations.'},';
-
-        $availableItemOperations = ['get', 'put', 'delete', 'patch'];
-
-        $configured = null;
-        $operations = 'itemOperations={';
-        while (null === $configured) {
-            if (empty($availableItemOperations)) {
-                $operations = rtrim($operations, ', ');
-
-                break;
-            }
-
-            $question = new Question('Item operation (enter ? to see all operations or press <return> to stop adding item operations)');
-            $question->setAutocompleterValues($availableItemOperations);
-            $operation = $io->askQuestion($question);
-
-            if (null === $operation) {
-                $operations = rtrim($operations, ', ');
-
-                break;
-            }
-
-            if ('?' === $operation) {
-                foreach ($availableItemOperations as $option) {
-                    $io->writeln(sprintf('  * <comment>%s</comment>', $option));
-                }
-
-                continue;
-            }
-
-            if (false === \in_array($operation, $availableItemOperations)) {
-                $io->error(sprintf('The operation "%s" is not available', $operation));
-
-                continue;
-            }
-            $operations .= sprintf('"%s", ', $operation);
-            $key = array_search($operation, $availableItemOperations);
-
-            unset($availableItemOperations[$key]);
-        }
-
-        $this->apiResourceConfiguration[] = $operations.'},';
+        return $options;
     }
 
     private function addFormatsConfiguration(ConsoleStyle $io)
     {
-        $availableFormats = [
-            'application/ld+json' => 'jsonld',
-            'n/a' => 'n/a',
-            'application/vnd.api+json' => 'jsonapi',
-            'application/hal+json' => 'jsonhal',
-            'application/x-yaml' => 'yaml',
-            'text/csv' => 'csv',
-            'text/html' => 'html',
-            'application/xml' => 'xml',
-            'application/json' => 'json',
-        ];
+        $formats = $this->submitQuestionnaire(
+            $io,
+            'Format (enter ? to see all formats)',
+            self::$availableFormats
+        );
+        $strFormats = "formats={\n";
 
-        $configured = null;
-        $formats = "formats={\n";
-        while (null === $configured) {
-            $question = new Question(
-                'Format (enter ? to see all formats)'
+        foreach ($formats as $key => $format) {
+            $strFormats .= sprintf(
+                ' *         "%s"={"%s"},'."\n",
+                $format,
+                array_search($format, self::$availableFormats)
             );
-            $question->setAutocompleterValues($availableFormats);
-
-            $format = $io->askQuestion($question);
-
-            if (null === $format) {
-                break;
-            }
-
-            if ('?' === $format) {
-                foreach ($availableFormats as $option) {
-                    $io->writeln(sprintf('  * <comment>%s</comment>', $option));
-                }
-
-                continue;
-            }
-
-            if (false === \in_array($format, $availableFormats)) {
-                $io->error(sprintf('The format "%s" is not available', $format));
-
-                continue;
-            }
-            // get mime/type
-            $key = array_search($format, $availableFormats);
-            $formats .= sprintf(' *         "%s"={"%s"},'."\n", $format, $key);
-
-            unset($availableFormats[$key]);
         }
 
-        $this->apiResourceConfiguration[] = $formats.' *     },';
+        $this->apiResourceConfiguration[] = $strFormats.' *     },';
     }
 
+    /**
+     * Here i test a new paradigm for passing values, I allow the user to pass several groups separated by comas.
+     * Tell me if you like.
+     */
     private function addNormalizationConfiguration(ConsoleStyle $io)
     {
         $question = new Question(
@@ -396,9 +367,7 @@ class MakeApiResourceHelper
 
         $configured = null;
         while (null === $configured) {
-            $question = new Question(
-                'Let\'s configuring pagination! (enter <comment>?</comment> to see all types))'
-            );
+            $question = new Question('Let\'s configuring pagination! (enter <comment>?</comment> to see all types))');
 
             $question->setAutocompleterValues($availablesOptions);
             $choice = $io->askQuestion($question);
@@ -428,7 +397,9 @@ class MakeApiResourceHelper
             }
 
             if ('pagination_client_enabled' === $choice || 'pagination_partial' === $choice || 'pagination_client_partial' === $choice) {
-                $value = $io->ask('Pass true or false');
+                $question = new Question('Pass true or false', 'true');
+                $question->setAutocompleterValues(['true', 'false']);
+                $value = $io->askQuestion($question);
                 $arguments[$choice] = $value;
             } else {
                 $value = $io->ask(sprintf('Quantity %s:', $choice), 30);
@@ -467,96 +438,6 @@ class MakeApiResourceHelper
         }
 
         return $optionName .= '},';
-    }
-
-    public function createApiFilter($io, $data)
-    {
-        $apiFilter = null;
-        while (null === $apiFilter) {
-            $question = new Question('Do you want to add a filter for your api resource? (enter <comment>?</comment> to see all filters)');
-            $question->setAutocompleterValues($this->getFiltersMatchingCurrentType($data, true));
-            $apiFilter = $this->getApiFilterFullClassNameIfExists($io->askQuestion($question));
-
-            if (null === $apiFilter) {
-                return $data;
-            }
-
-            if ('?' === $apiFilter) {
-                foreach ($this->getFiltersMatchingCurrentType($data) as $filter) {
-                    $io->writeln(sprintf('  * <comment>%s</comment>', $filter));
-                }
-
-                $apiFilter = null;
-                continue;
-            }
-
-            if (!\in_array($apiFilter, self::$availableFilters)) {
-                $io->error(sprintf('Invalid filter "%s".', $apiFilter));
-                $io->writeln('');
-
-                $apiFilter = null;
-                continue;
-            }
-
-            if (!$this->isTypeCompatibleWithApiFilter($data, $apiFilter)) {
-                $io->error(sprintf('The type "%s" is not compatible with the filter "%s"', $data['type'], $apiFilter));
-
-                $apiFilter = null;
-                continue;
-            }
-
-            $this->apiFilters[] = $apiFilter;
-
-            $classnameFilter = Str::getShortClassName($apiFilter);
-
-            if ('TermFilter' === $classnameFilter || 'MatchFilter' === $classnameFilter) {
-                $io->note('Elasticsearch is required for this Filter');
-                $io->writeln(' see: <href=https://api-platform.com/docs/core/elasticsearch/>Elasticsearch Support ApiPlatform</>');
-                $io->writeln('');
-            }
-
-            if ('DateFilter' === $classnameFilter || 'SearchFilter' === $classnameFilter) {
-                $strategyChoice = null;
-                while (null === $strategyChoice) {
-                    $question = new Question('Do you want to add a strategy for your filter? (enter <comment>?</comment> to see all strategies)');
-
-                    $availableStrategies = 'DateFilter' === $classnameFilter
-                        ? self::$availableDateFilterStrategies
-                        : self::$availableSearchFilterStrategies;
-
-                    $question->setAutocompleterValues($availableStrategies);
-                    $strategy = $io->askQuestion($question);
-
-                    if (null === $strategy) {
-                        break;
-                    }
-
-                    if ('?' === $strategy) {
-                        foreach ($availableStrategies as $strategy) {
-                            $io->writeln(sprintf('  * <comment>%s</comment>', $strategy));
-                        }
-
-                        $strategyChoice = null;
-                        continue;
-                    }
-
-                    if (!\in_array($strategy, $availableStrategies)) {
-                        $io->error(sprintf('Invalid strategy "%s".', $strategy));
-                        $io->writeln('');
-
-                        $strategyChoice = null;
-                        continue;
-                    }
-
-                    $this->apiFilterStrategies[$data['fieldName'].$classnameFilter] = 'DateFilter' === $classnameFilter ? 'DateFilter::'.$strategy : '"'.$strategy.'"';
-                    $strategyChoice = true;
-                }
-            }
-
-            $apiFilter = null;
-        }
-
-        return $data;
     }
 
     /**

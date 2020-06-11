@@ -32,7 +32,12 @@ class MakeApiResourceTest extends MakerTestCase
                 'put',
                 'delete',
                 'patch',
+
                 1,
+                'book:read, author:read',
+                'book:write, author:write',
+
+                2,
                 'client_enabled',
                 'true',
                 'items_per_page',
@@ -47,16 +52,29 @@ class MakeApiResourceTest extends MakerTestCase
                 'true',
                 '',
 
-                2,
-                'book:read, author:read',
-                'book:write, author:write',
-
                 3,
                 'jsonld',
+                'n/a',
+                'jsonapi',
+                'jsonhal',
+                'yaml',
+                'csv',
+                'html',
                 'xml',
+                'json',
+
+                4,
+                'custom_argument',
+                'custom_value_1',
+                125,
+                '',
                 '',
 
-                'end',
+                5,
+                'messenger=true',
+                '',
+
+                'next',
 
                 '',
             ])
@@ -74,8 +92,21 @@ class MakeApiResourceTest extends MakerTestCase
                 $this->assertStringContainsString('normalizationContext={"groups"={"book:read", "author:read"}}', $content);
                 $this->assertStringContainsString('denormalizationContext={"groups"={"book:write", "author:write"}}', $content);
 
-                $this->assertStringContainsString('"jsonld"={"application/ld+json"},', $content);
-                $this->assertStringContainsString('"xml"={"application/xml"},', $content);
+                $availableFormats = [
+                    'application/ld+json' => 'jsonld',
+                    'n/a' => 'n/a',
+                    'application/vnd.api+json' => 'jsonapi',
+                    'application/hal+json' => 'jsonhal',
+                    'application/x-yaml' => 'yaml',
+                    'text/csv' => 'csv',
+                    'text/html' => 'html',
+                    'application/xml' => 'xml',
+                    'application/json' => 'json',
+                ];
+
+                foreach ($availableFormats as $mimeType => $format) {
+                    $this->assertStringContainsString(sprintf('"%s"={"%s"},', $format, $mimeType), $content);
+                }
 
                 $paginationOptions = [
                     'pagination_client_enabled' => 'true',
@@ -86,11 +117,13 @@ class MakeApiResourceTest extends MakerTestCase
                     'pagination_client_partial' => 'true',
                 ];
 
-                $this->assertStringContainsString('attributes={', $content);
-
                 foreach ($paginationOptions as $option => $value) {
                     $this->assertStringContainsString(sprintf('"%s"=%s', $option, $value), $content);
                 }
+
+                $this->assertStringContainsString('"custom_argument"={"custom_value_1", 125}', $content);
+
+                $this->assertStringContainsString('messenger=true,', $content);
             }),
         ];
 
@@ -100,7 +133,7 @@ class MakeApiResourceTest extends MakerTestCase
                 // entity class name
                 'Product',
 
-                'end', // configuration of ApiResource()
+                'next', // configuration of ApiResource()
 
                 // add not additional fields
                 'nameString',
@@ -192,7 +225,7 @@ class MakeApiResourceTest extends MakerTestCase
             [
                 // entity class name
                 'Product',
-                'end', // configuration of ApiResource()
+                'next', // configuration of ApiResource()
 
                 // add not additional fields
                 'nameDatetime',
@@ -252,7 +285,7 @@ class MakeApiResourceTest extends MakerTestCase
             [
                 // entity class name
                 'Product',
-                'end', // configuration of ApiResource()
+                'next', // configuration of ApiResource()
 
                 // add not additional fields
                 'isAvailableGenericallyInMyCountry',
@@ -316,7 +349,7 @@ class MakeApiResourceTest extends MakerTestCase
                 // entity class name
                 'Product',
 
-                'end', // configuration of ApiResource()
+                'next', // configuration of ApiResource()
 
                 // add not additional fields
                 'nameString',
