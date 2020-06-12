@@ -240,7 +240,9 @@ final class PhpServicesCreator
 
     private function convertServiceOptionsToNodes(array $servicesValues)
     {
-        foreach ($servicesValues as $method => $value) {
+        foreach ($servicesValues as $serviceConfigKey => $value) {
+            $method = $serviceConfigKey;
+
             // options started by decoration_<option> are used as options of the method decorate().
             if (strstr($method, 'decoration_')) {
                 continue;
