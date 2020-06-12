@@ -292,7 +292,7 @@ final class PhpServicesCreator
 
                 case 'tags':
                     if (is_array($value) && $this->isAssociativeArray($value)) {
-                        throw new \InvalidArgumentException('TODO - this should work - not sure how it was working before');
+                        throw new \InvalidArgumentException('Unexpected associative array value for "tags"');
                     }
 
                     foreach ($value as $argValue) {
