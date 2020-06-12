@@ -94,9 +94,13 @@ final class MakeConvertPhpServices extends AbstractMaker
         $yamlContents = $this->fileManager->getFileContents($path);
         $kernelLoadsPhpConfig = str_contains($yamlContents, 'services.php');
 
-        $phpServicesContent = (new PhpServicesCreator())->convert(
-            $yamlContents
-        );
+        try {
+            $phpServicesContent = (new PhpServicesCreator())->convert(
+                $yamlContents
+            );
+        } catch (\Exception $e) {
+            throw new RuntimeCommandException(sprintf('%s could not be converted. This may be a bug in your YAML or a missing feature in this command. Error: "%s"', $path, $e->getMessage()), 0, $e);
+        }
 
         $newPath = $input->getArgument('newPath');
         $generator->dumpFile($newPath, $phpServicesContent);
