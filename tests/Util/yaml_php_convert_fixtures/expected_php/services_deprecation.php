@@ -11,8 +11,10 @@ return function (ContainerConfigurator $configurator) {
     $services = $configurator->services();
 
     $services->set('fake.service.old_syntax', SimpleFakeClassService::class)
-        ->deprecate('The fake.service.old_syntax service is deprecated');
+        ->deprecate('The %service_id% service is deprecated')
+    ;
 
     $services->set('fake.service.new_syntax', SimpleFakeClassService::class)
-        ->deprecate('symfony/foo-bar', '2.1', 'The fake.service.new_syntax service is deprecated');
+        ->deprecate('symfony/foobar', '2.1', 'The %service_id% service is deprecated')
+    ;
 };

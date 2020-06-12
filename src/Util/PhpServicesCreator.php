@@ -241,62 +241,101 @@ final class PhpServicesCreator
     private function convertServiceOptionsToNodes(array $servicesValues)
     {
         foreach ($servicesValues as $serviceConfigKey => $value) {
-            $method = $serviceConfigKey;
-
             // options started by decoration_<option> are used as options of the method decorate().
-            if (strstr($method, 'decoration_')) {
+            if (strstr($serviceConfigKey, 'decoration_')) {
                 continue;
             }
 
-            if ('deprecated' === $method || 'shared' === $method) {
-                $method = rtrim($method, 'd');
-            }
+            switch ($serviceConfigKey) {
+                case 'decorates':
+                    $this->addLineStmt($this->createDecorateMethod($servicesValues));
 
-            if ('decorates' === $method) {
-                $this->addLineStmt($this->createDecorateMethod($servicesValues));
+                    break;
 
-                continue;
-            }
+                case 'deprecated':
+                    $this->addLineStmt($this->createDeprecateMethod($value));
 
-            if (!\is_array($value)) {
-                $this->addLineStmt($this->createMethod($method, $this->toString($value)));
+                    break;
 
-                continue;
-            }
+                # simple "key: value" options
+                case 'shared':
+                case 'public':
+                case 'exclude':
+                case 'autowire':
+                case 'autoconfigure':
+                    if (is_array($value)) {
+                        throw new \InvalidArgumentException(sprintf('The "%s" service option does not support being set to an array value.', $serviceConfigKey));
+                    }
 
-            if (false === $this->isAssociativeArray($value)) {
-                switch ($method) {
-                    case 'tags':
-                        foreach ($value as $argValue) {
-                            $this->addLineStmt($this->createTagMethod($argValue));
-                        }
-                        break;
-                    case 'calls':
-                        foreach ($value as $argValue) {
-                            $this->addLineStmt($this->createCallMethod($argValue));
-                        }
-                        break;
-                    default:
-                        $this->addLineStmt($this->createMethod($method, $this->createSequentialArray($value)));
-                        break;
-                }
+                    $method = $serviceConfigKey;
+                    if ($serviceConfigKey === 'shared') {
+                        $method = 'share';
+                    }
 
-                continue;
-            }
+                    $this->addLineStmt($this->createMethod($method, $this->toString($value)));
 
-            if ('arguments' === $method) {
-                foreach ($value as $argKey => $argValue) {
+                    break;
+
+                case 'factory':
+                case 'configurator':
+                    if (is_array($value) && $this->isAssociativeArray($value)) {
+                        throw new \InvalidArgumentException(sprintf('The config key "%s" does not support an associative array', $serviceConfigKey));
+                    }
+
                     $this->addLineStmt($this->createMethod(
-                        'arg',
-                        $this->createStringArgument($argKey),
-                        $this->toString($argValue)
+                        $serviceConfigKey,
+                        // the handles converting all formats of the single arg
+                        $this->toString($value)
                     ));
-                }
 
-                continue;
+                    break;
+
+                case 'tags':
+                    if (is_array($value) && $this->isAssociativeArray($value)) {
+                        throw new \InvalidArgumentException('TODO - this should work - not sure how it was working before');
+                    }
+
+                    foreach ($value as $argValue) {
+                        $this->addLineStmt($this->createTagMethod($argValue));
+                    }
+
+                    break;
+
+                case 'calls':
+                    if ($this->isAssociativeArray($value)) {
+                        throw new \InvalidArgumentException('Unexpected associative array for "calls" config.');
+                    }
+
+                    foreach ($value as $argValue) {
+                        $this->addLineStmt($this->createCallMethod($argValue));
+                    }
+
+                    break;
+
+                case 'arguments':
+                    if ($this->isAssociativeArray($value)) {
+                        foreach ($value as $argKey => $argValue) {
+                            $this->addLineStmt($this->createMethod(
+                                'arg',
+                                $this->createStringArgument($argKey),
+                                $this->toString($argValue)
+                            ));
+                        }
+                    } else {
+                        $this->addLineStmt($this->createMethod(
+                            'args',
+                            $this->createSequentialArray($value))
+                        );
+                    }
+
+                    break;
+
+                default:
+                    throw new \InvalidArgumentException(sprintf('Unexpected service configuration option: "%s".', $serviceConfigKey));
             }
 
-            throw new \Exception(sprintf('Unexpected service configuration option: "%s". This could be a valid config option that the converter does not support yet.', $method));
+            // was used for sequential arrays
+            // $this->addLineStmt($this->createMethod($method, $this->createSequentialArray($value)));
         }
     }
 
@@ -435,6 +474,25 @@ final class PhpServicesCreator
         }
 
         return $this->createMethod('tag', $name, $this->createAssociativeArray($value));
+    }
+
+    private function createDeprecateMethod($value): string
+    {
+        // the old, simple format
+        if (!is_array($value)) {
+            return $this->createMethod('deprecate', $this->toString($value));
+        }
+
+        $package = $value['package'] ?? '';
+        $version = $value['version'] ?? '';
+        $message = $value['message'] ?? '';
+
+        return $this->createMethod(
+            'deprecate',
+            $this->toString($package),
+            $this->toString($version),
+            $this->toString($message)
+        );
     }
 
     /**
