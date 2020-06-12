@@ -66,16 +66,6 @@ class PhpServicesCreatorTest extends TestCase
         }
     }
 
-    public function testParameters()
-    {
-        $source = file_get_contents(self::YAML_PHP_CONVERT_FIXTURES_PATH.'/source_yaml/parameters.yaml');
-        $expectedSource = file_get_contents(self::YAML_PHP_CONVERT_FIXTURES_PATH.'/expected_php/parameters.php');
-
-        $creator = new PhpServicesCreator();
-
-        $this->assertSame($expectedSource, $creator->convert($source));
-    }
-
     /*
      * Not the same configuration, only test if they're built the same way.
      */
