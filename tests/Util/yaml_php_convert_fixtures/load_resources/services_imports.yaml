@@ -1,2 +1,2 @@
 imports:
-  - { 'type': 'annotations', resource: 'somefile.yaml', ignore_errors: true }
+  - { 'type': 'annotations', resource: 'services_simple.yaml', ignore_errors: true }
