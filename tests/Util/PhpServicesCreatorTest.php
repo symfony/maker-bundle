@@ -32,7 +32,7 @@ class PhpServicesCreatorTest extends TestCase
     /**
      * @dataProvider getConfigurationFiles
      */
-    public function testYamlServicesConversion(string $yamlPath, string $phpExpectedSourcePath, bool $shouldCompareContainers)
+    public function testYamlServicesConversion(string $yamlPath, string $phpExpectedSourcePath, bool $shouldCompareContainers, bool $shouldCompareContainerDefinitions)
     {
         $creator = new PhpServicesCreator();
         $this->assertSame(
@@ -41,7 +41,7 @@ class PhpServicesCreatorTest extends TestCase
         );
 
         if ($shouldCompareContainers) {
-            $this->compareContainers($yamlPath, $phpExpectedSourcePath);
+            $this->compareContainers($yamlPath, $phpExpectedSourcePath, $shouldCompareContainerDefinitions);
         }
     }
 
@@ -54,32 +54,23 @@ class PhpServicesCreatorTest extends TestCase
             $phpExpectedRealPath = str_replace(['source_yaml', '.yaml'], ['expected_php', '.php'], $file->getRealPath());
 
             $shouldCompareContainers = true;
+            $shouldCompareContainerDefinitions = true;
             // this file loads "resources", which will fail as there are no real files
             if ($file->getFilename() === 'services_load_resources.yaml') {
                 $shouldCompareContainers = false;
+            }
+            // internally, references have slight, meaningless differences in each format
+            if ($file->getFilename() === 'reference.yaml') {
+                $shouldCompareContainerDefinitions = false;
             }
 
             yield $file->getFilenameWithoutExtension() => [
                 $file->getRealPath(),
                 $phpExpectedRealPath,
                 $shouldCompareContainers,
+                $shouldCompareContainerDefinitions
             ];
         }
-    }
-
-    public function testCasesWhenContainerIsBuiltDifferently()
-    {
-        $yamlRealPath = self::YAML_PHP_CONVERT_FIXTURES_PATH.'/container_built_differently/reference.yaml';
-        $phpExpectedRealPath = self::YAML_PHP_CONVERT_FIXTURES_PATH.'/container_built_differently/reference.php';
-
-        $source = file_get_contents($yamlRealPath);
-        $expectedSource = file_get_contents($phpExpectedRealPath);
-
-        $creator = new PhpServicesCreator();
-
-        $this->assertSame($expectedSource, $creator->convert($source));
-
-        $this->compareContainers($yamlRealPath, $phpExpectedRealPath, false);
     }
 
     private function compareContainers(string $yamlRealPath, string $phpRealPath, bool $shouldCompareDefinitions = true)
