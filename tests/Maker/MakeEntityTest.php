@@ -80,13 +80,11 @@ class MakeEntityTest extends MakerTestCase
             ->updateSchemaAfterCommand(),
         ];
 
-        yield 'entity_updating' => [MakerTestDetails::createTest(
+        yield 'entity_updating_main' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),
             [
                 // entity class name
                 'User',
-                // this field already exists
-                'firstName',
                 // add additional fields
                 'lastName',
                 'string',
