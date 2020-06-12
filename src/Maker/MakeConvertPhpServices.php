@@ -25,6 +25,7 @@ use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * @author Antoine Michelet <jean.marcel.michelet@gmail.com>
+ * @author Ryan Weaver <ryan@symfonycasts.com>
  *
  * @internal
  */
@@ -54,7 +55,7 @@ final class MakeConvertPhpServices extends AbstractMaker
         $command->addArgument('path');
         $command->addArgument('newPath');
 
-        $path = $io->ask('What file do you want to convert?', 'config/services.yaml', function($value) {
+        $path = $io->ask('What file do you want to convert?', 'config/services.yaml', function ($value) {
             if (!$this->fileManager->fileExists($value)) {
                 throw new \InvalidArgumentException(sprintf('File %s does not exist', $value));
             }
@@ -65,7 +66,7 @@ final class MakeConvertPhpServices extends AbstractMaker
 
         $newPath = str_replace(['.yml', '.yaml'], ['.php', '.php'], $path);
         if ($newPath === $path) {
-            $newPath = $io->ask('What filename should be used for the new file?', 'config/services.php', function($value) {
+            $newPath = $io->ask('What filename should be used for the new file?', 'config/services.php', function ($value) {
                 if ($this->fileManager->fileExists($value)) {
                     throw new \InvalidArgumentException(sprintf('File %s already exists', $value));
                 }
@@ -130,8 +131,8 @@ final class MakeConvertPhpServices extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies)
     {
-         if (Kernel::VERSION_ID < 50100) {
-             throw new RuntimeCommandException(sprintf('The "%s" command requires Symfony 5.1. What a great time to upgrade!', self::getCommandName()));
-         }
+        if (Kernel::VERSION_ID < 50100) {
+            throw new RuntimeCommandException(sprintf('The "%s" command requires Symfony 5.1. What a great time to upgrade!', self::getCommandName()));
+        }
     }
 }

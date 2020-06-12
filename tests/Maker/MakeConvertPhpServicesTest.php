@@ -36,7 +36,7 @@ class MakeConvertPhpServicesTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('created: config/services.php', $output);
                 $this->assertStringContainsString('deleted: config/services.yaml', $output);
-            })
+            }),
         ];
     }
 }

@@ -63,11 +63,11 @@ class PhpServicesCreatorTest extends TestCase
             $shouldCompareContainers = true;
             $shouldCompareContainerDefinitions = true;
             // this file loads "resources", which will fail as there are no real files
-            if ($file->getFilename() === 'services_load_resources.yaml') {
+            if ('services_load_resources.yaml' === $file->getFilename()) {
                 $shouldCompareContainers = false;
             }
             // internally, references have slight, meaningless differences in each format
-            if ($file->getFilename() === 'reference.yaml') {
+            if ('reference.yaml' === $file->getFilename()) {
                 $shouldCompareContainerDefinitions = false;
             }
 
@@ -75,7 +75,7 @@ class PhpServicesCreatorTest extends TestCase
                 $file->getRealPath(),
                 $phpExpectedRealPath,
                 $shouldCompareContainers,
-                $shouldCompareContainerDefinitions
+                $shouldCompareContainerDefinitions,
             ];
         }
     }

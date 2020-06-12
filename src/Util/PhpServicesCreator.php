@@ -257,18 +257,18 @@ final class PhpServicesCreator
 
                     break;
 
-                # simple "key: value" options
+                // simple "key: value" options
                 case 'shared':
                 case 'public':
                 case 'exclude':
                 case 'autowire':
                 case 'autoconfigure':
-                    if (is_array($value)) {
+                    if (\is_array($value)) {
                         throw new \InvalidArgumentException(sprintf('The "%s" service option does not support being set to an array value.', $serviceConfigKey));
                     }
 
                     $method = $serviceConfigKey;
-                    if ($serviceConfigKey === 'shared') {
+                    if ('shared' === $serviceConfigKey) {
                         $method = 'share';
                     }
 
@@ -278,7 +278,7 @@ final class PhpServicesCreator
 
                 case 'factory':
                 case 'configurator':
-                    if (is_array($value) && $this->isAssociativeArray($value)) {
+                    if (\is_array($value) && $this->isAssociativeArray($value)) {
                         throw new \InvalidArgumentException(sprintf('The config key "%s" does not support an associative array', $serviceConfigKey));
                     }
 
@@ -291,7 +291,7 @@ final class PhpServicesCreator
                     break;
 
                 case 'tags':
-                    if (is_array($value) && $this->isAssociativeArray($value)) {
+                    if (\is_array($value) && $this->isAssociativeArray($value)) {
                         throw new \InvalidArgumentException('Unexpected associative array value for "tags"');
                     }
 
@@ -479,7 +479,7 @@ final class PhpServicesCreator
     private function createDeprecateMethod($value): string
     {
         // the old, simple format
-        if (!is_array($value)) {
+        if (!\is_array($value)) {
             return $this->createMethod('deprecate', $this->toString($value));
         }
 
@@ -635,7 +635,7 @@ final class PhpServicesCreator
 
     /**
      * @param array $inOrderKeys Pass an array of keys to sort if exists
-     * or an associative array following this logic [$key => $valueIfNotExists]
+     *                           or an associative array following this logic [$key => $valueIfNotExists]
      *
      * @return array
      */
