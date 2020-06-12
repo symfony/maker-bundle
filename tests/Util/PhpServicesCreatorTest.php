@@ -32,15 +32,16 @@ class PhpServicesCreatorTest extends TestCase
     /**
      * @dataProvider getConfigurationFiles
      */
-    public function testYamlServicesConversion(string $yamlSource, string $phpExpectedSource, bool $shouldCompareContainers)
+    public function testYamlServicesConversion(string $yamlPath, string $phpExpectedSourcePath, bool $shouldCompareContainers)
     {
         $creator = new PhpServicesCreator();
-        $this->assertSame($phpExpectedSource, $creator->convert($yamlSource));
+        $this->assertSame(
+            file_get_contents($phpExpectedSourcePath),
+            $creator->convert(file_get_contents($yamlPath))
+        );
 
         if ($shouldCompareContainers) {
-            list($tmpYamlFilename, $tmpPhpFilename) = $this->createTemporaryFiles($yamlSource, $phpExpectedSource);
-            $this->compareContainers($tmpYamlFilename, $tmpPhpFilename);
-            $this->removeTemporaryFiles($tmpYamlFilename, $tmpPhpFilename);
+            $this->compareContainers($yamlPath, $phpExpectedSourcePath);
         }
     }
 
@@ -59,30 +60,10 @@ class PhpServicesCreatorTest extends TestCase
             }
 
             yield $file->getFilenameWithoutExtension() => [
-                $file->getContents(),
-                file_get_contents($phpExpectedRealPath),
+                $file->getRealPath(),
+                $phpExpectedRealPath,
                 $shouldCompareContainers,
             ];
-        }
-    }
-
-    /*
-     * Not the same configuration, only test if they're built the same way.
-     */
-    public function testFixturesLoad()
-    {
-        $finder = Finder::create()->files()->name('*.yaml')
-            ->in(self::YAML_PHP_CONVERT_FIXTURES_PATH.'/load_resources');
-
-        foreach ($finder as $key => $file) {
-            $yamlRealPath = $file->getRealPath();
-            $phpExpectedRealPath = str_replace('.yaml', '.php', $file->getRealPath());
-
-            $creator = new PhpServicesCreator();
-            $yamlConvert = $creator->convert($file->getContents());
-            $this->assertSame(file_get_contents($phpExpectedRealPath), $yamlConvert);
-
-            $this->compareContainers($yamlRealPath, $phpExpectedRealPath);
         }
     }
 
@@ -118,21 +99,5 @@ class PhpServicesCreatorTest extends TestCase
 
         $this->assertTrue($yamlContainerBuilder->getParameterBag() == $phpContainerBuilder->getParameterBag());
         $this->assertTrue($yamlContainerBuilder->getAliases() == $phpContainerBuilder->getAliases());
-    }
-
-    private function createTemporaryFiles(string $yamlSource, string $phpExpectedSource)
-    {
-        $tmpYamlFilename = tempnam(sys_get_temp_dir(), 'maker_');
-        $tmpPhpFilename = tempnam(sys_get_temp_dir(), 'maker_');
-        file_put_contents($tmpYamlFilename, $yamlSource);
-        file_put_contents($tmpPhpFilename, $phpExpectedSource);
-
-        return [$tmpYamlFilename, $tmpPhpFilename];
-    }
-
-    private function removeTemporaryFiles(string $tmpYamlFilename, string $tmpPhpFilename)
-    {
-        unlink($tmpYamlFilename);
-        unlink($tmpPhpFilename);
     }
 }
