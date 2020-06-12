@@ -12,10 +12,10 @@ return function (ContainerConfigurator $configurator) {
     $services = $configurator->services();
 
     $services->set(SimpleFakeClass::class)
-        ->configurator([ref(SimpleFakeClassTwo::class), 'configure'])
+        ->configurator([service(SimpleFakeClassTwo::class), 'configure'])
     ;
 
     $services->set(SimpleFakeClassTwo::class)
-        ->configurator(ref(SimpleFakeClass::class))
+        ->configurator(service(SimpleFakeClass::class))
     ;
 };

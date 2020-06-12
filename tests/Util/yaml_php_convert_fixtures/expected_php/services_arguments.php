@@ -18,12 +18,12 @@ return function (ContainerConfigurator $configurator) {
 
     $services->set(SimpleFakeClassService::class)
         ->args([
-            ref('string'),
+            service('string'),
             ['isaevsgdbfhhnth', 1234561456545, 'jean@vgbsetgil.com'],
             456,
             [
-                'App\FooCommand' => ref('app.command_handler.foo'),
-                'App\BarCommand' => ref('app.command_handler.bar'),
+                'App\FooCommand' => service('app.command_handler.foo'),
+                'App\BarCommand' => service('app.command_handler.bar'),
             ],
             tagged_locator('app.handler', 'key'),
             tagged_iterator('app.handler'),
@@ -35,7 +35,7 @@ return function (ContainerConfigurator $configurator) {
     ;
 
     $services->set(SimpleFakeClassServiceThree::class)
-        ->arg('$fake1', ref('id.fake.service'))
+        ->arg('$fake1', service('id.fake.service'))
         ->arg('$fake2', ['fake_argument', 123, 'jean@mail.com'])
     ;
 

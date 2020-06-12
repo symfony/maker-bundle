@@ -15,14 +15,14 @@ return function (ContainerConfigurator $configurator) {
     $services = $configurator->services();
 
     $services->set(SimpleFakeClassService::class)
-        ->args([inline(AnonymousBar::class)])
+        ->args([inline_service(AnonymousBar::class)])
     ;
 
     $services->set(SimpleFakeClassServiceTwo::class)
-        ->args([inline(SimpleFakeClass::class)])
+        ->args([inline_service(SimpleFakeClass::class)])
     ;
 
     $services->set(SimpleFakeClassServiceThree::class)
-        ->factory([inline(AnonymousBar::class), 'constructFoo'])
+        ->factory([inline_service(AnonymousBar::class), 'constructFoo'])
     ;
 };

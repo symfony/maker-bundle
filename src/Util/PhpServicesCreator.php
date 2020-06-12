@@ -344,7 +344,7 @@ final class PhpServicesCreator
         if ($fullClassName = strstr($serviceKey, ' $', true)) {
             $argument = strstr($serviceKey, '$');
             $shortClassName = $this->addUseStatementIfNecessary($fullClassName).".' ".$argument."'";
-            // extract '@' before calling method createStringArgument() because ref() is not necessary.
+            // extract '@' before calling method createStringArgument() because service() is not necessary.
             $alias = $this->createStringArgument(substr($serviceValues, 1));
 
             $this->addLineStmt(sprintf('$services->alias(%s, %s);',
@@ -531,7 +531,7 @@ final class PhpServicesCreator
         if ('service' === $value->getTag()) {
             $className = $this->addUseStatementIfNecessary($value->getValue()['class']);
 
-            return 'inline('.$className.')';
+            return 'inline_service('.$className.')';
         }
 
         if (\is_array($value->getValue())) {
@@ -622,12 +622,12 @@ final class PhpServicesCreator
         if (class_exists($value) || interface_exists($value)) {
             $value = $this->addUseStatementIfNecessary($value);
             if ('ref' === $expression) {
-                return 'ref('.$value.')';
+                return 'service('.$value.')';
             }
         }
 
         if ('ref' === $expression) {
-            return "ref('".$value."')";
+            return "service('".$value."')";
         }
 
         return $value;

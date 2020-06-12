@@ -11,12 +11,12 @@ return function (ContainerConfigurator $configurator) {
     $services = $configurator->services();
 
     $services->set(SimpleFakeClassService::class)
-        ->call('withMailer', [ref('mailer')], false)
-        ->call('setLogger', [ref('logger')])
-        ->call('setMailer', [ref('mailer')])
-        ->call('withMailer', [ref('mailer'), 'argument'], false)
-        ->call('setLogger', [ref('logger')])
-        ->call('setMailer', [ref('mailer')])
-        ->call('withLogger', [ref('logger')], true)
+        ->call('withMailer', [service('mailer')], false)
+        ->call('setLogger', [service('logger')])
+        ->call('setMailer', [service('mailer')])
+        ->call('withMailer', [service('mailer'), 'argument'], false)
+        ->call('setLogger', [service('logger')])
+        ->call('setMailer', [service('mailer')])
+        ->call('withLogger', [service('logger')], true)
     ;
 };

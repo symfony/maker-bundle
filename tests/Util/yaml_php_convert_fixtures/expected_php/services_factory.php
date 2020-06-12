@@ -12,11 +12,11 @@ return function (ContainerConfigurator $configurator) {
     $services = $configurator->services();
 
     $services->set('string_service_factory', SimpleFakeClassService::class)
-        ->factory(ref('factory_service_invokable'))
+        ->factory(service('factory_service_invokable'))
     ;
 
     $services->set('array_service_factory', SimpleFakeClassService::class)
-        ->factory([ref('factory_service'), 'constructFoo'])
+        ->factory([service('factory_service'), 'constructFoo'])
     ;
 
     $services->set('array_static_factory', SimpleFakeClassService::class)
