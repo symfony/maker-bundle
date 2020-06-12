@@ -8,7 +8,10 @@ class ConvertPhpServicesTest extends WebTestCase
 {
     public function testIfServicesPhpFileExists ()
     {
-        $this->assertTrue(file_exists('config/services.php'));
-        $this->assertFalse(file_exists('config/services.yaml'));
+        $client = self::createClient();
+        $client->request('GET', '/');
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode(), $client->getResponse()->getContent());
+        $this->assertStringContainsString('IT WORKS', $client->getResponse()->getContent());
     }
 }
