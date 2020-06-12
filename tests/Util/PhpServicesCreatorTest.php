@@ -32,16 +32,12 @@ class PhpServicesCreatorTest extends TestCase
     /**
      * @dataProvider getConfigurationFiles
      */
-    public function testYamlServicesConversion(string $yamlSource, string $phpExpectedSource, string $filename)
+    public function testYamlServicesConversion(string $yamlSource, string $phpExpectedSource, bool $shouldCompareContainers)
     {
         $creator = new PhpServicesCreator();
         $this->assertSame($phpExpectedSource, $creator->convert($yamlSource));
-        /*
-         * test if default comments and configuration in services_load_resources.yaml are successfully converted in php but
-         * resources "app\", "App\Controller" can't be loaded in this context, then services_load_resources.yaml and
-         * services_load_resources.php building are tested with other fake resources by the testFixturesLoad() method above.
-         */
-        if ('services_load_resources' !== $filename) {
+
+        if ($shouldCompareContainers) {
             list($tmpYamlFilename, $tmpPhpFilename) = $this->createTemporaryFiles($yamlSource, $phpExpectedSource);
             $this->compareContainers($tmpYamlFilename, $tmpPhpFilename);
             $this->removeTemporaryFiles($tmpYamlFilename, $tmpPhpFilename);
@@ -54,13 +50,18 @@ class PhpServicesCreatorTest extends TestCase
             ->in(self::YAML_PHP_CONVERT_FIXTURES_PATH.'/source_yaml');
 
         foreach ($finder as $key => $file) {
-            $filename = $file->getFilenameWithoutExtension();
             $phpExpectedRealPath = str_replace(['source_yaml', '.yaml'], ['expected_php', '.php'], $file->getRealPath());
 
-            yield $filename => [
+            $shouldCompareContainers = true;
+            // this file loads "resources", which will fail as there are no real files
+            if ($file->getFilename() === 'services_load_resources.yaml') {
+                $shouldCompareContainers = false;
+            }
+
+            yield $file->getFilenameWithoutExtension() => [
                 $file->getContents(),
                 file_get_contents($phpExpectedRealPath),
-                $filename,
+                $shouldCompareContainers,
             ];
         }
     }
