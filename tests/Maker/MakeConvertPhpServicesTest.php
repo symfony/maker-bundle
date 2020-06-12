@@ -23,6 +23,7 @@ class MakeConvertPhpServicesTest extends MakerTestCase
         yield 'convert_php_services' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeConvertPhpServices::class),
             [
+                '', // use default path
                 'y',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeConvertPhpServices')

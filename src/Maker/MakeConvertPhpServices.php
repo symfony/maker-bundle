@@ -51,8 +51,35 @@ final class MakeConvertPhpServices extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
+        $command->addArgument('path');
+        $command->addArgument('newPath');
+
+        $path = $io->ask('What file do you want to convert?', 'config/services.yaml', function($value) {
+            if (!$this->fileManager->fileExists($value)) {
+                throw new \InvalidArgumentException(sprintf('File %s does not exist', $value));
+            }
+
+            return $value;
+        });
+        $input->setArgument('path', $path);
+
+        $newPath = str_replace(['.yml', '.yaml'], ['.php', '.php'], $path);
+        if ($newPath === $path) {
+            $newPath = $io->ask('What filename should be used for the new file?', 'config/services.php', function($value) {
+                if ($this->fileManager->fileExists($value)) {
+                    throw new \InvalidArgumentException(sprintf('File %s already exists', $value));
+                }
+
+                return $value;
+            });
+        }
+        $input->setArgument('newPath', $newPath);
+
         if (!$input->getOption('confirm')) {
-            $input->setOption('confirm', $io->confirm('This command will completely remove your services.yaml file after completion. Ready to convert to services.php?', false));
+            $input->setOption('confirm', $io->confirm(sprintf(
+                'This command will completely remove your <fg=yellow>%s</> file after completion. Ready to convert to services.php?',
+                $path,
+            ), false));
         }
     }
 
@@ -62,17 +89,15 @@ final class MakeConvertPhpServices extends AbstractMaker
             return;
         }
 
-        if (!$this->fileManager->fileExists('config/services.yaml')) {
-            throw new RuntimeCommandException('The file "config/services.yaml" does not exist.');
-        }
-
+        $path = $input->getArgument('path');
         $phpServicesContent = (new PhpServicesCreator())->convert(
-            $this->fileManager->getFileContents('config/services.yaml')
+            $this->fileManager->getFileContents($path)
         );
 
-        $generator->dumpFile('config/services.php', $phpServicesContent);
+        $newPath = $input->getArgument('newPath');
+        $generator->dumpFile($newPath, $phpServicesContent);
 
-        $generator->removeFile('config/services.yaml');
+        $generator->removeFile($path);
 
         $generator->writeChanges();
 
