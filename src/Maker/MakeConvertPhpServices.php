@@ -106,8 +106,8 @@ final class MakeConvertPhpServices extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies)
     {
-        // if (Kernel::VERSION_ID < 50100) {
-        //     throw new RuntimeCommandException(sprintf('The "%s" command requires Symfony 5.1. What a great time to upgrade!', self::getCommandName()));
-        // }
+         if (Kernel::VERSION_ID < 50100) {
+             throw new RuntimeCommandException(sprintf('The "%s" command requires Symfony 5.1. What a great time to upgrade!', self::getCommandName()));
+         }
     }
 }
