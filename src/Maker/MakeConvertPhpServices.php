@@ -90,8 +90,12 @@ final class MakeConvertPhpServices extends AbstractMaker
         }
 
         $path = $input->getArgument('path');
+
+        $yamlContents = $this->fileManager->getFileContents($path);
+        $kernelLoadsPhpConfig = str_contains($yamlContents, 'services.php');
+
         $phpServicesContent = (new PhpServicesCreator())->convert(
-            $this->fileManager->getFileContents($path)
+            $yamlContents
         );
 
         $newPath = $input->getArgument('newPath');
@@ -102,6 +106,22 @@ final class MakeConvertPhpServices extends AbstractMaker
         $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
+
+        $closing = [];
+        $closing[] = 'Next:';
+        $index = 0;
+        if (!$kernelLoadsPhpConfig) {
+            $closing[] = sprintf('  %d) Make sure your <fg=yellow>src/Kernel.php</> file is loading the new PHP file.', ++$index);
+            $closing[] = '      You may need to update your symfony/framework-bundle recipe.';
+            $closing[] = '      Run <fg=yellow>composer recipes symfony/framework-bundle</> recipe to see if there is an update.';
+        }
+
+        $closing[] = sprintf('  %d) Review the new <fg=yellow>%s</> file and test your site!', ++$index, $newPath);
+
+        $io->text($closing);
+        $io->newLine();
+        $io->text('Then open your browser, go to "/reset-password" and enjoy!');
+        $io->newLine();
     }
 
     public function configureDependencies(DependencyBuilder $dependencies)
