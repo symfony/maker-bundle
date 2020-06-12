@@ -18,6 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpKernel\Kernel;
 
 // For testing parameters conversion
 \define('_MAKER_TEST_GLOBAL_CONSTANT', 'value');
@@ -34,6 +35,12 @@ class PhpServicesCreatorTest extends TestCase
      */
     public function testYamlServicesConversion(string $yamlPath, string $phpExpectedSourcePath, bool $shouldCompareContainers, bool $shouldCompareContainerDefinitions)
     {
+        if (Kernel::VERSION_ID < 50100) {
+            $this->markTestSkipped('Test requires Symfony 5.1');
+
+            return;
+        }
+
         $creator = new PhpServicesCreator();
         $this->assertSame(
             file_get_contents($phpExpectedSourcePath),

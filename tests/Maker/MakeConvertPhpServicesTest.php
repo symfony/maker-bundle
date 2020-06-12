@@ -20,6 +20,12 @@ class MakeConvertPhpServicesTest extends MakerTestCase
 {
     public function getTestDetails()
     {
+        if (Kernel::VERSION_ID < 50100) {
+            $this->markTestSkipped('Test requires Symfony 5.1');
+
+            return;
+        }
+
         yield 'convert_php_services' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeConvertPhpServices::class),
             [
@@ -31,12 +37,6 @@ class MakeConvertPhpServicesTest extends MakerTestCase
                 $this->assertStringContainsString('created: config/services.php', $output);
                 $this->assertStringContainsString('deleted: config/services.yaml', $output);
             })
-            // workaround for segfault in PHP 7.1 CI :/
-            ->setRequiredPhpVersion(70200),
         ];
-
-        if (Kernel::VERSION_ID < 50100) {
-            $this->markTestSkipped('Test requires Symfony 5.1');
-        }
     }
 }
