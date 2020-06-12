@@ -71,7 +71,7 @@ class PhpServicesCreatorTest extends TestCase
      */
     public function testFixturesLoad()
     {
-        $finder = Finder::create()->files()->name('*.yaml')->notName('somefile.*')
+        $finder = Finder::create()->files()->name('*.yaml')
             ->in(self::YAML_PHP_CONVERT_FIXTURES_PATH.'/load_resources');
 
         foreach ($finder as $key => $file) {
