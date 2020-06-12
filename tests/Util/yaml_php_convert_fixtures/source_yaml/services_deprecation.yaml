@@ -1,0 +1,12 @@
+
+services:
+  fake.service.old_syntax:
+    class: Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassService
+    deprecated: 'The fake.service.old_syntax service is deprecated'
+
+  fake.service.new_syntax:
+    class: Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassService
+    deprecated:
+      message: 'The fake.service.new_syntax service is deprecated'
+      package: 'symfony/foobar'
+      version: '2.1'
