@@ -79,7 +79,7 @@ class PhpServicesCreatorTest extends TestCase
             $phpExpectedRealPath = str_replace('.yaml', '.php', $file->getRealPath());
 
             $creator = new PhpServicesCreator();
-            $yamlConvert = str_replace('.yaml', '.php', $creator->convert($file->getContents()));
+            $yamlConvert = $creator->convert($file->getContents());
             $this->assertSame(file_get_contents($phpExpectedRealPath), $yamlConvert);
 
             $this->compareContainers($yamlRealPath, $phpExpectedRealPath);
