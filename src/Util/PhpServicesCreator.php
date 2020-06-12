@@ -56,6 +56,7 @@ final class PhpServicesCreator
             )
         );
 
+        /** @var Node\Stmt\Namespace_ $node */
         $node = $creatorFactory->getNode();
         $beforeClosure = !empty($this->useStatements) ? "\n" : null;
         // add a blank line between the last use statement and the closure
