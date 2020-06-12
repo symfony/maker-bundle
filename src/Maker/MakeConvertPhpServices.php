@@ -78,7 +78,7 @@ final class MakeConvertPhpServices extends AbstractMaker
         if (!$input->getOption('confirm')) {
             $input->setOption('confirm', $io->confirm(sprintf(
                 'This command will completely remove your <fg=yellow>%s</> file after completion. Ready to convert to services.php?',
-                $path,
+                $path
             ), false));
         }
     }
