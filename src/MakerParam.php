@@ -18,14 +18,12 @@ class MakerParam
 {
     private $name;
     private $value;
-    private $required;
     private $interactive;
 
-    public function __construct(string $name, $value = null, bool $required = true, bool $interactive = true)
+    public function __construct(string $name, $value = null, bool $interactive = true)
     {
         $this->name = $name;
         $this->value = $value;
-        $this->required = $required;
         $this->interactive = $interactive;
     }
 
@@ -42,11 +40,6 @@ class MakerParam
     public function getValue()
     {
         return $this->value;
-    }
-
-    public function isRequired(): bool
-    {
-        return $this->required;
     }
 
     public function isEmpty(): bool
