@@ -14,17 +14,19 @@ namespace Symfony\Bundle\MakerBundle;
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
  */
-class MakerArgument
+class MakerParam
 {
     private $name;
     private $value;
     private $required;
+    private $interactive;
 
-    public function __construct(string $name, $value = null, bool $required = true)
+    public function __construct(string $name, $value = null, bool $required = true, bool $interactive = true)
     {
         $this->name = $name;
         $this->value = $value;
         $this->required = $required;
+        $this->interactive = $interactive;
     }
 
     public function getName(): string
@@ -50,5 +52,10 @@ class MakerArgument
     public function isEmpty(): bool
     {
         return null === $this->value || '' === $this->value;
+    }
+
+    public function isInteractive(): bool
+    {
+        return $this->interactive;
     }
 }

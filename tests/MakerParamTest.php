@@ -12,12 +12,12 @@
 namespace Symfony\Bundle\MakerBundle\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Bundle\MakerBundle\MakerArgument;
+use Symfony\Bundle\MakerBundle\MakerParam;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
  */
-final class MakerArgumentTest extends TestCase
+final class MakerParamTest extends TestCase
 {
     public function dataProvider(): \Generator
     {
@@ -34,7 +34,7 @@ final class MakerArgumentTest extends TestCase
      */
     public function testIsEmpty($value, bool $expected): void
     {
-        $argument = new MakerArgument('test', $value);
+        $argument = new MakerParam('test', $value);
 
         $this->assertSame($expected, $argument->isEmpty());
     }

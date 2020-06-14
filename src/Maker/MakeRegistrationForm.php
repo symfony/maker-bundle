@@ -20,7 +20,6 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\MakerArgument;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Str;
@@ -57,8 +56,6 @@ final class MakeRegistrationForm extends AbstractMaker
 
     public function __construct(FileManager $fileManager, FormTypeRenderer $formTypeRenderer, RouterInterface $router)
     {
-        parent::__construct();
-
         $this->fileManager = $fileManager;
         $this->formTypeRenderer = $formTypeRenderer;
         $this->router = $router;
@@ -77,23 +74,22 @@ final class MakeRegistrationForm extends AbstractMaker
         ;
 
         $arguments = [
-            'user-class' => true,
-            'username-field' => true,
-            'password-field' => true,
-            'will-verify-email' => true,
-            'id-getter' => false,
-            'email-getter' => false,
-            'from-email-address' => false,
-            'from-email-name' => false,
-            'auto-login-authenticator' => false,
-            'firewall-name' => false,
-            'redirect-route-name' => false,
-            'add-unique-entity-constraint' => false,
+            'user-class',
+            'username-field',
+            'password-field',
+            'will-verify-email',
+            'id-getter',
+            'email-getter',
+            'from-email-address',
+            'from-email-name',
+            'auto-login-authenticator',
+            'firewall-name',
+            'redirect-route-name',
+            'add-unique-entity-constraint',
         ];
 
-        foreach ($arguments as $name => $required) {
-            $argument = new MakerArgument($name, null, $required);
-            $this->arguments->addArgument($argument);
+        foreach ($arguments as $param) {
+            $this->setMakerParam($param, null);
         }
     }
 
@@ -109,7 +105,7 @@ final class MakeRegistrationForm extends AbstractMaker
         $securityData = $manipulator->getData();
         $providersData = $securityData['security']['providers'] ?? [];
 
-        $this->arguments->setArgumentValue('user-class',
+        $this->setMakerParam('user-class',
             $userClass = $interactiveSecurityHelper->guessUserClass(
                 $io,
                 $providersData,
@@ -119,12 +115,12 @@ final class MakeRegistrationForm extends AbstractMaker
 
         $io->text(sprintf('Creating a registration form for <info>%s</info>', $userClass));
 
-        $this->arguments->setArgumentValue(
+        $this->setMakerParam(
             'username-field',
             $interactiveSecurityHelper->guessUserNameField($io, $userClass, $providersData)
         );
 
-        $this->arguments->setArgumentValue(
+        $this->setMakerParam(
             'password-field',
             $interactiveSecurityHelper->guessPasswordField($io, $userClass)
         );
@@ -135,9 +131,9 @@ final class MakeRegistrationForm extends AbstractMaker
         if (!$userClassDetails->doesDocBlockContainAnnotation('@UniqueEntity')) {
             $addAnnotation = $io->confirm(sprintf('Do you want to add a <comment>@UniqueEntity</comment> validation annotation on your <comment>%s</comment> class to make sure duplicate accounts aren\'t created?', Str::getShortClassName($userClass)));
         }
-        $this->arguments->setArgumentValue('add-unique-entity-constraint', $addAnnotation);
+        $this->setMakerParam('add-unique-entity-constraint', $addAnnotation);
 
-        $this->arguments->setArgumentValue(
+        $this->setMakerParam(
             'will-verify-email',
             $willVerify = $io->confirm('Do you want to send an email to verify the user\'s email address after registration?', true)
         );
@@ -145,16 +141,16 @@ final class MakeRegistrationForm extends AbstractMaker
         if ($willVerify) {
             $this->checkComponentsExist($io);
 
-            $this->arguments->setArgumentValue('id-getter', $interactiveSecurityHelper->guessIdGetter($io, $userClass));
-            $this->arguments->setArgumentValue('email-getter', $interactiveSecurityHelper->guessEmailGetter($io, $userClass, 'email'));
+            $this->setMakerParam('id-getter', $interactiveSecurityHelper->guessIdGetter($io, $userClass));
+            $this->setMakerParam('email-getter', $interactiveSecurityHelper->guessEmailGetter($io, $userClass, 'email'));
 
-            $this->arguments->setArgumentValue('from-email-address', $io->ask(
+            $this->setMakerParam('from-email-address', $io->ask(
                     'What email address will be used to send registration confirmations? e.g. mailer@your-domain.com',
                     null,
                     [Validator::class, 'validateEmailAddress']
             ));
 
-            $this->arguments->setArgumentValue('from-email-name', $io->ask(
+            $this->setMakerParam('from-email-name', $io->ask(
                     'What "name" should be associated with that email address? e.g. "Acme Mail Bot"',
                     null,
                     [Validator::class, 'notBlank']
@@ -171,15 +167,13 @@ final class MakeRegistrationForm extends AbstractMaker
             );
         }
 
-        if (!$this->getArgumentValue('auto-login-authenticator')) {
+        if (!$this->getMakerParamValue('auto-login-authenticator')) {
             $routeNames = array_keys($this->router->getRouteCollection()->all());
-            $this->arguments->setArgumentValue('redirect-route-name', $io->choice(
+            $this->setMakerParam('redirect-route-name', $io->choice(
                     'What route should the user be redirected to after registration?',
                     $routeNames
             ));
         }
-
-        $this->checkRequiredArgumentValues();
     }
 
     private function interactAuthenticatorQuestions(InputInterface $input, ConsoleStyle $io, InteractiveSecurityHelper $interactiveSecurityHelper, array $securityData, Command $command): void
@@ -197,14 +191,14 @@ final class MakeRegistrationForm extends AbstractMaker
             return;
         }
 
-        $this->arguments->setArgumentValue('firewall-name', $firewallName);
+        $this->setMakerParam('firewall-name', $firewallName);
 
         // get list of guard authenticators
         $authenticatorClasses = $interactiveSecurityHelper->getAuthenticatorClasses($firewallsData[$firewallName]);
         if (empty($authenticatorClasses)) {
             $io->note('No Guard authenticators found - so your user won\'t be automatically authenticated after registering.');
         } else {
-            $this->arguments->setArgumentValue(
+            $this->setMakerParam(
                 'auto-login-authenticator',
                 1 === \count($authenticatorClasses) ? $authenticatorClasses[0] : $io->choice(
                     'Which authenticator\'s onAuthenticationSuccess() should be used after logging in?',
@@ -215,7 +209,7 @@ final class MakeRegistrationForm extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-        $userClass = $this->getArgumentValue('user-class');
+        $userClass = $this->getMakerParamValue('user-class');
         $userClassNameDetails = $generator->createClassNameDetails(
             '\\'.$userClass,
             'Entity\\'
@@ -226,13 +220,13 @@ final class MakeRegistrationForm extends AbstractMaker
             'Security\\'
         );
 
-        if ($this->getArgumentValue('will-verify-email')) {
+        if ($this->getMakerParamValue('will-verify-email')) {
             $generator->generateClass(
                 $verifyEmailServiceClassNameDetails->getFullName(),
                 'verifyEmail/EmailVerifier.tpl.php',
                 [
-                    'id_getter' => $this->getArgumentValue('id-getter'),
-                    'email_getter' => $this->getArgumentValue('email-getter'),
+                    'id_getter' => $this->getMakerParamValue('id-getter'),
+                    'email_getter' => $this->getMakerParamValue('email-getter'),
                 ]
             );
 
@@ -243,7 +237,7 @@ final class MakeRegistrationForm extends AbstractMaker
         }
 
         // 1) Generate the form class
-        $usernameField = $this->getArgumentValue('username-field');
+        $usernameField = $this->getMakerParamValue('username-field');
         $formClassDetails = $this->generateFormClass(
             $userClassNameDetails,
             $generator,
@@ -256,7 +250,7 @@ final class MakeRegistrationForm extends AbstractMaker
             'Controller\\'
         );
 
-        $authenticatorClassName = $this->getArgumentValue('auto-login-authenticator');
+        $authenticatorClassName = $this->getMakerParamValue('auto-login-authenticator');
         $generator->generateController(
             $controllerClassNameDetails->getFullName(),
             'registration/RegistrationController.tpl.php',
@@ -267,16 +261,16 @@ final class MakeRegistrationForm extends AbstractMaker
                 'form_full_class_name' => $formClassDetails->getFullName(),
                 'user_class_name' => $userClassNameDetails->getShortName(),
                 'user_full_class_name' => $userClassNameDetails->getFullName(),
-                'password_field' => $this->getArgumentValue('password-field'),
-                'will_verify_email' => $this->getArgumentValue('will-verify-email'),
+                'password_field' => $this->getMakerParamValue('password-field'),
+                'will_verify_email' => $this->getMakerParamValue('will-verify-email'),
                 'verify_email_security_service' => $verifyEmailServiceClassNameDetails->getFullName(),
-                'from_email' => $this->getArgumentValue('from-email-address'),
-                'from_email_name' => $this->getArgumentValue('from-email-name'),
-                'email_getter' => $this->getArgumentValue('email-getter'),
+                'from_email' => $this->getMakerParamValue('from-email-address'),
+                'from_email_name' => $this->getMakerParamValue('from-email-name'),
+                'email_getter' => $this->getMakerParamValue('email-getter'),
                 'authenticator_class_name' => $authenticatorClassName ? Str::getShortClassName($authenticatorClassName) : null,
                 'authenticator_full_class_name' => $authenticatorClassName,
-                'firewall_name' => $this->getArgumentValue('firewall-name'),
-                'redirect_route_name' => $this->getArgumentValue('redirect-route-name'),
+                'firewall_name' => $this->getMakerParamValue('firewall-name'),
+                'redirect_route_name' => $this->getMakerParamValue('redirect-route-name'),
             ]
         );
 
@@ -290,7 +284,7 @@ final class MakeRegistrationForm extends AbstractMaker
         );
 
         // 4) Update the User class if necessary
-        if ($this->getArgumentValue('add-unique-entity-constraint')) {
+        if ($this->getMakerParamValue('add-unique-entity-constraint')) {
             $classDetails = new ClassDetails($userClass);
             $userManipulator = new ClassSourceManipulator(
                 file_get_contents($classDetails->getPath())
@@ -307,7 +301,7 @@ final class MakeRegistrationForm extends AbstractMaker
             $this->fileManager->dumpFile($classDetails->getPath(), $userManipulator->getSourceCode());
         }
 
-        if ($this->getArgumentValue('will-verify-email')) {
+        if ($this->getMakerParamValue('will-verify-email')) {
             $classDetails = new ClassDetails($userClass);
             $userManipulator = new ClassSourceManipulator(
                 file_get_contents($classDetails->getPath())
@@ -324,7 +318,7 @@ final class MakeRegistrationForm extends AbstractMaker
         $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
-        $this->successMessage($io, $this->getArgumentValue('will-verify-email'), $userClassNameDetails->getShortName());
+        $this->successMessage($io, $this->getMakerParamValue('will-verify-email'), $userClassNameDetails->getShortName());
     }
 
     private function successMessage(ConsoleStyle $io, bool $emailVerification, string $userClass): void
