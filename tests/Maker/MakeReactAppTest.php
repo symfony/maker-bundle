@@ -71,21 +71,5 @@ class MakeReactAppTest extends MakerTestCase
                 $this->assertStringContainsString('created: assets/app_react/@styles/app.css', $output);
             }),
         ];
-
-        yield 'create_react_api_resource' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeReactApi::class),
-            [
-                'app_react',
-                'product',
-                'Api',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeReactApi')
-            ->addExtraDependencies('symfony/webpack-encore-bundle')
-            ->assert(function (string $output, string $directory) {
-                $this->assertStringContainsString('Success', $output);
-
-                $this->assertStringContainsString('created: assets/app_react/Api/ApiProduct.js', $output);
-            }),
-        ];
     }
 }

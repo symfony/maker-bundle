@@ -121,11 +121,5 @@
                 <argument>%kernel.project_dir%</argument>
                 <tag name="maker.command" />
             </service>
-
-            <service id="maker.maker.make_react_api" class="Symfony\Bundle\MakerBundle\Maker\MakeReactApi">
-                <argument type="service" id="maker.file_manager" />
-                <argument>%kernel.project_dir%</argument>
-                <tag name="maker.command" />
-            </service>
         </services>
 </container>

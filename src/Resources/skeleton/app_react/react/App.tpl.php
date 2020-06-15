@@ -15,7 +15,7 @@ const App = () => {
 <?php if (true === $is_spa): ?>
         <Router>
             <Switch>
-                <Route path="/app-react" component={Home} />
+                <Route path="/<?= $app_path ?>" component={Home} />
             </Switch>
             <Footer />
         </Router>

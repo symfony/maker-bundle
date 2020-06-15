@@ -12,18 +12,6 @@ const Home = () => {
         <div className="logo">
             <img src={logo} alt="logo-create-react-app"/>
         </div>
-        <div>
-            <h3>Some tips to considerably speed up the development of your applications:</h3>
-            <p>
-                You can use make:react:api to generate ajax queries for CRUD operations (with the Axios or Fetch libraries) for a specific api resource in the Api folder of your React application (e.g. Api/ArticleAPI.js).
-            </p>
-            <p>
-                If you are using ApiPlatform, the command make:api:resource allows you to create and to configure entities in details as an ApiPlatform resource.
-            </p>
-            <p>
-                The ApiPlatform library also provides a <a target="_blank" href="https://api-platform.com/docs/client-generator/react/">React Generator</a> wich "[...] contains the React Client Generator, all dependencies it needs, a Progressive Web App skeleton generated with Create React App, a development Docker container to serve the webapp, and all the API Platform components you may need, including an API server supporting Hydra."
-            </p>
-        </div>
     </div>);
 }
 

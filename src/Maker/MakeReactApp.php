@@ -27,14 +27,6 @@ use Symfony\WebpackEncoreBundle\WebpackEncoreBundle;
  */
 final class MakeReactApp extends AbstractMaker
 {
-    private $filesOnlyInSpa = [
-        'Api/home',
-        'Api/ApiResource',
-        'components/footer',
-        'components/header',
-        'pages/home',
-    ];
-
     private $reactFilesToGenerate = [
         'App.js',
         'index.js',
@@ -46,9 +38,17 @@ final class MakeReactApp extends AbstractMaker
         '@styles/app.css',
     ];
 
+    private $availablesOnlyInSpa = [
+        'Api/home',
+        'Api/ApiResource',
+        'components/footer',
+        'components/header',
+        'pages/home',
+    ];
+
     public static function getCommandName(): string
     {
-        return 'make:react:app';
+        return 'make:react';
     }
 
     /**
@@ -116,15 +116,15 @@ final class MakeReactApp extends AbstractMaker
         );
 
         foreach ($this->reactFilesToGenerate as $filePath) {
-            $ext = '.'.explode('.', $filePath)[1];
-            $filePath = str_replace($ext, '', $filePath);
+            $extension = '.'.explode('.', $filePath)[1];
+            $filePath = str_replace($extension, '', $filePath);
 
-            if (\in_array($filePath, $this->filesOnlyInSpa) && false === $input->getArgument('is-spa')) {
+            if (\in_array($filePath, $this->availablesOnlyInSpa) && false === $input->getArgument('is-spa')) {
                 continue;
             }
 
             $generator->generateFile(
-                'assets/'.Str::asRouteName($input->getArgument('name')).'/'.$filePath.$ext,
+                'assets/'.Str::asRouteName($input->getArgument('name')).'/'.$filePath.$extension,
                 'app_react/react/'.$filePath.'.tpl.php', [
                     'app_name' => Str::asTwigVariable($input->getArgument('name')),
                     'app_path' => Str::asCommand($input->getArgument('name')),
@@ -142,26 +142,26 @@ final class MakeReactApp extends AbstractMaker
         $io->comment(sprintf('<fg=yellow;options=bold>%s:</>', 'The proposed single page application structure in '.Str::asSnakeCase($input->getArgument('name'))));
         $io->writeln('');
 
-        $io->writeln(sprintf('<fg=blue>%s</>', ' @styles/'));
-        $io->writeln('    app.css');
+        $io->writeln(sprintf('  <fg=blue>%s</>', ' @styles/'));
+        $io->writeln('      app.css');
         $io->writeln('');
 
-        $io->writeln(sprintf('<fg=blue>%s</>', ' Api/'));
-        $io->writeln('    ApiResource.js');
+        $io->writeln(sprintf('  <fg=blue>%s</>', ' Api/'));
+        $io->writeln('      ApiResource.js');
         $io->writeln('');
 
-        $io->writeln(sprintf('<fg=blue>%s</>', ' components/'));
-        $io->writeln('    header.js');
-        $io->writeln('    footer.js');
+        $io->writeln(sprintf('  <fg=blue>%s</>', ' components/'));
+        $io->writeln('      header.js');
+        $io->writeln('      footer.js');
         $io->writeln('');
 
-        $io->writeln(sprintf('<fg=blue>%s</>', ' pages/'));
-        $io->writeln('    home.js');
+        $io->writeln(sprintf('  <fg=blue>%s</>', ' pages/'));
+        $io->writeln('      home.js');
         $io->writeln('');
 
-        $io->writeln(sprintf('<fg=blue>%s</> <comment>%s</>', ' App.js   ', ' * global organization with react-router by default'));
-        $io->writeln(sprintf('<fg=blue>%s</> <comment>%s</>', ' index.js ', ' * renders the application in a twig template with react-dom'));
-        $io->writeln(sprintf('<fg=blue>%s</>', ' logo.svg'));
+        $io->writeln(sprintf('  <fg=blue>%s</> ', ' App.js   '));
+        $io->writeln(sprintf('  <fg=blue>%s</> ', ' index.js '));
+        $io->writeln(sprintf('  <fg=blue>%s</>', ' logo.svg'));
         $io->writeln('');
     }
 }
