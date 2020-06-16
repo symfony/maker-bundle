@@ -85,6 +85,8 @@ class MakeEntityTest extends MakerTestCase
             [
                 // entity class name
                 'User',
+                // this field already exists
+                'firstName',
                 // add additional fields
                 'lastName',
                 'string',
