@@ -17,8 +17,8 @@ use Doctrine\ORM\Mapping as ORM;
 class <?= $class_name."\n" ?>
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\Id
+     * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private $id;
