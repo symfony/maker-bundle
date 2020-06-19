@@ -36,7 +36,7 @@ class <?= $class_name ?> extends AbstractGuardAuthenticator
         // todo
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, <?= $provider_key_type_hint ?>$providerKey)
     {
         // todo
     }

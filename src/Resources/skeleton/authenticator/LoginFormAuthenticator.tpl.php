@@ -98,7 +98,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
     }
 
 <?php endif ?>
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, <?= $provider_key_type_hint ?>$providerKey)
     {
         if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
             return new RedirectResponse($targetPath);
