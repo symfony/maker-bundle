@@ -70,18 +70,20 @@ final class MakeDto extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
-        if (null === $input->getArgument('entity')) {
-            $argument = $command->getDefinition()->getArgument('entity');
-
-            $entities = $this->doctrineHelper->getEntitiesForAutocomplete();
-
-            $question = new Question($argument->getDescription());
-            $question->setValidator(function ($answer) use ($entities) {return Validator::existsOrNull($answer, $entities); });
-            $question->setAutocompleterValues($entities);
-            $question->setMaxAttempts(3);
-
-            $input->setArgument('entity', $io->askQuestion($question));
+        if (null !== $input->getArgument('entity')) {
+            return;
         }
+
+        $argument = $command->getDefinition()->getArgument('entity');
+
+        $entities = $this->doctrineHelper->getEntitiesForAutocomplete();
+
+        $question = new Question($argument->getDescription());
+        $question->setValidator(function ($answer) use ($entities) {return Validator::existsOrNull($answer, $entities); });
+        $question->setAutocompleterValues($entities);
+        $question->setMaxAttempts(3);
+
+        $input->setArgument('entity', $io->askQuestion($question));
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
