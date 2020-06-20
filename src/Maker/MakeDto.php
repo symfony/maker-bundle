@@ -61,17 +61,17 @@ final class MakeDto extends AbstractMaker
         $command
             ->setDescription('Creates a new "data transfer object" (DTO) class from a Doctrine entity')
             ->addArgument('name', InputArgument::REQUIRED, sprintf('The name of the DTO class (e.g. <fg=yellow>%sData</>)', Str::asClassName(Str::getRandomTerm())))
-            ->addArgument('bound-class', InputArgument::REQUIRED, 'The name of Entity that the DTO will be bound to')
+            ->addArgument('entity', InputArgument::REQUIRED, 'The name of Entity that the DTO will be bound to')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeDto.txt'))
         ;
 
-        $inputConf->setArgumentAsNonInteractive('bound-class');
+        $inputConf->setArgumentAsNonInteractive('entity');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
-        if (null === $input->getArgument('bound-class')) {
-            $argument = $command->getDefinition()->getArgument('bound-class');
+        if (null === $input->getArgument('entity')) {
+            $argument = $command->getDefinition()->getArgument('entity');
 
             $entities = $this->doctrineHelper->getEntitiesForAutocomplete();
 
@@ -80,7 +80,7 @@ final class MakeDto extends AbstractMaker
             $question->setAutocompleterValues($entities);
             $question->setMaxAttempts(3);
 
-            $input->setArgument('bound-class', $io->askQuestion($question));
+            $input->setArgument('entity', $io->askQuestion($question));
         }
     }
 
@@ -92,15 +92,15 @@ final class MakeDto extends AbstractMaker
             'Data'
         );
 
-        $boundClass = $input->getArgument('bound-class');
+        $entity = $input->getArgument('entity');
 
-        $boundClassDetails = $generator->createClassNameDetails(
-            $boundClass,
+        $entityDetails = $generator->createClassNameDetails(
+            $entity,
             'Entity\\'
         );
 
         // Verify that class is an entity
-        if (false === $this->doctrineHelper->isClassAMappedEntity($boundClassDetails->getFullName())) {
+        if (false === $this->doctrineHelper->isClassAMappedEntity($entityDetails->getFullName())) {
             throw new RuntimeCommandException('The bound class is not a valid doctrine entity.');
         }
 
@@ -109,7 +109,7 @@ final class MakeDto extends AbstractMaker
          *
          * @var ClassMetaData
          */
-        $metaData = $this->doctrineHelper->getMetadata($boundClassDetails->getFullName());
+        $metaData = $this->doctrineHelper->getMetadata($entityDetails->getFullName());
 
         // Get list of fields
         $fields = $metaData->fieldMappings;
@@ -126,17 +126,17 @@ final class MakeDto extends AbstractMaker
         // Check, whether there are missing methods
         $missingGettersSetters = false;
         foreach ($fields as $fieldName => $mapping) {
-            $fields[$fieldName]['hasSetter'] = $this->entityHasSetter($boundClassDetails->getFullName(), $fieldName);
-            $fields[$fieldName]['hasGetter'] = $this->entityHasGetter($boundClassDetails->getFullName(), $fieldName);
+            $fields[$fieldName]['hasSetter'] = $this->entityHasSetter($entityDetails->getFullName(), $fieldName);
+            $fields[$fieldName]['hasGetter'] = $this->entityHasGetter($entityDetails->getFullName(), $fieldName);
 
             if (!$fields[$fieldName]['hasGetter'] || !$fields[$fieldName]['hasSetter']) {
                 $missingGettersSetters = true;
             }
         }
 
-        $boundClassVars = [
-            'bounded_full_class_name' => $boundClassDetails->getFullName(),
-            'bounded_class_name' => $boundClassDetails->getShortName(),
+        $entityVars = [
+            'entity_full_class_name' => $entityDetails->getFullName(),
+            'entity_class_name' => $entityDetails->getShortName(),
         ];
 
         $DTOClassPath = $generator->generateClass(
@@ -148,7 +148,7 @@ final class MakeDto extends AbstractMaker
                     'addHelpers' => $addHelpers,
                     'generateGettersSetters' => $generateGettersSetters,
                 ],
-                $boundClassVars
+                $entityVars
             )
         );
 
@@ -169,7 +169,7 @@ final class MakeDto extends AbstractMaker
             if (array_key_exists('declared', $mapping)) {
                 $fullClassName = $mapping['declared'];
             } else {
-                $fullClassName = $boundClassDetails->getFullName();
+                $fullClassName = $entityDetails->getFullName();
             }
 
             // Property Annotations
@@ -193,7 +193,7 @@ final class MakeDto extends AbstractMaker
             }
 
             // Compare the amount of constraints in annotations with those in the complete validator-metadata for the entity
-            if (false === $this->hasAsManyValidations($boundClassDetails->getFullName(), $fieldName, $constraintCount)) {
+            if (false === $this->hasAsManyValidations($entityDetails->getFullName(), $fieldName, $constraintCount)) {
                 $suspectYamlXmlValidations = true;
             }
 
@@ -237,7 +237,7 @@ final class MakeDto extends AbstractMaker
         $io->text([
             sprintf('Next: Review the new DTO <info>%s</info>', $DTOClassPath),
             'Then: Create a form for this DTO by running:',
-            sprintf('<info>$ php bin/console make:form %s</>', $boundClassDetails->getShortName()),
+            sprintf('<info>$ php bin/console make:form %s</>', $entityDetails->getShortName()),
             sprintf('and enter <info>\\%s</>', $dataClassNameDetails->getFullName()),
             '',
             'Find the documentation at <fg=yellow>https://symfony.com/doc/current/forms/data_transfer_objects.html</>',

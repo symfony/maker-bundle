@@ -5,12 +5,12 @@
 
 namespace <?= $namespace ?>;
 
-<?php if (isset($bounded_full_class_name)): ?>
-use <?= $bounded_full_class_name ?>;
+<?php if (isset($entity_full_class_name)): ?>
+use <?= $entity_full_class_name ?>;
 <?php endif ?>
 
 /**
- * Data transfer object for <?= $bounded_class_name ?>.
+ * Data transfer object for <?= $entity_class_name ?>.
  */
 class <?= $class_name ?>
 
@@ -19,62 +19,62 @@ class <?= $class_name ?>
     /**
      * Create DTO, optionally extracting data from a model.
      */
-    public function __construct(?<?= $bounded_class_name ?> $<?= lcfirst($bounded_class_name) ?> = null)
+    public function __construct(?<?= $entity_class_name ?> $<?= lcfirst($entity_class_name) ?> = null)
     {
-        if (null !== $<?= lcfirst($bounded_class_name) ?>) {
-            $this->extract($<?= lcfirst($bounded_class_name) ?>);
+        if (null !== $<?= lcfirst($entity_class_name) ?>) {
+            $this->extract($<?= lcfirst($entity_class_name) ?>);
         }
     }
 
     /**
      * Fill entity with data from the DTO.
      */
-    public function fill(<?= $bounded_class_name ?> $<?= lcfirst($bounded_class_name) ?>): <?= $bounded_class_name ?><?= PHP_EOL ?>
+    public function fill(<?= $entity_class_name ?> $<?= lcfirst($entity_class_name) ?>): <?= $entity_class_name ?><?= PHP_EOL ?>
     {
 <?php if ($generateGettersSetters): ?>
 <?php foreach ($fields as $propertyName => $mapping): ?>
 <?php if (false === $mapping['hasSetter']): ?>
         // @todo implement setter on the Entity
-        //$<?= lcfirst($bounded_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this->get<?= Str::asCamelCase($propertyName) ?>());
+        //$<?= lcfirst($entity_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this->get<?= Str::asCamelCase($propertyName) ?>());
 <?php else : ?>
-        $<?= lcfirst($bounded_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this->get<?= Str::asCamelCase($propertyName) ?>());
+        $<?= lcfirst($entity_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this->get<?= Str::asCamelCase($propertyName) ?>());
 <?php endif; ?>
 <?php endforeach; ?>
 <?php else : ?>
 <?php foreach ($fields as $propertyName => $mapping): ?>
 <?php if (false === $mapping['hasSetter']): ?>
         // @todo implement setter on the Entity
-        //$<?= lcfirst($bounded_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this-><?= $propertyName ?>);
+        //$<?= lcfirst($entity_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this-><?= $propertyName ?>);
 <?php else : ?>
-        $<?= lcfirst($bounded_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this-><?= $propertyName ?>);
+        $<?= lcfirst($entity_class_name) ?>->set<?= Str::asCamelCase($propertyName) ?>($this-><?= $propertyName ?>);
 <?php endif; ?>
 <?php endforeach; ?>
 <?php endif; ?>
 
-        return $<?= lcfirst($bounded_class_name) ?>;
+        return $<?= lcfirst($entity_class_name) ?>;
     }
 
     /**
      * Extract data from entity into the DTO.
      */
-    public function extract(<?= $bounded_class_name ?> $<?= lcfirst($bounded_class_name) ?>): self
+    public function extract(<?= $entity_class_name ?> $<?= lcfirst($entity_class_name) ?>): self
     {
 <?php if ($generateGettersSetters): ?>
 <?php foreach ($fields as $propertyName => $mapping): ?>
 <?php if (false === $mapping['hasGetter']): ?>
         // @todo implement getter on the Entity
-        //$this->set<?= Str::asCamelCase($propertyName) ?>($<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>());
+        //$this->set<?= Str::asCamelCase($propertyName) ?>($<?= lcfirst($entity_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>());
 <?php else : ?>
-        $this->set<?= Str::asCamelCase($propertyName) ?>($<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>());
+        $this->set<?= Str::asCamelCase($propertyName) ?>($<?= lcfirst($entity_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>());
 <?php endif; ?>
 <?php endforeach; ?>
 <?php else : ?>
 <?php foreach ($fields as $propertyName => $mapping): ?>
 <?php if (false === $mapping['hasGetter']): ?>
         // @todo implement getter on the Entity
-        //$this-><?= $propertyName ?> = $<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>();
+        //$this-><?= $propertyName ?> = $<?= lcfirst($entity_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>();
 <?php else : ?>
-        $this-><?= $propertyName ?> = $<?= lcfirst($bounded_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>();
+        $this-><?= $propertyName ?> = $<?= lcfirst($entity_class_name) ?>->get<?= Str::asCamelCase($propertyName) ?>();
 <?php endif; ?>
 <?php endforeach; ?>
 <?php endif; ?>
