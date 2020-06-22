@@ -335,8 +335,6 @@ final class DTOClassSourceManipulator
     /**
      * Modified to public from ClassSourceManipulator.
      *
-     * @param string $class
-     *
      * @return string The alias to use when referencing this class
      */
     public function addUseStatementIfNecessary(string $class): string
@@ -485,8 +483,6 @@ final class DTOClassSourceManipulator
     }
 
     /**
-     * @param callable $filterCallback
-     *
      * @return Node|null
      */
     private function findFirstNode(callable $filterCallback)
@@ -500,9 +496,6 @@ final class DTOClassSourceManipulator
     }
 
     /**
-     * @param callable $filterCallback
-     * @param array    $ast
-     *
      * @return Node|null
      */
     private function findLastNode(callable $filterCallback, array $ast)
@@ -692,8 +685,6 @@ final class DTOClassSourceManipulator
      * Adds this new node where a new property should go.
      *
      * Useful for adding properties, or adding a constructor.
-     *
-     * @param Node $newNode
      */
     private function addNodeAfterProperties(Node $newNode)
     {
