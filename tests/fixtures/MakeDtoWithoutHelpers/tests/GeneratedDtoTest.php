@@ -11,12 +11,9 @@
 
 namespace App\Tests;
 
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use App\Dto\TaskData;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-/**
- * @requires PHP 7.1
- */
 class GeneratedDtoTest extends KernelTestCase
 {
     public function testGeneratedDto()

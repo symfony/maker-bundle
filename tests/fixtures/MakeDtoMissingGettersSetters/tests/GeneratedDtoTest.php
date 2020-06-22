@@ -11,17 +11,14 @@
 
 namespace App\Tests;
 
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use App\Dto\TaskData;
 use App\Entity\Task;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-/**
- * @requires PHP 7.1
- */
 class GeneratedDtoTest extends KernelTestCase
 {
     /**
-     * Use the helpers to make sure that they work, even though there are missing getters/setters
+     * Use the helpers to make sure that they work, even though there are missing getters/setters.
      */
     public function testHelpers()
     {
@@ -30,13 +27,11 @@ class GeneratedDtoTest extends KernelTestCase
 
         $taskData = new TaskData($taskEntity);
 
-        $this->assertEquals($taskEntity->getDueDate(), $taskData->dueDate);
-
-        $taskData->task = 'Foo';
+        $this->assertEquals($taskEntity->getDueDate(), $taskData->getDueDate());
 
         $taskEntity = new Task();
         $taskData->fill($taskEntity);
 
-        $this->assertEquals($taskEntity->getDueDate(), $taskData->dueDate);
+        $this->assertEquals($taskEntity->getDueDate(), $taskData->getDueDate());
     }
 }

@@ -168,7 +168,7 @@ final class MakeDto extends AbstractMaker
             $annotationReader = new AnnotationReader();
 
             // Lookup classname for inherited properties
-            if (array_key_exists('declared', $mapping)) {
+            if (\array_key_exists('declared', $mapping)) {
                 $fullClassName = $mapping['declared'];
             } else {
                 $fullClassName = $entityDetails->getFullName();

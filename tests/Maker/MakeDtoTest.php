@@ -36,8 +36,7 @@ class MakeDtoTest extends MakerTestCase
                 $this->assertContains('created: src/Dto/TaskData.php', $output);
                 $this->assertContains('updated: src/Dto/TaskData.php', $output);
                 $this->assertContains('\\App\\Dto\\TaskData', $output);
-            })
-            ->setRequiredPhpVersion(70100),
+            }),
         ];
 
         yield 'dto_getters_setters' => [MakerTestDetails::createTest(
@@ -56,8 +55,7 @@ class MakeDtoTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertContains('created: src/Dto/TaskData.php', $output);
                 $this->assertContains('updated: src/Dto/TaskData.php', $output);
-            })
-            ->setRequiredPhpVersion(70100),
+            }),
         ];
 
         yield 'dto_validator_yaml_xml' => [MakerTestDetails::createTest(
@@ -78,8 +76,7 @@ class MakeDtoTest extends MakerTestCase
                 $this->assertContains('created: src/Dto/TaskData.php', $output);
                 $this->assertContains('updated: src/Dto/TaskData.php', $output);
                 $this->assertContains('The entity possibly uses Yaml/Xml validators.', $output);
-            })
-            ->setRequiredPhpVersion(70100)
+            }),
         ];
 
         yield 'dto_without_helpers' => [MakerTestDetails::createTest(
@@ -98,8 +95,7 @@ class MakeDtoTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertContains('created: src/Dto/TaskData.php', $output);
                 $this->assertContains('updated: src/Dto/TaskData.php', $output);
-            })
-            ->setRequiredPhpVersion(70100),
+            }),
         ];
 
         yield 'dto_without_validations' => [MakerTestDetails::createTest(
@@ -117,8 +113,7 @@ class MakeDtoTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertContains('created: src/Dto/TaskData.php', $output);
                 $this->assertContains('updated: src/Dto/TaskData.php', $output);
-            })
-            ->setRequiredPhpVersion(70100)
+            }),
         ];
 
         yield 'dto_invalid_entity' => [MakerTestDetails::createTest(
@@ -137,8 +132,7 @@ class MakeDtoTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeDtoInvalidEntity')
             ->assert(function (string $output, string $directory) {
                 $this->assertContains('The bound class is not a valid doctrine entity.', $output);
-            })
-            ->setRequiredPhpVersion(70100),
+            }),
         ];
 
         yield 'dto_mapped_super_class' => [MakerTestDetails::createTest(
@@ -158,8 +152,7 @@ class MakeDtoTest extends MakerTestCase
                 $this->assertContains('created: src/Dto/TaskData.php', $output);
                 $this->assertContains('updated: src/Dto/TaskData.php', $output);
                 $this->assertContains('\\App\\Dto\\TaskData', $output);
-            })
-            ->setRequiredPhpVersion(70100),
+            }),
         ];
 
         yield 'dto_composite_id' => [MakerTestDetails::createTest(
@@ -179,8 +172,7 @@ class MakeDtoTest extends MakerTestCase
                 $this->assertContains('created: src/Dto/TaskData.php', $output);
                 $this->assertContains('updated: src/Dto/TaskData.php', $output);
                 $this->assertContains('\\App\\Dto\\TaskData', $output);
-            })
-            ->setRequiredPhpVersion(70100),
+            }),
         ];
 
         yield 'dto_missing_getters_setters' => [MakerTestDetails::createTest(
@@ -201,8 +193,7 @@ class MakeDtoTest extends MakerTestCase
                 $this->assertContains('updated: src/Dto/TaskData.php', $output);
                 $this->assertContains('\\App\\Dto\\TaskData', $output);
                 $this->assertContains('The maker found missing getters/setters for properties in the entity.', $output);
-            })
-            ->setRequiredPhpVersion(70100),
+            }),
         ];
     }
 }

@@ -89,7 +89,7 @@ class Task
     }
 
     /**
-     * Get the value of group
+     * Get the value of group.
      */
     public function getGroup()
     {
@@ -97,9 +97,9 @@ class Task
     }
 
     /**
-     * Set the value of group
+     * Set the value of group.
      *
-     * @return  self
+     * @return self
      */
     public function setGroup($group)
     {
@@ -109,7 +109,7 @@ class Task
     }
 
     /**
-     * Get the value of id
+     * Get the value of id.
      */
     public function getId()
     {
@@ -117,9 +117,9 @@ class Task
     }
 
     /**
-     * Set the value of id
+     * Set the value of id.
      *
-     * @return  self
+     * @return self
      */
     public function setId($id)
     {

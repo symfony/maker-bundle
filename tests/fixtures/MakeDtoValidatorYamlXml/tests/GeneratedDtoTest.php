@@ -11,16 +11,13 @@
 
 namespace App\Tests;
 
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use App\Entity\Task;
 use App\Dto\TaskData;
+use App\Entity\Task;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Validation;
 
-/**
- * @requires PHP 7.1
- */
 class GeneratedDtoTest extends KernelTestCase
 {
     public function testGeneratedDto()
