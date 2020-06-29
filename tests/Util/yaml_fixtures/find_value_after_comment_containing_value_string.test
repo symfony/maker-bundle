@@ -1,0 +1,14 @@
+services:
+    first_database:
+        ports:
+            # exposes port 3306 to a random port on your host machine
+            - '3306'
+===
+$data['services']['database'] = true;
+===
+services:
+    first_database:
+        ports:
+            # exposes port 3306 to a random port on your host machine
+            - '3306'
+    database: true

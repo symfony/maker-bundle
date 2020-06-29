@@ -12,9 +12,9 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
-use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Bundle\MakerBundle\Test\MakerTestKernel;
 use Symfony\Component\Finder\Finder;
 
@@ -33,17 +33,19 @@ class FunctionalTest extends TestCase
 
         $application = new Application($kernel);
         foreach ($finder as $file) {
-            $class = 'Symfony\Bundle\MakerBundle\Maker\\'.$file->getBasename('.php');
+            $maker = new ReflectionClass(sprintf('Symfony\Bundle\MakerBundle\Maker\%s', $file->getBasename('.php')));
 
-            if (AbstractMaker::class === $class) {
+            if ($maker->isAbstract()) {
                 continue;
             }
 
-            $commandName = $class::getCommandName();
             // if the command does not exist, this will explode
-            $command = $application->find($commandName);
+            $command = $application->find(
+                $maker->getMethod('getCommandName')->invoke(null)
+            );
+
             // just a smoke test assert
-            $this->assertInstanceOf(MakerCommand::class, $command);
+            self::assertInstanceOf(MakerCommand::class, $command);
         }
     }
 }

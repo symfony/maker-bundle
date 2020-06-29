@@ -839,7 +839,16 @@ class YamlSourceManipulator
                 throw new YamlManipulationFailedException(sprintf('Cannot find the original value "%s"', $value));
             }
 
-            return $matches[0][1] + \strlen($matches[0][0]);
+            $position = $matches[0][1] + \strlen($matches[0][0]);
+
+            // edge case where there is a comment between the current position
+            // and the value we're looking for AND that comment contains an
+            // exact string match for the value we're looking for
+            if ($this->isFinalLineComment(substr($this->contents, $this->currentPosition, $position - $this->currentPosition))) {
+                return $this->findEndPositionOfValue($value, $position);
+            }
+
+            return $position;
         }
 
         // there are other possible values, but we don't support them
@@ -848,6 +857,7 @@ class YamlSourceManipulator
 
     private function advanceCurrentPosition(int $newPosition)
     {
+        $this->log(sprintf('advanceCurrentPosition() from %d to %d', $this->currentPosition, $newPosition), true);
         $originalPosition = $this->currentPosition;
         $this->currentPosition = $newPosition;
 
@@ -894,6 +904,7 @@ class YamlSourceManipulator
 
     private function decrementDepth()
     {
+        $this->log('Moving up 1 level of depth');
         unset($this->indentationForDepths[$this->depth]);
         unset($this->arrayFormatForDepths[$this->depth]);
         unset($this->arrayTypeForDepths[$this->depth]);
@@ -1005,14 +1016,17 @@ class YamlSourceManipulator
 
     private function advanceToEndOfLine()
     {
-        while (!$this->isCharLineBreak(substr($this->contents, $this->currentPosition, 1))) {
-            if ($this->isEOF()) {
+        $newPosition = $this->currentPosition;
+        while (!$this->isCharLineBreak(substr($this->contents, $newPosition, 1))) {
+            if ($this->isEOF($newPosition)) {
                 // found the end of the file!
-                return;
+                break;
             }
 
-            $this->advanceCurrentPosition($this->currentPosition + 1);
+            ++$newPosition;
         }
+
+        $this->advanceCurrentPosition($newPosition);
     }
 
     /**
@@ -1139,10 +1153,29 @@ class YamlSourceManipulator
             return false;
         }
 
+        return $this->isLineComment($line);
+    }
+
+    private function isLineComment(string $line): bool
+    {
         // adopted from Parser::isCurrentLineComment() from symfony/yaml
         $ltrimmedLine = ltrim($line, ' ');
 
         return '' !== $ltrimmedLine && '#' === $ltrimmedLine[0];
+    }
+
+    private function isFinalLineComment(string $content): bool
+    {
+        if (!$content) {
+            return false;
+        }
+
+        $content = str_replace("\r", "\n", $content);
+
+        $lines = explode("\n", $content);
+        $line = end($lines);
+
+        return $this->isLineComment($line);
     }
 
     private function getPreviousLine(int $position)
