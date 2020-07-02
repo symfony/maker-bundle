@@ -479,6 +479,44 @@ final class DTOClassSourceManipulator
         $this->addConstructor($params, $methodBody);
     }
 
+    public function createNamedConstructor(ClassNameDetails $entityDetails, $dtoName)
+    {
+        $pendingConstructorParams = $this->getPendingConstructorParams();
+        if (!\count($pendingConstructorParams)) {
+            return;
+        }
+
+        // sort to put optional params to the end.
+        uasort($pendingConstructorParams, [$this, 'sortConstructorParams']);
+
+        $entityName = $entityDetails->getShortName();
+        $this->addUseStatementIfNecessary($entityDetails->getFullName());
+
+        $methodBody = '<?php'.PHP_EOL;
+        $methodBody .= 'return new self('.PHP_EOL;
+
+        $keys = array_keys($pendingConstructorParams);
+
+        foreach ($pendingConstructorParams as $key => $paramOptions) {
+            $methodBody .= '$'.lcfirst($entityName).'->get'.Str::asCamelCase($paramOptions['name']).'()';
+            $methodBody .= (end($keys) === $key) ? PHP_EOL : ','.PHP_EOL;
+        }
+        $methodBody .=  ');'.PHP_EOL;
+
+        $methodBuilder = $this->createMethodBuilder('from'.ucfirst($entityName), 'self', false);
+        $methodBuilder->makeStatic();
+        $params = [
+            (new Param(lcfirst($entityName)))->setType($entityName)->getNode(),
+        ];
+
+        $this->addMethodParams($methodBuilder, $params);
+
+        $this->addMethodBody($methodBuilder, $methodBody);
+
+        $this->addNodeAfterProperties($methodBuilder->getNode());
+        $this->updateSourceCodeFromNewStmts();
+    }
+
     private function sortConstructorParams(array $paramA, array $paramB): int
     {
         if ($paramA['nullable'] || $paramB['nullable']) {

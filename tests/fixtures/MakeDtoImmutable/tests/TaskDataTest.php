@@ -38,4 +38,17 @@ class TaskDataTest extends KernelTestCase
         $this->assertEquals($taskData->getTask(), 'Acme');
         $this->assertEquals($taskData->getDueDate(), new \DateTime('2018-01-29 01:30'));
     }
+
+    public function testNamedConstructor()
+    {
+        $this->assertTrue(method_exists(TaskData::class, 'fromTask'));
+
+        $taskEntity = new Task;
+        $taskEntity->setTask('Acme');
+        $taskEntity->setDueDate(new \DateTime('2018-01-29 01:30'));
+        $taskData = TaskData::fromTask($taskEntity);
+
+        $this->assertEquals($taskData->getTask(), 'Acme');
+        $this->assertEquals($taskData->getDueDate(), new \DateTime('2018-01-29 01:30'));
+    }
 }

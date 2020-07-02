@@ -171,6 +171,7 @@ final class MakeDto extends AbstractMaker
         $this->createProperties($dtoManipulator, $entityDetails, $fields);
 
         if ($this->shouldCreateConstructor($input)) {
+            $dtoManipulator->createNamedConstructor($entityDetails, $dataClassNameDetails->getShortName());
             $dtoManipulator->createConstructor();
         }
 
@@ -186,7 +187,6 @@ final class MakeDto extends AbstractMaker
 
             $this->createEntityMutator(
                 $entityManipulator,
-                $entityDetails,
                 $dataClassNameDetails,
                 $fields,
                 $this->shouldGenerateGetters($input)
@@ -343,7 +343,7 @@ final class MakeDto extends AbstractMaker
         }
     }
 
-    private function createEntityMutator(ClassSourceManipulator $entityManipulator, ClassNameDetails $entityDetails, ClassNameDetails $dataClassNameDetails, array $fields, bool $dtoHasGetters)
+    private function createEntityMutator(ClassSourceManipulator $entityManipulator, ClassNameDetails $dataClassNameDetails, array $fields, bool $dtoHasGetters)
     {
         $dataClassUseName = $entityManipulator->addUseStatementIfNecessary($dataClassNameDetails->getFullName());
 
