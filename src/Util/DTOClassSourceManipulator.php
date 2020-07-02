@@ -501,7 +501,7 @@ final class DTOClassSourceManipulator
             $methodBody .= '$'.lcfirst($entityName).'->get'.Str::asCamelCase($paramOptions['name']).'()';
             $methodBody .= (end($keys) === $key) ? PHP_EOL : ','.PHP_EOL;
         }
-        $methodBody .=  ');'.PHP_EOL;
+        $methodBody .= ');'.PHP_EOL;
 
         $methodBuilder = $this->createMethodBuilder('from'.ucfirst($entityName), 'self', false);
         $methodBuilder->makeStatic();
