@@ -12,7 +12,6 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity()
@@ -28,21 +27,28 @@ class Task
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Assert\NotBlank()
      */
     private $task;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $dueDate;
+    private $iCanGetNo;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $iCanSetNo;
 
     public function getId()
     {
         return $this->id;
     }
 
-    // commented out for the test.
+    /**
+     * Commented out for the test.
+     * We want the setter/getter to be missing.
+     */
     // /**
     //  * Get the value of task.
     //  */
@@ -64,22 +70,50 @@ class Task
     // }
 
     /**
-     * Get the value of dueDate.
+     * Commented out for the test.
+     * We want the getter to be missing.
      */
-    public function getDueDate()
-    {
-        return $this->dueDate;
-    }
+    // /**
+    //  * Get the value of iCanGetNo
+    //  */
+    // public function getICanGetNo()
+    // {
+    //     return $this->iCanGetNo;
+    // }
 
     /**
-     * Set the value of dueDate.
+     * Set the value of iCanGetNo.
      *
      * @return self
      */
-    public function setDueDate($dueDate)
+    public function setICanGetNo($iCanGetNo)
     {
-        $this->dueDate = $dueDate;
+        $this->iCanGetNo = $iCanGetNo;
 
         return $this;
+    }
+
+    /**
+     * Commented out for the test.
+     * We want the setter to be missing.
+     */
+    // /**
+    //  * Set the value of iCanSetNo.
+    //  *
+    //  * @return self
+    //  */
+    // public function setICanSetNo($iCanSetNo)
+    // {
+    //     $this->iCanSetNo = $iCanSetNo;
+
+    //     return $this;
+    // }
+
+    /**
+     * Get the value of iCanSetNo.
+     */
+    public function getICanSetNo()
+    {
+        return $this->iCanSetNo;
     }
 }

@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Util;
 
 use PhpParser\Builder;
+use PhpParser\Builder\Param;
 use PhpParser\BuilderHelpers;
 use PhpParser\Lexer;
 use PhpParser\Node;
@@ -33,6 +34,10 @@ final class DTOClassSourceManipulator
     private $overwrite;
     private $useAnnotations;
     private $fluentMutators;
+    private $generateGetters;
+    private $generateSetters;
+    private $generatePublicProperties;
+    private $generateConstructor;
     private $parser;
     private $lexer;
     private $printer;
@@ -46,11 +51,16 @@ final class DTOClassSourceManipulator
 
     private $pendingComments = [];
 
-    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true, bool $generateGettersSetters = true)
+    private $pendingConstructorParams = [];
+
+    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true, bool $generateGetters = true, bool $generateSetters = true, bool $generatePublicProperties = true, bool $generateConstructor = true)
     {
         $this->overwrite = $overwrite;
         $this->useAnnotations = $useAnnotations;
-        $this->generateGettersSetters = $generateGettersSetters;
+        $this->generateGetters = $generateGetters;
+        $this->generateSetters = $generateSetters;
+        $this->generatePublicProperties = $generatePublicProperties;
+        $this->generateConstructor = $generateConstructor;
         $this->fluentMutators = $fluentMutators;
         $this->lexer = new Lexer\Emulative([
             'usedAttributes' => [
@@ -86,22 +96,29 @@ final class DTOClassSourceManipulator
         }
         $this->addProperty($propertyName, $comments, $defaultValue);
 
-        // return early when setters/getters should not be added.
-        if (false === $this->generateGettersSetters) {
-            return;
+        if ($this->generateGetters) {
+            $this->addGetter(
+                $propertyName,
+                $typeHint,
+                // getter methods always have nullable return values
+                // because even though these are required in the db, they may not be set yet
+                true
+            );
         }
 
-        $this->addGetter(
-            $propertyName,
-            $typeHint,
-            // getter methods always have nullable return values
-            // because even though these are required in the db, they may not be set yet
-            true
-        );
-
         // don't generate setters for id fields
-        if (!$isId) {
+        if ($this->generateSetters && !$isId) {
             $this->addSetter($propertyName, $typeHint, $nullable);
+        }
+
+        if ($this->generateConstructor) {
+            $this->pendingConstructorParams[$propertyName] = [
+                'name' => $propertyName,
+                'nullable' => $nullable,
+                'type' => $typeHint,
+                'default' => $defaultValue,
+                'isId' => $isId,
+            ];
         }
     }
 
@@ -124,9 +141,34 @@ final class DTOClassSourceManipulator
         $this->addMethod($builder->getNode());
     }
 
+    /**
+     * @param Node[] $params
+     */
+    public function addConstructor(array $params, string $methodBody)
+    {
+        if (null !== $this->getConstructorNode()) {
+            throw new \LogicException('Constructor already exists.');
+        }
+
+        $methodBuilder = $this->createMethodBuilder('__construct', null, false);
+
+        $this->addMethodParams($methodBuilder, $params);
+
+        $this->addMethodBody($methodBuilder, $methodBody);
+
+        $this->addNodeAfterProperties($methodBuilder->getNode());
+        $this->updateSourceCodeFromNewStmts();
+    }
+
     public function addMethodBuilder(Builder\Method $methodBuilder)
     {
         $this->addMethod($methodBuilder->getNode());
+    }
+
+    public function addMethodBody(Builder\Method $methodBuilder, string $methodBody)
+    {
+        $nodes = $this->parser->parse($methodBody);
+        $methodBuilder->addStmts($nodes);
     }
 
     public function createMethodBuilder(string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = []): Builder\Method
@@ -164,8 +206,7 @@ final class DTOClassSourceManipulator
         }
         $newPropertyBuilder = new Builder\Property($name);
 
-        // if we do not add getters/setters, the fields must be public
-        if (false === $this->generateGettersSetters) {
+        if ($this->generatePublicProperties) {
             $newPropertyBuilder->makePublic();
         } else {
             $newPropertyBuilder->makePrivate();
@@ -410,6 +451,56 @@ final class DTOClassSourceManipulator
         $this->updateSourceCodeFromNewStmts();
 
         return $shortClassName;
+    }
+
+    public function createConstructor()
+    {
+        $pendingConstructorParams = $this->getPendingConstructorParams();
+        if (!\count($pendingConstructorParams)) {
+            return;
+        }
+
+        // sort to put optional params to the end.
+        uasort($pendingConstructorParams, [$this, 'sortConstructorParams']);
+
+        $params = [];
+        $methodBody = '<?php'.PHP_EOL;
+
+        foreach ($pendingConstructorParams as $paramOptions) {
+            $param = new Param($paramOptions['name']);
+            $param->setType($paramOptions['nullable'] ? new Node\NullableType($paramOptions['type']) : $paramOptions['type']);
+            if (null !== $paramOptions['default']) {
+                $param->setDefault($paramOptions['default']);
+            }
+            $params[] = $param->getNode();
+
+            $methodBody .= '$this->'.$paramOptions['name'].' = $'.$paramOptions['name'].';'.PHP_EOL;
+        }
+        $this->addConstructor($params, $methodBody);
+    }
+
+    private function sortConstructorParams(array $paramA, array $paramB): int
+    {
+        if ($paramA['nullable'] || $paramB['nullable']) {
+            if ($paramA['nullable'] === $paramB['nullable']) {
+                return 0;
+            }
+
+            return ($paramA['nullable'] > $paramB['nullable']) ? 1 : -1;
+        }
+        if (null !== $paramA['default']) {
+            return 1;
+        }
+        if (null !== $paramB['default']) {
+            return -1;
+        }
+
+        return 0;
+    }
+
+    public function getPendingConstructorParams(): array
+    {
+        return $this->pendingConstructorParams;
     }
 
     private function updateSourceCodeFromNewStmts()
@@ -757,6 +848,13 @@ final class DTOClassSourceManipulator
         }
 
         return false;
+    }
+
+    private function addMethodParams(Builder\Method $methodBuilder, array $params)
+    {
+        foreach ($params as $param) {
+            $methodBuilder->addParam($param);
+        }
     }
 
     private function writeNote(string $note)

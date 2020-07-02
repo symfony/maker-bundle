@@ -11,15 +11,13 @@
 
 namespace App\Tests;
 
-use App\Dto\TaskData;
+use App\Entity\Task;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class GeneratedDtoTest extends KernelTestCase
+class TaskDataTest extends KernelTestCase
 {
-    public function testGeneratedDto()
+    public function testNoMutators()
     {
-        $this->assertClassHasAttribute('task', TaskData::class);
-        $this->assertClassHasAttribute('dueDate', TaskData::class);
-        $this->assertClassNotHasAttribute('id', TaskData::class);
+        $this->assertFalse(method_exists(Task::class, 'updateFromTaskData'));
     }
 }

@@ -15,9 +15,9 @@ use App\Dto\TaskData;
 use App\Entity\Task;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class GeneratedDtoTest extends KernelTestCase
+class TaskDataTest extends KernelTestCase
 {
-    public function testGeneratedDto()
+    public function testGetters()
     {
         $this->assertTrue(method_exists(TaskData::class, 'setTask'));
         $this->assertTrue(method_exists(TaskData::class, 'getTask'));
@@ -26,11 +26,18 @@ class GeneratedDtoTest extends KernelTestCase
         $this->assertTrue(method_exists(TaskData::class, 'getDueDate'));
     }
 
-    public function testGettersSetters()
+    public function testConstructor()
     {
-        $taskData = new Task();
-        $taskData->setTask('Acme');
-        $taskData->setDueDate(new \DateTime('2018-01-29 01:30'));
+        $this->assertTrue(method_exists(TaskData::class, '__construct'));
+
+        $taskEntity = new Task();
+        $taskEntity->setTask('Acme');
+        $taskEntity->setDueDate(new \DateTime('2018-01-29 01:30'));
+
+        $taskData = new TaskData($taskEntity);
+
+        $this->assertEquals($taskEntity->getTask(), $taskData->getTask());
+        $this->assertEquals($taskEntity->getDueDate(), $taskData->getDueDate());
 
         $this->assertEquals($taskData->getTask(), 'Acme');
         $this->assertEquals($taskData->getDueDate(), new \DateTime('2018-01-29 01:30'));

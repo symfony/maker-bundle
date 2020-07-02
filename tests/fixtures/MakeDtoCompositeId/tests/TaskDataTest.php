@@ -14,11 +14,12 @@ namespace App\Tests;
 use App\Dto\TaskData;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class GeneratedDtoTest extends KernelTestCase
+class TaskDataTest extends KernelTestCase
 {
-    public function testGeneratedDto()
+    public function testCompositeIdEmitted()
     {
-        $this->assertFalse(method_exists(TaskData::class, 'fill'));
-        $this->assertFalse(method_exists(TaskData::class, 'extract'));
+        // the Entity has a composite Id - test that the attributes are both omitted from the DTO
+        $this->assertClassNotHasAttribute('id', TaskData::class);
+        $this->assertClassNotHasAttribute('group', TaskData::class);
     }
 }

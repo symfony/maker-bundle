@@ -17,16 +17,13 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-class GeneratedDtoTest extends KernelTestCase
+class TaskDataTest extends KernelTestCase
 {
-    public function testGeneratedDto()
+    public function testMappedSuperClass()
     {
         $this->assertClassHasAttribute('task', TaskData::class);
         $this->assertClassHasAttribute('dueDate', TaskData::class);
         $this->assertClassNotHasAttribute('id', TaskData::class);
-
-        $this->assertTrue(method_exists(TaskData::class, 'fill'));
-        $this->assertTrue(method_exists(TaskData::class, 'extract'));
 
         $this->assertFalse(method_exists(TaskData::class, 'setTask'));
         $this->assertFalse(method_exists(TaskData::class, 'getTask'));
@@ -35,7 +32,7 @@ class GeneratedDtoTest extends KernelTestCase
         $this->assertFalse(method_exists(TaskData::class, 'getDueDate'));
     }
 
-    public function testHelpers()
+    public function testMutator()
     {
         $taskEntity = new Task();
         $taskEntity->setTask('Acme');
@@ -49,22 +46,9 @@ class GeneratedDtoTest extends KernelTestCase
         $taskData->task = 'Foo';
 
         $taskEntity = new Task();
-        $taskData->fill($taskEntity);
+        $taskEntity->updateFromTaskData($taskData);
 
         $this->assertEquals($taskEntity->getTask(), $taskData->task);
         $this->assertEquals($taskEntity->getDueDate(), $taskData->dueDate);
-    }
-
-    public function testAnnotations()
-    {
-        $annotationReader = new AnnotationReader();
-        $reflectionProperty = new \ReflectionProperty(TaskData::class, 'task');
-        $propertyAnnotations = $annotationReader->getPropertyAnnotations($reflectionProperty);
-        $this->assertCount(1, $propertyAnnotations);
-        $this->assertContainsOnlyInstancesOf(NotBlank::class, $propertyAnnotations);
-
-        $reflectionProperty = new \ReflectionProperty(TaskData::class, 'dueDate');
-        $propertyAnnotations = $annotationReader->getPropertyAnnotations($reflectionProperty);
-        $this->assertCount(0, $propertyAnnotations);
     }
 }

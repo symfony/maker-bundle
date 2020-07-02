@@ -18,7 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Validation;
 
-class GeneratedDtoTest extends KernelTestCase
+class TaskDataTest extends KernelTestCase
 {
     public function testGeneratedDto()
     {
