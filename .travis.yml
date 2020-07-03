@@ -29,6 +29,10 @@ before_install:
     - find ~/.phpenv -name xdebug.ini -delete
     - composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-master
     - composer update
+    - git clone https://github.com/nicolas-grekas/symfony.git fork
+    - cd fork && git checkout -b console-stty origin/console-stty && cd ..
+    - rm -rf vendor/symfony/console
+    - mv fork/src/Symfony/Component/Console vendor/symfony/console
 
 install:
     - ./vendor/bin/simple-phpunit install
