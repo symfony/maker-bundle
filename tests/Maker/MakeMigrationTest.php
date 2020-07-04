@@ -32,8 +32,11 @@ class MakeMigrationTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('Success', $output);
 
+                // support for Migrations 3 (/migrations) and earlier
+                $migrationsDirectoryPath = file_exists($directory.'/migrations') ? 'migrations' : 'src/Migrations';
+
                 $finder = new Finder();
-                $finder->in($directory.'/migrations')
+                $finder->in($directory.'/'.$migrationsDirectoryPath)
                     ->name('*.php');
                 $this->assertCount(1, $finder);
 
