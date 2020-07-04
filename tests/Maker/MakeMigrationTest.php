@@ -28,7 +28,7 @@ class MakeMigrationTest extends MakerTestCase
             // doctrine-migrations-bundle only requires doctrine-bundle, which
             // only requires doctrine/dbal. But we're testing with the ORM,
             // so let's install it
-            ->addExtraDependencies('doctrine/orm')
+            ->addExtraDependencies('doctrine/orm:@stable')
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('Success', $output);
 
@@ -53,7 +53,7 @@ class MakeMigrationTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
             ->configureDatabase()
             // sync the database, so no changes are needed
-            ->addExtraDependencies('doctrine/orm')
+            ->addExtraDependencies('doctrine/orm:@stable')
             ->assert(function (string $output, string $directory) {
                 $this->assertNotContains('Success', $output);
 
