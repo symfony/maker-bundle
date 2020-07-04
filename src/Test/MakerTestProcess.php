@@ -24,7 +24,7 @@ final class MakerTestProcess
 
     private function __construct($commandLine, $cwd, array $envVars, $timeout)
     {
-        $this->process = is_string($commandLine)
+        $this->process = \is_string($commandLine)
             ? Process::fromShellCommandline($commandLine, $cwd, null, null, $timeout)
             : new Process($commandLine, $cwd, null, null, $timeout);
 
