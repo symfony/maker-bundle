@@ -18,7 +18,9 @@ matrix:
     fast_finish: true
     include:
         - php: 7.1.33
+          env: MAKER_TEST_VERSION=stable
         - php: 7.3
+          env: MAKER_TEST_VERSION=stable-dev
         - php: 7.3
           env: MAKER_TEST_VERSION=dev
     allow_failures:
