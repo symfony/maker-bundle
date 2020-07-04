@@ -33,14 +33,14 @@ class MakeMigrationTest extends MakerTestCase
                 $this->assertStringContainsString('Success', $output);
 
                 $finder = new Finder();
-                $finder->in($directory.'/src/Migrations')
+                $finder->in($directory.'/migrations')
                     ->name('*.php');
                 $this->assertCount(1, $finder);
 
                 // see that the exact filename is in the output
                 $iterator = $finder->getIterator();
                 $iterator->rewind();
-                $this->assertStringContainsString(sprintf('"src/Migrations/%s"', $iterator->current()->getFilename()), $output);
+                $this->assertStringContainsString(sprintf('"migrations/%s"', $iterator->current()->getFilename()), $output);
             }),
         ];
 
