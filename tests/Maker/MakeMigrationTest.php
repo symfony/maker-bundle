@@ -28,19 +28,22 @@ class MakeMigrationTest extends MakerTestCase
             // doctrine-migrations-bundle only requires doctrine-bundle, which
             // only requires doctrine/dbal. But we're testing with the ORM,
             // so let's install it
-            ->addExtraDependencies('doctrine/orm')
+            ->addExtraDependencies('doctrine/orm:@stable')
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('Success', $output);
 
+                // support for Migrations 3 (/migrations) and earlier
+                $migrationsDirectoryPath = file_exists($directory.'/migrations') ? 'migrations' : 'src/Migrations';
+
                 $finder = new Finder();
-                $finder->in($directory.'/src/Migrations')
+                $finder->in($directory.'/'.$migrationsDirectoryPath)
                     ->name('*.php');
                 $this->assertCount(1, $finder);
 
                 // see that the exact filename is in the output
                 $iterator = $finder->getIterator();
                 $iterator->rewind();
-                $this->assertStringContainsString(sprintf('"src/Migrations/%s"', $iterator->current()->getFilename()), $output);
+                $this->assertStringContainsString(sprintf('"%s/%s"', $migrationsDirectoryPath, $iterator->current()->getFilename()), $output);
             }),
         ];
 
@@ -50,7 +53,7 @@ class MakeMigrationTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
             ->configureDatabase()
             // sync the database, so no changes are needed
-            ->addExtraDependencies('doctrine/orm')
+            ->addExtraDependencies('doctrine/orm:@stable')
             ->assert(function (string $output, string $directory) {
                 $this->assertNotContains('Success', $output);
 
