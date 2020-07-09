@@ -25,21 +25,21 @@ class MigrationDiffFilteredOutput implements OutputInterface
         $this->output = $output;
     }
 
-    public function write($messages, bool $newline = false, int $options = 0)
+    public function write($messages, $newline = false, $options = 0)
     {
         $messages = $this->filterMessages($messages, $newline);
 
         $this->output->write($messages, $newline, $options);
     }
 
-    public function writeln($messages, int $options = 0)
+    public function writeln($messages, $options = 0)
     {
         $messages = $this->filterMessages($messages, true);
 
         $this->output->writeln($messages, $options);
     }
 
-    public function setVerbosity(int $level)
+    public function setVerbosity($level)
     {
         $this->output->setVerbosity($level);
     }
@@ -69,7 +69,7 @@ class MigrationDiffFilteredOutput implements OutputInterface
         return $this->output->isDebug();
     }
 
-    public function setDecorated(bool $decorated)
+    public function setDecorated($decorated)
     {
         $this->output->setDecorated($decorated);
     }
