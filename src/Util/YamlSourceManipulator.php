@@ -90,11 +90,12 @@ class YamlSourceManipulator
         // update the data now that the special chars have been removed
         $this->currentData = Yaml::parse($this->contents);
 
+        // remove special metadata keys that were replaced
+        $newData = $this->removeMetadataKeys($newData);
+
         // Before comparing, re-index any sequences on the new data.
         // The current data will already use sequential indexes
         $newData = $this->normalizeSequences($newData);
-        // remove special metadata keys that were replaced
-        $newData = $this->removeMetadataKeys($newData);
 
         if ($newData !== $this->currentData) {
             throw new YamlManipulationFailedException(sprintf('Failed updating YAML contents: the process was successful, but something was not updated. Expected new data: %s. Actual new data: %s', var_export($newData, true), var_export($this->currentData, true)));
