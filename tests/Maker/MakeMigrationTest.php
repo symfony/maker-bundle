@@ -51,13 +51,48 @@ class MakeMigrationTest extends MakerTestCase
             $this->getMakerInstance(MakeMigration::class),
             [/* no input */])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
-            ->configureDatabase()
             // sync the database, so no changes are needed
+            ->configureDatabase()
             ->addExtraDependencies('doctrine/orm:@stable')
             ->assert(function (string $output, string $directory) {
                 $this->assertNotContains('Success', $output);
 
                 $this->assertStringContainsString('No database changes were detected', $output);
+            }),
+        ];
+
+        yield 'migration_with_previous_migration_question' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeMigration::class),
+            [
+                // confirm migration
+                'y',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
+            ->configureDatabase(false)
+            ->addExtraDependencies('doctrine/orm:@stable')
+            // generate a migration first
+            ->addPreMakeCommand('php bin/console make:migration')
+            ->assert(function (string $output, string $directory) {
+                $this->assertStringContainsString('You have 1 available migrations to execute', $output);
+                $this->assertStringContainsString('Success', $output);
+                $this->assertCount(14, explode("\n", $output), 'Asserting that very specific output is shown - some should be hidden');
+                var_dump($output);
+            }),
+        ];
+
+        yield 'migration_with_previous_migration_decline_question' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeMigration::class),
+            [
+                // no to confirm
+                'n',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
+            ->configureDatabase(false)
+            ->addExtraDependencies('doctrine/orm:@stable')
+            // generate a migration first
+            ->addPreMakeCommand('php bin/console make:migration')
+            ->assert(function (string $output, string $directory) {
+                $this->assertStringNotContainsString('Success', $output);
             }),
         ];
     }
