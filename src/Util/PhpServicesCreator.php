@@ -257,10 +257,13 @@ final class PhpServicesCreator
 
                     break;
 
+                case 'exclude':
+                    $this->addLineStmt($this->createMethod('exclude', $this->toString($value)));
+                    break;
+
                 // simple "key: value" options
                 case 'shared':
                 case 'public':
-                case 'exclude':
                 case 'autowire':
                 case 'autoconfigure':
                     if (\is_array($value)) {

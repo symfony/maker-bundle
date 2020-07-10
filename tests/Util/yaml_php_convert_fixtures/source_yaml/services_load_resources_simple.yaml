@@ -11,6 +11,7 @@ services:
   App\Controller\:
     resource: '../src/Controller'
     tags: ['controller.service_arguments']
+    exclude: ['../src/Controller/SomeFile.php', '../src/Controller/OtherFile.php']
 
   command_handlers:
     namespace: App\Domain\

@@ -18,6 +18,7 @@ return function (ContainerConfigurator $configurator) {
     // as action arguments even if you don't extend any base controller class
     $services->load('App\\Controller\\', '../src/Controller')
         ->tag('controller.service_arguments')
+        ->exclude(['../src/Controller/SomeFile.php', '../src/Controller/OtherFile.php'])
     ;
 
     $services->load('App\\Domain\\', '../src/Domain/*/CommandHandler')
