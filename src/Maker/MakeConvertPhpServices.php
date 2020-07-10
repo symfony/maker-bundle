@@ -132,15 +132,15 @@ EOF
         }, $paths);
         unset($environmentPaths['all']);
 
-        $phpServicesCreator = new PhpServicesCreator();
         $finalPhpContents = [];
         foreach ($paths as $environment => $path) {
+            $phpServicesCreator = new PhpServicesCreator();
             $yamlContents = $this->fileManager->getFileContents($path);
             try {
                 $finalPhpContents[$path] = $phpServicesCreator->convert(
                     $yamlContents,
                     // for the main environment, import the other environment files
-                    $environment === 'main' ? $environmentPaths : []
+                    $environment === 'all' ? $environmentPaths : []
                 );
             } catch (\Exception $e) {
                 throw new RuntimeCommandException(sprintf('%s could not be converted. This may be a bug in your YAML or a missing feature in this command. Error: "%s"', $path, $e->getMessage()), 0, $e);
