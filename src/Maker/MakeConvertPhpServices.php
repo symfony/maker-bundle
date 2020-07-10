@@ -72,11 +72,11 @@ EOF
         if (!empty($paths)) {
             $io->text(sprintf(
                 'We found <info>%d</> service file%s to convert:',
-                count($paths),
-                count($paths) === 1 ? '' : 's'
+                \count($paths),
+                1 === \count($paths) ? '' : 's'
             ));
             $io->writeln('');
-            $io->listing(array_map(function($path) {
+            $io->listing(array_map(function ($path) {
                 return sprintf('<comment>%s</>', $path);
             }, $paths));
 
@@ -127,7 +127,7 @@ EOF
         // get an array of the files for other environments
         // *just* include their filename because we're assuming
         // that all files live directly in config/
-        $environmentPaths = array_map(function($path) {
+        $environmentPaths = array_map(function ($path) {
             return str_replace('config/', '', $path);
         }, $paths);
         unset($environmentPaths['all']);
@@ -140,7 +140,7 @@ EOF
                 $finalPhpContents[$path] = $phpServicesCreator->convert(
                     $yamlContents,
                     // for the main environment, import the other environment files
-                    $environment === 'all' ? $environmentPaths : []
+                    'all' === $environment ? $environmentPaths : []
                 );
             } catch (\Exception $e) {
                 throw new RuntimeCommandException(sprintf('%s could not be converted. This may be a bug in your YAML or a missing feature in this command. Error: "%s"', $path, $e->getMessage()), 0, $e);
@@ -192,7 +192,7 @@ EOF
 
         $serviceFilenames = [];
         foreach ($finder as $file) {
-            if ($file->getFilename() === 'services.yaml') {
+            if ('services.yaml' === $file->getFilename()) {
                 $environment = 'all';
             } else {
                 $environment = substr($file->getFilename(), 9, -5);

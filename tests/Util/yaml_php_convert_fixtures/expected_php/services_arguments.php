@@ -12,8 +12,8 @@ use Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\Si
 /*
  * This file is the entry point to configure your own services.
  */
-return function (ContainerConfigurator $configurator, Kernel $kernel): void {
-    $services = $configurator->services();
+return function (ContainerConfigurator $container, Kernel $kernel): void {
+    $services = $container->services();
 
     $services->alias(SimpleFakeClassServiceTwo::class.' $shoutyTransformer', 'App\Util\UppercaseTransformer');
 

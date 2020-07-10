@@ -11,11 +11,26 @@
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
-use PhpParser\Builder\Namespace_;
-use PhpParser\Builder\Param;
-use PhpParser\BuilderFactory;
+use InvalidArgumentException;
+use LogicException;
+use PhpParser\Builder\Use_ as UseBuilder;
+use PhpParser\BuilderHelpers;
 use PhpParser\Node;
+use PhpParser\Node\Arg;
+use PhpParser\Node\Expr\Array_;
+use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Name;
+use PhpParser\Node\Stmt\Expression;
+use PhpParser\Node\Stmt\Namespace_;
+use PhpParser\Node\Stmt\Nop;
+use PhpParser\Node\Stmt\Return_;
+use PhpParser\Node\Stmt\Use_;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\PhpParser\ClosureNodeFactory;
+use Symfony\Bundle\MakerBundle\Util\PhpParser\FluentMethodCallPrinter;
+use Symfony\Bundle\MakerBundle\Util\PhpParser\PhpNodeFactory;
+use Symfony\Bundle\MakerBundle\Util\PhpParser\ServicesPhpNodeFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Yaml\Tag\TaggedValue;
@@ -26,69 +41,92 @@ use Symfony\Component\Yaml\Yaml;
  *
  * @author Antoine Michelet <jean.marcel.michelet@gmail.com>
  *
+ * Credit to https://github.com/migrify/migrify
+ *
  * @internal
  */
 final class PhpServicesCreator
 {
-    private $factory;
+    public const CONTAINER_CONFIGURATOR_NAME = 'container';
+
+    /**
+     * @var string
+     */
+    private const EOL_CHAR = "\n";
+
+    /**
+     * @var Node[]
+     */
     private $stmts = [];
+
+    /**
+     * @var string[]
+     */
     private $useStatements = [];
+
+    /**
+     * @var Parser
+     */
+    private $yamlParser;
+
+    /**
+     * @var PhpNodeFactory
+     */
+    private $phpNodeFactory;
+
+    /**
+     * @var ServicesPhpNodeFactory
+     */
+    private $servicesPhpNodeFactory;
+
+    /**
+     * @var ClosureNodeFactory
+     */
+    private $closureNodeFactory;
+
+    /**
+     * @var PrettyPrinter
+     */
+    private $prettyPrinter;
 
     public function __construct()
     {
-        $this->factory = new BuilderFactory();
+        $this->yamlParser = new Parser();
+        $this->phpNodeFactory = new PhpNodeFactory();
+        $this->servicesPhpNodeFactory = new ServicesPhpNodeFactory($this->phpNodeFactory);
+        $this->closureNodeFactory = new ClosureNodeFactory();
+        $this->prettyPrinter = new FluentMethodCallPrinter();
     }
 
-    /**
-     * Converts the source YAML into PHP services config
-     *
-     * If $environmentFiles is specified, it should be an array where
-     * the key is an environment and the value is a relative path to
-     * a file that should be imported in that environment.
-     */
     public function convert(string $yaml, array $environmentFiles = []): string
     {
-        $creatorFactory = $this->factory->namespace('Symfony\Component\DependencyInjection\Loader\Configurator');
+        $this->useStatements = [
+            'App\\Kernel',
+        ];
+        $namespace = new Namespace_(new Name('Symfony\Component\DependencyInjection\Loader\Configurator'));
 
-        // for the Kernel type-hint
-        $this->useStatements[] = 'App\\Kernel';
+        $yamlArray = $this->yamlParser->parse($yaml, Yaml::PARSE_CUSTOM_TAGS);
+        $closureStmts = $this->createClosureStmts($yamlArray, $namespace, $environmentFiles);
 
-        $closureStmt = $this->createClosureStmts(
-            (new Parser())->parse($yaml, Yaml::PARSE_CUSTOM_TAGS),
-            $creatorFactory,
-            $environmentFiles
-        );
+        $closure = $this->closureNodeFactory->createClosureFromStmts($closureStmts);
+        $return = new Return_($closure);
 
-        $creatorFactory->addStmt(
-            new Node\Stmt\Return_(
-                new Node\Expr\Closure([
-                    'params' => [
-                        (new Param('configurator'))->setType('ContainerConfigurator')->getNode(),
-                        (new Param('kernel'))->setType('Kernel')->getNode(),
-                    ],
-                    'stmts' => $closureStmt,
-                    'returnType' => 'void',
-                ])
-            )
-        );
-
-        /** @var Node\Stmt\Namespace_ $node */
-        $node = $creatorFactory->getNode();
-        $beforeClosure = !empty($this->useStatements) ? "\n" : null;
         // add a blank line between the last use statement and the closure
-        array_splice($node->stmts,
-            -1,
-            0,
-            [new Node\Name($beforeClosure."/*\n * This file is the entry point to configure your own services.\n */")]
-        );
+        if ([] !== $this->useStatements) {
+            $namespace->stmts[] = new Nop();
+        }
 
-        return (new PrettyPrinter())->prettyPrintFile([$node])."\n";
+        $namespace->stmts[] = new Node\Name("/*\n * This file is the entry point to configure your own services.\n */");
+
+        $namespace->stmts[] = $return;
+
+        return $this->prettyPrinter->prettyPrintFile([$namespace]).self::EOL_CHAR;
     }
 
     /**
      * @return Node[]
      */
-    private function createClosureStmts(array $yamlData, Namespace_ $creatorFactory, array $environmentFiles): array
+    private function createClosureStmts(array $yamlData, Namespace_ $namespace, array $environmentFiles): array
     {
         foreach ($yamlData as $key => $values) {
             if (null === $values) {
@@ -106,7 +144,7 @@ final class PhpServicesCreator
                     $this->addServicesNodes($values);
                     break;
                 default:
-                    throw new \LogicException(sprintf('The key %s is not supported by the converter: only service config can live in services.yaml for conversion.', $key));
+                    throw new LogicException(sprintf('The key %s is not supported by the converter: only service config can live in services.yaml for conversion.', $key));
                     break;
             }
         }
@@ -117,60 +155,75 @@ final class PhpServicesCreator
 
         sort($this->useStatements);
         foreach ($this->useStatements as $className) {
-            $creatorFactory->addStmt($this->factory->use($className));
+            $useBuilder = new UseBuilder($className, Use_::TYPE_NORMAL);
+            $namespace->stmts[] = $useBuilder->getNode();
         }
 
         // remove the last carriage return "\n" if exists.
         $lastStmt = $this->stmts[array_key_last($this->stmts)];
-        if ($lastStmt instanceof Node\Name) {
-            $lastStmt->parts[0] = rtrim($lastStmt->parts[0], "\n");
+
+        if ($lastStmt instanceof Name) {
+            $lastStmt->parts[0] = rtrim($lastStmt->parts[0], self::EOL_CHAR);
+        }
+
+        $lastKey = array_key_last($this->stmts);
+        if ($this->stmts[$lastKey] instanceof Nop) {
+            unset($this->stmts[$lastKey]);
         }
 
         return $this->stmts;
     }
 
-    private function addParametersNodes(array $parameters)
+    private function addParametersNodes(array $parameters): void
     {
         $this->addLineStmt('// Put parameters here that don\'t need to change on each machine where the app is deployed.');
-        $this->addLineStmt('// https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration.');
-
-        $this->addLineStmt('$parameters = $configurator->parameters();', true);
+        $this->addLineStmt('// https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration');
+        $assign = $this->phpNodeFactory->createAssignContainerCallToVariable('parameters', 'parameters');
+        $this->addNodeAsExpression($assign);
 
         foreach ($parameters as $parameterName => $value) {
-            $this->addLineStmt(sprintf(
-                '$parameters->set(%s, %s);',
-                $this->createStringArgument($parameterName),
-                $this->toString($value, true)
-            ), true);
+            $parametersSetMethodCall = $this->phpNodeFactory->createParameterSetMethodCall($parameterName, $value);
+            $this->addNodeAsExpression($parametersSetMethodCall);
+        }
+
+        // separater parameters by empty space
+        if (\count($parameters)) {
+            $this->addNode(new Nop());
         }
     }
 
-    private function addImportsNodes(array $imports)
+    private function addImportsNodes(array $imports): void
     {
         foreach ($imports as $import) {
             if (\is_array($import)) {
                 $arguments = $this->sortArgumentsByKeyIfExists($import, ['resource', 'type', 'ignore_errors']);
 
-                $import = $this->createListFromArray($arguments);
-            } else {
-                $import = $this->createStringArgument($import);
+                $methodCall = $this->phpNodeFactory->createImportMethodCall($arguments);
+                $this->addNodeAsExpression($methodCall);
+                continue;
             }
 
-            $this->addLineStmt(sprintf(
-                '$configurator->import(%s);',
-                $import
-            ), true);
+            $import = $this->createStringArgument($import);
+
+            $line = sprintf('$%s->import(%s);', self::CONTAINER_CONFIGURATOR_NAME, $import);
+            $this->addLineStmt($line, false);
+        }
+
+        if (\count($imports)) {
+            $this->addNode(new Nop());
         }
     }
 
-    private function addServicesNodes(array $services)
+    private function addServicesNodes(array $services): void
     {
-        $this->addLineStmt('$services = $configurator->services();', true);
+        $line = sprintf('$services = $%s->services();', self::CONTAINER_CONFIGURATOR_NAME);
+        $this->addLineStmt($line, true);
 
         foreach ($services as $serviceKey => $serviceValues) {
             if ('_defaults' === $serviceKey) {
                 $this->addLineStmt('// default configuration for services in *this* file');
-                $this->addNode($this->factory->methodCall(new Node\Expr\Variable('services'), 'defaults'));
+                $methodCall = new MethodCall(new Variable('services'), 'defaults');
+                $this->addNode($methodCall);
 
                 $this->convertServiceOptionsToNodes($serviceValues);
                 $this->addLineStmt(';', true);
@@ -209,27 +262,53 @@ final class PhpServicesCreator
                     $this->addLineStmt('// as action arguments even if you don\'t extend any base controller class');
                 }
 
-                $loadMethod = '$services->load(%s, %s)';
-                $loadMethod .= 1 === \count($serviceValues) ? ';' : '';
-
-                $this->addLineStmt(sprintf($loadMethod,
-                    $this->createStringArgument($serviceKey),
-                    '__DIR__.' . $this->createStringArgument('/'.$serviceValues['resource']))
+                $servicesLoadMethodCall = $this->servicesPhpNodeFactory->createServicesLoadMethodCall(
+                    $serviceKey,
+                    $serviceValues
                 );
+                unset($serviceValues['resource']);
 
-                if (\count($serviceValues) > 1) {
-                    unset($serviceValues['resource']);
-
-                    $this->convertServiceOptionsToNodes($serviceValues);
-                    $this->addLineStmt(';', true);
+                if (!isset($serviceValues['exclude'])) {
+                    if (\count($serviceValues) > 0) {
+                        // repeated below
+                        $this->addNode($servicesLoadMethodCall);
+                        $this->convertServiceOptionsToNodes($serviceValues);
+                        $this->addLineStmt(';', true);
+                    } else {
+                        $this->addNodeAsExpression($servicesLoadMethodCall);
+                    }
+                    continue;
                 }
+
+                $exclude = $serviceValues['exclude'];
+                unset($serviceValues['exclude']);
+                $excludeMethodCall = new MethodCall($servicesLoadMethodCall, 'exclude');
+
+                if (\is_array($exclude)) {
+                    $excludeValue = [];
+                    foreach ($exclude as $key => $singleExclude) {
+                        $excludeValue[$key] = $this->phpNodeFactory->createAbsoluteDirExpr($singleExclude);
+                    }
+                } else {
+                    $excludeValue = $this->phpNodeFactory->createAbsoluteDirExpr($exclude);
+                }
+
+                $excludeValue = BuilderHelpers::normalizeValue($excludeValue);
+                if ($excludeValue instanceof Array_) {
+                    $excludeValue->setAttribute('kind', Array_::KIND_SHORT);
+                }
+                $excludeMethodCall->args[] = new Arg($excludeValue);
+
+                // repeated above
+                $this->addNode($excludeMethodCall);
+                $this->convertServiceOptionsToNodes($serviceValues);
+                $this->addLineStmt(';', true);
 
                 continue;
             }
 
             if ($this->isAlias($serviceKey, $serviceValues)) {
                 $this->addAliasNode($serviceKey, $serviceValues);
-
                 continue;
             }
 
@@ -261,7 +340,7 @@ final class PhpServicesCreator
         }
     }
 
-    private function convertServiceOptionsToNodes(array $servicesValues)
+    private function convertServiceOptionsToNodes(array $servicesValues): void
     {
         foreach ($servicesValues as $serviceConfigKey => $value) {
             // options started by decoration_<option> are used as options of the method decorate().
@@ -280,17 +359,27 @@ final class PhpServicesCreator
 
                     break;
 
-                case 'exclude':
-                    $this->addLineStmt($this->createMethod('exclude', $this->toString($value)));
-                    break;
-
                 // simple "key: value" options
                 case 'shared':
                 case 'public':
+                    if (\is_array($value)) {
+                        if ($this->isAssociativeArray($value)) {
+                            throw new InvalidArgumentException(sprintf('The config key "%s" does not support an associative array', $serviceConfigKey));
+                        }
+
+                        $this->addLineStmt($this->createMethod(
+                            $serviceConfigKey,
+                            // the handles converting all formats of the single arg
+                            $this->toString($value)
+                        ));
+
+                        break;
+                    }
+                    // no break
                 case 'autowire':
                 case 'autoconfigure':
                     if (\is_array($value)) {
-                        throw new \InvalidArgumentException(sprintf('The "%s" service option does not support being set to an array value.', $serviceConfigKey));
+                        throw new InvalidArgumentException(sprintf('The "%s" service option does not support being set to an array value.', $serviceConfigKey));
                     }
 
                     $method = $serviceConfigKey;
@@ -305,7 +394,7 @@ final class PhpServicesCreator
                 case 'factory':
                 case 'configurator':
                     if (\is_array($value) && $this->isAssociativeArray($value)) {
-                        throw new \InvalidArgumentException(sprintf('The config key "%s" does not support an associative array', $serviceConfigKey));
+                        throw new InvalidArgumentException(sprintf('The config key "%s" does not support an associative array', $serviceConfigKey));
                     }
 
                     $this->addLineStmt($this->createMethod(
@@ -318,7 +407,7 @@ final class PhpServicesCreator
 
                 case 'tags':
                     if (\is_array($value) && $this->isAssociativeArray($value)) {
-                        throw new \InvalidArgumentException('Unexpected associative array value for "tags"');
+                        throw new InvalidArgumentException('Unexpected associative array value for "tags"');
                     }
 
                     foreach ($value as $argValue) {
@@ -329,7 +418,7 @@ final class PhpServicesCreator
 
                 case 'calls':
                     if ($this->isAssociativeArray($value)) {
-                        throw new \InvalidArgumentException('Unexpected associative array for "calls" config.');
+                        throw new InvalidArgumentException('Unexpected associative array for "calls" config.');
                     }
 
                     foreach ($value as $argValue) {
@@ -348,35 +437,49 @@ final class PhpServicesCreator
                             ));
                         }
                     } else {
+                        $this->addLineStmt($this->createMethod('args', $this->createSequentialArray($value)));
+                    }
+
+                    break;
+
+                case 'bind':
+                    foreach ($value as $argKey => $argValue) {
                         $this->addLineStmt($this->createMethod(
-                            'args',
-                            $this->createSequentialArray($value))
-                        );
+                            'bind',
+                            $this->createStringArgument($argKey),
+                            $this->toString($argValue)
+                        ));
                     }
 
                     break;
 
                 default:
-                    throw new \InvalidArgumentException(sprintf('Unexpected service configuration option: "%s".', $serviceConfigKey));
+                    throw new InvalidArgumentException(sprintf('Unexpected service configuration option: "%s".', $serviceConfigKey));
             }
-
-            // was used for sequential arrays
-            // $this->addLineStmt($this->createMethod($method, $this->createSequentialArray($value)));
         }
     }
 
-    private function addAliasNode($serviceKey, $serviceValues)
+    private function addAliasNode($serviceKey, $serviceValues): void
     {
+        if (class_exists($serviceKey) || interface_exists($serviceKey)) {
+            $shortClassName = $this->addUseStatementIfNecessary($serviceKey);
+            $aliasTarget = \is_array($serviceValues) ? $serviceValues['alias'] : $serviceValues;
+            // extract '@' before calling method createStringArgument() because service() is not necessary.
+            $aliasTarget = substr($aliasTarget, 1);
+            $alias = $this->createStringArgument($aliasTarget);
+
+            $this->addLineStmt(sprintf('$services->alias(%s, %s);', $shortClassName, $alias), true);
+
+            return;
+        }
+
         if ($fullClassName = strstr($serviceKey, ' $', true)) {
             $argument = strstr($serviceKey, '$');
             $shortClassName = $this->addUseStatementIfNecessary($fullClassName).".' ".$argument."'";
             // extract '@' before calling method createStringArgument() because service() is not necessary.
             $alias = $this->createStringArgument(substr($serviceValues, 1));
 
-            $this->addLineStmt(sprintf('$services->alias(%s, %s);',
-                $shortClassName,
-                $alias
-            ), true);
+            $this->addLineStmt(sprintf('$services->alias(%s, %s);', $shortClassName, $alias), true);
 
             return;
         }
@@ -474,7 +577,8 @@ final class PhpServicesCreator
             $values[1] = $values[$method];
         }
 
-        $value = sprintf(self::tab().'->call(%s, %s',
+        $value = sprintf(
+            self::tab().'->call(%s, %s',
             $this->createStringArgument($method),
             $this->toString($values[1])
         );
@@ -533,10 +637,8 @@ final class PhpServicesCreator
         switch (\gettype($value)) {
             case 'array':
                 return $this->createArrayArgument($value);
-                break;
             case 'string':
                 return strstr($value, '::') ? $value : $this->createStringArgument($value);
-                break;
             case 'boolean':
                 // The convertor preserve the boolean values only if it's necessary. >>>
                 if ($preserveValueIfTrueBoolean && true === $value) {
@@ -544,7 +646,6 @@ final class PhpServicesCreator
                 }
                 // >>> Because most of the methods don't need to pass true as an argument.
                 return true === $value ? '' : 'false';
-                break;
             case 'NULL':
                 return 'null';
             default:
@@ -583,10 +684,10 @@ final class PhpServicesCreator
 
     private function createSequentialArray(array $array, bool $transformInList = false): string
     {
-        if ($this->indentationIsRequired($array)) {
-            $stringArray = "\n";
-            foreach ($array as $subKey => $subValue) {
-                $stringArray .= self::tab(3).$this->toString($subValue, true).",\n";
+        if ($this->isIndentationRequired($array)) {
+            $stringArray = self::EOL_CHAR;
+            foreach ($array as $subValue) {
+                $stringArray .= self::tab(3).$this->toString($subValue, true).','.self::EOL_CHAR;
             }
 
             if ($transformInList) {
@@ -599,7 +700,7 @@ final class PhpServicesCreator
 
         $stringArray = $transformInList ? '' : '[';
 
-        foreach ($array as $key => $value) {
+        foreach ($array as $value) {
             $stringArray .= $this->toString($value, true).', ';
         }
         $stringArray = rtrim($stringArray, ', ');
@@ -609,11 +710,11 @@ final class PhpServicesCreator
 
     private function createAssociativeArray(array $array): string
     {
-        if ($this->indentationIsRequired($array)) {
+        if ($this->isIndentationRequired($array)) {
             $stringArray = "[\n";
             foreach ($array as $key => $value) {
                 $stringArray .= self::tab(4).$this->toString($key).' => '.$this->toString($value, true);
-                $stringArray .= \count($array) > 1 ? ",\n" : "\n";
+                $stringArray .= \count($array) > 1 ? ",\n" : self::EOL_CHAR;
             }
 
             return $stringArray.self::tab(3).']';
@@ -635,7 +736,7 @@ final class PhpServicesCreator
 
     private function createStringArgument(string $value): string
     {
-        list($expression, $value) = $this->extractStringValue($value);
+        [$expression, $value] = $this->extractStringValue($value);
 
         if ('expr' === $expression) {
             if (strstr($value, '"')) {
@@ -709,22 +810,22 @@ final class PhpServicesCreator
 
     private function addUseStatementIfNecessary(string $className): string
     {
-        if (!\in_array($className, $this->useStatements)) {
+        if (!\in_array($className, $this->useStatements, true)) {
             $this->useStatements[] = $className;
         }
 
         return Str::getShortClassName($className).'::class';
     }
 
-    private function addNode($node)
+    private function addNode(Node $node): void
     {
         $this->stmts[] = $node;
     }
 
-    private function addLineStmt(string $line, bool $addBlankLine = null)
+    private function addLineStmt(string $line, ?bool $addBlankLine = null): void
     {
-        $addBlankLine = $addBlankLine ? "\n" : null;
-        $this->addNode(new Node\Name($line.$addBlankLine));
+        $addBlankLine = $addBlankLine ? self::EOL_CHAR : null;
+        $this->addNode(new Name($line.$addBlankLine));
     }
 
     private function isAlias($serviceKey, $serviceValues): bool
@@ -739,12 +840,12 @@ final class PhpServicesCreator
         return array_keys($array) !== range(0, \count($array) - 1);
     }
 
-    private function indentationIsRequired(array $array): bool
+    private function isIndentationRequired(array $array): bool
     {
         $nbChars = 0;
         if ($this->isAssociativeArray($array)) {
             foreach ($array as $key => $value) {
-                $nbChars += (\strlen($this->toString($key)) + \strlen($this->toString($value)));
+                $nbChars += \strlen($this->toString($key)) + \strlen($this->toString($value));
             }
         } else {
             foreach ($array as $value) {
@@ -755,12 +856,14 @@ final class PhpServicesCreator
         return $nbChars > 70;
     }
 
-    /**
-     * return a tabulation space.
-     */
     private function tab(int $count = 1): string
     {
         return str_repeat(' ', $count * 4);
+    }
+
+    private function addNodeAsExpression(Node $node): void
+    {
+        $this->addNode(new Expression($node));
     }
 
     private function addEnvironmentImport(string $environment, string $path)

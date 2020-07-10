@@ -11,14 +11,14 @@
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
-use PhpParser\Node\Stmt;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Stmt;
 use PhpParser\PrettyPrinter\Standard;
 
 /**
  * @internal
  */
-final class PrettyPrinter extends Standard
+class PrettyPrinter extends Standard
 {
     /**
      * Overridden to fix indentation problem with tabs.
