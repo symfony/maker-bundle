@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Test;
 
+use Composer\Semver\Semver;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
@@ -39,6 +40,10 @@ abstract class MakerTestCase extends TestCase
 
         // prepare environment to test
         $testEnv->prepare();
+
+        if (!$this->hasRequiredDependencyVersions($testDetails, $testEnv)) {
+            $this->markTestSkipped('Some dependencies versions are too low');
+        }
 
         // run tests
         $makerTestProcess = $testEnv->runMaker();
@@ -94,5 +99,33 @@ abstract class MakerTestCase extends TestCase
         $serviceId = $serviceId ?? sprintf('maker.maker.%s', Str::asRouteName((new \ReflectionClass($makerClass))->getShortName()));
 
         return $this->kernel->getContainer()->get($serviceId);
+    }
+
+    private function hasRequiredDependencyVersions(MakerTestDetails $testDetails, MakerTestEnvironment $testEnv): bool
+    {
+        if (empty($testDetails->getRequiredPackageVersions())) {
+            return true;
+        }
+
+        $installedPackages = json_decode($testEnv->readFile('vendor/composer/installed.json'), true);
+        $packageVersions = [];
+        foreach ($installedPackages as $installedPackage) {
+            $packageVersions[$installedPackage['name']] = $installedPackage['version_normalized'];
+        }
+
+        foreach ($testDetails->getRequiredPackageVersions() as $requiredPackageData) {
+            $name = $requiredPackageData['name'];
+            $versionConstraint = $requiredPackageData['version_constraint'];
+
+            if (!isset($packageVersions[$name])) {
+                throw new \Exception(sprintf('Package "%s" is required in the test project at version "%s" but it is not installed?', $name, $versionConstraint));
+            }
+
+            if (!Semver::satisfies($packageVersions[$name], $versionConstraint)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
