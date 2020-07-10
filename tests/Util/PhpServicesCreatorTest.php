@@ -14,7 +14,9 @@ namespace Symfony\Bundle\MakerBundle\Tests\Util;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Util\PhpServicesCreator;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Finder\Finder;
@@ -80,6 +82,47 @@ class PhpServicesCreatorTest extends TestCase
         }
     }
 
+    public function testEnvironments()
+    {
+        $mainYaml = file_get_contents(self::YAML_PHP_CONVERT_FIXTURES_PATH.'/source_yaml/default.yaml');
+
+        $converter = new PhpServicesCreator();
+        $finalPhp = $converter->convert($mainYaml, [
+            'dev' => 'services_dev.php',
+            'test' => 'services_test.php',
+        ]);
+
+        $this->assertSame(<<<EOF
+<?php
+
+namespace Symfony\Component\DependencyInjection\Loader\Configurator;
+
+use App\Kernel;
+
+/*
+ * This file is the entry point to configure your own services.
+ */
+return function (ContainerConfigurator \$configurator, Kernel \$kernel): void {
+    \$services = \$configurator->services();
+
+    // default configuration for services in *this* file
+    \$services->defaults()
+        ->autowire()
+        ->autoconfigure()
+    ;
+
+    if (\$kernel->getEnvironment() === 'dev') {
+        \$configurator->import('services_dev.php');
+    }
+    if (\$kernel->getEnvironment() === 'test') {
+        \$configurator->import('services_test.php');
+    }
+};
+
+EOF
+        , $finalPhp);
+    }
+
     private function compareContainers(string $yamlRealPath, string $phpRealPath, bool $shouldCompareDefinitions = true)
     {
         $yamlContainerBuilder = new ContainerBuilder();
@@ -88,7 +131,34 @@ class PhpServicesCreatorTest extends TestCase
 
         $phpContainerBuilder = new ContainerBuilder();
         $phpLoader = new PhpFileLoader($phpContainerBuilder, new FileLocator());
-        $phpLoader->load($phpRealPath);
+        $instanceOf = [];
+        $containerConfigurator = new ContainerConfigurator($phpContainerBuilder, $phpLoader, $instanceOf, 'src/Kernel.php', 'src/Kernel.php');
+
+        $kernel = new class('dev', true) extends Kernel {
+            public function registerBundles()
+            {
+            }
+            public function registerContainerConfiguration(LoaderInterface $loader)
+            {
+            }
+        };
+        // this mimics the src/Kernel.php recipe logic
+        // it allows a Kernel 2nd argument, but we remove the type-hint to allow
+        // our anonymous class. Fun hackiness!
+        $originalContents = file_get_contents($phpRealPath);
+        // yes, I *did* just do that - first time for everything!
+        $tmpPath = $phpRealPath.'_tmp.php';
+        file_put_contents($tmpPath, str_replace(
+            'Kernel $kernel',
+            '$kernel',
+            $originalContents
+        ));
+        try {
+            $callable = require($tmpPath);
+        } finally {
+            unlink($tmpPath);
+        }
+        $callable($containerConfigurator->withPath($phpRealPath), $kernel);
 
         if ($shouldCompareDefinitions) {
             $this->assertTrue($yamlContainerBuilder->getDefinitions() == $phpContainerBuilder->getDefinitions());

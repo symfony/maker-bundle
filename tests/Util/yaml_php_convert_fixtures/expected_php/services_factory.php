@@ -2,13 +2,14 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use App\Kernel;
 use Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassService;
 use Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassServiceTwo;
 
 /*
  * This file is the entry point to configure your own services.
  */
-return function (ContainerConfigurator $configurator) {
+return function (ContainerConfigurator $configurator, Kernel $kernel): void {
     $services = $configurator->services();
 
     $services->set('string_service_factory', SimpleFakeClassService::class)

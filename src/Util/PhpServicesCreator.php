@@ -11,10 +11,10 @@
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
+use PhpParser\Builder\Namespace_;
 use PhpParser\Builder\Param;
 use PhpParser\BuilderFactory;
 use PhpParser\Node;
-use PhpParser\PrettyPrinter\Standard;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Yaml\Parser;
@@ -39,19 +39,35 @@ final class PhpServicesCreator
         $this->factory = new BuilderFactory();
     }
 
-    public function convert(string $yaml): string
+    /**
+     * Converts the source YAML into PHP services config
+     *
+     * If $environmentFiles is specified, it should be an array where
+     * the key is an environment and the value is a relative path to
+     * a file that should be imported in that environment.
+     */
+    public function convert(string $yaml, array $environmentFiles = []): string
     {
         $creatorFactory = $this->factory->namespace('Symfony\Component\DependencyInjection\Loader\Configurator');
 
-        $closureStmt = $this->createClosureStmts((new Parser())->parse($yaml, Yaml::PARSE_CUSTOM_TAGS), $creatorFactory);
+        // for the Kernel type-hint
+        $this->useStatements[] = 'App\\Kernel';
+
+        $closureStmt = $this->createClosureStmts(
+            (new Parser())->parse($yaml, Yaml::PARSE_CUSTOM_TAGS),
+            $creatorFactory,
+            $environmentFiles
+        );
 
         $creatorFactory->addStmt(
             new Node\Stmt\Return_(
                 new Node\Expr\Closure([
                     'params' => [
                         (new Param('configurator'))->setType('ContainerConfigurator')->getNode(),
+                        (new Param('kernel'))->setType('Kernel')->getNode(),
                     ],
                     'stmts' => $closureStmt,
+                    'returnType' => 'void',
                 ])
             )
         );
@@ -66,13 +82,13 @@ final class PhpServicesCreator
             [new Node\Name($beforeClosure."/*\n * This file is the entry point to configure your own services.\n */")]
         );
 
-        return (new Standard())->prettyPrintFile([$node])."\n";
+        return (new PrettyPrinter())->prettyPrintFile([$node])."\n";
     }
 
     /**
      * @return Node[]
      */
-    private function createClosureStmts(array $yamlData, $creatorFactory): array
+    private function createClosureStmts(array $yamlData, Namespace_ $creatorFactory, array $environmentFiles): array
     {
         foreach ($yamlData as $key => $values) {
             if (null === $values) {
@@ -95,6 +111,10 @@ final class PhpServicesCreator
             }
         }
 
+        foreach ($environmentFiles as $environment => $path) {
+            $this->addEnvironmentImport($environment, $path);
+        }
+
         sort($this->useStatements);
         foreach ($this->useStatements as $className) {
             $creatorFactory->addStmt($this->factory->use($className));
@@ -102,7 +122,9 @@ final class PhpServicesCreator
 
         // remove the last carriage return "\n" if exists.
         $lastStmt = $this->stmts[array_key_last($this->stmts)];
-        $lastStmt->parts[0] = rtrim($lastStmt->parts[0], "\n");
+        if ($lastStmt instanceof Node\Name) {
+            $lastStmt->parts[0] = rtrim($lastStmt->parts[0], "\n");
+        }
 
         return $this->stmts;
     }
@@ -128,6 +150,7 @@ final class PhpServicesCreator
         foreach ($imports as $import) {
             if (\is_array($import)) {
                 $arguments = $this->sortArgumentsByKeyIfExists($import, ['resource', 'type', 'ignore_errors']);
+
                 $import = $this->createListFromArray($arguments);
             } else {
                 $import = $this->createStringArgument($import);
@@ -191,7 +214,7 @@ final class PhpServicesCreator
 
                 $this->addLineStmt(sprintf($loadMethod,
                     $this->createStringArgument($serviceKey),
-                    $this->createStringArgument($serviceValues['resource']))
+                    '__DIR__.' . $this->createStringArgument('/'.$serviceValues['resource']))
                 );
 
                 if (\count($serviceValues) > 1) {
@@ -738,5 +761,28 @@ final class PhpServicesCreator
     private function tab(int $count = 1): string
     {
         return str_repeat(' ', $count * 4);
+    }
+
+    private function addEnvironmentImport(string $environment, string $path)
+    {
+        // if ($kernel->getEnvironment() === 'dev')
+        $ifNode = new Node\Stmt\If_(new Node\Expr\BinaryOp\Identical(
+            new Node\Expr\MethodCall(
+                new Node\Expr\Variable('kernel'),
+                'getEnvironment'
+            ),
+            new Node\Scalar\String_($environment)
+        ));
+
+        // $configurator->import('services_dev.php');
+        $ifNode->stmts = [
+            new Node\Stmt\Expression(new Node\Expr\MethodCall(
+                new Node\Expr\Variable('configurator'),
+                'import',
+                [new Node\Arg(new Node\Scalar\String_($path))]
+            )),
+        ];
+
+        $this->addNode($ifNode);
     }
 }

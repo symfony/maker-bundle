@@ -1,0 +1,10 @@
+parameters:
+    app.admin_email: 'dev@example.com'
+
+services:
+    _default:
+        autowire: false
+
+    service1:
+        class: Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClass
+        arguments: [service1_arg_dev]

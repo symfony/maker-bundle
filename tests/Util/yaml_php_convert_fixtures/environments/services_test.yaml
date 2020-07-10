@@ -1,0 +1,12 @@
+imports:
+  - { resource: 'services_dev.yaml' }
+
+parameters:
+    app.admin_email: 'test@example.com'
+
+services:
+    _default:
+        autowire: true
+
+    service_test:
+        class: Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClass

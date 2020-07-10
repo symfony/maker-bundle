@@ -1,0 +1,20 @@
+parameters:
+    app.admin_email: 'original@example.com'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    service1:
+        class: Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClass
+        autowire: false
+        arguments: [service1_arg]
+        tag: [service1_tag]
+
+    service2:
+        class: Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClass
+        arguments: [service2_arg]
+
+    Symfony\Bundle\MakerBundle\Tests\Util\yaml_php_convert_fixtures\FakeClass\SimpleFakeClassServiceTwo $variable: '@service1'

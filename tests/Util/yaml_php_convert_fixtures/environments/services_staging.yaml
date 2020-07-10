@@ -1,0 +1,2 @@
+parameters:
+    app.admin_email: 'staging@example.com'

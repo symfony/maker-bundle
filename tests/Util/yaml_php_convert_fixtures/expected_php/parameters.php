@@ -2,10 +2,12 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use App\Kernel;
+
 /*
  * This file is the entry point to configure your own services.
  */
-return function (ContainerConfigurator $configurator) {
+return function (ContainerConfigurator $configurator, Kernel $kernel): void {
     // Put parameters here that don't need to change on each machine where the app is deployed.
     // https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration.
     $parameters = $configurator->parameters();

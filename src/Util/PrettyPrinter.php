@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Util;
 
 use PhpParser\Node\Stmt;
+use PhpParser\Node\Expr;
 use PhpParser\PrettyPrinter\Standard;
 
 /**
@@ -61,5 +62,25 @@ final class PrettyPrinter extends Standard
         }
 
         return $classMethod;
+    }
+
+    /**
+     * Overridden to change coding standards.
+     *
+     * Before:
+     *      function () : string
+     *
+     * After
+     *      function (): string
+     */
+    protected function pExpr_Closure(Expr\Closure $node)
+    {
+        $closure = parent::pExpr_Closure($node);
+
+        if ($node->returnType) {
+            $closure = str_replace(') :', '):', $closure);
+        }
+
+        return $closure;
     }
 }
