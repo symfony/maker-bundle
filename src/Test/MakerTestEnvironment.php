@@ -69,6 +69,15 @@ final class MakerTestEnvironment
         return $this->path;
     }
 
+    public function readFile(string $path): string
+    {
+        if (!file_exists($this->path.'/'.$path)) {
+            throw new \InvalidArgumentException(sprintf('Cannot find file "%s"', $path));
+        }
+
+        return file_get_contents($this->path.'/'.$path);
+    }
+
     private function changeRootNamespaceIfNeeded()
     {
         if ('App' === ($rootNamespace = $this->testDetails->getRootNamespace())) {

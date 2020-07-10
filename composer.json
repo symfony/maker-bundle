@@ -25,6 +25,7 @@
         "symfony/http-kernel": "^3.4|^4.0|^5.0"
     },
     "require-dev": {
+        "composer/semver": "^3.0@dev",
         "doctrine/doctrine-bundle": "^1.8|^2.0",
         "doctrine/orm": "^2.3",
         "friendsofphp/php-cs-fixer": "^2.8",

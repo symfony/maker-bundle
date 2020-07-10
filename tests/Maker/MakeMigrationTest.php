@@ -69,6 +69,7 @@ class MakeMigrationTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
             ->configureDatabase(false)
+            ->addRequiredPackageVersion('doctrine/doctrine-migrations-bundle', '>=3')
             ->addExtraDependencies('doctrine/orm:@stable')
             // generate a migration first
             ->addPreMakeCommand('php bin/console make:migration')
@@ -76,7 +77,6 @@ class MakeMigrationTest extends MakerTestCase
                 $this->assertStringContainsString('You have 1 available migrations to execute', $output);
                 $this->assertStringContainsString('Success', $output);
                 $this->assertCount(14, explode("\n", $output), 'Asserting that very specific output is shown - some should be hidden');
-                var_dump($output);
             }),
         ];
 
@@ -88,6 +88,7 @@ class MakeMigrationTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
             ->configureDatabase(false)
+            ->addRequiredPackageVersion('doctrine/doctrine-migrations-bundle', '>=3')
             ->addExtraDependencies('doctrine/orm:@stable')
             // generate a migration first
             ->addPreMakeCommand('php bin/console make:migration')
