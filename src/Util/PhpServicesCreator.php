@@ -34,16 +34,26 @@ final class PhpServicesCreator
     private $stmts = [];
     private $useStatements = [];
 
+    private $yamlData;
+    private $environmentsYamlData;
+
     public function __construct()
     {
         $this->factory = new BuilderFactory();
     }
 
-    public function convert(string $yaml): string
+    public function convert(string $mainYaml, array $environmentsYaml = []): string
     {
         $creatorFactory = $this->factory->namespace('Symfony\Component\DependencyInjection\Loader\Configurator');
 
-        $closureStmt = $this->createClosureStmts((new Parser())->parse($yaml, Yaml::PARSE_CUSTOM_TAGS), $creatorFactory);
+        $yamlParser = new Parser();
+        $this->yamlData = $yamlParser->parse($mainYaml, Yaml::PARSE_CUSTOM_TAGS);
+        $this->environmentsYamlData = [];
+        foreach ($environmentsYaml as $environment => $environmentYaml) {
+            $this->environmentsYamlData[$environment] = $yamlParser->parse($mainYaml, Yaml::PARSE_CUSTOM_TAGS);
+        }
+
+        $closureStmt = $this->createClosureStmts($creatorFactory);
 
         $creatorFactory->addStmt(
             new Node\Stmt\Return_(
@@ -66,15 +76,19 @@ final class PhpServicesCreator
             [new Node\Name($beforeClosure."/*\n * This file is the entry point to configure your own services.\n */")]
         );
 
+        // reset state
+        $this->yamlData = null;
+        $this->environmentsYamlData = null;
+
         return (new Standard())->prettyPrintFile([$node])."\n";
     }
 
     /**
      * @return Node[]
      */
-    private function createClosureStmts(array $yamlData, $creatorFactory): array
+    private function createClosureStmts($creatorFactory): array
     {
-        foreach ($yamlData as $key => $values) {
+        foreach ($this->yamlData as $key => $values) {
             if (null === $values) {
                 // declare the variable ($parameters/$services) even if the key is written without values.
                 $values = [];
