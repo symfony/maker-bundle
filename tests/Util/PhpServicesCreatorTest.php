@@ -112,10 +112,10 @@ return function (ContainerConfigurator \$container, Kernel \$kernel): void {
     ;
 
     if (\$kernel->getEnvironment() === 'dev') {
-        \$configurator->import('services_dev.php');
+        \$container->import('services_dev.php');
     }
     if (\$kernel->getEnvironment() === 'test') {
-        \$configurator->import('services_test.php');
+        \$container->import('services_test.php');
     }
 };
 
