@@ -1,3 +1,9 @@
+1.20
+====
+
+* [make:docker:database] Added a new command to generate a database service
+  in your `docker-compose.yaml` file - #640 thanks to @jrushlow!
+
 1.19
 ====
 
