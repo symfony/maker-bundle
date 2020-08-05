@@ -10,7 +10,7 @@ class GeneratedFormTest extends TypeTestCase
     public function testGeneratedForm()
     {
         $formData = [
-            'field_name' => 'field_value'
+            'field_name' => 'field_value',
         ];
 
         $form = $this->factory->create(FooBarType::class);

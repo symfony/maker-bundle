@@ -19,17 +19,17 @@ class User
     private $id;
 
     /**
-     * @ORM\OneToMany(targetEntity="UserAvatar", mappedBy="user")
+     * @ORM\OneToMany(targetEntity=UserAvatar::class, mappedBy="user")
      */
     private $avatars;
 
     /**
-     * @ORM\OneToOne(targetEntity="UserProfile", mappedBy="user")
+     * @ORM\OneToOne(targetEntity=UserProfile::class, mappedBy="user")
      */
     private $userProfile;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag")
+     * @ORM\ManyToMany(targetEntity=Tag::class)
      */
     private $tags;
 
@@ -54,8 +54,8 @@ class User
         $this->userProfile = $userProfile;
 
         // set (or unset) the owning side of the relation if necessary
-        $newUser = $userProfile === null ? null : $this;
-        if ($newUser !== $userProfile->getUser()) {
+        $newUser = null === $userProfile ? null : $this;
+        if ($userProfile->getUser() !== $newUser) {
             $userProfile->setUser($newUser);
         }
 

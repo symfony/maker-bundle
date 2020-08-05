@@ -11,7 +11,7 @@ class GeneratedFormTest extends TypeTestCase
     public function testGeneratedForm()
     {
         $formData = [
-            'title' => 'lemon'
+            'title' => 'lemon',
         ];
 
         $form = $this->factory->create(SourFoodType::class);

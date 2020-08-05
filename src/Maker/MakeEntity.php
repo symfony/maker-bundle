@@ -18,17 +18,17 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
+use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
+use Symfony\Bundle\MakerBundle\Doctrine\EntityRelation;
 use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
-use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Doctrine\EntityRelation;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -47,8 +47,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     private $fileManager;
     private $doctrineHelper;
     private $generator;
+    private $entityClassGenerator;
 
-    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null)
+    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null, EntityClassGenerator $entityClassGenerator = null)
     {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
@@ -59,6 +60,13 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $this->generator = new Generator($fileManager, 'App\\');
         } else {
             $this->generator = $generator;
+        }
+
+        if (null === $entityClassGenerator) {
+            @trigger_error(sprintf('Passing a "%s" instance as 5th argument is mandatory since version 1.15.1', EntityClassGenerator::class), E_USER_DEPRECATED);
+            $this->entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
+        } else {
+            $this->entityClassGenerator = $entityClassGenerator;
         }
     }
 
@@ -137,8 +145,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {
-            $entityClassGenerator = new EntityClassGenerator($generator);
-            $entityPath = $entityClassGenerator->generateEntityClass(
+            $entityPath = $this->entityClassGenerator->generateEntityClass(
                 $entityClassDetails,
                 $input->getOption('api-resource')
             );
@@ -256,15 +263,13 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $this->writeSuccessMessage($io);
         $io->text([
-            'Next: When you\'re ready, create a migration with <comment>make:migration</comment>',
+            'Next: When you\'re ready, create a migration with <info>php bin/console make:migration</info>',
             '',
         ]);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)
     {
-        $dependencies->requirePHP71();
-
         if (null !== $input && $input->getOption('api-resource')) {
             $dependencies->addClassDependency(
                 ApiResource::class,
@@ -315,11 +320,19 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $defaultType = 'boolean';
         } elseif (0 === strpos($snakeCasedField, 'has_')) {
             $defaultType = 'boolean';
+        } elseif ('uuid' === $snakeCasedField) {
+            $defaultType = 'uuid';
+        } elseif ('guid' === $snakeCasedField) {
+            $defaultType = 'guid';
         }
 
         $type = null;
+        $types = Type::getTypesMap();
+        // remove deprecated json_array
+        unset($types[Type::JSON_ARRAY]);
+
         $allValidTypes = array_merge(
-            array_keys(Type::getTypesMap()),
+            array_keys($types),
             EntityRelation::getValidRelationTypes(),
             ['relation']
         );
@@ -466,17 +479,19 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         while (null === $targetEntityClass) {
             $question = $this->createEntityClassQuestion('What class should this entity be related to?');
 
-            $targetEntityClass = $io->askQuestion($question);
+            $answeredEntityClass = $io->askQuestion($question);
 
-            if (!class_exists($targetEntityClass)) {
-                if (!class_exists($this->getEntityNamespace().'\\'.$targetEntityClass)) {
-                    $io->error(sprintf('Unknown class "%s"', $targetEntityClass));
-                    $targetEntityClass = null;
-
-                    continue;
-                }
-
-                $targetEntityClass = $this->getEntityNamespace().'\\'.$targetEntityClass;
+            // find the correct class name - but give priority over looking
+            // in the Entity namespace versus just checking the full class
+            // name to avoid issues with classes like "Directory" that exist
+            // in PHP's core.
+            if (class_exists($this->getEntityNamespace().'\\'.$answeredEntityClass)) {
+                $targetEntityClass = $this->getEntityNamespace().'\\'.$answeredEntityClass;
+            } elseif (class_exists($answeredEntityClass)) {
+                $targetEntityClass = $answeredEntityClass;
+            } else {
+                $io->error(sprintf('Unknown class "%s"', $answeredEntityClass));
+                continue;
             }
         }
 
@@ -760,7 +775,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function regenerateEntities(string $classOrNamespace, bool $overwrite, Generator $generator)
     {
-        $regenerator = new EntityRegenerator($this->doctrineHelper, $this->fileManager, $generator, $overwrite);
+        $regenerator = new EntityRegenerator($this->doctrineHelper, $this->fileManager, $generator, $this->entityClassGenerator, $overwrite);
         $regenerator->regenerateEntities($classOrNamespace);
     }
 

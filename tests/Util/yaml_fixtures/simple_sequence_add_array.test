@@ -1,0 +1,13 @@
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+security:
+    access_control:
+===
+$data['security']['access_control'] = [];
+$data['security']['access_control'][] = ['path' => '^/login$', 'roles' => 'IS_AUTHENTICATED_ANONYMOUSLY'];
+===
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+security:
+    access_control:
+        -
+            path: ^/login$
+            roles: IS_AUTHENTICATED_ANONYMOUSLY

@@ -33,8 +33,6 @@ class AutoloaderUtil
     /**
      * Returns the relative path to where a new class should live.
      *
-     * @param string $className
-     *
      * @return string|null
      *
      * @throws \Exception

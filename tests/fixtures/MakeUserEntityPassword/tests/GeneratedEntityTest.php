@@ -2,8 +2,8 @@
 
 namespace App\Tests;
 
-use Doctrine\ORM\EntityManager;
 use App\Entity\User;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoder;
 
@@ -11,7 +11,8 @@ class GeneratedEntityTest extends WebTestCase
 {
     public function testGeneratedEntity()
     {
-        self::bootKernel();
+        $client = static::createClient();
+
         /** @var EntityManager $em */
         $em = self::$kernel->getContainer()
             ->get('doctrine')
@@ -31,7 +32,6 @@ class GeneratedEntityTest extends WebTestCase
         $em->flush();
 
         // login then access a protected page
-        $client = static::createClient();
         $client->request('GET', '/login?email=foo@example.com');
 
         $this->assertSame(302, $client->getResponse()->getStatusCode());

@@ -17,7 +17,7 @@ class User
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\UserProfile", inversedBy="user", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity=UserProfile::class, inversedBy="user", cascade={"persist", "remove"})
      */
     private $userProfile;
 

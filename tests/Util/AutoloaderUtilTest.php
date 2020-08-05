@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use Composer\Autoload\ClassLoader;
@@ -76,7 +85,7 @@ class AutoloaderUtilTest extends TestCase
 
         foreach ($composerJsonParams['autoload'] as $psr => $dirs) {
             foreach ($dirs as $prefix => $path) {
-                if ($psr == 'psr-4') {
+                if ('psr-4' === $psr) {
                     $classLoader->addPsr4($prefix, self::$currentRootDir.$path);
                 } else {
                     $classLoader->add($prefix, self::$currentRootDir.$path);
@@ -87,6 +96,7 @@ class AutoloaderUtilTest extends TestCase
         /** @var \PHPUnit_Framework_MockObject_MockObject|ComposerAutoloaderFinder $finder */
         $finder = $this
             ->getMockBuilder(ComposerAutoloaderFinder::class)
+            ->setConstructorArgs(['App\\'])
             ->getMock();
 
         $finder

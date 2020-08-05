@@ -18,5 +18,4 @@ class Recept
      * @ORM\Column(type="string", length=255)
      */
     private $steps;
-
 }

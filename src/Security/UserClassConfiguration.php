@@ -24,7 +24,7 @@ final class UserClassConfiguration
 
     private $hasPassword;
 
-    private $useArgon2 = true;
+    private $useArgon2 = false;
 
     private $userProviderClass;
 
@@ -50,11 +50,17 @@ final class UserClassConfiguration
         return $this->hasPassword;
     }
 
+    /**
+     * @deprecated since MakerBundle 1.12
+     */
     public function useArgon2(bool $shouldUse)
     {
         $this->useArgon2 = $shouldUse;
     }
 
+    /**
+     * @deprecated since MakerBundle 1.12
+     */
     public function shouldUseArgon2(): bool
     {
         return $this->useArgon2;

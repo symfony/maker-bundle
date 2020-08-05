@@ -1,3 +1,92 @@
+1.20
+====
+
+* [make:docker:database] Added a new command to generate a database service
+  in your `docker-compose.yaml` file - #640 thanks to @jrushlow!
+
+1.19
+====
+
+* Added "email verification/confirmation" option to `make:registration-form` - see #603
+  thanks to @jrushlow!
+
+1.18
+====
+
+* Reverted support for `doctrine/inflector` 2.0 - #611 thanks to @weaverryan
+
+1.17
+====
+
+* PHP 7.1 is now the required minimum version - #598 thanks to @weaverryan
+
+* MakerBundle now allows `doctrine/inflector` 2.0 - #600 thanks to @alcaeus
+
+1.16
+====
+
+* [make:entity] Generated entities will now use the RelationName::class
+  syntax when generating relationships (e.g.
+  `targetEntity=RelationName::class`) - #573 thanks to @rogeriolino.
+
+* When listing generated files in the console, if a file link formatter
+  is configured, the links will now be clickable - #559 thanks to @l-vo.
+
+* [make:entity] Added UUID and GUID default type to entity maker - if you name a
+  field `uuid` or `guid`, the Maker will guess those types by default - #593
+  thanks to @thomas-miceli.
+
+1.15
+====
+
+* [make:reset-password] New `make:reset-password` to generate an
+  entire "reset password" controller, forms, template setup - #567
+  thanks to @jrushlow and @romaricdrigon
+
+* [make:message] New `make:message` command to generate a
+  Messenger messaage & handler class - #338 thanks to @nikophil
+
+* [make:messenger-middleware] New `make:messenger-middleware`
+  command to generate a middleware for Messenger
+
+1.14
+====
+
+* Added support for Symfony 5
+
+1.13
+====
+
+* [make:functional-test] Use Panther when available - #417
+  thanks to @adrienlucas
+
+* Allow rehashing passwords when possible and needed - #389
+  thanks to @nicolas-grekas
+
+1.12
+====
+
+* Use `[make:*-test]` Use the new WebTestAssertionsTrait methods in the generated
+  functional tests - #381 thanks to @adrienlucas
+
+* Add a agree terms checkbox to `make:registration-form` - #394
+  thanks to @ismail1432
+
+* Template generation respects `twig.default_path` - #346
+  thanks to @LeJeanbono
+
+* [Serializer] Normalizer now implements CacheableSupportsMethodInterface
+  with condition - #399 thanks to @jojotjebaby
+
+* Deprecate Argon2i encoder used in `make:user` and use
+  `auto` instead - #398 thanks to @nicolas-grekas
+
+* [make:auth] Added logout support and help for logged in user -
+  in #406 thanks to @St0iK
+
+* Use new event class names instead of strings in `make:event-subscriber` -
+  in #403 thanks to @jojotjebaby
+
 1.11
 ====
 

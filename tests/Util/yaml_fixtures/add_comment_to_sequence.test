@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+    database:
+        image: 'mysql:8.0'
+        environment:
+            MYSQL_ROOT_PASSWORD: 'root'
+===
+$data['services']['database']['ports'] = [
+    0 => '__COMMENT__ exposes port 3306 to a random port on your host machine',
+    1 => '__COMMENT__ use 3306:3306 to expose to port 3306 on your host machine',
+    2 => '3306',
+];
+===
+version: '3.7'
+services:
+    database:
+        image: 'mysql:8.0'
+        environment:
+            MYSQL_ROOT_PASSWORD: 'root'
+        ports:
+            # exposes port 3306 to a random port on your host machine
+            # use 3306:3306 to expose to port 3306 on your host machine
+            - '3306'

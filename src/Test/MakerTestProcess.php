@@ -22,24 +22,18 @@ final class MakerTestProcess
 {
     private $process;
 
-    private function __construct($commandLine, $cwd, $timeout)
+    private function __construct($commandLine, $cwd, array $envVars, $timeout)
     {
-        $this->process = method_exists(Process::class, 'fromShellCommandline')
+        $this->process = \is_string($commandLine)
             ? Process::fromShellCommandline($commandLine, $cwd, null, null, $timeout)
             : new Process($commandLine, $cwd, null, null, $timeout);
-        $this->process->inheritEnvironmentVariables();
+
+        $this->process->setEnv($envVars);
     }
 
-    public static function create($commandLine, $cwd, $timeout = null): self
+    public static function create($commandLine, $cwd, array $envVars = [], $timeout = null): self
     {
-        return new self($commandLine, $cwd, $timeout);
-    }
-
-    public function setEnv($env): self
-    {
-        $this->process->setEnv($env);
-
-        return $this;
+        return new self($commandLine, $cwd, $envVars, $timeout);
     }
 
     public function setInput($input): self
@@ -49,17 +43,12 @@ final class MakerTestProcess
         return $this;
     }
 
-    public function run($allowToFail = false): self
+    public function run($allowToFail = false, array $envVars = []): self
     {
-        $this->process->run();
+        $this->process->run(null, $envVars);
 
         if (!$allowToFail && !$this->process->isSuccessful()) {
-            throw new \Exception(sprintf(
-                'Error running command: "%s". Output: "%s". Error: "%s"',
-                $this->process->getCommandLine(),
-                $this->process->getOutput(),
-                $this->process->getErrorOutput()
-            ));
+            throw new \Exception(sprintf('Error running command: "%s". Output: "%s". Error: "%s"', $this->process->getCommandLine(), $this->process->getOutput(), $this->process->getErrorOutput()));
         }
 
         return $this;

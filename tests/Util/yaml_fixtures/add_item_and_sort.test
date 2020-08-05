@@ -1,0 +1,15 @@
+page_types:
+    - App\Entity\Page\ContentPage
+    - App\Entity\Page\ErrorPage
+    - App\Entity\Page\HomePage
+    - App\Entity\Page\OverviewPage
+===
+$data['page_types'][] = 'App\Entity\Page\NewsPage';
+sort($data['page_types']);
+===
+page_types:
+    - App\Entity\Page\ContentPage
+    - App\Entity\Page\ErrorPage
+    - App\Entity\Page\HomePage
+    - App\Entity\Page\NewsPage
+    - App\Entity\Page\OverviewPage

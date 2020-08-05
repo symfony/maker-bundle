@@ -51,7 +51,6 @@ final class GeneratorTwigHelper
                 $printCode .= ' ? '.$printCode.'|date(\'H:i:s\') : \'\'';
                 break;
             case 'json':
-            case 'json_array':
                 $printCode .= ' ? '.$printCode.'|json_encode : \'\'';
                 break;
             case 'array':
@@ -67,7 +66,7 @@ final class GeneratorTwigHelper
 
     public function getHeadPrintCode($title): string
     {
-        if ($this->fileManager->fileExists('templates/base.html.twig')) {
+        if ($this->fileManager->fileExists($this->fileManager->getPathForTemplate('base.html.twig'))) {
             return <<<TWIG
 {% extends 'base.html.twig' %}
 

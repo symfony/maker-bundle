@@ -4,7 +4,10 @@ namespace <?= $namespace; ?>;
 
 use <?= $entity_full_class_name; ?>;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use <?= $doctrine_registry_class; ?>;
+<?= $with_password_upgrade ? "use Symfony\Component\Security\Core\Exception\UnsupportedUserException;\n" : '' ?>
+<?= $with_password_upgrade ? "use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;\n" : '' ?>
+<?= $with_password_upgrade ? "use Symfony\Component\Security\Core\User\UserInterface;\n" : '' ?>
 
 /**
  * @method <?= $entity_class_name; ?>|null find($id, $lockMode = null, $lockVersion = null)
@@ -12,13 +15,32 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method <?= $entity_class_name; ?>[]    findAll()
  * @method <?= $entity_class_name; ?>[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class <?= $class_name; ?> extends ServiceEntityRepository
+class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgrade ? " implements PasswordUpgraderInterface\n" : "\n" ?>
 {
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, <?= $entity_class_name; ?>::class);
     }
+<?php if ($include_example_comments): // When adding a new method without existing default comments, the blank line is automatically added.?>
 
+<?php endif; ?>
+<?php if ($with_password_upgrade): ?>
+    /**
+     * Used to upgrade (rehash) the user's password automatically over time.
+     */
+    public function upgradePassword(UserInterface $user, string $newEncodedPassword): void
+    {
+        if (!$user instanceof <?= $entity_class_name ?>) {
+            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
+        }
+
+        $user->setPassword($newEncodedPassword);
+        $this->_em->persist($user);
+        $this->_em->flush();
+    }
+
+<?php endif ?>
+<?php if ($include_example_comments): ?>
     // /**
     //  * @return <?= $entity_class_name ?>[] Returns an array of <?= $entity_class_name ?> objects
     //  */
@@ -47,4 +69,5 @@ class <?= $class_name; ?> extends ServiceEntityRepository
         ;
     }
     */
+<?php endif; ?>
 }

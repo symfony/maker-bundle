@@ -1,7 +1,17 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
+use PhpParser\Builder\Param;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
@@ -34,7 +44,7 @@ class ClassSourceManipulatorTest extends TestCase
             'User_simple.php',
             'fooProp',
             [],
-            'User_simple.php'
+            'User_simple.php',
         ];
 
         yield 'with_no_properties_and_comment' => [
@@ -42,23 +52,23 @@ class ClassSourceManipulatorTest extends TestCase
             'fooProp',
             [
                 '@var string',
-                '@internal'
+                '@internal',
             ],
-            'User_no_props.php'
+            'User_no_props.php',
         ];
 
         yield 'no_properties_and_constants' => [
             'User_no_props_constants.php',
             'fooProp',
             [],
-            'User_no_props_constants.php'
+            'User_no_props_constants.php',
         ];
 
         yield 'property_empty_class' => [
             'User_empty.php',
             'fooProp',
             [],
-            'User_empty.php'
+            'User_empty.php',
         ];
     }
 
@@ -85,7 +95,7 @@ class ClassSourceManipulatorTest extends TestCase
             'fooProp',
             'string',
             [],
-            'User_simple.php'
+            'User_simple.php',
         ];
 
         yield 'getter_no_props_comments' => [
@@ -94,9 +104,9 @@ class ClassSourceManipulatorTest extends TestCase
             'string',
             [
                 '@return string',
-                '@internal'
+                '@internal',
             ],
-            'User_no_props.php'
+            'User_no_props.php',
         ];
 
         yield 'getter_empty_class' => [
@@ -104,7 +114,7 @@ class ClassSourceManipulatorTest extends TestCase
             'fooProp',
             'string',
             [],
-            'User_empty.php'
+            'User_empty.php',
         ];
     }
 
@@ -132,7 +142,7 @@ class ClassSourceManipulatorTest extends TestCase
             'string',
             false,
             [],
-            'User_simple.php'
+            'User_simple.php',
         ];
 
         yield 'setter_no_props_comments' => [
@@ -142,9 +152,9 @@ class ClassSourceManipulatorTest extends TestCase
             true,
             [
                 '@param string $fooProp',
-                '@internal'
+                '@internal',
             ],
-            'User_no_props.php'
+            'User_no_props.php',
         ];
 
         yield 'setter_empty_class' => [
@@ -153,7 +163,7 @@ class ClassSourceManipulatorTest extends TestCase
             'string',
             false,
             [],
-            'User_empty.php'
+            'User_empty.php',
         ];
     }
 
@@ -175,7 +185,7 @@ class ClassSourceManipulatorTest extends TestCase
         yield 'empty_annotation' => [
             '@ORM\Column',
             [],
-            '@ORM\Column()'
+            '@ORM\Column()',
         ];
 
         yield 'complex_annotation' => [
@@ -185,7 +195,7 @@ class ClassSourceManipulatorTest extends TestCase
                 'length' => 10,
                 'nullable' => false,
             ],
-            '@ORM\Column(name="firstName", length=10, nullable=false)'
+            '@ORM\Column(name="firstName", length=10, nullable=false)',
         ];
     }
 
@@ -212,9 +222,9 @@ class ClassSourceManipulatorTest extends TestCase
                 'type' => 'string',
                 'length' => 255,
                 'nullable' => false,
-                'options' => ['comment' => 'new field']
+                'options' => ['comment' => 'new field'],
             ],
-            'User_simple.php'
+            'User_simple.php',
         ];
 
         yield 'entity_add_datetime' => [
@@ -224,7 +234,7 @@ class ClassSourceManipulatorTest extends TestCase
                 'type' => 'datetime',
                 'nullable' => true,
             ],
-            'User_simple_datetime.php'
+            'User_simple_datetime.php',
         ];
 
         yield 'entity_field_property_already_exists' => [
@@ -235,7 +245,18 @@ class ClassSourceManipulatorTest extends TestCase
                 'length' => 255,
                 'nullable' => false,
             ],
-            'User_simple_prop_already_exists.php'
+            'User_simple_prop_already_exists.php',
+        ];
+
+        yield 'entity_field_property_zero' => [
+            'User_simple.php',
+            'decimal',
+            [
+                'type' => 'decimal',
+                'precision' => 6,
+                'scale' => 0,
+            ],
+            'User_simple_prop_zero.php',
         ];
     }
 
@@ -262,7 +283,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('category')
                 ->setTargetClassName('App\Entity\Category')
                 ->setTargetPropertyName('foods')
-                ->setIsNullable(false)
+                ->setIsNullable(false),
         ];
 
         yield 'many_to_one_nullable' => [
@@ -272,7 +293,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('category')
                 ->setTargetClassName('App\Entity\Category')
                 ->setTargetPropertyName('foods')
-                ->setIsNullable(true)
+                ->setIsNullable(true),
         ];
 
         yield 'many_to_one_other_namespace' => [
@@ -282,7 +303,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('category')
                 ->setTargetClassName('Foo\Entity\Category')
                 ->setTargetPropertyName('foods')
-                ->setIsNullable(true)
+                ->setIsNullable(true),
         ];
 
         yield 'many_to_one_empty_other_namespace' => [
@@ -292,7 +313,17 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('category')
                 ->setTargetClassName('Foo\Entity\Category')
                 ->setTargetPropertyName('foods')
-                ->setIsNullable(true)
+                ->setIsNullable(true),
+        ];
+
+        yield 'many_to_one_same_and_other_namespaces' => [
+            'User_with_relation.php',
+            'User_with_relation_same_and_other_namespaces.php',
+            (new RelationManyToOne())
+                ->setPropertyName('subCategory')
+                ->setTargetClassName('App\Entity\SubDirectory\Category')
+                ->setTargetPropertyName('foods')
+                ->setIsNullable(true),
         ];
 
         yield 'many_to_one_no_inverse' => [
@@ -303,7 +334,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\Entity\Category')
                 ->setTargetPropertyName('foods')
                 ->setIsNullable(true)
-                ->setMapInverseRelation(false)
+                ->setMapInverseRelation(false),
         ];
     }
 
@@ -330,7 +361,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('avatarPhotos')
                 ->setTargetClassName('App\Entity\UserAvatarPhoto')
                 ->setTargetPropertyName('user')
-                ->setOrphanRemoval(false)
+                ->setOrphanRemoval(false),
         ];
 
         // interesting also because the source file has its
@@ -342,7 +373,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('avatarPhotos')
                 ->setTargetClassName('App\Entity\UserAvatarPhoto')
                 ->setTargetPropertyName('user')
-                ->setOrphanRemoval(false)
+                ->setOrphanRemoval(false),
         ];
 
         yield 'one_to_many_orphan_removal' => [
@@ -352,7 +383,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('avatarPhotos')
                 ->setTargetClassName('App\Entity\UserAvatarPhoto')
                 ->setTargetPropertyName('user')
-                ->setOrphanRemoval(true)
+                ->setOrphanRemoval(true),
         ];
 
         // todo test existing constructor
@@ -381,7 +412,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('recipes')
                 ->setTargetClassName('App\Entity\Recipe')
                 ->setTargetPropertyName('foods')
-                ->setIsOwning(true)
+                ->setIsOwning(true),
         ];
 
         yield 'many_to_many_inverse' => [
@@ -391,10 +422,10 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setPropertyName('recipes')
                 ->setTargetClassName('App\Entity\Recipe')
                 ->setTargetPropertyName('foods')
-                ->setIsOwning(false)
+                ->setIsOwning(false),
         ];
 
-        yield 'many_to_many_owning' => [
+        yield 'many_to_many_owning_inverse' => [
             'User_simple.php',
             'User_simple_no_inverse.php',
             (new RelationManyToMany())
@@ -402,7 +433,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\Entity\Recipe')
                 ->setTargetPropertyName('foods')
                 ->setIsOwning(true)
-                ->setMapInverseRelation(false)
+                ->setMapInverseRelation(false),
         ];
     }
 
@@ -430,7 +461,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\Entity\UserProfile')
                 ->setTargetPropertyName('user')
                 ->setIsNullable(true)
-                ->setIsOwning(true)
+                ->setIsOwning(true),
         ];
 
         // a relationship to yourself - return type is self
@@ -442,7 +473,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\Entity\User')
                 ->setTargetPropertyName('user')
                 ->setIsNullable(true)
-                ->setIsOwning(true)
+                ->setIsOwning(true),
         ];
 
         yield 'one_to_one_inverse' => [
@@ -453,7 +484,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\Entity\User')
                 ->setTargetPropertyName('userProfile')
                 ->setIsNullable(true)
-                ->setIsOwning(false)
+                ->setIsOwning(false),
         ];
 
         yield 'one_to_one_inverse_not_nullable' => [
@@ -464,7 +495,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\Entity\User')
                 ->setTargetPropertyName('userProfile')
                 ->setIsNullable(false)
-                ->setIsOwning(false)
+                ->setIsOwning(false),
         ];
 
         yield 'one_to_one_no_inverse' => [
@@ -476,7 +507,7 @@ class ClassSourceManipulatorTest extends TestCase
                 //->setTargetPropertyName('user')
                 ->setIsNullable(true)
                 ->setIsOwning(true)
-                ->setMapInverseRelation(false)
+                ->setMapInverseRelation(false),
         ];
 
         yield 'one_to_one_no_inverse_not_nullable' => [
@@ -488,7 +519,7 @@ class ClassSourceManipulatorTest extends TestCase
                 //->setTargetPropertyName('user')
                 ->setIsNullable(false)
                 ->setIsOwning(true)
-                ->setMapInverseRelation(false)
+                ->setMapInverseRelation(false),
         ];
 
         yield 'avoid_duplicate_use_statement' => [
@@ -499,7 +530,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\OtherEntity\UserProfile')
                 ->setTargetPropertyName('user')
                 ->setIsNullable(true)
-                ->setIsOwning(true)
+                ->setIsOwning(true),
         ];
 
         yield 'avoid_duplicate_use_statement_with_alias' => [
@@ -510,7 +541,7 @@ class ClassSourceManipulatorTest extends TestCase
                 ->setTargetClassName('App\OtherEntity\Category')
                 ->setTargetPropertyName('user')
                 ->setIsNullable(true)
-                ->setIsOwning(true)
+                ->setIsOwning(true),
         ];
     }
 
@@ -543,6 +574,39 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
+    public function testAddInterfaceToClassWithOtherInterface()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple_with_interface.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/implements_interface/User_simple_with_interface.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+        $manipulator->addInterface(UserInterface::class);
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddMethodBuilder()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_method/UserEmpty_with_newMethod.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $methodBuilder = $manipulator->createMethodBuilder('testAddNewMethod', 'string', true, ['test comment on public method']);
+
+        $manipulator->addMethodBuilder(
+            $methodBuilder,
+            [
+                (new Param('someParam'))->setType('string')->getNode(),
+            ], <<<'CODE'
+<?php
+$this->someParam = $someParam;
+CODE
+);
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
     public function testAddMethodWithBody()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/EmptyController.php');
@@ -552,9 +616,10 @@ class ClassSourceManipulatorTest extends TestCase
 
         $methodBuilder = $manipulator->createMethodBuilder('action', 'JsonResponse', false, ['@Route("/action", name="app_action")']);
         $methodBuilder->addParam(
-            (new \PhpParser\Builder\Param('param'))->setTypeHint('string')
+            (new Param('param'))->setTypeHint('string')
         );
-        $manipulator->addMethodBody($methodBuilder, <<<'CODE'
+        $manipulator->addMethodBody($methodBuilder,
+<<<'CODE'
 <?php
 return new JsonResponse(['param' => $param]);
 CODE
@@ -573,7 +638,7 @@ CODE
     {
         $manipulator = new ClassSourceManipulator($source);
         $manipulator->addAnnotationToClass('Bar\\SomeAnnotation', [
-            'message' => 'Foo'
+            'message' => 'Foo',
         ]);
 
         $this->assertEquals($expectedSource, $manipulator->getSourceCode());
@@ -582,7 +647,7 @@ CODE
     public function getTestsForAddAnnotationToClass()
     {
         yield 'no_doc_block' => [
-            <<<EOF
+<<<EOF
 <?php
 
 namespace Acme;
@@ -591,8 +656,8 @@ class Foo
 {
 }
 EOF
-            ,
-            <<<EOF
+,
+<<<EOF
 <?php
 
 namespace Acme;
@@ -606,10 +671,10 @@ class Foo
 {
 }
 EOF
-        ];
+];
 
         yield 'normal_doc_block' => [
-            <<<EOF
+<<<EOF
 <?php
 
 namespace Acme;
@@ -621,8 +686,8 @@ class Foo
 {
 }
 EOF
-            ,
-            <<<EOF
+,
+<<<EOF
 <?php
 
 namespace Acme;
@@ -637,10 +702,10 @@ class Foo
 {
 }
 EOF
-        ];
+];
 
         yield 'simple_inline_doc_block' => [
-            <<<EOF
+<<<EOF
 <?php
 
 namespace Acme;
@@ -650,8 +715,8 @@ class Foo
 {
 }
 EOF
-            ,
-            <<<EOF
+,
+<<<EOF
 <?php
 
 namespace Acme;
@@ -669,7 +734,7 @@ EOF
         ];
 
         yield 'weird_inline_doc_block' => [
-            <<<EOF
+<<<EOF
 <?php
 
 namespace Acme;
@@ -679,8 +744,8 @@ class Foo
 {
 }
 EOF
-            ,
-            <<<EOF
+,
+<<<EOF
 <?php
 
 namespace Acme;
@@ -695,6 +760,146 @@ class Foo
 {
 }
 EOF
-        ];
+];
+    }
+
+    public function testAddTraitInEmptyClass()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_only_trait.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addTrait('App\TestTrait');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddTraitWithProperty()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_prop_trait.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addTrait('App\TestTrait');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddTraitWithConstant()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_const_trait.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addTrait('App\TestTrait');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddTraitWithTrait()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_with_trait.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addTrait('App\TestTrait');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddTraitAlReadyExists()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addTrait('App\TraitAlreadyHere');
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddConstructor()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserEmpty_with_constructor.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addConstructor([
+                (new Param('someObjectParam'))->setType('object')->getNode(),
+                (new Param('someStringParam'))->setType('string')->getNode(),
+                ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddConstructorInClassContainsPropsAndMethods()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserSimple_with_constructor.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addConstructor([
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddConstructorInClassContainsOnlyConstants()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/User_with_constructor_constante.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $manipulator->addConstructor([
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
+
+        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function testAddConstructorInClassContainsConstructor()
+    {
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_with_constructor.php');
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        $this->expectException('LogicException');
+        $this->expectExceptionMessage('Constructor already exists');
+
+        $manipulator->addConstructor([
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+<?php
+$this->someObjectParam = $someObjectParam;
+$this->someMethod($someStringParam);
+CODE
+        );
     }
 }

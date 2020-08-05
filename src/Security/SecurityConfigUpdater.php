@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
+use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 
 /**
  * @internal
@@ -23,12 +24,6 @@ final class SecurityConfigUpdater
 
     /**
      * Updates security.yaml contents based on a new User class.
-     *
-     * @param string                 $yamlSource
-     * @param UserClassConfiguration $userConfig
-     * @param string                 $userClass
-     *
-     * @return string
      */
     public function updateForUserClass(string $yamlSource, UserClassConfiguration $userConfig, string $userClass): string
     {
@@ -48,7 +43,7 @@ final class SecurityConfigUpdater
         return $contents;
     }
 
-    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass): string
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup): string
     {
         $this->manipulator = new YamlSourceManipulator($yamlSource);
 
@@ -80,6 +75,16 @@ final class SecurityConfigUpdater
             $firewall['guard']['entry_point'] = $chosenEntryPoint ?? current($firewall['guard']['authenticators']);
         }
 
+        if (!isset($firewall['logout']) && $logoutSetup) {
+            $firewall['logout'] = ['path' => 'app_logout'];
+            $firewall['logout'][] = $this->manipulator->createCommentLine(
+                ' where to redirect after logout'
+            );
+            $firewall['logout'][] = $this->manipulator->createCommentLine(
+                ' target: app_any_route'
+            );
+        }
+
         $newData['security']['firewalls'][$firewallName] = $firewall;
         $this->manipulator->setData($newData);
         $contents = $this->manipulator->getContents();
@@ -98,12 +103,7 @@ final class SecurityConfigUpdater
 
     private function updateProviders(UserClassConfiguration $userConfig, string $userClass)
     {
-        if ($this->isSingleInMemoryProviderConfigured()) {
-            // empty the providers if the generic "in_memory" is the only one
-            $newData = $this->manipulator->getData();
-            $newData['security']['providers'] = [];
-            $this->manipulator->setData($newData);
-        }
+        $this->removeMemoryProviderIfIsSingleConfigured();
 
         $newData = $this->manipulator->getData();
         $newData['security']['providers']['__'] = $this->manipulator->createCommentLine(
@@ -137,9 +137,30 @@ final class SecurityConfigUpdater
         }
 
         $newData['security']['encoders'][$userClass] = [
-            'algorithm' => $userConfig->shouldUseArgon2() ? 'argon2i' : 'bcrypt',
+            'algorithm' => $userConfig->shouldUseArgon2() ? 'argon2i' : (class_exists(NativePasswordEncoder::class) ? 'auto' : 'bcrypt'),
         ];
         $newData['security']['encoders']['_'] = $this->manipulator->createEmptyLine();
+
+        $this->manipulator->setData($newData);
+    }
+
+    private function removeMemoryProviderIfIsSingleConfigured()
+    {
+        if (!$this->isSingleInMemoryProviderConfigured()) {
+            return;
+        }
+
+        $newData = $this->manipulator->getData();
+
+        $memoryProviderName = array_keys($newData['security']['providers'])[0];
+
+        $newData['security']['providers'] = [];
+
+        foreach ($newData['security']['firewalls'] as &$firewall) {
+            if (($firewall['provider'] ?? null) === $memoryProviderName) {
+                $firewall['provider'] = 'app_user_provider';
+            }
+        }
 
         $this->manipulator->setData($newData);
     }
@@ -158,6 +179,6 @@ final class SecurityConfigUpdater
 
         $firstProviderConfig = array_values($providersConfig)[0];
 
-        return array_key_exists('memory', $firstProviderConfig);
+        return \array_key_exists('memory', $firstProviderConfig);
     }
 }

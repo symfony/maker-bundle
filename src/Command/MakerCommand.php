@@ -99,7 +99,7 @@ final class MakerCommand extends Command
         $this->maker->interact($input, $this->io, $this);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->maker->generate($input, $this->io, $this->generator);
 
@@ -107,6 +107,8 @@ final class MakerCommand extends Command
         if ($this->generator->hasPendingOperations()) {
             throw new \LogicException('Make sure to call the writeChanges() method on the generator.');
         }
+
+        return 0;
     }
 
     public function setApplication(Application $application = null)

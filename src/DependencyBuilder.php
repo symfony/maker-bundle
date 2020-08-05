@@ -16,7 +16,7 @@ final class DependencyBuilder
     private $dependencies = [];
     private $devDependencies = [];
 
-    private $minimumPHPVersion = 70000;
+    private $minimumPHPVersion = 70100;
 
     /**
      * Add a dependency that will be reported if the given class is missing.
@@ -44,7 +44,7 @@ final class DependencyBuilder
 
     public function requirePHP71()
     {
-        $this->minimumPHPVersion = 70100;
+        // no-op - MakerBundle now required PHP 7.1
     }
 
     /**
@@ -96,7 +96,7 @@ final class DependencyBuilder
         $message = sprintf(
             "Missing package%s: %s, run:\n",
             $packagesCount > 1 ? 's' : '',
-            $message ? $message : sprintf('to use the %s command', $commandName)
+            $message ?: sprintf('to use the %s command', $commandName)
         );
 
         if (!empty($packages)) {
@@ -136,7 +136,7 @@ final class DependencyBuilder
         $missingPackages = [];
         $missingOptionalPackages = [];
         foreach ($dependencies as $package) {
-            if (class_exists($package['class']) || interface_exists($package['class'])) {
+            if (class_exists($package['class']) || interface_exists($package['class']) || trait_exists($package['class'])) {
                 continue;
             }
             if (true === $package['required']) {

@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests;
 
 use PHPUnit\Framework\TestCase;
@@ -42,6 +51,22 @@ class DependencyBuilderTest extends TestCase
         $this->assertSame([], $actualDeps);
     }
 
+    public function testGetMissingDependenciesBasedOnTraitsAndInterfaces()
+    {
+        $depBuilder = new DependencyBuilder();
+        $depBuilder->addClassDependency('DummyInterface', 'dummy-interface-package');
+        $depBuilder->addClassDependency('DummyTrait', 'dummy-trait-package');
+
+        $actualDeps = $depBuilder->getMissingDependencies();
+        $this->assertSame(['dummy-interface-package', 'dummy-trait-package'], $actualDeps);
+
+        eval('interface DummyInterface{}');
+        eval('trait DummyTrait{}');
+
+        $actualDeps = $depBuilder->getMissingDependencies();
+        $this->assertSame([], $actualDeps);
+    }
+
     /**
      * @dataProvider getMissingPackagesMessageTests
      */
@@ -66,7 +91,7 @@ class DependencyBuilderTest extends TestCase
         yield 'nothing_missing' => [
             [],
             [],
-            ''
+            '',
         ];
 
         yield 'missing_one_package' => [

@@ -15,7 +15,7 @@ class <?= $class_name ?> implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-           '<?= $event ?>' => '<?= $method_name ?>',
+            <?= $event ?> => '<?= $method_name ?>',
         ];
     }
 }

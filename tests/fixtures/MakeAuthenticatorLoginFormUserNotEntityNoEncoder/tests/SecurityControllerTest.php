@@ -14,7 +14,7 @@ class SecurityControllerTest extends WebTestCase
         $this->assertSame('urlGenerator', $constructorParameters[0]->getName());
 
         // assert authenticator is *not* injected
-        $this->assertEquals(2, \count($constructorParameters));
+        $this->assertCount(2, $constructorParameters);
 
         $client = self::createClient();
         $crawler = $client->request('GET', '/login');
@@ -24,12 +24,12 @@ class SecurityControllerTest extends WebTestCase
         $form = $crawler->filter('form')->form();
         $form->setValues(
             [
-                'email'    => 'bar',
+                'email' => 'bar',
                 'password' => 'foo',
             ]
         );
         $client->submit($form);
 
-        $this->assertContains('TODO: check the credentials', $client->getResponse()->getContent());
+        $this->assertStringContainsString('TODO: check the credentials', $client->getResponse()->getContent());
     }
 }
