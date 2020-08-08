@@ -444,7 +444,7 @@ echo json_encode($missingDependencies);
     private function getTargetFlexVersion(): string
     {
         if (null === $this->targetFlexVersion) {
-            $targetVersion = $_SERVER['MAKER_TEST_VERSION'] ?? 'stable-dev';
+            $targetVersion = $_SERVER['MAKER_TEST_VERSION'] ?? 'stable';
 
             if ('stable' === $targetVersion) {
                 $this->targetFlexVersion = '';
