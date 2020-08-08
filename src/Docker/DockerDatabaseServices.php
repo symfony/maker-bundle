@@ -31,6 +31,7 @@ final class DockerDatabaseServices
                     'image' => sprintf('mariadb:%s', $version),
                     'environment' => [
                         'MYSQL_ROOT_PASSWORD' => 'password',
+                        'MYSQL_DATABASE' => 'main',
                     ],
                 ];
             case 'mysql':
@@ -38,6 +39,7 @@ final class DockerDatabaseServices
                     'image' => sprintf('mysql:%s', $version),
                     'environment' => [
                         'MYSQL_ROOT_PASSWORD' => 'password',
+                        'MYSQL_DATABASE' => 'main',
                     ],
                 ];
             case 'postgres':
