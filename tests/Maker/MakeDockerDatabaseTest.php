@@ -68,6 +68,7 @@ final class MakeDockerDatabaseTest extends MakerTestCase
 
                     self::assertSame('mysql:latest', $mysql['image']);
                     self::assertSame('password', $mysql['environment']['MYSQL_ROOT_PASSWORD']);
+                    self::assertSame('main', $mysql['environment']['MYSQL_DATABASE']);
                     self::assertSame(['3306'], $mysql['ports']);
                 }
             ),
@@ -94,6 +95,7 @@ final class MakeDockerDatabaseTest extends MakerTestCase
 
                     self::assertSame('mariadb:latest', $mariadb['image']);
                     self::assertSame('password', $mariadb['environment']['MYSQL_ROOT_PASSWORD']);
+                    self::assertSame('main', $mariadb['environment']['MYSQL_DATABASE']);
                     self::assertSame(['3306'], $mariadb['ports']);
                 }
             ),
