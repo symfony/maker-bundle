@@ -20,7 +20,12 @@ matrix:
         - php: 7.1.33
           env: MAKER_TEST_VERSION=stable
         - php: 7.3
-          env: MAKER_TEST_VERSION=stable-dev
+          env: MAKER_TEST_VERSION=stable
+          # too unstable - sometimes we need other dev deps
+          # for things to pass, sometimes dev deps of other libraries
+          # are unstable and cause things to fail.
+#        - php: 7.3
+#          env: MAKER_TEST_VERSION=stable-dev
         - php: 7.3
           env: MAKER_TEST_VERSION=dev
     allow_failures:
