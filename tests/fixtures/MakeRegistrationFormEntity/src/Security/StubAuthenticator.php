@@ -4,6 +4,7 @@ namespace App\Security;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -20,7 +21,7 @@ class StubAuthenticator extends AbstractGuardAuthenticator
         $this->router = $router;
     }
 
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
         return false;
     }
@@ -29,11 +30,11 @@ class StubAuthenticator extends AbstractGuardAuthenticator
     {
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
     {
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
     }
 
@@ -41,7 +42,7 @@ class StubAuthenticator extends AbstractGuardAuthenticator
     {
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey): ?Response
     {
         return new RedirectResponse($this->router->generate('app_homepage'));
     }

@@ -6,6 +6,7 @@ namespace <?= $namespace ?>;
 <?= $user_is_entity ? "use Doctrine\\ORM\\EntityManagerInterface;\n" : null ?>
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 <?= $user_needs_encoder ? "use Symfony\\Component\\Security\\Core\\Encoder\\UserPasswordEncoderInterface;\n" : null ?>
@@ -39,7 +40,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
 <?= $user_needs_encoder ? "        \$this->passwordEncoder = \$passwordEncoder;\n" : null ?>
     }
 
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
         return self::LOGIN_ROUTE === $request->attributes->get('_route')
             && $request->isMethod('POST');
@@ -60,7 +61,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
         return $credentials;
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
     {
         $token = new CsrfToken('authenticate', $credentials['csrf_token']);
         if (!$this->csrfTokenManager->isTokenValid($token)) {
@@ -80,7 +81,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
         return $user;
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
         <?= $user_needs_encoder ? "return \$this->passwordEncoder->isPasswordValid(\$user, \$credentials['password']);\n"
         : "// Check the user's password or other credentials and return true or false
@@ -98,7 +99,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
     }
 
 <?php endif ?>
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey): ?Response
     {
         if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
             return new RedirectResponse($targetPath);
@@ -108,7 +109,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
         throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
     }
 
-    protected function getLoginUrl()
+    protected function getLoginUrl(): string
     {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
     }

@@ -94,8 +94,9 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getSalt()
+    public function getSalt(): ?string
     {
+        return null;
     }
 
     public function eraseCredentials()

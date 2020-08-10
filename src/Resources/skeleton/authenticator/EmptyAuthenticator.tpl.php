@@ -3,6 +3,7 @@
 namespace <?= $namespace ?>;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -11,7 +12,7 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
 class <?= $class_name ?> extends AbstractGuardAuthenticator
 {
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
         // todo
     }
@@ -21,12 +22,12 @@ class <?= $class_name ?> extends AbstractGuardAuthenticator
         // todo
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
     {
         // todo
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
         // todo
     }
@@ -36,7 +37,7 @@ class <?= $class_name ?> extends AbstractGuardAuthenticator
         // todo
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey): ?Response
     {
         // todo
     }
