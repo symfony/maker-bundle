@@ -21,7 +21,7 @@ use Symfony\Component\Finder\Finder;
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  *
- * @internal
+ * @final
  */
 class FileManager
 {
