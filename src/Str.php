@@ -178,7 +178,7 @@ final class Str
         $nouns = [
             'elephant',
             'pizza',
-            'jellybean',
+            'popsicle',
             'chef',
             'puppy',
             'gnome',
