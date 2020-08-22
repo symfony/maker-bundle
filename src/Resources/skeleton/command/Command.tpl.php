@@ -37,6 +37,6 @@ class <?= $class_name; ?> extends Command
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 
-        return 0;
+        return <?= defined('Symfony\Component\Console\Command\Command::SUCCESS') ? 'Command::SUCCESS' : '0' ?>;
     }
 }
