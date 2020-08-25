@@ -1,0 +1,52 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-07-08T19:00:34Z
+
+Excellent catch!
+
+To avoid needing 2 templates, could we improve the HTML one to make it friendlier? It seems like the biggest problem is the fact that the link just says "here"... which is probably not really a great thing for even an HTML email. What about updating the HTML email to say:
+
+```
+<h1>Hi!</h1>
+
+<p>
+    To reset your password, please visit the following link
+</p>
+
+<a href="{{ url('app_reset_password', {token: resetToken.token}) }}">{{ url('app_reset_password', {token: resetToken.token}) }}</a>
+
+<p>
+    This link will expire in {{ tokenLifetime|date('g') }} hour(s).
+</p>
+
+<p>
+    Cheers!
+</p>
+```
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-07-08T19:01:17Z
+
+Btw, part of my motivation to avoid 2 templates is that it is very likely that the user will want to customize the email. If we ship with 2 templates, they will need to update both of them (and realize that there are 2).
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2020-07-10T15:26:46Z
+
+If possible, Ryan's solution would be better. Otherwise, let's merge this!
+
+---------------------------------------------------------------------------
+
+by pierredup at 2020-07-10T15:45:24Z
+
+I'll have a look at implementing the suggestion, but the formatting would still be off.
+Although I think this is something that should be fixed in the Symfony mailer side, as just stripping the HTML tags to create a text template causes some issues with the whitespace
+
+---------------------------------------------------------------------------
+
+by pierredup at 2020-07-13T08:31:42Z
+
+I updated the template to the suggestion but inlined some of the text with the HTML tags. This keeps the formatting clean when generating the text template and doesn't have any additional extra spaces before the text.
+
+![Screenshot 2020-07-13 at 10 29 55](https://user-images.githubusercontent.com/144858/87281901-fda88c00-c4f3-11ea-8cef-4b660bbba3e8.png)
