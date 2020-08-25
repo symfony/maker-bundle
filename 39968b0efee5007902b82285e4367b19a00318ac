@@ -1,0 +1,13 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-08-25T17:14:22Z
+
+Btw, the cause is that starting in DoctrineBundle 2.1.1, DoctrineBundle *allows* doctrine/persistence 2.0 and doctrine/common 3.0. IF you have these installed, then any type-hints that use the old, legacy `Doctrine\Common\Persistence\ManagerRegistry` class no longer works.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-08-25T20:47:22Z
+
+The tests are a mess due to this same change causing failures in API Platform - https://github.com/api-platform/core/issues/3683 - and an unrelated regression in the PHP-Parser (which is still on an unreleased version) - https://github.com/nikic/PHP-Parser/pull/705
+
+Merging so we can get Maker working for people again :)
