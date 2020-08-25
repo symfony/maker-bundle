@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-07-08T19:08:48Z
+
+Hey @jenyak!
+
+Hmm. So yes... but because this bundle is still used in Symfony 4, this needs to be conditional: we can only add the `string` type-hint if the user is using Symfony 5 (or, more accurately, if `AuthenticatorInterface::onAuthenticationSuccess` has a `string` type for its 3rd arg - we could use Reflection to be sure). We would need to detect that and pass this into the template so we could do this conditionally.
+
+Could you make that change?
+
+Thanks!
+
+---------------------------------------------------------------------------
+
+by jenyak at 2020-07-10T13:09:50Z
+
+Hi Ryan. Please look at the changes. I did as you suggested.
