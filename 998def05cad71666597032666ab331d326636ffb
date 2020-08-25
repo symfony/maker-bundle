@@ -1,0 +1,39 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-07-08T19:02:41Z
+
+Hey @j4nr6n!
+
+Can you rebase? The master tests were failing when you made this - but they should be better now. I have a feeling that once the tests pass, a bunch might be failing (that are looking for this `()`) - but we will need to see!
+
+Thanks!
+
+---------------------------------------------------------------------------
+
+by j4nr6n at 2020-07-08T22:08:12Z
+
+Yeah, no problem @weaverryan!
+
+FYI: I ran the tests locally both before and after my changes and I didn't see any change in the test results.
+Before:
+![Tests-before](https://user-images.githubusercontent.com/3661151/86974854-09d3c880-c145-11ea-9045-46c38268b897.png)
+
+After:
+![Tests-after](https://user-images.githubusercontent.com/3661151/86974893-1d7f2f00-c145-11ea-9a5b-896a355a1e30.png)
+
+I don't think the errors I'm seeing are related, but I'd love to figure out what is going on. :smile: I don't see them replicated on the CI services.
+```
+1) Symfony\Bundle\MakerBundle\Tests\Maker\MakeControllerTest::testExecute with data set "controller_without_template" (Symfony\Bundle\MakerBundle\Test\MakerTestDetails Object (...))
+Failed asserting that '\n
+ Choose a name for your controller class (e.g. TinyPizzaController):\n
+ > \n
+ created: src/Controller/FooNoTemplateController.php\n
+\n
+           \n
+  Success! \n
+           \n
+\n
+ Next: Open your new controller class and add some pages!\n
+' contains "created: src/Controller/FooNoTemplateController.php".
+```
+`ctrl` + `f` found it...
