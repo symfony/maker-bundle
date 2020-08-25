@@ -222,7 +222,8 @@ final class MakeAuthenticator extends AbstractMaker
                 $input->getArgument('authenticator-type'),
                 $input->getArgument('authenticator-class'),
                 $securityData,
-                $input->hasArgument('user-class') ? $input->getArgument('user-class') : null
+                $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
+                $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false
             )
         );
     }
@@ -306,7 +307,7 @@ final class MakeAuthenticator extends AbstractMaker
         );
     }
 
-    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, array $securityData, $userClass): array
+    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, array $securityData, $userClass, bool $logoutSetup): array
     {
         $nextTexts = ['Next:'];
         $nextTexts[] = '- Customize your new authenticator.';
@@ -316,7 +317,8 @@ final class MakeAuthenticator extends AbstractMaker
                 'security: {}',
                 'main',
                 null,
-                $authenticatorClass
+                $authenticatorClass,
+                $logoutSetup
             );
             $nextTexts[] = '- Your <info>security.yaml</info> could not be updated automatically. You\'ll need to add the following config manually:\n\n'.$yamlExample;
         }
