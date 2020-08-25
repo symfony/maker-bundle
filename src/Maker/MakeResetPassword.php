@@ -52,11 +52,13 @@ class MakeResetPassword extends AbstractMaker
 {
     private $fileManager;
     private $doctrineHelper;
+    private $entityClassGenerator;
 
-    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper)
+    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, EntityClassGenerator $entityClassGenerator)
     {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
+        $this->entityClassGenerator = $entityClassGenerator;
     }
 
     public static function getCommandName(): string
@@ -323,9 +325,7 @@ class MakeResetPassword extends AbstractMaker
 
     private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails, string $userClass): void
     {
-        $entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
-
-        $requestEntityPath = $entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, false);
+        $requestEntityPath = $this->entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, false);
 
         $generator->writeChanges();
 
@@ -359,7 +359,7 @@ CODE
 
         $this->fileManager->dumpFile($requestEntityPath, $manipulator->getSourceCode());
 
-        $entityClassGenerator->generateRepositoryClass(
+        $this->entityClassGenerator->generateRepositoryClass(
             $repositoryClassNameDetails->getFullName(),
             $requestClassNameDetails->getFullName(),
             false,

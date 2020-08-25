@@ -77,6 +77,7 @@
             <service id="maker.maker.make_reset_password" class="Symfony\Bundle\MakerBundle\Maker\MakeResetPassword">
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.doctrine_helper" />
+                <argument type="service" id="maker.entity_class_generator" />
                 <tag name="maker.command" />
             </service>
 
