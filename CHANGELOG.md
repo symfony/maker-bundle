@@ -1,3 +1,9 @@
+1.21
+====
+
+* [make:docker:database] When using MySQL, a "main" database is now created
+   automatically for you - #656 thanks to @robmeijer!
+
 1.20
 ====
 
