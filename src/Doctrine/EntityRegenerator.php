@@ -11,9 +11,10 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
-use Doctrine\Common\Persistence\Mapping\MappingException as CommonMappingException;
+use Doctrine\Common\Persistence\Mapping\MappingException as LegacyCommonMappingException;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException;
+use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -43,7 +44,7 @@ final class EntityRegenerator
     {
         try {
             $metadata = $this->doctrineHelper->getMetadata($classOrNamespace);
-        } catch (MappingException | CommonMappingException $mappingException) {
+        } catch (MappingException | LegacyCommonMappingException | PersistenceMappingException $mappingException) {
             $metadata = $this->doctrineHelper->getMetadata($classOrNamespace, true);
         }
 
