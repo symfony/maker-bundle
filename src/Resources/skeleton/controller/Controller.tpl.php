@@ -3,6 +3,7 @@
 namespace <?= $namespace; ?>;
 
 use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name; ?>;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
@@ -10,7 +11,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
     /**
      * @Route("<?= $route_path ?>", name="<?= $route_name ?>")
      */
-    public function index()
+    public function index(): Response
     {
 <?php if ($with_template) { ?>
         return $this->render('<?= $template_name ?>', [
