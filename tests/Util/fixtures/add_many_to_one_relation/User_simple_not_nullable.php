@@ -17,7 +17,7 @@ class User
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Category", inversedBy="foods")
+     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="foods")
      * @ORM\JoinColumn(nullable=false)
      */
     private $category;

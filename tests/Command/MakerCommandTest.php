@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Command;
 
 use PHPUnit\Framework\TestCase;
@@ -12,16 +21,15 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class MakerCommandTest extends TestCase
 {
-    /**
-     * @expectedException \Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException
-     * @expectedExceptionMessageRegExp /composer require foo-package/
-     */
     public function testExceptionOnMissingDependencies()
     {
+        $this->expectException(\Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException::class);
+        $this->expectExceptionMessageRegExp('/composer require foo-package/');
+
         $maker = $this->createMock(MakerInterface::class);
         $maker->expects($this->once())
             ->method('configureDependencies')
-            ->willReturnCallback(function(DependencyBuilder $depBuilder) {
+            ->willReturnCallback(function (DependencyBuilder $depBuilder) {
                 $depBuilder->addClassDependency('Foo', 'foo-package');
             });
 
@@ -31,7 +39,7 @@ class MakerCommandTest extends TestCase
         // needed because it's normally set by the Application
         $command->setName('make:foo');
         $tester = new CommandTester($command);
-        $tester->execute(array());
+        $tester->execute([]);
     }
 
     public function testExceptionOnUnknownRootNamespace()
@@ -44,8 +52,8 @@ class MakerCommandTest extends TestCase
         // needed because it's normally set by the Application
         $command->setName('make:foo');
         $tester = new CommandTester($command);
-        $tester->execute(array());
+        $tester->execute([]);
 
-        $this->assertContains('using a namespace other than "Unknown"', $tester->getDisplay());
+        $this->assertStringContainsString('using a namespace other than "Unknown"', $tester->getDisplay());
     }
 }

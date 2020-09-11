@@ -69,6 +69,15 @@ final class MakerTestEnvironment
         return $this->path;
     }
 
+    public function readFile(string $path): string
+    {
+        if (!file_exists($this->path.'/'.$path)) {
+            throw new \InvalidArgumentException(sprintf('Cannot find file "%s"', $path));
+        }
+
+        return file_get_contents($this->path.'/'.$path);
+    }
+
     private function changeRootNamespaceIfNeeded()
     {
         if ('App' === ($rootNamespace = $this->testDetails->getRootNamespace())) {
@@ -129,7 +138,7 @@ final class MakerTestEnvironment
             try {
                 // lets do some magic here git is faster than copy
                 MakerTestProcess::create(
-                    'git clone "$FLEX_PATH" "$APP_PATH"',
+                    '\\' === \DIRECTORY_SEPARATOR ? 'git clone %FLEX_PATH% %APP_PATH%' : 'git clone "$FLEX_PATH" "$APP_PATH"',
                     \dirname($this->flexPath),
                     [
                         'FLEX_PATH' => $this->flexPath,
@@ -199,10 +208,10 @@ final class MakerTestEnvironment
 
     public function runMaker()
     {
-        $this->preMake();
-
         // Lets remove cache
         $this->fs->remove($this->path.'/var/cache');
+
+        $this->preMake();
 
         // We don't need ansi coloring in tests!
         $testProcess = MakerTestProcess::create(
@@ -245,9 +254,9 @@ final class MakerTestEnvironment
 
         $matches = [];
 
-        preg_match_all('#(created|updated): (.*)\n#iu', $output, $matches, PREG_PATTERN_ORDER);
+        preg_match_all('#(created|updated): (]8;;[^]*\\\)?(.*?)(]8;;\\\)?\n#iu', $output, $matches, PREG_PATTERN_ORDER);
 
-        return array_map('trim', $matches[2]);
+        return array_map('trim', $matches[3]);
     }
 
     public function fileExists(string $file)
@@ -289,6 +298,7 @@ final class MakerTestEnvironment
             $yaml = file_get_contents($this->path.'/config/packages/security.yaml');
             $manipulator = new YamlSourceManipulator($yaml);
             $data = $manipulator->getData();
+
             foreach ($guardAuthenticators as $firewallName => $id) {
                 if (!isset($data['security']['firewalls'][$firewallName])) {
                     throw new \Exception(sprintf('Could not find firewall "%s"', $firewallName));
@@ -318,13 +328,19 @@ final class MakerTestEnvironment
             $this->cachePath
         )->run();
 
-        $rootPath = str_replace('\\', '\\\\', realpath(__DIR__.'/../..'));
-
-        // allow dev dependencies
         if (false !== strpos($targetVersion, 'dev')) {
+            // make sure that dev versions allow dev deps
+            // for the current stable minor of Symfony, by default,
+            // minimum-stability is NOT dev, even when getting the -dev version
+            // of symfony/skeleton
             MakerTestProcess::create('composer config minimum-stability dev', $this->flexPath)
                 ->run();
+
+            MakerTestProcess::create(['composer', 'update'], $this->flexPath)
+                ->run();
         }
+
+        $rootPath = str_replace('\\', '\\\\', realpath(__DIR__.'/../..'));
 
         // processes any changes needed to the Flex project
         $replacements = [
@@ -351,12 +367,18 @@ final class MakerTestEnvironment
         MakerTestProcess::create('composer require phpunit browser-kit symfony/css-selector --prefer-dist --no-progress --no-suggest', $this->flexPath)
                         ->run();
 
+        if ('\\' !== \DIRECTORY_SEPARATOR) {
+            $this->fs->remove($this->flexPath.'/vendor/symfony/phpunit-bridge');
+
+            $this->fs->symlink($rootPath.'/vendor/symfony/phpunit-bridge', $this->flexPath.'/vendor/symfony/phpunit-bridge');
+        }
+
         // temporarily ignoring indirect deprecations - see #237
         $replacements = [
             [
                 'filename' => '.env.test',
                 'find' => 'SYMFONY_DEPRECATIONS_HELPER=999999',
-                'replace' => 'SYMFONY_DEPRECATIONS_HELPER=weak_vendors',
+                'replace' => 'SYMFONY_DEPRECATIONS_HELPER=max[self]=0',
             ],
         ];
         $this->processReplacements($replacements, $this->flexPath);
@@ -439,12 +461,13 @@ echo json_encode($missingDependencies);
                     $version = $data['latest'];
                     $parts = explode('.', $version);
 
-                    return sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
-                case 'dev':
-                    $version = $data['dev'];
-                    $parts = explode('.', $version);
+                    $this->targetFlexVersion = sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
 
-                    return sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
+                    break;
+                case 'dev':
+                    $this->targetFlexVersion = 'dev-master';
+
+                    break;
                 default:
                     throw new \Exception('Invalid target version');
             }

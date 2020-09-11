@@ -66,12 +66,8 @@ class Generator
 
     /**
      * Generate a normal file from a template.
-     *
-     * @param string $targetPath
-     * @param string $templateName
-     * @param array  $variables
      */
-    public function generateFile(string $targetPath, string $templateName, array $variables)
+    public function generateFile(string $targetPath, string $templateName, array $variables = [])
     {
         $variables = array_merge($variables, [
             'helper' => $this->twigHelper,
@@ -126,12 +122,9 @@ class Generator
      *      // Cool\Stuff\BalloonController
      *      $gen->createClassNameDetails('Cool\\Stuff\\Balloon', 'Controller', 'Controller');
      *
-     * @param string $name                   The short "name" that will be turned into the class name
-     * @param string $namespacePrefix        Recommended namespace where this class should live, but *without* the "App\\" part
-     * @param string $suffix                 Optional suffix to guarantee is on the end of the class
-     * @param string $validationErrorMessage
-     *
-     * @return ClassNameDetails
+     * @param string $name            The short "name" that will be turned into the class name
+     * @param string $namespacePrefix Recommended namespace where this class should live, but *without* the "App\\" part
+     * @param string $suffix          Optional suffix to guarantee is on the end of the class
      */
     public function createClassNameDetails(string $name, string $namespacePrefix, string $suffix = '', string $validationErrorMessage = ''): ClassNameDetails
     {
@@ -162,10 +155,7 @@ class Generator
     private function addOperation(string $targetPath, string $templateName, array $variables)
     {
         if ($this->fileManager->fileExists($targetPath)) {
-            throw new RuntimeCommandException(sprintf(
-                'The file "%s" can\'t be generated because it already exists.',
-                $this->fileManager->relativizePath($targetPath)
-            ));
+            throw new RuntimeCommandException(sprintf('The file "%s" can\'t be generated because it already exists.', $this->fileManager->relativizePath($targetPath)));
         }
 
         $variables['relative_path'] = $this->fileManager->relativizePath($targetPath);
@@ -235,12 +225,8 @@ class Generator
 
     /**
      * Generate a template file.
-     *
-     * @param string $targetPath
-     * @param string $templateName
-     * @param array  $variables
      */
-    public function generateTemplate(string $targetPath, string $templateName, array $variables)
+    public function generateTemplate(string $targetPath, string $templateName, array $variables = [])
     {
         $this->generateFile(
             $this->fileManager->getPathForTemplate($targetPath),

@@ -1,0 +1,15 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            description: |
+                Multiline string
+                Second line
+===
+
+===
+nelmio_api_doc:
+    documentation:
+        info:
+            description: |
+                Multiline string
+                Second line

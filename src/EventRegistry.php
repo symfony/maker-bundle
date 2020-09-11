@@ -14,7 +14,11 @@ namespace Symfony\Bundle\MakerBundle;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
+use Symfony\Component\EventDispatcher\Event as LegacyEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\FilterControllerArgumentsEvent;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
@@ -23,17 +27,15 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
-use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
-use Symfony\Component\HttpKernel\Event\ControllerEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Event\ViewEvent;
-use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
+use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\Security\Core\Event\AuthenticationEvent;
 use Symfony\Component\Security\Core\Event\AuthenticationFailureEvent;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * @internal
@@ -76,11 +78,10 @@ class EventRegistry
         $this->eventDispatcher = $eventDispatcher;
 
         // Loop through the new event classes
-        foreach (self::$newEventsMap as $oldEventName => $newEventClass) {
+        foreach (self::$newEventsMap as $eventName => $newEventClass) {
             //Check if the new event classes exist, if so replace the old one with the new.
-            if (isset(self::$eventsMap[$oldEventName]) && class_exists($newEventClass)) {
-                unset(self::$eventsMap[$oldEventName]);
-                self::$eventsMap[$newEventClass] = $newEventClass;
+            if (isset(self::$eventsMap[$eventName]) && class_exists($newEventClass)) {
+                self::$eventsMap[$eventName] = $newEventClass;
             }
         }
     }
@@ -106,6 +107,10 @@ class EventRegistry
             if (isset(self::$newEventsMap[$listenerKey])) {
                 unset($listeners[$listenerKey]);
             }
+
+            if (!isset(self::$eventsMap[$listenerKey])) {
+                self::$eventsMap[$listenerKey] = $this->getEventClassName($listenerKey);
+            }
         }
 
         $activeEvents = array_unique(array_merge($activeEvents, array_keys($listeners)));
@@ -120,6 +125,11 @@ class EventRegistry
      */
     public function getEventClassName(string $event)
     {
+        // if the event is already a class name, use it
+        if (class_exists($event)) {
+            return $event;
+        }
+
         if (isset(self::$eventsMap[$event])) {
             return self::$eventsMap[$event];
         }
@@ -141,10 +151,30 @@ class EventRegistry
             }
 
             if (null !== $type = $args[0]->getType()) {
-                return (string) $type;
+                $type = $type instanceof \ReflectionNamedType ? $type->getName() : $type->__toString();
+
+                if (LegacyEvent::class === $type && class_exists(Event::class)) {
+                    return Event::class;
+                }
+
+                // ignore an "object" type-hint
+                if ('object' === $type) {
+                    continue;
+                }
+
+                return $type;
             }
         }
 
         return null;
+    }
+
+    public function listActiveEvents(array $events)
+    {
+        foreach ($events as $key => $event) {
+            $events[$key] = sprintf('%s (<fg=yellow>%s</>)', $event, self::$eventsMap[$event]);
+        }
+
+        return $events;
     }
 }

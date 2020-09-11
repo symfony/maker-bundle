@@ -44,12 +44,11 @@ final class MakerTestDetails
 
     private $requiredPhpVersion;
 
+    private $requiredPackageVersions = [];
+
     private $guardAuthenticators = [];
 
     /**
-     * @param MakerInterface $maker
-     * @param array          $inputs
-     *
      * @return static
      */
     public static function createTest(MakerInterface $maker, array $inputs)
@@ -219,6 +218,13 @@ final class MakerTestDetails
         return $this;
     }
 
+    public function addRequiredPackageVersion(string $packageName, string $versionConstraint): self
+    {
+        $this->requiredPackageVersions[] = ['name' => $packageName, 'version_constraint' => $versionConstraint];
+
+        return $this;
+    }
+
     public function setGuardAuthenticator(string $firewallName, string $id): self
     {
         $this->guardAuthenticators[$firewallName] = $id;
@@ -318,5 +324,10 @@ final class MakerTestDetails
     public function getGuardAuthenticators(): array
     {
         return $this->guardAuthenticators;
+    }
+
+    public function getRequiredPackageVersions(): array
+    {
+        return $this->requiredPackageVersions;
     }
 }

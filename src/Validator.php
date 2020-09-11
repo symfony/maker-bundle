@@ -11,7 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -34,13 +35,13 @@ final class Validator
             'clone', 'const', 'continue', 'declare', 'default', 'die', 'do',
             'echo', 'else', 'elseif', 'empty', 'enddeclare', 'endfor',
             'endforeach', 'endif', 'endswitch', 'endwhile', 'eval',
-            'exit', 'extends', 'final', 'for', 'foreach', 'function',
+            'exit', 'extends', 'final', 'finally', 'for', 'foreach', 'function',
             'global', 'goto', 'if', 'implements', 'include',
             'include_once', 'instanceof', 'insteadof', 'interface', 'isset',
             'list', 'namespace', 'new', 'or', 'print', 'private',
             'protected', 'public', 'require', 'require_once', 'return',
             'static', 'switch', 'throw', 'trait', 'try', 'unset',
-            'use', 'var', 'while', 'xor',
+            'use', 'var', 'while', 'xor', 'yield',
             'int', 'float', 'bool', 'string', 'true', 'false', 'null', 'void',
             'iterable', 'object', '__file__', '__line__', '__dir__', '__function__', '__class__',
             '__method__', '__namespace__', '__trait__', 'self', 'parent',
@@ -155,8 +156,15 @@ final class Validator
         return $name;
     }
 
-    public static function validateDoctrineFieldName(string $name, ManagerRegistry $registry)
+    /**
+     * @param ManagerRegistry|LegacyManagerRegistry $registry
+     */
+    public static function validateDoctrineFieldName(string $name, $registry)
     {
+        if (!$registry instanceof ManagerRegistry && !$registry instanceof LegacyManagerRegistry) {
+            throw new \InvalidArgumentException(sprintf('Argument 2 to %s::validateDoctrineFieldName must be an instance of %s, %s passed.', __CLASS__, ManagerRegistry::class, \is_object($registry) ? \get_class($registry) : \gettype($registry)));
+        }
+
         // check reserved words
         if ($registry->getConnection()->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name)) {
             throw new \InvalidArgumentException(sprintf('Name "%s" is a reserved word.', $name));
@@ -165,6 +173,15 @@ final class Validator
         self::validatePropertyName($name);
 
         return $name;
+    }
+
+    public static function validateEmailAddress(?string $email): string
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new RuntimeCommandException(sprintf('"%s" is not a valid email address.', $email));
+        }
+
+        return $email;
     }
 
     public static function existsOrNull(string $className = null, array $entities = [])

@@ -1,16 +1,28 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Doctrine;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
+use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
+use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Filesystem\Filesystem;
@@ -29,6 +41,17 @@ class EntityRegeneratorTest extends TestCase
      */
     public function testRegenerateEntities(string $expectedDirName, bool $overwrite)
     {
+        /*
+         * Prior to symfony/doctrine-bridge 5.0 (which require
+         * PHP 7.3), the deprecated Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain
+         * is used when our test container. This shows up as a *direct*
+         * deprecation. We're choosing to silence it here, instead of
+         * ignoring all direct deprecations.
+         */
+        if (\PHP_VERSION_ID < 70300) {
+            $this->setGroups(['@legacy']);
+        }
+
         $kernel = new TestEntityRegeneratorKernel('dev', true);
         $this->doTestRegeneration(
             __DIR__.'/fixtures/source_project',
@@ -44,12 +67,12 @@ class EntityRegeneratorTest extends TestCase
     {
         yield 'regenerate_no_overwrite' => [
             'expected_no_overwrite',
-            false
+            false,
         ];
 
         yield 'regenerate_overwrite' => [
             'expected_overwrite',
-            true
+            true,
         ];
     }
 
@@ -81,19 +104,23 @@ class EntityRegeneratorTest extends TestCase
         $autoloaderUtil = $this->createMock(AutoloaderUtil::class);
         $autoloaderUtil->expects($this->any())
             ->method('getPathForFutureClass')
-            ->willReturnCallback(function($className) use ($tmpDir, $targetDirName) {
+            ->willReturnCallback(function ($className) use ($tmpDir, $targetDirName) {
                 $shortClassName = str_replace('Symfony\Bundle\MakerBundle\Tests\tmp\\'.$targetDirName.'\src\\', '', $className);
 
                 // strip the App\, change \ to / and add .php
                 return $tmpDir.'/src/'.str_replace('\\', '/', $shortClassName).'.php';
             });
 
-        $fileManager = new FileManager($fs, $autoloaderUtil, $tmpDir);
+        $fileManager = new FileManager($fs, $autoloaderUtil, new MakerFileLinkFormatter(null), $tmpDir);
         $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
+        $generator = new Generator($fileManager, 'App\\');
+        $entityClassGenerator = new EntityClassGenerator($generator, $doctrineHelper);
+        $entityClassGenerator->setMangerRegistryClassName(ManagerRegistry::class);
         $regenerator = new EntityRegenerator(
             $doctrineHelper,
             $fileManager,
-            new Generator($fileManager, 'App\\', true),
+            $generator,
+            $entityClassGenerator,
             $overwrite
         );
 
@@ -103,7 +130,6 @@ class EntityRegeneratorTest extends TestCase
         $finder = (new Finder())->in($expectedDir)->files();
 
         foreach ($finder as $file) {
-
             /** @var SplFileInfo $file */
             $expectedContents = file_get_contents($file->getPathname());
 
@@ -120,6 +146,7 @@ class EntityRegeneratorTest extends TestCase
     {
         $directoryIterator = new \RecursiveDirectoryIterator($sourceDir, \FilesystemIterator::SKIP_DOTS);
         $filter = new AllButTraitsIterator($directoryIterator);
+
         return new \RecursiveIteratorIterator($filter, \RecursiveIteratorIterator::SELF_FIRST);
     }
 }
@@ -130,10 +157,10 @@ class TestEntityRegeneratorKernel extends Kernel
 
     public function registerBundles()
     {
-        return array(
+        return [
             new FrameworkBundle(),
             new DoctrineBundle(),
-        );
+        ];
     }
 
     protected function configureRoutes(RouteCollectionBuilder $routes)
@@ -142,7 +169,13 @@ class TestEntityRegeneratorKernel extends Kernel
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
-        $c->setParameter('kernel.secret', 123);
+        $c->loadFromExtension('framework', [
+            'secret' => 123,
+            'router' => [
+                'utf8' => true,
+            ],
+        ]);
+
         $c->prependExtensionConfig('doctrine', [
             'dbal' => [
                 'driver' => 'pdo_sqlite',
@@ -153,12 +186,12 @@ class TestEntityRegeneratorKernel extends Kernel
                     'EntityRegenerator' => [
                         'is_bundle' => false,
                         'type' => 'annotation',
-                        'dir' => '%kernel.root_dir%/src/Entity',
+                        'dir' => '%kernel.project_dir%/src/Entity',
                         'prefix' => 'Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity',
                         'alias' => 'EntityRegeneratorApp',
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ]);
     }
 
@@ -179,10 +212,10 @@ class TestXmlEntityRegeneratorKernel extends Kernel
 
     public function registerBundles()
     {
-        return array(
+        return [
             new FrameworkBundle(),
             new DoctrineBundle(),
-        );
+        ];
     }
 
     protected function configureRoutes(RouteCollectionBuilder $routes)
@@ -191,7 +224,13 @@ class TestXmlEntityRegeneratorKernel extends Kernel
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
-        $c->setParameter('kernel.secret', 123);
+        $c->loadFromExtension('framework', [
+            'secret' => 123,
+            'router' => [
+                'utf8' => true,
+            ],
+        ]);
+
         $c->prependExtensionConfig('doctrine', [
             'dbal' => [
                 'driver' => 'pdo_sqlite',
@@ -203,12 +242,12 @@ class TestXmlEntityRegeneratorKernel extends Kernel
                     'EntityRegenerator' => [
                         'is_bundle' => false,
                         'type' => 'xml',
-                        'dir' => '%kernel.root_dir%/config/doctrine',
+                        'dir' => '%kernel.project_dir%/config/doctrine',
                         'prefix' => 'Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity',
                         'alias' => 'EntityRegeneratorApp',
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ]);
     }
 
@@ -225,7 +264,8 @@ class TestXmlEntityRegeneratorKernel extends Kernel
 
 class AllButTraitsIterator extends \RecursiveFilterIterator
 {
-    public function accept() {
-        return !in_array($this->current()->getFilename(), []);
+    public function accept()
+    {
+        return !\in_array($this->current()->getFilename(), []);
     }
 }

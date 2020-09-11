@@ -2,11 +2,11 @@
 
 namespace App\Tests;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Doctrine\ORM\EntityManager;
-use Custom\Entity\User;
 use Custom\Entity\Course;
+use Custom\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManager;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class GeneratedEntityTest extends KernelTestCase
 {
@@ -59,6 +59,6 @@ class GeneratedEntityTest extends KernelTestCase
         $this->assertEmpty($course2->getStudents());
 
         // check repository namespace
-        $this->assertStringStartsWith('Custom\\', get_class($em->getRepository(Course::class)));
+        $this->assertStringStartsWith('Custom\\', \get_class($em->getRepository(Course::class)));
     }
 }

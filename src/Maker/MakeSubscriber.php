@@ -59,7 +59,7 @@ final class MakeSubscriber extends AbstractMaker
             $events = $this->eventRegistry->getAllActiveEvents();
 
             $io->writeln(' <fg=green>Suggested Events:</>');
-            $io->listing($events);
+            $io->listing($this->eventRegistry->listActiveEvents($events));
             $question = new Question(sprintf(' <fg=green>%s</>', $command->getDefinition()->getArgument('event')->getDescription()));
             $question->setAutocompleterValues($events);
             $question->setValidator([Validator::class, 'notBlank']);
@@ -87,7 +87,7 @@ final class MakeSubscriber extends AbstractMaker
                 'event' => class_exists($event) ? sprintf('%s::class', $eventClassName) : sprintf('\'%s\'', $event),
                 'event_full_class_name' => $eventFullClassName,
                 'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
-                'method_name' => class_exists($event) ?  Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
+                'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
             ]
         );
 

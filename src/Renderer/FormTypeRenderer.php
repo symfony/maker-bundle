@@ -27,7 +27,7 @@ final class FormTypeRenderer
         $this->generator = $generator;
     }
 
-    public function render(ClassNameDetails $formClassDetails, array $formFields, ClassNameDetails $boundClassDetails = null, array $constraintClasses = [])
+    public function render(ClassNameDetails $formClassDetails, array $formFields, ClassNameDetails $boundClassDetails = null, array $constraintClasses = [], array $extraUseClasses = [])
     {
         $fieldTypeUseStatements = [];
         $fields = [];
@@ -42,6 +42,9 @@ final class FormTypeRenderer
             $fields[$name] = $fieldTypeOptions;
         }
 
+        $mergedTypeUseStatements = array_unique(array_merge($fieldTypeUseStatements, $extraUseClasses));
+        sort($mergedTypeUseStatements);
+
         $this->generator->generateClass(
             $formClassDetails->getFullName(),
             'form/Type.tpl.php',
@@ -49,7 +52,7 @@ final class FormTypeRenderer
                 'bounded_full_class_name' => $boundClassDetails ? $boundClassDetails->getFullName() : null,
                 'bounded_class_name' => $boundClassDetails ? $boundClassDetails->getShortName() : null,
                 'form_fields' => $fields,
-                'field_type_use_statements' => $fieldTypeUseStatements,
+                'field_type_use_statements' => $mergedTypeUseStatements,
                 'constraint_use_statements' => $constraintClasses,
             ]
         );

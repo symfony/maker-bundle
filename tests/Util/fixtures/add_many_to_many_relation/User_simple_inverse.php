@@ -19,7 +19,7 @@ class User
     private $id;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Recipe", mappedBy="foods")
+     * @ORM\ManyToMany(targetEntity=Recipe::class, mappedBy="foods")
      */
     private $recipes;
 

@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -114,7 +115,7 @@ authenticators will be ignored, and can be blank.',
 
     public function guessUserNameField(SymfonyStyle $io, string $userClass, array $providers): string
     {
-        if (1 === \count($providers) && isset(current($providers)['entity'])) {
+        if (1 === \count($providers) && isset(current($providers)['entity']) && isset(current($providers)['entity']['property'])) {
             $entityProvider = current($providers);
 
             return $entityProvider['entity']['property'];
@@ -142,6 +143,24 @@ authenticators will be ignored, and can be blank.',
             sprintf('Which field on your <fg=yellow>%s</> class will people enter when logging in?', $userClass),
             $classProperties,
             property_exists($userClass, 'username') ? 'username' : (property_exists($userClass, 'email') ? 'email' : null)
+        );
+    }
+
+    public function guessEmailField(SymfonyStyle $io, string $userClass): string
+    {
+        if (property_exists($userClass, 'email')) {
+            return 'email';
+        }
+
+        $classProperties = [];
+        $reflectionClass = new \ReflectionClass($userClass);
+        foreach ($reflectionClass->getProperties() as $property) {
+            $classProperties[] = $property->name;
+        }
+
+        return $io->choice(
+            sprintf('Which field on your <fg=yellow>%s</> class holds the email address?', $userClass),
+            $classProperties
         );
     }
 
@@ -183,5 +202,60 @@ authenticators will be ignored, and can be blank.',
         }
 
         return $authenticatorClasses;
+    }
+
+    public function guessPasswordSetter(SymfonyStyle $io, string $userClass): string
+    {
+        if (null === ($methodChoices = $this->methodNameGuesser($userClass, 'setPassword'))) {
+            return 'setPassword';
+        }
+
+        return $io->choice(
+            sprintf('Which method on your <fg=yellow>%s</> class can be used to set the encoded password (e.g. setPassword())?', $userClass),
+            $methodChoices
+        );
+    }
+
+    public function guessEmailGetter(SymfonyStyle $io, string $userClass, string $emailPropertyName): string
+    {
+        $supposedEmailMethodName = sprintf('get%s', Str::asCamelCase($emailPropertyName));
+
+        if (null === ($methodChoices = $this->methodNameGuesser($userClass, $supposedEmailMethodName))) {
+            return $supposedEmailMethodName;
+        }
+
+        return $io->choice(
+            sprintf('Which method on your <fg=yellow>%s</> class can be used to get the email address (e.g. getEmail())?', $userClass),
+            $methodChoices
+        );
+    }
+
+    public function guessIdGetter(SymfonyStyle $io, string $userClass): string
+    {
+        if (null === ($methodChoices = $this->methodNameGuesser($userClass, 'getId'))) {
+            return 'getId';
+        }
+
+        return $io->choice(
+            sprintf('Which method on your <fg=yellow>%s</> class can be used to get the unique user identifier (e.g. getId())?', $userClass),
+            $methodChoices
+        );
+    }
+
+    private function methodNameGuesser(string $className, string $suspectedMethodName): ?array
+    {
+        $reflectionClass = new \ReflectionClass($className);
+
+        if ($reflectionClass->hasMethod($suspectedMethodName)) {
+            return null;
+        }
+
+        $classMethods = [];
+
+        foreach ($reflectionClass->getMethods() as $method) {
+            $classMethods[] = $method->name;
+        }
+
+        return $classMethods;
     }
 }

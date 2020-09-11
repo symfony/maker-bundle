@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
@@ -33,6 +34,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Security\Core\Encoder\Argon2iPasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -48,13 +50,19 @@ final class MakeUser extends AbstractMaker
 
     private $configUpdater;
 
+    private $doctrineHelper;
+
+    private $entityClassGenerator;
+
     private $generator;
 
-    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, Generator $generator)
+    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, DoctrineHelper $doctrineHelper, EntityClassGenerator $entityClassGenerator, Generator $generator)
     {
         $this->fileManager = $fileManager;
         $this->userClassBuilder = $userClassBuilder;
         $this->configUpdater = $configUpdater;
+        $this->doctrineHelper = $doctrineHelper;
+        $this->entityClassGenerator = $entityClassGenerator;
         $this->generator = $generator;
     }
 
@@ -110,7 +118,6 @@ final class MakeUser extends AbstractMaker
         $userWillHavePassword = $io->confirm('Does this app need to hash/check user passwords?');
         $input->setOption('with-password', $userWillHavePassword);
 
-        $useArgon2Encoder = false;
         if ($userWillHavePassword && !class_exists(NativePasswordEncoder::class) && Argon2iPasswordEncoder::isSupported()) {
             $io->writeln('The newer <comment>Argon2i</comment> password hasher requires PHP 7.2, libsodium or paragonie/sodium_compat. Your system DOES support this algorithm.');
             $io->writeln('You should use <comment>Argon2i</comment> unless your production system will not support it.');
@@ -138,10 +145,10 @@ final class MakeUser extends AbstractMaker
 
         // A) Generate the User class
         if ($userClassConfiguration->isEntity()) {
-            $entityClassGenerator = new EntityClassGenerator($generator);
-            $classPath = $entityClassGenerator->generateEntityClass(
+            $classPath = $this->entityClassGenerator->generateEntityClass(
                 $userClassNameDetails,
-                false // api resource
+                false, // api resource
+                $userClassConfiguration->hasPassword() && interface_exists(PasswordUpgraderInterface::class) // security user
             );
         } else {
             $classPath = $generator->generateClass($userClassNameDetails->getFullName(), 'Class.tpl.php');
@@ -161,11 +168,12 @@ final class MakeUser extends AbstractMaker
             $manipulator,
             $userClassConfiguration
         );
+
         $generator->dumpFile($classPath, $manipulator->getSourceCode());
 
         // C) Generate a custom user provider, if necessary
         if (!$userClassConfiguration->isEntity()) {
-            $userClassConfiguration->setUserProviderClass('App\\Security\\UserProvider');
+            $userClassConfiguration->setUserProviderClass($generator->getRootNamespace().'\\Security\\UserProvider');
             $customProviderPath = $generator->generateClass(
                 $userClassConfiguration->getUserProviderClass(),
                 'security/UserProvider.tpl.php',
@@ -230,8 +238,6 @@ final class MakeUser extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)
     {
-        $dependencies->requirePHP71();
-
         // checking for SecurityBundle guarantees security.yaml is present
         $dependencies->addClassDependency(
             SecurityBundle::class,

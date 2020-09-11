@@ -13,7 +13,7 @@ class SecurityControllerTest extends WebTestCase
     {
         $this->assertTrue(method_exists(SecurityController::class, 'login'));
 
-        $client  = self::createClient();
+        $client = self::createClient();
         $crawler = $client->request('GET', '/login');
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
@@ -31,7 +31,7 @@ class SecurityControllerTest extends WebTestCase
         $form = $crawler->filter('form')->form();
         $form->setValues(
             [
-                'email'    => 'test@symfony.com',
+                'email' => 'test@symfony.com',
                 'password' => 'foo',
             ]
         );
@@ -40,16 +40,16 @@ class SecurityControllerTest extends WebTestCase
         $this->assertEquals(302, $client->getResponse()->getStatusCode());
         $client->followRedirect();
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $this->assertContains('Invalid credentials.', $client->getResponse()->getContent());
+        $this->assertStringContainsString('Invalid credentials.', $client->getResponse()->getContent());
 
         $form->setValues(
             [
-                'email'    => 'test@symfony.com',
+                'email' => 'test@symfony.com',
                 'password' => 'password',
             ]
         );
         $client->submit($form);
 
-        $this->assertContains('TODO: provide a valid redirect', $client->getResponse()->getContent());
+        $this->assertStringContainsString('TODO: provide a valid redirect', $client->getResponse()->getContent());
     }
 }

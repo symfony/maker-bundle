@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
@@ -55,13 +64,19 @@ class SecurityConfigUpdaterTest extends TestCase
         yield 'model_email_password_existing_providers' => [
             new UserClassConfiguration(false, 'email', true),
             'model_email_password_existing_providers.yaml',
-            'multiple_providers_security.yaml'
+            'multiple_providers_security.yaml',
         ];
 
         yield 'empty_source_model_email_password' => [
             new UserClassConfiguration(false, 'email', true),
             'empty_source_model_email_with_password.yaml',
-            'empty_security.yaml'
+            'empty_security.yaml',
+        ];
+
+        yield 'simple_security_with_single_memory_provider_configured' => [
+            new UserClassConfiguration(true, 'email', true),
+            'simple_security_with_single_memory_provider_configured.yaml',
+            'simple_security_with_single_memory_provider_configured.yaml',
         ];
     }
 
@@ -85,7 +100,7 @@ class SecurityConfigUpdaterTest extends TestCase
             null,
             'empty_source.yaml',
             'empty_security.yaml',
-            false
+            false,
         ];
 
         yield 'simple_security' => [
@@ -93,7 +108,7 @@ class SecurityConfigUpdaterTest extends TestCase
             null,
             'simple_security_source.yaml',
             'simple_security.yaml',
-            false
+            false,
         ];
 
         yield 'simple_security_with_firewalls' => [
@@ -101,7 +116,7 @@ class SecurityConfigUpdaterTest extends TestCase
             null,
             'simple_security_with_firewalls.yaml',
             'simple_security_with_firewalls.yaml',
-            false
+            false,
         ];
 
         yield 'simple_security_with_firewalls_and_authenticator' => [
@@ -109,7 +124,7 @@ class SecurityConfigUpdaterTest extends TestCase
             'App\\Security\\AppCustomAuthenticator',
             'simple_security_with_firewalls_and_authenticator.yaml',
             'simple_security_with_firewalls_and_authenticator.yaml',
-            false
+            false,
         ];
 
         yield 'simple_security_with_firewalls_and_logout' => [
@@ -117,7 +132,7 @@ class SecurityConfigUpdaterTest extends TestCase
             'App\\Security\\AppCustomAuthenticator',
             'simple_security_with_firewalls_and_logout.yaml',
             'simple_security_with_firewalls_and_logout.yaml',
-            true
+            true,
         ];
     }
 }

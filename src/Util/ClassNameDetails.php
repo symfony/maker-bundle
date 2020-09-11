@@ -44,8 +44,6 @@ final class ClassNameDetails
      *
      * For example, assuming the namespace is App\Entity:
      *      App\Entity\Admin\User => Admin\User
-     *
-     * @return string
      */
     public function getRelativeName(): string
     {

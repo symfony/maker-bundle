@@ -17,7 +17,7 @@ class UserProfile
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\User", mappedBy="userProfile", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity=User::class, mappedBy="userProfile", cascade={"persist", "remove"})
      */
     private $user;
 
@@ -36,8 +36,8 @@ class UserProfile
         $this->user = $user;
 
         // set (or unset) the owning side of the relation if necessary
-        $newUserProfile = $user === null ? null : $this;
-        if ($newUserProfile !== $user->getUserProfile()) {
+        $newUserProfile = null === $user ? null : $this;
+        if ($user->getUserProfile() !== $newUserProfile) {
             $user->setUserProfile($newUserProfile);
         }
 

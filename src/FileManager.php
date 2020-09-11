@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
+use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -26,17 +27,24 @@ class FileManager
 {
     private $fs;
     private $autoloaderUtil;
+    private $makerFileLinkFormatter;
     private $rootDirectory;
     /** @var SymfonyStyle */
     private $io;
     private $twigDefaultPath;
 
-    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory, string $twigDefaultPath = null)
-    {
+    public function __construct(
+        Filesystem $fs,
+        AutoloaderUtil $autoloaderUtil,
+        MakerFileLinkFormatter $makerFileLinkFormatter,
+        string $rootDirectory,
+        string $twigDefaultPath = null
+    ) {
         // move FileManagerTest stuff
         // update EntityRegeneratorTest to mock the autoloader
         $this->fs = $fs;
         $this->autoloaderUtil = $autoloaderUtil;
+        $this->makerFileLinkFormatter = $makerFileLinkFormatter;
         $this->rootDirectory = rtrim($this->realPath($this->normalizeSlashes($rootDirectory)), '/');
         $this->twigDefaultPath = $twigDefaultPath ? rtrim($this->relativizePath($twigDefaultPath), '/') : null;
     }
@@ -61,18 +69,19 @@ class FileManager
         $newFile = !$this->fileExists($filename);
         $existingContent = $newFile ? '' : file_get_contents($absolutePath);
 
-        $comment = $newFile ? 'created' : 'updated';
+        $comment = $newFile ? '<fg=blue>created</>' : '<fg=yellow>updated</>';
         if ($existingContent === $content) {
-            $comment = 'no change';
+            $comment = '<fg=green>no change</>';
         }
 
         $this->fs->dumpFile($absolutePath, $content);
+        $relativePath = $this->relativizePath($filename);
 
         if ($this->io) {
             $this->io->comment(sprintf(
-                '<fg=green>%s</>: %s',
+                '%s: %s',
                 $comment,
-                $this->relativizePath($filename)
+                $this->makerFileLinkFormatter->makeLinkedPath($absolutePath, $relativePath)
             ));
         }
     }
@@ -86,8 +95,6 @@ class FileManager
      * Attempts to make the path relative to the root directory.
      *
      * @param string $absolutePath
-     *
-     * @return string
      *
      * @throws \Exception
      */
@@ -148,8 +155,6 @@ class FileManager
     }
 
     /**
-     * @param string $className
-     *
      * @return string|null
      *
      * @throws \Exception
@@ -189,8 +194,6 @@ class FileManager
      * Resolve '../' in paths (like real_path), but for non-existent files.
      *
      * @param string $absolutePath
-     *
-     * @return string
      */
     private function realPath($absolutePath): string
     {

@@ -5,43 +5,39 @@ cache:
         - $HOME/.composer/cache/files
         - $HOME/symfony-bridge/.phpunit
 
+services:
+    - mysql
+
 env:
     global:
         - PHPUNIT_FLAGS="-v"
         - SYMFONY_PHPUNIT_DIR="$HOME/symfony-bridge/.phpunit"
+        - SYMFONY_REQUIRE='>=3.4'
 
 matrix:
     fast_finish: true
     include:
-        - php: 7.1
-          env: SYMFONY_PHPUNIT_VERSION=7.4
-        - php: 7.1
-          env: deps=high SYMFONY_PHPUNIT_VERSION=7.4
-        - php: 7.1
-          env: MAKER_TEST_VERSION=stable-dev
-        - php: 7.1
-          env: MAKER_TEST_VERSION=dev
-        - php: 7.2
-          env: deps=low
+        - php: 7.1.33
+          env: MAKER_TEST_VERSION=stable
         - php: 7.3
-
+          env: MAKER_TEST_VERSION=stable
+          # too unstable - sometimes we need other dev deps
+          # for things to pass, sometimes dev deps of other libraries
+          # are unstable and cause things to fail.
+#        - php: 7.3
+#          env: MAKER_TEST_VERSION=stable-dev
+        - php: 7.3
+          env: MAKER_TEST_VERSION=dev
     allow_failures:
-          # Dev-master is allowed to fail.
-        - env: STABILITY="dev"
+        - php: 7.3
+          env: MAKER_TEST_VERSION=dev
 
 before_install:
-    - if [[ $COVERAGE != true ]]; then phpenv config-rm xdebug.ini || true; fi
-    - if ! [ -z "$STABILITY" ]; then composer config minimum-stability ${STABILITY}; fi;
-    - if ! [ -v "$DEPENDENCIES" ]; then composer require --no-update ${DEPENDENCIES}; fi;
-    - composer install
+    - find ~/.phpenv -name xdebug.ini -delete
+    - composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-master
+    - composer update
 
 install:
-    - |
-      # Install symfony/flex
-      if [[ $deps = low ]]; then
-          export SYMFONY_REQUIRE='>=2.8'
-      fi
-      composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-master
     - ./vendor/bin/simple-phpunit install
 
 script:

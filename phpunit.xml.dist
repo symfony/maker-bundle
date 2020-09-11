@@ -6,19 +6,24 @@
          backupGlobals="false"
          colors="true"
          bootstrap="vendor/autoload.php"
+         failOnRisky="true"
+         failOnWarning="true"
 >
     <php>
         <ini name="error_reporting" value="-1" />
         <env name="TEST_DATABASE_DSN" value="mysql://root:@127.0.0.1:3306/test_maker" />
-        <!-- See #237 -->
-        <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak_vendors" />
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0"/>
     </php>
 
     <testsuites>
         <testsuite name="Project Test Suite">
             <directory>tests/</directory>
+            <exclude>tests/Maker</exclude>
             <exclude>tests/fixtures</exclude>
             <exclude>tests/tmp</exclude>
+        </testsuite>
+        <testsuite name="Maker Test Suite">
+            <directory>tests/Maker</directory>
         </testsuite>
     </testsuites>
 
