@@ -674,7 +674,7 @@ final class ClassSourceManipulator
             $removerNodeBuilder->addStmt(BuilderHelpers::normalizeStmt($removeElementCall));
         } else {
             if ($relation instanceof RelationOneToMany) {
-                //if ($this->avatars->removeElement($avatar))               
+                //if ($this->avatars->removeElement($avatar))
                 $ifRemoveElementStmt = new Node\Stmt\If_($removeElementCall);
                 $removerNodeBuilder->addStmt($ifRemoveElementStmt);
 
