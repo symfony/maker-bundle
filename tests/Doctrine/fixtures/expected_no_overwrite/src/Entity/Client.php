@@ -79,9 +79,7 @@ class Client extends BaseClient
 
     public function removeTag(Tag $tag): self
     {
-        if ($this->tags->contains($tag)) {
-            $this->tags->removeElement($tag);
-        }
+        $this->tags->removeElement($tag);
 
         return $this;
     }

@@ -75,8 +75,7 @@ class User
 
     public function removeAvatar(UserAvatar $avatar): self
     {
-        if ($this->avatars->contains($avatar)) {
-            $this->avatars->removeElement($avatar);
+        if ($this->avatars->removeElement($avatar)) {
             // set the owning side to null (unless already changed)
             if ($avatar->getUser() === $this) {
                 $avatar->setUser(null);
@@ -110,9 +109,7 @@ class User
 
     public function removeTag(Tag $tag): self
     {
-        if ($this->tags->contains($tag)) {
-            $this->tags->removeElement($tag);
-        }
+        $this->tags->removeElement($tag);
 
         return $this;
     }
