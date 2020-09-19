@@ -264,6 +264,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $this->writeSuccessMessage($io);
         $io->text([
             'Next: When you\'re ready, create a migration with <info>php bin/console make:migration</info>',
+            'Don\'t want to use migrations? Run <info>php bin/console doctrine:schema:update --force</info> update match your database with entities',
             '',
         ]);
     }
