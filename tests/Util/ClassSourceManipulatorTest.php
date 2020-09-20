@@ -105,7 +105,7 @@ class ClassSourceManipulatorTest extends TestCase
             'fooProp',
             'bool',
             [],
-            'User_simple_bool.php'
+            'User_simple_bool.php',
         ];
 
         yield 'getter_no_props_comments' => [
