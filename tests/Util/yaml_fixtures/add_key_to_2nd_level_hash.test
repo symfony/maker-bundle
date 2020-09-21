@@ -1,44 +1,8 @@
-version: '3.4'
-
-services:
-  abc-svc:
-    volumes:
-      - abc-data:/tmp/abc
-
 volumes:
-  shared-drive:
-    external: true
   abc-data:
-
-networks:
-  first-network:
-
-something-else:
-  value: "here"
 ===
-$data['services']['foo-svc'] = ['volumes' => ['foo-data:/tmp/data']];
 $data['volumes']['foo-data'] = null;
-$data['networks']['some-network'] = null;
 ===
-version: '3.4'
-
-services:
-  abc-svc:
-    volumes:
-      - abc-data:/tmp/abc
-  foo-svc:
-    volumes:
-      - foo-data:/tmp/data
-
 volumes:
-  shared-drive:
-    external: true
   abc-data:
   foo-data:
-
-networks:
-  first-network:
-  some-network:
-
-something-else:
-  value: here
