@@ -1,8 +1,12 @@
 volumes:
   abc-data:
+
+networks:
 ===
 $data['volumes']['foo-data'] = null;
 ===
 volumes:
   abc-data:
-  foo-data:
+  foo-data: null
+
+networks:
