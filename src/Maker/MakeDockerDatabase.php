@@ -68,6 +68,7 @@ final class MakeDockerDatabase extends AbstractMaker
     {
         $command
             ->setDescription('Adds a database container to your docker-compose.yaml file')
+            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeDockerDatabase.txt'))
         ;
     }
 
