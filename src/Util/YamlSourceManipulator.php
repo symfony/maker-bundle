@@ -909,7 +909,7 @@ class YamlSourceManipulator
         $previousIndentation = $this->indentationForDepths[$this->depth];
         $newIndentation = $previousIndentation;
 
-        if ($advancedContent === "\n") {
+        if ("\n" === $advancedContent) {
             $this->log('Just a linebreak, no indent changes');
 
             return;
