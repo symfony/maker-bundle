@@ -1,0 +1,41 @@
+---------------------------------------------------------------------------
+
+by wouterj at 2020-01-24T11:24:19Z
+
+There is nothing directly wrong with doing `AppUser::class === $class`. There is something wrong if you have multiple user classes extending from `AppUser` or if you do `UserInterface::class === $class`.
+
+So I'm leaning towards keeping the current `AppUser::class === $class` template: It's what most people need, doesn't involve a function call and making this call more strict is better than making it too loose.
+
+---------------------------------------------------------------------------
+
+by MisatoTremor at 2020-01-24T12:17:19Z
+
+And it's wrong if e.g. using an ORM to load the user or other cases where you can end up getting a proxy object (which seems to be the main issue lately).
+
+As for the strictness, that's indeed a valid point ...
+
+My alternate proposition was to add a note to the Custom User Provider documentation (and maybe add a link to that in the nextSteps message). How about that?
+
+---------------------------------------------------------------------------
+
+by wouterj at 2020-01-24T16:21:00Z
+
+> And it's wrong if e.g. using an ORM to load the user or other cases where you can end up getting a proxy object (which seems to be the main issue lately).
+
+Oh, I missed this. Then definitely :+1: (99.999% of the applications uses some sort of Doctrine library to save the user I think)
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2020-01-27T14:41:22Z
+
+I also suffered this problem. Every page load resulted in this error: `There is no user provider for user "Proxies\__CG__\App\Entity\User.`  After a page reload, the error disappears ... but that means that I must load each page twice to use my app.
+
+@linaori kindly pointed me to this PR, so I applied the proposed fix and everything works now as it should. Please, consider merging this as soon as possible. Thanks!
+
+---------------------------------------------------------------------------
+
+by joshlopes at 2020-02-05T14:30:52Z
+
+Same issue as @javiereguiluz mentioned, it was pointed to me by someone from support sf channel. It appeared with the new sf minor update -- tests started failing on my app.
+
+This fixed the issue, thanks.
