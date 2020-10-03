@@ -59,7 +59,7 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
      */
     public function supportsClass($class)
     {
-        return <?= $user_short_name ?>::class === $class;
+        return <?= $user_short_name ?>::class === $class || is_subclass_of($class, <?= $user_short_name ?>::class);
     }
 <?php if ($password_upgrader): ?>
 
