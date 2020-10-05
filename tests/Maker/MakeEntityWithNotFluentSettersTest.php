@@ -14,9 +14,8 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
-use Symfony\Component\Finder\Finder;
 
-class MakeEntityTest extends MakerTestCase
+class MakeEntityWithNotFluentSettersTest extends MakerTestCase
 {
     public function getTestDetails()
     {
