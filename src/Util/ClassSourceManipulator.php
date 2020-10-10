@@ -673,10 +673,10 @@ final class ClassSourceManipulator
             // $this->avatars->removeElement($avatar);
             $removerNodeBuilder->addStmt(BuilderHelpers::normalizeStmt($removeElementCall));
         } else {
+            //if ($this->avatars->removeElement($avatar))
+            $ifRemoveElementStmt = new Node\Stmt\If_($removeElementCall);
+            $removerNodeBuilder->addStmt($ifRemoveElementStmt);
             if ($relation instanceof RelationOneToMany) {
-                //if ($this->avatars->removeElement($avatar))
-                $ifRemoveElementStmt = new Node\Stmt\If_($removeElementCall);
-                $removerNodeBuilder->addStmt($ifRemoveElementStmt);
 
                 // OneToMany: $student->setCourse(null);
                 /*
@@ -712,14 +712,12 @@ final class ClassSourceManipulator
                 $ifRemoveElementStmt->stmts[] = $ifNode;
             } elseif ($relation instanceof RelationManyToMany) {
                 // $student->removeCourse($this);
-                // $this->students->removeElement($student);
-                $removerNodeBuilder->addStmt(BuilderHelpers::normalizeStmt($removeElementCall));
-                $removerNodeBuilder->addStmt(
-                    new Node\Stmt\Expression(new Node\Expr\MethodCall(
+                $ifRemoveElementStmt->stmts[] = new Node\Stmt\Expression(
+                    new Node\Expr\MethodCall(
                         new Node\Expr\Variable($argName),
                         $relation->getTargetRemoverMethodName(),
                         [new Node\Expr\Variable('this')]
-                    ))
+                    )
                 );
             } else {
                 throw new \Exception('Unknown relation type');

@@ -53,8 +53,9 @@ class User
 
     public function removeRecipe(Recipe $recipe): self
     {
-        $this->recipes->removeElement($recipe);
-        $recipe->removeFood($this);
+        if ($this->recipes->removeElement($recipe)) {
+            $recipe->removeFood($this);
+        }
 
         return $this;
     }
