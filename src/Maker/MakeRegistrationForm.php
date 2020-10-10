@@ -290,7 +290,10 @@ final class MakeRegistrationForm extends AbstractMaker
         if ($input->getOption('add-unique-entity-constraint')) {
             $classDetails = new ClassDetails($userClass);
             $userManipulator = new ClassSourceManipulator(
-                file_get_contents($classDetails->getPath())
+                file_get_contents($classDetails->getPath()),
+                false,
+                true,
+                $generator->getFluentSetters()
             );
             $userManipulator->setIo($io);
 
@@ -307,7 +310,10 @@ final class MakeRegistrationForm extends AbstractMaker
         if ($input->getArgument('will-verify-email')) {
             $classDetails = new ClassDetails($userClass);
             $userManipulator = new ClassSourceManipulator(
-                file_get_contents($classDetails->getPath())
+                file_get_contents($classDetails->getPath()),
+                false,
+                true,
+                $generator->getFluentSetters()
             );
             $userManipulator->setIo($io);
 
