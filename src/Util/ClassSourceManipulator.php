@@ -677,7 +677,6 @@ final class ClassSourceManipulator
             $ifRemoveElementStmt = new Node\Stmt\If_($removeElementCall);
             $removerNodeBuilder->addStmt($ifRemoveElementStmt);
             if ($relation instanceof RelationOneToMany) {
-
                 // OneToMany: $student->setCourse(null);
                 /*
                  * // set the owning side to null (unless already changed)
