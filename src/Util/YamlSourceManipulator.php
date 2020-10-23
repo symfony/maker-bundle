@@ -228,7 +228,7 @@ class YamlSourceManipulator
         // Edge case: if the last item on a multi-line array has a comment,
         // we want to move to the end of the line, beyond that comment
         if (\count($currentData) < \count($newData) && $this->isCurrentArrayMultiline()) {
-            $this->advanceToEndOfLine();
+            $this->advanceBeyondMultilineArrayLastItem($currentData, $newData);
         }
 
         while (\count($currentData) < \count($newData)) {
@@ -531,6 +531,25 @@ class YamlSourceManipulator
     {
         $this->log('Advancing position beyond PREV key');
         $this->advanceCurrentPosition($this->getEndOfPreviousKeyPosition($key));
+    }
+
+    private function advanceBeyondMultilineArrayLastItem(array $currentData, array $newData)
+    {
+        $this->log('Trying to advance beyond the last item in a multiline array');
+        $this->advanceBeyondWhitespace();
+
+        if ('#' === substr($this->contents, $this->currentPosition, 1)) {
+            $this->log('The line ends with a comment, going to EOL');
+            $this->advanceToEndOfLine();
+
+            return;
+        }
+
+        $nextLineBreak = $this->findNextLineBreak($this->currentPosition);
+        if ('}' === trim(substr($this->contents, $this->currentPosition, $nextLineBreak - $this->currentPosition))) {
+            $this->log('The line ends with an array closing brace, going to EOL');
+            $this->advanceToEndOfLine();
+        }
     }
 
     private function advanceBeyondValue($value)
@@ -848,6 +867,11 @@ class YamlSourceManipulator
                 return $this->findEndPositionOfValue($value, $position);
             }
 
+            if (null === $value && "\n" === $matches[0][0] && !$this->isCurrentLineComment($position)) {
+                $this->log('Zero-length null value, next line not a comment, take a step back');
+                --$position;
+            }
+
             return $position;
         }
 
@@ -884,6 +908,13 @@ class YamlSourceManipulator
         $advancedContent = substr($this->contents, $originalPosition, $newPosition - $originalPosition);
         $previousIndentation = $this->indentationForDepths[$this->depth];
         $newIndentation = $previousIndentation;
+
+        if ("\n" === $advancedContent) {
+            $this->log('Just a linebreak, no indent changes');
+
+            return;
+        }
+
         if (false !== strpos($advancedContent, "\n")) {
             $lines = explode("\n", $advancedContent);
             if (!empty($lines)) {
@@ -1156,6 +1187,17 @@ class YamlSourceManipulator
         return $this->isLineComment($line);
     }
 
+    private function isCurrentLineComment(int $position): bool
+    {
+        $line = $this->getCurrentLine($position);
+
+        if (null === $line) {
+            return false;
+        }
+
+        return $this->isLineComment($line);
+    }
+
     private function isLineComment(string $line): bool
     {
         // adopted from Parser::isCurrentLineComment() from symfony/yaml
@@ -1199,6 +1241,18 @@ class YamlSourceManipulator
         $previousLine = substr($this->contents, $startPos, $endPos - $startPos);
 
         return trim($previousLine, "\r");
+    }
+
+    private function getCurrentLine(int $position)
+    {
+        $startPos = strrpos(substr($this->contents, 0, $position), "\n") + 1;
+        $endPos = strpos($this->contents, "\n", $startPos);
+
+        $this->log(sprintf('Looking for current line from %d to %d', $startPos, $endPos));
+
+        $line = substr($this->contents, $startPos, $endPos - $startPos);
+
+        return trim($line, "\r");
     }
 
     private function findNextLineBreak(int $position)
