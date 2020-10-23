@@ -23,9 +23,6 @@ matrix:
           env: MAKER_TEST_VERSION=stable
         - php: 7.4
           env: MAKER_TEST_VERSION=dev
-    allow_failures:
-        - php: 7.4
-          env: MAKER_TEST_VERSION=dev
 
 before_install:
     - find ~/.phpenv -name xdebug.ini -delete
