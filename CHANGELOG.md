@@ -1,3 +1,12 @@
+1.22
+====
+
+* [make:entity] Optimized how the `removeXXXX()` methods are generated
+  for relationships - #675 thanks to @mhabibi!
+
+* [make:serializer:normalizer] Generated a better template, trying to
+  guess the class you might be normalizing - #672 thanks to @BatsaxIV
+
 1.21
 ====
 
