@@ -213,7 +213,7 @@ final class Str
 
     public static function asHumanWords(string $variableName): string
     {
-        return implode(' ', preg_split('/(?=[A-Z])/', $variableName));
+        return str_replace('  ', ' ', ucfirst(trim(implode(' ', preg_split('/(?=[A-Z])/', $variableName)))));
     }
 
     private static function pluralize(string $word): string
