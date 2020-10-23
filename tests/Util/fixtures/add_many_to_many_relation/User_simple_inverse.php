@@ -53,8 +53,7 @@ class User
 
     public function removeRecipe(Recipe $recipe): self
     {
-        if ($this->recipes->contains($recipe)) {
-            $this->recipes->removeElement($recipe);
+        if ($this->recipes->removeElement($recipe)) {
             $recipe->removeFood($this);
         }
 

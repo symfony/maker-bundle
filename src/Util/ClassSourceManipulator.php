@@ -661,20 +661,21 @@ final class ClassSourceManipulator
         $paramBuilder->setTypeHint($typeHint);
         $removerNodeBuilder->addParam($paramBuilder->getNode());
 
-        // add if check to see if item actually exists
-        //if ($this->avatars->contains($avatar))
-        $ifContainsStmt = new Node\Stmt\If_($containsMethodCallNode);
-        $removerNodeBuilder->addStmt($ifContainsStmt);
-
-        // call removeElement
-        $ifContainsStmt->stmts[] = BuilderHelpers::normalizeStmt(new Node\Expr\MethodCall(
+        // $this->avatars->removeElement($avatar)
+        $removeElementCall = new Node\Expr\MethodCall(
             new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $relation->getPropertyName()),
             'removeElement',
             [new Node\Expr\Variable($argName)]
-        ));
+        );
 
         // set the owning side of the relationship
-        if (!$relation->isOwning()) {
+        if ($relation->isOwning()) {
+            // $this->avatars->removeElement($avatar);
+            $removerNodeBuilder->addStmt(BuilderHelpers::normalizeStmt($removeElementCall));
+        } else {
+            //if ($this->avatars->removeElement($avatar))
+            $ifRemoveElementStmt = new Node\Stmt\If_($removeElementCall);
+            $removerNodeBuilder->addStmt($ifRemoveElementStmt);
             if ($relation instanceof RelationOneToMany) {
                 // OneToMany: $student->setCourse(null);
                 /*
@@ -684,7 +685,7 @@ final class ClassSourceManipulator
                  * }
                  */
 
-                $ifContainsStmt->stmts[] = $this->createSingleLineCommentNode(
+                $ifRemoveElementStmt->stmts[] = $this->createSingleLineCommentNode(
                     'set the owning side to null (unless already changed)',
                     self::CONTEXT_CLASS_METHOD
                 );
@@ -707,14 +708,16 @@ final class ClassSourceManipulator
                     )),
                 ];
 
-                $ifContainsStmt->stmts[] = $ifNode;
+                $ifRemoveElementStmt->stmts[] = $ifNode;
             } elseif ($relation instanceof RelationManyToMany) {
-                // ManyToMany: $student->removeCourse($this);
-                $ifContainsStmt->stmts[] = new Node\Stmt\Expression(new Node\Expr\MethodCall(
-                    new Node\Expr\Variable($argName),
-                    $relation->getTargetRemoverMethodName(),
-                    [new Node\Expr\Variable('this')]
-                ));
+                // $student->removeCourse($this);
+                $ifRemoveElementStmt->stmts[] = new Node\Stmt\Expression(
+                    new Node\Expr\MethodCall(
+                        new Node\Expr\Variable($argName),
+                        $relation->getTargetRemoverMethodName(),
+                        [new Node\Expr\Variable('this')]
+                    )
+                );
             } else {
                 throw new \Exception('Unknown relation type');
             }
