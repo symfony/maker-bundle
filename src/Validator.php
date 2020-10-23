@@ -15,6 +15,7 @@ use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Component\Security\Core\User\UserInterface;
+use function Symfony\Component\String\b;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -48,7 +49,7 @@ final class Validator
         ];
 
         foreach ($pieces as $piece) {
-            if (!mb_check_encoding($piece, 'UTF-8')) {
+            if (!b($piece)->isUtf8()) {
                 $errorMessage = $errorMessage ?: sprintf('"%s" is not a UTF-8-encoded string.', $piece);
 
                 throw new RuntimeCommandException($errorMessage);

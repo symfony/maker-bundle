@@ -15,6 +15,7 @@ use Doctrine\Common\Inflector\Inflector as LegacyInflector;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use Symfony\Component\DependencyInjection\Container;
+use function Symfony\Component\String\u;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -30,7 +31,10 @@ final class Str
      */
     public static function hasSuffix(string $value, string $suffix): bool
     {
-        return 0 === strcasecmp($suffix, substr($value, -\strlen($suffix)));
+        if ($value === $suffix) {
+            return true;
+        }
+        return u($value)->ignoreCase()->endsWith(u($suffix)->ignoreCase());
     }
 
     /**
@@ -40,7 +44,7 @@ final class Str
      */
     public static function addSuffix(string $value, string $suffix): string
     {
-        return self::removeSuffix($value, $suffix).$suffix;
+        return self::removeSuffix($value, $suffix) . $suffix;
     }
 
     /**
@@ -60,11 +64,7 @@ final class Str
      */
     public static function asClassName(string $value, string $suffix = ''): string
     {
-        $value = trim($value);
-        $value = str_replace(['-', '_', '.', ':'], ' ', $value);
-        $value = ucwords($value);
-        $value = str_replace(' ', '', $value);
-        $value = ucfirst($value);
+        $value = u($value)->camel()->title();
         $value = self::addSuffix($value, $suffix);
 
         return $value;
@@ -76,28 +76,22 @@ final class Str
      */
     public static function asTwigVariable(string $value): string
     {
-        $value = trim($value);
-        $value = preg_replace('/[^a-zA-Z0-9_]/', '_', $value);
-        $value = preg_replace('/(?<=\\w)([A-Z])/', '_$1', $value);
-        $value = preg_replace('/_{2,}/', '_', $value);
-        $value = strtolower($value);
-
-        return $value;
+        return u($value)->snake();
     }
 
     public static function asLowerCamelCase(string $str): string
     {
-        return lcfirst(self::asCamelCase($str));
+        return u($str)->camel();
     }
 
     public static function asCamelCase(string $str): string
     {
-        return strtr(ucwords(strtr($str, ['_' => ' ', '.' => ' ', '\\' => ' '])), [' ' => '']);
+        return u($str)->camel()->title();
     }
 
     public static function asRoutePath(string $value): string
     {
-        return '/'.str_replace('_', '/', self::asTwigVariable($value));
+        return u(self::asTwigVariable($value))->replace('_', '/');
     }
 
     public static function asRouteName(string $value): string
@@ -112,7 +106,7 @@ final class Str
 
     public static function asCommand(string $value): string
     {
-        return str_replace('_', '-', self::asTwigVariable($value));
+        return u(self::asTwigVariable($value))->replace('_', '-');
     }
 
     public static function asEventMethod(string $eventName): string
@@ -136,8 +130,8 @@ final class Str
 
     public static function asFilePath(string $value): string
     {
-        $value = Container::underscore(trim($value));
-        $value = str_replace('\\', '/', $value);
+        $value = Container::underscore(u($value)->trim());
+        $value = u($value)->replace('\\', '/');
 
         return $value;
     }
@@ -145,9 +139,9 @@ final class Str
     public static function singularCamelCaseToPluralCamelCase(string $camelCase): string
     {
         $snake = self::asSnakeCase($camelCase);
-        $words = explode('_', $snake);
+        $words = u($snake)->split('_');
         $words[\count($words) - 1] = self::pluralize($words[\count($words) - 1]);
-        $reSnaked = implode('_', $words);
+        $reSnaked = u('_')->join($words);
 
         return self::asLowerCamelCase($reSnaked);
     }
@@ -155,9 +149,9 @@ final class Str
     public static function pluralCamelCaseToSingular(string $camelCase): string
     {
         $snake = self::asSnakeCase($camelCase);
-        $words = explode('_', $snake);
+        $words = u($snake)->split('_');
         $words[\count($words) - 1] = self::singularize($words[\count($words) - 1]);
-        $reSnaked = implode('_', $words);
+        $reSnaked = u('_')->join($words);
 
         return self::asLowerCamelCase($reSnaked);
     }
@@ -199,7 +193,7 @@ final class Str
      */
     public static function isValidPhpVariableName($name)
     {
-        return (bool) preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $name, $matches);
+        return (bool)preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $name, $matches);
     }
 
     public static function areClassesAlphabetical(string $class1, string $class2)
@@ -213,7 +207,7 @@ final class Str
 
     public static function asHumanWords(string $variableName): string
     {
-        return implode(' ', preg_split('/(?=[A-Z])/', $variableName));
+        return u(' ')->join(preg_split('/(?=[A-Z])/', $variableName));
     }
 
     private static function pluralize(string $word): string
