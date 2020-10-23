@@ -184,4 +184,19 @@ class StrTest extends TestCase
         yield ['App\\Entity\\Foo', 'Foo'];
         yield ['Foo', 'Foo'];
     }
+    
+    /**
+     * @dataProvider asHumanWordsTests
+     */
+    public function testAsHumanWords(string $original, string $expected)
+    {
+        $this->assertSame($expected, Str::asHumaWords($original));
+    }
+
+    public function asHumanWordsTests()
+    {
+        yield ['FooBar', 'Foo Bar'];
+        yield [' FooBar', 'Foo Bar'];
+        yield [' Foo Bar ', 'Foo Bar'];
+    }    
 }
