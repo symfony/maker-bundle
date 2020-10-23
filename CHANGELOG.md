@@ -1,3 +1,80 @@
+1.22
+====
+
+* [make:entity] Optimized how the `removeXXXX()` methods are generated
+  for relationships - #675 thanks to @mhabibi!
+
+* [make:serializer:normalizer] Generated a better template, trying to
+  guess the class you might be normalizing - #672 thanks to @BatsaxIV
+
+1.21
+====
+
+* [make:docker:database] When using MySQL, a "main" database is now created
+  automatically for you - #656 thanks to @robmeijer!
+
+* [make:voter] Better generated entity "guess" - #658 thanks to @yahyaerturan!
+
+* [make:command] Use the new Command::SUCCESS when available - #664
+  thanks to @Chi-teck!
+
+
+1.20
+====
+
+* [make:docker:database] Added a new command to generate a database service
+  in your `docker-compose.yaml` file - #640 thanks to @jrushlow!
+
+1.19
+====
+
+* Added "email verification/confirmation" option to `make:registration-form` - see #603
+  thanks to @jrushlow!
+
+1.18
+====
+
+* Reverted support for `doctrine/inflector` 2.0 - #611 thanks to @weaverryan
+
+1.17
+====
+
+* PHP 7.1 is now the required minimum version - #598 thanks to @weaverryan
+
+* MakerBundle now allows `doctrine/inflector` 2.0 - #600 thanks to @alcaeus
+
+1.16
+====
+
+* [make:entity] Generated entities will now use the RelationName::class
+  syntax when generating relationships (e.g.
+  `targetEntity=RelationName::class`) - #573 thanks to @rogeriolino.
+
+* When listing generated files in the console, if a file link formatter
+  is configured, the links will now be clickable - #559 thanks to @l-vo.
+
+* [make:entity] Added UUID and GUID default type to entity maker - if you name a
+  field `uuid` or `guid`, the Maker will guess those types by default - #593
+  thanks to @thomas-miceli.
+
+1.15
+====
+
+* [make:reset-password] New `make:reset-password` to generate an
+  entire "reset password" controller, forms, template setup - #567
+  thanks to @jrushlow and @romaricdrigon
+
+* [make:message] New `make:message` command to generate a
+  Messenger messaage & handler class - #338 thanks to @nikophil
+
+* [make:messenger-middleware] New `make:messenger-middleware`
+  command to generate a middleware for Messenger
+
+1.14
+====
+
+* Added support for Symfony 5
+
 1.13
 ====
 

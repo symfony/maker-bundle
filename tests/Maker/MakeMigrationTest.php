@@ -28,19 +28,22 @@ class MakeMigrationTest extends MakerTestCase
             // doctrine-migrations-bundle only requires doctrine-bundle, which
             // only requires doctrine/dbal. But we're testing with the ORM,
             // so let's install it
-            ->addExtraDependencies('doctrine/orm')
+            ->addExtraDependencies('doctrine/orm:@stable')
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('Success', $output);
 
+                // support for Migrations 3 (/migrations) and earlier
+                $migrationsDirectoryPath = file_exists($directory.'/migrations') ? 'migrations' : 'src/Migrations';
+
                 $finder = new Finder();
-                $finder->in($directory.'/src/Migrations')
+                $finder->in($directory.'/'.$migrationsDirectoryPath)
                     ->name('*.php');
                 $this->assertCount(1, $finder);
 
                 // see that the exact filename is in the output
                 $iterator = $finder->getIterator();
                 $iterator->rewind();
-                $this->assertStringContainsString(sprintf('"src/Migrations/%s"', $iterator->current()->getFilename()), $output);
+                $this->assertStringContainsString(sprintf('"%s/%s"', $migrationsDirectoryPath, $iterator->current()->getFilename()), $output);
             }),
         ];
 
@@ -48,13 +51,49 @@ class MakeMigrationTest extends MakerTestCase
             $this->getMakerInstance(MakeMigration::class),
             [/* no input */])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
-            ->configureDatabase()
             // sync the database, so no changes are needed
-            ->addExtraDependencies('doctrine/orm')
+            ->configureDatabase()
+            ->addExtraDependencies('doctrine/orm:@stable')
             ->assert(function (string $output, string $directory) {
                 $this->assertNotContains('Success', $output);
 
                 $this->assertStringContainsString('No database changes were detected', $output);
+            }),
+        ];
+
+        yield 'migration_with_previous_migration_question' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeMigration::class),
+            [
+                // confirm migration
+                'y',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
+            ->configureDatabase(false)
+            ->addRequiredPackageVersion('doctrine/doctrine-migrations-bundle', '>=3')
+            ->addExtraDependencies('doctrine/orm:@stable')
+            // generate a migration first
+            ->addPreMakeCommand('php bin/console make:migration')
+            ->assert(function (string $output, string $directory) {
+                $this->assertStringContainsString('You have 1 available migrations to execute', $output);
+                $this->assertStringContainsString('Success', $output);
+                $this->assertCount(14, explode("\n", $output), 'Asserting that very specific output is shown - some should be hidden');
+            }),
+        ];
+
+        yield 'migration_with_previous_migration_decline_question' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeMigration::class),
+            [
+                // no to confirm
+                'n',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeMigration')
+            ->configureDatabase(false)
+            ->addRequiredPackageVersion('doctrine/doctrine-migrations-bundle', '>=3')
+            ->addExtraDependencies('doctrine/orm:@stable')
+            // generate a migration first
+            ->addPreMakeCommand('php bin/console make:migration')
+            ->assert(function (string $output, string $directory) {
+                $this->assertStringNotContainsString('Success', $output);
             }),
         ];
     }

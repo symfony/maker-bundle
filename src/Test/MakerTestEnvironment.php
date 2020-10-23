@@ -69,6 +69,15 @@ final class MakerTestEnvironment
         return $this->path;
     }
 
+    public function readFile(string $path): string
+    {
+        if (!file_exists($this->path.'/'.$path)) {
+            throw new \InvalidArgumentException(sprintf('Cannot find file "%s"', $path));
+        }
+
+        return file_get_contents($this->path.'/'.$path);
+    }
+
     private function changeRootNamespaceIfNeeded()
     {
         if ('App' === ($rootNamespace = $this->testDetails->getRootNamespace())) {
@@ -245,9 +254,9 @@ final class MakerTestEnvironment
 
         $matches = [];
 
-        preg_match_all('#(created|updated): (.*)\n#iu', $output, $matches, PREG_PATTERN_ORDER);
+        preg_match_all('#(created|updated): (]8;;[^]*\\\)?(.*?)(]8;;\\\)?\n#iu', $output, $matches, PREG_PATTERN_ORDER);
 
-        return array_map('trim', $matches[2]);
+        return array_map('trim', $matches[3]);
     }
 
     public function fileExists(string $file)
@@ -319,13 +328,19 @@ final class MakerTestEnvironment
             $this->cachePath
         )->run();
 
-        $rootPath = str_replace('\\', '\\\\', realpath(__DIR__.'/../..'));
-
-        // dev deps already will allow dev deps, but we should prefer stable
         if (false !== strpos($targetVersion, 'dev')) {
-            MakerTestProcess::create('composer config prefer-stable true', $this->flexPath)
+            // make sure that dev versions allow dev deps
+            // for the current stable minor of Symfony, by default,
+            // minimum-stability is NOT dev, even when getting the -dev version
+            // of symfony/skeleton
+            MakerTestProcess::create('composer config minimum-stability dev', $this->flexPath)
+                ->run();
+
+            MakerTestProcess::create(['composer', 'update'], $this->flexPath)
                 ->run();
         }
+
+        $rootPath = str_replace('\\', '\\\\', realpath(__DIR__.'/../..'));
 
         // processes any changes needed to the Flex project
         $replacements = [

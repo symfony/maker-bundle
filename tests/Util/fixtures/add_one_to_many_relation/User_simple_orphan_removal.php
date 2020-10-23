@@ -19,7 +19,7 @@ class User
     private $id;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\UserAvatarPhoto", mappedBy="user", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=UserAvatarPhoto::class, mappedBy="user", orphanRemoval=true)
      */
     private $avatarPhotos;
 
@@ -53,8 +53,7 @@ class User
 
     public function removeAvatarPhoto(UserAvatarPhoto $avatarPhoto): self
     {
-        if ($this->avatarPhotos->contains($avatarPhoto)) {
-            $this->avatarPhotos->removeElement($avatarPhoto);
+        if ($this->avatarPhotos->removeElement($avatarPhoto)) {
             // set the owning side to null (unless already changed)
             if ($avatarPhoto->getUser() === $this) {
                 $avatarPhoto->setUser(null);

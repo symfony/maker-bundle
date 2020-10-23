@@ -24,6 +24,8 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
 {
     use TargetPathTrait;
 
+    public const LOGIN_ROUTE = 'app_login';
+
 <?= $user_is_entity ? "    private \$entityManager;\n" : null ?>
     private $urlGenerator;
     private $csrfTokenManager;
@@ -39,7 +41,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
 
     public function supports(Request $request)
     {
-        return 'app_login' === $request->attributes->get('_route')
+        return self::LOGIN_ROUTE === $request->attributes->get('_route')
             && $request->isMethod('POST');
     }
 
@@ -96,7 +98,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
     }
 
 <?php endif ?>
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, <?= $provider_key_type_hint ?>$providerKey)
     {
         if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
             return new RedirectResponse($targetPath);
@@ -108,6 +110,6 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
 
     protected function getLoginUrl()
     {
-        return $this->urlGenerator->generate('app_login');
+        return $this->urlGenerator->generate(self::LOGIN_ROUTE);
     }
 }

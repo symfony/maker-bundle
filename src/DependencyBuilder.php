@@ -16,7 +16,7 @@ final class DependencyBuilder
     private $dependencies = [];
     private $devDependencies = [];
 
-    private $minimumPHPVersion = 70000;
+    private $minimumPHPVersion = 70100;
 
     /**
      * Add a dependency that will be reported if the given class is missing.
@@ -44,7 +44,7 @@ final class DependencyBuilder
 
     public function requirePHP71()
     {
-        $this->minimumPHPVersion = 70100;
+        // no-op - MakerBundle now required PHP 7.1
     }
 
     /**

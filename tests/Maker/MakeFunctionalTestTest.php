@@ -35,7 +35,6 @@ class MakeFunctionalTestTest extends MakerTestCase
                 'FooBar',
             ])
             ->addExtraDependencies('panther')
-            ->setRequiredPhpVersion(70100)
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional'),
         ];
     }

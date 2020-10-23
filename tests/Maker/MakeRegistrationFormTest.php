@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 use Symfony\Bundle\MakerBundle\Maker\MakeRegistrationForm;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
+use Symfony\Component\Filesystem\Filesystem;
 
 class MakeRegistrationFormTest extends MakerTestCase
 {
@@ -25,8 +26,9 @@ class MakeRegistrationFormTest extends MakerTestCase
                 // user class guessed,
                 // username field guessed
                 // password guessed
-                // firewall name guessed
                 '', // yes to add UniqueEntity
+                'n', // verify user
+                // firewall name guessed
                 '', // yes authenticate after
                 // 1 authenticator will be guessed
             ])
@@ -48,6 +50,7 @@ class MakeRegistrationFormTest extends MakerTestCase
                 'emailAlt', // username field
                 'passwordAlt', // password field
                 'n', // no UniqueEntity
+                'n', // no verify user
                 '', // yes authenticate after
                 'main', // firewall
                 '1', // authenticator
@@ -60,6 +63,7 @@ class MakeRegistrationFormTest extends MakerTestCase
             [
                 // all basic data guessed
                 'y', // add UniqueEntity
+                'n', // no verify user
                 'n', // no authenticate after
                 'app_anonymous', // route name to redirect to
             ])
@@ -69,6 +73,55 @@ class MakeRegistrationFormTest extends MakerTestCase
             // workaround for strange failure - see test case
             // registration_form_entity_guard_authenticate for details
             ->addPostMakeCommand('php bin/console cache:clear --env=test'),
+        ];
+
+        yield 'registration_form_with_email_verification' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeRegistrationForm::class),
+            [
+                'n', // add UniqueEntity
+                'y', // no verify user
+                'jr@rushlow.dev', // from email address
+                'SymfonyCasts', // From Name
+                'n', // no authenticate after
+                0, // route number to redirect to
+            ])
+            ->setRequiredPhpVersion(70200)
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormVerifyEmail')
+            ->addExtraDependencies('symfonycasts/verify-email-bundle')
+            ->assert(
+                function (string $output, string $directory) {
+                    $this->assertStringContainsString('Success', $output);
+
+                    $fs = new Filesystem();
+
+                    $generatedFiles = [
+                        'src/Security/EmailVerifier.php',
+                        'templates/registration/confirmation_email.html.twig',
+                    ];
+
+                    foreach ($generatedFiles as $file) {
+                        $this->assertTrue($fs->exists(sprintf('%s/%s', $directory, $file)));
+                    }
+                }
+            ),
+        ];
+
+        yield 'verify_email_functional_test' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeRegistrationForm::class),
+            [
+                'n', // add UniqueEntity
+                'y', // no verify user
+                'jr@rushlow.dev', // from email address
+                'SymfonyCasts', // From Name
+                '', // yes authenticate after
+                'app_register',
+            ])
+            ->setRequiredPhpVersion(70200)
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormVerifyEmailFunctionalTest')
+            ->addExtraDependencies('symfonycasts/verify-email-bundle')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->addExtraDependencies('mailer'),
         ];
     }
 }

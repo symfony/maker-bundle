@@ -42,7 +42,7 @@ final class FormTypeRenderer
             $fields[$name] = $fieldTypeOptions;
         }
 
-        $mergedTypeUseStatements = array_merge($fieldTypeUseStatements, $extraUseClasses);
+        $mergedTypeUseStatements = array_unique(array_merge($fieldTypeUseStatements, $extraUseClasses));
         sort($mergedTypeUseStatements);
 
         $this->generator->generateClass(

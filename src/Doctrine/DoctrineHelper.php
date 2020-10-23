@@ -15,8 +15,10 @@ use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata as LegacyClassMetadata;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver as LegacyMappingDriver;
 use Doctrine\Common\Persistence\Mapping\MappingException as LegacyPersistenceMappingException;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException as ORMMappingException;
+use Doctrine\ORM\Mapping\NamingStrategy;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\AbstractClassMetadataFactory;
@@ -218,5 +220,27 @@ final class DoctrineHelper
         $legacyClass = str_replace('Doctrine\\Persistence\\', 'Doctrine\\Common\\Persistence\\', $class);
 
         return $object instanceof $class || $object instanceof $legacyClass;
+    }
+
+    public function getPotentialTableName(string $className): string
+    {
+        $entityManager = $this->getRegistry()->getManager();
+
+        if (!$entityManager instanceof EntityManagerInterface) {
+            throw new \RuntimeException('ObjectManager is not an EntityManagerInterface.');
+        }
+
+        /** @var NamingStrategy $namingStrategy */
+        $namingStrategy = $entityManager->getConfiguration()->getNamingStrategy();
+
+        return $namingStrategy->classToTableName($className);
+    }
+
+    public function isKeyword(string $name): bool
+    {
+        /** @var Connection $connection */
+        $connection = $this->getRegistry()->getConnection();
+
+        return $connection->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name);
     }
 }

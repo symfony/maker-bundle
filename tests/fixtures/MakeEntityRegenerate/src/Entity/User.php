@@ -27,7 +27,7 @@ class User
     private $createdAt;
 
     /**
-     * @ORM\OneToMany(targetEntity="UserAvatar", mappedBy="user")
+     * @ORM\OneToMany(targetEntity=UserAvatar::class, mappedBy="user")
      */
     private $avatars;
 

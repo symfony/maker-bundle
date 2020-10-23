@@ -1,0 +1,13 @@
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers:
+    - foo
+    - bar
+firewalls: false
+===
+$data['providers'][1] = 'baz';
+===
+# https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+providers:
+    - foo
+    - baz
+firewalls: false

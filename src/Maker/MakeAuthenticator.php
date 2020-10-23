@@ -35,6 +35,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -222,7 +223,8 @@ final class MakeAuthenticator extends AbstractMaker
                 $input->getArgument('authenticator-type'),
                 $input->getArgument('authenticator-class'),
                 $securityData,
-                $input->hasArgument('user-class') ? $input->getArgument('user-class') : null
+                $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
+                $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false
             )
         );
     }
@@ -234,7 +236,9 @@ final class MakeAuthenticator extends AbstractMaker
             $this->generator->generateClass(
                 $authenticatorClass,
                 'authenticator/EmptyAuthenticator.tpl.php',
-                []
+                [
+                    'provider_key_type_hint' => $this->providerKeyTypeHint(),
+                ]
             );
 
             return;
@@ -255,6 +259,7 @@ final class MakeAuthenticator extends AbstractMaker
                 'username_field_label' => Str::asHumanWords($userNameField),
                 'user_needs_encoder' => $this->userClassHasEncoder($securityData, $userClass),
                 'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($userClass),
+                'provider_key_type_hint' => $this->providerKeyTypeHint(),
             ]
         );
     }
@@ -306,7 +311,7 @@ final class MakeAuthenticator extends AbstractMaker
         );
     }
 
-    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, array $securityData, $userClass): array
+    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, array $securityData, $userClass, bool $logoutSetup): array
     {
         $nextTexts = ['Next:'];
         $nextTexts[] = '- Customize your new authenticator.';
@@ -316,7 +321,8 @@ final class MakeAuthenticator extends AbstractMaker
                 'security: {}',
                 'main',
                 null,
-                $authenticatorClass
+                $authenticatorClass,
+                $logoutSetup
             );
             $nextTexts[] = '- Your <info>security.yaml</info> could not be updated automatically. You\'ll need to add the following config manually:\n\n'.$yamlExample;
         }
@@ -364,5 +370,16 @@ final class MakeAuthenticator extends AbstractMaker
             Yaml::class,
             'yaml'
         );
+    }
+
+    private function providerKeyTypeHint(): string
+    {
+        $reflectionMethod = new \ReflectionMethod(AbstractFormLoginAuthenticator::class, 'onAuthenticationSuccess');
+        $typeHint = (string) $reflectionMethod->getParameters()[2]->getType();
+        if ($typeHint) {
+            $typeHint .= ' ';
+        }
+
+        return $typeHint;
     }
 }

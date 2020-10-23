@@ -4,20 +4,41 @@ namespace <?= $namespace; ?>;
 
 use <?= $user_full_class_name ?>;
 use <?= $form_full_class_name ?>;
+<?php if ($will_verify_email): ?>
+use <?= $verify_email_security_service; ?>;
+<?php endif; ?>
 <?php if ($authenticator_full_class_name): ?>
 use <?= $authenticator_full_class_name; ?>;
+<?php endif; ?>
+<?php if ($will_verify_email): ?>
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 <?php endif; ?>
 use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name; ?>;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+<?php if ($will_verify_email): ?>
+use Symfony\Component\Mime\Address;
+<?php endif; ?>
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 <?php if ($authenticator_full_class_name): ?>
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 <?php endif; ?>
+<?php if ($will_verify_email): ?>
+use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
+<?php endif; ?>
 
 class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 {
+<?php if ($will_verify_email): ?>
+    private $emailVerifier;
+
+    public function __construct(EmailVerifier $emailVerifier)
+    {
+        $this->emailVerifier = $emailVerifier;
+    }
+
+<?php endif; ?>
     /**
      * @Route("<?= $route_path ?>", name="<?= $route_name ?>")
      */
@@ -39,7 +60,17 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
+<?php if ($will_verify_email): ?>
 
+            // generate a signed url and email it to the user
+            $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
+                (new TemplatedEmail())
+                    ->from(new Address('<?= $from_email ?>', '<?= $from_email_name ?>'))
+                    ->to($user-><?= $email_getter ?>())
+                    ->subject('Please Confirm your Email')
+                    ->htmlTemplate('registration/confirmation_email.html.twig')
+            );
+<?php endif; ?>
             // do anything else you need here, like send an email
 
 <?php if ($authenticator_full_class_name): ?>
@@ -58,4 +89,28 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
             'registrationForm' => $form->createView(),
         ]);
     }
+<?php if ($will_verify_email): ?>
+
+    /**
+     * @Route("/verify/email", name="app_verify_email")
+     */
+    public function verifyUserEmail(Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        // validate email confirmation link, sets User::isVerified=true and persists
+        try {
+            $this->emailVerifier->handleEmailConfirmation($request, $this->getUser());
+        } catch (VerifyEmailExceptionInterface $exception) {
+            $this->addFlash('verify_email_error', $exception->getReason());
+
+            return $this->redirectToRoute('<?= $route_name ?>');
+        }
+
+        // @TODO Change the redirect on success and handle or remove the flash message in your templates
+        $this->addFlash('success', 'Your email address has been verified.');
+
+        return $this->redirectToRoute('app_register');
+    }
+<?php endif; ?>
 }

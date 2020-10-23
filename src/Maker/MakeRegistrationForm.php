@@ -27,6 +27,7 @@ use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -34,11 +35,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Validator\Validation;
+use SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle;
 
 /**
- * @author Ryan Weaver <ryan@symfonycasts.com>
+ * @author Ryan Weaver   <ryan@symfonycasts.com>
+ * @author Jesse Rushlow <jr@rushlow.dev>
  *
  * @internal
  */
@@ -77,6 +81,11 @@ final class MakeRegistrationForm extends AbstractMaker
             ->addArgument('user-class')
             ->addArgument('username-field')
             ->addArgument('password-field')
+            ->addArgument('will-verify-email')
+            ->addArgument('id-getter')
+            ->addArgument('email-getter')
+            ->addArgument('from-email-address')
+            ->addArgument('from-email-name')
             ->addOption('auto-login-authenticator')
             ->addOption('firewall-name')
             ->addOption('redirect-route-name')
@@ -124,6 +133,29 @@ final class MakeRegistrationForm extends AbstractMaker
             $addAnnotation
         );
 
+        $willVerify = $io->confirm('Do you want to send an email to verify the user\'s email address after registration?', true);
+
+        $input->setArgument('will-verify-email', $willVerify);
+
+        if ($willVerify) {
+            $this->checkComponentsExist($io);
+
+            $input->setArgument('id-getter', $interactiveSecurityHelper->guessIdGetter($io, $userClass));
+            $input->setArgument('email-getter', $interactiveSecurityHelper->guessEmailGetter($io, $userClass, 'email'));
+
+            $input->setArgument('from-email-address', $io->ask(
+                'What email address will be used to send registration confirmations? e.g. mailer@your-domain.com',
+                null,
+                [Validator::class, 'validateEmailAddress']
+            ));
+
+            $input->setArgument('from-email-name', $io->ask(
+                'What "name" should be associated with that email address? e.g. "Acme Mail Bot"',
+                null,
+                [Validator::class, 'notBlank']
+            ));
+        }
+
         if ($io->confirm('Do you want to automatically authenticate the user after registration?')) {
             $this->interactAuthenticatorQuestions(
                 $input,
@@ -132,7 +164,9 @@ final class MakeRegistrationForm extends AbstractMaker
                 $securityData,
                 $command
             );
-        } else {
+        }
+
+        if (!$input->getOption('auto-login-authenticator')) {
             $routeNames = array_keys($this->router->getRouteCollection()->all());
             $input->setOption(
                 'redirect-route-name',
@@ -184,6 +218,27 @@ final class MakeRegistrationForm extends AbstractMaker
             'Entity\\'
         );
 
+        $verifyEmailServiceClassNameDetails = $generator->createClassNameDetails(
+            'EmailVerifier',
+            'Security\\'
+        );
+
+        if ($input->getArgument('will-verify-email')) {
+            $generator->generateClass(
+                $verifyEmailServiceClassNameDetails->getFullName(),
+                'verifyEmail/EmailVerifier.tpl.php',
+                [
+                    'id_getter' => $input->getArgument('id-getter'),
+                    'email_getter' => $input->getArgument('email-getter'),
+                ]
+            );
+
+            $generator->generateTemplate(
+                'registration/confirmation_email.html.twig',
+                'registration/twig_email.tpl.php'
+            );
+        }
+
         // 1) Generate the form class
         $usernameField = $input->getArgument('username-field');
         $formClassDetails = $this->generateFormClass(
@@ -210,6 +265,11 @@ final class MakeRegistrationForm extends AbstractMaker
                 'user_class_name' => $userClassNameDetails->getShortName(),
                 'user_full_class_name' => $userClassNameDetails->getFullName(),
                 'password_field' => $input->getArgument('password-field'),
+                'will_verify_email' => $input->getArgument('will-verify-email'),
+                'verify_email_security_service' => $verifyEmailServiceClassNameDetails->getFullName(),
+                'from_email' => $input->getArgument('from-email-address'),
+                'from_email_name' => $input->getArgument('from-email-name'),
+                'email_getter' => $input->getArgument('email-getter'),
                 'authenticator_class_name' => $authenticatorClassName ? Str::getShortClassName($authenticatorClassName) : null,
                 'authenticator_full_class_name' => $authenticatorClassName,
                 'firewall_name' => $input->getOption('firewall-name'),
@@ -244,11 +304,85 @@ final class MakeRegistrationForm extends AbstractMaker
             $this->fileManager->dumpFile($classDetails->getPath(), $userManipulator->getSourceCode());
         }
 
+        if ($input->getArgument('will-verify-email')) {
+            $classDetails = new ClassDetails($userClass);
+            $userManipulator = new ClassSourceManipulator(
+                file_get_contents($classDetails->getPath())
+            );
+            $userManipulator->setIo($io);
+
+            $userManipulator->addProperty('isVerified', ['@ORM\Column(type="boolean")'], false);
+            $userManipulator->addAccessorMethod('isVerified', 'isVerified', 'bool', false);
+            $userManipulator->addSetter('isVerified', 'bool', false);
+
+            $this->fileManager->dumpFile($classDetails->getPath(), $userManipulator->getSourceCode());
+        }
+
         $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
-        $io->text('Next: Go to /register to check out your new form!');
-        $io->text('Make any changes you need to the form, controller & template.');
+        $this->successMessage($io, $input->getArgument('will-verify-email'), $userClassNameDetails->getShortName());
+    }
+
+    private function successMessage(ConsoleStyle $io, bool $emailVerification, string $userClass): void
+    {
+        $closing[] = 'Next:';
+
+        if (!$emailVerification) {
+            $closing[] = 'Make any changes you need to the form, controller & template.';
+        } else {
+            $index = 1;
+            if ($missingPackagesMessage = $this->getMissingComponentsComposerMessage()) {
+                $closing[] = '1) Install some missing packages:';
+                $closing[] = sprintf('     <fg=green>%s</>', $missingPackagesMessage);
+                ++$index;
+            }
+
+            $closing[] = sprintf('%d) In <fg=yellow>RegistrationController::verifyUserEmail()</>:', $index++);
+            $closing[] = '   * Customize the last <fg=yellow>redirectToRoute()</> after a successful email verification.';
+            $closing[] = '   * Make sure you\'re rendering <fg=yellow>success</> flash messages or change the <fg=yellow>$this->addFlash()</> line.';
+            $closing[] = sprintf('%d) Review and customize the form, controller, and templates as needed.', $index++);
+            $closing[] = sprintf('%d) Run <fg=yellow>"php bin/console make:migration"</> to generate a migration for the newly added <fg=yellow>%s::isVerified</> property.', $index++, $userClass);
+        }
+
+        $io->text($closing);
+        $io->newLine();
+        $io->text('Then open your browser, go to "/register" and enjoy your new form!');
+        $io->newLine();
+    }
+
+    private function checkComponentsExist(ConsoleStyle $io): void
+    {
+        $message = $this->getMissingComponentsComposerMessage();
+
+        if ($message) {
+            $io->warning([
+                'We\'re missing some important components. Don\'t forget to install these after you\'re finished.',
+                $message,
+            ]);
+        }
+    }
+
+    private function getMissingComponentsComposerMessage(): ?string
+    {
+        $missing = false;
+        $composerMessage = 'composer require';
+
+        if (!class_exists(SymfonyCastsVerifyEmailBundle::class)) {
+            $missing = true;
+            $composerMessage = sprintf('%s symfonycasts/verify-email-bundle', $composerMessage);
+        }
+
+        if (!interface_exists(MailerInterface::class)) {
+            $missing = true;
+            $composerMessage = sprintf('%s symfony/mailer', $composerMessage);
+        }
+
+        if (!$missing) {
+            return null;
+        }
+
+        return $composerMessage;
     }
 
     public function configureDependencies(DependencyBuilder $dependencies)

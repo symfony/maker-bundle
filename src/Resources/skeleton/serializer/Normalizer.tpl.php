@@ -15,7 +15,7 @@ class <?= $class_name ?> implements NormalizerInterface<?= $cacheable_interface 
         $this->normalizer = $normalizer;
     }
 
-    public function normalize($object, $format = null, array $context = array()): array
+    public function normalize($object, $format = null, array $context = []): array
     {
         $data = $this->normalizer->normalize($object, $format, $context);
 
@@ -26,7 +26,7 @@ class <?= $class_name ?> implements NormalizerInterface<?= $cacheable_interface 
 
     public function supportsNormalization($data, $format = null): bool
     {
-        return $data instanceof \App\Entity\BlogPost;
+        return $data instanceof \App\Entity\<?= str_replace('Normalizer', null, $class_name) ?>;
     }
 <?php if ($cacheable_interface): ?>
 
