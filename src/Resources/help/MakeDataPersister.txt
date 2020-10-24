@@ -1,0 +1,5 @@
+The <info>%command.name%</info> command generates a new Data Persister class.
+
+<info>php %command.full_name% CustomDataPersister</info>
+
+If the argument is missing, the command will ask for the message class interactively.

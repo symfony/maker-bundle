@@ -123,5 +123,9 @@
                 <argument>%kernel.project_dir%</argument>
                 <tag name="maker.command" />
             </service>
+
+            <service id="maker.maker.make_data_persister" class="Symfony\Bundle\MakerBundle\Maker\MakeDataPersister">
+                <tag name="maker.command" />
+            </service>
         </services>
 </container>
