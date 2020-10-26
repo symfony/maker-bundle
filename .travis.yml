@@ -36,6 +36,4 @@ install:
     - ./vendor/bin/simple-phpunit install
 
 script:
-    - composer validate --strict --no-check-lock
     - ./vendor/bin/simple-phpunit $PHPUNIT_FLAGS
-    - ./vendor/bin/php-cs-fixer fix --dry-run --diff
