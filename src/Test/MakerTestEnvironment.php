@@ -469,7 +469,7 @@ echo json_encode($missingDependencies);
 
                     break;
                 default:
-                    throw new \Exception('Invalid target version');
+                    throw new \InvalidArgumentException('Invalid target version');
             }
         }
 
