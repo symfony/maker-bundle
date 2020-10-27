@@ -109,7 +109,7 @@ abstract class MakerTestCase extends TestCase
 
         $installedPackages = json_decode($testEnv->readFile('vendor/composer/installed.json'), true);
         $packageVersions = [];
-        foreach ($installedPackages as $installedPackage) {
+        foreach ($installedPackages['packages'] ?? $installedPackages as $installedPackage) {
             $packageVersions[$installedPackage['name']] = $installedPackage['version_normalized'];
         }
 
