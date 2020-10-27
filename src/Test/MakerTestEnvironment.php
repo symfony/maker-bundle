@@ -465,7 +465,7 @@ echo json_encode($missingDependencies);
 
                     break;
                 case 'dev':
-                    $this->targetSkeletonVersion = 'dev-master';
+                    $this->targetSkeletonVersion = '5.x-dev';
 
                     break;
                 default:
