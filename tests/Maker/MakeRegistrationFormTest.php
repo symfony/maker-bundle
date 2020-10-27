@@ -121,6 +121,8 @@ class MakeRegistrationFormTest extends MakerTestCase
             ->addExtraDependencies('symfonycasts/verify-email-bundle')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
+            // needed for internal functional test
+            ->addExtraDependencies('symfony/web-profiler-bundle')
             ->addExtraDependencies('mailer'),
         ];
     }
