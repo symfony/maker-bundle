@@ -32,7 +32,7 @@ final class MakerTestEnvironment
     private $cachePath;
     private $flexPath;
     private $path;
-    private $targetFlexVersion;
+    private $targetSkeletonVersion;
 
     /**
      * @var MakerTestProcess
@@ -53,7 +53,7 @@ final class MakerTestEnvironment
         }
 
         $this->cachePath = realpath($cachePath);
-        $targetVersion = $this->getTargetFlexVersion();
+        $targetVersion = $this->getTargetSkeletonVersion();
         $this->flexPath = $this->cachePath.'/flex_project'.$targetVersion;
 
         $this->path = $this->cachePath.\DIRECTORY_SEPARATOR.$testDetails->getUniqueCacheDirectoryName().$targetVersion;
@@ -320,7 +320,7 @@ final class MakerTestEnvironment
 
     private function buildFlexSkeleton()
     {
-        $targetVersion = $this->getTargetFlexVersion();
+        $targetVersion = $this->getTargetSkeletonVersion();
         $versionString = $targetVersion ? sprintf(':%s', $targetVersion) : '';
 
         MakerTestProcess::create(
@@ -441,15 +441,15 @@ echo json_encode($missingDependencies);
         return array_merge($data, $this->testDetails->getExtraDependencies());
     }
 
-    private function getTargetFlexVersion(): string
+    private function getTargetSkeletonVersion(): string
     {
-        if (null === $this->targetFlexVersion) {
+        if (null === $this->targetSkeletonVersion) {
             $targetVersion = $_SERVER['MAKER_TEST_VERSION'] ?? 'stable';
 
             if ('stable' === $targetVersion) {
-                $this->targetFlexVersion = '';
+                $this->targetSkeletonVersion = '';
 
-                return $this->targetFlexVersion;
+                return $this->targetSkeletonVersion;
             }
 
             $httpClient = HttpClient::create();
@@ -461,11 +461,11 @@ echo json_encode($missingDependencies);
                     $version = $data['latest'];
                     $parts = explode('.', $version);
 
-                    $this->targetFlexVersion = sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
+                    $this->targetSkeletonVersion = sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
 
                     break;
                 case 'dev':
-                    $this->targetFlexVersion = 'dev-master';
+                    $this->targetSkeletonVersion = 'dev-master';
 
                     break;
                 default:
@@ -473,6 +473,6 @@ echo json_encode($missingDependencies);
             }
         }
 
-        return $this->targetFlexVersion;
+        return $this->targetSkeletonVersion;
     }
 }
