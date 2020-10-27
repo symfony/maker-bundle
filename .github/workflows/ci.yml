@@ -61,7 +61,7 @@ jobs:
                 run: "vendor/bin/php-cs-fixer fix --dry-run --diff"
 
     test:
-        name: "PHP ${{ matrix.php-version }} + MAKER_TEST_VERSION: ${{ matrix.maker-test-version }} + composer 2"
+        name: "PHP ${{ matrix.php-version }} + symfony/skeleton@${{ matrix.symfony-skeleton-stability }}"
 
         runs-on: ubuntu-latest
 
@@ -78,7 +78,7 @@ jobs:
         continue-on-error: ${{ matrix.allow-failures }}
 
         env:
-            MAKER_TEST_VERSION: ${{ matrix.maker-test-version }}
+            SYMFONY_SKELETON_STABILITY: ${{ matrix.symfony-skeleton-stability }}
 
         strategy:
             matrix:
@@ -87,15 +87,15 @@ jobs:
                     - '7.2.5'
                     - '7.3'
                     - '7.4'
-                maker-test-version:
+                symfony-skeleton-stability:
                     - 'stable'
                 allow-failures: [false]
                 include:
                     - php-version: '7.4'
-                      maker-test-version: 'dev'
+                      symfony-skeleton-stability: 'dev'
                       allow-failures: true
                     - php-version: '8.0'
-                      maker-test-version: 'stable'
+                      symfony-skeleton-stability: 'stable'
                       allow-failures: true
 
         steps:
@@ -133,7 +133,7 @@ jobs:
               uses: actions/cache@v2.1.2
               with:
                   path: ${{ steps.composer-cache.outputs.dir }}
-                  key: ${{ runner.os }}-${{ matrix.php-version }}-composer-${{ hashFiles('composer.json') }}-maker-test-version-${{ matrix.maker-test-version }}-allow-failures-${{ matrix.allow-failures }}
+                  key: ${{ runner.os }}-${{ matrix.php-version }}-composer-${{ hashFiles('composer.json') }}-symfony-skeleton-stability-${{ matrix.symfony-skeleton-stability }}-allow-failures-${{ matrix.allow-failures }}
                   restore-keys: ${{ runner.os }}-${{ matrix.php-version }}-composer-
 
             - name: "Require symfony/flex"

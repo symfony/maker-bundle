@@ -444,15 +444,15 @@ echo json_encode($missingDependencies);
     private function getTargetSkeletonVersion(): string
     {
         if (null === $this->targetSkeletonVersion) {
-            $targetVersion = $_SERVER['MAKER_TEST_VERSION'] ?? 'stable';
+            $stability = $_SERVER['SYMFONY_SKELETON_STABILITY'] ?? 'stable';
 
-            if ('stable' === $targetVersion) {
+            if ('stable' === $stability) {
                 $this->targetSkeletonVersion = '';
 
                 return $this->targetSkeletonVersion;
             }
 
-            switch ($targetVersion) {
+            switch ($stability) {
                 case 'stable-dev':
                     $httpClient = HttpClient::create();
                     $response = $httpClient->request('GET', 'https://symfony.com/versions.json');
@@ -469,7 +469,7 @@ echo json_encode($missingDependencies);
 
                     break;
                 default:
-                    throw new \InvalidArgumentException('Invalid target version');
+                    throw new \InvalidArgumentException('Invalid stability');
             }
         }
 
