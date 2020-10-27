@@ -452,12 +452,12 @@ echo json_encode($missingDependencies);
                 return $this->targetSkeletonVersion;
             }
 
-            $httpClient = HttpClient::create();
-            $response = $httpClient->request('GET', 'https://symfony.com/versions.json');
-            $data = $response->toArray();
-
             switch ($targetVersion) {
                 case 'stable-dev':
+                    $httpClient = HttpClient::create();
+                    $response = $httpClient->request('GET', 'https://symfony.com/versions.json');
+                    $data = $response->toArray();
+
                     $version = $data['latest'];
                     $parts = explode('.', $version);
 
