@@ -48,9 +48,11 @@ install:
     - IF %PHP%==0 echo extension=php_curl.dll >> php.ini
     - IF %PHP%==0 echo extension=php_pdo_mysql.dll >> php.ini
     - IF %PHP%==0 echo @php %%~dp0composer.phar %%* > composer.bat
-    - appveyor-retry appveyor DownloadFile https://getcomposer.org/download/1.10.5/composer.phar
+    - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer-stable.phar
+    - del composer.phar
+    - rename composer-stable.phar composer.phar
     - cd C:\projects\maker-bundle
-    - composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-master
+    - composer global require --no-progress --no-scripts --no-plugins symfony/flex
     - IF %dependencies%==highest appveyor-retry composer update --no-progress --no-suggest --ansi
     - vendor/bin/simple-phpunit install
 
