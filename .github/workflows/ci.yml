@@ -95,7 +95,7 @@ jobs:
                       symfony-skeleton-stability: 'dev'
                       allow-failures: true
                     - php-version: '8.0'
-                      symfony-skeleton-stability: 'stable'
+                      symfony-skeleton-stability: 'dev'
                       allow-failures: true
 
         steps:
