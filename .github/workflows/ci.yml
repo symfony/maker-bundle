@@ -61,9 +61,9 @@ jobs:
                 run: "vendor/bin/php-cs-fixer fix --dry-run --diff"
 
     test:
-        name: "PHP ${{ matrix.php-version }} + symfony/skeleton@${{ matrix.symfony-skeleton-stability }}"
+        name: "PHP ${{ matrix.php-version }} + symfony/skeleton@${{ matrix.symfony-skeleton-stability }} (${{ matrix.os }})"
 
-        runs-on: ubuntu-latest
+        runs-on: ${{ matrix.os }}
 
         services:
             mysql:
@@ -87,14 +87,26 @@ jobs:
                     - '7.2.5'
                     - '7.3'
                     - '7.4'
+                os:
+                    - 'ubuntu-latest'
                 symfony-skeleton-stability:
                     - 'stable'
                 allow-failures: [false]
                 include:
+                    - php-version: '7.2.5'
+                      os: 'windows-latest'
+                      symfony-skeleton-stability: 'stable'
+                      allow-failures: false
                     - php-version: '7.4'
+                      os: 'ubuntu-latest'
                       symfony-skeleton-stability: 'dev'
                       allow-failures: true
                     - php-version: '8.0'
+                      os: 'ubuntu-latest'
+                      symfony-skeleton-stability: 'dev'
+                      allow-failures: true
+                    - php-version: '8.0'
+                      os: 'windows-latest'
                       symfony-skeleton-stability: 'dev'
                       allow-failures: true
 
