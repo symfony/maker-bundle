@@ -1,3 +1,9 @@
+1.23
+====
+
+* Added experimental PHP 8 support. The bundle now allows php 8 and all
+  maker commands (whose dependencies allow PHP 8) now having passing tests.
+
 1.22
 ====
 
