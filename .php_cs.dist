@@ -5,8 +5,8 @@ if (!file_exists(__DIR__.'/src')) {
 }
 
 $finder = PhpCsFixer\Finder::create()
-    ->in(__DIR__)
-    ->exclude('vendor')
+    ->in('src')
+    ->in('tests')
     ->exclude('tests/tmp')
     ->exclude('fixtures')
     // the PHP template files are a bit special
@@ -14,7 +14,7 @@ $finder = PhpCsFixer\Finder::create()
 ;
 
 return PhpCsFixer\Config::create()
-    ->setRules(array(
+    ->setRules([
         '@Symfony' => true,
         '@Symfony:risky' => true,
         '@PHPUnit75Migration:risky' => true,
@@ -31,7 +31,7 @@ For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code.
 EOF
         ]
-    ))
+    ])
     ->setRiskyAllowed(true)
     ->setFinder($finder)
 ;
