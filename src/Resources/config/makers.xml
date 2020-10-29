@@ -125,6 +125,8 @@
             </service>
 
             <service id="maker.maker.make_data_persister" class="Symfony\Bundle\MakerBundle\Maker\MakeDataPersister">
+                <argument type="service" id="api_platform.metadata.resource.name_collection_factory" />
+                <argument type="service" id="api_platform.metadata.resource.metadata_factory" />
                 <tag name="maker.command" />
             </service>
         </services>
