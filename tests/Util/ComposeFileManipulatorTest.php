@@ -22,7 +22,7 @@ class ComposeFileManipulatorTest extends TestCase
 {
     public function testComposeFileVersion(): void
     {
-        self::assertSame('3.7', ComposeFileManipulator::COMPOSE_FILE_VERSION);
+        self::assertSame('3.8', ComposeFileManipulator::COMPOSE_FILE_VERSION);
     }
 
     public function testGetComposeDataReturnsEmptyComposeFileOnEmpty(): void
@@ -30,7 +30,7 @@ class ComposeFileManipulatorTest extends TestCase
         $manipulator = new ComposeFileManipulator('');
 
         $expected = [
-            'version' => '3.7',
+            'version' => '3.8',
             'services' => [],
         ];
 
@@ -40,7 +40,7 @@ class ComposeFileManipulatorTest extends TestCase
     public function testServiceExists(): void
     {
         $composeFile = <<< 'EOT'
-version: '3.7'
+version: '3.8'
 services:
     database:
 EOT;
@@ -56,7 +56,7 @@ EOT;
         $manipulator->addDockerService('redis', ['coming' => 'soon']);
 
         $expected = [
-            'version' => '3.7',
+            'version' => '3.8',
             'services' => [
                 'redis' => [
                     'coming' => 'soon',
@@ -70,7 +70,7 @@ EOT;
     public function testRemoveDockerService(): void
     {
         $composeFile = <<< 'EOT'
-version: '3.7'
+version: '3.8'
 services:
     database:
     rabbitmq:
@@ -79,7 +79,7 @@ EOT;
         $manipulator->removeDockerService('rabbitmq');
 
         $expected = [
-            'version' => '3.7',
+            'version' => '3.8',
             'services' => [
                 'database' => null,
             ],
@@ -91,7 +91,7 @@ EOT;
     public function testExposePorts(): void
     {
         $composeFile = <<< 'EOT'
-version: '3.7'
+version: '3.8'
 services:
     rabbitmq:
         am: 'I next?'
@@ -100,7 +100,7 @@ EOT;
         $manipulator->exposePorts('rabbitmq', ['15672']);
 
         $expected = [
-            'version' => '3.7',
+            'version' => '3.8',
             'services' => [
                 'rabbitmq' => [
                     'am' => 'I next?',
@@ -117,7 +117,7 @@ EOT;
     public function testAddVolume(): void
     {
         $composeFile = <<< 'EOT'
-version: '3.7'
+version: '3.8'
 services:
     php:
         yes: 'this looks fun'
@@ -127,7 +127,7 @@ EOT;
         $manipulator->addVolume('php', '/var/htdocs', '/var');
 
         $expected = [
-            'version' => '3.7',
+            'version' => '3.8',
             'services' => [
                 'php' => [
                     'yes' => 'this looks fun',

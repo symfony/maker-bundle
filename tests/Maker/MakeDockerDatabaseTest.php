@@ -43,7 +43,7 @@ final class MakeDockerDatabaseTest extends MakerTestCase
 
                     $data = $manipulator->getComposeData();
 
-                    self::assertSame('3.7', $data['version']);
+                    self::assertSame('3.8', $data['version']);
                 }
             ),
         ];

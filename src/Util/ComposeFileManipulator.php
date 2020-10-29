@@ -24,7 +24,7 @@ use Symfony\Component\Yaml\Dumper;
  */
 class ComposeFileManipulator
 {
-    public const COMPOSE_FILE_VERSION = '3.7';
+    public const COMPOSE_FILE_VERSION = '3.8';
 
     /** @var YamlSourceManipulator */
     private $manipulator;

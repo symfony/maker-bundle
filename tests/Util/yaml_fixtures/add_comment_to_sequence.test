@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 services:
     database:
         image: 'mysql:8.0'
@@ -11,7 +11,7 @@ $data['services']['database']['ports'] = [
     2 => '3306',
 ];
 ===
-version: '3.7'
+version: '3.8'
 services:
     database:
         image: 'mysql:8.0'
