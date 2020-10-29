@@ -15,12 +15,10 @@ $finder = PhpCsFixer\Finder::create()
 
 return PhpCsFixer\Config::create()
     ->setRules(array(
+        '@PHPUnit75Migration:risky' => true,
         '@Symfony' => true,
         '@Symfony:risky' => true,
-        '@PHPUnit75Migration:risky' => true,
         'array_syntax' => ['syntax' => 'short'],
-        'protected_to_private' => false,
-        'semicolon_after_instruction' => false,
         'header_comment' => [
             'header' => <<<EOF
 This file is part of the Symfony MakerBundle package.
@@ -30,7 +28,9 @@ This file is part of the Symfony MakerBundle package.
 For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code.
 EOF
-        ]
+        ],
+        'protected_to_private' => false,
+        'semicolon_after_instruction' => false,
     ))
     ->setRiskyAllowed(true)
     ->setFinder($finder)
