@@ -18,18 +18,28 @@ final class <?= $class_name; ?> implements ContextAwareDataPersisterInterface
 <?php endif ?>
     public function supports($data, array $context = []): bool
     {
-        // implement your logic to check whether the given data is supported by this data persister
-        <?= isset($resource_short_name) ? "return \$data instanceof $resource_short_name;" : "return true;\n" ?>
+<?php if (isset($is_doctrine_persister) && isset($resource_short_name)): ?>
+        return $this->decorated->supports($data, $context);
+<?php elseif (isset($resource_short_name)):?>
+        return $data instanceof <?= $resource_short_name; ?>;
+<?php else: ?>
+        return true;
+<?php endif ?>
     }
 
     public function persist($data, array $context = [])
     {
-        // call your persistence layer to save $data
+<?php if (isset($is_doctrine_persister) && isset($resource_short_name)): ?>
+        $data = $this->decorated->persist($data, $context);
+
+<?php endif ?>
         return $data;
     }
 
     public function remove($data, array $context = [])
     {
-        // call your persistence layer to delete $data
+<?php if (isset($is_doctrine_persister) && isset($resource_short_name)): ?>
+        return $this->decorated->persist($data, $context);
+<?php endif ?>
     }
 }

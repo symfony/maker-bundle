@@ -29,5 +29,39 @@ class MakeDataPersisterTest extends MakerTestCase
                 $this->assertFileExists($directory.'/src/DataPersister/CustomDataPersister.php');
             }),
         ];
+        yield 'entity_with_doctrine_persister' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeDataPersister::class),
+            [
+                'ArticleDataPersister',
+                'Article',
+                'yes',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeDataPersister')
+            ->assert(function (string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/DataPersister/ArticleDataPersister.php');
+            }),
+        ];
+        yield 'entity_without_doctrine_persister' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeDataPersister::class),
+            [
+                'ArticleBlogDataPersister',
+                'Article',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeDataPersister')
+            ->assert(function (string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/DataPersister/ArticleBlogDataPersister.php');
+            }),
+        ];
+        yield 'model_class_persister' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeDataPersister::class),
+            [
+                'BookDataPersister',
+                'Book',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeDataPersister')
+            ->assert(function (string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/DataPersister/BookDataPersister.php');
+            }),
+        ];
     }
 }

@@ -17,8 +17,11 @@ use ApiPlatform\Core\Metadata\Resource\Factory\ResourceNameCollectionFactoryInte
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -37,13 +40,17 @@ final class MakeDataPersister extends AbstractMaker
     protected $ressourceNameCollectionFactory;
     /** @var ResourceMetadataFactoryInterface */
     protected $ressourceMetaDataFactory;
+    protected $fileManager;
+    protected $doctrineHelper;
     protected $resourcesClassNames = [];
 
     public function __construct(
+        FileManager $fileManager,
         DoctrineHelper $doctrineHelper,
         $ressourceNameCollectionFactory = null,
         $ressourceMetaDataFactory = null
     ) {
+        $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
         $this->ressourceNameCollection = $ressourceNameCollectionFactory;
         $this->ressourceMetaDataFactory = $ressourceMetaDataFactory;
@@ -73,8 +80,9 @@ final class MakeDataPersister extends AbstractMaker
             $input->setArgument('resource', $value);
             $doctrineOption = new InputOption('is_doctrine_persister', 'a', InputOption::VALUE_NONE, 'Would you like your persister to call the core Doctrine persister?');
             $command->getDefinition()->addOption($doctrineOption);
+            $this->resourcesClassNames = array_flip($this->getResources());
 
-            if (\in_array($value, $this->resourcesClassNames) && $this->doctrineHelper->isClassAMappedEntity($this->resourcesClassNames[$value])) {
+            if (\in_array($value, $this->getResources()) && $this->doctrineHelper->isClassAMappedEntity($this->resourcesClassNames[$value])) {
                 $description = $command->getDefinition()->getOption('is_doctrine_persister')->getDescription();
                 $question = new ConfirmationQuestion($description, false);
                 $value = $io->askQuestion($question);
@@ -96,16 +104,24 @@ final class MakeDataPersister extends AbstractMaker
             $templateVariables['resource_class_name'] = $resourceClasseName;
         }
 
-        if ($input->hasOption('is_doctrine_persister')) {
-            $templateVariables['is_doctrine_persister'] = true;
-            //configure the service
-        }
-
         $dataPersisterClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
             'DataPersister\\',
             'DataPersister'
         );
+
+        if ($input->getOption('is_doctrine_persister')) {
+            $templateVariables['is_doctrine_persister'] = true;
+            if (!$this->fileManager->fileExists($path = 'config/services.yaml')) {
+                throw new RuntimeCommandException('The file "config/packages/security.yaml" does not exist. This command requires that file to exist so that it can be updated.');
+            }
+            $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents($path));
+
+            $servicesData = $manipulator->getData();
+            $servicesData['services'] = [$dataPersisterClassNameDetails->getFullName() => ['decorates' => 'api_platform.doctrine.orm.data_persister']] + $servicesData['services'];
+            $manipulator->setData($servicesData);
+            $this->fileManager->dumpFile($path, $manipulator->getContents());
+        }
 
         $generator->generateClass(
             $dataPersisterClassNameDetails->getFullName(),

@@ -125,6 +125,7 @@
             </service>
 
             <service id="maker.maker.make_data_persister" class="Symfony\Bundle\MakerBundle\Maker\MakeDataPersister">
+                <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.doctrine_helper"/>
                 <argument type="service" id="api_platform.metadata.resource.name_collection_factory" on-invalid="ignore"/>
                 <argument type="service" id="api_platform.metadata.resource.metadata_factory" on-invalid="ignore"/>
