@@ -16,11 +16,14 @@ use ApiPlatform\Core\Metadata\Resource\Factory\ResourceMetadataFactoryInterface;
 use ApiPlatform\Core\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
 /**
@@ -30,13 +33,18 @@ use Symfony\Component\Console\Question\Question;
  */
 final class MakeDataPersister extends AbstractMaker
 {
+    /** @var ResourceNameCollectionFactoryInterface */
     protected $ressourceNameCollectionFactory;
+    /** @var ResourceMetadataFactoryInterface */
     protected $ressourceMetaDataFactory;
+    protected $resourcesClassNames = [];
 
     public function __construct(
-        ResourceNameCollectionFactoryInterface $ressourceNameCollectionFactory,
-        ResourceMetadataFactoryInterface $ressourceMetaDataFactory
+        DoctrineHelper $doctrineHelper,
+        $ressourceNameCollectionFactory = null,
+        $ressourceMetaDataFactory = null
     ) {
+        $this->doctrineHelper = $doctrineHelper;
         $this->ressourceNameCollection = $ressourceNameCollectionFactory;
         $this->ressourceMetaDataFactory = $ressourceMetaDataFactory;
     }
@@ -53,6 +61,7 @@ final class MakeDataPersister extends AbstractMaker
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the Data Persister class (e.g. <fg=yellow>CustomDataPersister</>)')
             ->addArgument('resource', InputArgument::OPTIONAL, 'The name of the resource class')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeDataPersister.txt'));
+        $inputConfig->setArgumentAsNonInteractive('resource');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
@@ -62,18 +71,34 @@ final class MakeDataPersister extends AbstractMaker
             $question = $this->createResourceClassQuestion($argument->getDescription());
             $value = $io->askQuestion($question);
             $input->setArgument('resource', $value);
+            $doctrineOption = new InputOption('is_doctrine_persister', 'a', InputOption::VALUE_NONE, 'Would you like your persister to call the core Doctrine persister?');
+            $command->getDefinition()->addOption($doctrineOption);
+
+            if (\in_array($value, $this->resourcesClassNames) && $this->doctrineHelper->isClassAMappedEntity($this->resourcesClassNames[$value])) {
+                $description = $command->getDefinition()->getOption('is_doctrine_persister')->getDescription();
+                $question = new ConfirmationQuestion($description, false);
+                $value = $io->askQuestion($question);
+
+                $input->setOption('is_doctrine_persister', $value);
+            }
         }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $resourcesClassNames = array_flip($this->getResources());
-        $resourceShortName = $input->getArgument('resource');
         $templateVariables = [];
+        $resourceShortName = $input->getArgument('resource');
+        $this->resourcesClassNames = array_flip($this->getResources());
 
-        if ($resourceShortName) {
+        if ($resourceShortName && \in_array($resourceShortName, $this->resourcesClassNames)) {
+            $resourceClasseName = $this->resourcesClassNames[$resourceShortName];
             $templateVariables['resource_short_name'] = $resourceShortName;
-            $templateVariables['resource_class_name'] = $resourcesClassNames[$resourceShortName];
+            $templateVariables['resource_class_name'] = $resourceClasseName;
+        }
+
+        if ($input->hasOption('is_doctrine_persister')) {
+            $templateVariables['is_doctrine_persister'] = true;
+            //configure the service
         }
 
         $dataPersisterClassNameDetails = $generator->createClassNameDetails(

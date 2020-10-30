@@ -24,6 +24,7 @@ class MakeDataPersisterTest extends MakerTestCase
             [
                 // data persister name
                 'CustomDataPersister',
+                ' ',
             ])->assert(function (string $output, string $directory) {
                 $this->assertFileExists($directory.'/src/DataPersister/CustomDataPersister.php');
             }),
