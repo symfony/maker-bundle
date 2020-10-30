@@ -8,9 +8,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 {
+<?php if ($use_attributes) { ?>
+    #[Route('<?= $route_path ?>', name: '<?= $route_name ?>')]
+<?php } else { ?>
     /**
      * @Route("<?= $route_path ?>", name="<?= $route_name ?>")
      */
+<?php } ?>
     public function index(): Response
     {
 <?php if ($with_template) { ?>

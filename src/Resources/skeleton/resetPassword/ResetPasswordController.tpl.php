@@ -18,9 +18,13 @@ use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
 use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 
+<?php if ($use_attributes) { ?>
+#[Route('/reset-password')]
+<?php } else { ?>
 /**
  * @Route("/reset-password")
  */
+<?php } ?>
 class <?= $class_name ?> extends AbstractController
 {
     use ResetPasswordControllerTrait;
@@ -35,8 +39,13 @@ class <?= $class_name ?> extends AbstractController
     /**
      * Display & process form to request a password reset.
      *
+<?php if ($use_attributes) { ?>
+     */
+    #[Route('', name: 'app_forgot_password_request')]
+<?php } else { ?>
      * @Route("", name="app_forgot_password_request")
      */
+<?php } ?>
     public function request(Request $request, MailerInterface $mailer): Response
     {
         $form = $this->createForm(<?= $request_form_type_class_name ?>::class);
@@ -57,8 +66,13 @@ class <?= $class_name ?> extends AbstractController
     /**
      * Confirmation page after a user has requested a password reset.
      *
+<?php if ($use_attributes) { ?>
+     */
+    #[Route('/check-email', name: 'app_check_email')]
+<?php } else { ?>
      * @Route("/check-email", name="app_check_email")
      */
+<?php } ?>
     public function checkEmail(): Response
     {
         // We prevent users from directly accessing this page
@@ -74,8 +88,13 @@ class <?= $class_name ?> extends AbstractController
     /**
      * Validates and process the reset URL that the user clicked in their email.
      *
+<?php if ($use_attributes) { ?>
+     */
+    #[Route('/reset/{token}', name: 'app_reset_password')]
+<?php } else { ?>
      * @Route("/reset/{token}", name="app_reset_password")
      */
+<?php } ?>
     public function reset(Request $request, UserPasswordEncoderInterface $passwordEncoder, string $token = null): Response
     {
         if ($token) {
