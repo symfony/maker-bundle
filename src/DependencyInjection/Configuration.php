@@ -32,6 +32,7 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('root_namespace')->defaultValue('App')->end()
+                ->booleanNode('is_typed')->defaultFalse()->end()
             ->end()
         ;
 

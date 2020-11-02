@@ -230,6 +230,7 @@ final class MakeRegistrationForm extends AbstractMaker
                 [
                     'id_getter' => $input->getArgument('id-getter'),
                     'email_getter' => $input->getArgument('email-getter'),
+                    'isTyped' => $input->getOption('typed'),
                 ]
             );
 
@@ -274,6 +275,7 @@ final class MakeRegistrationForm extends AbstractMaker
                 'authenticator_full_class_name' => $authenticatorClassName,
                 'firewall_name' => $input->getOption('firewall-name'),
                 'redirect_route_name' => $input->getOption('redirect-route-name'),
+                'isTyped' => $input->getOption('typed'),
             ]
         );
 
@@ -311,7 +313,7 @@ final class MakeRegistrationForm extends AbstractMaker
             );
             $userManipulator->setIo($io);
 
-            $userManipulator->addProperty('isVerified', ['@ORM\Column(type="boolean")'], false);
+            $userManipulator->addProperty('isVerified', ['@ORM\Column(type="boolean")'], false, !$input->getOption('typed') ?: 'bool');
             $userManipulator->addAccessorMethod('isVerified', 'isVerified', 'bool', false);
             $userManipulator->addSetter('isVerified', 'bool', false);
 

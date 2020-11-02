@@ -8,7 +8,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class <?= $class_name ?> implements NormalizerInterface<?= $cacheable_interface ? ', CacheableSupportsMethodInterface' : '' ?><?= "\n" ?>
 {
-    private $normalizer;
+    private<?= $isTyped ? ' ObjectNormalizer' : null ?> $normalizer;
 
     public function __construct(ObjectNormalizer $normalizer)
     {

@@ -37,6 +37,8 @@ class MakerExtension extends Extension
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
 
+        $container->setParameter('isTyped', $config['is_typed']);
+
         $rootNamespace = trim($config['root_namespace'], '\\');
 
         $autoloaderFinderDefinition = $container->getDefinition('maker.autoloader_finder');

@@ -11,7 +11,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class <?= $class_name; ?> extends Command
 {
-    protected static $defaultName = '<?= $command_name; ?>';
+    protected static<?= $is_typed ? ' string' : null ?> $defaultName = '<?= $command_name; ?>';
 
     protected function configure()
     {

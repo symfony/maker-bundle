@@ -23,7 +23,9 @@ use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
  * Used as the Command class for the makers.
@@ -39,19 +41,22 @@ final class MakerCommand extends Command
     private $io;
     private $checkDependencies = true;
     private $generator;
+    private $params;
 
-    public function __construct(MakerInterface $maker, FileManager $fileManager, Generator $generator)
+    public function __construct(MakerInterface $maker, FileManager $fileManager, Generator $generator, ParameterBagInterface $params)
     {
         $this->maker = $maker;
         $this->fileManager = $fileManager;
         $this->inputConfig = new InputConfiguration();
         $this->generator = $generator;
+        $this->params = $params;
 
         parent::__construct();
     }
 
     protected function configure()
     {
+        $this->addOption('typed', null, InputOption::VALUE_NONE, 'Type the generated properties', $this->params->get('isTyped'));
         $this->maker->configureCommand($this, $this->inputConfig);
     }
 
@@ -81,6 +86,11 @@ final class MakerCommand extends Command
                 sprintf('It looks like your app may be using a namespace other than "%s".', $this->generator->getRootNamespace()),
                 'To configure this and make your life easier, see: https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html#configuration',
             ]);
+        }
+
+        if (70400 < \PHP_VERSION_ID && $input->getOption('typed')) {
+            $response = $this->io->ask('Be careful, you seem to be using a version of PHP that is too old to support property typing. Are you sure you know what you\'re doing');
+            $input->setOption('typed', $response);
         }
 
         foreach ($this->getDefinition()->getArguments() as $argument) {

@@ -44,6 +44,7 @@
                 <argument /> <!-- maker -->
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.generator" />
+                <argument type="service" id="parameter_bag" />
             </service>
 
             <service id="maker.generator" class="Symfony\Bundle\MakerBundle\Generator">

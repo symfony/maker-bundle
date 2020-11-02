@@ -209,10 +209,11 @@ class MakeResetPassword extends AbstractMaker
                 'from_email_name' => $input->getArgument('from-email-name'),
                 'email_getter' => $input->getArgument('email-getter'),
                 'email_field' => $input->getArgument('email-property-name'),
+                'isTyped' => $input->getOption('typed'),
             ]
         );
 
-        $this->generateRequestEntity($generator, $requestClassNameDetails, $repositoryClassNameDetails, $userClass);
+        $this->generateRequestEntity($generator, $requestClassNameDetails, $repositoryClassNameDetails, $userClass, $input->getOption('typed'));
 
         $this->setBundleConfig($io, $generator, $repositoryClassNameDetails->getFullName());
 
@@ -323,9 +324,9 @@ class MakeResetPassword extends AbstractMaker
         $io->newLine();
     }
 
-    private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails, string $userClass): void
+    private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails, string $userClass, bool $isTyped = false): void
     {
-        $requestEntityPath = $this->entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, false);
+        $requestEntityPath = $this->entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, false, $isTyped);
 
         $generator->writeChanges();
 

@@ -54,6 +54,7 @@ final class MakeSerializerEncoder extends AbstractMaker
             'serializer/Encoder.tpl.php',
             [
                 'format' => $format,
+                'isTyped' => $input->getOption('typed'),
             ]
         );
 

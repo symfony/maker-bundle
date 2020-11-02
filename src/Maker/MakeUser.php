@@ -144,7 +144,8 @@ final class MakeUser extends AbstractMaker
             $classPath = $this->entityClassGenerator->generateEntityClass(
                 $userClassNameDetails,
                 false, // api resource
-                $userClassConfiguration->hasPassword() && interface_exists(PasswordUpgraderInterface::class) // security user
+                $userClassConfiguration->hasPassword() && interface_exists(PasswordUpgraderInterface::class), // security user
+                $input->getOption('typed')
             );
         } else {
             $classPath = $generator->generateClass($userClassNameDetails->getFullName(), 'Class.tpl.php');

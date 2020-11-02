@@ -21,7 +21,7 @@ class <?= $class_name."\n" ?>
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private<?= $isTyped ? ' ?int' : null ?> $id;
 
     public function getId(): ?int
     {

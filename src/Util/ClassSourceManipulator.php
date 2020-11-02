@@ -83,7 +83,7 @@ final class ClassSourceManipulator
         return $this->sourceCode;
     }
 
-    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [])
+    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [], bool $isTyped = false)
     {
         $typeHint = $this->getEntityTypeHint($columnOptions['type']);
         $nullable = $columnOptions['nullable'] ?? false;
@@ -94,7 +94,7 @@ final class ClassSourceManipulator
         if ('array' === $typeHint) {
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
         }
-        $this->addProperty($propertyName, $comments, $defaultValue);
+        $this->addProperty($propertyName, $comments, $defaultValue, $isTyped ? $typeHint : null);
 
         $this->addGetter(
             $propertyName,
@@ -305,7 +305,7 @@ final class ClassSourceManipulator
         return $this->createBlankLineNode(self::CONTEXT_CLASS_METHOD);
     }
 
-    public function addProperty(string $name, array $annotationLines = [], $defaultValue = null)
+    public function addProperty(string $name, array $annotationLines = [], $defaultValue = null, $typeHint = null)
     {
         if ($this->propertyExists($name)) {
             // we never overwrite properties
@@ -315,6 +315,11 @@ final class ClassSourceManipulator
         $newPropertyBuilder = (new Builder\Property($name))->makePrivate();
         if ($annotationLines && $this->useAnnotations) {
             $newPropertyBuilder->setDocComment($this->createDocBlock($annotationLines));
+        }
+
+        if (null !== $typeHint) {
+            $newPropertyBuilder->setType(new Node\NullableType($typeHint));
+            $newPropertyBuilder->setDefault($defaultValue);
         }
 
         if (null !== $defaultValue) {

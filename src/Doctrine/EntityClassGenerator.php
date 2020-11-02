@@ -31,7 +31,7 @@ final class EntityClassGenerator
         $this->doctrineHelper = $doctrineHelper;
     }
 
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true): string
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $isTyped = false): string
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -50,6 +50,7 @@ final class EntityClassGenerator
                 'api_resource' => $apiResource,
                 'should_escape_table_name' => $this->doctrineHelper->isKeyword($tableName),
                 'table_name' => $tableName,
+                'isTyped' => $isTyped,
             ]
         );
 

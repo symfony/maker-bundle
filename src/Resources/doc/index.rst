@@ -43,11 +43,19 @@ optional arguments and options. Check them out with the ``--help`` option:
 
     $ php bin/console make:controller --help
 
+To adding typing on for your properties of your class you can use the optional
+--typing flag. This feature need PHP >= 7.4
+
+.. code-block:: terminal
+
+    $ php bin/console make:entity --typed
+
 Configuration
 -------------
 
 This bundle doesn't require any configuration. But, you *can* configure
-the root namespace that is used to "guess" what classes you want to generate:
+the root namespace that is used to "guess" what classes you want to generate.
+You can also defined if the properties of your class need to be typed:
 
 .. code-block:: yaml
 
@@ -58,6 +66,8 @@ the root namespace that is used to "guess" what classes you want to generate:
         # Acme namespace, instead of the default App
         # (e.g. Acme\Entity\Article, Acme\Command\MyCommand, etc)
         root_namespace: 'Acme'
+        # tell MakerBundle that properties need to be typed
+        is_typed: true
 
 Creating your Own Makers
 ------------------------

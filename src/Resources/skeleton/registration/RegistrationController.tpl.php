@@ -31,7 +31,7 @@ use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 {
 <?php if ($will_verify_email): ?>
-    private $emailVerifier;
+    private<?= $isTyped ? ' EmailVerifier' : null?> $emailVerifier;
 
     public function __construct(EmailVerifier $emailVerifier)
     {

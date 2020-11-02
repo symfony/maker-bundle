@@ -147,7 +147,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         if (!$classExists) {
             $entityPath = $this->entityClassGenerator->generateEntityClass(
                 $entityClassDetails,
-                $input->getOption('api-resource')
+                $input->getOption('api-resource'),
+                false,
+                true,
+                $input->getOption('typed')
             );
 
             $generator->writeChanges();
@@ -188,7 +191,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             if (\is_array($newField)) {
                 $annotationOptions = $newField;
                 unset($annotationOptions['fieldName']);
-                $manipulator->addEntityField($newField['fieldName'], $annotationOptions);
+                $manipulator->addEntityField($newField['fieldName'], $annotationOptions, [], $input->getOption('typed'));
 
                 $currentFields[] = $newField['fieldName'];
             } elseif ($newField instanceof EntityRelation) {

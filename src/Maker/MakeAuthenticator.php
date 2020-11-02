@@ -187,7 +187,8 @@ final class MakeAuthenticator extends AbstractMaker
             $input->getArgument('authenticator-type'),
             $input->getArgument('authenticator-class'),
             $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
-            $input->hasArgument('username-field') ? $input->getArgument('username-field') : null
+            $input->hasArgument('username-field') ? $input->getArgument('username-field') : null,
+            $input->getOption('isTyped')
         );
 
         // update security.yaml with guard config
@@ -229,7 +230,7 @@ final class MakeAuthenticator extends AbstractMaker
         );
     }
 
-    private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, $userClass, $userNameField)
+    private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, $userClass, $userNameField, bool $isTyped)
     {
         // generate authenticator class
         if (self::AUTH_TYPE_EMPTY_AUTHENTICATOR === $authenticatorType) {
@@ -260,6 +261,7 @@ final class MakeAuthenticator extends AbstractMaker
                 'user_needs_encoder' => $this->userClassHasEncoder($securityData, $userClass),
                 'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($userClass),
                 'provider_key_type_hint' => $this->providerKeyTypeHint(),
+                'isTyped' => $isTyped,
             ]
         );
     }

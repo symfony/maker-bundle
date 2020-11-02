@@ -57,6 +57,7 @@ final class MakeCommand extends AbstractMaker
             'command/Command.tpl.php',
             [
                 'command_name' => $commandName,
+                'is_typed' => $input->getOption('typed'),
             ]
         );
 
