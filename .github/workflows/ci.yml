@@ -79,7 +79,6 @@ jobs:
 
         env:
             SYMFONY_SKELETON_STABILITY: ${{ matrix.symfony-skeleton-stability }}
-            PHP_CS_FIXER_IGNORE_ENV: ${{ matrix.php-cs-fixer-ignore }}
 
         strategy:
             matrix:
@@ -88,8 +87,6 @@ jobs:
                     - '7.2'
                     - '7.3'
                     - '7.4'
-                php-cs-fixer-ignore:
-                    - 'false'
                 symfony-skeleton-stability:
                     - 'stable'
                 allow-failures: [false]
@@ -97,11 +94,9 @@ jobs:
                     - php-version: '7.4'
                       symfony-skeleton-stability: 'dev'
                       allow-failures: true
-                      php-cs-fixer-ignore: false
                     - php-version: '8.0'
                       symfony-skeleton-stability: 'dev'
                       allow-failures: true
-                      php-cs-fixer-ignore: true
 
         steps:
             - name: "Checkout code"

@@ -52,6 +52,10 @@ abstract class MakerTestCase extends TestCase
         foreach ($files as $file) {
             $this->assertTrue($testEnv->fileExists($file), sprintf('The file "%s" does not exist after generation', $file));
 
+            if (\PHP_VERSION_ID >= 80000) {
+                continue;
+            }
+
             if ('.php' === substr($file, -4)) {
                 $csProcess = $testEnv->runPhpCSFixer($file);
 
