@@ -11,8 +11,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class <?= $class_name; ?> extends Command
 {
-    protected static $defaultName = '<?= $command_name; ?>';
-    protected static $defaultDescription = 'Add a short description for your command';
+    protected static <?= $use_typed_properties ? "string " : null ?>$defaultName = '<?= $command_name; ?>';
+    protected static <?= $use_typed_properties ? "string " : null ?>$defaultDescription = 'Add a short description for your command';
 
     protected function configure()
     {

@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Security;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 
 class SecurityControllerBuilderTest extends TestCase
 {
@@ -22,7 +23,7 @@ class SecurityControllerBuilderTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/SecurityController.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/expected/SecurityController_login.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $securityControllerBuilder = new SecurityControllerBuilder();
         $securityControllerBuilder->addLoginMethod($manipulator);
@@ -35,7 +36,7 @@ class SecurityControllerBuilderTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/SecurityController.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/expected/SecurityController_logout.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $securityControllerBuilder = new SecurityControllerBuilder();
         $securityControllerBuilder->addLogoutMethod($manipulator);
@@ -48,7 +49,7 @@ class SecurityControllerBuilderTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/SecurityController.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/expected/SecurityController_login_logout.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $securityControllerBuilder = new SecurityControllerBuilder();
         $securityControllerBuilder->addLoginMethod($manipulator);

@@ -27,6 +27,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -58,12 +59,15 @@ final class MakeRegistrationForm extends AbstractMaker
 
     private $doctrineHelper;
 
+    private $phpCompatUtil;
+
     public function __construct(FileManager $fileManager, FormTypeRenderer $formTypeRenderer, RouterInterface $router, DoctrineHelper $doctrineHelper)
     {
         $this->fileManager = $fileManager;
         $this->formTypeRenderer = $formTypeRenderer;
         $this->router = $router;
         $this->doctrineHelper = $doctrineHelper;
+        $this->phpCompatUtil = new PhpCompatUtil($fileManager);
     }
 
     public static function getCommandName(): string
@@ -339,7 +343,8 @@ final class MakeRegistrationForm extends AbstractMaker
         if ($input->getOption('add-unique-entity-constraint')) {
             $classDetails = new ClassDetails($userClass);
             $userManipulator = new ClassSourceManipulator(
-                file_get_contents($classDetails->getPath())
+                file_get_contents($classDetails->getPath()),
+                $this->phpCompatUtil
             );
             $userManipulator->setIo($io);
 
@@ -356,7 +361,8 @@ final class MakeRegistrationForm extends AbstractMaker
         if ($input->getArgument('will-verify-email')) {
             $classDetails = new ClassDetails($userClass);
             $userManipulator = new ClassSourceManipulator(
-                file_get_contents($classDetails->getPath())
+                file_get_contents($classDetails->getPath()),
+                $this->phpCompatUtil
             );
             $userManipulator->setIo($io);
 

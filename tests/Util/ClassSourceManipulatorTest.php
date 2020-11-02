@@ -18,6 +18,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class ClassSourceManipulatorTest extends TestCase
@@ -30,7 +31,7 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_property/'.$expectedSourceFilename);
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
         $method = (new \ReflectionObject($manipulator))->getMethod('addProperty');
         $method->setAccessible(true);
         $method->invoke($manipulator, $propertyName, $commentLines);
@@ -80,7 +81,7 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_getter/'.$expectedSourceFilename);
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
         $method = (new \ReflectionObject($manipulator))->getMethod('addGetter');
         $method->setAccessible(true);
         $method->invoke($manipulator, $propertyName, $type, true, $commentLines);
@@ -126,7 +127,7 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_setter/'.$expectedSourceFilename);
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
         $method = (new \ReflectionObject($manipulator))->getMethod('addSetter');
         $method->setAccessible(true);
         $method->invoke($manipulator, $propertyName, $type, $isNullable, $commentLines);
@@ -172,7 +173,7 @@ class ClassSourceManipulatorTest extends TestCase
      */
     public function testBuildAnnotationLine(string $annotationClass, array $annotationOptions, string $expectedAnnotation)
     {
-        $manipulator = new ClassSourceManipulator('');
+        $manipulator = new ClassSourceManipulator('', $this->createMock(PhpCompatUtil::class));
         $method = (new \ReflectionObject($manipulator))->getMethod('buildAnnotationLine');
         $method->setAccessible(true);
         $actualAnnotation = $method->invoke($manipulator, $annotationClass, $annotationOptions);
@@ -207,7 +208,7 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_entity_field/'.$expectedSourceFilename);
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
         $manipulator->addEntityField($propertyName, $fieldOptions);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
@@ -268,7 +269,7 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_many_to_one_relation/'.$expectedSourceFilename);
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
         $manipulator->addManyToOneRelation($manyToOne);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
@@ -346,7 +347,7 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_one_to_many_relation/'.$expectedSourceFilename);
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
         $manipulator->addOneToManyRelation($oneToMany);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
@@ -397,7 +398,7 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_many_to_many_relation/'.$expectedSourceFilename);
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
         $manipulator->addManyToManyRelation($manyToMany);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
@@ -445,7 +446,7 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_one_to_one_relation/'.$expectedSourceFilename);
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
         $manipulator->addOneToOneRelation($oneToOne);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
@@ -550,7 +551,7 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/ProductWithTabs.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/with_tabs/ProductWithTabs.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $method = (new \ReflectionObject($manipulator))->getMethod('addProperty');
         $method->setAccessible(true);
@@ -568,7 +569,7 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/implements_interface/User_simple.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
         $manipulator->addInterface(UserInterface::class);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
@@ -579,7 +580,7 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/User_simple_with_interface.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/implements_interface/User_simple_with_interface.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
         $manipulator->addInterface(UserInterface::class);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
@@ -590,7 +591,7 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_method/UserEmpty_with_newMethod.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $methodBuilder = $manipulator->createMethodBuilder('testAddNewMethod', 'string', true, ['test comment on public method']);
 
@@ -612,7 +613,7 @@ CODE
         $source = file_get_contents(__DIR__.'/fixtures/source/EmptyController.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_method/Controller_with_action.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $methodBuilder = $manipulator->createMethodBuilder('action', 'JsonResponse', false, ['@Route("/action", name="app_action")']);
         $methodBuilder->addParam(
@@ -636,7 +637,7 @@ CODE
      */
     public function testAddAnnotationToClass(string $source, string $expectedSource)
     {
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
         $manipulator->addAnnotationToClass('Bar\\SomeAnnotation', [
             'message' => 'Foo',
         ]);
@@ -768,7 +769,7 @@ EOF
         $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_only_trait.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $manipulator->addTrait('App\TestTrait');
 
@@ -780,7 +781,7 @@ EOF
         $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_prop_trait.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $manipulator->addTrait('App\TestTrait');
 
@@ -792,7 +793,7 @@ EOF
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_const_trait.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $manipulator->addTrait('App\TestTrait');
 
@@ -804,7 +805,7 @@ EOF
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_trait.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $manipulator->addTrait('App\TestTrait');
 
@@ -816,7 +817,7 @@ EOF
         $source = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $manipulator->addTrait('App\TraitAlreadyHere');
 
@@ -828,7 +829,7 @@ EOF
         $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserEmpty_with_constructor.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $manipulator->addConstructor([
                 (new Param('someObjectParam'))->setType('object')->getNode(),
@@ -848,7 +849,7 @@ CODE
         $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserSimple_with_constructor.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $manipulator->addConstructor([
             (new Param('someObjectParam'))->setType('object')->getNode(),
@@ -868,7 +869,7 @@ CODE
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/User_with_constructor_constante.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $manipulator->addConstructor([
             (new Param('someObjectParam'))->setType('object')->getNode(),
@@ -887,7 +888,7 @@ CODE
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_constructor.php');
 
-        $manipulator = new ClassSourceManipulator($source);
+        $manipulator = new ClassSourceManipulator($source, $this->createMock(PhpCompatUtil::class));
 
         $this->expectException('LogicException');
         $this->expectExceptionMessage('Constructor already exists');

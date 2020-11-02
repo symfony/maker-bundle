@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\UserClassBuilder;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 
 class UserClassBuilderTest extends TestCase
 {
@@ -27,6 +28,7 @@ class UserClassBuilderTest extends TestCase
 
         $manipulator = new ClassSourceManipulator(
             file_get_contents($sourceFilename),
+            $this->createMock(PhpCompatUtil::class),
             true
         );
 

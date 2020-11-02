@@ -29,6 +29,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -46,6 +47,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 {
     private $fileManager;
     private $doctrineHelper;
+    private $phpCompatUtil;
     private $generator;
     private $entityClassGenerator;
 
@@ -53,6 +55,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
+        $this->phpCompatUtil = new PhpCompatUtil($fileManager);
         // $projectDirectory is unused, argument kept for BC
 
         if (null === $generator) {
@@ -757,7 +760,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite): ClassSourceManipulator
     {
-        $manipulator = new ClassSourceManipulator($this->fileManager->getFileContents($path), $overwrite);
+        $manipulator = new ClassSourceManipulator($this->fileManager->getFileContents($path), $this->phpCompatUtil, $overwrite);
         $manipulator->setIo($io);
 
         return $manipulator;

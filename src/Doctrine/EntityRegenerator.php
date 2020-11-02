@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 
 /**
  * @internal
@@ -30,6 +31,7 @@ final class EntityRegenerator
     private $generator;
     private $entityClassGenerator;
     private $overwrite;
+    private $phpCompatUtil;
 
     public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, EntityClassGenerator $entityClassGenerator, bool $overwrite)
     {
@@ -38,6 +40,7 @@ final class EntityRegenerator
         $this->generator = $generator;
         $this->entityClassGenerator = $entityClassGenerator;
         $this->overwrite = $overwrite;
+        $this->phpCompatUtil = new PhpCompatUtil($fileManager);
     }
 
     public function regenerateEntities(string $classOrNamespace)
@@ -201,6 +204,7 @@ final class EntityRegenerator
     {
         return new ClassSourceManipulator(
             $this->fileManager->getFileContents($classPath),
+            $this->phpCompatUtil,
             $this->overwrite,
             // use annotations
             // if properties need to be generated then, by definition,

@@ -26,9 +26,9 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
 
     public const LOGIN_ROUTE = 'app_login';
 
-<?= $user_is_entity ? "    private \$entityManager;\n" : null ?>
-    private $urlGenerator;
-    private $csrfTokenManager;
+<?= $user_is_entity ? "    private " . ($use_typed_properties ? "EntityManagerInterface " : null) ."\$entityManager;\n" : null ?>
+    private <?= $use_typed_properties ? "UrlGeneratorInterface " : null ?>$urlGenerator;
+    private <?= $use_typed_properties ? "CsrfTokenManagerInterface " : null ?>$csrfTokenManager;
 <?= $user_needs_encoder ? "    private \$passwordEncoder;\n" : null ?>
 
     public function __construct(<?= $user_is_entity ? 'EntityManagerInterface $entityManager, ' : null ?>UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager<?= $user_needs_encoder ? ', UserPasswordEncoderInterface $passwordEncoder' : null ?>)

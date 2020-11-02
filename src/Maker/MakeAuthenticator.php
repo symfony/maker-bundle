@@ -23,6 +23,7 @@ use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -60,12 +61,15 @@ final class MakeAuthenticator extends AbstractMaker
 
     private $useSecurity52 = false;
 
+    private $phpCompatUtil;
+
     public function __construct(FileManager $fileManager, SecurityConfigUpdater $configUpdater, Generator $generator, DoctrineHelper $doctrineHelper)
     {
         $this->fileManager = $fileManager;
         $this->configUpdater = $configUpdater;
         $this->generator = $generator;
         $this->doctrineHelper = $doctrineHelper;
+        $this->phpCompatUtil = new PhpCompatUtil($fileManager);
     }
 
     public static function getCommandName(): string
@@ -315,7 +319,7 @@ final class MakeAuthenticator extends AbstractMaker
             throw new RuntimeCommandException(sprintf('Method "login" already exists on class %s', $controllerClassNameDetails->getFullName()));
         }
 
-        $manipulator = new ClassSourceManipulator($controllerSourceCode, true);
+        $manipulator = new ClassSourceManipulator($controllerSourceCode, $this->phpCompatUtil, true);
 
         $securityControllerBuilder = new SecurityControllerBuilder();
         $securityControllerBuilder->addLoginMethod($manipulator);
