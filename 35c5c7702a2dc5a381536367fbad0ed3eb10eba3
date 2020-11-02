@@ -1,0 +1,50 @@
+---------------------------------------------------------------------------
+
+by OskarStark at 2020-10-31T07:59:05Z
+
+I would rather let them fail until PHP 8 is stable
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2020-10-31T08:52:16Z
+
+Agreed but, cs tests block actual tests. Lesser of two evils is to skip cs based tests for now so we can test the actual code base, not the styling of the code. This of course will get reverted when cs tooling is 8x compatible.
+
+---------------------------------------------------------------------------
+
+by OskarStark at 2020-11-01T17:55:31Z
+
+I thought we did in #715 🧐
+
+cc @weaverryan
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-11-01T19:44:42Z
+
+> I thought we did in #715 🧐
+
+The difference is that we're going to skip them completely now, instead of running them and telling php-cs-fixer to stop complaining that we're using it on an unsupported version. The reason for that change is that @jrushlow in #725 adds support for php 8 attributes. That forces us to skip php-cs-fixer entirely, because I believe it will explode on the syntax or at least think it's bad cs (but I'm just assuming, I could be wrong).
+
+@jrushlow it is true that we should "undo" the parts in #715 in the CI that set the `PHP_CS_FIXER_IGNORE_ENV` env var for php 8 - otherwise we have 2 things that basically do the same thing.
+
+---------------------------------------------------------------------------
+
+by OskarStark at 2020-11-02T05:42:00Z
+
+@jrushlow can you try to remove the env from CI ?
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2020-11-02T13:43:09Z
+
+@weaverryan @OskarStark yes and yes.
+
+We could leave the CI code in place for that, but ultimately we are not going to need to it with the conditional in the test suite it self to skip cs.
+
+For reference to self in the future - when running the test suite locally w/o this PR:
+1 of many on PHP8 RC3
+```
+1) Symfony\Bundle\MakerBundle\Tests\Maker\MakeControllerTest::testExecute with data set "controller_basic" (Symfony\Bundle\MakerBundle\Test\MakerTestDetails Object (...))
+File 'src/Controller/FooBarController.php' has a php-cs problem: PHP needs to be a minimum version of PHP 5.6.0 and maximum version of PHP 7.4.*.
+```
