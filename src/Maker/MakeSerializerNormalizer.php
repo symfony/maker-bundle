@@ -49,7 +49,10 @@ final class MakeSerializerNormalizer extends AbstractMaker
 
         $generator->generateClass(
             $normalizerClassNameDetails->getFullName(),
-            'serializer/Normalizer.tpl.php'
+            'serializer/Normalizer.tpl.php',
+            [
+                'is_typed' => $input->getOption('is_typed'),
+            ]
         );
 
         $generator->writeChanges();

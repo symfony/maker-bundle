@@ -24,9 +24,9 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
 {
     use TargetPathTrait;
 
-    public const<?= $is_typed ? ' string' : null ?> LOGIN_ROUTE = 'app_login';
+    public const LOGIN_ROUTE = 'app_login';
 
-<?= $user_is_entity ? '    private'.$is_typed ? ' EntityManagerInterface' : null." \$entityManager;\n" : null ?>
+<?= $user_is_entity ? '    private'. ($is_typed ? ' EntityManagerInterface' : null) ." \$entityManager;\n" : null ?>
     private<?= $is_typed ? ' UrlGeneratorInterface' : null  ?> $urlGenerator;
     private<?= $is_typed ? ' CsrfTokenManagerInterface' : null  ?> $csrfTokenManager;
 <?= $user_needs_encoder ? "    private \$passwordEncoder;\n" : null ?>

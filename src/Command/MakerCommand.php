@@ -77,6 +77,15 @@ final class MakerCommand extends Command
                 throw new RuntimeCommandException($missingPackagesMessage);
             }
         }
+
+        if (null === $input->getOption('typed')) {
+            $input->setOption('typed', true);
+        }
+
+        if (\PHP_VERSION_ID < 70400 && $input->getOption('typed')) {
+            $response = $this->io->confirm('Be careful, you seem to be using a version of PHP that is too old to support property typing. Are you sure you know what you\'re doing', false);
+            $input->setOption('typed', $response);
+        }
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
@@ -86,15 +95,6 @@ final class MakerCommand extends Command
                 sprintf('It looks like your app may be using a namespace other than "%s".', $this->generator->getRootNamespace()),
                 'To configure this and make your life easier, see: https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html#configuration',
             ]);
-        }
-
-        if (null === $input->getOption('typed')) {
-            $input->setOption('typed', true);
-        }
-
-        if (\PHP_VERSION_ID < 70400 && $input->getOption('typed')) {
-            $response = $this->io->confirm('Be careful, you seem to be using a version of PHP that is too old to support property typing. Are you sure you know what you\'re doing', false);
-            $input->setOption('typed', $response);
         }
 
         foreach ($this->getDefinition()->getArguments() as $argument) {
