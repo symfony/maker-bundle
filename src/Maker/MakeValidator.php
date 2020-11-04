@@ -63,7 +63,7 @@ final class MakeValidator extends AbstractMaker
             $constraintFullClassName,
             'validator/Constraint.tpl.php',
             [
-                'isTyped' => $input->getOption('typed'),
+                'is_typed' => $input->getOption('typed'),
             ]
         );
 

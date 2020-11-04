@@ -50,7 +50,7 @@ final class EntityClassGenerator
                 'api_resource' => $apiResource,
                 'should_escape_table_name' => $this->doctrineHelper->isKeyword($tableName),
                 'table_name' => $tableName,
-                'isTyped' => $isTyped,
+                'is_typed' => $isTyped,
             ]
         );
 

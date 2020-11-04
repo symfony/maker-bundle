@@ -56,7 +56,7 @@ final class MakerCommand extends Command
 
     protected function configure()
     {
-        $this->addOption('typed', null, InputOption::VALUE_OPTIONAL, 'Type the generated properties', $this->params->get('isTyped'));
+        $this->addOption('typed', null, InputOption::VALUE_OPTIONAL, 'Type the generated properties', $this->params->get('is_typed'));
         $this->maker->configureCommand($this, $this->inputConfig);
     }
 

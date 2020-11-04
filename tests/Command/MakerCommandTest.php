@@ -36,7 +36,7 @@ class MakerCommandTest extends TestCase
 
         $fileManager = $this->createMock(FileManager::class);
 
-        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, 'App'), new ParameterBag(['isTyped' => false]));
+        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, 'App'), new ParameterBag(['is_typed' => false]));
         // needed because it's normally set by the Application
         $command->setName('make:foo');
         $tester = new CommandTester($command);

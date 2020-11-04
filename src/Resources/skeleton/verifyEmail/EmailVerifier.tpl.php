@@ -12,9 +12,9 @@ use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
 class <?= $class_name; ?><?= "\n" ?>
 {
-    private<?= $isTyped ? ' VerifyEmailHelperInterface' : null ?> $verifyEmailHelper;
-    private<?= $isTyped ? ' MailerInterface' : null ?> $mailer;
-    private<?= $isTyped ? ' EntityManagerInterface' : null ?> $entityManager;
+    private<?= $is_typed ? ' VerifyEmailHelperInterface' : null ?> $verifyEmailHelper;
+    private<?= $is_typed ? ' MailerInterface' : null ?> $mailer;
+    private<?= $is_typed ? ' EntityManagerInterface' : null ?> $entityManager;
 
     public function __construct(VerifyEmailHelperInterface $helper, MailerInterface $mailer, EntityManagerInterface $manager)
     {

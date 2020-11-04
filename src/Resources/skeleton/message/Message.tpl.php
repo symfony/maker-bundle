@@ -9,7 +9,7 @@ final class <?= $class_name."\n" ?>
      * data for this message class.
      */
 
-//     private<?= $isTyped ? ' string' : null ?> $name;
+//     private<?= $is_typed ? ' string' : null ?> $name;
 //
 //     public function __construct(string $name)
 //     {

@@ -261,7 +261,7 @@ final class MakeAuthenticator extends AbstractMaker
                 'user_needs_encoder' => $this->userClassHasEncoder($securityData, $userClass),
                 'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($userClass),
                 'provider_key_type_hint' => $this->providerKeyTypeHint(),
-                'isTyped' => $isTyped,
+                'is_typed' => $isTyped,
             ]
         );
     }

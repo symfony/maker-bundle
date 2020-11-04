@@ -209,7 +209,7 @@ class MakeResetPassword extends AbstractMaker
                 'from_email_name' => $input->getArgument('from-email-name'),
                 'email_getter' => $input->getArgument('email-getter'),
                 'email_field' => $input->getArgument('email-property-name'),
-                'isTyped' => $input->getOption('typed'),
+                'is_typed' => $input->getOption('typed'),
             ]
         );
 

@@ -96,7 +96,7 @@ final class MakeMessage extends AbstractMaker
             $messageClassNameDetails->getFullName(),
             'message/Message.tpl.php',
             [
-                'isTyped' => $input->getOption('typed'),
+                'is_typed' => $input->getOption('typed'),
             ]
         );
 
