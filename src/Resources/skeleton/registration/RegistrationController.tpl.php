@@ -39,9 +39,13 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
     }
 
 <?php endif; ?>
+<?php if ($use_attributes) { ?>
+    #[Route('<?= $route_path ?>', name: '<?= $route_name ?>')]
+<?php } else { ?>
     /**
      * @Route("<?= $route_path ?>", name="<?= $route_name ?>")
      */
+<?php } ?>
     public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder<?= $authenticator_full_class_name ? sprintf(', GuardAuthenticatorHandler $guardHandler, %s $authenticator', $authenticator_class_name) : '' ?>): Response
     {
         $user = new <?= $user_class_name ?>();
@@ -91,9 +95,13 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
     }
 <?php if ($will_verify_email): ?>
 
+<?php if ($use_attributes) { ?>
+    #[Route('/verify/email', name: 'app_verify_email')]
+<?php } else { ?>
     /**
      * @Route("/verify/email", name="app_verify_email")
      */
+<?php } ?>
     public function verifyUserEmail(Request $request): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');

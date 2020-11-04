@@ -48,4 +48,9 @@ abstract class AbstractMaker implements MakerInterface
             $message
         );
     }
+
+    final protected function useAttributes(): bool
+    {
+        return \PHP_VERSION_ID >= 80000;
+    }
 }

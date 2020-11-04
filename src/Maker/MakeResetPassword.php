@@ -197,6 +197,7 @@ class MakeResetPassword extends AbstractMaker
             $controllerClassNameDetails->getFullName(),
             'resetPassword/ResetPasswordController.tpl.php',
             [
+                'use_attributes' => $this->useAttributes(),
                 'user_full_class_name' => $userClassNameDetails->getFullName(),
                 'user_class_name' => $userClassNameDetails->getShortName(),
                 'request_form_type_full_class_name' => $requestFormTypeClassNameDetails->getFullName(),
