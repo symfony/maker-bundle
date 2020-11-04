@@ -188,7 +188,7 @@ final class MakeAuthenticator extends AbstractMaker
             $input->getArgument('authenticator-class'),
             $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
             $input->hasArgument('username-field') ? $input->getArgument('username-field') : null,
-            $input->getOption('isTyped')
+            $input->getOption('typed')
         );
 
         // update security.yaml with guard config
