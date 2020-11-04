@@ -56,7 +56,7 @@ final class MakerCommand extends Command
 
     protected function configure()
     {
-        $this->addOption('typed', null, null, 'Type the generated properties', $this->params->get('isTyped'));
+        $this->addOption('typed', null, InputOption::VALUE_OPTIONAL, 'Type the generated properties', $this->params->get('isTyped'));
         $this->maker->configureCommand($this, $this->inputConfig);
     }
 
@@ -88,8 +88,12 @@ final class MakerCommand extends Command
             ]);
         }
 
-        if (70400 < \PHP_VERSION_ID && $input->getOption('typed')) {
-            $response = $this->io->ask('Be careful, you seem to be using a version of PHP that is too old to support property typing. Are you sure you know what you\'re doing');
+        if (null === $input->getOption('typed')) {
+            $input->setOption('typed', true);
+        }
+
+        if (\PHP_VERSION_ID < 70400 && $input->getOption('typed')) {
+            $response = $this->io->confirm('Be careful, you seem to be using a version of PHP that is too old to support property typing. Are you sure you know what you\'re doing', false);
             $input->setOption('typed', $response);
         }
 
