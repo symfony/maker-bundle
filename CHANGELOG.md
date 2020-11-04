@@ -1,3 +1,8 @@
+1.24
+====
+
+* Use PHP 8 Route attributes when using PHP 8 - #725 thanks to @jrushlow!
+
 1.23
 ====
 
