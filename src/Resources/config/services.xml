@@ -49,6 +49,7 @@
             <service id="maker.generator" class="Symfony\Bundle\MakerBundle\Generator">
                 <argument type="service" id="maker.file_manager" />
                 <argument /> <!-- root namespace -->
+                <argument type="service" id="maker.php_compat_util" />
             </service>
 
             <service id="maker.entity_class_generator" class="Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator">
@@ -62,6 +63,10 @@
 
             <service id="maker.renderer.form_type_renderer" class="Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer">
                 <argument type="service" id="maker.generator" />
+            </service>
+
+            <service id="maker.php_compat_util" class="Symfony\Bundle\MakerBundle\Util\PhpCompatUtil">
+                <argument type="service" id="maker.file_manager" />
             </service>
         </services>
 </container>

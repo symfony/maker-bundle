@@ -17,6 +17,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\MakerInterface;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class MakerCommandTest extends TestCase
@@ -35,7 +36,9 @@ class MakerCommandTest extends TestCase
 
         $fileManager = $this->createMock(FileManager::class);
 
-        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, 'App'));
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+
+        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, 'App', $mockPhpCompatUtil));
         // needed because it's normally set by the Application
         $command->setName('make:foo');
         $tester = new CommandTester($command);
@@ -48,7 +51,9 @@ class MakerCommandTest extends TestCase
 
         $fileManager = $this->createMock(FileManager::class);
 
-        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, 'Unknown'));
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+
+        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, 'Unknown', $mockPhpCompatUtil));
         // needed because it's normally set by the Application
         $command->setName('make:foo');
         $tester = new CommandTester($command);

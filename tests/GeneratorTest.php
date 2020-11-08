@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Tests;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 
 class GeneratorTest extends TestCase
 {
@@ -26,7 +27,11 @@ class GeneratorTest extends TestCase
         $fileManager->expects($this->any())
             ->method('getNamespacePrefixForClass')
             ->willReturn('Foo');
-        $generator = new Generator($fileManager, 'App\\');
+
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+
+        $generator = new Generator($fileManager, 'App\\', $mockPhpCompatUtil);
+
         $classNameDetails = $generator->createClassNameDetails($name, $prefix, $suffix);
 
         $this->assertSame($expectedFullClassName, $classNameDetails->getFullName());
