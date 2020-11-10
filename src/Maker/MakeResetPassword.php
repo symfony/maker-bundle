@@ -331,7 +331,10 @@ class MakeResetPassword extends AbstractMaker
         $generator->writeChanges();
 
         $manipulator = new ClassSourceManipulator(
-            $this->fileManager->getFileContents($requestEntityPath)
+            $this->fileManager->getFileContents($requestEntityPath),
+            false,
+            true,
+            $generator->getFluentSetters()
         );
 
         $manipulator->addInterface(ResetPasswordRequestInterface::class);
@@ -374,7 +377,10 @@ CODE
         );
 
         $manipulator = new ClassSourceManipulator(
-            $this->fileManager->getFileContents($pathRequestRepository)
+            $this->fileManager->getFileContents($pathRequestRepository),
+            false,
+            true,
+            $generator->getFluentSetters()
         );
 
         $manipulator->addInterface(ResetPasswordRequestRepositoryInterface::class);

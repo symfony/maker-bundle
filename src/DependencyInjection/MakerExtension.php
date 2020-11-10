@@ -38,12 +38,14 @@ class MakerExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $rootNamespace = trim($config['root_namespace'], '\\');
+        $fluentSetters = $config['fluent_setters'];
 
         $autoloaderFinderDefinition = $container->getDefinition('maker.autoloader_finder');
         $autoloaderFinderDefinition->replaceArgument(0, $rootNamespace);
 
         $makeCommandDefinition = $container->getDefinition('maker.generator');
         $makeCommandDefinition->replaceArgument(1, $rootNamespace);
+        $makeCommandDefinition->replaceArgument(2, $fluentSetters);
 
         $doctrineHelperDefinition = $container->getDefinition('maker.doctrine_helper');
         $doctrineHelperDefinition->replaceArgument(0, $rootNamespace.'\\Entity');

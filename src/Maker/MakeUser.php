@@ -51,15 +51,19 @@ final class MakeUser extends AbstractMaker
     private $configUpdater;
 
     private $doctrineHelper;
+
     private $entityClassGenerator;
 
-    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, DoctrineHelper $doctrineHelper, EntityClassGenerator $entityClassGenerator)
+    private $generator;
+
+    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, DoctrineHelper $doctrineHelper, EntityClassGenerator $entityClassGenerator, Generator $generator)
     {
         $this->fileManager = $fileManager;
         $this->userClassBuilder = $userClassBuilder;
         $this->configUpdater = $configUpdater;
         $this->doctrineHelper = $doctrineHelper;
         $this->entityClassGenerator = $entityClassGenerator;
+        $this->generator = $generator;
     }
 
     public static function getCommandName(): string
@@ -155,7 +159,9 @@ final class MakeUser extends AbstractMaker
         // B) Implement UserInterface
         $manipulator = new ClassSourceManipulator(
             $this->fileManager->getFileContents($classPath),
-            true
+            true,
+            true,
+            $this->generator->getFluentSetters()
         );
         $manipulator->setIo($io);
         $this->userClassBuilder->addUserInterfaceImplementation(
