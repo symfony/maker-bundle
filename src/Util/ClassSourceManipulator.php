@@ -984,9 +984,11 @@ final class ClassSourceManipulator
             case self::CONTEXT_OUTSIDE_CLASS:
                 // just not needed yet
                 throw new \Exception('not supported');
+                // no break
             case self::CONTEXT_CLASS:
                 // just not needed yet
                 throw new \Exception('not supported');
+                // no break
             case self::CONTEXT_CLASS_METHOD:
                 return BuilderHelpers::normalizeStmt(new Node\Expr\Variable(sprintf('__COMMENT__VAR_%d', \count($this->pendingComments) - 1)));
             default:
