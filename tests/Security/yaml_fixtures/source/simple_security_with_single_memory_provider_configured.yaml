@@ -6,5 +6,5 @@ security:
     firewalls:
         dev: ~
         main:
-            anonymous: true
+            anonymous: lazy
             provider: in_memory

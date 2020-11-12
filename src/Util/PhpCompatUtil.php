@@ -36,6 +36,13 @@ class PhpCompatUtil
         return version_compare($version, '8alpha', '>=') && Kernel::VERSION_ID >= 50200;
     }
 
+    public function canUseTypedProperties(): bool
+    {
+        $version = $this->getPhpVersion();
+
+        return version_compare($version, '7.4', '>=');
+    }
+
     protected function getPhpVersion(): string
     {
         $rootDirectory = $this->fileManager->getRootDirectory();

@@ -12,9 +12,13 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
+use Symfony\Component\HttpKernel\Log\Logger;
 use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 
 /**
+ * @author Ryan Weaver   <ryan@symfonycasts.com>
+ * @author Jesse Rushlow <jr@rushlow.dev>
+ *
  * @internal
  */
 final class SecurityConfigUpdater
@@ -22,12 +26,24 @@ final class SecurityConfigUpdater
     /** @var YamlSourceManipulator */
     private $manipulator;
 
+    /** @var Logger|null */
+    private $ysmLogger;
+
+    public function __construct(Logger $ysmLogger = null)
+    {
+        $this->ysmLogger = $ysmLogger;
+    }
+
     /**
      * Updates security.yaml contents based on a new User class.
      */
     public function updateForUserClass(string $yamlSource, UserClassConfiguration $userConfig, string $userClass): string
     {
         $this->manipulator = new YamlSourceManipulator($yamlSource);
+
+        if (null !== $this->ysmLogger) {
+            $this->manipulator->setLogger($this->ysmLogger);
+        }
 
         $this->normalizeSecurityYamlFile();
 
@@ -43,9 +59,13 @@ final class SecurityConfigUpdater
         return $contents;
     }
 
-    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup): string
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup, bool $useSecurity52): string
     {
         $this->manipulator = new YamlSourceManipulator($yamlSource);
+
+        if (null !== $this->ysmLogger) {
+            $this->manipulator->setLogger($this->ysmLogger);
+        }
 
         $this->normalizeSecurityYamlFile();
 
@@ -56,23 +76,50 @@ final class SecurityConfigUpdater
         }
 
         if (!isset($newData['security']['firewalls'][$firewallName])) {
-            $newData['security']['firewalls'][$firewallName] = ['anonymous' => true];
+            if ($useSecurity52) {
+                $newData['security']['firewalls'][$firewallName] = ['lazy' => true];
+            } else {
+                $newData['security']['firewalls'][$firewallName] = ['anonymous' => 'lazy'];
+            }
         }
 
         $firewall = $newData['security']['firewalls'][$firewallName];
 
-        if (!isset($firewall['guard'])) {
-            $firewall['guard'] = [];
-        }
+        if ($useSecurity52) {
+            if (isset($firewall['custom_authenticator'])) {
+                if (\is_array($firewall['custom_authenticator'])) {
+                    $firewall['custom_authenticator'][] = $authenticatorClass;
+                } else {
+                    $stringValue = $firewall['custom_authenticator'];
+                    $firewall['custom_authenticator'] = [];
+                    $firewall['custom_authenticator'][] = $stringValue;
+                    $firewall['custom_authenticator'][] = $authenticatorClass;
+                }
+            } else {
+                $firewall['custom_authenticator'] = $authenticatorClass;
+            }
 
-        if (!isset($firewall['guard']['authenticators'])) {
-            $firewall['guard']['authenticators'] = [];
-        }
+            if (!isset($firewall['entry_point']) && $chosenEntryPoint) {
+                $firewall['entry_point_empty_line'] = $this->manipulator->createEmptyLine();
+                $firewall['entry_point_comment'] = $this->manipulator->createCommentLine(
+                    ' the entry_point start() method determines what happens when an anonymous user accesses a protected page'
+                );
+                $firewall['entry_point'] = $authenticatorClass;
+            }
+        } else {
+            if (!isset($firewall['guard'])) {
+                $firewall['guard'] = [];
+            }
 
-        $firewall['guard']['authenticators'][] = $authenticatorClass;
+            if (!isset($firewall['guard']['authenticators'])) {
+                $firewall['guard']['authenticators'] = [];
+            }
 
-        if (\count($firewall['guard']['authenticators']) > 1) {
-            $firewall['guard']['entry_point'] = $chosenEntryPoint ?? current($firewall['guard']['authenticators']);
+            $firewall['guard']['authenticators'][] = $authenticatorClass;
+
+            if (\count($firewall['guard']['authenticators']) > 1) {
+                $firewall['guard']['entry_point'] = $chosenEntryPoint ?? current($firewall['guard']['authenticators']);
+            }
         }
 
         if (!isset($firewall['logout']) && $logoutSetup) {
@@ -86,10 +133,10 @@ final class SecurityConfigUpdater
         }
 
         $newData['security']['firewalls'][$firewallName] = $firewall;
-        $this->manipulator->setData($newData);
-        $contents = $this->manipulator->getContents();
 
-        return $contents;
+        $this->manipulator->setData($newData);
+
+        return $this->manipulator->getContents();
     }
 
     private function normalizeSecurityYamlFile()

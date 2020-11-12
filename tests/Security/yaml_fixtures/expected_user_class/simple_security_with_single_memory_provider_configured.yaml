@@ -14,5 +14,5 @@ security:
     firewalls:
         dev: ~
         main:
-            anonymous: true
+            anonymous: lazy
             provider: app_user_provider
