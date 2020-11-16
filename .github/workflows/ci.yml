@@ -40,21 +40,10 @@ jobs:
                 run: "composer validate --strict --no-check-lock"
 
             -
-                name: "Determine composer cache directory"
-                id: "determine-composer-cache-directory"
-                run: "echo \"::set-output name=directory::$(composer config cache-dir)\""
-
-            -
-                name: "Cache dependencies installed with composer"
-                uses: "actions/cache@v2"
+                name: "Composer install"
+                uses: "ramsey/composer-install@v1"
                 with:
-                    path: "${{ steps.determine-composer-cache-directory.outputs.directory }}"
-                    key: "php-${{ matrix.php-version }}-composer-${{ hashFiles('composer.json') }}"
-                    restore-keys: "php-${{ matrix.php-version }}-composer-"
-
-            -
-                name: "Install dependencies with composer"
-                run: "composer install --no-interaction --no-progress --no-suggest --no-scripts"
+                    composer-options: "--no-suggest --no-scripts"
 
             -
                 name: "Run friendsofphp/php-cs-fixer"
@@ -90,13 +79,16 @@ jobs:
                     - '7.4'
                 symfony-skeleton-stability:
                     - 'stable'
+                composer-options: ['--no-suggest']
                 allow-failures: [false]
                 include:
                     - php-version: '7.4'
                       symfony-skeleton-stability: 'dev'
+                      composer-options: '--no-suggest'
                       allow-failures: true
                     - php-version: '8.0'
                       symfony-skeleton-stability: 'dev'
+                      composer-options: '--no-suggest --ignore-platform-req=php'
                       allow-failures: true
 
         steps:
@@ -125,25 +117,13 @@ jobs:
             - name: "Add PHPUnit matcher"
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-            - name: "Set composer cache directory"
-              id: composer-cache
-              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-            - name: "Cache composer"
-              uses: actions/cache@v2.1.2
-              with:
-                  path: ${{ steps.composer-cache.outputs.dir }}
-                  key: ${{ runner.os }}-${{ matrix.php-version }}-composer-${{ hashFiles('composer.json') }}-symfony-skeleton-stability-${{ matrix.symfony-skeleton-stability }}-allow-failures-${{ matrix.allow-failures }}
-                  restore-keys: ${{ runner.os }}-${{ matrix.php-version }}-composer-
-
             - name: "Require symfony/flex"
               run: composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-main
 
-            - if: matrix.php-version != '8.0'
-              run: composer update
-
-            - if: matrix.php-version == '8.0'
-              run: composer update --ignore-platform-req=php
+            - name: "Composer install"
+              uses: "ramsey/composer-install@v1"
+              with:
+                  composer-options: "${{ matrix.composer-options }}"
 
             - name: "Install PHPUnit"
               run: vendor/bin/simple-phpunit install
