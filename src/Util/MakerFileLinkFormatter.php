@@ -47,7 +47,6 @@ final class MakerFileLinkFormatter
         }
 
         $outputFormatterStyle = new OutputFormatterStyle();
-        $outputFormatterStyle->setHref($formatted);
 
         return $outputFormatterStyle->apply($relativePath);
     }
