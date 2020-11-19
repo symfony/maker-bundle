@@ -136,7 +136,7 @@ final class MakerTestDetails
         $this
             ->addReplacement(
                 '.env',
-                'mysql://db_user:db_password@127.0.0.1:3306/db_name',
+                'postgresql://db_user:db_password@127.0.0.1:5432/db_name?serverVersion=13&charset=utf8',
                 getenv('TEST_DATABASE_DSN')
             )
         ;
@@ -144,8 +144,8 @@ final class MakerTestDetails
         // use MySQL 5.6, which is what's currently available on Travis
         $this->addReplacement(
             'config/packages/doctrine.yaml',
-            "server_version: '5.7'",
-            "server_version: '5.6'"
+            "#server_version: '13'",
+            "server_version: '5.7'"
         );
 
         // this looks silly, but it's the only way to drop the database *for sure*,
