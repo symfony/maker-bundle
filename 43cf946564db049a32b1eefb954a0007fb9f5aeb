@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by jrushlow at 2020-11-20T19:40:38Z
+
+why the change? If we change it here, we should be consistent across all Symfony repos that use GH Actions. There may already be a PR for this over on symfony/symfony (at a glance I did not see one) but symfony uses https://github.com/symfony/symfony/blob/5.x/.github/workflows/tests.yml
+
+For outsider context - github actions is capable of either `.yaml` or `.yml`. For Symfony sake, it would make sense to use `.yaml` as this is what we do in symfony itself.
+
+---------------------------------------------------------------------------
+
+by OskarStark at 2020-11-22T12:15:46Z
+
+> For Symfony sake, it would make sense to use .yaml as this is what we do in symfony itself.
+
+Exactly. We can rename the others accordingly 👍
+
+@weaverryan can you please merge? Thanks
