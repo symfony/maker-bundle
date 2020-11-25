@@ -2,6 +2,7 @@
 ====
 
 * Use PHP 8 Route attributes when using PHP 8 - #725 thanks to @jrushlow!
+* Improve version detection by reading config.platform.php - #728 thanks to @jrushlow!
 
 1.23
 ====
