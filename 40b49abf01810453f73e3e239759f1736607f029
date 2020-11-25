@@ -1,0 +1,21 @@
+---------------------------------------------------------------------------
+
+by stof at 2020-11-25T16:58:55Z
+
+The cause of introducing a faulty constraint is probably that the contributor adding it in https://github.com/symfony/maker-bundle/pull/728 ran `composer require symfony/deprecation-contracts`, letting Composer guess the constraint. But this guessing respect the minimum-stability of the project, and this project defines `dev` as the min stability.
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2020-11-25T17:05:30Z
+
+> contributor adding it in #728 ran composer require symfony/deprecation-contracts
+
+That's exactly what happened. Good catch!
+
+---------------------------------------------------------------------------
+
+by stof at 2020-11-25T17:11:12Z
+
+> Good catch!
+
+Well, that was actually catched because someone complain on Slack that `composer require symfony/maker-bundle` was broken.
