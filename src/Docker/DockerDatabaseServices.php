@@ -89,7 +89,7 @@ final class DockerDatabaseServices
                 $driver = 'mysql';
                 break;
             case 'postgres':
-                $driver = 'pdsql';
+                $driver = 'pgsql';
                 break;
             default:
                 self::throwInvalidDatabase($name);
