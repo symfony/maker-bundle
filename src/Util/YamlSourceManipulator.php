@@ -474,6 +474,7 @@ class YamlSourceManipulator
             // increase the indentation
             $this->manuallyIncrementIndentation();
             $newYamlValue = "\n".$this->indentMultilineYamlArray($newYamlValue);
+            $this->indentationForDepths[$this->depth] -= 4;
         } elseif ($this->isCurrentArrayMultiline() && $this->isCurrentArraySequence()) {
             // we are a multi-line sequence, so drop to next line, indent and add "- " in front
             $newYamlValue = "\n".$this->indentMultilineYamlArray('- '.$newYamlValue);
