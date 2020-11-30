@@ -474,7 +474,7 @@ class YamlSourceManipulator
             // increase the indentation
             $this->manuallyIncrementIndentation();
             $newYamlValue = "\n".$this->indentMultilineYamlArray($newYamlValue);
-            $this->indentationForDepths[$this->depth] -= 4;
+            $this->manuallyDecrementIndentation();
         } elseif ($this->isCurrentArrayMultiline() && $this->isCurrentArraySequence()) {
             // we are a multi-line sequence, so drop to next line, indent and add "- " in front
             $newYamlValue = "\n".$this->indentMultilineYamlArray('- '.$newYamlValue);
@@ -1172,6 +1172,19 @@ class YamlSourceManipulator
     private function manuallyIncrementIndentation()
     {
         $this->indentationForDepths[$this->depth] = $this->indentationForDepths[$this->depth] + $this->getPreferredIndentationSize();
+    }
+
+    private function manuallyDecrementIndentation(): void
+    {
+        $guessedIndentationSize = $this->getPreferredIndentationSize();
+
+        if ($this->indentationForDepths[$this->depth] === $guessedIndentationSize) {
+            $this->indentationForDepths[$this->depth] -= 4;
+
+            return;
+        }
+
+        $this->indentationForDepths[$this->depth] = $this->getPreferredIndentationSize() - $guessedIndentationSize;
     }
 
     private function isEOF(int $position = null)
