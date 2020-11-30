@@ -471,10 +471,8 @@ class YamlSourceManipulator
             // we're converting from a scalar to a (multiline) array
             // this means we need to break onto the next line
 
-            // increase the indentation
-            $this->manuallyIncrementIndentation();
-            $newYamlValue = "\n".$this->indentMultilineYamlArray($newYamlValue);
-            $this->manuallyDecrementIndentation();
+            // increase(override) the indentation
+            $newYamlValue = "\n".$this->indentMultilineYamlArray($newYamlValue, ($this->indentationForDepths[$this->depth] + $this->getPreferredIndentationSize()));
         } elseif ($this->isCurrentArrayMultiline() && $this->isCurrentArraySequence()) {
             // we are a multi-line sequence, so drop to next line, indent and add "- " in front
             $newYamlValue = "\n".$this->indentMultilineYamlArray('- '.$newYamlValue);
@@ -949,9 +947,11 @@ class YamlSourceManipulator
         --$this->depth;
     }
 
-    private function getCurrentIndentation(): string
+    private function getCurrentIndentation(int $override = null): string
     {
-        return str_repeat(' ', $this->indentationForDepths[$this->depth]);
+        $indent = $override ?? $this->indentationForDepths[$this->depth];
+
+        return str_repeat(' ', $indent);
     }
 
     private function log(string $message, $includeContent = false)
@@ -1174,19 +1174,6 @@ class YamlSourceManipulator
         $this->indentationForDepths[$this->depth] = $this->indentationForDepths[$this->depth] + $this->getPreferredIndentationSize();
     }
 
-    private function manuallyDecrementIndentation(): void
-    {
-        $guessedIndentationSize = $this->getPreferredIndentationSize();
-
-        if ($this->indentationForDepths[$this->depth] === $guessedIndentationSize) {
-            $this->indentationForDepths[$this->depth] -= 4;
-
-            return;
-        }
-
-        $this->indentationForDepths[$this->depth] = $this->indentationForDepths[$this->depth] - $guessedIndentationSize;
-    }
-
     private function isEOF(int $position = null)
     {
         $position = null === $position ? $this->currentPosition : $position;
@@ -1309,19 +1296,21 @@ class YamlSourceManipulator
      * Usually an empty line needs to be prepended to this result before
      * adding to the content.
      */
-    private function indentMultilineYamlArray(string $yaml): string
+    private function indentMultilineYamlArray(string $yaml, int $indentOverride = null): string
     {
+        $indent = $this->getCurrentIndentation($indentOverride);
+
         // But, if the *value* is an array, then ITS children will
         // also need to be indented artificially by the same amount
-        $yaml = str_replace("\n", "\n".$this->getCurrentIndentation(), $yaml);
+        $yaml = str_replace("\n", "\n".$indent, $yaml);
 
         if ($this->isMultilineString($yaml)) {
             // Remove extra indentation in case of blank line in multiline string
-            $yaml = str_replace("\n".$this->getCurrentIndentation()."\n", "\n\n", $yaml);
+            $yaml = str_replace("\n".$indent."\n", "\n\n", $yaml);
         }
 
         // now indent this level
-        return $this->getCurrentIndentation().$yaml;
+        return $indent.$yaml;
     }
 
     private function findPositionOfMultilineCharInLine(int $position): ?int
