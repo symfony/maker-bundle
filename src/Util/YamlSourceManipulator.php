@@ -1184,7 +1184,7 @@ class YamlSourceManipulator
             return;
         }
 
-        $this->indentationForDepths[$this->depth] = $this->getPreferredIndentationSize() - $guessedIndentationSize;
+        $this->indentationForDepths[$this->depth] = $this->indentationForDepths[$this->depth] - $guessedIndentationSize;
     }
 
     private function isEOF(int $position = null)
