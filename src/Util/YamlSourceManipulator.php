@@ -109,7 +109,7 @@ class YamlSourceManipulator
 
     public function createCommentLine(string $comment): string
     {
-        return sprintf(self::COMMENT_PLACEHOLDER_VALUE.$comment);
+        return self::COMMENT_PLACEHOLDER_VALUE.$comment;
     }
 
     private function updateData(array $newData)
