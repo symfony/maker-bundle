@@ -1,3 +1,9 @@
+1.25
+====
+
+* Add support for doctrine/inflector v2 (v1 is still allowed) - #758 thanks to @jrushlow!
+* [make:entity] Fixed setting a null value for OneToMany - #755 thanks to @Kocal!
+
 1.24
 ====
 
