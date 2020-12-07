@@ -33,12 +33,12 @@ class UserProfile
 
     public function setUser(User $user): self
     {
-        $this->user = $user;
-
         // set the owning side of the relation if necessary
         if ($user->getUserProfile() !== $this) {
             $user->setUserProfile($this);
         }
+
+        $this->user = $user;
 
         return $this;
     }

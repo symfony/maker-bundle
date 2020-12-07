@@ -33,13 +33,17 @@ class UserProfile
 
     public function setUser(?User $user): self
     {
-        $this->user = $user;
-
-        // set (or unset) the owning side of the relation if necessary
-        $newUserProfile = null === $user ? null : $this;
-        if ($user->getUserProfile() !== $newUserProfile) {
-            $user->setUserProfile($newUserProfile);
+        // unset the owning side of the relation if necessary
+        if ($user === null && $this->user !== null) {
+            $this->user->setUserProfile(null);
         }
+
+        // set the owning side of the relation if necessary
+        if ($user !== null && $user->getUserProfile() !== $this) {
+            $user->setUserProfile($this);
+        }
+
+        $this->user = $user;
 
         return $this;
     }
