@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Util;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
+use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
@@ -51,6 +52,15 @@ class PhpVersionTest extends TestCase
         $version = new PhpCompatUtil($mockFileManager);
 
         $result = $version->canUseAttributes();
+
+        /*
+         * Symfony 5.2 is required to compare the result. Otherwise it will always
+         * return false regardless of the PHP Version. If the test suite is run w/
+         * Symfony < 5.2, we assert false here but still rely on the assertions above.
+         */
+        if (Kernel::VERSION_ID < 50200) {
+            $expectedResult = false;
+        }
 
         self::assertSame($expectedResult, $result);
     }
