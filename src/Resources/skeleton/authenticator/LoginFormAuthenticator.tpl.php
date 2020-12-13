@@ -67,8 +67,7 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
             throw new InvalidCsrfTokenException();
         }
 
-        <?= $user_is_entity ? "\$user = \$this->entityManager->getRepository($user_class_name::class)->findOneBy(['$username_field' => \$credentials['$username_field']]);\n"
-        : "// Load / create our user however you need.
+        <?= "// Load / create our user however you need.
         // You can do this by calling the user provider, or with custom logic here.
         \$user = \$userProvider->loadUserByUsername(\$credentials['$username_field']);\n"; ?>
 
