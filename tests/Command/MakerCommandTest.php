@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Command;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\MakerInterface;
@@ -22,15 +23,16 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class MakerCommandTest extends TestCase
 {
-    public function testExceptionOnMissingDependencies()
+    public function testExceptionOnMissingDependencies(): void
     {
-        $this->expectException(\Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException::class);
-        $this->expectExceptionMessageRegExp('/composer require foo-package/');
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessageMatches('/composer require foo-package/');
 
         $maker = $this->createMock(MakerInterface::class);
-        $maker->expects($this->once())
+        $maker
+            ->expects(self::once())
             ->method('configureDependencies')
-            ->willReturnCallback(function (DependencyBuilder $depBuilder) {
+            ->willReturnCallback(static function (DependencyBuilder $depBuilder) {
                 $depBuilder->addClassDependency('Foo', 'foo-package');
             });
 
@@ -45,7 +47,7 @@ class MakerCommandTest extends TestCase
         $tester->execute([]);
     }
 
-    public function testExceptionOnUnknownRootNamespace()
+    public function testExceptionOnUnknownRootNamespace(): void
     {
         $maker = $this->createMock(MakerInterface::class);
 
@@ -59,6 +61,6 @@ class MakerCommandTest extends TestCase
         $tester = new CommandTester($command);
         $tester->execute([]);
 
-        $this->assertStringContainsString('using a namespace other than "Unknown"', $tester->getDisplay());
+        self::assertStringContainsString('using a namespace other than "Unknown"', $tester->getDisplay());
     }
 }
