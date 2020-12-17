@@ -1,6 +1,6 @@
 security:
     firewalls:
         main:
-            anonymous: true
+            anonymous: lazy
             guard:
                 authenticators: [App\Security\AppCustomAuthenticator]

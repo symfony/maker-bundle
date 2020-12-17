@@ -6,7 +6,7 @@ security:
     firewalls:
         dev: ~
         main:
-            anonymous: true
+            anonymous: lazy
             guard:
                 authenticators:
                     - App\Security\AppCustomAuthenticator
