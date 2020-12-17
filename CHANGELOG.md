@@ -1,3 +1,9 @@
+1.26
+====
+
+* [make:auth] Added support to make:auth for the new "authenticator" security mode in
+  Symfony 5.2 - #736 thanks to @jrushlow!
+
 1.25
 ====
 
