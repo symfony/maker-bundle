@@ -1,0 +1,18 @@
+---------------------------------------------------------------------------
+
+by jrushlow at 2020-11-15T18:08:46Z
+
+@jrushlow TODO:
+
+1) `make:user` _INPUT_ (`User`, `yes`, `email`, `yes`)
+2) `make:auth` ===
+
+![image](https://user-images.githubusercontent.com/40327885/99192867-55c1fa00-2743-11eb-985b-de3c8a64b647.png)
+
+~Gracefully handle security features not permitted w/ security 51~ not maker related
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2020-12-04T19:20:37Z
+
+coding standards are failing due to unrelated `sprintf()` usage. fix is available in #757
