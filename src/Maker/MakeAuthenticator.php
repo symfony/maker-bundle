@@ -348,7 +348,7 @@ final class MakeAuthenticator extends AbstractMaker
                 $logoutSetup,
                 $this->useSecurity52
             );
-            $nextTexts[] = '- Your <info>security.yaml</info> could not be updated automatically. You\'ll need to add the following config manually:\n\n'.$yamlExample;
+            $nextTexts[] = "- Your <info>security.yaml</info> could not be updated automatically. You'll need to add the following config manually:\n\n".$yamlExample;
         }
 
         if (self::AUTH_TYPE_FORM_LOGIN === $authenticatorType) {
