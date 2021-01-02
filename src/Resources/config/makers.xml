@@ -58,6 +58,11 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_makefile" class="Symfony\Bundle\MakerBundle\Maker\MakeMakefile">
+                <argument type="service" id="maker.file_manager" />
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_message" class="Symfony\Bundle\MakerBundle\Maker\MakeMessage">
                 <argument type="service" id="maker.file_manager" />
                 <tag name="maker.command" />

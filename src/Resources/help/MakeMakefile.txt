@@ -1,0 +1,5 @@
+The <info>%command.name%</info> command generates a Makefile in your project.
+
+<info>php %command.full_name%</info>
+
+Supports webpack encore and doctrine.
