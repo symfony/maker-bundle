@@ -28,7 +28,12 @@ class <?= $class_name; ?><?= "\n" ?>
         $signatureComponents = $this->verifyEmailHelper->generateSignature(
             $verifyEmailRouteName,
             $user-><?= $id_getter ?>(),
+<?php if ($verify_email_anonymously): ?>
+            $user-><?= $email_getter ?>(),
+            ['id' => $user->getId()]
+<?php else: ?>
             $user-><?= $email_getter ?>()
+<?php endif; ?>
         );
 
         $context = $email->getContext();

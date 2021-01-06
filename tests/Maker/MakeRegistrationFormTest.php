@@ -79,7 +79,8 @@ class MakeRegistrationFormTest extends MakerTestCase
             $this->getMakerInstance(MakeRegistrationForm::class),
             [
                 'n', // add UniqueEntity
-                'y', // no verify user
+                'y', // verify user
+                'y', // require authentication to verify user email
                 'jr@rushlow.dev', // from email address
                 'SymfonyCasts', // From Name
                 'n', // no authenticate after
@@ -110,7 +111,8 @@ class MakeRegistrationFormTest extends MakerTestCase
             $this->getMakerInstance(MakeRegistrationForm::class),
             [
                 'n', // add UniqueEntity
-                'y', // no verify user
+                'y', // verify user
+                'n', // require authentication to verify user email
                 'jr@rushlow.dev', // from email address
                 'SymfonyCasts', // From Name
                 '', // yes authenticate after
@@ -118,6 +120,27 @@ class MakeRegistrationFormTest extends MakerTestCase
             ])
             ->setRequiredPhpVersion(70200)
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormVerifyEmailFunctionalTest')
+            ->addExtraDependencies('symfonycasts/verify-email-bundle')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            // needed for internal functional test
+            ->addExtraDependencies('symfony/web-profiler-bundle')
+            ->addExtraDependencies('mailer'),
+        ];
+
+        yield 'verify_email_no_auth_functional_test' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeRegistrationForm::class),
+            [
+                'n', // add UniqueEntity
+                'y', // verify user's email
+                'y', // require authentication to verify user email
+                'jr@rushlow.dev', // from email address
+                'SymfonyCasts', // From Name
+                '', // yes authenticate after
+                'main', // redirect to route after registration
+            ])
+            ->setRequiredPhpVersion(70200)
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormVerifyEmailNoAuthFunctionalTest')
             ->addExtraDependencies('symfonycasts/verify-email-bundle')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
