@@ -16,6 +16,7 @@ use Doctrine\Common\Annotations\Annotation;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -55,11 +56,14 @@ final class MakeRegistrationForm extends AbstractMaker
 
     private $router;
 
-    public function __construct(FileManager $fileManager, FormTypeRenderer $formTypeRenderer, RouterInterface $router)
+    private $doctrineHelper;
+
+    public function __construct(FileManager $fileManager, FormTypeRenderer $formTypeRenderer, RouterInterface $router, DoctrineHelper $doctrineHelper)
     {
         $this->fileManager = $fileManager;
         $this->formTypeRenderer = $formTypeRenderer;
         $this->router = $router;
+        $this->doctrineHelper = $doctrineHelper;
     }
 
     public static function getCommandName(): string
@@ -83,6 +87,7 @@ final class MakeRegistrationForm extends AbstractMaker
             ->addArgument('username-field')
             ->addArgument('password-field')
             ->addArgument('will-verify-email')
+            ->addArgument('verify-email-anonymously')
             ->addArgument('id-getter')
             ->addArgument('email-getter')
             ->addArgument('from-email-address')
@@ -138,8 +143,21 @@ final class MakeRegistrationForm extends AbstractMaker
 
         $input->setArgument('will-verify-email', $willVerify);
 
+        // This must be preset to true to avoid code being generated if $willVerify === false
+        $input->setArgument('verify-email-anonymously', false);
+
         if ($willVerify) {
             $this->checkComponentsExist($io);
+
+            $emailText[] = 'By default, users are required to be authenticated when they click the verification link that is emailed to them.';
+            $emailText[] = 'This prevents the user from registering on their laptop, then clicking the link on their phone, without';
+            $emailText[] = 'having to log in. To allow multi device email verification, we can embed a user id in the verification link.';
+            $io->text($emailText);
+            $io->newLine();
+            $input->setArgument(
+                'verify-email-anonymously',
+                $io->confirm('Would you like to include the user id in the verification link to allow anonymous email verification?', false)
+            );
 
             $input->setArgument('id-getter', $interactiveSecurityHelper->guessIdGetter($io, $userClass));
             $input->setArgument('email-getter', $interactiveSecurityHelper->guessEmailGetter($io, $userClass, 'email'));
@@ -219,6 +237,26 @@ final class MakeRegistrationForm extends AbstractMaker
             'Entity\\'
         );
 
+        $userDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($userClassNameDetails->getFullName());
+
+        $userRepoVars = [
+            'repository_full_class_name' => 'Doctrine\ORM\EntityManagerInterface',
+            'repository_class_name' => 'EntityManagerInterface',
+            'repository_var' => '$manager',
+        ];
+
+        $userRepository = $userDoctrineDetails->getRepositoryClass();
+
+        if (null !== $userRepository) {
+            $userRepoClassDetails = $generator->createClassNameDetails('\\'.$userRepository, 'Repository\\', 'Repository');
+
+            $userRepoVars = [
+                'repository_full_class_name' => $userRepoClassDetails->getFullName(),
+                'repository_class_name' => $userRepoClassDetails->getShortName(),
+                'repository_var' => sprintf('$%s', lcfirst($userRepoClassDetails->getShortName())),
+            ];
+        }
+
         $verifyEmailServiceClassNameDetails = $generator->createClassNameDetails(
             'EmailVerifier',
             'Security\\'
@@ -228,10 +266,13 @@ final class MakeRegistrationForm extends AbstractMaker
             $generator->generateClass(
                 $verifyEmailServiceClassNameDetails->getFullName(),
                 'verifyEmail/EmailVerifier.tpl.php',
-                [
-                    'id_getter' => $input->getArgument('id-getter'),
-                    'email_getter' => $input->getArgument('email-getter'),
-                ]
+                array_merge([
+                        'id_getter' => $input->getArgument('id-getter'),
+                        'email_getter' => $input->getArgument('email-getter'),
+                        'verify_email_anonymously' => $input->getArgument('verify-email-anonymously'),
+                    ],
+                    $userRepoVars
+                )
             );
 
             $generator->generateTemplate(
@@ -258,24 +299,27 @@ final class MakeRegistrationForm extends AbstractMaker
         $generator->generateController(
             $controllerClassNameDetails->getFullName(),
             'registration/RegistrationController.tpl.php',
-            [
-                'route_path' => '/register',
-                'route_name' => 'app_register',
-                'form_class_name' => $formClassDetails->getShortName(),
-                'form_full_class_name' => $formClassDetails->getFullName(),
-                'user_class_name' => $userClassNameDetails->getShortName(),
-                'user_full_class_name' => $userClassNameDetails->getFullName(),
-                'password_field' => $input->getArgument('password-field'),
-                'will_verify_email' => $input->getArgument('will-verify-email'),
-                'verify_email_security_service' => $verifyEmailServiceClassNameDetails->getFullName(),
-                'from_email' => $input->getArgument('from-email-address'),
-                'from_email_name' => $input->getArgument('from-email-name'),
-                'email_getter' => $input->getArgument('email-getter'),
-                'authenticator_class_name' => $authenticatorClassName ? Str::getShortClassName($authenticatorClassName) : null,
-                'authenticator_full_class_name' => $authenticatorClassName,
-                'firewall_name' => $input->getOption('firewall-name'),
-                'redirect_route_name' => $input->getOption('redirect-route-name'),
-            ]
+            array_merge([
+                    'route_path' => '/register',
+                    'route_name' => 'app_register',
+                    'form_class_name' => $formClassDetails->getShortName(),
+                    'form_full_class_name' => $formClassDetails->getFullName(),
+                    'user_class_name' => $userClassNameDetails->getShortName(),
+                    'user_full_class_name' => $userClassNameDetails->getFullName(),
+                    'password_field' => $input->getArgument('password-field'),
+                    'will_verify_email' => $input->getArgument('will-verify-email'),
+                    'verify_email_anonymously' => $input->getArgument('verify-email-anonymously'),
+                    'verify_email_security_service' => $verifyEmailServiceClassNameDetails->getFullName(),
+                    'from_email' => $input->getArgument('from-email-address'),
+                    'from_email_name' => $input->getArgument('from-email-name'),
+                    'email_getter' => $input->getArgument('email-getter'),
+                    'authenticator_class_name' => $authenticatorClassName ? Str::getShortClassName($authenticatorClassName) : null,
+                    'authenticator_full_class_name' => $authenticatorClassName,
+                    'firewall_name' => $input->getOption('firewall-name'),
+                    'redirect_route_name' => $input->getOption('redirect-route-name'),
+                ],
+                $userRepoVars
+            )
         );
 
         // 3) Generate the template

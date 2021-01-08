@@ -71,6 +71,7 @@
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.renderer.form_type_renderer" />
                 <argument type="service" id="router" />
+                <argument type="service" id="maker.doctrine_helper" />
                 <tag name="maker.command" />
             </service>
 

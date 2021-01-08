@@ -11,6 +11,9 @@ use <?= $verify_email_security_service; ?>;
 use <?= $authenticator_full_class_name; ?>;
 <?php endif; ?>
 <?php if ($will_verify_email): ?>
+<?php if ($verify_email_anonymously): ?>
+use <?= $repository_full_class_name; ?>;
+<?php endif; ?>
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 <?php endif; ?>
 use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name; ?>;
@@ -102,13 +105,33 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
      * @Route("/verify/email", name="app_verify_email")
      */
 <?php } ?>
-    public function verifyUserEmail(Request $request): Response
+    public function verifyUserEmail(Request $request<?= $verify_email_anonymously ? sprintf(', %s %s', $repository_class_name, $repository_var) : null ?>): Response
     {
+<?php if (!$verify_email_anonymously): ?>
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+<?php else: ?>
+        $id = $request->get('id');
+
+        if (null === $id) {
+            return $this->redirectToRoute('app_register');
+        }
+<?php if ('$manager' === $repository_var): ?>
+
+        $repository = $manager->getRepository(<?= $user_class_name ?>::class);
+        $user = $repository->find($id);
+<?php else: ?>
+
+        <?= $repository_var; ?>->find($id);
+<?php endif; ?>
+
+        if (null === $user) {
+            return $this->redirectToRoute('app_register');
+        }
+<?php endif; ?>
 
         // validate email confirmation link, sets User::isVerified=true and persists
         try {
-            $this->emailVerifier->handleEmailConfirmation($request, $this->getUser());
+            $this->emailVerifier->handleEmailConfirmation($request, <?= $verify_email_anonymously ? '$user' : '$this->getUser()' ?>);
         } catch (VerifyEmailExceptionInterface $exception) {
             $this->addFlash('verify_email_error', $exception->getReason());
 
