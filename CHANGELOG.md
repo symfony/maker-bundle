@@ -1,3 +1,9 @@
+1.27
+
+* [make:registration-form] Added a new question to generate code that will allow
+  users to click on the "verify email" link in their email without needing to be
+  authenticated - #776 thanks to @jrushlow!
+
 1.26
 ====
 
