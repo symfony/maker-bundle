@@ -345,14 +345,14 @@ class MakeEntityTest extends MakerTestCase
             )
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('updated: src/Entity/User.php', $output);
-                $this->assertNotContains('updated: vendor/', $output);
+                $this->assertStringNotContainsString('updated: vendor/', $output);
 
                 // sanity checks on the generated code
                 $finder = new Finder();
                 $finder->in($directory.'/src/Entity')->files()->name('*.php');
                 $this->assertCount(1, $finder);
 
-                $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
+                $this->assertStringNotContainsString('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
             }),
         ];
 
@@ -382,9 +382,9 @@ class MakeEntityTest extends MakerTestCase
                 '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
             ->assert(function (string $output, string $directory) {
-                $this->assertNotContains('updated: vendor/', $output);
+                $this->assertStringNotContainsString('updated: vendor/', $output);
 
-                $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
+                $this->assertStringNotContainsString('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
             }),
         ];
 
@@ -416,9 +416,9 @@ class MakeEntityTest extends MakerTestCase
                 '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
             )
             ->assert(function (string $output, string $directory) {
-                $this->assertNotContains('updated: vendor/', $output);
+                $this->assertStringNotContainsString('updated: vendor/', $output);
 
-                $this->assertNotContains('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
+                $this->assertStringNotContainsString('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
             }),
         ];
 

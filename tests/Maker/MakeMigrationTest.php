@@ -55,7 +55,7 @@ class MakeMigrationTest extends MakerTestCase
             ->configureDatabase()
             ->addExtraDependencies('doctrine/orm:@stable')
             ->assert(function (string $output, string $directory) {
-                $this->assertNotContains('Success', $output);
+                $this->assertStringNotContainsString('Success', $output);
 
                 $this->assertStringContainsString('No database changes were detected', $output);
             }),
