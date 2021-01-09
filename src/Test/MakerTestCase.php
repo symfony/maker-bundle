@@ -15,6 +15,7 @@ use Composer\Semver\Semver;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Component\Process\Process;
 
 abstract class MakerTestCase extends TestCase
 {
@@ -32,6 +33,10 @@ abstract class MakerTestCase extends TestCase
 
     protected function executeMakerCommand(MakerTestDetails $testDetails)
     {
+        if (!class_exists(Process::class)) {
+            throw new \LogicException('The MakerTestCase cannot be run as the Process component is not installed. Try running "compose require --dev symfony/process".');
+        }
+
         if (!$testDetails->isSupportedByCurrentPhpVersion()) {
             $this->markTestSkipped();
         }
