@@ -1,0 +1,43 @@
+---------------------------------------------------------------------------
+
+by wouterj at 2021-01-09T14:49:54Z
+
+Hi! Thank you for taking the time to submit PRs!
+
+However, I believe the current state is correct. `symfony/process` is an optional dependency of MakerBundle (you only need it when you want to write tests for custom makers). I don't think we want to install `symfony/process` in all projects that use the maker commands.
+
+---------------------------------------------------------------------------
+
+by OskarStark at 2021-01-09T14:51:25Z
+
+Isn't maker bundle itself a dev dependency? So this should not affect the end user or do I miss sth?
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2021-01-09T16:45:51Z
+
+I'm not sure if this will fly, `MakerTestProcess::class` is marked as `internal` and as such the dependency on `symfony/process` is only needed when developing `MakerBundle` it self. @OskarStark is correct that technically `MakerBundle` _should_ be a dev dependency for the consumer. However, there is still an argument to be made that once we create a dependency - in this case move one, it puts a BC burden on the us for in the future.
+
+Thoughts @weaverryan ?
+
+---------------------------------------------------------------------------
+
+by wouterj at 2021-01-09T17:16:23Z
+
+> So this should not affect the end user or do I miss sth?
+
+Dev dependencies of projects are installed (unless you're using ``--no-dev``, which is highly unlikely if you run the command locally). So it does affect end users (end users of MakerBundle are developers on local machines).
+
+---
+
+In Symfony, such optional dependencies are never required directly - to minimize the number of dependent packages. However, we often include a check + exception with nice error message if the optional dependency was not used. As @jrushlow mentions, these classes are internal - but they are used in `MakerTestCase` (which is the official entry point to test your own makers).
+
+@franmomu what do you think of updating this PR to add something like a check for `class_exists(Process::class)` and a message like `Install the "symfony/process" package to use the MakerTestCase` in to the `MakerTestCase::executeMakerCommand()` >method?
+
+---------------------------------------------------------------------------
+
+by franmomu at 2021-01-10T10:06:57Z
+
+> @franmomu what do you think of updating this PR to add something like a check for `class_exists(Process::class)` and a message like `Install the "symfony/process" package to use the MakerTestCase` in to the `MakerTestCase::executeMakerCommand()` >method?
+
+Done!
