@@ -15,10 +15,14 @@ use Composer\Semver\Semver;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\Process;
 
 abstract class MakerTestCase extends TestCase
 {
+    /**
+     * @var KernelInterface
+     */
     private $kernel;
 
     /**
@@ -100,7 +104,7 @@ abstract class MakerTestCase extends TestCase
     protected function getMakerInstance(string $makerClass): MakerInterface
     {
         if (null === $this->kernel) {
-            $this->kernel = new MakerTestKernel('dev', true);
+            $this->kernel = $this->createKernel();
             $this->kernel->boot();
         }
 
@@ -108,6 +112,11 @@ abstract class MakerTestCase extends TestCase
         $serviceId = $serviceId ?? sprintf('maker.maker.%s', Str::asRouteName((new \ReflectionClass($makerClass))->getShortName()));
 
         return $this->kernel->getContainer()->get($serviceId);
+    }
+
+    protected function createKernel(): KernelInterface
+    {
+        return new MakerTestKernel('dev', true);
     }
 
     private function hasRequiredDependencyVersions(MakerTestDetails $testDetails, MakerTestEnvironment $testEnv): bool
