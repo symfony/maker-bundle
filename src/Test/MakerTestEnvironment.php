@@ -373,12 +373,18 @@ final class MakerTestEnvironment
             $this->fs->symlink($rootPath.'/vendor/symfony/phpunit-bridge', $this->flexPath.'/vendor/symfony/phpunit-bridge');
         }
 
-        // temporarily ignoring indirect deprecations - see #237
         $replacements = [
+            // temporarily ignoring indirect deprecations - see #237
             [
                 'filename' => '.env.test',
                 'find' => 'SYMFONY_DEPRECATIONS_HELPER=999999',
                 'replace' => 'SYMFONY_DEPRECATIONS_HELPER=max[self]=0',
+            ],
+            // do not explicitly set the PHPUnit version
+            [
+                'filename' => 'phpunit.xml.dist',
+                'find' => '<server name="SYMFONY_PHPUNIT_VERSION" value="8.5" />',
+                'replace' => '',
             ],
         ];
         $this->processReplacements($replacements, $this->flexPath);
