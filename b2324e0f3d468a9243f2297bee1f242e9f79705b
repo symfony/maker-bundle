@@ -1,0 +1,25 @@
+---------------------------------------------------------------------------
+
+by jrushlow at 2021-01-09T16:20:07Z
+
+we need to have a fallback / conditionally use PHPUnit 7x for PHP 7.1
+
+---------------------------------------------------------------------------
+
+by OskarStark at 2021-01-09T16:48:35Z
+
+Recipe is now merged @wouterj wou
+
+---------------------------------------------------------------------------
+
+by wouterj at 2021-01-09T17:22:15Z
+
+Alright after the merge, we now would need to do exactly the opposite for PHP 7.1 :smile:
+
+I've updated the PR to remove the PHPUNIT version line completely. If not explicitly set, the `simple-phpunit` binary already chooses the correct version based on the available PHP version ([ref](https://github.com/symfony/symfony/blob/5.x/src/Symfony/Bridge/PhpUnit/bin/simple-phpunit.php#L96-L104)).
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2021-01-09T17:37:54Z
+
+thanks @wouterj - nice to finally see a green check next to PHP8.0!
