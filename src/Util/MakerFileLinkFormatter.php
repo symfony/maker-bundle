@@ -47,7 +47,10 @@ final class MakerFileLinkFormatter
         }
 
         $outputFormatterStyle = new OutputFormatterStyle();
-        $outputFormatterStyle->setHref($formatted);
+        
+        if (method_exists(OutputFormatterStyle::class, 'setHref')) {
+            $outputFormatterStyle->setHref($formatted);
+        }
 
         return $outputFormatterStyle->apply($relativePath);
     }
