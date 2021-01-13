@@ -47,7 +47,7 @@ final class MakerFileLinkFormatter
         }
 
         $outputFormatterStyle = new OutputFormatterStyle();
-        
+
         if (method_exists(OutputFormatterStyle::class, 'setHref')) {
             $outputFormatterStyle->setHref($formatted);
         }
