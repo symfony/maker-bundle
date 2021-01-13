@@ -1,0 +1,18 @@
+---------------------------------------------------------------------------
+
+by ehrlich-media at 2020-11-17T16:15:12Z
+
+See here:
+https://github.com/symfony/maker-bundle/issues/625
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2020-11-19T17:39:08Z
+
+It looks like we need to check if this method exists and *only* call it if it does. So, you're right - but we shouldn't remove the call entirely, but only call it if it exists - it's used to make clickable links. I'm not sure why our tests didn't catch this problem on 3.4...
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2021-01-12T17:59:08Z
+
+closes #625
