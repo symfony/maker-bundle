@@ -33,6 +33,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Yaml\Yaml;
+use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestInterface;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestTrait;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordToken;
@@ -84,13 +85,11 @@ class MakeResetPassword extends AbstractMaker
 
         $dependencies->addClassDependency(Annotation::class, 'annotations');
 
-        // reset-password-bundle 1.2.1 includes support for translations and a fix for the bad expiration time bug.
-        // we need to check that version 1.2.1 is installed
+        // reset-password-bundle 1.3 includes helpers to get/set a ResetPasswordToken object from the session.
+        // we need to check that version 1.3 is installed
         if (class_exists(ResetPasswordToken::class)) {
-            $reflectedToken = new \ReflectionClass(ResetPasswordToken::class);
-
-            if (!$reflectedToken->hasMethod('getExpirationMessageKey')) {
-                throw new RuntimeCommandException('Please upgrade symfonycasts/reset-password-bundle to version 1.2.1 or greater.');
+            if (!method_exists(ResetPasswordControllerTrait::class, 'getTokenObjectFromSession')) {
+                throw new RuntimeCommandException('Please upgrade symfonycasts/reset-password-bundle to version 1.3 or greater.');
             }
         }
     }
