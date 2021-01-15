@@ -121,7 +121,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
         $user = $repository->find($id);
 <?php else: ?>
 
-        <?= $repository_var; ?>->find($id);
+        $user = <?= $repository_var; ?>->find($id);
 <?php endif; ?>
 
         if (null === $user) {
