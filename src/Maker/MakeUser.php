@@ -130,7 +130,7 @@ final class MakeUser extends AbstractMaker
             $input->getOption('with-password')
         );
         if ($input->getOption('use-argon2')) {
-            @trigger_error('The "--use-argon2" option is deprecated since MakerBundle 1.12.', E_USER_DEPRECATED);
+            @trigger_error('The "--use-argon2" option is deprecated since MakerBundle 1.12.', \E_USER_DEPRECATED);
             $userClassConfiguration->useArgon2(true);
         }
 

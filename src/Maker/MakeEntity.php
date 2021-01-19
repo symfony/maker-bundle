@@ -56,14 +56,14 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         // $projectDirectory is unused, argument kept for BC
 
         if (null === $generator) {
-            @trigger_error(sprintf('Passing a "%s" instance as 4th argument is mandatory since version 1.5.', Generator::class), E_USER_DEPRECATED);
+            @trigger_error(sprintf('Passing a "%s" instance as 4th argument is mandatory since version 1.5.', Generator::class), \E_USER_DEPRECATED);
             $this->generator = new Generator($fileManager, 'App\\');
         } else {
             $this->generator = $generator;
         }
 
         if (null === $entityClassGenerator) {
-            @trigger_error(sprintf('Passing a "%s" instance as 5th argument is mandatory since version 1.15.1', EntityClassGenerator::class), E_USER_DEPRECATED);
+            @trigger_error(sprintf('Passing a "%s" instance as 5th argument is mandatory since version 1.15.1', EntityClassGenerator::class), \E_USER_DEPRECATED);
             $this->entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
         } else {
             $this->entityClassGenerator = $entityClassGenerator;

@@ -105,7 +105,7 @@ class PhpVersionTest extends TestCase
 
         $result = $util->getVersionForTest();
 
-        self::assertSame(PHP_VERSION, $result);
+        self::assertSame(\PHP_VERSION, $result);
     }
 
     public function testWithoutPlatformVersionSet(): void
@@ -137,7 +137,7 @@ class PhpVersionTest extends TestCase
 
         $result = $util->getVersionForTest();
 
-        self::assertSame(PHP_VERSION, $result);
+        self::assertSame(\PHP_VERSION, $result);
     }
 
     /**
