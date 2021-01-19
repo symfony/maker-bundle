@@ -84,7 +84,7 @@ final class Validator
             return $length;
         }
 
-        $result = filter_var($length, FILTER_VALIDATE_INT, [
+        $result = filter_var($length, \FILTER_VALIDATE_INT, [
             'options' => ['min_range' => 1],
         ]);
 
@@ -101,7 +101,7 @@ final class Validator
             return $precision;
         }
 
-        $result = filter_var($precision, FILTER_VALIDATE_INT, [
+        $result = filter_var($precision, \FILTER_VALIDATE_INT, [
             'options' => ['min_range' => 1, 'max_range' => 65],
         ]);
 
@@ -118,7 +118,7 @@ final class Validator
             return $scale;
         }
 
-        $result = filter_var($scale, FILTER_VALIDATE_INT, [
+        $result = filter_var($scale, \FILTER_VALIDATE_INT, [
             'options' => ['min_range' => 0, 'max_range' => 30],
         ]);
 
@@ -139,7 +139,7 @@ final class Validator
             return false;
         }
 
-        if (null === $valueAsBool = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)) {
+        if (null === $valueAsBool = filter_var($value, \FILTER_VALIDATE_BOOLEAN, \FILTER_NULL_ON_FAILURE)) {
             throw new RuntimeCommandException(sprintf('Invalid bool value "%s".', $value));
         }
 
@@ -177,7 +177,7 @@ final class Validator
 
     public static function validateEmailAddress(?string $email): string
     {
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($email, \FILTER_VALIDATE_EMAIL)) {
             throw new RuntimeCommandException(sprintf('"%s" is not a valid email address.', $email));
         }
 

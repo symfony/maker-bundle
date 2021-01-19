@@ -110,7 +110,7 @@ class MigrationDiffFilteredOutput implements OutputInterface
             $this->buffer .= $message;
 
             if ($newLine) {
-                $this->buffer .= PHP_EOL;
+                $this->buffer .= \PHP_EOL;
             }
 
             if ($this->previousLineWasRemoved && !trim($message)) {

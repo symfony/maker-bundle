@@ -254,7 +254,7 @@ final class MakerTestEnvironment
 
         $matches = [];
 
-        preg_match_all('#(created|updated): (]8;;[^]*\\\)?(.*?)(]8;;\\\)?\n#iu', $output, $matches, PREG_PATTERN_ORDER);
+        preg_match_all('#(created|updated): (]8;;[^]*\\\)?(.*?)(]8;;\\\)?\n#iu', $output, $matches, \PREG_PATTERN_ORDER);
 
         return array_map('trim', $matches[3]);
     }
