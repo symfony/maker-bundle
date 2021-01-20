@@ -12,11 +12,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class <?= $class_name; ?> extends Command
 {
     protected static $defaultName = '<?= $command_name; ?>';
+    protected static $defaultDescription = 'Add a short description for your command';
 
     protected function configure()
     {
         $this
-            ->setDescription('Add a short description for your command')
+<?= $set_description ? "            ->setDescription(self::\$defaultDescription)\n" : '' ?>
             ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
             ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
         ;

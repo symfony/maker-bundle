@@ -34,10 +34,14 @@ final class MakeController extends AbstractMaker
         return 'make:controller';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new controller class';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new controller class')
             ->addArgument('controller-class', InputArgument::OPTIONAL, sprintf('Choose a name for your controller class (e.g. <fg=yellow>%sController</>)', Str::asClassName(Str::getRandomTerm())))
             ->addOption('no-template', null, InputOption::VALUE_NONE, 'Use this option to disable template generation')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeController.txt'))

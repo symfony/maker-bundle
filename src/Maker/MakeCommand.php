@@ -17,6 +17,7 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\LazyCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 
@@ -31,10 +32,14 @@ final class MakeCommand extends AbstractMaker
         return 'make:command';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new console command class';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new console command class')
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCommand.txt'))
         ;
@@ -57,6 +62,7 @@ final class MakeCommand extends AbstractMaker
             'command/Command.tpl.php',
             [
                 'command_name' => $commandName,
+                'set_description' => !class_exists(LazyCommand::class),
             ]
         );
 

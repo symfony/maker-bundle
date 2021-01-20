@@ -34,10 +34,14 @@ class MakeFunctionalTest extends AbstractMaker
         return 'make:functional-test';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new functional test class';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new functional test class')
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the functional test class (e.g. <fg=yellow>DefaultControllerTest</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeFunctionalTest.txt'))
         ;

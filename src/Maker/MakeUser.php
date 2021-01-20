@@ -67,10 +67,14 @@ final class MakeUser extends AbstractMaker
         return 'make:user';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new security user class';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new security user class')
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the security user class (e.g. <fg=yellow>User</>)')
             ->addOption('is-entity', null, InputOption::VALUE_NONE, 'Do you want to store user data in the database (via Doctrine)?')
             ->addOption('identity-property-name', null, InputOption::VALUE_REQUIRED, 'Enter a property name that will be the unique "display" name for the user (e.g. <comment>email, username, uuid</comment>)')

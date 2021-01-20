@@ -59,13 +59,17 @@ final class MakeCrud extends AbstractMaker
         return 'make:crud';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates CRUD for Doctrine entity class';
+    }
+
     /**
      * {@inheritdoc}
      */
     public function configureCommand(Command $command, InputConfiguration $inputConfig)
     {
         $command
-            ->setDescription('Creates CRUD for Doctrine entity class')
             ->addArgument('entity-class', InputArgument::OPTIONAL, sprintf('The class name of the entity to create CRUD (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCrud.txt'))
         ;

@@ -30,10 +30,14 @@ final class MakeSerializerNormalizer extends AbstractMaker
         return 'make:serializer:normalizer';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new serializer normalizer class';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new serializer normalizer class')
             ->addArgument('name', InputArgument::OPTIONAL, 'Choose a class name for your normalizer (e.g. <fg=yellow>UserNormalizer</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeSerializerNormalizer.txt'))
         ;

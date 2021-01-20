@@ -73,10 +73,14 @@ final class MakeAuthenticator extends AbstractMaker
         return 'make:auth';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a Guard authenticator of different flavors';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConfig)
     {
         $command
-            ->setDescription('Creates a Guard authenticator of different flavors')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeAuth.txt'));
     }
 

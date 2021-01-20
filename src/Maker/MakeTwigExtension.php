@@ -31,10 +31,14 @@ final class MakeTwigExtension extends AbstractMaker
         return 'make:twig-extension';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new Twig extension class';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new Twig extension class')
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the Twig extension class (e.g. <fg=yellow>AppExtension</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeTwigExtension.txt'))
         ;
