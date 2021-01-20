@@ -68,10 +68,14 @@ class MakeResetPassword extends AbstractMaker
         return 'make:reset-password';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Create controller, entity, and repositories for use with symfonycasts/reset-password-bundle';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConfig)
     {
         $command
-            ->setDescription('Create controller, entity, and repositories for use with symfonycasts/reset-password-bundle')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeResetPassword.txt'))
         ;
     }

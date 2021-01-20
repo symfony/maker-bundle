@@ -17,6 +17,8 @@ use Symfony\Component\Console\Input\InputInterface;
 /**
  * Interface that all maker commands must implement.
  *
+ * @method string getCommandDescription()
+ *
  * @author Ryan Weaver <ryan@knpuniversity.com>
  */
 interface MakerInterface

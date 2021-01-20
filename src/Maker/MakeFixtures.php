@@ -34,10 +34,14 @@ final class MakeFixtures extends AbstractMaker
         return 'make:fixtures';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new class to load Doctrine fixtures';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new class to load Doctrine fixtures')
             ->addArgument('fixtures-class', InputArgument::OPTIONAL, 'The class name of the fixtures to create (e.g. <fg=yellow>AppFixtures</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeFixture.txt'))
         ;

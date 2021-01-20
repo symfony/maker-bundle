@@ -32,10 +32,14 @@ final class MakeMessengerMiddleware extends AbstractMaker
         return 'make:messenger-middleware';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new messenger middleware';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConfig)
     {
         $command
-            ->setDescription('Creates a new messenger middleware')
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the middleware class (e.g. <fg=yellow>CustomMiddleware</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeMessage.txt'));
     }

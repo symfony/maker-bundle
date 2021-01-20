@@ -31,10 +31,14 @@ final class MakeVoter extends AbstractMaker
         return 'make:voter';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new security voter class';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new security voter class')
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the security voter class (e.g. <fg=yellow>BlogPostVoter</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeVoter.txt'))
         ;

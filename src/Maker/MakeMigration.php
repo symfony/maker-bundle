@@ -48,6 +48,11 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         return 'make:migration';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new migration based on database changes';
+    }
+
     public function setApplication(Application $application)
     {
         $this->application = $application;
@@ -56,7 +61,6 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new migration based on database changes')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeMigration.txt'))
         ;
 
