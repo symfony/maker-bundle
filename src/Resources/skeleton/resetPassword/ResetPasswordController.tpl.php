@@ -38,11 +38,11 @@ class <?= $class_name ?> extends AbstractController
 
     /**
      * Display & process form to request a password reset.
-     *
 <?php if ($use_attributes) { ?>
      */
     #[Route('', name: 'app_forgot_password_request')]
 <?php } else { ?>
+     *
      * @Route("", name="app_forgot_password_request")
      */
 <?php } ?>
