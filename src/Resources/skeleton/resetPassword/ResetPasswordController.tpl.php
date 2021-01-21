@@ -38,11 +38,11 @@ class <?= $class_name ?> extends AbstractController
 
     /**
      * Display & process form to request a password reset.
-     *
 <?php if ($use_attributes) { ?>
      */
     #[Route('', name: 'app_forgot_password_request')]
 <?php } else { ?>
+     *
      * @Route("", name="app_forgot_password_request")
      */
 <?php } ?>
@@ -65,11 +65,11 @@ class <?= $class_name ?> extends AbstractController
 
     /**
      * Confirmation page after a user has requested a password reset.
-     *
 <?php if ($use_attributes) { ?>
      */
     #[Route('/check-email', name: 'app_check_email')]
 <?php } else { ?>
+     *
      * @Route("/check-email", name="app_check_email")
      */
 <?php } ?>
@@ -87,11 +87,11 @@ class <?= $class_name ?> extends AbstractController
 
     /**
      * Validates and process the reset URL that the user clicked in their email.
-     *
 <?php if ($use_attributes) { ?>
      */
     #[Route('/reset/{token}', name: 'app_reset_password')]
 <?php } else { ?>
+     *
      * @Route("/reset/{token}", name="app_reset_password")
      */
 <?php } ?>
