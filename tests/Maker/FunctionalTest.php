@@ -16,6 +16,7 @@ use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
 use Symfony\Bundle\MakerBundle\Test\MakerTestKernel;
+use Symfony\Component\Console\Command\LazyCommand;
 use Symfony\Component\Finder\Finder;
 
 class FunctionalTest extends TestCase
@@ -43,6 +44,10 @@ class FunctionalTest extends TestCase
             $command = $application->find(
                 $maker->getMethod('getCommandName')->invoke(null)
             );
+
+            if ($command instanceof LazyCommand) {
+                $command = $command->getCommand();
+            }
 
             // just a smoke test assert
             self::assertInstanceOf(MakerCommand::class, $command);

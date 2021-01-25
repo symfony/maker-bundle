@@ -91,10 +91,15 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         // end 2.x support
 
         $generateMigrationCommand = $this->application->find('doctrine:migrations:diff');
+        $generateMigrationCommandInput = new ArgvInput($options);
+
+        if (!$input->isInteractive()) {
+            $generateMigrationCommandInput->setInteractive(false);
+        }
 
         $commandOutput = new MigrationDiffFilteredOutput($io->getOutput());
         try {
-            $returnCode = $generateMigrationCommand->run(new ArgvInput($options), $commandOutput);
+            $returnCode = $generateMigrationCommand->run($generateMigrationCommandInput, $commandOutput);
 
             // non-zero code would ideally mean the internal command has already printed an errror
             // this happens if you "decline" generating a migration when you already
