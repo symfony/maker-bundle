@@ -55,6 +55,7 @@ class MakeResetPassword extends AbstractMaker
     private $fileManager;
     private $doctrineHelper;
     private $entityClassGenerator;
+    private $generateApi = false;
 
     public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, EntityClassGenerator $entityClassGenerator)
     {
@@ -172,6 +173,11 @@ class MakeResetPassword extends AbstractMaker
             [Validator::class, 'notBlank']
         )
         );
+
+        $this->generateApi = $io->confirm('Do you want to implement API based Password Resets?', false);
+        
+        //@TODO Check if API Platform is installed, if true - continue, if false - alert user composer require api-platform
+        // @TODO May make more sense to ask this at the top and fail if yes and api platform is not installed. 
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -265,6 +271,13 @@ class MakeResetPassword extends AbstractMaker
             'reset_password/reset.html.twig',
             'resetPassword/twig_reset.tpl.php'
         );
+        
+        if ($this->generateApi) {
+            // @TODO - Create DTO
+            // @TODO - Create Data Transformer
+            // @TODO - Create Data Persister
+            // @TODO - Add API DocBlocks to Entity 
+        }
 
         $generator->writeChanges();
 
