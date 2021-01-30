@@ -5,23 +5,23 @@ namespace <?= $namespace ?>;
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
 use ApiPlatform\Core\DataPersister\DataPersisterInterface;
 use App\Dto\ResetPasswordInput;
-use App\Entity\User;
+use <?= $user_full_class_name ?>;
 use App\Message\SendResetPasswordMessage;
-use App\Repository\UserRepository;
+use <?= $repository_full_class_name ?>;
 use Symfony\Component\Messenger\MessageBusInterface;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 
 class <?= $class_name ?> implements ContextAwareDataPersisterInterface
 {
-    private DataPersisterInterface $decoratedDataPersister;
-    private UserRepository $userRepository;
-    private ResetPasswordHelperInterface $resetPasswordHelper;
-    private MessageBusInterface $messageBus;
+    private <?= $use_typed_properties ? 'DataPersisterInterface ' : null ?> $decoratedDataPersister;
+    private <?= $use_typed_properties ? sprintf('%s %s', $repository_class_name, $repository_var) : $repository_var ?>;
+    private <?= $use_typed_properties ? 'ResetPasswordHelperInterface ' : null ?>$resetPasswordHelper;
+    private <?= $use_typed_properties ? 'MessageBusInterface ' : null ?>$messageBus;
 
-    public function __construct(DataPersisterInterface $decoratedDataPersister, UserRepository $userRepository, ResetPasswordHelperInterface $resetPasswordHelper, MessageBusInterface $messageBus)
+    public function __construct(DataPersisterInterface $decoratedDataPersister, <?= $repository_class_name ?> <?= $repository_var ?>, ResetPasswordHelperInterface $resetPasswordHelper, MessageBusInterface $messageBus)
     {
         $this->decoratedDataPersister = $decoratedDataPersister;
-        $this->userRepository = $userRepository;
+        $this-><?= $repository_property_var ?> = <?= $repository_var?>;
         $this->resetPasswordHelper = $resetPasswordHelper;
         $this->messageBus = $messageBus;
     }
@@ -36,9 +36,14 @@ class <?= $class_name ?> implements ContextAwareDataPersisterInterface
      */
     public function persist($data, array $context = []): void
     {
-        $user = $this->userRepository->findOneBy(['email' => $data->email]);
+<?php if ('$manager' === $repository_var): ?>
+        $repository = $this-><?= $repository_property_var ?>->getRepository(<?= $user_class_name ?>::class);
+        $user = $repository->findOneBy(['email' => $data->email]);
+<?php else: ?>
+        $user = $this-><?= $repository_property_var ?>->findOneBy(['email' => $data->email]);
+<?php endif; ?>
 
-        if (!$user instanceof User) {
+        if (!$user instanceof <?= $user_class_name?>) {
             return;
         }
 

@@ -188,6 +188,26 @@ class MakeResetPassword extends AbstractMaker
             'Entity\\'
         );
 
+        $userDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($userClassNameDetails->getFullName());
+
+        $userRepoVars = [
+            'repository_full_class_name' => 'Doctrine\ORM\EntityManagerInterface',
+            'repository_class_name' => 'EntityManagerInterface',
+            'repository_property_var' => 'manager',
+            'repository_var' => '$manager',
+        ];
+
+        if (null !== $userDoctrineDetails && null !== ($userRepository = $userDoctrineDetails->getRepositoryClass())) {
+            $userRepoClassDetails = $generator->createClassNameDetails('\\'.$userRepository, 'Repository\\', 'Repository');
+
+            $userRepoVars = [
+                'repository_full_class_name' => $userRepoClassDetails->getFullName(),
+                'repository_class_name' => $userRepoClassDetails->getShortName(),
+                'repository_property_var' => lcfirst($userRepoClassDetails->getShortName()),
+                'repository_var' => sprintf('$%s', lcfirst($userRepoClassDetails->getShortName())),
+            ];
+        }
+
         $controllerClassNameDetails = $generator->createClassNameDetails(
             'ResetPasswordController',
             'Controller\\'
@@ -300,7 +320,13 @@ class MakeResetPassword extends AbstractMaker
 
             $generator->generateClass(
                 $dataPersisterClassNameDetails->getFullName(),
-                'resetPassword/ResetPasswordDataPersister.tpl.php'
+                'resetPassword/ResetPasswordDataPersister.tpl.php',
+                array_merge([
+                    'user_full_class_name' => $userClassNameDetails->getFullName(),
+                    'user_class_name' => $userClassNameDetails->getShortName(),
+                    ],
+                    $userRepoVars
+                )
             );
 
 //             @TODO - Add API DocBlocks to Entity

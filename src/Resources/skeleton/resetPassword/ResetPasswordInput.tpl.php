@@ -12,5 +12,5 @@ class <?= $class_name."\n" ?>
      * @Assert\NotBlank
      * @Assert\Email()
      */
-    public ?string $email = null;
+    public <?= $use_typed_properties ? '?string ' : null ?>$email = null;
 }
