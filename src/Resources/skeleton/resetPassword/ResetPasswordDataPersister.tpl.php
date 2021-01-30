@@ -1,6 +1,6 @@
-<?php
+<?= "<?php\n" ?>
 
-namespace App\DataPersister;
+namespace <?= $namespace ?>;
 
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
 use ApiPlatform\Core\DataPersister\DataPersisterInterface;
@@ -11,7 +11,7 @@ use App\Repository\UserRepository;
 use Symfony\Component\Messenger\MessageBusInterface;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 
-class ResetPasswordDataPersister implements ContextAwareDataPersisterInterface
+class <?= $class_name ?> implements ContextAwareDataPersisterInterface
 {
     private DataPersisterInterface $decoratedDataPersister;
     private UserRepository $userRepository;
@@ -44,7 +44,6 @@ class ResetPasswordDataPersister implements ContextAwareDataPersisterInterface
 
         $token = $this->resetPasswordHelper->generateResetToken($user);
 
-        /** @psalm-suppress PossiblyNullArgument */
         $this->messageBus->dispatch(new SendResetPasswordMessage($user->getEmail(), $token));
 
         return;

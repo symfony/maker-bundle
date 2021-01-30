@@ -271,12 +271,39 @@ class MakeResetPassword extends AbstractMaker
             'reset_password/reset.html.twig',
             'resetPassword/twig_reset.tpl.php'
         );
-        
+
         if ($this->generateApi) {
-            // @TODO - Create DTO
-            // @TODO - Create Data Transformer
-            // @TODO - Create Data Persister
-            // @TODO - Add API DocBlocks to Entity 
+            $dtoClassNameDetails = $generator->createClassNameDetails(
+                'ResetPasswordInput',
+                'Dto\\'
+            );
+
+            $generator->generateClass(
+                $dtoClassNameDetails->getFullName(),
+                'resetPassword/ResetPasswordInput.tpl.php'
+            );
+
+            $dataTransformerClassNameDetails = $generator->createClassNameDetails(
+                'ResetPasswordInputDataTransformer',
+                'DataTransformer\\'
+            );
+
+            $generator->generateClass(
+                $dataTransformerClassNameDetails->getFullName(),
+                'resetPassword/ResetPasswordInputDataTransformer.tpl.php',
+            );
+
+            $dataPersisterClassNameDetails = $generator->createClassNameDetails(
+                'ResetPasswordDataPersister',
+                'DataPersister\\'
+            );
+
+            $generator->generateClass(
+                $dataPersisterClassNameDetails->getFullName(),
+                'resetPassword/ResetPasswordDataPersister.tpl.php'
+            );
+
+//             @TODO - Add API DocBlocks to Entity
         }
 
         $generator->writeChanges();

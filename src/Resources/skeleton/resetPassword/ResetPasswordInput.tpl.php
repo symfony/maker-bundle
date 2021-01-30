@@ -1,11 +1,11 @@
-<?php
+<?= "<?php\n" ?>
 
-namespace App\Dto;
+namespace <?= $namespace ?>;
 
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class ResetPasswordInput
+class <?= $class_name."\n" ?>
 {
     /**
      * @Groups({"reset-password:write"})

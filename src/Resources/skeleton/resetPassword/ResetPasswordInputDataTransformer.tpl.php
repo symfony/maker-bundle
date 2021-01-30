@@ -1,12 +1,12 @@
-<?php
+<?= "<?php\n" ?>
 
-namespace App\DataTransformer;
+namespace <?= $namespace ?>;
 
 use ApiPlatform\Core\DataTransformer\DataTransformerInterface;
 use App\Dto\ResetPasswordInput;
 use App\Entity\ResetPasswordRequest;
 
-class ResetPasswordInputDataTransformer implements DataTransformerInterface
+class <?= $class_name ?> implements DataTransformerInterface
 {
     public function transform($object, string $to, array $context = []): object
     {
