@@ -8,9 +8,21 @@ use Symfony\Component\Validator\Constraints as Assert;
 class <?= $class_name."\n" ?>
 {
     /**
-     * @Groups({"reset-password:write"})
-     * @Assert\NotBlank
-     * @Assert\Email()
-     */
+    * @Assert\NotBlank(groups={"postValidation"})
+    * @Assert\Email(groups={"postValidation"})
+    * @Groups({"reset-password:post"})
+    */
     public <?= $use_typed_properties ? '?string ' : null ?>$email = null;
+
+    /**
+    * @Assert\NotBlank(groups={"putValidation"})
+    * @Groups({"reset-password:put"})
+    */
+    public <?= $use_typed_properties ? '?string ' : null ?>$token = null;
+
+    /**
+    * @Assert\NotBlank(groups={"putValidation"})
+    * @Groups({"reset-password:put"})
+    */
+    public <?= $use_typed_properties ? '?string ' : null ?>$plainTextPassword = null;
 }
