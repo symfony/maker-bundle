@@ -165,13 +165,20 @@ final class UserClassBuilder
             // add an empty method only
             $builder = $manipulator->createMethodBuilder(
                 'getPassword',
-                null,
-                false,
-                ['@see UserInterface']
+                'string',
+                true,
+                [
+                    'This method is not needed for apps that do not check user passwords.',
+                    '',
+                    '@see UserInterface',
+                ]
             );
+
             $builder->addStmt(
-                $manipulator->createMethodLevelCommentNode(
-                    'not needed for apps that do not check user passwords'
+                new Node\Stmt\Return_(
+                    new Node\Expr\ConstFetch(
+                        new Node\Name('null')
+                    )
                 )
             );
 
@@ -222,26 +229,38 @@ final class UserClassBuilder
 
     private function addGetSalt(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig)
     {
-        // add getSalt(): always empty
+        if ($userClassConfig->hasPassword()) {
+            $methodDescription = [
+                'Returning a salt is only needed, if you are not using a modern',
+                'hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.',
+            ];
+        } else {
+            $methodDescription = [
+                'This method is not needed for apps that do not check user passwords.',
+            ];
+        }
+
+        // add getSalt(): ?string - always returning null
         $builder = $manipulator->createMethodBuilder(
             'getSalt',
-            null,
-            false,
-            ['@see UserInterface']
+            'string',
+            true,
+            array_merge(
+                $methodDescription,
+                [
+                    '',
+                    '@see UserInterface',
+                ]
+            )
         );
-        if ($userClassConfig->hasPassword()) {
-            $builder->addStmt(
-                $manipulator->createMethodLevelCommentNode(
-                    'not needed when using the "bcrypt" algorithm in security.yaml'
+
+        $builder->addStmt(
+            new Node\Stmt\Return_(
+                new Node\Expr\ConstFetch(
+                    new Node\Name('null')
                 )
-            );
-        } else {
-            $builder->addStmt(
-                $manipulator->createMethodLevelCommentNode(
-                    'not needed for apps that do not check user passwords'
-                )
-            );
-        }
+            )
+        );
 
         $manipulator->addMethodBuilder($builder);
     }
