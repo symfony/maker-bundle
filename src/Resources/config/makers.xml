@@ -115,7 +115,6 @@
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.user_class_builder" />
                 <argument type="service" id="maker.security_config_updater" />
-                <argument type="service" id="maker.doctrine_helper" />
                 <argument type="service" id="maker.entity_class_generator" />
                 <tag name="maker.command" />
             </service>

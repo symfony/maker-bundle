@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
-use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
@@ -50,15 +49,13 @@ final class MakeUser extends AbstractMaker
 
     private $configUpdater;
 
-    private $doctrineHelper;
     private $entityClassGenerator;
 
-    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, DoctrineHelper $doctrineHelper, EntityClassGenerator $entityClassGenerator)
+    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, EntityClassGenerator $entityClassGenerator)
     {
         $this->fileManager = $fileManager;
         $this->userClassBuilder = $userClassBuilder;
         $this->configUpdater = $configUpdater;
-        $this->doctrineHelper = $doctrineHelper;
         $this->entityClassGenerator = $entityClassGenerator;
     }
 
