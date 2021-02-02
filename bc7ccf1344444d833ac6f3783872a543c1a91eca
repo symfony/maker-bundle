@@ -1,0 +1,13 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2021-02-02T21:11:11Z
+
+Hi!
+
+Thanks for this :).
+
+1) I'm fine with the single-line format - `/** ... *`
+2) Perhaps we should - as a convention - prefix all these properties? e.g. `$inputFromEmailAddress` and `$inputFromEmailName`?
+3) In general, if a doc block doesn't add anything, then let's not include it - I'm 👍 for that
+
+Cheers!
