@@ -99,6 +99,10 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_test" class="Symfony\Bundle\MakerBundle\Maker\MakeTest">
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_unit_test" class="Symfony\Bundle\MakerBundle\Maker\MakeUnitTest">
                 <tag name="maker.command" />
             </service>

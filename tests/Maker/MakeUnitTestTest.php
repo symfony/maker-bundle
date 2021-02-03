@@ -15,6 +15,9 @@ use Symfony\Bundle\MakerBundle\Maker\MakeUnitTest;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 
+/**
+ * @group legacy
+ */
 class MakeUnitTestTest extends MakerTestCase
 {
     public function getTestDetails()

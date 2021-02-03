@@ -30,7 +30,11 @@ class FunctionalTest extends TestCase
         $kernel = new MakerTestKernel('dev', true);
 
         $finder = new Finder();
-        $finder->in(__DIR__.'/../../src/Maker');
+        $finder
+            ->in(__DIR__.'/../../src/Maker')
+            // exclude deprecated classes
+            ->notContains('/@deprecated/')
+        ;
 
         $application = new Application($kernel);
         foreach ($finder as $file) {
