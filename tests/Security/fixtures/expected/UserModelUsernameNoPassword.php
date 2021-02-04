@@ -47,19 +47,23 @@ class User implements UserInterface
     }
 
     /**
+     * This method is not needed for apps that do not check user passwords.
+     *
      * @see UserInterface
      */
-    public function getPassword()
+    public function getPassword(): ?string
     {
-        // not needed for apps that do not check user passwords
+        return null;
     }
 
     /**
+     * This method is not needed for apps that do not check user passwords.
+     *
      * @see UserInterface
      */
-    public function getSalt()
+    public function getSalt(): ?string
     {
-        // not needed for apps that do not check user passwords
+        return null;
     }
 
     /**
