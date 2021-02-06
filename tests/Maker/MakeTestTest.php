@@ -22,20 +22,20 @@ class MakeTestTest extends MakerTestCase
         yield 'TestCase' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeTest::class),
             [
-                // class name
-                'FooBar',
                 // type
                 'TestCase',
+                // class name
+                'FooBar',
             ]),
         ];
 
         yield 'KernelTestCase' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeTest::class),
             [
-                // functional test class name
-                'FooBar',
                 // type
                 'KernelTestCase',
+                // functional test class name
+                'FooBar',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional'),
         ];
@@ -43,10 +43,10 @@ class MakeTestTest extends MakerTestCase
         yield 'WebTestCase' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeTest::class),
             [
-                // functional test class name
-                'FooBar',
                 // type
                 'WebTestCase',
+                // functional test class name
+                'FooBar',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional'),
         ];
@@ -54,10 +54,10 @@ class MakeTestTest extends MakerTestCase
         yield 'PantherTestCase' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeTest::class),
             [
-                // functional test class name
-                'FooBar',
                 // type
                 'PantherTestCase',
+                // functional test class name
+                'FooBar',
             ])
             ->addExtraDependencies('panther')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional'),

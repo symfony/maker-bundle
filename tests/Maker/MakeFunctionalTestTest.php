@@ -22,6 +22,16 @@ class MakeFunctionalTestTest extends MakerTestCase
 {
     public function getTestDetails()
     {
+        yield 'functional_maker' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeFunctionalTest::class),
+            [
+                // functional test class name
+                'FooBar',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
+            ->skip('See https://github.com/symfony/maker-bundle/pull/807/files#r571308250'),
+        ];
+
         yield 'functional_with_panther' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeFunctionalTest::class),
             [
