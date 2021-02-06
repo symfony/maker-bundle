@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\BrowserKit\History;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -77,43 +78,57 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
         }
 
         $command
-            ->addArgument('name', InputArgument::OPTIONAL, 'The name of the test class (e.g. <fg=yellow>BlogPostTest</>)')
             ->addArgument('type', InputArgument::OPTIONAL, 'The type of test: '.implode(', ', $typesDesc))
+            ->addArgument('name', InputArgument::OPTIONAL, 'The name of the test class (e.g. <fg=yellow>BlogPostTest</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeTest.txt').implode("\n", $typesHelp));
 
+        $inputConf->setArgumentAsNonInteractive('name');
         $inputConf->setArgumentAsNonInteractive('type');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
         /* @deprecated remove the following block when removing make:unit-test and make:functional-test */
-        $currentCommand = $input->getFirstArgument();
-        switch ($currentCommand) {
-            case 'make:unit-test':
-                $input->setArgument('type', 'TestCase');
-                $io->caution('The "make:unit-test" command is deprecated, use "make:test" instead.');
-
-                return;
-
-            case 'make:functional-test':
-                $input->setArgument('type', trait_exists(PantherTestCaseTrait::class) ? 'WebTestCase' : 'PantherTestCase');
-                $io->caution('The "make:functional-test" command is deprecated, use "make:test" instead.');
-
-                return;
-        }
+        $this->handleDeprecatedMakerCommands($input, $io);
 
         if (null !== $type = $input->getArgument('type')) {
             if (!isset(self::DESCRIPTIONS[$type])) {
                 throw new RuntimeCommandException(sprintf('The test type must be one of "%s", "%s" given.', implode('", "', array_keys(self::DESCRIPTIONS)), $type));
             }
-
-            return;
+        } else {
+            $input->setArgument(
+                'type',
+                $io->choice('Which test type would you like?', self::DESCRIPTIONS)
+            );
         }
 
-        $input->setArgument(
-            'type',
-            $io->choice('Which test type would you like?', self::DESCRIPTIONS)
-        );
+        if ('ApiTestCase' === $input->getArgument('type') && !class_exists(ApiTestCase::class)) {
+            $io->warning([
+                'API Platform is required for this test type. Install it with',
+                'composer require api',
+            ]);
+        }
+
+        if ('PantherTestCase' === $input->getArgument('type') && !trait_exists(PantherTestCaseTrait::class)) {
+            $io->warning([
+                'symfony/panther is required for this test type. Install it with',
+                'composer require symfony/panther --dev',
+            ]);
+        }
+
+        if (null === $input->getArgument('name')) {
+            $io->writeln([
+                '',
+                'Choose a class name for your test, like:',
+                ' * <fg=yellow>UtilTest</> (to create tests/UtilTest.php)',
+                ' * <fg=yellow>Service\\UtilTest</> (to create tests/Service/UtilTest.php)',
+                ' * <fg=yellow>\\App\Tests\\Service\\UtilTest</> (to create tests/Service/UtilTest.php)',
+            ]);
+
+            $nameArgument = $command->getDefinition()->getArgument('name');
+            $value = $io->ask($nameArgument->getDescription(), $nameArgument->getDefault(), [Validator::class, 'notBlank']);
+            $input->setArgument($nameArgument->getName(), $value);
+        }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -184,6 +199,25 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
                 );
 
                 return;
+        }
+    }
+
+    /**
+     * @deprecated
+     */
+    private function handleDeprecatedMakerCommands(InputInterface $input, ConsoleStyle $io): void
+    {
+        $currentCommand = $input->getFirstArgument();
+        switch ($currentCommand) {
+            case 'make:unit-test':
+                $input->setArgument('type', 'TestCase');
+                $io->warning('The "make:unit-test" command is deprecated, use "make:test" instead.');
+                break;
+
+            case 'make:functional-test':
+                $input->setArgument('type', trait_exists(PantherTestCaseTrait::class) ? 'WebTestCase' : 'PantherTestCase');
+                $io->warning('The "make:functional-test" command is deprecated, use "make:test" instead.');
+                break;
         }
     }
 }

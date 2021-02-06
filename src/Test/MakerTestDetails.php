@@ -48,6 +48,9 @@ final class MakerTestDetails
 
     private $guardAuthenticators = [];
 
+    private $shouldSkip = false;
+    private $skipMessage;
+
     /**
      * @return static
      */
@@ -329,5 +332,23 @@ final class MakerTestDetails
     public function getRequiredPackageVersions(): array
     {
         return $this->requiredPackageVersions;
+    }
+
+    public function skip(string $message)
+    {
+        $this->shouldSkip = true;
+        $this->skipMessage = $message;
+
+        return $this;
+    }
+
+    public function shouldSkip(): bool
+    {
+        return $this->shouldSkip;
+    }
+
+    public function getSkipMessage(): ?string
+    {
+        return $this->skipMessage;
     }
 }

@@ -11,5 +11,7 @@ class <?= $class_name ?> extends KernelTestCase
         $kernel = self::bootKernel();
 
         $this->assertSame('test', $kernel->getEnvironment());
+        //$routerService = self::$container->get('router');
+        //$myCustomService = self::$container->get(CustomService::class);
     }
 }
