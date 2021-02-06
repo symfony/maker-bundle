@@ -1,4 +1,12 @@
+1.29
+====
+
+* [make:test] Added the maker
+* [make:unit-test] Deprecated the maker
+* [make:functional-test] Deprecated the maker
+
 1.27
+====
 
 * [make:registration-form] Added a new question to generate code that will allow
   users to click on the "verify email" link in their email without needing to be

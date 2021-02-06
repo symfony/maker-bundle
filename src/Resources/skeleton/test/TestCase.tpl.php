@@ -1,4 +1,3 @@
-<?php /* @deprecated remove this method when removing make:unit-test and make:functional-test */ ?>
 <?= "<?php\n" ?>
 
 namespace <?= $namespace; ?>;
