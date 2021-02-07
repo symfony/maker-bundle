@@ -1,9 +1,15 @@
 1.29
 ====
 
-* [make:test] Added the maker
-* [make:unit-test] Deprecated the maker
+* [make:test] Added a new command that interactively asks you between
+  several different styles of test classes. See #807 thanks to @dunglas.
+* [make:unit-test] Deprecated the maker in favor of `make:test`.
 * [make:functional-test] Deprecated the maker
+
+1.28
+====
+
+* Sort entity auto-completion in various commands - thanks to @zorn-v
 
 1.27
 ====
