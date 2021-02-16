@@ -1,14 +1,14 @@
 caddy:
     ports:
-      - 'foo_bar'
+      - "foo:foo"
     volumes:
       - caddy_data
 ===
-$data['caddy']['ports'][] = "443:443";
+$data['caddy']['ports'][] = "bar:baz";
 ===
 caddy:
     ports:
-      - 'foo_bar'
-      - '443:443'
+      - "foo:foo"
+      - 'bar:baz'
     volumes:
       - caddy_data
