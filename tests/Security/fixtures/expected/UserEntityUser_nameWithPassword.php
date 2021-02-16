@@ -18,9 +18,9 @@ class User implements UserInterface
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=180, unique=true)
+     * @ORM\Column(type="string", length=180, unique=true, name="user_name")
      */
-    private $user_name;
+    private $userName;
 
     /**
      * @ORM\Column(type="json")
@@ -45,12 +45,12 @@ class User implements UserInterface
      */
     public function getUsername(): string
     {
-        return (string) $this->user_name;
+        return (string) $this->userName;
     }
 
-    public function setUserName(string $user_name): self
+    public function setUserName(string $userName): self
     {
-        $this->user_name = $user_name;
+        $this->userName = $userName;
 
         return $this;
     }

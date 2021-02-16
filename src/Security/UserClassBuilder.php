@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Security;
 use PhpParser\Node;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\String\UnicodeString;
 
 /**
  * Adds logic to implement UserInterface to an existing User class.
@@ -69,7 +70,7 @@ final class UserClassBuilder
 
         // define getUsername (if it was defined above, this will override)
         $manipulator->addAccessorMethod(
-            $userClassConfig->getIdentityPropertyName(),
+            (new UnicodeString($userClassConfig->getIdentityPropertyName()))->camel(),
             'getUsername',
             'string',
             false,

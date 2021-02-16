@@ -29,6 +29,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Component\String\UnicodeString;
 
 /**
  * @internal
@@ -85,6 +86,14 @@ final class ClassSourceManipulator
 
     public function addEntityField(string $propertyName, array $columnOptions, array $comments = [])
     {
+        $camelizedPropertyName = (string) (new UnicodeString($propertyName))->camel();
+
+        if ($camelizedPropertyName !== $propertyName) {
+            $columnOptions['name'] = $propertyName;
+
+            $propertyName = $camelizedPropertyName;
+        }
+
         $typeHint = $this->getEntityTypeHint($columnOptions['type']);
         $nullable = $columnOptions['nullable'] ?? false;
         $isId = (bool) ($columnOptions['id'] ?? false);
