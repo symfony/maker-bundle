@@ -1,0 +1,14 @@
+caddy:
+    ports:
+      - 'foo_bar'
+    volumes:
+      - caddy_data
+===
+$data['caddy']['ports'][] = "443:443";
+===
+caddy:
+    ports:
+      - 'foo_bar'
+      - '443:443'
+    volumes:
+      - caddy_data
