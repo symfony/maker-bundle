@@ -36,6 +36,26 @@ class MakeCrudTest extends MakerTestCase
             ->setRequiredPhpVersion(70200),
         ];
 
+        yield 'crud_basic_tests' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeCrud::class),
+            [
+                // entity class name
+                'SweetFood',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
+            ->addExtraDependencies('symfony/css-selector')
+            ->addExtraDependencies('symfony/browser-kit')
+            // need for crud web tests
+            ->configureDatabase()
+            ->assert(function (string $output, string $directory) {
+                $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
+                $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('created: tests/Controller/SweetFoodControllerTest.php', $output);
+            })
+            // workaround for segfault in PHP 7.1 CI :/
+            ->setRequiredPhpVersion(70200),
+        ];
+
         yield 'crud_basic_in_custom_root_namespace' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeCrud::class),
             [

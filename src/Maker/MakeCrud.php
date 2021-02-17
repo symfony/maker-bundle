@@ -24,10 +24,12 @@ use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
+use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\CssSelector\CssSelectorConverter;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
@@ -210,6 +212,38 @@ final class MakeCrud extends AbstractMaker
                 'crud/templates/'.$template.'.tpl.php',
                 $variables
             );
+        }
+
+        if (class_exists(CssSelectorConverter::class) && class_exists(AbstractBrowser::class)) {
+            $testClassDetails = $generator->createClassNameDetails(
+                $entityClassDetails->getRelativeNameWithoutSuffix(),
+                'Test\\Controller\\',
+                'ControllerTest'
+            );
+
+            $entityFields = $entityDoctrineDetails->getDisplayFields();
+            $entityFields = array_filter($entityFields, function ($field) use ($entityDoctrineDetails) {
+                return $field['fieldName'] !== $entityDoctrineDetails->getIdentifier();
+            });
+
+            $generator->generateFile(
+                'tests/Controller/'.$testClassDetails->getShortName().'.php',
+                'crud/test/Test.tpl.php',
+                [
+                    'entity_full_class_name' => $entityClassDetails->getFullName(),
+                    'entity_class_name' => $entityClassDetails->getShortName(),
+                    'entity_var_singular' => $entityVarSingular,
+                    'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
+                    'route_name' => $routeName,
+                    'class_name' => Str::getShortClassName($testClassDetails->getFullName()),
+                    'namespace' => Str::getNamespace($testClassDetails->getFullName()),
+                    'form_fields' => $entityDoctrineDetails->getFormFields(),
+                    'entity_fields' => $entityFields,
+                ]
+            );
+        } else {
+            var_dump(CssSelectorConverter::class, class_exists(CssSelectorConverter::class), AbstractBrowser::class, class_exists(AbstractBrowser::class));
+            $io->note('Skipping test generation because the test dependencies (css-selector and browser-kit) are not installed.');
         }
 
         $generator->writeChanges();
