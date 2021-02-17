@@ -1,0 +1,5 @@
+---------------------------------------------------------------------------
+
+by jrushlow at 2021-02-16T18:35:39Z
+
+This should fix #777. But does not handle passing a literal `"80:80"` as a new array value and getting `'80:80'` in return. PR #782 is a WIP for this "issue" with an unknown future.
