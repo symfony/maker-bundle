@@ -4,9 +4,9 @@ namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity;
 
 class UserAvatar
 {
-    private ?int $id;
+    private $id;
 
-    private ?UserXml $user;
+    private $user;
 
     public function getId(): ?int
     {

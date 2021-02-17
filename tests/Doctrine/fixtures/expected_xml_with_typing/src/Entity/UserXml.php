@@ -7,11 +7,11 @@ use Doctrine\Common\Collections\Collection;
 
 class UserXml
 {
-    private ?int $id;
+    private $id;
 
-    private ?string $name;
+    private $name;
 
-    private Collection $avatars;
+    private $avatars;
 
     public function __construct()
     {

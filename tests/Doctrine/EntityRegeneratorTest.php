@@ -80,11 +80,13 @@ class EntityRegeneratorTest extends TestCase
     public function testXmlRegeneration()
     {
         $kernel = new TestXmlEntityRegeneratorKernel('dev', true);
+        $phpCompatUtil = $this->createMock(PhpCompatUtil::class);
+
         $this->doTestRegeneration(
             __DIR__.'/fixtures/xml_source_project',
             $kernel,
             'Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity',
-            'expected_xml',
+            $phpCompatUtil->canUseTypedProperties() ? 'expected_xml_with_typing' : 'expected_xml',
             false,
             'current_project_xml'
         );
