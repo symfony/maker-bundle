@@ -272,7 +272,7 @@ final class MakerTestEnvironment
 
     public function runTwigCSLint(string $file)
     {
-        return MakerTestProcess::create(sprintf('php vendor/bin/twigcs lint %s', $this->path.'/'.$file), $this->rootPath)
+        return MakerTestProcess::create(sprintf('php vendor/bin/twigcs --config ./.twig_cs.dist %s', $this->path.'/'.$file), $this->rootPath)
                                ->run(true);
     }
 
