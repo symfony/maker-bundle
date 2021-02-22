@@ -2,6 +2,9 @@
 
 namespace <?= $namespace; ?>;
 
+<?php if ($use_attributes && $use_command_attribute): ?>
+use Symfony\Component\Console\Attribute\AsCommand;
+<?php endif; ?>
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -9,11 +12,19 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+<?php if ($use_attributes && $use_command_attribute): ?>
+#[AsCommand(
+    name: '<?= $command_name; ?>',
+    description: 'Add a short description for your command',
+)]
+<?php endif; ?>
 class <?= $class_name; ?> extends Command
 {
+<?php if (!$use_attributes || !$use_command_attribute): ?>
     protected static $defaultName = '<?= $command_name; ?>';
     protected static $defaultDescription = 'Add a short description for your command';
 
+<?php endif; ?>
     protected function configure()
     {
         $this

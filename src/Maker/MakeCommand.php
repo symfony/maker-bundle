@@ -16,6 +16,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LazyCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -63,6 +64,7 @@ final class MakeCommand extends AbstractMaker
             [
                 'command_name' => $commandName,
                 'set_description' => !class_exists(LazyCommand::class),
+                'use_command_attribute' => 80000 <= \PHP_VERSION_ID && class_exists(AsCommand::class),
             ]
         );
 
