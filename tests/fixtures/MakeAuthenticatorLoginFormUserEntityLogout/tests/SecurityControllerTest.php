@@ -6,6 +6,8 @@ use App\Entity\User;
 use App\Security\AppCustomAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class SecurityControllerTest extends WebTestCase
 {
@@ -60,10 +62,23 @@ class SecurityControllerTest extends WebTestCase
         $client->submit($form);
 
         $this->assertStringContainsString('TODO: provide a valid redirect', $client->getResponse()->getContent());
-        $this->assertNotNull($token = $client->getContainer()->get('security.token_storage')->getToken());
-        $this->assertInstanceOf(User::class, $token->getUser());
+        $this->assertInstanceOf(User::class, $this->getToken()->getUser());
 
         $client->request('GET', '/logout');
-        $this->assertNull($client->getContainer()->get('security.token_storage')->getToken());
+        $this->assertNull($this->getToken());
+    }
+
+    /**
+     * Handle Session deprecations in Symfony 5.3+
+     */
+    private function getToken(): ?TokenInterface
+    {
+        $tokenStorage = static::$container->get('security.token_storage');
+
+        if (Kernel::VERSION_ID >= 50300) {
+            $tokenStorage->disableUsageTracking();
+        }
+
+        return $tokenStorage->getToken();
     }
 }
