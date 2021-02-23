@@ -15,6 +15,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
+use Symfony\Bundle\MakerBundle\Util\TemplateClassDetails;
+use Symfony\Bundle\MakerBundle\Util\TemplateClassFormatter;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -26,9 +28,10 @@ class Generator
     private $twigHelper;
     private $pendingOperations = [];
     private $namespacePrefix;
+    private $templateClassFormatter;
     private $phpCompatUtil;
 
-    public function __construct(FileManager $fileManager, string $namespacePrefix, PhpCompatUtil $phpCompatUtil = null)
+    public function __construct(FileManager $fileManager, string $namespacePrefix, PhpCompatUtil $phpCompatUtil = null, TemplateClassFormatter $templateClassFormatter = null)
     {
         $this->fileManager = $fileManager;
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
@@ -41,6 +44,14 @@ class Generator
         }
 
         $this->phpCompatUtil = $phpCompatUtil;
+
+        if (null === $phpCompatUtil) {
+            $templateClassFormatter = new TemplateClassFormatter($this->phpCompatUtil);
+
+//            trigger_deprecation('symfony/maker-bundle', '1.25', 'Initializing Generator without providing an instance of PhpCompatUtil is deprecated.');
+        }
+
+        $this->templateClassFormatter = $templateClassFormatter;
     }
 
     /**
@@ -238,5 +249,10 @@ class Generator
             $templateName,
             $variables
         );
+    }
+
+    public function getTemplateClassDetails(string $fullClassName): TemplateClassDetails
+    {
+        return $this->templateClassFormatter->generateClassDetailsForTemplate($fullClassName);
     }
 }
