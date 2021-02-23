@@ -6,9 +6,10 @@ namespace <?= $namespace ?>;
 <?= $user_is_entity ? "use Doctrine\\ORM\\EntityManagerInterface;\n" : null ?>
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+<?= ($user_needs_encoder && str_contains($password_encoder_details->getUseStatement() , 'Hasher')) ? $password_encoder_details->getUseStatement() : null ?>
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-<?= $user_needs_encoder ? $password_encoder_details->getUseStatement() : null ?>
+<?= ($user_needs_encoder && str_contains($password_encoder_details->getUseStatement() , 'Encoder')) ? $password_encoder_details->getUseStatement() : null ?>
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 <?= $user_needs_encoder ? "use Symfony\\Component\\Security\\Core\\Encoder\\UserPasswordEncoderInterface;\n" : null ?>
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
