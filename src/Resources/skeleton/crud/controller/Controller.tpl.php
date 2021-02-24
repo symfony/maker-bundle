@@ -114,10 +114,10 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
     }
 
 <?php if ($use_attributes) { ?>
-    #[Route('/{<?= $entity_identifier ?>}', name: '<?= $route_name ?>_delete', methods: ['DELETE'])]
+    #[Route('/{<?= $entity_identifier ?>}', name: '<?= $route_name ?>_delete', methods: ['POST'])]
 <?php } else { ?>
     /**
-     * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_delete", methods={"DELETE"})
+     * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_delete", methods={"POST"})
      */
 <?php } ?>
     public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
