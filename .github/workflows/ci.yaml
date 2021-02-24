@@ -9,7 +9,7 @@ on:
 env:
     PHPUNIT_FLAGS: "-v"
     SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
-    SYMFONY_REQUIRE: ">=3.4"
+    SYMFONY_REQUIRE: ">=4.0"
 
 jobs:
     coding-standards:
@@ -43,7 +43,7 @@ jobs:
                 name: "Composer install"
                 uses: "ramsey/composer-install@v1"
                 with:
-                    composer-options: "--no-suggest --no-scripts"
+                    composer-options: "--no-scripts"
 
             -
                 name: "Run friendsofphp/php-cs-fixer"
@@ -84,11 +84,9 @@ jobs:
                 include:
                     - php-version: '7.4'
                       symfony-skeleton-stability: 'dev'
-                      composer-options: '--no-suggest'
                       allow-failures: true
                     - php-version: '8.0'
                       symfony-skeleton-stability: 'dev'
-                      composer-options: '--no-suggest --ignore-platform-req=php'
                       allow-failures: true
 
         steps:
