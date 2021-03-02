@@ -1,0 +1,41 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2021-02-02T21:34:27Z
+
+I suspect that the failing tests are caused by - https://github.com/symfony/symfony/pull/38616 - the timing is pretty much perfect. What we'll need to do is run that test locally (using the flags so we get the `dev` dependencies) and see if we can repeat. After we run the test (and it fails), you should be able to move into the tmp directory of the project and execute the test inside that project to see the failure again, because the actual failure is coming from when we run the test. It's coming from this line: https://github.com/symfony/maker-bundle/blob/main/tests/fixtures/MakeAuthenticatorLoginFormUserEntity/tests/SecurityControllerTest.php#L63
+
+If we *are* able to reproduce all of this, then we could try to create a tiny, reproducer project that shows the (potential) bug and open an issue in symfony. I don't want to ping the author `jderusse` until we have something more easy for him to take a look at.
+
+Thanks!
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2021-02-23T23:01:26Z
+
+Most of the session related test issues on the `dev` branches were fixed by https://github.com/symfony/recipes/pull/905 referenced in https://github.com/symfony/symfony/issues/40282. The remaining session based issues will be fixed by either
+
+```php
+// login a user in WebTestCase
+
+$usageTrackingTokenStorage = static::$container->get('security.token_storage');
+$usageTrackingTokenStorage->disableUsageTracking();  // <- bypasses trying to get the session from the request stack
+$token = $usageTrackingTokenStorage->getToken();
+$this->assertNotNull($token); // passes
+```
+or by adding a event listener on the request with a callable to the test as done in https://github.com/symfony/symfony/pull/38616/files#diff-c1a4581fd182f7bd35bbb4f0297fd62d1df49fb0b2a4b4210707f3a8131766d1R53-R55
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2021-02-24T07:27:19Z
+
+`dev`  CRUD failures ~may be~ related to https://github.com/symfony/recipes/pull/892 which disables `http_method_override` by default.
+
+With `framework.http_method_override` `false`, the hidden `<input type="hidden" name="_method" value="DELETE">` is ignored by the router. A conditional is needed for `make:crud` in 5.3+ to enable http method overrides.
+
+see https://github.com/symfony/maker-bundle/pull/825
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2021-02-24T08:41:34Z
+
+splitting up the test fixes into individual PR's - there are too many issues across different parts of maker to fix everything under one roof.
