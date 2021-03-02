@@ -52,7 +52,7 @@ jobs:
     test:
         name: "PHP ${{ matrix.php-version }} + symfony/skeleton@${{ matrix.symfony-skeleton-stability }}"
 
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-latest
 
         services:
             mysql:
@@ -131,3 +131,86 @@ jobs:
 
             - name: "Run tests"
               run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
+
+    test-18-04:
+        name: "18.04 PHP ${{ matrix.php-version }} + symfony/skeleton@${{ matrix.symfony-skeleton-stability }}"
+
+        runs-on: ubuntu-18.04
+
+        services:
+            mysql:
+                image: mysql:5.7
+                env:
+                    MYSQL_ROOT_PASSWORD: root
+                    MYSQL_DATABASE: test_maker
+                ports:
+                    - 3306
+                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+        continue-on-error: ${{ matrix.allow-failures }}
+
+        env:
+            SYMFONY_SKELETON_STABILITY: ${{ matrix.symfony-skeleton-stability }}
+
+        strategy:
+            fail-fast: false
+            matrix:
+                php-version:
+                    - '7.1.3'
+                    - '7.2'
+                    - '7.3'
+                    - '7.4'
+                symfony-skeleton-stability:
+                    - 'stable'
+                composer-options: [ '--no-suggest' ]
+                allow-failures: [ false ]
+                include:
+                    -   php-version: '7.4'
+                        symfony-skeleton-stability: 'dev'
+                        allow-failures: true
+                    -   php-version: '8.0'
+                        symfony-skeleton-stability: 'dev'
+                        allow-failures: true
+
+        steps:
+            -   name: "Checkout code"
+                uses: actions/checkout@v2.3.3
+
+            -   name: "Start MySQL"
+                run: |
+                    sudo /etc/init.d/mysql start
+
+            -   name: "Verify MySQL connection from host"
+                run: |
+                    mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "SHOW DATABASES;"
+
+            -   name: "Setup Database"
+                run: |
+                    mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test_maker;"
+
+            -   name: "Install PHP with extensions"
+                uses: shivammathur/setup-php@2.7.0
+                with:
+                    coverage: "none"
+                    php-version: ${{ matrix.php-version }}
+                    tools: composer:v2
+
+            -   name: "Add PHPUnit matcher"
+                run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+            -   name: "Require symfony/flex"
+                run: composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-main
+
+            -   name: "Composer install"
+                uses: "ramsey/composer-install@v1"
+                with:
+                    composer-options: "${{ matrix.composer-options }}"
+
+            -   name: "Install PHPUnit"
+                run: vendor/bin/simple-phpunit install
+
+            -   name: "PHPUnit version"
+                run: vendor/bin/simple-phpunit --version
+
+            -   name: "Run tests"
+                run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
