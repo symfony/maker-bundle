@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Security\AppCustomAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpKernel\Kernel;
 
 class SecurityControllerTest extends WebTestCase
 {
@@ -60,7 +61,17 @@ class SecurityControllerTest extends WebTestCase
         $client->submit($form);
 
         $this->assertStringContainsString('TODO: provide a valid redirect', $client->getResponse()->getContent());
-        $this->assertNotNull($token = $client->getContainer()->get('security.token_storage')->getToken());
+
+        $tokenStorage = static::$container->get('security.token_storage');
+
+        // Handle Session deprecations in Symfony 5.3+
+        if (Kernel::VERSION_ID >= 50300) {
+            $tokenStorage->disableUsageTracking();
+        }
+
+        $token = $tokenStorage->getToken();
+
+        self::assertNotNull($token);
         $this->assertInstanceOf(User::class, $token->getUser());
     }
 }

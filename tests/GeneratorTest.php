@@ -21,7 +21,7 @@ class GeneratorTest extends TestCase
     /**
      * @dataProvider getClassNameDetailsTests
      */
-    public function testCreateClassNameDetails(string $name, string $prefix, string $suffix = '', string $expectedFullClassName, string $expectedRelativeClassName)
+    public function testCreateClassNameDetails(string $name, string $prefix, string $suffix, string $expectedFullClassName, string $expectedRelativeClassName): void
     {
         $fileManager = $this->createMock(FileManager::class);
         $fileManager->expects($this->any())
@@ -38,7 +38,7 @@ class GeneratorTest extends TestCase
         $this->assertSame($expectedRelativeClassName, $classNameDetails->getRelativeName());
     }
 
-    public function getClassNameDetailsTests()
+    public function getClassNameDetailsTests(): \Generator
     {
         yield 'simple_class' => [
             'foo',
