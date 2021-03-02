@@ -52,7 +52,7 @@ jobs:
     test:
         name: "PHP ${{ matrix.php-version }} + symfony/skeleton@${{ matrix.symfony-skeleton-stability }}"
 
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-18.04
 
         services:
             mysql:
