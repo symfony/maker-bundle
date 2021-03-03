@@ -1,0 +1,15 @@
+---------------------------------------------------------------------------
+
+by stof at 2021-03-02T20:19:58Z
+
+AFAIK, `shivammathur/setup-php` can install older PHP versions on ubunut-20-04. What changes is which pre-installed version is available.
+
+The difference is that when a version is not pre-installed, properly configuring the list of extensions you need is more important (as there is no preinstalled extensions either). tests in https://github.com/symfony/maker-bundle/pull/828/checks?check_run_id=2016163291 are failing because they try to use PDO mysql without installing that extension.
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2021-03-03T13:33:43Z
+
+> AFAIK, shivammathur/setup-php can install older PHP versions on ubunut-20-04. What changes is which pre-installed version is available.
+
+That is my understanding as well. We could continue to use the `ubuntu-latest` (20.04) then install php 7.1 - 7.3 and require the PDO extension. However using 18.04 negates the need to install the previous versions of PHP & the PDO extension.
