@@ -161,7 +161,7 @@ final class DoctrineHelper
         if ($this->isDoctrineInstalled()) {
             $allMetadata = $this->getMetadata();
 
-            /* @var ClassMetadata $metadata */
+            /** @var ClassMetadata $classname */
             foreach (array_keys($allMetadata) as $classname) {
                 $entityClassDetails = new ClassNameDetails($classname, $this->entityNamespace);
                 $entities[] = $entityClassDetails->getRelativeName();
