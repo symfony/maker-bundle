@@ -38,7 +38,7 @@ class MakeControllerTest extends MakerTestCase
                 // controller class name
                 'FooTwig',
             ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeControllerTwig')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeControllerTwig'),
         ];
 
         yield 'controller_with_template_no_base' => [MakerTestDetails::createTest(
