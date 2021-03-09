@@ -393,6 +393,8 @@ final class MakeAuthenticator extends AbstractMaker
             'security'
         );
 
+        $dependencies->addClassDependency(TwigBundle::class, 'symfony/twig-bundle');
+
         // needed to update the YAML files
         $dependencies->addClassDependency(
             Yaml::class,
