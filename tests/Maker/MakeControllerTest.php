@@ -39,7 +39,6 @@ class MakeControllerTest extends MakerTestCase
                 'FooTwig',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeControllerTwig')
-            ->addExtraDependencies('twig'),
         ];
 
         yield 'controller_with_template_no_base' => [MakerTestDetails::createTest(
@@ -49,7 +48,6 @@ class MakeControllerTest extends MakerTestCase
                 'FooTwig',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeControllerTwig')
-            ->addExtraDependencies('twig')
             ->deleteFile('templates/base.html.twig'),
         ];
 
@@ -60,7 +58,6 @@ class MakeControllerTest extends MakerTestCase
                 'FooNoTemplate',
             ])
             ->setArgumentsString('--no-template')
-            ->addExtraDependencies('twig')
             ->assert(function (string $output, string $directory) {
                 // make sure the template was not configured
                 $this->assertContainsCount('created: ', $output, 1);
@@ -88,7 +85,6 @@ class MakeControllerTest extends MakerTestCase
                 // controller class name
                 'Admin\\FooBar',
             ])
-            ->addExtraDependencies('twig')
             ->assert(function (string $output, string $directory) {
                 $this->assertFileExists($directory.'/templates/admin/foo_bar/index.html.twig');
             }),
@@ -100,7 +96,6 @@ class MakeControllerTest extends MakerTestCase
                 // controller class name
                 '\App\Foo\Bar\CoolController',
             ])
-            ->addExtraDependencies('twig')
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('created: src/Foo/Bar/CoolController.php', $output);
                 $this->assertStringContainsString('created: templates/foo/bar/cool/index.html.twig', $output);

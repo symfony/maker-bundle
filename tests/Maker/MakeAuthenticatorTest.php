@@ -144,7 +144,6 @@ class MakeAuthenticatorTest extends MakerTestCase
                 ]
             )
             ->addExtraDependencies('doctrine')
-            ->addExtraDependencies('twig')
             ->addExtraDependencies('symfony/form')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntity')
             ->configureDatabase()
@@ -179,7 +178,6 @@ class MakeAuthenticatorTest extends MakerTestCase
                 ]
             )
             ->addExtraDependencies('doctrine/annotations')
-            ->addExtraDependencies('twig')
             ->addExtraDependencies('symfony/form')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormCustomUsernameField'),
         ];
@@ -198,7 +196,6 @@ class MakeAuthenticatorTest extends MakerTestCase
                 ]
             )
             ->addExtraDependencies('doctrine')
-            ->addExtraDependencies('twig')
             ->addExtraDependencies('symfony/form')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntityNoEncoder')
             ->configureDatabase()
@@ -220,7 +217,6 @@ class MakeAuthenticatorTest extends MakerTestCase
                     'no',
                 ]
             )
-            ->addExtraDependencies('twig')
             ->addExtraDependencies('doctrine/annotations')
             ->addExtraDependencies('symfony/form')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserNotEntity'),
@@ -241,7 +237,6 @@ class MakeAuthenticatorTest extends MakerTestCase
                     'no',
                 ]
             )
-            ->addExtraDependencies('twig')
             ->addExtraDependencies('doctrine/annotations')
             ->addExtraDependencies('symfony/form')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserNotEntityNoEncoder'),
@@ -261,7 +256,6 @@ class MakeAuthenticatorTest extends MakerTestCase
                 ]
             )
             ->addExtraDependencies('doctrine')
-            ->addExtraDependencies('twig')
             ->addExtraDependencies('symfony/form')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormExistingController')
             ->configureDatabase()
@@ -283,7 +277,6 @@ class MakeAuthenticatorTest extends MakerTestCase
                 ]
             )
                 ->addExtraDependencies('doctrine')
-                ->addExtraDependencies('twig')
                 ->addExtraDependencies('symfony/form')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntityLogout')
                 ->configureDatabase()
@@ -355,7 +348,6 @@ class MakeAuthenticatorTest extends MakerTestCase
                 ->setRequiredPhpVersion(70200)
                 ->addRequiredPackageVersion('symfony/security-bundle', '>=5.2')
                 ->addExtraDependencies('doctrine')
-                ->addExtraDependencies('twig')
                 ->addExtraDependencies('symfony/form')
                 ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorSecurity52LoginForm')
                 ->configureDatabase()

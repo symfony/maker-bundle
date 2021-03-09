@@ -31,7 +31,6 @@ class MakeResetPasswordTest extends MakerTestCase
             ])
             ->setRequiredPhpVersion(70200)
             ->addExtraDependencies('security-bundle')
-            ->addExtraDependencies('twig')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeResetPassword')
             ->assert(
                 function (string $output, string $directory) {
@@ -77,7 +76,6 @@ class MakeResetPasswordTest extends MakerTestCase
             ])
             ->setRequiredPhpVersion(70200)
             ->addExtraDependencies('security-bundle')
-            ->addExtraDependencies('twig')
             ->deleteFile('config/packages/reset_password.yaml')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeResetPasswordCustomConfig')
             ->assert(
@@ -104,7 +102,6 @@ class MakeResetPasswordTest extends MakerTestCase
             ])
             ->setRequiredPhpVersion(70200)
             ->addExtraDependencies('security-bundle')
-            ->addExtraDependencies('twig')
             ->addReplacement(
                 'config/packages/reset_password.yaml',
                 'symfonycasts_reset_password:',
@@ -140,7 +137,6 @@ class MakeResetPasswordTest extends MakerTestCase
             ->addExtraDependencies('security-bundle')
             ->addExtraDependencies('symfony/form')
             ->addExtraDependencies('symfony/validator')
-            ->addExtraDependencies('twig')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeResetPasswordFunctionalTest'),
         ];
 
@@ -156,7 +152,6 @@ class MakeResetPasswordTest extends MakerTestCase
             ])
             ->setRequiredPhpVersion(70200)
             ->addExtraDependencies('security-bundle')
-            ->addExtraDependencies('twig')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeResetPasswordCustomUserAttribute')
             ->assert(
                 function (string $output, string $directory) {
