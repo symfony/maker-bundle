@@ -44,6 +44,8 @@ final class MakeCrud extends AbstractMaker
 
     private $inflector;
 
+    private $controllerClassName;
+
     public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer)
     {
         $this->doctrineHelper = $doctrineHelper;
@@ -91,6 +93,13 @@ final class MakeCrud extends AbstractMaker
 
             $input->setArgument('entity-class', $value);
         }
+
+        $defaultControllerClass = Str::asClassName(sprintf('%s Controller', $input->getArgument('entity-class')));
+
+        $this->controllerClassName = $io->ask(
+            sprintf('Choose a name for your controller class (e.g. <fg=yellow>%s</>)', $defaultControllerClass),
+            $defaultControllerClass
+        );
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -119,7 +128,7 @@ final class MakeCrud extends AbstractMaker
         }
 
         $controllerClassDetails = $generator->createClassNameDetails(
-            $entityClassDetails->getRelativeNameWithoutSuffix().'Controller',
+            $this->controllerClassName,
             'Controller\\',
             'Controller'
         );
