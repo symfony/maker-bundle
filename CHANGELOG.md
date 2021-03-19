@@ -1,3 +1,14 @@
+1.30
+====
+
+* [make:crud] Ask a new question - controller name - to allow that to
+  be customized - #840 thanks to @weaverryan
+
+* [make:crud] Make the delete form submit via a normal POST request
+  instead of delete - #825 thanks to @jrushlow
+
+* Dropped support for Symfony 3 - #819 thanks to @jrushlow
+
 1.29
 ====
 
