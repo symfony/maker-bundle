@@ -97,11 +97,11 @@ final class DoctrineHelper
 
         $metadataDriver = $em->getConfiguration()->getMetadataDriverImpl();
 
-        if (!$this->isInstanceOf($metadataDriver, MappingDriverChain::class)) {
+        if (!$this->isInstanceOf($metadataDriver->getDriver(), MappingDriverChain::class)) {
             return $metadataDriver;
         }
 
-        foreach ($metadataDriver->getDrivers() as $namespace => $driver) {
+        foreach ($metadataDriver->getDriver()->getDrivers() as $namespace => $driver) {
             if (0 === strpos($className, $namespace)) {
                 return $driver;
             }
