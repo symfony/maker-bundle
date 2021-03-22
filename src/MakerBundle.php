@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\MakeCommandRegistrationPass;
 use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\RemoveMissingParametersPass;
+use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\SetDoctrineAnnotatedPrefixesPass;
 use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\SetDoctrineManagerRegistryClassPass;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -30,5 +31,6 @@ class MakerBundle extends Bundle
         $container->addCompilerPass(new MakeCommandRegistrationPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 10);
         $container->addCompilerPass(new RemoveMissingParametersPass());
         $container->addCompilerPass(new SetDoctrineManagerRegistryClassPass());
+        $container->addCompilerPass(new SetDoctrineAnnotatedPrefixesPass());
     }
 }
