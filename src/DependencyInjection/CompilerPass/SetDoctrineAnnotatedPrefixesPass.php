@@ -11,8 +11,11 @@
 
 namespace Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass;
 
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
+use Doctrine\Persistence\Mapping\Driver\AnnotationDriver as AbstractAnnotationDriver;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 class SetDoctrineAnnotatedPrefixesPass implements CompilerPassInterface
@@ -35,16 +38,35 @@ class SetDoctrineAnnotatedPrefixesPass implements CompilerPassInterface
             }
 
             $managerName = $m[1];
+            $methodCalls = $metadataDriverImpl->getMethodCalls();
 
-            foreach ($metadataDriverImpl->getMethodCalls() as [$method, $arguments]) {
-                if ('addDriver' === $method) {
-                    $isAnnotated = 'doctrine.orm.'.$managerName.'_annotation_metadata_driver' === (string) $arguments[0];
-                    $annotatedPrefixes[$managerName][] = [
-                        $arguments[1],
-                        $isAnnotated ? new Reference($arguments[0]) : null,
-                    ];
+            foreach ($methodCalls as $i => [$method, $arguments]) {
+                if ('addDriver' !== $method) {
+                    continue;
                 }
+
+                if ($arguments[0] instanceof Definition) {
+                    $class = $arguments[0]->getClass();
+                    $namespace = substr($class, 0, strrpos($class, '\\'));
+
+                    if ('Doctrine\ORM\Mapping\Driver' === $namespace ? AnnotationDriver::class !== $class : !is_subclass_of($class, AbstractAnnotationDriver::class)) {
+                        continue;
+                    }
+
+                    $id = sprintf('.%d_annotation_metadata_driver~%s', $i, ContainerBuilder::hash($arguments));
+                    $container->setDefinition($id, $arguments[0]);
+                    $arguments[0] = new Reference($id);
+                    $methodCalls[$i] = $arguments;
+                }
+
+                $isAnnotated = false !== strpos($arguments[0], '_annotation_metadata_driver');
+                $annotatedPrefixes[$managerName][] = [
+                    $arguments[1],
+                    $isAnnotated ? new Reference($arguments[0]) : null,
+                ];
             }
+
+            $metadataDriverImpl->setMethodCalls($methodCalls);
         }
 
         if (null !== $annotatedPrefixes) {
