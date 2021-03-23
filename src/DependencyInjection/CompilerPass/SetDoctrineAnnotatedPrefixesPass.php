@@ -37,7 +37,7 @@ class SetDoctrineAnnotatedPrefixesPass implements CompilerPassInterface
             $managerName = $m[1];
 
             foreach ($metadataDriverImpl->getMethodCalls() as [$method, $arguments]) {
-                if ('addDriver' === $method) {
+                if ('addDriver' === $method && $arguments[0] instanceof Reference) {
                     $isAnnotated = 'doctrine.orm.'.$managerName.'_annotation_metadata_driver' === (string) $arguments[0];
                     $annotatedPrefixes[$managerName][] = [
                         $arguments[1],
