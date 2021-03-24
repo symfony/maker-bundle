@@ -15,6 +15,8 @@ use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @internal
@@ -69,6 +71,15 @@ final class EntityClassGenerator
     {
         $shortEntityClass = Str::getShortClassName($entityClass);
         $entityAlias = strtolower($shortEntityClass[0]);
+
+        $passwordUserInterfaceName = UserInterface::class;
+
+        if (interface_exists(PasswordAuthenticatedUserInterface::class)) {
+            $passwordUserInterfaceName = PasswordAuthenticatedUserInterface::class;
+        }
+
+        $interfaceClassNameDetails = new ClassNameDetails($passwordUserInterfaceName, 'Symfony\Component\Security\Core\User');
+
         $this->generator->generateClass(
             $repositoryClass,
             'doctrine/Repository.tpl.php',
@@ -77,6 +88,7 @@ final class EntityClassGenerator
                 'entity_class_name' => $shortEntityClass,
                 'entity_alias' => $entityAlias,
                 'with_password_upgrade' => $withPasswordUpgrade,
+                'password_upgrade_user_interface' => $interfaceClassNameDetails,
                 'doctrine_registry_class' => $this->managerRegistryClassName,
                 'include_example_comments' => $includeExampleComments,
             ]

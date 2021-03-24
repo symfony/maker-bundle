@@ -1,20 +1,42 @@
 <?php
 
-namespace App\Security;
+namespace App\Entity;
 
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+/**
+ * @ORM\Entity()
+ */
+class User implements UserInterface
 {
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
+    private $id;
+
+    /**
+     * @ORM\Column(type="string", length=180, unique=true)
+     */
     private $email;
 
+    /**
+     * @ORM\Column(type="json")
+     */
     private $roles = [];
 
     /**
      * @var string The hashed password
+     * @ORM\Column(type="string")
      */
     private $password;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     public function getEmail(): ?string
     {
@@ -58,7 +80,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @see PasswordAuthenticatedUserInterface
+     * @see UserInterface
      */
     public function getPassword(): string
     {

@@ -159,10 +159,8 @@ final class MakeUser extends AbstractMaker
             true
         );
         $manipulator->setIo($io);
-        $this->userClassBuilder->addUserInterfaceImplementation(
-            $manipulator,
-            $userClassConfiguration
-        );
+
+        $this->userClassBuilder->addUserInterfaceImplementation($manipulator, $userClassConfiguration);
 
         $generator->dumpFile($classPath, $manipulator->getSourceCode());
 
