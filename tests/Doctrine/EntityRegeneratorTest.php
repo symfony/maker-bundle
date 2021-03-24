@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Doctrine;
 
+use Doctrine\Bundle\DoctrineBundle\DependencyInjection\DoctrineExtension;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\TestCase;
@@ -156,6 +157,7 @@ class EntityRegeneratorTest extends TestCase
 class TestEntityRegeneratorKernel extends Kernel
 {
     use MicroKernelTrait;
+    use OverrideUrlTraitFixture;
 
     public function registerBundles()
     {
@@ -178,11 +180,17 @@ class TestEntityRegeneratorKernel extends Kernel
             ],
         ]);
 
+        $dbal = [
+            'driver' => 'pdo_sqlite',
+            'url' => 'sqlite:///fake',
+        ];
+
+        if ($this->canOverrideUrl($c)) {
+            $dbal['override_url'] = true;
+        }
+
         $c->prependExtensionConfig('doctrine', [
-            'dbal' => [
-                'driver' => 'pdo_sqlite',
-                'url' => 'sqlite:///fake',
-            ],
+            'dbal' => $dbal,
             'orm' => [
                 'mappings' => [
                     'EntityRegenerator' => [
@@ -211,6 +219,7 @@ class TestEntityRegeneratorKernel extends Kernel
 class TestXmlEntityRegeneratorKernel extends Kernel
 {
     use MicroKernelTrait;
+    use OverrideUrlTraitFixture;
 
     public function registerBundles()
     {
@@ -233,11 +242,17 @@ class TestXmlEntityRegeneratorKernel extends Kernel
             ],
         ]);
 
+        $dbal = [
+            'driver' => 'pdo_sqlite',
+            'url' => 'sqlite:///fake',
+        ];
+
+        if ($this->canOverrideUrl($c)) {
+            $dbal['override_url'] = true;
+        }
+
         $c->prependExtensionConfig('doctrine', [
-            'dbal' => [
-                'driver' => 'pdo_sqlite',
-                'url' => 'sqlite:///fake',
-            ],
+            'dbal' => $dbal,
             'orm' => [
                 'auto_generate_proxy_classes' => true,
                 'mappings' => [
@@ -269,5 +284,23 @@ class AllButTraitsIterator extends \RecursiveFilterIterator
     public function accept()
     {
         return !\in_array($this->current()->getFilename(), []);
+    }
+}
+
+trait OverrideUrlTraitFixture
+{
+    /**
+     * Quick and dirty way to check if override_url is required since doctrine-bundle 2.3.
+     */
+    public function canOverrideUrl(ContainerBuilder $builder): bool
+    {
+        /** @var DoctrineExtension $ext */
+        $ext = $builder->getExtension('doctrine');
+        $method = new \ReflectionMethod(DoctrineExtension::class, 'getConnectionOptions');
+        $method->setAccessible(true);
+
+        $configOptions = $method->invoke($ext, ['override_url' => 'string', 'shards' => [], 'replicas' => [], 'slaves' => []]);
+
+        return \array_key_exists('connection_override_options', $configOptions);
     }
 }
