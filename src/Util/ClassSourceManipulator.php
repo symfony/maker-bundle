@@ -47,6 +47,7 @@ final class ClassSourceManipulator
     private $printer;
     /** @var ConsoleStyle|null */
     private $io;
+    private $phpCompatUtil;
 
     private $sourceCode;
     private $oldStmts;
@@ -55,7 +56,7 @@ final class ClassSourceManipulator
 
     private $pendingComments = [];
 
-    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true)
+    public function __construct(string $sourceCode, PhpCompatUtil $phpCompatUtil, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true)
     {
         $this->overwrite = $overwrite;
         $this->useAnnotations = $useAnnotations;
@@ -69,6 +70,7 @@ final class ClassSourceManipulator
         ]);
         $this->parser = new Parser\Php7($this->lexer);
         $this->printer = new PrettyPrinter();
+        $this->phpCompatUtil = $phpCompatUtil;
 
         $this->setSourceCode($sourceCode);
     }
@@ -94,7 +96,7 @@ final class ClassSourceManipulator
         if ('array' === $typeHint) {
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
         }
-        $this->addProperty($propertyName, $comments, $defaultValue);
+        $this->addProperty($propertyName, $comments, $defaultValue, $this->phpCompatUtil->canUseTypedProperties() ? $typeHint : null);
 
         $this->addGetter(
             $propertyName,
@@ -311,7 +313,7 @@ final class ClassSourceManipulator
         return $this->createBlankLineNode(self::CONTEXT_CLASS_METHOD);
     }
 
-    public function addProperty(string $name, array $annotationLines = [], $defaultValue = null)
+    public function addProperty(string $name, array $annotationLines = [], $defaultValue = null, $typeHint = null)
     {
         if ($this->propertyExists($name)) {
             // we never overwrite properties
@@ -321,6 +323,11 @@ final class ClassSourceManipulator
         $newPropertyBuilder = (new Builder\Property($name))->makePrivate();
         if ($annotationLines && $this->useAnnotations) {
             $newPropertyBuilder->setDocComment($this->createDocBlock($annotationLines));
+        }
+
+        if (null !== $typeHint) {
+            $newPropertyBuilder->setType(new Node\NullableType($typeHint));
+            $newPropertyBuilder->setDefault($defaultValue);
         }
 
         if (null !== $defaultValue) {

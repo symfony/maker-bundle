@@ -26,6 +26,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -54,6 +55,7 @@ class MakeResetPassword extends AbstractMaker
     private $fileManager;
     private $doctrineHelper;
     private $entityClassGenerator;
+    private $phpCompatUtil;
 
     private $fromEmailAddress;
     private $fromEmailName;
@@ -68,6 +70,7 @@ class MakeResetPassword extends AbstractMaker
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
         $this->entityClassGenerator = $entityClassGenerator;
+        $this->phpCompatUtil = new PhpCompatUtil($fileManager);
     }
 
     public static function getCommandName(): string
@@ -326,7 +329,8 @@ class MakeResetPassword extends AbstractMaker
         $generator->writeChanges();
 
         $manipulator = new ClassSourceManipulator(
-            $this->fileManager->getFileContents($requestEntityPath)
+            $this->fileManager->getFileContents($requestEntityPath),
+            $this->phpCompatUtil
         );
 
         $manipulator->addInterface(ResetPasswordRequestInterface::class);
@@ -369,7 +373,8 @@ CODE
         );
 
         $manipulator = new ClassSourceManipulator(
-            $this->fileManager->getFileContents($pathRequestRepository)
+            $this->fileManager->getFileContents($pathRequestRepository),
+            $this->phpCompatUtil
         );
 
         $manipulator->addInterface(ResetPasswordRequestRepositoryInterface::class);

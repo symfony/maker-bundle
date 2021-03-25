@@ -24,6 +24,7 @@ use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\UserClassBuilder;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -51,12 +52,15 @@ final class MakeUser extends AbstractMaker
 
     private $entityClassGenerator;
 
+    private $phpCompatUtil;
+
     public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, EntityClassGenerator $entityClassGenerator)
     {
         $this->fileManager = $fileManager;
         $this->userClassBuilder = $userClassBuilder;
         $this->configUpdater = $configUpdater;
         $this->entityClassGenerator = $entityClassGenerator;
+        $this->phpCompatUtil = new PhpCompatUtil($fileManager);
     }
 
     public static function getCommandName(): string
@@ -156,6 +160,7 @@ final class MakeUser extends AbstractMaker
         // B) Implement UserInterface
         $manipulator = new ClassSourceManipulator(
             $this->fileManager->getFileContents($classPath),
+            $this->phpCompatUtil,
             true
         );
         $manipulator->setIo($io);

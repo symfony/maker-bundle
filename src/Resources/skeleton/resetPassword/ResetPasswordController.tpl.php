@@ -29,7 +29,7 @@ class <?= $class_name ?> extends AbstractController
 {
     use ResetPasswordControllerTrait;
 
-    private $resetPasswordHelper;
+    private <?= $use_typed_properties ? "ResetPasswordHelperInterface " : null ?>$resetPasswordHelper;
 
     public function __construct(ResetPasswordHelperInterface $resetPasswordHelper)
     {
