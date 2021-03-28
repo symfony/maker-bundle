@@ -377,6 +377,27 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {
             $data['nullable'] = true;
+        } elseif ($io->confirm('Would you like to set a default value?')) {
+            switch ($type) {
+                case 'boolean':
+                    $data['options']['default'] = $io->confirm('Should this field\'s value be <fg=yellow>true</> by default?', false);
+                    break;
+                case 'string':
+                    $data['options']['default'] = $io->ask('Default value') ?? '';
+                    break;
+                case 'integer':
+                case 'smallint':
+                case 'bigint':
+                case 'float':
+                    $data['options']['default'] = $io->ask('Default value', 0);
+                    break;
+                default:
+                    $io->text([
+                        'Sorry, setting default value for type <fg=yellow>'.$type.'</> is not supported.',
+                        ''
+                    ]);
+                    break;
+            }
         }
 
         return $data;
