@@ -394,7 +394,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 default:
                     $io->text([
                         'Sorry, setting default value for type <fg=yellow>'.$type.'</> is not supported.',
-                        ''
+                        '',
                     ]);
                     break;
             }
