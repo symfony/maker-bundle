@@ -193,7 +193,7 @@ class SecurityConfigUpdaterTest extends TestCase
             'simple_security_with_access_control.yaml',
             false,
             false,
-            true
+            true,
         ];
 
         yield 'simple_security_without_access_control' => [
@@ -203,7 +203,7 @@ class SecurityConfigUpdaterTest extends TestCase
             'simple_security.yaml',
             false,
             false,
-            true
+            true,
         ];
     }
 
