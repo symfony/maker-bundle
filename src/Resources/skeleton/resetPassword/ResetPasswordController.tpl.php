@@ -75,9 +75,10 @@ class <?= $class_name ?> extends AbstractController
 <?php } ?>
     public function checkEmail(): Response
     {
-        // We prevent users from directly accessing this page
+        // Generate a fake token if the user does not exist or someone hit this page directly.
+        // This prevents exposing whether or not a user was found with the given email address or not
         if (null === ($resetToken = $this->getTokenObjectFromSession())) {
-            return $this->redirectToRoute('app_forgot_password_request');
+            $resetToken = $this->resetPasswordHelper->generateFakeResetToken();
         }
 
         return $this->render('reset_password/check_email.html.twig', [
