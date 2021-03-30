@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class User implements UserInterface
@@ -47,9 +48,9 @@ class User implements UserInterface
     }
 
     /**
-     * This method is not needed for apps that do not check user passwords.
+     * This method can be removed in Symfony 6.0 - is not needed for apps that do not check user passwords.
      *
-     * @see UserInterface
+     * @see PasswordAuthenticatedUserInterface
      */
     public function getPassword(): ?string
     {
@@ -57,7 +58,7 @@ class User implements UserInterface
     }
 
     /**
-     * This method is not needed for apps that do not check user passwords.
+     * This method can be removed in Symfony 6.0 - is not needed for apps that do not check user passwords.
      *
      * @see UserInterface
      */

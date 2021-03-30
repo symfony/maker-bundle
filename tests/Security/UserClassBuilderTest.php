@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\UserClassBuilder;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 class UserClassBuilderTest extends TestCase
 {
@@ -33,7 +34,15 @@ class UserClassBuilderTest extends TestCase
         $classBuilder = new UserClassBuilder();
         $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig);
 
-        $expectedPath = __DIR__.'/fixtures/expected/'.$expectedFilename;
+        $expectedPath = __DIR__.'/fixtures/expected';
+
+        // Can be removed when < Symfony 6 support is dropped.
+        if (!interface_exists(PasswordAuthenticatedUserInterface::class)) {
+            $expectedPath = sprintf('%s/legacy', $expectedPath);
+        }
+
+        $expectedPath = sprintf('%s/%s', $expectedPath, $expectedFilename);
+
         if (!file_exists($expectedPath)) {
             throw new \Exception(sprintf('Expected file missing: "%s"', $expectedPath));
         }
