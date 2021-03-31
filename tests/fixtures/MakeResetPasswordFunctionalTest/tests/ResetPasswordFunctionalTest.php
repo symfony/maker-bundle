@@ -11,7 +11,7 @@ class ResetPasswordFunctionalTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/reset-password');
 
-        $this->assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(200, $client->getResponse()->getStatusCode());
     }
 
     public function testResetRequestRouteDeniesInvalidToken()
@@ -19,15 +19,15 @@ class ResetPasswordFunctionalTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/reset-password/reset/badToken1234');
 
-        $this->assertSame(302, $client->getResponse()->getStatusCode());
+        self::assertSame(302, $client->getResponse()->getStatusCode());
     }
 
-    public function testCheckEmailRouteRedirectsToRequestRouteIfUserNotAllowedToCheckEmail()
+    public function testCheckEmailPageIsAlwaysAccessible()
     {
         $client = static::createClient();
         $client->request('GET', '/reset-password/check-email');
 
-        $this->assertSame(302, $client->getResponse()->getStatusCode());
-        $this->assertResponseRedirects('/reset-password');
+        self::assertResponseIsSuccessful();
+        self::assertPageTitleSame('Password Reset Email Sent');
     }
 }

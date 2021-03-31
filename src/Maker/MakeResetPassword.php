@@ -32,12 +32,11 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Yaml\Yaml;
-use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestInterface;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestTrait;
-use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordToken;
 use SymfonyCasts\Bundle\ResetPassword\Persistence\Repository\ResetPasswordRequestRepositoryTrait;
 use SymfonyCasts\Bundle\ResetPassword\Persistence\ResetPasswordRequestRepositoryInterface;
+use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelper;
 use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
 
 /**
@@ -96,12 +95,10 @@ class MakeResetPassword extends AbstractMaker
 
         $dependencies->addClassDependency(Annotation::class, 'annotations');
 
-        // reset-password-bundle 1.3 includes helpers to get/set a ResetPasswordToken object from the session.
-        // we need to check that version 1.3 is installed
-        if (class_exists(ResetPasswordToken::class)) {
-            if (!method_exists(ResetPasswordControllerTrait::class, 'getTokenObjectFromSession')) {
-                throw new RuntimeCommandException('Please upgrade symfonycasts/reset-password-bundle to version 1.3 or greater.');
-            }
+        // reset-password-bundle 1.6 includes the ability to generate a fake token.
+        // we need to check that version 1.6 is installed
+        if (class_exists(ResetPasswordHelper::class) && !method_exists(ResetPasswordHelper::class, 'generateFakeResetToken')) {
+            throw new RuntimeCommandException('Please run "composer upgrade symfonycasts/reset-password-bundle". Version 1.6 or greater of this bundle is required.');
         }
     }
 
