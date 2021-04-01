@@ -15,9 +15,11 @@ use Doctrine\Common\Annotations\Annotation;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -33,6 +35,17 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 final class MakeController extends AbstractMaker
 {
+    private $phpCompatUtil;
+
+    public function __construct(FileManager $fileManager, PhpCompatUtil $phpCompatUtil = null)
+    {
+        if (null === $phpCompatUtil) {
+            $phpCompatUtil = new PhpCompatUtil($fileManager);
+        }
+
+        $this->phpCompatUtil = $phpCompatUtil;
+    }
+
     public static function getCommandName(): string
     {
         return 'make:controller';
@@ -100,6 +113,10 @@ final class MakeController extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
+        if ($this->phpCompatUtil->canUseAttributes()) {
+            return;
+        }
+
         $dependencies->addClassDependency(
             Annotation::class,
             'doctrine/annotations'
