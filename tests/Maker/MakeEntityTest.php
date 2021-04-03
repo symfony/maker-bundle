@@ -564,5 +564,34 @@ class MakeEntityTest extends MakerTestCase
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
         ];
+
+        yield 'entity_new_broadcast' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // Mark the entity as broadcasted
+                'y',
+                // add not additional fields
+                '',
+            ])
+            ->setRequiredPhpVersion(70200)
+            ->addExtraDependencies('ux-turbo-mercure')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
+            ->configureDatabase()
+            ->addReplacement(
+                '.env',
+                'https://127.0.0.1:8000/.well-known/mercure',
+                'http://127.0.0.1:1337/.well-known/mercure'
+            )
+            ->updateSchemaAfterCommand()
+            ->assert(function (string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Entity/User.php');
+
+                $content = file_get_contents($directory.'/src/Entity/User.php');
+                $this->assertStringContainsString('use Symfony\UX\Turbo\Attribute\Broadcast;', $content);
+                $this->assertStringContainsString(\PHP_VERSION_ID >= 80000 ? '#[Broadcast]' : '@Broadcast', $content);
+            }),
+        ];
     }
 }
