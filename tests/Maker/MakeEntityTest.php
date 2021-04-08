@@ -52,7 +52,7 @@ class MakeEntityTest extends MakerTestCase
 
                 $content = file_get_contents($directory.'/src/Entity/User.php');
                 $this->assertStringContainsString('use ApiPlatform\Core\Annotation\ApiResource;', $content);
-                $this->assertStringContainsString('@ApiResource', $content);
+                $this->assertStringContainsString(\PHP_VERSION_ID >= 80000 ? '#[ApiResource]' : '@ApiResource', $content);
             }),
         ];
 
