@@ -101,10 +101,6 @@ final class EntityRegenerator
                     continue;
                 }
 
-                if (!\in_array($fieldName, $mappedFields)) {
-                    continue;
-                }
-
                 $manipulator->addEntityField($fieldName, $mapping);
             }
 

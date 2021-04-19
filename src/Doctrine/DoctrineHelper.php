@@ -25,6 +25,7 @@ use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\Driver\AnnotationDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
+use ReflectionException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 
 /**
@@ -195,7 +196,13 @@ final class DoctrineHelper
                 }
             }
 
-            foreach ($cmf->getAllMetadata() as $m) {
+            try{
+                $loaded = $cmf->getAllMetadata();
+            } catch (ReflectionException $e){
+                $loaded = $this->isInstanceOf($cmf, AbstractClassMetadataFactory::class) ? $cmf->getLoadedMetadata() : [];
+            }
+
+            foreach ($loaded as $m) {
                 if (null === $classOrNamespace) {
                     $metadata[$m->getName()] = $m;
                 } else {
