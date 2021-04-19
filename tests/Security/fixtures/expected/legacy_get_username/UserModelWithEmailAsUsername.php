@@ -10,11 +10,6 @@ class User implements UserInterface
 
     private $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
-    private $password;
-
     public function getEmail(): ?string
     {
         return $this->email;
@@ -57,23 +52,17 @@ class User implements UserInterface
     }
 
     /**
+     * This method can be removed in Symfony 6.0 - is not needed for apps that do not check user passwords.
+     *
      * @see UserInterface
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): self
-    {
-        $this->password = $password;
-
-        return $this;
+        return null;
     }
 
     /**
-     * Returning a salt is only needed, if you are not using a modern
-     * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
+     * This method can be removed in Symfony 6.0 - is not needed for apps that do not check user passwords.
      *
      * @see UserInterface
      */

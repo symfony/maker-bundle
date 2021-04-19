@@ -1,42 +1,14 @@
 <?php
 
-namespace App\Entity;
+namespace App\Security;
 
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * @ORM\Entity()
- */
 class User implements UserInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    private $username;
 
-    /**
-     * @ORM\Column(type="string", length=180, unique=true)
-     */
-    private $user_name;
-
-    /**
-     * @ORM\Column(type="json")
-     */
     private $roles = [];
-
-    /**
-     * @var string The hashed password
-     * @ORM\Column(type="string")
-     */
-    private $password;
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     /**
      * A visual identifier that represents this user.
@@ -45,12 +17,12 @@ class User implements UserInterface
      */
     public function getUsername(): string
     {
-        return (string) $this->user_name;
+        return (string) $this->username;
     }
 
-    public function setUserName(string $user_name): self
+    public function setUsername(string $username): self
     {
-        $this->user_name = $user_name;
+        $this->username = $username;
 
         return $this;
     }
@@ -75,23 +47,17 @@ class User implements UserInterface
     }
 
     /**
+     * This method can be removed in Symfony 6.0 - is not needed for apps that do not check user passwords.
+     *
      * @see UserInterface
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): self
-    {
-        $this->password = $password;
-
-        return $this;
+        return null;
     }
 
     /**
-     * Returning a salt is only needed, if you are not using a modern
-     * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
+     * This method can be removed in Symfony 6.0 - is not needed for apps that do not check user passwords.
      *
      * @see UserInterface
      */

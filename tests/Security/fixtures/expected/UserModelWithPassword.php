@@ -7,7 +7,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    private $email;
+    private $userIdentifier;
 
     private $roles = [];
 
@@ -16,26 +16,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $password;
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
     /**
      * A visual identifier that represents this user.
      *
      * @see UserInterface
      */
-    public function getUsername(): string
+    public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return (string) $this->userIdentifier;
+    }
+
+    public function setUserIdentifier(string $userIdentifier): self
+    {
+        $this->userIdentifier = $userIdentifier;
+
+        return $this;
     }
 
     /**

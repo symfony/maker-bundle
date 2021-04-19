@@ -5,30 +5,25 @@ namespace App\Security;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface
 {
-    private $username;
+    private $userIdentifier;
 
     private $roles = [];
-
-    /**
-     * @var string The hashed password
-     */
-    private $password;
 
     /**
      * A visual identifier that represents this user.
      *
      * @see UserInterface
      */
-    public function getUsername(): string
+    public function getUserIdentifier(): string
     {
-        return (string) $this->username;
+        return (string) $this->userIdentifier;
     }
 
-    public function setUsername(string $username): self
+    public function setUserIdentifier(string $userIdentifier): self
     {
-        $this->username = $username;
+        $this->userIdentifier = $userIdentifier;
 
         return $this;
     }
@@ -53,23 +48,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
+     * This method can be removed in Symfony 6.0 - is not needed for apps that do not check user passwords.
+     *
      * @see PasswordAuthenticatedUserInterface
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): self
-    {
-        $this->password = $password;
-
-        return $this;
+        return null;
     }
 
     /**
-     * Returning a salt is only needed, if you are not using a modern
-     * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
+     * This method can be removed in Symfony 6.0 - is not needed for apps that do not check user passwords.
      *
      * @see UserInterface
      */

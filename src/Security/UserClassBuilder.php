@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Security;
 use PhpParser\Node;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -67,7 +68,7 @@ final class UserClassBuilder
         $this->addGetPassword($manipulator, $userClassConfig);
     }
 
-    private function addGetUsername(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig)
+    private function addGetUsername(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
     {
         if ($userClassConfig->isEntity()) {
             // add entity property
@@ -97,10 +98,17 @@ final class UserClassBuilder
             );
         }
 
+        $getterIdentifierName = 'getUsername';
+
+        // Check if we're using Symfony 5.3+ - UserInterface::getUsername() was replaced with UserInterface::getUserIdentifier()
+        if (class_exists(InMemoryUser::class)) {
+            $getterIdentifierName = 'getUserIdentifier';
+        }
+
         // define getUsername (if it was defined above, this will override)
         $manipulator->addAccessorMethod(
             $userClassConfig->getIdentityPropertyName(),
-            'getUsername',
+            $getterIdentifierName,
             'string',
             false,
             [

@@ -21,7 +21,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      */
-    private $user_name;
+    private $email;
 
     /**
      * @ORM\Column(type="json")
@@ -39,21 +39,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
     /**
      * A visual identifier that represents this user.
      *
      * @see UserInterface
      */
-    public function getUsername(): string
+    public function getUserIdentifier(): string
     {
-        return (string) $this->user_name;
-    }
-
-    public function setUserName(string $user_name): self
-    {
-        $this->user_name = $user_name;
-
-        return $this;
+        return (string) $this->email;
     }
 
     /**
