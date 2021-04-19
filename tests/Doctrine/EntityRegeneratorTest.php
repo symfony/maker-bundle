@@ -115,9 +115,6 @@ class EntityRegeneratorTest extends TestCase
 
         $fileManager = new FileManager($fs, $autoloaderUtil, new MakerFileLinkFormatter(null), $tmpDir);
         $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
-        // triggers a cache warmup, which puts old mapping metadata in cache
-
-        $doctrineHelper->getMetadata($namespace);
         $phpCompatUtil = new PhpCompatUtil($fileManager);
         $generator = new Generator($fileManager, 'App\\', $phpCompatUtil);
         $entityClassGenerator = new EntityClassGenerator($generator, $doctrineHelper);

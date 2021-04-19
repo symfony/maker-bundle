@@ -101,6 +101,20 @@ final class EntityRegenerator
                     continue;
                 }
 
+                if (!\in_array($fieldName, $mappedFields)) {
+                    $traitProperties = [];
+
+                    foreach ($classMetadata->reflClass->getTraits() as $trait) {
+                        foreach ($trait->getProperties() as $property) {
+                            $traitProperties[] = $property->getName();
+                        }
+                    }
+
+                    if (\in_array($fieldName, $traitProperties) || isset($mapping['declared'])) {
+                        continue;
+                    }
+                }
+
                 $manipulator->addEntityField($fieldName, $mapping);
             }
 
