@@ -196,9 +196,9 @@ final class DoctrineHelper
                 }
             }
 
-            try{
+            try {
                 $loaded = $cmf->getAllMetadata();
-            } catch (ReflectionException $e){
+            } catch (ReflectionException $e) {
                 $loaded = $this->isInstanceOf($cmf, AbstractClassMetadataFactory::class) ? $cmf->getLoadedMetadata() : [];
             }
 
