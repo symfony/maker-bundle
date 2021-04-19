@@ -1,0 +1,11 @@
+nelmio_api_doc:
+    documentation:
+        security:
+            - Bearer: []
+===
+
+===
+nelmio_api_doc:
+    documentation:
+        security:
+            - Bearer: []

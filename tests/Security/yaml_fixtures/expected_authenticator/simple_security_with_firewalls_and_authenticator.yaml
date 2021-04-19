@@ -8,11 +8,11 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
-            anonymous: true
+            anonymous: lazy
             guard:
                 authenticators:
                     - App\Security\Authenticator
                     - App\Security\AppCustomAuthenticator
                 entry_point: App\Security\AppCustomAuthenticator
         foo:
-            anonymous: true
+            anonymous: lazy

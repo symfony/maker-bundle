@@ -13,7 +13,6 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -47,18 +46,26 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     private $fileManager;
     private $doctrineHelper;
     private $generator;
+    private $entityClassGenerator;
 
-    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null)
+    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null, EntityClassGenerator $entityClassGenerator = null)
     {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
         // $projectDirectory is unused, argument kept for BC
 
         if (null === $generator) {
-            @trigger_error(sprintf('Passing a "%s" instance as 4th argument is mandatory since version 1.5.', Generator::class), E_USER_DEPRECATED);
+            @trigger_error(sprintf('Passing a "%s" instance as 4th argument is mandatory since version 1.5.', Generator::class), \E_USER_DEPRECATED);
             $this->generator = new Generator($fileManager, 'App\\');
         } else {
             $this->generator = $generator;
+        }
+
+        if (null === $entityClassGenerator) {
+            @trigger_error(sprintf('Passing a "%s" instance as 5th argument is mandatory since version 1.15.1', EntityClassGenerator::class), \E_USER_DEPRECATED);
+            $this->entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
+        } else {
+            $this->entityClassGenerator = $entityClassGenerator;
         }
     }
 
@@ -67,10 +74,14 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return 'make:entity';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates or updates a Doctrine entity class, and optionally an API Platform resource';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates or updates a Doctrine entity class, and optionally an API Platform resource')
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('Class name of the entity to create or update (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
             ->addOption('api-resource', 'a', InputOption::VALUE_NONE, 'Mark this class as an API Platform resource (expose a CRUD API for it)')
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
@@ -137,8 +148,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {
-            $entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
-            $entityPath = $entityClassGenerator->generateEntityClass(
+            $entityPath = $this->entityClassGenerator->generateEntityClass(
                 $entityClassDetails,
                 $input->getOption('api-resource')
             );
@@ -263,8 +273,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)
     {
-        $dependencies->requirePHP71();
-
         if (null !== $input && $input->getOption('api-resource')) {
             $dependencies->addClassDependency(
                 ApiResource::class,
@@ -315,6 +323,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $defaultType = 'boolean';
         } elseif (0 === strpos($snakeCasedField, 'has_')) {
             $defaultType = 'boolean';
+        } elseif ('uuid' === $snakeCasedField) {
+            $defaultType = 'uuid';
+        } elseif ('guid' === $snakeCasedField) {
+            $defaultType = 'guid';
         }
 
         $type = null;
@@ -766,7 +778,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function regenerateEntities(string $classOrNamespace, bool $overwrite, Generator $generator)
     {
-        $regenerator = new EntityRegenerator($this->doctrineHelper, $this->fileManager, $generator, $overwrite);
+        $regenerator = new EntityRegenerator($this->doctrineHelper, $this->fileManager, $generator, $this->entityClassGenerator, $overwrite);
         $regenerator->regenerateEntities($classOrNamespace);
     }
 
@@ -796,9 +808,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $className = reset($otherClassMetadatas)->getName();
         }
 
-        $driver = $this->doctrineHelper->getMappingDriverForClass($className);
-
-        return $driver instanceof AnnotationDriver;
+        return $this->doctrineHelper->isClassAnnotated($className);
     }
 
     private function getEntityNamespace(): string

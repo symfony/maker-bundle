@@ -27,15 +27,28 @@ class MakeUserTest extends MakerTestCase
                 'y', // entity
                 'email', // identity property
                 'y', // with password
-                'y', // argon
+                'y', // argon   @TODO This should only be done in <5.0
             ])
             ->addExtraDependencies('doctrine')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeUserEntityPassword')
             ->configureDatabase()
             ->addExtraDependencies('doctrine')
             ->setGuardAuthenticator('main', 'App\\Security\\AutomaticAuthenticator')
-            ->setRequiredPhpVersion(70100)
             ->updateSchemaAfterCommand(),
+        ];
+
+        yield 'user_security_entity_with_password_authenticated_user_interface' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeUser::class),
+            [
+                // user class name
+                'User',
+                'y', // entity
+                'email', // identity property
+                'y', // with password
+            ])
+            ->addRequiredPackageVersion('symfony/security-bundle', '>=5.3')
+            ->addExtraDependencies('doctrine')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeUserEntityPasswordAuthenticatedUserInterface'),
         ];
 
         yield 'user_security_model_no_password' => [MakerTestDetails::createTest(
@@ -49,7 +62,6 @@ class MakeUserTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeUserModelNoPassword')
             ->setGuardAuthenticator('main', 'App\\Security\\AutomaticAuthenticator')
-            ->setRequiredPhpVersion(70100)
             ->addPostMakeReplacement(
                 'src/Security/UserProvider.php',
                 'throw new \Exception(\'TODO: fill in refreshUser() inside \'.__FILE__);',

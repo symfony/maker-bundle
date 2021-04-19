@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -205,39 +206,56 @@ authenticators will be ignored, and can be blank.',
 
     public function guessPasswordSetter(SymfonyStyle $io, string $userClass): string
     {
-        $reflectionClass = new \ReflectionClass($userClass);
-
-        if ($reflectionClass->hasMethod('setPassword')) {
+        if (null === ($methodChoices = $this->methodNameGuesser($userClass, 'setPassword'))) {
             return 'setPassword';
-        }
-
-        $classMethods = [];
-        foreach ($reflectionClass->getMethods() as $method) {
-            $classMethods[] = $method->name;
         }
 
         return $io->choice(
             sprintf('Which method on your <fg=yellow>%s</> class can be used to set the encoded password (e.g. setPassword())?', $userClass),
-            $classMethods
+            $methodChoices
         );
     }
 
-    public function guessEmailGetter(SymfonyStyle $io, string $userClass): string
+    public function guessEmailGetter(SymfonyStyle $io, string $userClass, string $emailPropertyName): string
     {
-        $reflectionClass = new \ReflectionClass($userClass);
+        $supposedEmailMethodName = sprintf('get%s', Str::asCamelCase($emailPropertyName));
 
-        if ($reflectionClass->hasMethod('getEmail')) {
-            return 'getEmail';
-        }
-
-        $classMethods = [];
-        foreach ($reflectionClass->getMethods() as $method) {
-            $classMethods[] = $method->name;
+        if (null === ($methodChoices = $this->methodNameGuesser($userClass, $supposedEmailMethodName))) {
+            return $supposedEmailMethodName;
         }
 
         return $io->choice(
             sprintf('Which method on your <fg=yellow>%s</> class can be used to get the email address (e.g. getEmail())?', $userClass),
-            $classMethods
+            $methodChoices
         );
+    }
+
+    public function guessIdGetter(SymfonyStyle $io, string $userClass): string
+    {
+        if (null === ($methodChoices = $this->methodNameGuesser($userClass, 'getId'))) {
+            return 'getId';
+        }
+
+        return $io->choice(
+            sprintf('Which method on your <fg=yellow>%s</> class can be used to get the unique user identifier (e.g. getId())?', $userClass),
+            $methodChoices
+        );
+    }
+
+    private function methodNameGuesser(string $className, string $suspectedMethodName): ?array
+    {
+        $reflectionClass = new \ReflectionClass($className);
+
+        if ($reflectionClass->hasMethod($suspectedMethodName)) {
+            return null;
+        }
+
+        $classMethods = [];
+
+        foreach ($reflectionClass->getMethods() as $method) {
+            $classMethods[] = $method->name;
+        }
+
+        return $classMethods;
     }
 }

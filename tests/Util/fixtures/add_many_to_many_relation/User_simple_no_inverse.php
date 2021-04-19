@@ -19,7 +19,7 @@ class User
     private $id;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Recipe")
+     * @ORM\ManyToMany(targetEntity=Recipe::class)
      */
     private $recipes;
 
@@ -52,9 +52,7 @@ class User
 
     public function removeRecipe(Recipe $recipe): self
     {
-        if ($this->recipes->contains($recipe)) {
-            $this->recipes->removeElement($recipe);
-        }
+        $this->recipes->removeElement($recipe);
 
         return $this;
     }

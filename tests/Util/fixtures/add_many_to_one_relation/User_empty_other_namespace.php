@@ -7,7 +7,7 @@ use Foo\Entity\Category;
 class User
 {
     /**
-     * @ORM\ManyToOne(targetEntity="Foo\Entity\Category", inversedBy="foods")
+     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="foods")
      */
     private $category;
 

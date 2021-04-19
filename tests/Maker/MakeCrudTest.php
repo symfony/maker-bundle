@@ -24,6 +24,7 @@ class MakeCrudTest extends MakerTestCase
             [
                 // entity class name
                 'SweetFood',
+                '', // default controller
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
             // need for crud web tests
@@ -36,11 +37,30 @@ class MakeCrudTest extends MakerTestCase
             ->setRequiredPhpVersion(70200),
         ];
 
+        yield 'crud_basic_custom_controller' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeCrud::class),
+            [
+                // entity class name
+                'SweetFood',
+                'SweetFoodAdminController', // default controller
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudCustomController')
+            // need for crud web tests
+            ->configureDatabase()
+            ->assert(function (string $output, string $directory) {
+                $this->assertStringContainsString('created: src/Controller/SweetFoodAdminController.php', $output);
+                $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
+            })
+            // workaround for segfault in PHP 7.1 CI :/
+            ->setRequiredPhpVersion(70200),
+        ];
+
         yield 'crud_basic_in_custom_root_namespace' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeCrud::class),
             [
                 // entity class name
                 'SweetFood',
+                '', // default controller
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudInCustomRootNamespace')
             ->changeRootNamespace('Custom')
@@ -59,6 +79,7 @@ class MakeCrudTest extends MakerTestCase
             [
                 // entity class name
                 'SweetFood',
+                '', // default controller
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudRepository')
             // need for crud web tests
@@ -76,6 +97,7 @@ class MakeCrudTest extends MakerTestCase
             [
                 // entity class name
                 'SweetFood',
+                '', // default controller
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
             // need for crud web tests

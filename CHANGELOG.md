@@ -1,3 +1,135 @@
+1.30
+====
+
+* [make:crud] Ask a new question - controller name - to allow that to
+  be customized - #840 thanks to @weaverryan
+
+* [make:crud] Make the delete form submit via a normal POST request
+  instead of delete - #825 thanks to @jrushlow
+
+* Dropped support for Symfony 3 - #819 thanks to @jrushlow
+
+1.29
+====
+
+* [make:test] Added a new command that interactively asks you between
+  several different styles of test classes. See #807 thanks to @dunglas.
+* [make:unit-test] Deprecated the maker in favor of `make:test`.
+* [make:functional-test] Deprecated the maker
+
+1.28
+====
+
+* Sort entity auto-completion in various commands - thanks to @zorn-v
+
+1.27
+====
+
+* [make:registration-form] Added a new question to generate code that will allow
+  users to click on the "verify email" link in their email without needing to be
+  authenticated - #776 thanks to @jrushlow!
+
+1.26
+====
+
+* [make:auth] Added support to make:auth for the new "authenticator" security mode in
+  Symfony 5.2 - #736 thanks to @jrushlow!
+
+1.25
+====
+
+* Add support for doctrine/inflector v2 (v1 is still allowed) - #758 thanks to @jrushlow!
+* [make:entity] Fixed setting a null value for OneToMany - #755 thanks to @Kocal!
+
+1.24
+====
+
+* Use PHP 8 Route attributes when using PHP 8 - #725 thanks to @jrushlow!
+* Improve version detection by reading config.platform.php - #728 thanks to @jrushlow!
+
+1.23
+====
+
+* Added experimental PHP 8 support. The bundle now allows php 8 and all
+  maker commands (whose dependencies allow PHP 8) now having passing tests.
+
+1.22
+====
+
+* [make:entity] Optimized how the `removeXXXX()` methods are generated
+  for relationships - #675 thanks to @mhabibi!
+
+* [make:serializer:normalizer] Generated a better template, trying to
+  guess the class you might be normalizing - #672 thanks to @BatsaxIV
+
+1.21
+====
+
+* [make:docker:database] When using MySQL, a "main" database is now created
+  automatically for you - #656 thanks to @robmeijer!
+
+* [make:voter] Better generated entity "guess" - #658 thanks to @yahyaerturan!
+
+* [make:command] Use the new Command::SUCCESS when available - #664
+  thanks to @Chi-teck!
+
+
+1.20
+====
+
+* [make:docker:database] Added a new command to generate a database service
+  in your `docker-compose.yaml` file - #640 thanks to @jrushlow!
+
+1.19
+====
+
+* Added "email verification/confirmation" option to `make:registration-form` - see #603
+  thanks to @jrushlow!
+
+1.18
+====
+
+* Reverted support for `doctrine/inflector` 2.0 - #611 thanks to @weaverryan
+
+1.17
+====
+
+* PHP 7.1 is now the required minimum version - #598 thanks to @weaverryan
+
+* MakerBundle now allows `doctrine/inflector` 2.0 - #600 thanks to @alcaeus
+
+1.16
+====
+
+* [make:entity] Generated entities will now use the RelationName::class
+  syntax when generating relationships (e.g.
+  `targetEntity=RelationName::class`) - #573 thanks to @rogeriolino.
+
+* When listing generated files in the console, if a file link formatter
+  is configured, the links will now be clickable - #559 thanks to @l-vo.
+
+* [make:entity] Added UUID and GUID default type to entity maker - if you name a
+  field `uuid` or `guid`, the Maker will guess those types by default - #593
+  thanks to @thomas-miceli.
+
+1.15
+====
+
+* [make:reset-password] New `make:reset-password` to generate an
+  entire "reset password" controller, forms, template setup - #567
+  thanks to @jrushlow and @romaricdrigon
+
+* [make:message] New `make:message` command to generate a
+  Messenger messaage & handler class - #338 thanks to @nikophil
+
+* [make:messenger-middleware] New `make:messenger-middleware`
+  command to generate a middleware for Messenger
+
+1.14
+====
+
+* Added support for Symfony 5
+
 1.13
 ====
 

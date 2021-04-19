@@ -42,10 +42,14 @@ final class MakeMessage extends AbstractMaker
         return 'make:message';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new message and handler';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new message and handler')
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the message class (e.g. <fg=yellow>SendEmailMessage</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeMessage.txt'))
         ;

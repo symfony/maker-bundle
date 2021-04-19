@@ -1,1 +1,5 @@
+.* export-ignore
+*.md export-ignore
+appveyor.yml
+phpunit.xml.dist
 /tests export-ignore

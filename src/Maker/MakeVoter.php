@@ -18,6 +18,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
@@ -31,16 +32,20 @@ final class MakeVoter extends AbstractMaker
         return 'make:voter';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new security voter class';
+    }
+
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->setDescription('Creates a new security voter class')
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the security voter class (e.g. <fg=yellow>BlogPostVoter</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeVoter.txt'))
         ;
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $voterClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -51,7 +56,9 @@ final class MakeVoter extends AbstractMaker
         $generator->generateClass(
             $voterClassNameDetails->getFullName(),
             'security/Voter.tpl.php',
-            []
+            [
+                'use_type_hints' => 50000 <= Kernel::VERSION_ID,
+            ]
         );
 
         $generator->writeChanges();
@@ -64,7 +71,7 @@ final class MakeVoter extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Voter::class,

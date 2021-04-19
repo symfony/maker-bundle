@@ -11,7 +11,9 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
-use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Common\Inflector\Inflector as LegacyInflector;
+use Doctrine\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
 use Symfony\Component\DependencyInjection\Container;
 
 /**
@@ -20,6 +22,9 @@ use Symfony\Component\DependencyInjection\Container;
  */
 final class Str
 {
+    /** @var Inflector|null */
+    private static $inflector;
+
     /**
      * Looks for suffixes in strings in a case-insensitive way.
      */
@@ -141,7 +146,7 @@ final class Str
     {
         $snake = self::asSnakeCase($camelCase);
         $words = explode('_', $snake);
-        $words[\count($words) - 1] = Inflector::pluralize($words[\count($words) - 1]);
+        $words[\count($words) - 1] = self::pluralize($words[\count($words) - 1]);
         $reSnaked = implode('_', $words);
 
         return self::asLowerCamelCase($reSnaked);
@@ -151,7 +156,7 @@ final class Str
     {
         $snake = self::asSnakeCase($camelCase);
         $words = explode('_', $snake);
-        $words[\count($words) - 1] = Inflector::singularize($words[\count($words) - 1]);
+        $words[\count($words) - 1] = self::singularize($words[\count($words) - 1]);
         $reSnaked = implode('_', $words);
 
         return self::asLowerCamelCase($reSnaked);
@@ -173,7 +178,7 @@ final class Str
         $nouns = [
             'elephant',
             'pizza',
-            'jellybean',
+            'popsicle',
             'chef',
             'puppy',
             'gnome',
@@ -208,6 +213,33 @@ final class Str
 
     public static function asHumanWords(string $variableName): string
     {
-        return implode(' ', preg_split('/(?=[A-Z])/', $variableName));
+        return str_replace('  ', ' ', ucfirst(trim(implode(' ', preg_split('/(?=[A-Z])/', $variableName)))));
+    }
+
+    private static function pluralize(string $word): string
+    {
+        if (class_exists(Inflector::class)) {
+            return static::getInflector()->pluralize($word);
+        }
+
+        return LegacyInflector::pluralize($word);
+    }
+
+    private static function singularize(string $word): string
+    {
+        if (class_exists(Inflector::class)) {
+            return static::getInflector()->singularize($word);
+        }
+
+        return LegacyInflector::singularize($word);
+    }
+
+    private static function getInflector(): Inflector
+    {
+        if (null === static::$inflector) {
+            static::$inflector = InflectorFactory::create()->build();
+        }
+
+        return static::$inflector;
     }
 }

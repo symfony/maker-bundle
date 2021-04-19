@@ -15,6 +15,9 @@ use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 
+/**
+ * @group legacy
+ */
 class MakeFunctionalTestTest extends MakerTestCase
 {
     public function getTestDetails()
@@ -25,7 +28,8 @@ class MakeFunctionalTestTest extends MakerTestCase
                 // functional test class name
                 'FooBar',
             ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional'),
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
+            ->skip('See https://github.com/symfony/maker-bundle/pull/807/files#r571308250'),
         ];
 
         yield 'functional_with_panther' => [MakerTestDetails::createTest(
@@ -35,7 +39,6 @@ class MakeFunctionalTestTest extends MakerTestCase
                 'FooBar',
             ])
             ->addExtraDependencies('panther')
-            ->setRequiredPhpVersion(70100)
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional'),
         ];
     }

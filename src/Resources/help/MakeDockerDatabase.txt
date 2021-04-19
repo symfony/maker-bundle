@@ -1,0 +1,5 @@
+The <info>%command.name%</info> command generates or updates databases services in docker-compose.yaml
+
+<info>php %command.full_name%</info>
+
+Supports MySQL, MariaDB and PostgreSQL

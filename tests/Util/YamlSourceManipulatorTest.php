@@ -58,13 +58,17 @@ class YamlSourceManipulatorTest extends TestCase
         foreach ($finder as $file) {
             list($source, $changeCode, $expected) = explode('===', $file->getContents());
 
+            // Multiline string ends with an \n
+            $source = substr_replace($source, '', (\strlen($source) - 1));
+            $expected = ltrim($expected, "\n");
+
             $data = Yaml::parse($source);
             eval($changeCode);
 
             yield $file->getFilename() => [
-                'source' => rtrim($source, "\n"),
+                'source' => $source,
                 'newData' => $data,
-                'expectedSource' => ltrim($expected, "\n"),
+                'expectedSource' => $expected,
             ];
         }
 
@@ -100,12 +104,12 @@ class YamlSourceManipulatorTest extends TestCase
             $maxLen = max(array_map('strlen', array_keys($context)));
 
             foreach ($context as $key => $val) {
-                $message .= sprintf(sprintf(
+                $message .= sprintf(
                     "\n    %s%s: %s",
                     str_repeat(' ', $maxLen - \strlen($key)),
                     $key,
                     $val
-                ));
+                );
             }
 
             return $message."\n\n";

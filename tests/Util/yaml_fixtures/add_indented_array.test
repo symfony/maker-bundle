@@ -1,0 +1,14 @@
+services:
+  abc-svc:
+    volumes:
+      - abc-data:/tmp/abc
+===
+$data['services'] = array_merge($data['services'], ['foo-svc' => ['volumes' => ['foo-data:/tmp/data']]]);
+===
+services:
+  abc-svc:
+    volumes:
+      - abc-data:/tmp/abc
+  foo-svc:
+    volumes:
+      - 'foo-data:/tmp/data'

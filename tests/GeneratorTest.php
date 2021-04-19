@@ -14,26 +14,31 @@ namespace Symfony\Bundle\MakerBundle\Tests;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 
 class GeneratorTest extends TestCase
 {
     /**
      * @dataProvider getClassNameDetailsTests
      */
-    public function testCreateClassNameDetails(string $name, string $prefix, string $suffix = '', string $expectedFullClassName, string $expectedRelativeClassName)
+    public function testCreateClassNameDetails(string $name, string $prefix, string $suffix, string $expectedFullClassName, string $expectedRelativeClassName): void
     {
         $fileManager = $this->createMock(FileManager::class);
         $fileManager->expects($this->any())
             ->method('getNamespacePrefixForClass')
             ->willReturn('Foo');
-        $generator = new Generator($fileManager, 'App\\');
+
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+
+        $generator = new Generator($fileManager, 'App\\', $mockPhpCompatUtil);
+
         $classNameDetails = $generator->createClassNameDetails($name, $prefix, $suffix);
 
         $this->assertSame($expectedFullClassName, $classNameDetails->getFullName());
         $this->assertSame($expectedRelativeClassName, $classNameDetails->getRelativeName());
     }
 
-    public function getClassNameDetailsTests()
+    public function getClassNameDetailsTests(): \Generator
     {
         yield 'simple_class' => [
             'foo',

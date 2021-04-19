@@ -305,5 +305,71 @@ class MakeAuthenticatorTest extends MakerTestCase
                     }
                 ),
         ];
+
+        yield 'security_52_empty_authenticator' => [
+            MakerTestDetails::createTest(
+                $this->getMakerInstance(MakeAuthenticator::class),
+                [
+                    // authenticator type => empty-auth
+                    0,
+                    // authenticator class name
+                    'AppCustomAuthenticator',
+                ]
+            )
+                ->setRequiredPhpVersion(70200)
+                ->addRequiredPackageVersion('symfony/security-bundle', '>=5.2')
+                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorSecurity52Empty')
+                ->assert(
+                    function (string $output, string $directory) {
+                        $this->assertStringContainsString('Success', $output);
+
+                        $fs = new Filesystem();
+                        $this->assertTrue($fs->exists(sprintf('%s/src/Security/AppCustomAuthenticator.php', $directory)));
+
+                        $securityConfig = Yaml::parse(file_get_contents(sprintf('%s/config/packages/security.yaml', $directory)));
+
+                        $this->assertEquals(
+                            'App\\Security\\AppCustomAuthenticator',
+                            $securityConfig['security']['firewalls']['main']['custom_authenticator']
+                        );
+                    }
+                ),
+        ];
+
+        yield 'security_52_login_form_authenticator' => [
+            MakerTestDetails::createTest(
+                $this->getMakerInstance(MakeAuthenticator::class),
+                [
+                    // authenticator type => login-form
+                    1,
+                    // class name
+                    'AppTestSecurity52LoginFormAuthenticator',
+                    // controller name
+                    'SecurityController',
+                    // User selector field
+                    'userEmail',
+                    // Logout Url
+                    'no',
+                ]
+            )
+                ->setRequiredPhpVersion(70200)
+                ->addRequiredPackageVersion('symfony/security-bundle', '>=5.2')
+                ->addExtraDependencies('doctrine')
+                ->addExtraDependencies('twig')
+                ->addExtraDependencies('symfony/form')
+                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorSecurity52LoginForm')
+                ->configureDatabase()
+                ->updateSchemaAfterCommand()
+                ->assert(
+                    function (string $output, string $directory) {
+                        $this->assertStringContainsString('Success', $output);
+
+                        $fs = new Filesystem();
+                        $this->assertTrue($fs->exists(sprintf('%s/src/Controller/SecurityController.php', $directory)));
+                        $this->assertTrue($fs->exists(sprintf('%s/templates/security/login.html.twig', $directory)));
+                        $this->assertTrue($fs->exists(sprintf('%s/src/Security/AppTestSecurity52LoginFormAuthenticator.php', $directory)));
+                    }
+                ),
+        ];
     }
 }

@@ -18,17 +18,17 @@ class User
     private $id;
 
     /**
-     * @ORM\OneToMany(targetEntity="UserAvatar", mappedBy="user")
+     * @ORM\OneToMany(targetEntity=UserAvatar::class, mappedBy="user")
      */
     private $avatars;
 
     /**
-     * @ORM\OneToOne(targetEntity="UserProfile", mappedBy="user")
+     * @ORM\OneToOne(targetEntity=UserProfile::class, mappedBy="user")
      */
     private $userProfile;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag")
+     * @ORM\ManyToMany(targetEntity=Tag::class)
      */
     private $tags;
 

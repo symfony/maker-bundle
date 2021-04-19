@@ -12,11 +12,11 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
-use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
-use Symfony\Bundle\MakerBundle\Maker\MakeForgottenPassword;
 use Symfony\Bundle\MakerBundle\Test\MakerTestKernel;
+use Symfony\Component\Console\Command\LazyCommand;
 use Symfony\Component\Finder\Finder;
 
 class FunctionalTest extends TestCase
@@ -30,26 +30,31 @@ class FunctionalTest extends TestCase
         $kernel = new MakerTestKernel('dev', true);
 
         $finder = new Finder();
-        $finder->in(__DIR__.'/../../src/Maker');
+        $finder
+            ->in(__DIR__.'/../../src/Maker')
+            // exclude deprecated classes
+            ->notContains('/@deprecated/')
+        ;
 
         $application = new Application($kernel);
         foreach ($finder as $file) {
-            $class = 'Symfony\Bundle\MakerBundle\Maker\\'.$file->getBasename('.php');
+            $maker = new ReflectionClass(sprintf('Symfony\Bundle\MakerBundle\Maker\%s', $file->getBasename('.php')));
 
-            if (AbstractMaker::class === $class) {
+            if ($maker->isAbstract()) {
                 continue;
             }
 
-            /* Skip make forgotten password as it is temp. disabled (tkt#537) */
-            if (MakeForgottenPassword::class === $class) {
-                continue;
-            }
-
-            $commandName = $class::getCommandName();
             // if the command does not exist, this will explode
-            $command = $application->find($commandName);
+            $command = $application->find(
+                $maker->getMethod('getCommandName')->invoke(null)
+            );
+
+            if ($command instanceof LazyCommand) {
+                $command = $command->getCommand();
+            }
+
             // just a smoke test assert
-            $this->assertInstanceOf(MakerCommand::class, $command);
+            self::assertInstanceOf(MakerCommand::class, $command);
         }
     }
 }

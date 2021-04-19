@@ -12,23 +12,40 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LogLevel;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
+use Symfony\Component\HttpKernel\Log\Logger;
 use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 
 class SecurityConfigUpdaterTest extends TestCase
 {
     /**
+     * Set to true to enable low level debug logging during tests for
+     * the YamlSourceManipulator.
+     *
+     * @var bool
+     */
+    private $enableYsmLogging = false;
+
+    /**
+     * @var Logger|null
+     */
+    private $ysmLogger = null;
+
+    /**
      * @dataProvider getUserClassTests
      */
     public function testUpdateForUserClass(UserClassConfiguration $userConfig, string $expectedSourceFilename, string $startingSourceFilename = 'simple_security.yaml')
     {
+        $this->createLogger();
+
         $userClass = $userConfig->isEntity() ? 'App\\Entity\\User' : 'App\\Security\\User';
         if (!$userConfig->isEntity()) {
             $userConfig->setUserProviderClass('App\\Security\\UserProvider');
         }
 
-        $updater = new SecurityConfigUpdater();
+        $updater = new SecurityConfigUpdater($this->ysmLogger);
         $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
         $actualSource = $updater->updateForUserClass($source, $userConfig, $userClass);
         $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_user_class/'.$expectedSourceFilename);
@@ -83,11 +100,13 @@ class SecurityConfigUpdaterTest extends TestCase
     /**
      * @dataProvider getAuthenticatorTests
      */
-    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename, bool $logoutSetup)
+    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename, bool $logoutSetup, bool $useSecurity51)
     {
-        $updater = new SecurityConfigUpdater();
+        $this->createLogger();
+
+        $updater = new SecurityConfigUpdater($this->ysmLogger);
         $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
-        $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator', $logoutSetup);
+        $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator', $logoutSetup, $useSecurity51);
         $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_authenticator/'.$expectedSourceFilename);
 
         $this->assertSame($expectedSource, $actualSource);
@@ -101,6 +120,7 @@ class SecurityConfigUpdaterTest extends TestCase
             'empty_source.yaml',
             'empty_security.yaml',
             false,
+            false,
         ];
 
         yield 'simple_security' => [
@@ -108,6 +128,7 @@ class SecurityConfigUpdaterTest extends TestCase
             null,
             'simple_security_source.yaml',
             'simple_security.yaml',
+            false,
             false,
         ];
 
@@ -117,6 +138,7 @@ class SecurityConfigUpdaterTest extends TestCase
             'simple_security_with_firewalls.yaml',
             'simple_security_with_firewalls.yaml',
             false,
+            false,
         ];
 
         yield 'simple_security_with_firewalls_and_authenticator' => [
@@ -124,6 +146,7 @@ class SecurityConfigUpdaterTest extends TestCase
             'App\\Security\\AppCustomAuthenticator',
             'simple_security_with_firewalls_and_authenticator.yaml',
             'simple_security_with_firewalls_and_authenticator.yaml',
+            false,
             false,
         ];
 
@@ -133,6 +156,56 @@ class SecurityConfigUpdaterTest extends TestCase
             'simple_security_with_firewalls_and_logout.yaml',
             'simple_security_with_firewalls_and_logout.yaml',
             true,
+            false,
         ];
+
+        yield 'security_52_empty_source' => [
+            'main',
+            null,
+            'security_52_empty_source.yaml',
+            'security_52_empty_security.yaml',
+            false,
+            true,
+        ];
+
+        yield 'security_52_simple_security_with_firewalls_and_logout' => [
+            'main',
+            'App\\Security\\AppCustomAuthenticator',
+            'security_52_with_firewalls_and_logout.yaml',
+            'security_52_with_firewalls_and_logout.yaml',
+            true,
+            true,
+        ];
+
+        yield 'security_52_with_multiple_authenticators' => [
+            'main',
+            'App\\Security\\AppCustomAuthenticator',
+            'security_52_with_multiple_authenticators.yaml',
+            'security_52_with_multiple_authenticators.yaml',
+            false,
+            true,
+        ];
+    }
+
+    private function createLogger(): void
+    {
+        if (!$this->enableYsmLogging) {
+            return;
+        }
+
+        $this->ysmLogger = new Logger(LogLevel::DEBUG, 'php://stdout', function (string $level, string $message, array $context) {
+            $maxLen = max(array_map('strlen', array_keys($context)));
+
+            foreach ($context as $key => $val) {
+                $message .= sprintf(
+                    "\n    %s%s: %s",
+                    str_repeat(' ', $maxLen - \strlen($key)),
+                    $key,
+                    $val
+                );
+            }
+
+            return $message."\n\n";
+        });
     }
 }

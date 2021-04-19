@@ -11,15 +11,20 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Doctrine;
 
+use Doctrine\Bundle\DoctrineBundle\DependencyInjection\DoctrineExtension;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
+use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
+use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Filesystem\Filesystem;
@@ -108,15 +113,20 @@ class EntityRegeneratorTest extends TestCase
                 return $tmpDir.'/src/'.str_replace('\\', '/', $shortClassName).'.php';
             });
 
-        $fileManager = new FileManager($fs, $autoloaderUtil, $tmpDir);
+        $fileManager = new FileManager($fs, $autoloaderUtil, new MakerFileLinkFormatter(null), $tmpDir);
         $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
         // triggers a cache warmup, which puts old mapping metadata in cache
 
         $doctrineHelper->getMetadata($namespace);
+        $phpCompatUtil = new PhpCompatUtil($fileManager);
+        $generator = new Generator($fileManager, 'App\\', $phpCompatUtil);
+        $entityClassGenerator = new EntityClassGenerator($generator, $doctrineHelper);
+        $entityClassGenerator->setMangerRegistryClassName(ManagerRegistry::class);
         $regenerator = new EntityRegenerator(
             $doctrineHelper,
             $fileManager,
-            new Generator($fileManager, 'App\\'),
+            $generator,
+            $entityClassGenerator,
             $overwrite
         );
 
@@ -150,6 +160,7 @@ class EntityRegeneratorTest extends TestCase
 class TestEntityRegeneratorKernel extends Kernel
 {
     use MicroKernelTrait;
+    use OverrideUrlTraitFixture;
 
     public function registerBundles()
     {
@@ -172,11 +183,17 @@ class TestEntityRegeneratorKernel extends Kernel
             ],
         ]);
 
+        $dbal = [
+            'driver' => 'pdo_sqlite',
+            'url' => 'sqlite:///fake',
+        ];
+
+        if ($this->canOverrideUrl($c)) {
+            $dbal['override_url'] = true;
+        }
+
         $c->prependExtensionConfig('doctrine', [
-            'dbal' => [
-                'driver' => 'pdo_sqlite',
-                'url' => 'sqlite:///fake',
-            ],
+            'dbal' => $dbal,
             'orm' => [
                 'mappings' => [
                     'EntityRegenerator' => [
@@ -205,6 +222,7 @@ class TestEntityRegeneratorKernel extends Kernel
 class TestXmlEntityRegeneratorKernel extends Kernel
 {
     use MicroKernelTrait;
+    use OverrideUrlTraitFixture;
 
     public function registerBundles()
     {
@@ -227,11 +245,17 @@ class TestXmlEntityRegeneratorKernel extends Kernel
             ],
         ]);
 
+        $dbal = [
+            'driver' => 'pdo_sqlite',
+            'url' => 'sqlite:///fake',
+        ];
+
+        if ($this->canOverrideUrl($c)) {
+            $dbal['override_url'] = true;
+        }
+
         $c->prependExtensionConfig('doctrine', [
-            'dbal' => [
-                'driver' => 'pdo_sqlite',
-                'url' => 'sqlite:///fake',
-            ],
+            'dbal' => $dbal,
             'orm' => [
                 'auto_generate_proxy_classes' => true,
                 'mappings' => [
@@ -263,5 +287,23 @@ class AllButTraitsIterator extends \RecursiveFilterIterator
     public function accept()
     {
         return !\in_array($this->current()->getFilename(), []);
+    }
+}
+
+trait OverrideUrlTraitFixture
+{
+    /**
+     * Quick and dirty way to check if override_url is required since doctrine-bundle 2.3.
+     */
+    public function canOverrideUrl(ContainerBuilder $builder): bool
+    {
+        /** @var DoctrineExtension $ext */
+        $ext = $builder->getExtension('doctrine');
+        $method = new \ReflectionMethod(DoctrineExtension::class, 'getConnectionOptions');
+        $method->setAccessible(true);
+
+        $configOptions = $method->invoke($ext, ['override_url' => 'string', 'shards' => [], 'replicas' => [], 'slaves' => []]);
+
+        return \array_key_exists('connection_override_options', $configOptions);
     }
 }

@@ -11,7 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -83,7 +84,7 @@ final class Validator
             return $length;
         }
 
-        $result = filter_var($length, FILTER_VALIDATE_INT, [
+        $result = filter_var($length, \FILTER_VALIDATE_INT, [
             'options' => ['min_range' => 1],
         ]);
 
@@ -100,7 +101,7 @@ final class Validator
             return $precision;
         }
 
-        $result = filter_var($precision, FILTER_VALIDATE_INT, [
+        $result = filter_var($precision, \FILTER_VALIDATE_INT, [
             'options' => ['min_range' => 1, 'max_range' => 65],
         ]);
 
@@ -117,7 +118,7 @@ final class Validator
             return $scale;
         }
 
-        $result = filter_var($scale, FILTER_VALIDATE_INT, [
+        $result = filter_var($scale, \FILTER_VALIDATE_INT, [
             'options' => ['min_range' => 0, 'max_range' => 30],
         ]);
 
@@ -138,7 +139,7 @@ final class Validator
             return false;
         }
 
-        if (null === $valueAsBool = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)) {
+        if (null === $valueAsBool = filter_var($value, \FILTER_VALIDATE_BOOLEAN, \FILTER_NULL_ON_FAILURE)) {
             throw new RuntimeCommandException(sprintf('Invalid bool value "%s".', $value));
         }
 
@@ -155,8 +156,15 @@ final class Validator
         return $name;
     }
 
-    public static function validateDoctrineFieldName(string $name, ManagerRegistry $registry)
+    /**
+     * @param ManagerRegistry|LegacyManagerRegistry $registry
+     */
+    public static function validateDoctrineFieldName(string $name, $registry)
     {
+        if (!$registry instanceof ManagerRegistry && !$registry instanceof LegacyManagerRegistry) {
+            throw new \InvalidArgumentException(sprintf('Argument 2 to %s::validateDoctrineFieldName must be an instance of %s, %s passed.', __CLASS__, ManagerRegistry::class, \is_object($registry) ? \get_class($registry) : \gettype($registry)));
+        }
+
         // check reserved words
         if ($registry->getConnection()->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name)) {
             throw new \InvalidArgumentException(sprintf('Name "%s" is a reserved word.', $name));
@@ -165,6 +173,15 @@ final class Validator
         self::validatePropertyName($name);
 
         return $name;
+    }
+
+    public static function validateEmailAddress(?string $email): string
+    {
+        if (!filter_var($email, \FILTER_VALIDATE_EMAIL)) {
+            throw new RuntimeCommandException(sprintf('"%s" is not a valid email address.', $email));
+        }
+
+        return $email;
     }
 
     public static function existsOrNull(string $className = null, array $entities = [])

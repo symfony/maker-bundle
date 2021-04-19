@@ -1,0 +1,14 @@
+main:
+    custom_authenticator: App\Security\SomeOtherAuthenticator
+===
+$string = $data['main']['custom_authenticator'];
+$data['main']['custom_authenticator'] = [];
+$data['main']['custom_authenticator'][] = $string;
+$data['main']['custom_authenticator'][] = 'App\Security\AppCustomAuthenticator';
+$data['main']['entry_point'] = 'Entry';
+===
+main:
+    custom_authenticator:
+        - App\Security\SomeOtherAuthenticator
+        - App\Security\AppCustomAuthenticator
+    entry_point: Entry

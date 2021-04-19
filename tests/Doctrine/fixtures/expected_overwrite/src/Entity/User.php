@@ -19,17 +19,17 @@ class User
     private $id;
 
     /**
-     * @ORM\OneToMany(targetEntity="UserAvatar", mappedBy="user")
+     * @ORM\OneToMany(targetEntity=UserAvatar::class, mappedBy="user")
      */
     private $avatars;
 
     /**
-     * @ORM\OneToOne(targetEntity="UserProfile", mappedBy="user")
+     * @ORM\OneToOne(targetEntity=UserProfile::class, mappedBy="user")
      */
     private $userProfile;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag")
+     * @ORM\ManyToMany(targetEntity=Tag::class)
      */
     private $tags;
 
@@ -51,13 +51,17 @@ class User
 
     public function setUserProfile(?UserProfile $userProfile): self
     {
-        $this->userProfile = $userProfile;
-
-        // set (or unset) the owning side of the relation if necessary
-        $newUser = null === $userProfile ? null : $this;
-        if ($userProfile->getUser() !== $newUser) {
-            $userProfile->setUser($newUser);
+        // unset the owning side of the relation if necessary
+        if ($userProfile === null && $this->userProfile !== null) {
+            $this->userProfile->setUser(null);
         }
+
+        // set the owning side of the relation if necessary
+        if ($userProfile !== null && $userProfile->getUser() !== $this) {
+            $userProfile->setUser($this);
+        }
+
+        $this->userProfile = $userProfile;
 
         return $this;
     }
@@ -82,8 +86,7 @@ class User
 
     public function removeAvatar(UserAvatar $avatar): self
     {
-        if ($this->avatars->contains($avatar)) {
-            $this->avatars->removeElement($avatar);
+        if ($this->avatars->removeElement($avatar)) {
             // set the owning side to null (unless already changed)
             if ($avatar->getUser() === $this) {
                 $avatar->setUser(null);
@@ -117,9 +120,7 @@ class User
 
     public function removeTag(Tag $tag): self
     {
-        if ($this->tags->contains($tag)) {
-            $this->tags->removeElement($tag);
-        }
+        $this->tags->removeElement($tag);
 
         return $this;
     }

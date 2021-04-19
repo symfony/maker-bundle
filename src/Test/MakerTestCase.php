@@ -11,12 +11,18 @@
 
 namespace Symfony\Bundle\MakerBundle\Test;
 
+use Composer\Semver\Semver;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Process\Process;
 
 abstract class MakerTestCase extends TestCase
 {
+    /**
+     * @var KernelInterface
+     */
     private $kernel;
 
     /**
@@ -31,6 +37,14 @@ abstract class MakerTestCase extends TestCase
 
     protected function executeMakerCommand(MakerTestDetails $testDetails)
     {
+        if (!class_exists(Process::class)) {
+            throw new \LogicException('The MakerTestCase cannot be run as the Process component is not installed. Try running "compose require --dev symfony/process".');
+        }
+
+        if ($testDetails->shouldSkip()) {
+            $this->markTestSkipped($testDetails->getSkipMessage());
+        }
+
         if (!$testDetails->isSupportedByCurrentPhpVersion()) {
             $this->markTestSkipped();
         }
@@ -40,12 +54,20 @@ abstract class MakerTestCase extends TestCase
         // prepare environment to test
         $testEnv->prepare();
 
+        if (!$this->hasRequiredDependencyVersions($testDetails, $testEnv)) {
+            $this->markTestSkipped('Some dependencies versions are too low');
+        }
+
         // run tests
         $makerTestProcess = $testEnv->runMaker();
         $files = $testEnv->getGeneratedFilesFromOutputText();
 
         foreach ($files as $file) {
-            $this->assertTrue($testEnv->fileExists($file));
+            $this->assertTrue($testEnv->fileExists($file), sprintf('The file "%s" does not exist after generation', $file));
+
+            if (\PHP_VERSION_ID >= 80000) {
+                continue;
+            }
 
             if ('.php' === substr($file, -4)) {
                 $csProcess = $testEnv->runPhpCSFixer($file);
@@ -86,7 +108,7 @@ abstract class MakerTestCase extends TestCase
     protected function getMakerInstance(string $makerClass): MakerInterface
     {
         if (null === $this->kernel) {
-            $this->kernel = new MakerTestKernel('dev', true);
+            $this->kernel = $this->createKernel();
             $this->kernel->boot();
         }
 
@@ -94,5 +116,38 @@ abstract class MakerTestCase extends TestCase
         $serviceId = $serviceId ?? sprintf('maker.maker.%s', Str::asRouteName((new \ReflectionClass($makerClass))->getShortName()));
 
         return $this->kernel->getContainer()->get($serviceId);
+    }
+
+    protected function createKernel(): KernelInterface
+    {
+        return new MakerTestKernel('dev', true);
+    }
+
+    private function hasRequiredDependencyVersions(MakerTestDetails $testDetails, MakerTestEnvironment $testEnv): bool
+    {
+        if (empty($testDetails->getRequiredPackageVersions())) {
+            return true;
+        }
+
+        $installedPackages = json_decode($testEnv->readFile('vendor/composer/installed.json'), true);
+        $packageVersions = [];
+        foreach ($installedPackages['packages'] ?? $installedPackages as $installedPackage) {
+            $packageVersions[$installedPackage['name']] = $installedPackage['version_normalized'];
+        }
+
+        foreach ($testDetails->getRequiredPackageVersions() as $requiredPackageData) {
+            $name = $requiredPackageData['name'];
+            $versionConstraint = $requiredPackageData['version_constraint'];
+
+            if (!isset($packageVersions[$name])) {
+                throw new \Exception(sprintf('Package "%s" is required in the test project at version "%s" but it is not installed?', $name, $versionConstraint));
+            }
+
+            if (!Semver::satisfies($packageVersions[$name], $versionConstraint)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -32,7 +32,7 @@ final class MakerTestEnvironment
     private $cachePath;
     private $flexPath;
     private $path;
-    private $targetFlexVersion;
+    private $targetSkeletonVersion;
 
     /**
      * @var MakerTestProcess
@@ -53,7 +53,7 @@ final class MakerTestEnvironment
         }
 
         $this->cachePath = realpath($cachePath);
-        $targetVersion = $this->getTargetFlexVersion();
+        $targetVersion = $this->getTargetSkeletonVersion();
         $this->flexPath = $this->cachePath.'/flex_project'.$targetVersion;
 
         $this->path = $this->cachePath.\DIRECTORY_SEPARATOR.$testDetails->getUniqueCacheDirectoryName().$targetVersion;
@@ -67,6 +67,15 @@ final class MakerTestEnvironment
     public function getPath(): string
     {
         return $this->path;
+    }
+
+    public function readFile(string $path): string
+    {
+        if (!file_exists($this->path.'/'.$path)) {
+            throw new \InvalidArgumentException(sprintf('Cannot find file "%s"', $path));
+        }
+
+        return file_get_contents($this->path.'/'.$path);
     }
 
     private function changeRootNamespaceIfNeeded()
@@ -245,9 +254,9 @@ final class MakerTestEnvironment
 
         $matches = [];
 
-        preg_match_all('#(created|updated): (.*)\n#iu', $output, $matches, PREG_PATTERN_ORDER);
+        preg_match_all('#(created|updated): (]8;;[^]*\\\)?(.*?)(]8;;\\\)?\n#iu', $output, $matches, \PREG_PATTERN_ORDER);
 
-        return array_map('trim', $matches[2]);
+        return array_map('trim', $matches[3]);
     }
 
     public function fileExists(string $file)
@@ -263,7 +272,7 @@ final class MakerTestEnvironment
 
     public function runTwigCSLint(string $file)
     {
-        return MakerTestProcess::create(sprintf('php vendor/bin/twigcs lint %s', $this->path.'/'.$file), $this->rootPath)
+        return MakerTestProcess::create(sprintf('php vendor/bin/twigcs --config ./.twig_cs.dist %s', $this->path.'/'.$file), $this->rootPath)
                                ->run(true);
     }
 
@@ -311,7 +320,7 @@ final class MakerTestEnvironment
 
     private function buildFlexSkeleton()
     {
-        $targetVersion = $this->getTargetFlexVersion();
+        $targetVersion = $this->getTargetSkeletonVersion();
         $versionString = $targetVersion ? sprintf(':%s', $targetVersion) : '';
 
         MakerTestProcess::create(
@@ -319,13 +328,19 @@ final class MakerTestEnvironment
             $this->cachePath
         )->run();
 
-        $rootPath = str_replace('\\', '\\\\', realpath(__DIR__.'/../..'));
-
-        // dev deps already will allow dev deps, but we should prefer stable
         if (false !== strpos($targetVersion, 'dev')) {
-            MakerTestProcess::create('composer config prefer-stable true', $this->flexPath)
+            // make sure that dev versions allow dev deps
+            // for the current stable minor of Symfony, by default,
+            // minimum-stability is NOT dev, even when getting the -dev version
+            // of symfony/skeleton
+            MakerTestProcess::create('composer config minimum-stability dev', $this->flexPath)
+                ->run();
+
+            MakerTestProcess::create(['composer', 'update'], $this->flexPath)
                 ->run();
         }
+
+        $rootPath = str_replace('\\', '\\\\', realpath(__DIR__.'/../..'));
 
         // processes any changes needed to the Flex project
         $replacements = [
@@ -358,12 +373,18 @@ final class MakerTestEnvironment
             $this->fs->symlink($rootPath.'/vendor/symfony/phpunit-bridge', $this->flexPath.'/vendor/symfony/phpunit-bridge');
         }
 
-        // temporarily ignoring indirect deprecations - see #237
         $replacements = [
+            // temporarily ignoring indirect deprecations - see #237
             [
                 'filename' => '.env.test',
                 'find' => 'SYMFONY_DEPRECATIONS_HELPER=999999',
                 'replace' => 'SYMFONY_DEPRECATIONS_HELPER=max[self]=0',
+            ],
+            // do not explicitly set the PHPUnit version
+            [
+                'filename' => 'phpunit.xml.dist',
+                'find' => '<server name="SYMFONY_PHPUNIT_VERSION" value="8.5" />',
+                'replace' => '',
             ],
         ];
         $this->processReplacements($replacements, $this->flexPath);
@@ -426,38 +447,38 @@ echo json_encode($missingDependencies);
         return array_merge($data, $this->testDetails->getExtraDependencies());
     }
 
-    private function getTargetFlexVersion(): string
+    private function getTargetSkeletonVersion(): string
     {
-        if (null === $this->targetFlexVersion) {
-            $targetVersion = $_SERVER['MAKER_TEST_VERSION'] ?? 'stable';
+        if (null === $this->targetSkeletonVersion) {
+            $stability = $_SERVER['SYMFONY_SKELETON_STABILITY'] ?? 'stable';
 
-            if ('stable' === $targetVersion) {
-                $this->targetFlexVersion = '';
+            if ('stable' === $stability) {
+                $this->targetSkeletonVersion = '';
 
-                return $this->targetFlexVersion;
+                return $this->targetSkeletonVersion;
             }
 
-            $httpClient = HttpClient::create();
-            $response = $httpClient->request('GET', 'https://symfony.com/versions.json');
-            $data = $response->toArray();
-
-            switch ($targetVersion) {
+            switch ($stability) {
                 case 'stable-dev':
+                    $httpClient = HttpClient::create();
+                    $response = $httpClient->request('GET', 'https://symfony.com/versions.json');
+                    $data = $response->toArray();
+
                     $version = $data['latest'];
                     $parts = explode('.', $version);
 
-                    $this->targetFlexVersion = sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
+                    $this->targetSkeletonVersion = sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
 
                     break;
                 case 'dev':
-                    $this->targetFlexVersion = 'dev-master';
+                    $this->targetSkeletonVersion = '5.x-dev';
 
                     break;
                 default:
-                    throw new \Exception('Invalid target version');
+                    throw new \InvalidArgumentException('Invalid stability');
             }
         }
 
-        return $this->targetFlexVersion;
+        return $this->targetSkeletonVersion;
     }
 }

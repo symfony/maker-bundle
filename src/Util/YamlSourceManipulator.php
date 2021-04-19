@@ -90,11 +90,12 @@ class YamlSourceManipulator
         // update the data now that the special chars have been removed
         $this->currentData = Yaml::parse($this->contents);
 
+        // remove special metadata keys that were replaced
+        $newData = $this->removeMetadataKeys($newData);
+
         // Before comparing, re-index any sequences on the new data.
         // The current data will already use sequential indexes
         $newData = $this->normalizeSequences($newData);
-        // remove special metadata keys that were replaced
-        $newData = $this->removeMetadataKeys($newData);
 
         if ($newData !== $this->currentData) {
             throw new YamlManipulationFailedException(sprintf('Failed updating YAML contents: the process was successful, but something was not updated. Expected new data: %s. Actual new data: %s', var_export($newData, true), var_export($this->currentData, true)));
@@ -108,7 +109,7 @@ class YamlSourceManipulator
 
     public function createCommentLine(string $comment): string
     {
-        return sprintf(self::COMMENT_PLACEHOLDER_VALUE.$comment);
+        return self::COMMENT_PLACEHOLDER_VALUE.$comment;
     }
 
     private function updateData(array $newData)
@@ -227,7 +228,14 @@ class YamlSourceManipulator
         // Edge case: if the last item on a multi-line array has a comment,
         // we want to move to the end of the line, beyond that comment
         if (\count($currentData) < \count($newData) && $this->isCurrentArrayMultiline()) {
-            $this->advanceToEndOfLine();
+            $this->advanceBeyondMultilineArrayLastItem($currentData, $newData);
+        }
+
+        if (0 === $this->indentationForDepths[$this->depth] && $this->depth > 1) {
+            $ident = $this->getPreferredIndentationSize();
+            $previousDepth = $this->depth - 1;
+
+            $this->indentationForDepths[$this->depth] = ($ident + $this->indentationForDepths[$previousDepth]);
         }
 
         while (\count($currentData) < \count($newData)) {
@@ -314,7 +322,17 @@ class YamlSourceManipulator
 
         if (\is_int($key)) {
             if ($this->isCurrentArrayMultiline()) {
-                $newYamlValue = '- '.$this->convertToYaml($value);
+                if ($this->isCurrentArraySequence()) {
+                    $newYamlValue = '- '.$this->convertToYaml($value);
+                } else {
+                    // this is an associative array, but an indexed key
+                    // is being added. We can't use the "- " format
+                    $newYamlValue = sprintf(
+                        '%s: %s',
+                        $key,
+                        $this->convertToYaml($value)
+                    );
+                }
             } else {
                 $newYamlValue = $this->convertToYaml($value);
             }
@@ -449,14 +467,22 @@ class YamlSourceManipulator
 
         $endValuePosition = $this->findEndPositionOfValue($originalVal);
 
-        $newYamlValue = $this->convertToYaml($value);
-        if (!\is_array($originalVal) && \is_array($value)) {
+        $isMultilineValue = null !== $this->findPositionOfMultilineCharInLine($this->currentPosition);
+
+        // In case of multiline, $value is converted as plain string like "Foo\nBar"
+        // We need to keep it "as is"
+        $newYamlValue = $isMultilineValue ? rtrim($value, "\n") : $this->convertToYaml($value);
+        if ((!\is_array($originalVal) && \is_array($value)) ||
+            ($this->isMultilineString($originalVal) && $this->isMultilineString($value))
+        ) {
             // we're converting from a scalar to a (multiline) array
             // this means we need to break onto the next line
 
-            // increase the indentation
-            $this->manuallyIncrementIndentation();
-            $newYamlValue = "\n".$this->indentMultilineYamlArray($newYamlValue);
+            // increase(override) the indentation
+            $newYamlValue = "\n".$this->indentMultilineYamlArray($newYamlValue, ($this->indentationForDepths[$this->depth] + $this->getPreferredIndentationSize()));
+        } elseif ($this->isCurrentArrayMultiline() && $this->isCurrentArraySequence()) {
+            // we are a multi-line sequence, so drop to next line, indent and add "- " in front
+            $newYamlValue = "\n".$this->indentMultilineYamlArray('- '.$newYamlValue);
         } else {
             // empty space between key & value
             $newYamlValue = ' '.$newYamlValue;
@@ -468,7 +494,13 @@ class YamlSourceManipulator
             ++$newPosition;
         }
 
+        if ($isMultilineValue) {
+            // strlen(" |")
+            $newPosition -= 2;
+        }
+
         $newContents = substr($this->contents, 0, $this->currentPosition)
+            .($isMultilineValue ? ' |' : '')
             .$newYamlValue
             /*
              * If the next line is a comment, this means we probably had
@@ -507,6 +539,25 @@ class YamlSourceManipulator
         $this->advanceCurrentPosition($this->getEndOfPreviousKeyPosition($key));
     }
 
+    private function advanceBeyondMultilineArrayLastItem(array $currentData, array $newData)
+    {
+        $this->log('Trying to advance beyond the last item in a multiline array');
+        $this->advanceBeyondWhitespace();
+
+        if ('#' === substr($this->contents, $this->currentPosition, 1)) {
+            $this->log('The line ends with a comment, going to EOL');
+            $this->advanceToEndOfLine();
+
+            return;
+        }
+
+        $nextLineBreak = $this->findNextLineBreak($this->currentPosition);
+        if ('}' === trim(substr($this->contents, $this->currentPosition, $nextLineBreak - $this->currentPosition))) {
+            $this->log('The line ends with an array closing brace, going to EOL');
+            $this->advanceToEndOfLine();
+        }
+    }
+
     private function advanceBeyondValue($value)
     {
         if (\is_array($value)) {
@@ -519,7 +570,7 @@ class YamlSourceManipulator
 
     private function getEndOfKeyPosition($key)
     {
-        preg_match($this->getKeyRegex($key), $this->contents, $matches, PREG_OFFSET_CAPTURE, $this->currentPosition);
+        preg_match($this->getKeyRegex($key), $this->contents, $matches, \PREG_OFFSET_CAPTURE, $this->currentPosition);
 
         if (empty($matches)) {
             // for integers, the key may not be explicitly printed
@@ -538,12 +589,22 @@ class YamlSourceManipulator
      */
     private function getEndOfPreviousKeyPosition($key): int
     {
-        preg_match($this->getKeyRegex($key), $this->contents, $matches, PREG_OFFSET_CAPTURE, $this->currentPosition);
+        preg_match($this->getKeyRegex($key), $this->contents, $matches, \PREG_OFFSET_CAPTURE, $this->currentPosition);
 
         if (empty($matches)) {
             // for integers, the key may not be explicitly printed
             if (\is_int($key)) {
                 return $this->currentPosition;
+            }
+
+            $cursor = $this->currentPosition;
+
+            while ('-' !== substr($this->contents, $cursor - 1, 1) && -1 !== $cursor) {
+                --$cursor;
+            }
+
+            if ($cursor >= 0) {
+                return $cursor;
             }
 
             throw new YamlManipulationFailedException(sprintf('Cannot find the key "%s"', $key));
@@ -623,7 +684,7 @@ class YamlSourceManipulator
 
     private function getKeyRegex($key)
     {
-        return sprintf('#%s( )*:#', preg_quote($key));
+        return sprintf('#\b%s( )*:#', preg_quote($key));
     }
 
     private function updateContents(string $newContents, array $newData, int $newPosition)
@@ -652,7 +713,11 @@ class YamlSourceManipulator
 
     private function convertToYaml($data)
     {
-        $newDataString = Yaml::dump($data, 4);
+        $indent = $this->depth > 0 && isset($this->indentationForDepths[$this->depth])
+            ? $this->indentationForDepths[$this->depth] / $this->depth
+            : 4;
+
+        $newDataString = Yaml::dump($data, 4, $indent);
         // new line is appended: remove it
         $newDataString = rtrim($newDataString, "\n");
 
@@ -771,16 +836,26 @@ class YamlSourceManipulator
         }
 
         if (is_scalar($value) || null === $value) {
+            $offset = null === $offset ? $this->currentPosition : $offset;
+
             if (\is_bool($value)) {
                 // (?i) & (?-i) opens/closes case insensitive match
                 $pattern = sprintf('(?i)%s(?-i)', $value ? 'true' : 'false');
             } elseif (null === $value) {
                 $pattern = '(~|NULL|null|\n)';
             } else {
-                $pattern = sprintf('\'?"?%s\'?"?', preg_quote($value, '#'));
-            }
+                // Multiline value ends with \n.
+                // If we remove this character, the next property will ne merged with this value
+                $quotedValue = preg_quote(rtrim($value, "\n"), '#');
+                $patternValue = $quotedValue;
 
-            $offset = null === $offset ? $this->currentPosition : $offset;
+                // Iterates until we find a new line char or we reach end of file
+                if (null !== $this->findPositionOfMultilineCharInLine($offset)) {
+                    $patternValue = str_replace(["\r\n", "\n"], '\r?\n\s*', $quotedValue);
+                }
+
+                $pattern = sprintf('\'?"?%s\'?"?', $patternValue);
+            }
 
             // a value like "foo:" can simply end a file
             // this means the value is null
@@ -788,12 +863,26 @@ class YamlSourceManipulator
                 return $offset;
             }
 
-            preg_match(sprintf('#%s#', $pattern), $this->contents, $matches, PREG_OFFSET_CAPTURE, $offset);
+            preg_match(sprintf('#%s#', $pattern), $this->contents, $matches, \PREG_OFFSET_CAPTURE, $offset);
             if (empty($matches)) {
                 throw new YamlManipulationFailedException(sprintf('Cannot find the original value "%s"', $value));
             }
 
-            return $matches[0][1] + \strlen($matches[0][0]);
+            $position = $matches[0][1] + \strlen($matches[0][0]);
+
+            // edge case where there is a comment between the current position
+            // and the value we're looking for AND that comment contains an
+            // exact string match for the value we're looking for
+            if ($this->isFinalLineComment(substr($this->contents, $this->currentPosition, $position - $this->currentPosition))) {
+                return $this->findEndPositionOfValue($value, $position);
+            }
+
+            if (null === $value && "\n" === $matches[0][0] && !$this->isCurrentLineComment($position)) {
+                $this->log('Zero-length null value, next line not a comment, take a step back');
+                --$position;
+            }
+
+            return $position;
         }
 
         // there are other possible values, but we don't support them
@@ -802,6 +891,7 @@ class YamlSourceManipulator
 
     private function advanceCurrentPosition(int $newPosition)
     {
+        $this->log(sprintf('advanceCurrentPosition() from %d to %d', $this->currentPosition, $newPosition), true);
         $originalPosition = $this->currentPosition;
         $this->currentPosition = $newPosition;
 
@@ -828,6 +918,13 @@ class YamlSourceManipulator
         $advancedContent = substr($this->contents, $originalPosition, $newPosition - $originalPosition);
         $previousIndentation = $this->indentationForDepths[$this->depth];
         $newIndentation = $previousIndentation;
+
+        if ("\n" === $advancedContent) {
+            $this->log('Just a linebreak, no indent changes');
+
+            return;
+        }
+
         if (false !== strpos($advancedContent, "\n")) {
             $lines = explode("\n", $advancedContent);
             if (!empty($lines)) {
@@ -848,6 +945,7 @@ class YamlSourceManipulator
 
     private function decrementDepth()
     {
+        $this->log('Moving up 1 level of depth');
         unset($this->indentationForDepths[$this->depth]);
         unset($this->arrayFormatForDepths[$this->depth]);
         unset($this->arrayTypeForDepths[$this->depth]);
@@ -856,9 +954,11 @@ class YamlSourceManipulator
         --$this->depth;
     }
 
-    private function getCurrentIndentation(): string
+    private function getCurrentIndentation(int $override = null): string
     {
-        return str_repeat(' ', $this->indentationForDepths[$this->depth]);
+        $indent = $override ?? $this->indentationForDepths[$this->depth];
+
+        return str_repeat(' ', $indent);
     }
 
     private function log(string $message, $includeContent = false)
@@ -959,14 +1059,17 @@ class YamlSourceManipulator
 
     private function advanceToEndOfLine()
     {
-        while (!$this->isCharLineBreak(substr($this->contents, $this->currentPosition, 1))) {
-            if ($this->isEOF()) {
+        $newPosition = $this->currentPosition;
+        while (!$this->isCharLineBreak(substr($this->contents, $newPosition, 1))) {
+            if ($this->isEOF($newPosition)) {
                 // found the end of the file!
-                return;
+                break;
             }
 
-            $this->advanceCurrentPosition($this->currentPosition + 1);
+            ++$newPosition;
         }
+
+        $this->advanceCurrentPosition($newPosition);
     }
 
     /**
@@ -1093,10 +1196,40 @@ class YamlSourceManipulator
             return false;
         }
 
+        return $this->isLineComment($line);
+    }
+
+    private function isCurrentLineComment(int $position): bool
+    {
+        $line = $this->getCurrentLine($position);
+
+        if (null === $line) {
+            return false;
+        }
+
+        return $this->isLineComment($line);
+    }
+
+    private function isLineComment(string $line): bool
+    {
         // adopted from Parser::isCurrentLineComment() from symfony/yaml
         $ltrimmedLine = ltrim($line, ' ');
 
         return '' !== $ltrimmedLine && '#' === $ltrimmedLine[0];
+    }
+
+    private function isFinalLineComment(string $content): bool
+    {
+        if (!$content) {
+            return false;
+        }
+
+        $content = str_replace("\r", "\n", $content);
+
+        $lines = explode("\n", $content);
+        $line = end($lines);
+
+        return $this->isLineComment($line);
     }
 
     private function getPreviousLine(int $position)
@@ -1120,6 +1253,18 @@ class YamlSourceManipulator
         $previousLine = substr($this->contents, $startPos, $endPos - $startPos);
 
         return trim($previousLine, "\r");
+    }
+
+    private function getCurrentLine(int $position)
+    {
+        $startPos = strrpos(substr($this->contents, 0, $position), "\n") + 1;
+        $endPos = strpos($this->contents, "\n", $startPos);
+
+        $this->log(sprintf('Looking for current line from %d to %d', $startPos, $endPos));
+
+        $line = substr($this->contents, $startPos, $endPos - $startPos);
+
+        return trim($line, "\r");
     }
 
     private function findNextLineBreak(int $position)
@@ -1158,13 +1303,39 @@ class YamlSourceManipulator
      * Usually an empty line needs to be prepended to this result before
      * adding to the content.
      */
-    private function indentMultilineYamlArray(string $yaml): string
+    private function indentMultilineYamlArray(string $yaml, int $indentOverride = null): string
     {
+        $indent = $this->getCurrentIndentation($indentOverride);
+
         // But, if the *value* is an array, then ITS children will
         // also need to be indented artificially by the same amount
-        $yaml = str_replace("\n", "\n".$this->getCurrentIndentation(), $yaml);
+        $yaml = str_replace("\n", "\n".$indent, $yaml);
+
+        if ($this->isMultilineString($yaml)) {
+            // Remove extra indentation in case of blank line in multiline string
+            $yaml = str_replace("\n".$indent."\n", "\n\n", $yaml);
+        }
 
         // now indent this level
-        return $this->getCurrentIndentation().$yaml;
+        return $indent.$yaml;
+    }
+
+    private function findPositionOfMultilineCharInLine(int $position): ?int
+    {
+        $cursor = $position;
+        while (!$this->isCharLineBreak($currentChar = substr($this->contents, $cursor + 1, 1)) && !$this->isEOF($cursor)) {
+            if ('|' === $currentChar) {
+                return $cursor;
+            }
+
+            ++$cursor;
+        }
+
+        return null;
+    }
+
+    private function isMultilineString($value): bool
+    {
+        return \is_string($value) && false !== strpos($value, "\n");
     }
 }

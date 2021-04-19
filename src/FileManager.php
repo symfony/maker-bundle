@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
+use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -26,17 +27,24 @@ class FileManager
 {
     private $fs;
     private $autoloaderUtil;
+    private $makerFileLinkFormatter;
     private $rootDirectory;
     /** @var SymfonyStyle */
     private $io;
     private $twigDefaultPath;
 
-    public function __construct(Filesystem $fs, AutoloaderUtil $autoloaderUtil, string $rootDirectory, string $twigDefaultPath = null)
-    {
+    public function __construct(
+        Filesystem $fs,
+        AutoloaderUtil $autoloaderUtil,
+        MakerFileLinkFormatter $makerFileLinkFormatter,
+        string $rootDirectory,
+        string $twigDefaultPath = null
+    ) {
         // move FileManagerTest stuff
         // update EntityRegeneratorTest to mock the autoloader
         $this->fs = $fs;
         $this->autoloaderUtil = $autoloaderUtil;
+        $this->makerFileLinkFormatter = $makerFileLinkFormatter;
         $this->rootDirectory = rtrim($this->realPath($this->normalizeSlashes($rootDirectory)), '/');
         $this->twigDefaultPath = $twigDefaultPath ? rtrim($this->relativizePath($twigDefaultPath), '/') : null;
     }
@@ -49,7 +57,7 @@ class FileManager
     public function parseTemplate(string $templatePath, array $parameters): string
     {
         ob_start();
-        extract($parameters, EXTR_SKIP);
+        extract($parameters, \EXTR_SKIP);
         include $templatePath;
 
         return ob_get_clean();
@@ -67,12 +75,13 @@ class FileManager
         }
 
         $this->fs->dumpFile($absolutePath, $content);
+        $relativePath = $this->relativizePath($filename);
 
         if ($this->io) {
             $this->io->comment(sprintf(
                 '%s: %s',
                 $comment,
-                $this->relativizePath($filename)
+                $this->makerFileLinkFormatter->makeLinkedPath($absolutePath, $relativePath)
             ));
         }
     }

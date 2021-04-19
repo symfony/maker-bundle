@@ -19,7 +19,11 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 
+trigger_deprecation('symfony/maker-bundle', '1.29', 'The "%s" class is deprecated, use "%s" instead.', MakeUnitTest::class, MakeTest::class);
+
 /**
+ * @deprecated since MakerBundle 1.29, use Symfony\Bundle\MakerBundle\Maker\MakeTest instead.
+ *
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
@@ -30,10 +34,14 @@ final class MakeUnitTest extends AbstractMaker
         return 'make:unit-test';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Creates a new unit test class';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
-            ->setDescription('Creates a new unit test class')
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the unit test class (e.g. <fg=yellow>UtilTest</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeUnitTest.txt'))
         ;
