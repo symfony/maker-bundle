@@ -65,6 +65,17 @@ jobs:
                 ports:
                     - 3306
                 options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+            mercure:
+                image: dunglas/mercure
+                env:
+                    SERVER_NAME: :1337
+                    MERCURE_PUBLISHER_JWT_KEY: '!ChangeMe!'
+                    MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeMe!'
+                    MERCURE_EXTRA_DIRECTIVES: |
+                        anonymous
+                        cors_origins *
+                ports:
+                    - 1337:1337
 
         continue-on-error: ${{ matrix.allow-failures }}
 
