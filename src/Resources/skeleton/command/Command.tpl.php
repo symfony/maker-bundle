@@ -25,7 +25,7 @@ class <?= $class_name; ?> extends Command
     protected static $defaultDescription = 'Add a short description for your command';
 
 <?php endif; ?>
-    protected function configure()
+    protected function configure(): void
     {
         $this
 <?= $set_description ? "            ->setDescription(self::\$defaultDescription)\n" : '' ?>
