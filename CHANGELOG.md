@@ -1,3 +1,26 @@
+# Changelog
+
+## [v1.31.0](https://github.com/symfony/maker-bundle/releases/tag/v1.31.0)
+
+*May 5th, 2021*
+
+### Feature
+
+- [#864](https://github.com/symfony/maker-bundle/pull/864) - [make:command] template: add void return type to configure method - *@duboiss*
+- [#862](https://github.com/symfony/maker-bundle/pull/862) - [make:user] implement getUserIdentifier if required - *@jrushlow*
+- [#860](https://github.com/symfony/maker-bundle/pull/860) - Add support for Symfony UX Turbo - *@dunglas*
+- [#859](https://github.com/symfony/maker-bundle/pull/859) - use attributes for API Platform when using PHP 8+ - *@dunglas*
+- [#855](https://github.com/symfony/maker-bundle/pull/855) - [reset-password] allow anyone to access check email - *@jrushlow*
+- [#853](https://github.com/symfony/maker-bundle/pull/853) - [make:voter] generate type hints - *@jrushlow*
+- [#849](https://github.com/symfony/maker-bundle/pull/849) - [make:user] user entities implement PasswordAuthenticatedUserInterface - *@jrushlow*
+- [#826](https://github.com/symfony/maker-bundle/pull/826) - Add autocomplete html tag to forms - *@duboiss*
+- [#822](https://github.com/symfony/maker-bundle/pull/822) - [make:command] lets use attributes if possible - *@jrushlow*
+
+### Bug Fix
+
+- [#869](https://github.com/symfony/maker-bundle/pull/869) - [make:serializer:encoder] set public constant visibility modifier - *@jrushlow*
+- [#818](https://github.com/symfony/maker-bundle/pull/818) - [MakeDocker] add support for .yml docker-compose files - *@jrushlow*
+
 1.30
 ====
 
