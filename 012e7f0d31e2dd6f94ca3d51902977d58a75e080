@@ -1,0 +1,211 @@
+---------------------------------------------------------------------------
+
+by jrushlow at 2021-04-27T18:48:22Z
+
+![image](https://user-images.githubusercontent.com/40327885/116295916-9ba9d200-a767-11eb-92d1-143f495de413.png)
+Fixed w/ https://github.com/symfony/flex/pull/760
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2021-04-27T20:23:51Z
+
+`PHP Fatal error:  Uncaught Error: Call to undefined method Symfony\Flex\Downloader::setFlexId() in phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(221) : eval()'d code:129`
+
+```
+Run vendor/bin/simple-phpunit -v
+PHPUnit 8.5.15 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 7.4.16
+Configuration: /home/runner/work/maker-bundle/maker-bundle/phpunit.xml.dist
+
+Testing
+...............................................................  63 / 516 ( 12%)
+..................................................SSSSSSS...... 126 / 516 ( 24%)
+............................................................... 189 / 516 ( 36%)
+............................................................... 252 / 516 ( 48%)
+............................................................... 315 / 516 ( 61%)
+............................................................... 378 / 516 ( 73%)
+.......................................EEEEEEEEEEEEEEESEEEEEEEE 441 / 516 ( 85%)
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEESEEEEEEEEEEEEEEEEEEEEEEE 504 / 516 ( 97%)
+EEEEEEEEEEEE                                                    516 / 516 (100%)
+
+Time: 5.05 seconds, Memory: 60.50 MB
+
+There were 97 errors:
+
+1) Symfony\Bundle\MakerBundle\Tests\Maker\MakeAuthenticatorTest::testExecute with data set "auth_empty_one_firewall" (Symfony\Bundle\MakerBundle\Test\MakerTestDetails Object (...))
+Exception: Error running command: "composer create-project symfony/skeleton flex_project --prefer-dist --no-progress -vvv". Output: "
+Fatal error: Uncaught Error: Call to undefined method Symfony\Flex\Downloader::setFlexId() in phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(221) : eval()'d code:129
+Stack trace:
+#0 phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(337): Symfony\Flex\Flex_composer_tmp3->activate()
+#1 phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(233): Composer\Plugin\PluginManager->addPlugin()
+#2 phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(404): Composer\Plugin\PluginManager->registerPackage()
+#3 phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(88): Composer\Plugin\PluginManager->loadRepository()
+#4 phar:///usr/local/bin/composer/src/Composer/Factory.php(404): Composer\Plugin\PluginManager->loadInstalledPlugins()
+#5 phar:///usr/local/bin/composer/src/Composer/Factory.php(595): Composer\Factory->createComposer()
+#6 phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(221) : eval()'d code(426): Composer\Factory::creat in phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(221) : eval()'d code on line 129
+". Error: "Loading config file /home/runner/.composer/config.json
+Loading config file /home/runner/.composer/auth.json
+Reading /home/runner/.composer/composer.json
+Loading config file /home/runner/.composer/config.json
+Loading config file /home/runner/.composer/auth.json
+Loading config file /home/runner/.composer/composer.json (/home/runner/.composer/composer.json)
+Loading config file /home/runner/.composer/auth.json
+Reading /home/runner/.composer/auth.json
+Checked CA file /etc/ssl/certs/ca-certificates.crt: valid
+Executing command (/home/runner/.composer): git branch -a --no-color --no-abbrev -v
+Executing command (/home/runner/.composer): git describe --exact-match --tags
+Executing command (CWD): git --version
+Executing command (/home/runner/.composer): git log --pretty="%H" -n1 HEAD --no-show-signature
+Executing command (/home/runner/.composer): hg branch
+Executing command (/home/runner/.composer): fossil branch list
+Executing command (/home/runner/.composer): fossil tag list
+Executing command (/home/runner/.composer): svn info --xml
+Reading /home/runner/.composer/vendor/composer/installed.json
+Loading plugin Symfony\Flex\Flex (from symfony/flex)
+Running 2.0.13 (2021-04-27 13:11:08) with PHP 7.4.16 on Linux / 5.4.0-1046-azure
+Loading config file /home/runner/.composer/config.json
+Loading config file /home/runner/.composer/auth.json
+Reading /home/runner/.composer/composer.json
+Loading config file /home/runner/.composer/config.json
+Loading config file /home/runner/.composer/auth.json
+Loading config file /home/runner/.composer/composer.json (/home/runner/.composer/composer.json)
+Loading config file /home/runner/.composer/auth.json
+Reading /home/runner/.composer/auth.json
+Executing command (/home/runner/.composer): git branch -a --no-color --no-abbrev -v
+Executing command (/home/runner/.composer): git describe --exact-match --tags
+Executing command (/home/runner/.composer): git log --pretty="%H" -n1 HEAD --no-show-signature
+Executing command (/home/runner/.composer): hg branch
+Executing command (/home/runner/.composer): fossil branch list
+Executing command (/home/runner/.composer): fossil tag list
+Executing command (/home/runner/.composer): svn info --xml
+Reading /home/runner/.composer/vendor/composer/installed.json
+Loading plugin Symfony\Flex\Flex_composer_tmp0 (from symfony/flex)
+Creating a "symfony/skeleton" project at "./flex_project"
+Loading config file /home/runner/.composer/config.json
+Loading config file /home/runner/.composer/auth.json
+Executing command (/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache): git branch -a --no-color --no-abbrev -v
+Executing command (/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache): git describe --exact-match --tags
+Reading /home/runner/.composer/composer.json
+Loading config file /home/runner/.composer/config.json
+Loading config file /home/runner/.composer/auth.json
+Loading config file /home/runner/.composer/composer.json (/home/runner/.composer/composer.json)
+Loading config file /home/runner/.composer/auth.json
+Reading /home/runner/.composer/auth.json
+Reading /home/runner/.composer/vendor/composer/installed.json
+Loading plugin Symfony\Flex\Flex_composer_tmp1 (from symfony/flex, installed globally)
+Downloading https://repo.packagist.org/packages.json
+[200] https://repo.packagist.org/packages.json
+Writing /home/runner/.cache/composer/repo/https---repo.packagist.org/packages.json into cache
+Reading /home/runner/.cache/composer/repo/https---repo.packagist.org/provider-symfony~skeleton.json from cache
+Downloading https://repo.packagist.org/p2/symfony/skeleton.json if modified
+[304] https://repo.packagist.org/p2/symfony/skeleton.json
+Installing symfony/skeleton (v5.2.99)
+Reading /home/runner/.cache/composer/files/symfony/skeleton/5bb2362d920953160acd90eb83fabc03785ba4d2.zip from cache
+  - Loading symfony/skeleton (v5.2.99) from cache
+  - Installing symfony/skeleton (v5.2.99): Extracting archive
+Executing async command (CWD): unzip -qq  '/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/vendor/composer/tmp-40fad9bc2300e331e4096b73ec19e78a' -d '/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/vendor/composer/5aeb14d4'
+Executing command (CWD): rm -rf '/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project'
+Executing command (CWD): rm -rf '/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/vendor/composer/5aeb14d4'
+Executing command (CWD): rm -rf '/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/vendor/composer/'
+Executing command (CWD): rm -rf '/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/vendor'
+> post-package-install: Symfony\Flex\Flex_composer_tmp1->record
+Downloading https://packagist.org/downloads/
+[201] https://packagist.org/downloads/
+Created project in /home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project
+Reading composer.json (/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project/composer.json)
+Loading config file /home/runner/.composer/config.json
+Loading config file /home/runner/.composer/auth.json
+Loading config file composer.json (/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project/composer.json)
+Reading /home/runner/.composer/composer.json
+Loading config file /home/runner/.composer/config.json
+Loading config file /home/runner/.composer/auth.json
+Loading config file /home/runner/.composer/composer.json (/home/runner/.composer/composer.json)
+Loading config file /home/runner/.composer/auth.json
+Reading /home/runner/.composer/auth.json
+Reading /home/runner/.composer/vendor/composer/installed.json
+Loading plugin Symfony\Flex\Flex_composer_tmp2 (from symfony/flex, installed globally)
+> pre-update-cmd: Symfony\Flex\Flex_composer_tmp2->configureInstaller
+Loading composer repositories with package information
+Downloading https://repo.packagist.org/packages.json
+[200] https://repo.packagist.org/packages.json
+Writing /home/runner/.cache/composer/repo/https---repo.packagist.org/packages.json into cache
+Reading /home/runner/.cache/composer/repo/https---repo.packagist.org/provider-symfony~flex.json from cache
+Downloading https://repo.packagist.org/p2/symfony/flex.json if modified
+Reading /home/runner/.cache/composer/repo/https---repo.packagist.org/provider-symfony~flex~dev.json from cache
+Downloading https://repo.packagist.org/p2/symfony/flex~dev.json if modified
+[304] https://repo.packagist.org/p2/symfony/flex.json
+[200] https://repo.packagist.org/p2/symfony/flex~dev.json
+Writing /home/runner/.cache/composer/repo/https---repo.packagist.org/provider-symfony~flex~dev.json into cache
+> pre-pool-create: Symfony\Flex\Flex_composer_tmp2->truncatePackages
+Reading /home/runner/.cache/composer/repo/https---flex.symfony.com/versions.json from cache
+Downloading https://flex.symfony.com/versions.json if modified
+[304] https://flex.symfony.com/versions.json
+Updating dependencies
+Generating rules
+Resolving dependencies through SAT
+Looking at all rules.
+
+Dependency resolution completed in 0.000 seconds
+Analyzed 160 packages to resolve dependencies
+Analyzed 205 rules to resolve dependencies
+Lock file operations: 1 install, 0 updates, 0 removals
+Installs: symfony/flex:v1.12.2
+  - Locking symfony/flex (v1.12.2)
+Writing lock file
+Installing dependencies from lock file (including require-dev)
+Reading composer.lock (/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project/composer.lock)
+Package operations: 1 install, 0 updates, 0 removals
+Installs: symfony/flex:v1.12.2
+Reading /home/runner/.cache/composer/files/symfony/flex/0bd4f387559369c1f1ee22955a7b3c73b2c2f804.zip from cache
+  - Loading symfony/flex (v1.12.2) from cache
+  - Installing symfony/flex (v1.12.2): Extracting archive
+Executing async command (CWD): unzip -qq  '/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project/vendor/composer/tmp-e95c85e0d664f8149f007cf2925857e9' -d '/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project/vendor/composer/f18c686a'
+Executing command (CWD): rm -rf '/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project/vendor/symfony/flex'
+Executing command (CWD): rm -rf '/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project/vendor/composer/f18c686a'
+Executing command (CWD): rm -rf '/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project/vendor/composer/'
+> post-package-install: Symfony\Flex\Flex_composer_tmp2->record
+Downloading https://packagist.org/downloads/
+[201] https://packagist.org/downloads/
+Generating optimized autoload files
+> post-autoload-dump: Symfony\Flex\Flex_composer_tmp2->updateAutoloadFile
+1 package you are using is looking for funding.
+Use the `composer fund` command to find out more!
+> post-update-cmd: Symfony\Flex\Flex_composer_tmp2->update
+Downloading https://flex.symfony.com/p/symfony,flex,iv1.12.2,1613484305
+[200] https://flex.symfony.com/p/symfony,flex,iv1.12.2,1613484305
+
+Symfony operations: 1 recipe (f8f73b6967aba2373e0786973c530e2f)
+  - Configuring symfony/flex (>=1.0): From github.com/symfony/recipes:master
+    Copying files from recipe
+      Created "./.env"
+Reading composer.json (/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project/composer.json)
+Loading config file /home/runner/.composer/config.json
+Loading config file /home/runner/.composer/auth.json
+Loading config file composer.json (/home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project/composer.json)
+Reading /home/runner/.composer/composer.json
+Loading config file /home/runner/.composer/config.json
+Loading config file /home/runner/.composer/auth.json
+Loading config file /home/runner/.composer/composer.json (/home/runner/.composer/composer.json)
+Loading config file /home/runner/.composer/auth.json
+Reading /home/runner/.composer/auth.json
+Reading /home/runner/work/maker-bundle/maker-bundle/tests/tmp/cache/flex_project/vendor/composer/installed.json
+Reading /home/runner/.composer/vendor/composer/installed.json
+Loading plugin Symfony\Flex\Flex_composer_tmp3 (from symfony/flex)
+PHP Fatal error:  Uncaught Error: Call to undefined method Symfony\Flex\Downloader::setFlexId() in phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(221) : eval()'d code:129
+Stack trace:
+#0 phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(337): Symfony\Flex\Flex_composer_tmp3->activate()
+#1 phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(233): Composer\Plugin\PluginManager->addPlugin()
+#2 phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(404): Composer\Plugin\PluginManager->registerPackage()
+#3 phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(88): Composer\Plugin\PluginManager->loadRepository()
+#4 phar:///usr/local/bin/composer/src/Composer/Factory.php(404): Composer\Plugin\PluginManager->loadInstalledPlugins()
+#5 phar:///usr/local/bin/composer/src/Composer/Factory.php(595): Composer\Factory->createComposer()
+#6 phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(221) : eval()'d code(426): Composer\Factory::creat in phar:///usr/local/bin/composer/src/Composer/Plugin/PluginManager.php(221) : eval()'d code on line 129
+"
+
+/home/runner/work/maker-bundle/maker-bundle/src/Test/MakerTestProcess.php:51
+/home/runner/work/maker-bundle/maker-bundle/src/Test/MakerTestEnvironment.php:329
+/home/runner/work/maker-bundle/maker-bundle/src/Test/MakerTestEnvironment.php:134
+/home/runner/work/maker-bundle/maker-bundle/src/Test/MakerTestCase.php:55
+/home/runner/work/maker-bundle/maker-bundle/src/Test/MakerTestCase.php:33
+```
