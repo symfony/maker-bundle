@@ -129,6 +129,11 @@ jobs:
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
             - name: "Require symfony/flex"
+              if: contains('stable', env.SYMFONY_SKELETON_STABILITY)
+              run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
+
+            - name: "Require symfony/flex dev-main"
+              if: contains('dev', env.SYMFONY_SKELETON_STABILITY)
               run: composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-main
 
             - name: "Composer install"
