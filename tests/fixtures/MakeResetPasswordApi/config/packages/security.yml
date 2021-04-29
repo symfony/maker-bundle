@@ -1,0 +1,3 @@
+security:
+    encoders:
+        App\Entity\User: bcrypt
