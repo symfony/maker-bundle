@@ -28,6 +28,7 @@ use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -94,6 +95,7 @@ class MakeResetPassword extends AbstractMaker
         ORMDependencyBuilder::buildDependencies($dependencies);
 
         $dependencies->addClassDependency(Annotation::class, 'annotations');
+        $dependencies->addClassDependency(TwigBundle::class, 'symfony/twig-bundle');
 
         // reset-password-bundle 1.6 includes the ability to generate a fake token.
         // we need to check that version 1.6 is installed

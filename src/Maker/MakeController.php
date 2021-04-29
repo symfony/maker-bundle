@@ -93,6 +93,8 @@ final class MakeController extends AbstractMaker
             Annotation::class,
             'doctrine/annotations'
         );
+
+        $dependencies->addClassDependency(TwigBundle::class, 'symfony/twig-bundle');
     }
 
     private function isTwigInstalled()
