@@ -4,7 +4,7 @@ if (!file_exists(__DIR__.'/src')) {
     exit(0);
 }
 
-$finder = PhpCsFixer\Finder::create()
+$finder = (new PhpCsFixer\Finder())
     ->in(__DIR__)
     ->exclude('vendor')
     ->exclude('tests/tmp')
@@ -13,12 +13,11 @@ $finder = PhpCsFixer\Finder::create()
     ->notName('*.tpl.php')
 ;
 
-return PhpCsFixer\Config::create()
+return (new PhpCsFixer\Config())
     ->setRules(array(
         '@PHPUnit75Migration:risky' => true,
         '@Symfony' => true,
         '@Symfony:risky' => true,
-        'array_syntax' => ['syntax' => 'short'],
         'header_comment' => [
             'header' => <<<EOF
 This file is part of the Symfony MakerBundle package.

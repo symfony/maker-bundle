@@ -29,7 +29,7 @@
         "composer/semver": "^3.0@dev",
         "doctrine/doctrine-bundle": "^1.8|^2.0",
         "doctrine/orm": "^2.3",
-        "friendsofphp/php-cs-fixer": "^2.8",
+        "friendsofphp/php-cs-fixer": "^3.0",
         "friendsoftwig/twigcs": "^4.1.0|^5.0.0",
         "symfony/http-client": "^4.3|^5.0",
         "symfony/phpunit-bridge": "^4.3|^5.0",
