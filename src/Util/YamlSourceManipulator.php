@@ -24,15 +24,15 @@ use Symfony\Component\Yaml\Yaml;
  */
 class YamlSourceManipulator
 {
-    const EMPTY_LINE_PLACEHOLDER_VALUE = '__EMPTY_LINE__';
-    const COMMENT_PLACEHOLDER_VALUE = '__COMMENT__';
+    public const EMPTY_LINE_PLACEHOLDER_VALUE = '__EMPTY_LINE__';
+    public const COMMENT_PLACEHOLDER_VALUE = '__COMMENT__';
 
-    const UNSET_KEY_FLAG = '__MAKER_VALUE_UNSET';
-    const ARRAY_FORMAT_MULTILINE = 'multi';
-    const ARRAY_FORMAT_INLINE = 'inline';
+    public const UNSET_KEY_FLAG = '__MAKER_VALUE_UNSET';
+    public const ARRAY_FORMAT_MULTILINE = 'multi';
+    public const ARRAY_FORMAT_INLINE = 'inline';
 
-    const ARRAY_TYPE_SEQUENCE = 'sequence';
-    const ARRAY_TYPE_HASH = 'hash';
+    public const ARRAY_TYPE_SEQUENCE = 'sequence';
+    public const ARRAY_TYPE_HASH = 'hash';
 
     /**
      * @var LoggerInterface|null
