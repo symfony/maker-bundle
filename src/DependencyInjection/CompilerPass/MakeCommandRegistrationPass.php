@@ -23,7 +23,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class MakeCommandRegistrationPass implements CompilerPassInterface
 {
-    const MAKER_TAG = 'maker.command';
+    public const MAKER_TAG = 'maker.command';
 
     public function process(ContainerBuilder $container)
     {
