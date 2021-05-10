@@ -15,7 +15,7 @@ Run this command to install and enable this bundle in your application:
 
 .. code-block:: terminal
 
-    $ composer require symfony/maker-bundle --dev
+    $ composer require --dev symfony/maker-bundle
 
 Usage
 -----
