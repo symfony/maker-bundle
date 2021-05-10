@@ -11,7 +11,7 @@
 >
     <php>
         <ini name="error_reporting" value="-1" />
-        <env name="TEST_DATABASE_DSN" value="mysql://root:root@127.0.0.1:3306/test_maker" />
+        <env name="TEST_DATABASE_DSN" value="mysql://root:root@127.0.0.1:3306/test_maker?serverVersion=5.7" />
         <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0"/>
     </php>
 
