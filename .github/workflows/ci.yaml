@@ -58,7 +58,7 @@ jobs:
 
         services:
             mysql:
-                image: mysql:5.7
+                image: mysql:5.7 # Update server_version in phpunit.xml.dist if this changes.
                 env:
                     MYSQL_ROOT_PASSWORD: root
                     MYSQL_DATABASE: test_maker

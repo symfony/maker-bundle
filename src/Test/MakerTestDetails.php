@@ -144,13 +144,6 @@ final class MakerTestDetails
             )
         ;
 
-        // use MySQL 5.6, which is what's currently available on Travis
-        $this->addReplacement(
-            'config/packages/doctrine.yaml',
-            "#server_version: '13'",
-            "server_version: '5.7'"
-        );
-
         // this looks silly, but it's the only way to drop the database *for sure*,
         // as doctrine:database:drop will error if there is no database
         // also, skip for SQLITE, as it does not support --if-not-exists
