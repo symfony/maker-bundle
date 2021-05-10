@@ -1,2 +1,0 @@
-framework:
-  ide: 'phpstorm://open?file=%%f&line=%%l'
