@@ -129,7 +129,6 @@ final class DoctrineHelper
         if ($this->isDoctrineInstalled()) {
             $allMetadata = $this->getMetadata();
 
-            /* @var ClassMetadata $metadata */
             foreach (array_keys($allMetadata) as $classname) {
                 $entityClassDetails = new ClassNameDetails($classname, $this->entityNamespace);
                 $entities[] = $entityClassDetails->getRelativeName();
@@ -142,7 +141,7 @@ final class DoctrineHelper
     }
 
     /**
-     * @return array|ClassMetadata|LegacyClassMetadata
+     * @return ClassMetadata|ClassMetadata[]|LegacyClassMetadata|LegacyClassMetadata[]
      */
     public function getMetadata(string $classOrNamespace = null, bool $disconnected = false)
     {

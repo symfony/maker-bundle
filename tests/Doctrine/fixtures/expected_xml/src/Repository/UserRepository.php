@@ -11,6 +11,9 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method UserXml|null findOneBy(array $criteria, array $orderBy = null)
  * @method UserXml[]    findAll()
  * @method UserXml[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method UserXml|null findOneByName($name, array $orderBy = null)
+ * @method UserXml[]    findByName($name, array $orderBy = null, $limit = null, $offset = null)
+ * @method int          countByName($name)
  */
 class UserRepository extends ServiceEntityRepository
 {
