@@ -6,9 +6,10 @@ namespace <?= $namespace ?>;
 <?= $user_is_entity ? "use Doctrine\\ORM\\EntityManagerInterface;\n" : null ?>
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+<?= ($user_needs_encoder && str_contains($password_encoder_details->getUseStatement() , 'Hasher')) ? $password_encoder_details->getUseStatement() : null ?>
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-<?= $user_needs_encoder ? "use Symfony\\Component\\Security\\Core\\Encoder\\UserPasswordEncoderInterface;\n" : null ?>
+<?= ($user_needs_encoder && str_contains($password_encoder_details->getUseStatement() , 'Encoder')) ? $password_encoder_details->getUseStatement() : null ?>
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Core\Security;
@@ -29,14 +30,14 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
 <?= $user_is_entity ? "    private \$entityManager;\n" : null ?>
     private $urlGenerator;
     private $csrfTokenManager;
-<?= $user_needs_encoder ? "    private \$passwordEncoder;\n" : null ?>
+<?= $user_needs_encoder ? $password_encoder_details->getPropertyStatement() : null ?>
 
-    public function __construct(<?= $user_is_entity ? 'EntityManagerInterface $entityManager, ' : null ?>UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager<?= $user_needs_encoder ? ', UserPasswordEncoderInterface $passwordEncoder' : null ?>)
+    public function __construct(<?= $user_is_entity ? 'EntityManagerInterface $entityManager, ' : null ?>UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager<?= $user_needs_encoder ? sprintf(', %s', $password_encoder_details->getMethodArgument()) : null ?>)
     {
 <?= $user_is_entity ? "        \$this->entityManager = \$entityManager;\n" : null ?>
         $this->urlGenerator = $urlGenerator;
         $this->csrfTokenManager = $csrfTokenManager;
-<?= $user_needs_encoder ? "        \$this->passwordEncoder = \$passwordEncoder;\n" : null ?>
+<?= $user_needs_encoder ? $password_encoder_details->getConstructorArgument() : null ?>
     }
 
     public function supports(Request $request)
@@ -82,10 +83,13 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
 
     public function checkCredentials($credentials, UserInterface $user)
     {
-        <?= $user_needs_encoder ? "return \$this->passwordEncoder->isPasswordValid(\$user, \$credentials['password']);\n"
-        : "// Check the user's password or other credentials and return true or false
+<?php if ($user_needs_encoder): ?>
+        return <?= $password_encoder_details->getProperty() ?>->isPasswordValid($user, $credentials['password']);
+<?php else: ?>
+        // Check the user's password or other credentials and return true or false
         // If there are no credentials to check, you can just return true
-        throw new \Exception('TODO: check the credentials inside '.__FILE__);\n" ?>
+        throw new \Exception('TODO: check the credentials inside '.__FILE__);
+<?php endif; ?>
     }
 
 <?php if ($password_authenticated): ?>

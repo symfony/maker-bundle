@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
+use Symfony\Bundle\MakerBundle\Security\SecurityCompatUtil;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
@@ -60,12 +61,15 @@ final class MakeAuthenticator extends AbstractMaker
 
     private $useSecurity52 = false;
 
-    public function __construct(FileManager $fileManager, SecurityConfigUpdater $configUpdater, Generator $generator, DoctrineHelper $doctrineHelper)
+    private $securityCompatUtil;
+
+    public function __construct(FileManager $fileManager, SecurityConfigUpdater $configUpdater, Generator $generator, DoctrineHelper $doctrineHelper, SecurityCompatUtil $securityCompatUtil)
     {
         $this->fileManager = $fileManager;
         $this->configUpdater = $configUpdater;
         $this->generator = $generator;
         $this->doctrineHelper = $doctrineHelper;
+        $this->securityCompatUtil = $securityCompatUtil;
     }
 
     public static function getCommandName(): string
@@ -275,6 +279,14 @@ final class MakeAuthenticator extends AbstractMaker
             'Entity\\'
         );
 
+        $hasEncoder = $this->userClassHasEncoder($securityData, $userClass);
+        $userPasswordEncoder = null;
+
+        if ($hasEncoder) {
+            $encoderDetails = $this->securityCompatUtil->getPasswordEncoderClassNameDetails();
+            $userPasswordEncoder = $this->generator->getTemplateClassDetails($encoderDetails->getFullName());
+        }
+
         $this->generator->generateClass(
             $authenticatorClass,
             sprintf('authenticator/%sLoginFormAuthenticator.tpl.php', $this->useSecurity52 ? 'Security52' : ''),
@@ -285,6 +297,7 @@ final class MakeAuthenticator extends AbstractMaker
                 'username_field_label' => Str::asHumanWords($userNameField),
                 'username_field_var' => Str::asLowerCamelCase($userNameField),
                 'user_needs_encoder' => $this->userClassHasEncoder($securityData, $userClass),
+                'password_encoder_details' => $userPasswordEncoder,
                 'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($userClass),
                 'provider_key_type_hint' => $this->providerKeyTypeHint(),
             ]
