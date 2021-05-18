@@ -1,12 +1,10 @@
-name: "CI"
+name: "CI 3.x Support"
 
 on:
     pull_request:
     push:
         branches:
             - 'main'
-    schedule:
-        -   cron: '0 0 * * *'
 
 env:
     PHPUNIT_FLAGS: "-v"
