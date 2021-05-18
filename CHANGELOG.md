@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.31.1](https://github.com/symfony/maker-bundle/releases/tag/v1.31.1)
+
+*May 12th, 2021*
+
+### Security
+
+- [security](https://github.com/symfony/maker-bundle/releases/tag/v1.31.1) - CVE-2021-21424 Prevent user enumeration - *@chalasr*
+
 ## [v1.31.0](https://github.com/symfony/maker-bundle/releases/tag/v1.31.0)
 
 *May 5th, 2021*
