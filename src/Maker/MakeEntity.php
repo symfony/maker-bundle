@@ -353,7 +353,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $snakeCasedField = Str::asSnakeCase($fieldName);
 
         if ('_at' === $suffix = substr($snakeCasedField, -3)) {
-            $defaultType = 'datetime';
+            $defaultType = 'datetime_immutable';
         } elseif ('_id' === $suffix) {
             $defaultType = 'integer';
         } elseif (0 === strpos($snakeCasedField, 'is_')) {
