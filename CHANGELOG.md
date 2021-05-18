@@ -1,3 +1,13 @@
+# Changelog
+
+## [v1.29.2](https://github.com/symfony/maker-bundle/releases/tag/v1.29.2)
+
+*May 18th, 2021*
+
+### Security
+
+- [#882](https://github.com/symfony/maker-bundle/pull/882) - [security] fix cve-2021-21424 legacy Symfony 3.x + MakerBundle- *@jrushlow*
+
 1.29
 ====
 
