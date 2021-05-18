@@ -5,6 +5,8 @@ on:
     push:
         branches:
             - 'main'
+    schedule:
+        -   cron: '0 0 * * *'
 
 env:
     PHPUNIT_FLAGS: "-v"
@@ -15,7 +17,7 @@ jobs:
     coding-standards:
         name: "Coding Standards (${{ matrix.php-version }})"
 
-        runs-on: "ubuntu-latest"
+        runs-on: "ubuntu-18.04"
 
         strategy:
             fail-fast: false
@@ -43,7 +45,7 @@ jobs:
                 name: "Composer install"
                 uses: "ramsey/composer-install@v1"
                 with:
-                    composer-options: "--no-suggest --no-scripts"
+                    composer-options: "--no-scripts"
 
             -
                 name: "Run friendsofphp/php-cs-fixer"
@@ -52,17 +54,28 @@ jobs:
     test:
         name: "PHP ${{ matrix.php-version }} + symfony/skeleton@${{ matrix.symfony-skeleton-stability }}"
 
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-18.04
 
         services:
             mysql:
-                image: mysql:5.7
+                image: mysql:5.7 # Update server_version in phpunit.xml.dist if this changes.
                 env:
                     MYSQL_ROOT_PASSWORD: root
                     MYSQL_DATABASE: test_maker
                 ports:
                     - 3306
                 options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+            mercure:
+                image: dunglas/mercure
+                env:
+                    SERVER_NAME: :1337
+                    MERCURE_PUBLISHER_JWT_KEY: '!ChangeMe!'
+                    MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeMe!'
+                    MERCURE_EXTRA_DIRECTIVES: |
+                        anonymous
+                        cors_origins *
+                ports:
+                    - 1337:1337
 
         continue-on-error: ${{ matrix.allow-failures }}
 
@@ -84,11 +97,9 @@ jobs:
                 include:
                     - php-version: '7.4'
                       symfony-skeleton-stability: 'dev'
-                      composer-options: '--no-suggest'
                       allow-failures: true
                     - php-version: '8.0'
                       symfony-skeleton-stability: 'dev'
-                      composer-options: '--no-suggest --ignore-platform-req=php'
                       allow-failures: true
 
         steps:
@@ -118,6 +129,11 @@ jobs:
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
             - name: "Require symfony/flex"
+              if: contains('stable', env.SYMFONY_SKELETON_STABILITY)
+              run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
+
+            - name: "Require symfony/flex dev-main"
+              if: contains('dev', env.SYMFONY_SKELETON_STABILITY)
               run: composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-main
 
             - name: "Composer install"
