@@ -86,6 +86,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('Class name of the entity to create or update (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
             ->addOption('api-resource', 'a', InputOption::VALUE_NONE, 'Mark this class as an API Platform resource (expose a CRUD API for it)')
             ->addOption('broadcast', 'b', InputOption::VALUE_NONE, 'Add the ability to broadcast entity updates using Symfony UX Turbo?')
+            ->addOption('example-comments', 'c', InputOption::VALUE_NONE, 'Include code samples in the generated repository?')
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
@@ -141,11 +142,22 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
             $input->setOption('broadcast', $value);
         }
+
+        if (
+            !$input->getOption('example-comments')
+        ) {
+            $description = $command->getDefinition()->getOption('example-comments')->getDescription();
+            $question = new ConfirmationQuestion($description, true);
+            $value = $io->askQuestion($question);
+
+            $input->setOption('example-comments', $value);
+        }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $overwrite = $input->getOption('overwrite');
+        $includeExampleComments = $input->getOption('example-comments');
 
         // the regenerate option has entirely custom behavior
         if ($input->getOption('regenerate')) {
@@ -168,7 +180,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 $input->getOption('api-resource'),
                 false,
                 true,
-                $broadcast
+                $broadcast,
+                $includeExampleComments
             );
 
             if ($broadcast) {
