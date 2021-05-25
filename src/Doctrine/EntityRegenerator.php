@@ -237,7 +237,7 @@ final class EntityRegenerator
 
     private function getMappedFieldsInEntity(ClassMetadata $classMetadata)
     {
-        /* @var $classReflection \ReflectionClass */
+        /** @var \ReflectionClass $classReflection */
         $classReflection = $classMetadata->reflClass;
 
         $targetFields = array_merge(
