@@ -33,7 +33,7 @@ final class EntityClassGenerator
         $this->doctrineHelper = $doctrineHelper;
     }
 
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false): string
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false, bool $useComposition = false): string
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -45,7 +45,7 @@ final class EntityClassGenerator
 
         $entityPath = $this->generator->generateClass(
             $entityClassDetails->getFullName(),
-            'doctrine/Entity.tpl.php',
+            $useComposition === true ? 'doctrine/Entity-use-composition.tpl.php': 'doctrine/Entity.tpl.php',
             [
                 'repository_full_class_name' => $repoClassDetails->getFullName(),
                 'repository_class_name' => $repoClassDetails->getShortName(),
@@ -61,14 +61,15 @@ final class EntityClassGenerator
                 $repoClassDetails->getFullName(),
                 $entityClassDetails->getFullName(),
                 $withPasswordUpgrade,
-                true
+                true,
+                $useComposition
             );
         }
 
         return $entityPath;
     }
 
-    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade, bool $includeExampleComments = true)
+    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade, bool $includeExampleComments = true, bool $useComposition = false)
     {
         $shortEntityClass = Str::getShortClassName($entityClass);
         $entityAlias = strtolower($shortEntityClass[0]);
@@ -83,7 +84,7 @@ final class EntityClassGenerator
 
         $this->generator->generateClass(
             $repositoryClass,
-            'doctrine/Repository.tpl.php',
+            $useComposition === true ? 'doctrine/Repository-use-composition.tpl.php': 'doctrine/Repository.tpl.php',
             [
                 'entity_full_class_name' => $entityClass,
                 'entity_class_name' => $shortEntityClass,

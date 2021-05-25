@@ -22,3 +22,8 @@ for the properties of existing entities:
 You can also *overwrite* any existing methods:
 
 <info>php %command.full_name% --regenerate --overwrite</info>
+
+Use --use-composition if you want to generate proper services for repositories,
+using composition instead of inheritance.
+
+<info>php %command.full_name% --use-composition</info>

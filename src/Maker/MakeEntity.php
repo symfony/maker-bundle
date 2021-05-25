@@ -88,6 +88,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             ->addOption('broadcast', 'b', InputOption::VALUE_NONE, 'Add the ability to broadcast entity updates using Symfony UX Turbo?')
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
+            ->addOption('use-composition', null, InputOption::VALUE_NONE, 'Use composition instead of inheritance')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
         ;
 
@@ -163,12 +164,14 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {
             $broadcast = $input->getOption('broadcast');
+            $useComposition = $input->getOption('use-composition');
             $entityPath = $this->entityClassGenerator->generateEntityClass(
                 $entityClassDetails,
                 $input->getOption('api-resource'),
                 false,
                 true,
-                $broadcast
+                $broadcast,
+                $useComposition
             );
 
             if ($broadcast) {
