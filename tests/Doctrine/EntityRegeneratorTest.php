@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Doctrine;
 
-use Doctrine\Bundle\DoctrineBundle\DependencyInjection\DoctrineExtension;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\TestCase;
@@ -41,7 +40,7 @@ class EntityRegeneratorTest extends TestCase
     /**
      * @dataProvider getRegenerateEntitiesTests
      */
-    public function testRegenerateEntities(string $expectedDirName, bool $overwrite)
+    public function testRegenerateEntities(string $expectedDirName, bool $overwrite): void
     {
         /*
          * Prior to symfony/doctrine-bridge 5.0 (which require
@@ -65,7 +64,7 @@ class EntityRegeneratorTest extends TestCase
         );
     }
 
-    public function getRegenerateEntitiesTests()
+    public function getRegenerateEntitiesTests(): \Generator
     {
         yield 'regenerate_no_overwrite' => [
             'expected_no_overwrite',
@@ -78,7 +77,7 @@ class EntityRegeneratorTest extends TestCase
         ];
     }
 
-    public function testXmlRegeneration()
+    public function testXmlRegeneration(): void
     {
         $kernel = new TestXmlEntityRegeneratorKernel('dev', true);
         $this->doTestRegeneration(
@@ -91,7 +90,7 @@ class EntityRegeneratorTest extends TestCase
         );
     }
 
-    private function doTestRegeneration(string $sourceDir, Kernel $kernel, string $namespace, string $expectedDirName, bool $overwrite, string $targetDirName)
+    private function doTestRegeneration(string $sourceDir, Kernel $kernel, string $namespace, string $expectedDirName, bool $overwrite, string $targetDirName): void
     {
         $fs = new Filesystem();
         $tmpDir = __DIR__.'/../tmp/'.$targetDirName;
@@ -157,9 +156,8 @@ class EntityRegeneratorTest extends TestCase
 class TestEntityRegeneratorKernel extends Kernel
 {
     use MicroKernelTrait;
-    use OverrideUrlTraitFixture;
 
-    public function registerBundles()
+    public function registerBundles(): array
     {
         return [
             new FrameworkBundle(),
@@ -167,11 +165,11 @@ class TestEntityRegeneratorKernel extends Kernel
         ];
     }
 
-    protected function configureRoutes(RouteCollectionBuilder $routes)
+    protected function configureRoutes(RouteCollectionBuilder $routes): void
     {
     }
 
-    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
+    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader): void
     {
         $c->loadFromExtension('framework', [
             'secret' => 123,
@@ -184,10 +182,6 @@ class TestEntityRegeneratorKernel extends Kernel
             'driver' => 'pdo_sqlite',
             'url' => 'sqlite:///fake',
         ];
-
-        if ($this->canOverrideUrl($c)) {
-            $dbal['override_url'] = true;
-        }
 
         $c->prependExtensionConfig('doctrine', [
             'dbal' => $dbal,
@@ -205,12 +199,7 @@ class TestEntityRegeneratorKernel extends Kernel
         ]);
     }
 
-    public function getProjectDir()
-    {
-        return $this->getRootDir();
-    }
-
-    public function getRootDir()
+    public function getProjectDir(): string
     {
         return __DIR__.'/../tmp/current_project';
     }
@@ -219,9 +208,8 @@ class TestEntityRegeneratorKernel extends Kernel
 class TestXmlEntityRegeneratorKernel extends Kernel
 {
     use MicroKernelTrait;
-    use OverrideUrlTraitFixture;
 
-    public function registerBundles()
+    public function registerBundles(): array
     {
         return [
             new FrameworkBundle(),
@@ -229,11 +217,11 @@ class TestXmlEntityRegeneratorKernel extends Kernel
         ];
     }
 
-    protected function configureRoutes(RouteCollectionBuilder $routes)
+    protected function configureRoutes(RouteCollectionBuilder $routes): void
     {
     }
 
-    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
+    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader): void
     {
         $c->loadFromExtension('framework', [
             'secret' => 123,
@@ -246,10 +234,6 @@ class TestXmlEntityRegeneratorKernel extends Kernel
             'driver' => 'pdo_sqlite',
             'url' => 'sqlite:///fake',
         ];
-
-        if ($this->canOverrideUrl($c)) {
-            $dbal['override_url'] = true;
-        }
 
         $c->prependExtensionConfig('doctrine', [
             'dbal' => $dbal,
@@ -268,12 +252,7 @@ class TestXmlEntityRegeneratorKernel extends Kernel
         ]);
     }
 
-    public function getProjectDir()
-    {
-        return $this->getRootDir();
-    }
-
-    public function getRootDir()
+    public function getProjectDir(): string
     {
         return __DIR__.'/../tmp/current_project_xml';
     }
@@ -281,26 +260,8 @@ class TestXmlEntityRegeneratorKernel extends Kernel
 
 class AllButTraitsIterator extends \RecursiveFilterIterator
 {
-    public function accept()
+    public function accept(): bool
     {
         return !\in_array($this->current()->getFilename(), []);
-    }
-}
-
-trait OverrideUrlTraitFixture
-{
-    /**
-     * Quick and dirty way to check if override_url is required since doctrine-bundle 2.3.
-     */
-    public function canOverrideUrl(ContainerBuilder $builder): bool
-    {
-        /** @var DoctrineExtension $ext */
-        $ext = $builder->getExtension('doctrine');
-        $method = new \ReflectionMethod(DoctrineExtension::class, 'getConnectionOptions');
-        $method->setAccessible(true);
-
-        $configOptions = $method->invoke($ext, ['override_url' => 'string', 'shards' => [], 'replicas' => [], 'slaves' => []]);
-
-        return \array_key_exists('connection_override_options', $configOptions);
     }
 }
