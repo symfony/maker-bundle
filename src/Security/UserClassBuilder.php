@@ -103,6 +103,16 @@ final class UserClassBuilder
         // Check if we're using Symfony 5.3+ - UserInterface::getUsername() was replaced with UserInterface::getUserIdentifier()
         if (class_exists(InMemoryUser::class)) {
             $getterIdentifierName = 'getUserIdentifier';
+
+            // also add the deprecated getUsername method
+            $manipulator->addAccessorMethod(
+                $userClassConfig->getIdentityPropertyName(),
+                'getUsername',
+                'string',
+                false,
+                ['@deprecated since Symfony 5.3, use getUserIdentifier instead'],
+                true
+            );
         }
 
         // define getUsername (if it was defined above, this will override)
