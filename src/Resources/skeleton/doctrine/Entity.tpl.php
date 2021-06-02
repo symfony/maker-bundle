@@ -14,7 +14,11 @@ use Doctrine\ORM\Mapping as ORM;
 <?php endif ?>
 <?php if ($broadcast && !$use_attributes): ?> * @Broadcast()
 <?php endif ?>
+<?php if ($use_standalone_services): ?>
+ * @ORM\Entity
+<?php else: ?>
  * @ORM\Entity(repositoryClass=<?= $repository_class_name ?>::class)
+<?php endif ?>
 <?php if ($should_escape_table_name): ?> * @ORM\Table(name="`<?= $table_name ?>`")
 <?php endif ?>
  */

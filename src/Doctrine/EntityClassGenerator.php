@@ -45,7 +45,7 @@ final class EntityClassGenerator
 
         $entityPath = $this->generator->generateClass(
             $entityClassDetails->getFullName(),
-            $useComposition === true ? 'doctrine/Entity-use-composition.tpl.php': 'doctrine/Entity.tpl.php',
+            'doctrine/Entity.tpl.php',
             [
                 'repository_full_class_name' => $repoClassDetails->getFullName(),
                 'repository_class_name' => $repoClassDetails->getShortName(),
@@ -53,6 +53,7 @@ final class EntityClassGenerator
                 'broadcast' => $broadcast,
                 'should_escape_table_name' => $this->doctrineHelper->isKeyword($tableName),
                 'table_name' => $tableName,
+                'use_standalone_services' => $useStandaloneServices,
             ]
         );
 
@@ -84,7 +85,7 @@ final class EntityClassGenerator
 
         $this->generator->generateClass(
             $repositoryClass,
-            $useComposition === true ? 'doctrine/Repository-use-composition.tpl.php': 'doctrine/Repository.tpl.php',
+            'doctrine/Repository.tpl.php',
             [
                 'entity_full_class_name' => $entityClass,
                 'entity_class_name' => $shortEntityClass,
@@ -93,6 +94,7 @@ final class EntityClassGenerator
                 'password_upgrade_user_interface' => $interfaceClassNameDetails,
                 'doctrine_registry_class' => $this->managerRegistryClassName,
                 'include_example_comments' => $includeExampleComments,
+                'use_standalone_services' => $useStandaloneServices,
             ]
         );
     }

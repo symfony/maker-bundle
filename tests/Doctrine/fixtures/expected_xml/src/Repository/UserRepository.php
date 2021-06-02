@@ -23,7 +23,7 @@ class UserRepository extends ServiceEntityRepository
     //  * @return UserXml[] Returns an array of UserXml objects
     //  */
     /*
-    public function findByExampleField($value)
+    public function findByExampleField($value): array
     {
         return $this->createQueryBuilder('u')
             ->andWhere('u.exampleField = :val')
