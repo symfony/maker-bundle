@@ -33,7 +33,7 @@ final class EntityClassGenerator
         $this->doctrineHelper = $doctrineHelper;
     }
 
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false, bool $useComposition = false): string
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false, bool $useStandaloneServices = false): string
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -62,14 +62,14 @@ final class EntityClassGenerator
                 $entityClassDetails->getFullName(),
                 $withPasswordUpgrade,
                 true,
-                $useComposition
+                $useStandaloneServices
             );
         }
 
         return $entityPath;
     }
 
-    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade, bool $includeExampleComments = true, bool $useComposition = false)
+    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade, bool $includeExampleComments = true, bool $useStandaloneServices = false)
     {
         $shortEntityClass = Str::getShortClassName($entityClass);
         $entityAlias = strtolower($shortEntityClass[0]);

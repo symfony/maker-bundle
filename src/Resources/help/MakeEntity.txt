@@ -23,7 +23,7 @@ You can also *overwrite* any existing methods:
 
 <info>php %command.full_name% --regenerate --overwrite</info>
 
-Use --use-composition if you want to generate proper services for repositories,
-using composition instead of inheritance.
+Use --use-standalone-services if you want to generate entities having repository
+that are standalone services.
 
-<info>php %command.full_name% --use-composition</info>
+<info>php %command.full_name% --use-standalone-services</info>
