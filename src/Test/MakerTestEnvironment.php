@@ -78,7 +78,7 @@ final class MakerTestEnvironment
         return file_get_contents($this->path.'/'.$path);
     }
 
-    private function changeRootNamespaceIfNeeded()
+    private function changeRootNamespaceIfNeeded(): void
     {
         if ('App' === ($rootNamespace = $this->testDetails->getRootNamespace())) {
             return;
@@ -128,7 +128,7 @@ final class MakerTestEnvironment
         $this->processReplacements($replacements, $this->path);
     }
 
-    public function prepare()
+    public function prepare(): void
     {
         if (!$this->fs->exists($this->flexPath)) {
             $this->buildFlexSkeleton();
@@ -198,7 +198,7 @@ final class MakerTestEnvironment
             ->run();
     }
 
-    private function preMake()
+    private function preMake(): void
     {
         foreach ($this->testDetails->getPreMakeCommands() as $preCommand) {
             MakerTestProcess::create($preCommand, $this->path)
@@ -206,7 +206,7 @@ final class MakerTestEnvironment
         }
     }
 
-    public function runMaker()
+    public function runMaker(): MakerTestProcess
     {
         // Lets remove cache
         $this->fs->remove($this->path.'/var/cache');
@@ -248,7 +248,7 @@ final class MakerTestEnvironment
         return $this->runnedMakerProcess;
     }
 
-    public function getGeneratedFilesFromOutputText()
+    public function getGeneratedFilesFromOutputText(): array
     {
         $output = $this->runnedMakerProcess->getOutput();
 
@@ -259,37 +259,37 @@ final class MakerTestEnvironment
         return array_map('trim', $matches[3]);
     }
 
-    public function fileExists(string $file)
+    public function fileExists(string $file): bool
     {
         return $this->fs->exists($this->path.'/'.$file);
     }
 
-    public function runPhpCSFixer(string $file)
+    public function runPhpCSFixer(string $file): MakerTestProcess
     {
         return MakerTestProcess::create(sprintf('php vendor/bin/php-cs-fixer --config=%s fix --dry-run --diff %s', __DIR__.'/../Resources/test/.php_cs.test', $this->path.'/'.$file), $this->rootPath)
                                ->run(true);
     }
 
-    public function runTwigCSLint(string $file)
+    public function runTwigCSLint(string $file): MakerTestProcess
     {
         return MakerTestProcess::create(sprintf('php vendor/bin/twigcs --config ./.twig_cs.dist %s', $this->path.'/'.$file), $this->rootPath)
                                ->run(true);
     }
 
-    public function runInternalTests()
+    public function runInternalTests(): ?MakerTestProcess
     {
         $finder = new Finder();
         $finder->in($this->path.'/tests')->files();
         if ($finder->count() > 0) {
             // execute the tests that were moved into the project!
-            return MakerTestProcess::create(sprintf('php %s', $this->rootPath.'/vendor/bin/simple-phpunit'), $this->path)
+            return MakerTestProcess::create(sprintf('php %s', $this->path.'/bin/phpunit'), $this->path)
                                    ->run(true);
         }
 
         return null;
     }
 
-    private function postMake()
+    private function postMake(): void
     {
         $this->processReplacements($this->testDetails->getPostMakeReplacements(), $this->path);
 
@@ -318,7 +318,7 @@ final class MakerTestEnvironment
         }
     }
 
-    private function buildFlexSkeleton()
+    private function buildFlexSkeleton(): void
     {
         $targetVersion = $this->getTargetSkeletonVersion();
         $versionString = $targetVersion ? sprintf(':%s', $targetVersion) : '';
@@ -397,7 +397,7 @@ final class MakerTestEnvironment
         )->run();
     }
 
-    private function processReplacements(array $replacements, $rootDir)
+    private function processReplacements(array $replacements, $rootDir): void
     {
         foreach ($replacements as $replacement) {
             $path = realpath($rootDir.'/'.$replacement['filename']);
