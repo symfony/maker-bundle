@@ -144,6 +144,14 @@ final class MakerTestDetails
             )
         ;
 
+        // Flex includes a recipe to suffix the dbname w/ "_test" - lets keep
+        // things simple for these tests and not do that.
+        $this->addReplacement(
+            'config/packages/test/doctrine.yaml',
+            "dbname_suffix: '_test%env(default::TEST_TOKEN)%'",
+            '')
+        ;
+
         // this looks silly, but it's the only way to drop the database *for sure*,
         // as doctrine:database:drop will error if there is no database
         // also, skip for SQLITE, as it does not support --if-not-exists
