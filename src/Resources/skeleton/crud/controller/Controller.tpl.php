@@ -66,13 +66,20 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
             $entityManager->persist($<?= $entity_var_singular ?>);
             $entityManager->flush();
 
-            return $this->redirectToRoute('<?= $route_name ?>_index');
+            return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
         }
 
+<?php if ($use_render_form) { ?>
+        return $this->renderForm('<?= $templates_path ?>/new.html.twig', [
+            '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
+            'form' => $form,
+        ]);
+<?php } else { ?>
         return $this->render('<?= $templates_path ?>/new.html.twig', [
             '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
             'form' => $form->createView(),
         ]);
+<?php } ?>
     }
 
 <?php if ($use_attributes) { ?>
@@ -104,13 +111,20 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('<?= $route_name ?>_index');
+            return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
         }
 
+<?php if ($use_render_form) { ?>
+        return $this->renderForm('<?= $templates_path ?>/edit.html.twig', [
+            '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
+            'form' => $form,
+        ]);
+<?php } else { ?>
         return $this->render('<?= $templates_path ?>/edit.html.twig', [
             '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
             'form' => $form->createView(),
         ]);
+<?php } ?>
     }
 
 <?php if ($use_attributes) { ?>
@@ -128,6 +142,6 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('<?= $route_name ?>_index');
+        return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
     }
 }
