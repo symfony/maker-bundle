@@ -65,6 +65,16 @@ final class EntityClassGenerator
                 true,
                 $useStandaloneServices
             );
+
+            if (true === $useStandaloneServices) {
+                $this->generateRepositoryInterface(
+                    $repoClassDetails->getFullName(),
+                    $entityClassDetails->getFullName(),
+                    $withPasswordUpgrade,
+                    true,
+                    $useStandaloneServices
+                );
+            }
         }
 
         return $entityPath;
@@ -86,6 +96,35 @@ final class EntityClassGenerator
         $this->generator->generateClass(
             $repositoryClass,
             'doctrine/Repository.tpl.php',
+            [
+                'entity_full_class_name' => $entityClass,
+                'entity_class_name' => $shortEntityClass,
+                'entity_alias' => $entityAlias,
+                'with_password_upgrade' => $withPasswordUpgrade,
+                'password_upgrade_user_interface' => $interfaceClassNameDetails,
+                'doctrine_registry_class' => $this->managerRegistryClassName,
+                'include_example_comments' => $includeExampleComments,
+                'use_standalone_services' => $useStandaloneServices,
+            ]
+        );
+    }
+
+    public function generateRepositoryInterface(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade, bool $includeExampleComments = true, bool $useStandaloneServices = false)
+    {
+        $shortEntityClass = Str::getShortClassName($entityClass);
+        $entityAlias = strtolower($shortEntityClass[0]);
+
+        $passwordUserInterfaceName = UserInterface::class;
+
+        if (interface_exists(PasswordAuthenticatedUserInterface::class)) {
+            $passwordUserInterfaceName = PasswordAuthenticatedUserInterface::class;
+        }
+
+        $interfaceClassNameDetails = new ClassNameDetails($passwordUserInterfaceName, 'Symfony\Component\Security\Core\User');
+
+        $this->generator->generateInterface(
+            $repositoryClass,
+            'doctrine/RepositoryInterface.tpl.php',
             [
                 'entity_full_class_name' => $entityClass,
                 'entity_class_name' => $shortEntityClass,

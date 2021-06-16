@@ -29,7 +29,7 @@ if ($with_password_upgrade) {
     $interfaces[] = 'PasswordUpgraderInterface';
 }
 if ($use_standalone_services) {
-    $interfaces[] = 'ObjectRepository';
+    $interfaces[] = $interface_name;
 }
 $interfaces = $interfaces !== [] ? sprintf(' implements %s', implode(', ', $interfaces)) : '';
 ?>
@@ -41,7 +41,6 @@ use <?= $entity_full_class_name; ?>;
 <?php if (true === $use_standalone_services) : ?>
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ObjectRepository;
 <?php else : ?>
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use <?= $doctrine_registry_class; ?>;
@@ -59,7 +58,7 @@ use <?= $doctrine_registry_class; ?>;
 <?php if (false === $use_standalone_services) : ?>
     public function __construct(ManagerRegistry $registry)
     {
-    parent::__construct($registry, <?= $entity_class_name; ?>::class);
+        parent::__construct($registry, <?= $entity_class_name; ?>::class);
     }
 <?php else : ?>
     private EntityManagerInterface $entityManager;
@@ -68,53 +67,47 @@ use <?= $doctrine_registry_class; ?>;
 
     public function __construct(EntityManagerInterface $entityManager)
     {
-    $this->entityManager = $entityManager;
-    $this->repository = $entityManager->getRepository(<?= $entity_class_name; ?>::class);
+        $this->entityManager = $entityManager;
+        $this->repository = $entityManager->getRepository(<?= $entity_class_name; ?>::class);
     }
 <?php endif; ?>
 <?php if (true === $use_standalone_services) : ?>
     public function find($id, $lockMode = null, $lockVersion = null): ?<?= $entity_class_name; ?><?= "\n" ?>
     {
-    return $this->repository->find($id, $lockMode, $lockVersion);
+        return $this->repository->find($id, $lockMode, $lockVersion);
     }
 
     public function findOneBy(array $criteria, array $orderBy = null): ?<?= $entity_class_name; ?><?= "\n" ?>
     {
-    return $this->repository->findOneBy($criteria, $orderBy);
+        return $this->repository->findOneBy($criteria, $orderBy);
     }
 
-    /**
-    * @return <?= $entity_class_name; ?>[]
-    */
     public function findAll(): array
     {
-    return $this->repository->findAll();
+        return $this->repository->findAll();
     }
 
-    /**
-    * @return <?= $entity_class_name; ?>[]
-    */
     public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
     {
-    return $this->repository->findBy($criteria, $orderBy, $limit, $offset);
+        return $this->repository->findBy($criteria, $orderBy, $limit, $offset);
     }
 
-    public function getClassName()
+    public function getClassName(): string
     {
-    return <?= $entity_class_name; ?>::class;
+        return <?= $entity_class_name; ?>::class;
     }
 <?php endif; ?>
 <?php if ($with_password_upgrade) : ?>
     /**
-    * Used to upgrade (rehash) the user's password automatically over time.
-    */
+     * Used to upgrade (rehash) the user's password automatically over time.
+     */
     public function upgradePassword(<?= sprintf('%s ', $password_upgrade_user_interface->getShortName()); ?>$user, string $newEncodedPassword): void
     {
-    if (!$user instanceof <?= $entity_class_name ?>) {
-    throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
-    }
+        if (!$user instanceof <?= $entity_class_name ?>) {
+            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
+        }
 
-    $user->setPassword($newEncodedPassword);
+        $user->setPassword($newEncodedPassword);
     <?php if (true === $use_standalone_services) : ?>
         $this->entityManager->persist($user);
         $this->entityManager->flush();
@@ -127,22 +120,22 @@ use <?= $doctrine_registry_class; ?>;
 <?php if ($include_example_comments) : ?>
 
     // /**
-    // * @return <?= $entity_class_name ?>[] Returns an array of <?= $entity_class_name ?> objects
-    // */
+    //  * @return <?= $entity_class_name ?>[] Returns an array of <?= $entity_class_name ?> objects
+    //  */
     /*
     public function findByExampleField($value): array
     {
     <?php if (true === $use_standalone_services) : ?>
-        return $this->repository->createQueryBuilder('<?= $entity_alias; ?>')
+    return $this->repository->createQueryBuilder('<?= $entity_alias; ?>')
     <?php else : ?>
-        return $this->createQueryBuilder('<?= $entity_alias; ?>')
+    return $this->createQueryBuilder('<?= $entity_alias; ?>')
     <?php endif ?>
-    ->andWhere('<?= $entity_alias; ?>.exampleField = :val')
-    ->setParameter('val', $value)
-    ->orderBy('<?= $entity_alias; ?>.id', 'ASC')
-    ->setMaxResults(10)
-    ->getQuery()
-    ->getResult()
+        ->andWhere('<?= $entity_alias; ?>.exampleField = :val')
+            ->setParameter('val', $value)
+            ->orderBy('<?= $entity_alias; ?>.id', 'ASC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult()
     ;
     }
     */
@@ -151,14 +144,14 @@ use <?= $doctrine_registry_class; ?>;
     public function findOneBySomeField($value): ?<?= $entity_class_name . "\n" ?>
     {
     <?php if (true === $use_standalone_services) : ?>
-        return $this->repository->createQueryBuilder('<?= $entity_alias; ?>')
+    return $this->repository->createQueryBuilder('<?= $entity_alias; ?>')
     <?php else : ?>
-        return $this->createQueryBuilder('<?= $entity_alias; ?>')
+    return $this->createQueryBuilder('<?= $entity_alias; ?>')
     <?php endif ?>
-    ->andWhere('<?= $entity_alias ?>.exampleField = :val')
-    ->setParameter('val', $value)
-    ->getQuery()
-    ->getOneOrNullResult()
+        ->andWhere('<?= $entity_alias ?>.exampleField = :val')
+            ->setParameter('val', $value)
+            ->getQuery()
+            ->getOneOrNullResult()
     ;
     }
     */
