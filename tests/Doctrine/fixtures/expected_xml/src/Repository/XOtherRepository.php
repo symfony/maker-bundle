@@ -23,7 +23,7 @@ class XOtherRepository extends ServiceEntityRepository
     //  * @return XOther[] Returns an array of XOther objects
     //  */
     /*
-    public function findByExampleField($value)
+    public function findByExampleField($value): array
     {
         return $this->createQueryBuilder('x')
             ->andWhere('x.exampleField = :val')

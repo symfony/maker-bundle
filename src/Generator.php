@@ -56,6 +56,8 @@ class Generator
      */
     public function generateClass(string $className, string $templateName, array $variables = []): string
     {
+        $interfaceName = $className.'Interface';
+
         $targetPath = $this->fileManager->getRelativePathForFutureClass($className);
 
         if (null === $targetPath) {
@@ -63,7 +65,39 @@ class Generator
         }
 
         $variables = array_merge($variables, [
+            'interface_name' => Str::getShortClassName($interfaceName),
             'class_name' => Str::getShortClassName($className),
+            'namespace' => Str::getNamespace($className),
+        ]);
+
+        $this->addOperation($targetPath, $templateName, $variables);
+
+        return $targetPath;
+    }
+
+    /**
+     * Generate a new file for an interface from a template.
+     *
+     * @param string $className    The fully-qualified class name
+     * @param string $templateName Template name in Resources/skeleton to use
+     * @param array  $variables    Array of variables to pass to the template
+     *
+     * @return string The path where the file will be created
+     *
+     * @throws \Exception
+     */
+    public function generateInterface(string $className, string $templateName, array $variables = []): string
+    {
+        $className .= 'Interface';
+
+        $targetPath = $this->fileManager->getRelativePathForFutureClass($className);
+
+        if (null === $targetPath) {
+            throw new \LogicException(sprintf('Could not determine where to locate the new interface "%s", maybe try with a full namespace like "\\My\\Full\\Namespace\\%s"', $className, Str::getShortClassName($className)));
+        }
+
+        $variables = array_merge($variables, [
+            'interface_name' => Str::getShortClassName($className),
             'namespace' => Str::getNamespace($className),
         ]);
 
