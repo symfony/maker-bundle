@@ -36,8 +36,8 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
     {
         return $this->loadUserByIdentifier($username);
     }
-<?php endif ?>
 
+<?php endif ?>
     /**
      * Refreshes the user after being reloaded from the session.
      *
