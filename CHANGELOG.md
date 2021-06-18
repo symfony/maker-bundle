@@ -1,5 +1,19 @@
 # Changelog
 
+## [v1.32.0](https://github.com/symfony/maker-bundle/releases/tag/v1.32.0)
+
+*June 18th, 2021*
+
+### Feature
+
+- [#877](https://github.com/symfony/maker-bundle/pull/877) - [make:entity] Default to "datetime_immutable" when creating entities - *@nicolas-grekas*
+
+### Bug Fix
+
+- [#899](https://github.com/symfony/maker-bundle/pull/899) - Use proper name for parameter of upgradePassword - *@Tobion*
+- [#896](https://github.com/symfony/maker-bundle/pull/896) - Fix keys not found when surrounded by quotes - *@valentinloiseau*
+- [#890](https://github.com/symfony/maker-bundle/pull/890) - [make:user] Keep implementing deprecated username methods - *@wouterj*
+
 ## [v1.31.1](https://github.com/symfony/maker-bundle/releases/tag/v1.31.1)
 
 *May 12th, 2021*
