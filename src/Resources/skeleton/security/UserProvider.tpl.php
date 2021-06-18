@@ -28,6 +28,16 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
         throw new \Exception('TODO: fill in <?= $uses_user_identifier ? 'loadUserByIdentifier()' : 'loadUserByUsername()' ?> inside '.__FILE__);
     }
 
+<?php if ($uses_user_identifier) : ?>
+    /**
+     * @deprecated since Symfony 5.3, loadUserByIdentifier() is used instead
+     */
+    public function loadUserByUsername($username): UserInterface
+    {
+        return $this->loadUserByIdentifier($username);
+    }
+
+<?php endif ?>
     /**
      * Refreshes the user after being reloaded from the session.
      *

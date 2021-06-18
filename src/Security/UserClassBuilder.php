@@ -98,12 +98,9 @@ final class UserClassBuilder
             );
         }
 
-        $getterIdentifierName = 'getUsername';
-
         // Check if we're using Symfony 5.3+ - UserInterface::getUsername() was replaced with UserInterface::getUserIdentifier()
-        if (class_exists(InMemoryUser::class)) {
-            $getterIdentifierName = 'getUserIdentifier';
-        }
+        $symfony53GTE = class_exists(InMemoryUser::class);
+        $getterIdentifierName = $symfony53GTE ? 'getUserIdentifier' : 'getUsername';
 
         // define getUsername (if it was defined above, this will override)
         $manipulator->addAccessorMethod(
@@ -118,6 +115,18 @@ final class UserClassBuilder
             ],
             true
         );
+
+        if ($symfony53GTE) {
+            // also add the deprecated getUsername method
+            $manipulator->addAccessorMethod(
+                $userClassConfig->getIdentityPropertyName(),
+                'getUsername',
+                'string',
+                false,
+                ['@deprecated since Symfony 5.3, use getUserIdentifier instead'],
+                true
+            );
+        }
     }
 
     private function addGetRoles(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig)

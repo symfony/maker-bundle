@@ -51,6 +51,14 @@ class User implements UserInterface
     }
 
     /**
+     * @deprecated since Symfony 5.3, use getUserIdentifier instead
+     */
+    public function getUsername(): string
+    {
+        return (string) $this->userIdentifier;
+    }
+
+    /**
      * @see UserInterface
      */
     public function getRoles(): array
