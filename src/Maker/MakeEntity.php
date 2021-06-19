@@ -48,9 +48,16 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     private $doctrineHelper;
     private $generator;
     private $entityClassGenerator;
+    private $generateRepositoryExamples;
 
-    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null, EntityClassGenerator $entityClassGenerator = null)
-    {
+    public function __construct(
+        FileManager $fileManager,
+        DoctrineHelper $doctrineHelper,
+        string $projectDirectory,
+        Generator $generator = null,
+        EntityClassGenerator $entityClassGenerator = null,
+        bool $generateRepositoryExamples
+    ) {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
         // $projectDirectory is unused, argument kept for BC
@@ -68,6 +75,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         } else {
             $this->entityClassGenerator = $entityClassGenerator;
         }
+        $this->generateRepositoryExamples = $generateRepositoryExamples;
     }
 
     public static function getCommandName(): string
@@ -168,7 +176,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 $input->getOption('api-resource'),
                 false,
                 true,
-                $broadcast
+                $broadcast,
+                $this->generateRepositoryExamples
             );
 
             if ($broadcast) {

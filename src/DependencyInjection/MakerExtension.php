@@ -65,6 +65,9 @@ class MakerExtension extends Extension
         $doctrineHelperDefinition = $container->getDefinition('maker.doctrine_helper');
         $doctrineHelperDefinition->replaceArgument(0, $rootNamespace.'\\Entity');
 
+        $makeEntityDefinition = $container->getDefinition('maker.maker.make_entity');
+        $makeEntityDefinition->replaceArgument(5, $config['entity']['repository_examples']);
+
         $container->registerForAutoconfiguration(MakerInterface::class)
             ->addTag(MakeCommandRegistrationPass::MAKER_TAG);
     }

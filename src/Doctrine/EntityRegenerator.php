@@ -30,14 +30,16 @@ final class EntityRegenerator
     private $generator;
     private $entityClassGenerator;
     private $overwrite;
+    private $includeExampleComments;
 
-    public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, EntityClassGenerator $entityClassGenerator, bool $overwrite)
+    public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, EntityClassGenerator $entityClassGenerator, bool $overwrite, bool $includeExampleComments = true)
     {
         $this->doctrineHelper = $doctrineHelper;
         $this->fileManager = $fileManager;
         $this->generator = $generator;
         $this->entityClassGenerator = $entityClassGenerator;
         $this->overwrite = $overwrite;
+        $this->includeExampleComments = $includeExampleComments;
     }
 
     public function regenerateEntities(string $classOrNamespace)
@@ -229,7 +231,8 @@ final class EntityRegenerator
         $this->entityClassGenerator->generateRepositoryClass(
             $metadata->customRepositoryClassName,
             $metadata->name,
-            false
+            false,
+            $this->includeExampleComments
         );
 
         $this->generator->writeChanges();
