@@ -56,7 +56,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         string $projectDirectory,
         Generator $generator = null,
         EntityClassGenerator $entityClassGenerator = null,
-        bool $generateRepositoryExamples
+        bool $generateRepositoryExamples = true
     ) {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
