@@ -27,6 +27,7 @@
     },
     "require-dev": {
         "composer/semver": "^3.0@dev",
+        "doctrine/annotations": "1.14.x-dev",
         "doctrine/doctrine-bundle": "^1.8|^2.0",
         "doctrine/orm": "^2.3",
         "friendsofphp/php-cs-fixer": "^3.0",
