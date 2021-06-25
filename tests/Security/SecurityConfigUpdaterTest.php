@@ -16,6 +16,7 @@ use Psr\Log\LogLevel;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
 use Symfony\Component\HttpKernel\Log\Logger;
+use Symfony\Component\PasswordHasher\Hasher\NativePasswordHasher;
 use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 
 class SecurityConfigUpdaterTest extends TestCase
@@ -48,9 +49,10 @@ class SecurityConfigUpdaterTest extends TestCase
         $updater = new SecurityConfigUpdater($this->ysmLogger);
         $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
         $actualSource = $updater->updateForUserClass($source, $userConfig, $userClass);
-        $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_user_class/'.$expectedSourceFilename);
+        $symfonyVersion = class_exists(NativePasswordHasher::class) ? '5.3' : 'legacy';
+        $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_user_class/'.$symfonyVersion.'/'.$expectedSourceFilename);
 
-        $bcryptOrAuto = class_exists(NativePasswordEncoder::class) ? 'auto' : 'bcrypt';
+        $bcryptOrAuto = ('5.3' === $symfonyVersion || class_exists(NativePasswordEncoder::class)) ? 'auto' : 'bcrypt';
         $expectedSource = str_replace('{BCRYPT_OR_AUTO}', $bcryptOrAuto, $expectedSource);
 
         $this->assertSame($expectedSource, $actualSource);
@@ -94,6 +96,18 @@ class SecurityConfigUpdaterTest extends TestCase
             new UserClassConfiguration(true, 'email', true),
             'simple_security_with_single_memory_provider_configured.yaml',
             'simple_security_with_single_memory_provider_configured.yaml',
+        ];
+
+        yield 'security_52_empty_security' => [
+            new UserClassConfiguration(true, 'email', true),
+            'security_52_entity_email_with_password.yaml',
+            'security_52_empty_security.yaml',
+        ];
+
+        yield 'security_52_with_firewalls_and_logout' => [
+            new UserClassConfiguration(true, 'email', true),
+            'security_52_complex_entity_email_with_password.yaml',
+            'security_52_with_firewalls_and_logout.yaml',
         ];
     }
 

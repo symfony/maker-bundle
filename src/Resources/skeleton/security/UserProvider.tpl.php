@@ -72,13 +72,13 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
 <?php if ($password_upgrader): ?>
 
     /**
-     * Upgrades the encoded password of a user, typically for using a better hash algorithm.
+     * Upgrades the hashed password of a user, typically for using a better hash algorithm.
      */
-    public function upgradePassword(UserInterface $user, string $newEncodedPassword): void
+    public function upgradePassword(UserInterface $user, string $newHashedPassword): void
     {
-        // TODO: when encoded passwords are in use, this method should:
+        // TODO: when hashed passwords are in use, this method should:
         // 1. persist the new password in the user storage
-        // 2. update the $user object with $user->setPassword($newEncodedPassword);
+        // 2. update the $user object with $user->setPassword($newHashedPassword);
     }
 <?php endif ?>
 }

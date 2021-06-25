@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\HttpKernel\Log\Logger;
+use Symfony\Component\PasswordHasher\Hasher\NativePasswordHasher;
 use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 
 /**
@@ -50,7 +51,8 @@ final class SecurityConfigUpdater
         $this->updateProviders($userConfig, $userClass);
 
         if ($userConfig->hasPassword()) {
-            $this->updateEncoders($userConfig, $userClass);
+            $symfonyGte53 = class_exists(NativePasswordHasher::class);
+            $this->updatePasswordHashers($userConfig, $userClass, $symfonyGte53 ? 'password_hashers' : 'encoders');
         }
 
         $contents = $this->manipulator->getContents();
@@ -72,6 +74,10 @@ final class SecurityConfigUpdater
         $newData = $this->manipulator->getData();
 
         if (!isset($newData['security']['firewalls'])) {
+            if ($newData['security']) {
+                $newData['security']['_firewalls'] = $this->manipulator->createEmptyLine();
+            }
+
             $newData['security']['firewalls'] = [];
         }
 
@@ -153,6 +159,10 @@ final class SecurityConfigUpdater
         $this->removeMemoryProviderIfIsSingleConfigured();
 
         $newData = $this->manipulator->getData();
+        if ($newData['security'] && !\array_key_exists('providers', $newData['security'])) {
+            $newData['security']['_providers'] = $this->manipulator->createEmptyLine();
+        }
+
         $newData['security']['providers']['__'] = $this->manipulator->createCommentLine(
             ' used to reload user from session & other features (e.g. switch_user)'
         );
@@ -175,18 +185,34 @@ final class SecurityConfigUpdater
         $this->manipulator->setData($newData);
     }
 
-    private function updateEncoders(UserClassConfiguration $userConfig, string $userClass)
+    private function updatePasswordHashers(UserClassConfiguration $userConfig, string $userClass, string $keyName = 'password_hashers')
     {
         $newData = $this->manipulator->getData();
-        if (!isset($newData['security']['encoders'])) {
-            // encoders is usually the first key, by convention
-            $newData['security'] = ['encoders' => []] + $newData['security'];
+        if ('password_hashers' === $keyName && isset($newData['security']['encoders'])) {
+            // fallback to "encoders" if the user already defined encoder config
+            $this->updatePasswordHashers($userClass, $userClass, 'encoders');
+
+            return;
         }
 
-        $newData['security']['encoders'][$userClass] = [
-            'algorithm' => $userConfig->shouldUseArgon2() ? 'argon2i' : (class_exists(NativePasswordEncoder::class) ? 'auto' : 'bcrypt'),
+        if (!isset($newData['security'][$keyName])) {
+            // by convention, password_hashers are put before the user provider option
+            $providersIndex = array_search('providers', array_keys($newData['security']));
+            if (false === $providersIndex) {
+                $newData['security'] = [$keyName => []] + $newData['security'];
+            } else {
+                $newData['security'] = array_merge(
+                    \array_slice($newData['security'], 0, $providersIndex),
+                    [$keyName => []],
+                    \array_slice($newData['security'], $providersIndex)
+                );
+            }
+        }
+
+        $newData['security'][$keyName][$userClass] = [
+            'algorithm' => $userConfig->shouldUseArgon2() ? 'argon2i' : ((class_exists(NativePasswordHasher::class) || class_exists(NativePasswordEncoder::class)) ? 'auto' : 'bcrypt'),
         ];
-        $newData['security']['encoders']['_'] = $this->manipulator->createEmptyLine();
+        $newData['security'][$keyName]['_'] = $this->manipulator->createEmptyLine();
 
         $this->manipulator->setData($newData);
     }
