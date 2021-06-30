@@ -266,7 +266,7 @@ final class MakeRegistrationForm extends AbstractMaker
             'Security\\'
         );
 
-        if ($input->getArgument('will-verify-email')) {
+        if (($willVerify = $input->getArgument('will-verify-email'))) {
             $generator->generateClass(
                 $verifyEmailServiceClassNameDetails->getFullName(),
                 'verifyEmail/EmailVerifier.tpl.php',
@@ -332,6 +332,7 @@ final class MakeRegistrationForm extends AbstractMaker
             'registration/twig_template.tpl.php',
             [
                 'username_field' => $usernameField,
+                'will_verify_email' => $willVerify,
             ]
         );
 
