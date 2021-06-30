@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
@@ -223,7 +224,7 @@ class Generator
             $controllerTemplatePath,
             $parameters +
             [
-                'parent_class_name' => method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
+                'parent_class_name' => static::getControllerBaseClass()->getShortName(),
             ]
         );
     }
@@ -238,5 +239,13 @@ class Generator
             $templateName,
             $variables
         );
+    }
+
+    public static function getControllerBaseClass(): ClassNameDetails
+    {
+        // Support for Controller::class can be dropped when FrameworkBundle minimum supported version is >=4.1
+        $class = method_exists(AbstractController::class, 'getParameter') ? AbstractController::class : Controller::class;
+
+        return new ClassNameDetails($class, '\\');
     }
 }

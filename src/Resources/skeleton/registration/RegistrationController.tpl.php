@@ -2,34 +2,7 @@
 
 namespace <?= $namespace; ?>;
 
-use <?= $user_full_class_name ?>;
-use <?= $form_full_class_name ?>;
-<?php if ($will_verify_email): ?>
-use <?= $verify_email_security_service; ?>;
-<?php endif; ?>
-<?php if ($authenticator_full_class_name): ?>
-use <?= $authenticator_full_class_name; ?>;
-<?php endif; ?>
-<?php if ($will_verify_email): ?>
-<?php if ($verify_email_anonymously): ?>
-use <?= $repository_full_class_name; ?>;
-<?php endif; ?>
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-<?php endif; ?>
-use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name; ?>;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-<?php if ($will_verify_email): ?>
-use Symfony\Component\Mime\Address;
-<?php endif; ?>
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-<?php if ($authenticator_full_class_name): ?>
-use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
-<?php endif; ?>
-<?php if ($will_verify_email): ?>
-use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
-<?php endif; ?>
+<?= $use_statements; ?>
 
 class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 {
