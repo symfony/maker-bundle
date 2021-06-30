@@ -593,5 +593,28 @@ class MakeEntityTest extends MakerTestCase
                 $this->assertStringContainsString(\PHP_VERSION_ID >= 80000 ? '#[Broadcast]' : '@Broadcast', $content);
             }),
         ];
+
+        yield 'entity_new_with_api_and_broadcast_dependencies' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // Mark the entity as not an API Platform resource
+                'n',
+                // Mark the entity as not broadcasted
+                'n',
+                // add not additional fields
+                '',
+            ])
+            ->setRequiredPhpVersion(70200)
+            ->addExtraDependencies('api')
+            ->addExtraDependencies('ux-turbo-mercure')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->assert(function (string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Entity/User.php');
+            }),
+        ];
     }
 }
