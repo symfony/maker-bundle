@@ -176,6 +176,9 @@ class TestEntityRegeneratorKernel extends Kernel
             'router' => [
                 'utf8' => true,
             ],
+            'annotations' => [
+                'enabled' => true,
+            ],
         ]);
 
         $dbal = [
