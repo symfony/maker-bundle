@@ -18,6 +18,13 @@ namespace Symfony\Bundle\MakerBundle\Util;
  */
 final class TemplateComponentGenerator
 {
+    private $phpCompatUtil;
+
+    public function __construct(PhpCompatUtil $phpCompatUtil)
+    {
+        $this->phpCompatUtil = $phpCompatUtil;
+    }
+
     public static function generateUseStatements(array $classesToBeImported): string
     {
         $transformed = [];
@@ -35,5 +42,18 @@ final class TemplateComponentGenerator
         }
 
         return $statements;
+    }
+
+    public function generateRouteForControllerMethod(string $routePath, string $routeName): string
+    {
+        if ($this->phpCompatUtil->canUseAttributes()) {
+            return sprintf("    #[Route('%s', name: '%s')]\n", $routePath, $routeName);
+        }
+
+        $annotation = "    /**\n";
+        $annotation .= sprintf("     * @Route(\"%s\", name=\"%s\")\n", $routePath, $routeName);
+        $annotation .= "     */\n";
+
+        return $annotation;
     }
 }

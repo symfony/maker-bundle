@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\Sorter;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 
@@ -76,5 +77,39 @@ use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 
 EOT;
         self::assertSame($expected, $result);
+    }
+
+    public function testRouteAttributes(): void
+    {
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+        $mockPhpCompatUtil
+            ->expects(self::once())
+            ->method('canUseAttributes')
+            ->willReturn(true)
+        ;
+
+        $generator = new TemplateComponentGenerator($mockPhpCompatUtil);
+
+        $expected = "    #[Route('/', name: 'app_home')]\n";
+
+        self::assertSame($expected, $generator->generateRouteForControllerMethod('/', 'app_home'));
+    }
+
+    public function testRouteAnnotations(): void
+    {
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+        $mockPhpCompatUtil
+            ->expects(self::once())
+            ->method('canUseAttributes')
+            ->willReturn(false)
+        ;
+
+        $generator = new TemplateComponentGenerator($mockPhpCompatUtil);
+
+        $expected = "    /**\n";
+        $expected .= "     * @Route(\"/\", name=\"app_home\")\n";
+        $expected .= "     */\n";
+
+        self::assertSame($expected, $generator->generateRouteForControllerMethod('/', 'app_home'));
     }
 }
