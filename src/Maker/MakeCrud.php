@@ -15,6 +15,7 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Common\Inflector\Inflector as LegacyInflector;
 use Doctrine\Inflector\InflectorFactory;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -168,6 +169,7 @@ final class MakeCrud extends AbstractMaker
                     'entity_var_singular' => $entityVarSingular,
                     'entity_twig_var_singular' => $entityTwigVarSingular,
                     'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
+                    'use_render_form' => method_exists(AbstractController::class, 'renderForm'),
                 ],
                 $repositoryVars
             )
