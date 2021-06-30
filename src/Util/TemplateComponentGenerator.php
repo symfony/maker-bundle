@@ -44,15 +44,45 @@ final class TemplateComponentGenerator
         return $statements;
     }
 
-    public function generateRouteForControllerMethod(string $routePath, string $routeName): string
+    public function generateRouteForControllerMethod(string $routePath, string $routeName, array $methods = [], bool $ident = true, bool $trailingNewLine = true): string
     {
         if ($this->phpCompatUtil->canUseAttributes()) {
-            return sprintf("    #[Route('%s', name: '%s')]\n", $routePath, $routeName);
+            $attribute = sprintf('%s#[Route(\'%s\', name: \'%s\'', $ident ? '    ' : null, $routePath, $routeName);
+
+            if (!empty($methods)) {
+                $attribute .= ', methods: [';
+
+                foreach ($methods as $method) {
+                    $attribute .= sprintf('\'%s\',', $method);
+                }
+
+                $attribute = rtrim($attribute, ',');
+
+                $attribute .= ']';
+            }
+
+            $attribute .= sprintf(')]%s', $trailingNewLine ? "\n" : null);
+
+            return $attribute;
         }
 
-        $annotation = "    /**\n";
-        $annotation .= sprintf("     * @Route(\"%s\", name=\"%s\")\n", $routePath, $routeName);
-        $annotation .= "     */\n";
+        $annotation = sprintf('%s/**%s', $ident ? '    ' : null, "\n");
+        $annotation .= sprintf('%s * @Route("%s", name="%s"', $ident ? '    ' : null, $routePath, $routeName);
+
+        if (!empty($methods)) {
+            $annotation .= ', methods={';
+
+            foreach ($methods as $method) {
+                $annotation .= sprintf('"%s",', $method);
+            }
+
+            $annotation = rtrim($annotation, ',');
+
+            $annotation .= '}';
+        }
+
+        $annotation .= sprintf(')%s', "\n");
+        $annotation .= sprintf('%s */%s', $ident ? '    ' : null, $trailingNewLine ? "\n" : null);
 
         return $annotation;
     }
