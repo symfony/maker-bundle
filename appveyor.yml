@@ -21,6 +21,7 @@ init:
     - SET PHP=0 # This var is connected to PHP install cache
     - SET ANSICON=121x90 (121x90)
     - SET MAKER_DISABLE_FILE_LINKS=1
+    - SET MAKER_SKIP_MERCURE_TEST=1
 
 environment:
     TEST_DATABASE_DSN: mysql://root:Password12!@127.0.0.1:3306/test_maker
