@@ -21,6 +21,7 @@
 
             <service id="maker.maker.make_controller" class="Symfony\Bundle\MakerBundle\Maker\MakeController">
                 <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.php_compat_util" />
                 <tag name="maker.command" />
             </service>
 
