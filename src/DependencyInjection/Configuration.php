@@ -32,6 +32,12 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('root_namespace')->defaultValue('App')->end()
+                ->arrayNode('entity')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('repository_examples')->defaultTrue()->end()
+                    ->end()
+                ->end()
             ->end()
         ;
 
