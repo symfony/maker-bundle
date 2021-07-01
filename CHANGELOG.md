@@ -1,5 +1,19 @@
 # Changelog
 
+## [v1.33.0](https://github.com/symfony/maker-bundle/releases/tag/v1.33.0)
+
+*June 30th, 2021*
+
+### Feature
+
+- [#895](https://github.com/symfony/maker-bundle/pull/895) - [make:crud] send the proper HTTP status codes and use renderForm() when available - *@dunglas*
+- [#889](https://github.com/symfony/maker-bundle/pull/889) - [make:user] Use password_hashers instead of encoders - *@wouterj*
+
+### Bug Fix
+
+- [#913](https://github.com/symfony/maker-bundle/pull/913) - [make:registration] conditionally generate verify email flash in template - *@jrushlow*
+- [#881](https://github.com/symfony/maker-bundle/pull/881) - [make:entity] Fix error when API-Platform is installed. - *@MichaelBrauner*
+
 ## [v1.32.0](https://github.com/symfony/maker-bundle/releases/tag/v1.32.0)
 
 *June 18th, 2021*
