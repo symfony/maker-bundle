@@ -41,10 +41,6 @@ class SetDoctrineAnnotatedPrefixesPass implements CompilerPassInterface
             $methodCalls = $metadataDriverImpl->getMethodCalls();
 
             foreach ($methodCalls as $i => [$method, $arguments]) {
-                if ('addDriver' !== $method) {
-                    continue;
-                }
-
                 if ($arguments[0] instanceof Definition) {
                     $class = $arguments[0]->getClass();
                     $namespace = substr($class, 0, strrpos($class, '\\'));
@@ -59,10 +55,9 @@ class SetDoctrineAnnotatedPrefixesPass implements CompilerPassInterface
                     $methodCalls[$i] = $arguments;
                 }
 
-                $isAnnotated = false !== strpos($arguments[0], '_annotation_metadata_driver');
                 $annotatedPrefixes[$managerName][] = [
                     $arguments[1],
-                    $isAnnotated ? new Reference($arguments[0]) : null,
+                    new Reference($arguments[0]),
                 ];
             }
 
