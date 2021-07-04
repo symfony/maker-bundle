@@ -86,7 +86,6 @@ final class DoctrineHelper
         return $this->entityNamespace;
     }
 
-    // check is not needed anymore
     public function isClassAnnotated(string $className): bool
     {
         /** @var EntityManagerInterface $em */
@@ -235,7 +234,7 @@ final class DoctrineHelper
             return false;
         }
 
-        return (bool) $this->getMetadata($className);
+        return (bool)$this->getMetadata($className);
     }
 
     private function isInstanceOf($object, string $class): bool
@@ -271,13 +270,18 @@ final class DoctrineHelper
         return $connection->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name);
     }
 
+    /**
+     * this method try to find the correct MappingDriver for the given namespace/class
+     * To determine which MappingDriver belongs to the class we check the prefixes configured in Doctrine and use the
+     * prefix that has the closest match to the given $namespace
+     */
     public function getMappingDriverForNamespace(string $namespace): ?MappingDriver
     {
         $lowestCharacterDiff = null;
         $foundDriver = null;
 
         foreach ($this->annotatedPrefixes as $key => $mappings) {
-            foreach($mappings as [$prefix, $driver]) {
+            foreach ($mappings as [$prefix, $driver]) {
                 $diff = substr_compare($namespace, $prefix, 0);
 
                 if (null === $lowestCharacterDiff || $diff < $lowestCharacterDiff) {

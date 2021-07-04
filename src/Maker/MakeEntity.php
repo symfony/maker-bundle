@@ -837,23 +837,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }, $reflClass->getProperties());
     }
 
-    // not needed anymore
-    private function doesEntityUseAnnotationMapping(string $className): bool
-    {
-        if (!class_exists($className)) {
-            $otherClassMetadatas = $this->doctrineHelper->getMetadata(Str::getNamespace($className).'\\', true);
-
-            // if we have no metadata, we should assume this is the first class being mapped
-            if (empty($otherClassMetadatas)) {
-                return false;
-            }
-
-            $className = reset($otherClassMetadatas)->getName();
-        }
-
-        return $this->doctrineHelper->isClassAnnotated($className);
-    }
-
     private function getEntityNamespace(): string
     {
         return $this->doctrineHelper->getEntityNamespace();
