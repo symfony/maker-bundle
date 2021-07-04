@@ -1365,6 +1365,13 @@ final class ClassSourceManipulator
         }
     }
 
+    /**
+     * builds a PHPParser Expr Node based on the value given in $value
+     * throws an Exception when the given $value is not resolvable by this method
+     *
+     * @param mixed $value
+     * @throws \Exception
+     */
     private function buildNodeExprByValue($value): Node\Expr
     {
         switch (gettype($value)) {
@@ -1405,6 +1412,12 @@ final class ClassSourceManipulator
         return $nodeValue;
     }
 
+    /**
+     * builds an PHPParser attribute node
+     *
+     * @param string $attributeClass    the attribute class which should be used for the attribute
+     * @param array $options            the named arguments for the attribute ($key = argument name, $value = argument value)
+     */
     private function buildAttributeNode(string $attributeClass, array $options)
     {
         $options = $this->sortOptionsByClassConstructorParameters($options, $attributeClass);
@@ -1420,6 +1433,12 @@ final class ClassSourceManipulator
         );
     }
 
+    /**
+     * sort the given options based on the constructor parameters for the given $classString
+     * this prevents code inspections warnings for IDEs like intellij/phpstorm
+     *
+     * option keys that are not found in the constructor will be added at the end of the sorted array
+     */
     private function sortOptionsByClassConstructorParameters(array $options, string $classString): array
     {
         if (substr($classString, 0, 4) === 'ORM\\') {
