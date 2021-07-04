@@ -57,7 +57,9 @@
                 <argument type="service" id="maker.doctrine_helper" />
             </service>
 
-            <service id="maker.user_class_builder" class="Symfony\Bundle\MakerBundle\Security\UserClassBuilder" />
+            <service id="maker.user_class_builder" class="Symfony\Bundle\MakerBundle\Security\UserClassBuilder">
+                <argument type="service" id="maker.php_compat_util" />
+            </service>
 
             <service id="maker.security_config_updater" class="Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater" />
 

@@ -123,6 +123,7 @@ class EntityRegeneratorTest extends TestCase
             $fileManager,
             $generator,
             $entityClassGenerator,
+            $phpCompatUtil,
             $overwrite
         );
 

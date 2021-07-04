@@ -83,9 +83,9 @@ final class ClassSourceManipulator
         return $this->sourceCode;
     }
 
-    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [])
+    public function addEntityField(PhpCompatUtil $phpCompatUtil, string $propertyName, array $columnOptions, array $comments = [])
     {
-        $typeHint = $this->getEntityTypeHint($columnOptions['type']);
+        $typeHint = $this->getEntityTypeHint($phpCompatUtil, $columnOptions['type']);
         $nullable = $columnOptions['nullable'] ?? false;
         $isId = (bool) ($columnOptions['id'] ?? false);
 
@@ -1071,7 +1071,7 @@ final class ClassSourceManipulator
         $methodBuilder->setReturnType('self');
     }
 
-    private function getEntityTypeHint($doctrineType)
+    private function getEntityTypeHint(PhpCompatUtil $phpCompatUtil, $doctrineType)
     {
         switch ($doctrineType) {
             case 'string':
@@ -1113,6 +1113,8 @@ final class ClassSourceManipulator
                 return '\\'.\DateInterval::class;
 
             case 'object':
+                return $phpCompatUtil->canUseObjectTypehint() ? 'object' : null;
+
             case 'binary':
             case 'blob':
             default:

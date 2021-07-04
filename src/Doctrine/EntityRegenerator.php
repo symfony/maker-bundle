@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 
 /**
  * @internal
@@ -29,14 +30,16 @@ final class EntityRegenerator
     private $fileManager;
     private $generator;
     private $entityClassGenerator;
+    private $phpCompatUtil;
     private $overwrite;
 
-    public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, EntityClassGenerator $entityClassGenerator, bool $overwrite)
+    public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, EntityClassGenerator $entityClassGenerator, PhpCompatUtil $phpCompatUtil, bool $overwrite)
     {
         $this->doctrineHelper = $doctrineHelper;
         $this->fileManager = $fileManager;
         $this->generator = $generator;
         $this->entityClassGenerator = $entityClassGenerator;
+        $this->phpCompatUtil = $phpCompatUtil;
         $this->overwrite = $overwrite;
     }
 
@@ -96,7 +99,7 @@ final class EntityRegenerator
                 if (false !== strpos($fieldName, '.')) {
                     list($fieldName, $embeddedFiledName) = explode('.', $fieldName);
 
-                    $operations[$embeddedClasses[$fieldName]]->addEntityField($embeddedFiledName, $mapping);
+                    $operations[$embeddedClasses[$fieldName]]->addEntityField($this->phpCompatUtil, $embeddedFiledName, $mapping);
 
                     continue;
                 }
@@ -105,7 +108,7 @@ final class EntityRegenerator
                     continue;
                 }
 
-                $manipulator->addEntityField($fieldName, $mapping);
+                $manipulator->addEntityField($this->phpCompatUtil, $fieldName, $mapping);
             }
 
             $getIsNullable = function (array $mapping) {

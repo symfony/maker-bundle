@@ -186,6 +186,55 @@ class PhpVersionTest extends TestCase
         yield ['7.0', false];
         yield ['5.7', false];
     }
+
+    /**
+     * @dataProvider phpVersionForObjectTypehintDataProvider
+     */
+    public function testCanUseObjectTypehint(string $version, bool $expectedResult): void
+    {
+        $json = sprintf('{"platform-overrides": {"php": "%s"}}', $version);
+
+        $mockFileManager = $this->createMock(FileManager::class);
+        $mockFileManager
+            ->expects(self::once())
+            ->method('getRootDirectory')
+            ->willReturn('/test')
+        ;
+
+        $mockFileManager
+            ->expects(self::once())
+            ->method('fileExists')
+            ->with('/test/composer.lock')
+            ->willReturn(true)
+        ;
+
+        $mockFileManager
+            ->expects(self::once())
+            ->method('getFileContents')
+            ->with('/test/composer.lock')
+            ->willReturn($json)
+        ;
+
+        $version = new PhpCompatUtil($mockFileManager);
+
+        $result = $version->canUseObjectTypehint();
+
+        self::assertSame($expectedResult, $result);
+    }
+
+    public function phpVersionForObjectTypehintDataProvider(): \Generator
+    {
+        yield ['8', true];
+        yield ['8.0.1', true];
+        yield ['8RC1', true];
+        yield ['7.4', true];
+        yield ['7.4.6', true];
+        yield ['7.2.1', true];
+        yield ['7.2', true];
+        yield ['7.1.5', false];
+        yield ['7', false];
+        yield ['5.7', false];
+    }
 }
 
 class PhpCompatUtilTestFixture extends PhpCompatUtil

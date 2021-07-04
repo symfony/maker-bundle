@@ -18,6 +18,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class ClassSourceManipulatorTest extends TestCase
@@ -207,8 +208,11 @@ class ClassSourceManipulatorTest extends TestCase
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_entity_field/'.$expectedSourceFilename);
 
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+        $mockPhpCompatUtil->method('canUseObjectTypehint')->willReturn(\PHP_VERSION_ID >= 70200);
+
         $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addEntityField($propertyName, $fieldOptions);
+        $manipulator->addEntityField($mockPhpCompatUtil, $propertyName, $fieldOptions);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -257,6 +261,15 @@ class ClassSourceManipulatorTest extends TestCase
                 'scale' => 0,
             ],
             'User_simple_prop_zero.php',
+        ];
+
+        yield 'entity_add_object' => [
+            'User_simple.php',
+            'someObject',
+            [
+                'type' => 'object',
+            ],
+            \PHP_VERSION_ID < 70200 ? 'User_simple_object71.php' : 'User_simple_object72.php',
         ];
     }
 

@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Security;
 
 use PhpParser\Node;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -25,6 +26,13 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class UserClassBuilder
 {
+    private $phpCompatUtil;
+
+    public function __construct(PhpCompatUtil $phpCompatUtil)
+    {
+        $this->phpCompatUtil = $phpCompatUtil;
+    }
+
     public function addUserInterfaceImplementation(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
     {
         $manipulator->addInterface(UserInterface::class);
@@ -73,6 +81,7 @@ final class UserClassBuilder
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
+                $this->phpCompatUtil,
                 $userClassConfig->getIdentityPropertyName(),
                 [
                     'type' => 'string',
@@ -134,6 +143,7 @@ final class UserClassBuilder
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
+                $this->phpCompatUtil,
                 'roles',
                 [
                     'type' => 'json',
@@ -240,6 +250,7 @@ final class UserClassBuilder
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
+                $this->phpCompatUtil,
                 'password',
                 [
                     'type' => 'string',

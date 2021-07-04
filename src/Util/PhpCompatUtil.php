@@ -36,6 +36,13 @@ class PhpCompatUtil
         return version_compare($version, '8alpha', '>=') && Kernel::VERSION_ID >= 50200;
     }
 
+    public function canUseObjectTypehint(): bool
+    {
+        $version = $this->getPhpVersion();
+
+        return version_compare($version, '7.2', '>=');
+    }
+
     public function canUseTypedProperties(): bool
     {
         $version = $this->getPhpVersion();

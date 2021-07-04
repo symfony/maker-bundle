@@ -41,6 +41,7 @@
                 <argument>%kernel.project_dir%</argument>
                 <argument type="service" id="maker.generator" />
                 <argument type="service" id="maker.entity_class_generator" />
+                <argument type="service" id="maker.php_compat_util" />
                 <tag name="maker.command" />
             </service>
 

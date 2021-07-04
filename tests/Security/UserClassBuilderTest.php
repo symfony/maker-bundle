@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\UserClassBuilder;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\User;
 
@@ -31,7 +32,9 @@ class UserClassBuilderTest extends TestCase
 
         $manipulator = $this->getClassSourceManipulator($userClassConfig);
 
-        $classBuilder = new UserClassBuilder();
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+
+        $classBuilder = new UserClassBuilder($mockPhpCompatUtil);
         $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig);
 
         $expectedPath = $this->getExpectedPath($expectedFilename);
@@ -92,7 +95,9 @@ class UserClassBuilderTest extends TestCase
 
         $manipulator = $this->getClassSourceManipulator($userClassConfig);
 
-        $classBuilder = new UserClassBuilder();
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+
+        $classBuilder = new UserClassBuilder($mockPhpCompatUtil);
         $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig);
 
         $expectedPath = $this->getExpectedPath($expectedFilename, 'legacy_get_username');
@@ -134,7 +139,9 @@ class UserClassBuilderTest extends TestCase
 
         $manipulator = $this->getClassSourceManipulator($userClassConfig);
 
-        $classBuilder = new UserClassBuilder();
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+
+        $classBuilder = new UserClassBuilder($mockPhpCompatUtil);
         $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig);
 
         $expectedPath = $this->getExpectedPath($expectedFilename, 'legacy_get_password');
