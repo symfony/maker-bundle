@@ -41,6 +41,7 @@ final class ClassSourceManipulator
 
     private $overwrite;
     private $useAnnotations;
+    private $useAttributes;
     private $fluentMutators;
     private $parser;
     private $lexer;
@@ -55,7 +56,7 @@ final class ClassSourceManipulator
 
     private $pendingComments = [];
 
-    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true)
+    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true, bool $useAttributes = false)
     {
         $this->overwrite = $overwrite;
         $this->useAnnotations = $useAnnotations;
@@ -71,6 +72,7 @@ final class ClassSourceManipulator
         $this->printer = new PrettyPrinter();
 
         $this->setSourceCode($sourceCode);
+        $this->useAttributes = $useAttributes;
     }
 
     public function setIo(ConsoleStyle $io)
@@ -83,18 +85,23 @@ final class ClassSourceManipulator
         return $this->sourceCode;
     }
 
-    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [])
+    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [], array $attributes = [])
     {
         $typeHint = $this->getEntityTypeHint($columnOptions['type']);
         $nullable = $columnOptions['nullable'] ?? false;
         $isId = (bool) ($columnOptions['id'] ?? false);
 
-        $comments[] = $this->buildAnnotationLine('@ORM\Column', $columnOptions);
+        if ($this->useAnnotations) {
+            $comments[] = $this->buildAnnotationLine('@ORM\Column', $columnOptions);
+        } elseif ($this->useAttributes) {
+            $attributes[] = $this->buildAttributeNode('ORM\Column', $columnOptions);
+        }
+
         $defaultValue = null;
         if ('array' === $typeHint) {
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
         }
-        $this->addProperty($propertyName, $comments, $defaultValue);
+        $this->addProperty($propertyName, $comments, $defaultValue, $attributes);
 
         $this->addGetter(
             $propertyName,
@@ -123,7 +130,16 @@ final class ClassSourceManipulator
             ),
         ];
 
-        $this->addProperty($propertyName, $annotations);
+        $attributes = [
+            $this->buildAttributeNode(
+                'ORM\\Embedded',
+                [
+                    'class' => new ClassNameValue($className, $typeHint)
+                ]
+            )
+        ];
+
+        $this->addProperty($propertyName, $annotations, null, $attributes);
 
         // logic to avoid re-adding the same ArrayCollection line
         $addEmbedded = true;
@@ -311,7 +327,7 @@ final class ClassSourceManipulator
         return $this->createBlankLineNode(self::CONTEXT_CLASS_METHOD);
     }
 
-    public function addProperty(string $name, array $annotationLines = [], $defaultValue = null)
+    public function addProperty(string $name, array $annotationLines = [], $defaultValue = null, array $attributes = [])
     {
         if ($this->propertyExists($name)) {
             // we never overwrite properties
@@ -321,6 +337,12 @@ final class ClassSourceManipulator
         $newPropertyBuilder = (new Builder\Property($name))->makePrivate();
         if ($annotationLines && $this->useAnnotations) {
             $newPropertyBuilder->setDocComment($this->createDocBlock($annotationLines));
+        }
+
+        if ($attributes && $this->useAttributes) {
+            foreach ($attributes as $attribute) {
+                $newPropertyBuilder->addAttribute($attribute);
+            }
         }
 
         if (null !== $defaultValue) {
@@ -502,13 +524,23 @@ final class ClassSourceManipulator
             ),
         ];
 
+        $attributes = [
+            $this->buildAttributeNode(
+                $relation instanceof RelationManyToOne ? 'ORM\\ManyToOne' : 'ORM\\OneToOne',
+                $annotationOptions
+            )
+        ];
+
         if (!$relation->isNullable() && $relation->isOwning()) {
             $annotations[] = $this->buildAnnotationLine('@ORM\\JoinColumn', [
                 'nullable' => false,
             ]);
+            $attributes[] = $this->buildAttributeNode('ORM\\JoinColumn', [
+                'nullable' => false
+            ]);
         }
 
-        $this->addProperty($relation->getPropertyName(), $annotations);
+        $this->addProperty($relation->getPropertyName(), $annotations, null, $attributes);
 
         $this->addGetter(
             $relation->getPropertyName(),
@@ -579,8 +611,14 @@ final class ClassSourceManipulator
                 $annotationOptions
             ),
         ];
+        $attributes = [
+            $this->buildAttributeNode(
+                $relation instanceof RelationManyToMany ? 'ORM\\ManyToMany' : 'ORM\\OneToMany',
+                $annotationOptions
+            )
+        ];
 
-        $this->addProperty($relation->getPropertyName(), $annotations);
+        $this->addProperty($relation->getPropertyName(), $annotations, null, $attributes);
 
         // logic to avoid re-adding the same ArrayCollection line
         $addArrayCollection = true;
@@ -1325,5 +1363,79 @@ final class ClassSourceManipulator
         foreach ($params as $param) {
             $methodBuilder->addParam($param);
         }
+    }
+
+    private function buildNodeExprByValue($value): Node\Expr
+    {
+        switch (gettype($value)) {
+            case 'string':
+                $nodeValue = new Node\Scalar\String_($value);
+                break;
+            case 'integer':
+                $nodeValue = new Node\Scalar\LNumber($value);
+                break;
+            case 'double':
+                $nodeValue = new Node\Scalar\DNumber($value);
+                break;
+            case 'boolean':
+                $nodeValue = new Node\Expr\ConstFetch(new Node\Name($value ? 'true' : 'false'));
+                break;
+            case 'array':
+                $context = $this;
+                $arrayItems = array_map(static function ($key, $value) use ($context) {
+                    return new Node\Expr\ArrayItem(
+                        $context->buildNodeExprByValue($value),
+                        !is_int($key) ? $context->buildNodeExprByValue($key) : null
+                    );
+                }, array_keys($value), array_values($value));
+                $nodeValue = new Node\Expr\Array_($arrayItems, ['kind' => Node\Expr\Array_::KIND_SHORT]);
+                break;
+            default:
+                $nodeValue = null;
+        }
+
+        if ($nodeValue === null) {
+            if ($value instanceof ClassNameValue) {
+                $nodeValue = new Node\Expr\ConstFetch(new Node\Name(\sprintf('%s::class', $value->getShortName())));
+            }
+        }
+
+        return $nodeValue;
+    }
+
+    private function buildAttributeNode(string $attributeClass, array $options)
+    {
+        $options = $this->sortOptionsByClassConstructorParameters($options, $attributeClass);
+
+        $context = $this;
+        $nodeArguments = \array_map(static function ($option, $value) use ($context) {
+            return new Node\Arg($context->buildNodeExprByValue($value), false, false, [], new Node\Identifier($option));
+        }, array_keys($options), array_values($options));
+
+        return new Node\Attribute(
+            new Node\Name($attributeClass),
+            $nodeArguments
+        );
+    }
+
+    private function sortOptionsByClassConstructorParameters(array $options, string $classString): array
+    {
+        if (substr($classString, 0, 4) === 'ORM\\') {
+            $classString = sprintf('Doctrine\\ORM\\Mapping\\%s', substr($classString, 4));
+        }
+
+        $constructorParameterNames = array_map(static function (\ReflectionParameter $reflectionParameter) {
+            return $reflectionParameter->getName();
+        }, (new \ReflectionClass($classString))->getConstructor()->getParameters());
+
+        $sorted = [];
+        foreach ($constructorParameterNames as $name) {
+            if (array_key_exists($name, $options)) {
+                $sorted[$name] = $options[$name];
+                unset($options[$name]);
+            }
+        }
+
+        return array_merge($sorted, $options);
     }
 }

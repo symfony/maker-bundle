@@ -23,6 +23,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\AbstractClassMetadataFactory;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\Driver\AnnotationDriver;
+use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
@@ -85,6 +86,7 @@ final class DoctrineHelper
         return $this->entityNamespace;
     }
 
+    // check is not needed anymore
     public function isClassAnnotated(string $className): bool
     {
         /** @var EntityManagerInterface $em */
@@ -267,5 +269,23 @@ final class DoctrineHelper
         $connection = $this->getRegistry()->getConnection();
 
         return $connection->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name);
+    }
+
+    public function getMappingDriverForNamespace(string $namespace): ?MappingDriver
+    {
+        $lowestCharacterDiff = null;
+        $foundDriver = null;
+
+        foreach ($this->annotatedPrefixes as $key => $mappings) {
+            foreach($mappings as [$prefix, $driver]) {
+                $diff = substr_compare($namespace, $prefix, 0);
+
+                if (null === $lowestCharacterDiff || $diff < $lowestCharacterDiff) {
+                    $foundDriver = $driver;
+                }
+            }
+        }
+
+        return $foundDriver;
     }
 }
