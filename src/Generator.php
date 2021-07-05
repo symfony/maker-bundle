@@ -16,6 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
+use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -28,8 +29,9 @@ class Generator
     private $pendingOperations = [];
     private $namespacePrefix;
     private $phpCompatUtil;
+    private $templateComponentGenerator;
 
-    public function __construct(FileManager $fileManager, string $namespacePrefix, PhpCompatUtil $phpCompatUtil = null)
+    public function __construct(FileManager $fileManager, string $namespacePrefix, PhpCompatUtil $phpCompatUtil = null, TemplateComponentGenerator $templateComponentGenerator = null)
     {
         $this->fileManager = $fileManager;
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
@@ -42,6 +44,7 @@ class Generator
         }
 
         $this->phpCompatUtil = $phpCompatUtil;
+        $this->templateComponentGenerator = $templateComponentGenerator;
     }
 
     /**
@@ -224,6 +227,7 @@ class Generator
             $controllerTemplatePath,
             $parameters +
             [
+                'generator' => $this->templateComponentGenerator,
                 'parent_class_name' => static::getControllerBaseClass()->getShortName(),
             ]
         );
