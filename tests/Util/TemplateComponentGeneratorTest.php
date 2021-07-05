@@ -112,4 +112,98 @@ EOT;
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod('/', 'app_home'));
     }
+
+    /**
+     * @dataProvider routeMethodDataProvider
+     */
+    public function testRouteMethods(string $expected, bool $useAttribute, array $methods): void
+    {
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+        $mockPhpCompatUtil
+            ->expects(self::once())
+            ->method('canUseAttributes')
+            ->willReturn($useAttribute)
+        ;
+
+        $generator = new TemplateComponentGenerator($mockPhpCompatUtil);
+
+        if (!$useAttribute) {
+            $annotation = "    /**\n";
+            $annotation .= $expected;
+            $annotation .= "     */\n";
+
+            $expected = $annotation;
+        }
+
+        self::assertSame($expected, $generator->generateRouteForControllerMethod(
+            '/',
+            'app_home',
+            $methods
+        ));
+    }
+
+    public function routeMethodDataProvider(): \Generator
+    {
+        yield ["    #[Route('/', name: 'app_home', methods: ['GET'])]\n", true, ['GET']];
+        yield ["     * @Route(\"/\", name=\"app_home\", methods={\"GET\"})\n", false, ['GET']];
+        yield ["    #[Route('/', name: 'app_home', methods: ['GET','POST'])]\n", true, ['GET', 'POST']];
+        yield ["     * @Route(\"/\", name=\"app_home\", methods={\"GET\",\"POST\"})\n", false, ['GET', 'POST']];
+    }
+
+    /**
+     * @dataProvider routeIndentationDataProvider
+     */
+    public function testRouteIndentation(string $expected, bool $useAttribute): void
+    {
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+        $mockPhpCompatUtil
+            ->expects(self::once())
+            ->method('canUseAttributes')
+            ->willReturn($useAttribute)
+        ;
+
+        $generator = new TemplateComponentGenerator($mockPhpCompatUtil);
+
+        self::assertSame($expected, $generator->generateRouteForControllerMethod(
+            '/',
+            'app_home',
+            [],
+            false
+        ));
+    }
+
+    public function routeIndentationDataProvider(): \Generator
+    {
+        yield ["#[Route('/', name: 'app_home')]\n", true];
+        yield ["/**\n * @Route(\"/\", name=\"app_home\")\n */\n", false];
+    }
+
+    /**
+     * @dataProvider routeTrailingNewLineDataProvider
+     */
+    public function testRouteTrailingNewLine(string $expected, bool $useAttribute): void
+    {
+        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
+        $mockPhpCompatUtil
+            ->expects(self::once())
+            ->method('canUseAttributes')
+            ->willReturn($useAttribute)
+        ;
+
+        $generator = new TemplateComponentGenerator($mockPhpCompatUtil);
+
+        self::assertSame($expected, $generator->generateRouteForControllerMethod(
+            '/',
+            'app_home',
+            [],
+            false,
+            false
+        ));
+    }
+
+    public function routeTrailingNewLineDataProvider(): \Generator
+    {
+        yield ["#[Route('/', name: 'app_home')]", true];
+        yield ["/**\n * @Route(\"/\", name=\"app_home\")\n */", false];
+    }
 }
