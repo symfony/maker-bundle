@@ -7,11 +7,11 @@ namespace <?= $namespace; ?>;
 class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 {
 <?php if ($will_verify_email): ?>
-    private $emailVerifier;
+<?= $email_verifier_details->getPropertyStatement() ?>
 
-    public function __construct(EmailVerifier $emailVerifier)
+    public function __construct(<?= $email_verifier_details->getMethodArgument() ?>)
     {
-        $this->emailVerifier = $emailVerifier;
+        <?= $email_verifier_details->getConstructorArgument(true, false) ?>
     }
 
 <?php endif; ?>
@@ -22,7 +22,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
      * @Route("<?= $route_path ?>", name="<?= $route_name ?>")
      */
 <?php } ?>
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder<?= $authenticator_full_class_name ? sprintf(', GuardAuthenticatorHandler $guardHandler, %s $authenticator', $authenticator_class_name) : '' ?>): Response
+    public function register(Request $request, <?= $password_details->getMethodArgument() ?><?= $authenticator_full_class_name ? sprintf(', GuardAuthenticatorHandler $guardHandler, %s $authenticator', $authenticator_class_name) : '' ?>): Response
     {
         $user = new <?= $user_class_name ?>();
         $form = $this->createForm(<?= $form_class_name ?>::class, $user);
@@ -31,7 +31,11 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
         if ($form->isSubmitted() && $form->isValid()) {
             // encode the plain password
             $user->set<?= ucfirst($password_field) ?>(
-                $passwordEncoder->encodePassword(
+<?php if ($use_password_hasher) : ?>
+                <?= $password_details->getVariable() ?>->hashPassword(
+<?php else: ?>
+                <?= $password_details->getVariable() ?>->encodePassword(
+<?php endif; ?>
                     $user,
                     $form->get('plainPassword')->getData()
                 )
@@ -43,7 +47,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 <?php if ($will_verify_email): ?>
 
             // generate a signed url and email it to the user
-            $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
+            <?= $email_verifier_details->getProperty() ?>->sendEmailConfirmation('app_verify_email', $user,
                 (new TemplatedEmail())
                     ->from(new Address('<?= $from_email ?>', '<?= $from_email_name ?>'))
                     ->to($user-><?= $email_getter ?>())
@@ -104,7 +108,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 
         // validate email confirmation link, sets User::isVerified=true and persists
         try {
-            $this->emailVerifier->handleEmailConfirmation($request, <?= $verify_email_anonymously ? '$user' : '$this->getUser()' ?>);
+            <?= $email_verifier_details->getProperty() ?>->handleEmailConfirmation($request, <?= $verify_email_anonymously ? '$user' : '$this->getUser()' ?>);
         } catch (VerifyEmailExceptionInterface $exception) {
             $this->addFlash('verify_email_error', $exception->getReason());
 

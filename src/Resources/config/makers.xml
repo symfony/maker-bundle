@@ -72,6 +72,7 @@
                 <argument type="service" id="maker.renderer.form_type_renderer" />
                 <argument type="service" id="router" />
                 <argument type="service" id="maker.doctrine_helper" />
+                <argument type="service" id="maker.php_compat_util" />
                 <tag name="maker.command" />
             </service>
 

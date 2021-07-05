@@ -28,6 +28,8 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
+use Symfony\Bundle\MakerBundle\Util\TemplateClassDetails;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -42,6 +44,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -60,12 +63,10 @@ use SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle;
 final class MakeRegistrationForm extends AbstractMaker
 {
     private $fileManager;
-
     private $formTypeRenderer;
-
     private $router;
-
     private $doctrineHelper;
+    private $phpCompatUtil;
 
     private $userClass;
     private $usernameField;
@@ -81,12 +82,13 @@ final class MakeRegistrationForm extends AbstractMaker
     private $redirectRouteName;
     private $addUniqueEntityConstraint;
 
-    public function __construct(FileManager $fileManager, FormTypeRenderer $formTypeRenderer, RouterInterface $router, DoctrineHelper $doctrineHelper)
+    public function __construct(FileManager $fileManager, FormTypeRenderer $formTypeRenderer, RouterInterface $router, DoctrineHelper $doctrineHelper, PhpCompatUtil $phpCompatUtil)
     {
         $this->fileManager = $fileManager;
         $this->formTypeRenderer = $formTypeRenderer;
         $this->router = $router;
         $this->doctrineHelper = $doctrineHelper;
+        $this->phpCompatUtil = $phpCompatUtil;
     }
 
     public static function getCommandName(): string
@@ -276,6 +278,12 @@ final class MakeRegistrationForm extends AbstractMaker
             'Controller\\'
         );
 
+        $passwordHasher = UserPasswordEncoderInterface::class;
+
+        if (interface_exists(UserPasswordHasherInterface::class)) {
+            $passwordHasher = UserPasswordHasherInterface::class;
+        }
+
         $useStatements = [
             Generator::getControllerBaseClass()->getFullName(),
             $formClassDetails->getFullName(),
@@ -283,7 +291,7 @@ final class MakeRegistrationForm extends AbstractMaker
             Request::class,
             Response::class,
             Route::class,
-            UserPasswordEncoderInterface::class,
+            $passwordHasher,
         ];
 
         if ($this->willVerifyEmail) {
@@ -313,8 +321,8 @@ final class MakeRegistrationForm extends AbstractMaker
                     'user_class_name' => $userClassNameDetails->getShortName(),
                     'password_field' => $this->passwordField,
                     'will_verify_email' => $this->willVerifyEmail,
+                    'email_verifier_details' => new TemplateClassDetails($verifyEmailServiceClassNameDetails->getFullName(), $this->phpCompatUtil->canUseTypedProperties()),
                     'verify_email_anonymously' => $this->verifyEmailAnonymously,
-                    'verify_email_security_service' => $verifyEmailServiceClassNameDetails->getFullName(),
                     'from_email' => $this->fromEmailAddress,
                     'from_email_name' => $this->fromEmailName,
                     'email_getter' => $this->emailGetter,
@@ -322,6 +330,8 @@ final class MakeRegistrationForm extends AbstractMaker
                     'authenticator_full_class_name' => $this->autoLoginAuthenticator,
                     'firewall_name' => $this->firewallName,
                     'redirect_route_name' => $this->redirectRouteName,
+                    'password_details' => new TemplateClassDetails($passwordHasher, $this->phpCompatUtil->canUseTypedProperties()),
+                    'use_password_hasher' => UserPasswordHasherInterface::class === $passwordHasher,
                 ],
                 $userRepoVars
             )
