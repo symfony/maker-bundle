@@ -53,7 +53,7 @@ final class EntityClassGenerator
                 'broadcast' => $broadcast,
                 'should_escape_table_name' => $this->doctrineHelper->isKeyword($tableName),
                 'table_name' => $tableName,
-                'doctrine_use_attributes' => $doctrineAttributes
+                'doctrine_use_attributes' => $doctrineAttributes,
             ]
         );
 

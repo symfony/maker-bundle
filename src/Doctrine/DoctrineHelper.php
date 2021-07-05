@@ -234,7 +234,7 @@ final class DoctrineHelper
             return false;
         }
 
-        return (bool)$this->getMetadata($className);
+        return (bool) $this->getMetadata($className);
     }
 
     private function isInstanceOf($object, string $class): bool
@@ -273,7 +273,7 @@ final class DoctrineHelper
     /**
      * this method try to find the correct MappingDriver for the given namespace/class
      * To determine which MappingDriver belongs to the class we check the prefixes configured in Doctrine and use the
-     * prefix that has the closest match to the given $namespace
+     * prefix that has the closest match to the given $namespace.
      */
     public function getMappingDriverForNamespace(string $namespace): ?MappingDriver
     {

@@ -134,9 +134,9 @@ final class ClassSourceManipulator
             $this->buildAttributeNode(
                 'ORM\\Embedded',
                 [
-                    'class' => new ClassNameValue($className, $typeHint)
+                    'class' => new ClassNameValue($className, $typeHint),
                 ]
-            )
+            ),
         ];
 
         $this->addProperty($propertyName, $annotations, null, $attributes);
@@ -528,7 +528,7 @@ final class ClassSourceManipulator
             $this->buildAttributeNode(
                 $relation instanceof RelationManyToOne ? 'ORM\\ManyToOne' : 'ORM\\OneToOne',
                 $annotationOptions
-            )
+            ),
         ];
 
         if (!$relation->isNullable() && $relation->isOwning()) {
@@ -536,7 +536,7 @@ final class ClassSourceManipulator
                 'nullable' => false,
             ]);
             $attributes[] = $this->buildAttributeNode('ORM\\JoinColumn', [
-                'nullable' => false
+                'nullable' => false,
             ]);
         }
 
@@ -615,7 +615,7 @@ final class ClassSourceManipulator
             $this->buildAttributeNode(
                 $relation instanceof RelationManyToMany ? 'ORM\\ManyToMany' : 'ORM\\OneToMany',
                 $annotationOptions
-            )
+            ),
         ];
 
         $this->addProperty($relation->getPropertyName(), $annotations, null, $attributes);
@@ -1367,14 +1367,15 @@ final class ClassSourceManipulator
 
     /**
      * builds a PHPParser Expr Node based on the value given in $value
-     * throws an Exception when the given $value is not resolvable by this method
+     * throws an Exception when the given $value is not resolvable by this method.
      *
      * @param mixed $value
+     *
      * @throws \Exception
      */
     private function buildNodeExprByValue($value): Node\Expr
     {
-        switch (gettype($value)) {
+        switch (\gettype($value)) {
             case 'string':
                 $nodeValue = new Node\Scalar\String_($value);
                 break;
@@ -1392,7 +1393,7 @@ final class ClassSourceManipulator
                 $arrayItems = array_map(static function ($key, $value) use ($context) {
                     return new Node\Expr\ArrayItem(
                         $context->buildNodeExprByValue($value),
-                        !is_int($key) ? $context->buildNodeExprByValue($key) : null
+                        !\is_int($key) ? $context->buildNodeExprByValue($key) : null
                     );
                 }, array_keys($value), array_values($value));
                 $nodeValue = new Node\Expr\Array_($arrayItems, ['kind' => Node\Expr\Array_::KIND_SHORT]);
@@ -1401,11 +1402,11 @@ final class ClassSourceManipulator
                 $nodeValue = null;
         }
 
-        if ($nodeValue === null) {
+        if (null === $nodeValue) {
             if ($value instanceof ClassNameValue) {
-                $nodeValue = new Node\Expr\ConstFetch(new Node\Name(\sprintf('%s::class', $value->getShortName())));
+                $nodeValue = new Node\Expr\ConstFetch(new Node\Name(sprintf('%s::class', $value->getShortName())));
             } else {
-                throw new \Exception(sprintf('Cannot build a node expr for value of type "%s"', gettype($value)));
+                throw new \Exception(sprintf('Cannot build a node expr for value of type "%s"', \gettype($value)));
             }
         }
 
@@ -1413,17 +1414,17 @@ final class ClassSourceManipulator
     }
 
     /**
-     * builds an PHPParser attribute node
+     * builds an PHPParser attribute node.
      *
-     * @param string $attributeClass    the attribute class which should be used for the attribute
-     * @param array $options            the named arguments for the attribute ($key = argument name, $value = argument value)
+     * @param string $attributeClass the attribute class which should be used for the attribute
+     * @param array  $options        the named arguments for the attribute ($key = argument name, $value = argument value)
      */
     private function buildAttributeNode(string $attributeClass, array $options)
     {
         $options = $this->sortOptionsByClassConstructorParameters($options, $attributeClass);
 
         $context = $this;
-        $nodeArguments = \array_map(static function ($option, $value) use ($context) {
+        $nodeArguments = array_map(static function ($option, $value) use ($context) {
             return new Node\Arg($context->buildNodeExprByValue($value), false, false, [], new Node\Identifier($option));
         }, array_keys($options), array_values($options));
 
@@ -1435,13 +1436,13 @@ final class ClassSourceManipulator
 
     /**
      * sort the given options based on the constructor parameters for the given $classString
-     * this prevents code inspections warnings for IDEs like intellij/phpstorm
+     * this prevents code inspections warnings for IDEs like intellij/phpstorm.
      *
      * option keys that are not found in the constructor will be added at the end of the sorted array
      */
     private function sortOptionsByClassConstructorParameters(array $options, string $classString): array
     {
-        if (substr($classString, 0, 4) === 'ORM\\') {
+        if ('ORM\\' === substr($classString, 0, 4)) {
             $classString = sprintf('Doctrine\\ORM\\Mapping\\%s', substr($classString, 4));
         }
 
@@ -1451,7 +1452,7 @@ final class ClassSourceManipulator
 
         $sorted = [];
         foreach ($constructorParameterNames as $name) {
-            if (array_key_exists($name, $options)) {
+            if (\array_key_exists($name, $options)) {
                 $sorted[$name] = $options[$name];
                 unset($options[$name]);
             }
