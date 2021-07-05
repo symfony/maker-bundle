@@ -42,6 +42,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -60,11 +61,8 @@ use SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle;
 final class MakeRegistrationForm extends AbstractMaker
 {
     private $fileManager;
-
     private $formTypeRenderer;
-
     private $router;
-
     private $doctrineHelper;
 
     private $userClass;
@@ -276,6 +274,16 @@ final class MakeRegistrationForm extends AbstractMaker
             'Controller\\'
         );
 
+        /*
+         * @legacy Conditional can be removed when MakerBundle no longer
+         *         supports Symfony < 5.2
+         */
+        $passwordHasher = UserPasswordEncoderInterface::class;
+
+        if (interface_exists(UserPasswordHasherInterface::class)) {
+            $passwordHasher = UserPasswordHasherInterface::class;
+        }
+
         $useStatements = [
             Generator::getControllerBaseClass()->getFullName(),
             $formClassDetails->getFullName(),
@@ -283,7 +291,7 @@ final class MakeRegistrationForm extends AbstractMaker
             Request::class,
             Response::class,
             Route::class,
-            UserPasswordEncoderInterface::class,
+            $passwordHasher,
         ];
 
         if ($this->willVerifyEmail) {
@@ -313,8 +321,8 @@ final class MakeRegistrationForm extends AbstractMaker
                     'user_class_name' => $userClassNameDetails->getShortName(),
                     'password_field' => $this->passwordField,
                     'will_verify_email' => $this->willVerifyEmail,
+                    'email_verifier_class_details' => $verifyEmailServiceClassNameDetails,
                     'verify_email_anonymously' => $this->verifyEmailAnonymously,
-                    'verify_email_security_service' => $verifyEmailServiceClassNameDetails->getFullName(),
                     'from_email' => $this->fromEmailAddress,
                     'from_email_name' => $this->fromEmailName,
                     'email_getter' => $this->emailGetter,
@@ -322,6 +330,9 @@ final class MakeRegistrationForm extends AbstractMaker
                     'authenticator_full_class_name' => $this->autoLoginAuthenticator,
                     'firewall_name' => $this->firewallName,
                     'redirect_route_name' => $this->redirectRouteName,
+                    'password_class_details' => ($passwordClassDetails = $generator->createClassNameDetails($passwordHasher, '\\')),
+                    'password_variable_name' => sprintf('$%s', lcfirst($passwordClassDetails->getShortName())), // @legacy see passwordHasher conditional above
+                    'use_password_hasher' => UserPasswordHasherInterface::class === $passwordHasher, // @legacy see passwordHasher conditional above
                 ],
                 $userRepoVars
             )
