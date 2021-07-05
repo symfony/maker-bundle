@@ -28,6 +28,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\TemplateClassDetails;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
@@ -62,12 +63,10 @@ use SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle;
 final class MakeRegistrationForm extends AbstractMaker
 {
     private $fileManager;
-
     private $formTypeRenderer;
-
     private $router;
-
     private $doctrineHelper;
+    private $phpCompatUtil;
 
     private $userClass;
     private $usernameField;
@@ -83,12 +82,13 @@ final class MakeRegistrationForm extends AbstractMaker
     private $redirectRouteName;
     private $addUniqueEntityConstraint;
 
-    public function __construct(FileManager $fileManager, FormTypeRenderer $formTypeRenderer, RouterInterface $router, DoctrineHelper $doctrineHelper)
+    public function __construct(FileManager $fileManager, FormTypeRenderer $formTypeRenderer, RouterInterface $router, DoctrineHelper $doctrineHelper, PhpCompatUtil $phpCompatUtil)
     {
         $this->fileManager = $fileManager;
         $this->formTypeRenderer = $formTypeRenderer;
         $this->router = $router;
         $this->doctrineHelper = $doctrineHelper;
+        $this->phpCompatUtil = $phpCompatUtil;
     }
 
     public static function getCommandName(): string
@@ -330,7 +330,7 @@ final class MakeRegistrationForm extends AbstractMaker
                     'authenticator_full_class_name' => $this->autoLoginAuthenticator,
                     'firewall_name' => $this->firewallName,
                     'redirect_route_name' => $this->redirectRouteName,
-                    'password_details' => new TemplateClassDetails($passwordHasher, true),
+                    'password_details' => new TemplateClassDetails($passwordHasher, $this->phpCompatUtil->canUseTypedProperties()),
                     'use_password_hasher' => $passwordHasher === UserPasswordHasherInterface::class,
                 ],
                 $userRepoVars
