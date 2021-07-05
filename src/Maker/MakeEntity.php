@@ -13,6 +13,9 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\Mapping\Driver\AttributeDriver;
+use Doctrine\Persistence\Mapping\Driver\AnnotationDriver;
+use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -20,7 +23,6 @@ use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityRelation;
 use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
-use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
@@ -160,6 +162,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             'Entity\\'
         );
 
+        $mappingDriver = $this->doctrineHelper->getMappingDriverForNamespace($entityClassDetails->getFullName());
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {
             $broadcast = $input->getOption('broadcast');
@@ -168,7 +171,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 $input->getOption('api-resource'),
                 false,
                 true,
-                $broadcast
+                $broadcast,
+                $mappingDriver instanceof AttributeDriver
             );
 
             if ($broadcast) {
@@ -186,10 +190,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $generator->writeChanges();
         }
 
-        if (!$this->doesEntityUseAnnotationMapping($entityClassDetails->getFullName())) {
-            throw new RuntimeCommandException(sprintf('Only annotation mapping is supported by make:entity, but the <info>%s</info> class uses a different format. If you would like this command to generate the properties & getter/setter methods, add your mapping configuration, and then re-run this command with the <info>--regenerate</info> flag.', $entityClassDetails->getFullName()));
-        }
-
         if ($classExists) {
             $entityPath = $this->getPathOfClass($entityClassDetails->getFullName());
             $io->text([
@@ -204,7 +204,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         $currentFields = $this->getPropertyNames($entityClassDetails->getFullName());
-        $manipulator = $this->createClassManipulator($entityPath, $io, $overwrite);
+        $manipulator = $this->createClassManipulator($entityPath, $io, $overwrite, $mappingDriver);
 
         $isFirstField = true;
         while (true) {
@@ -232,7 +232,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                     $otherManipulator = $manipulator;
                 } else {
                     $otherManipulatorFilename = $this->getPathOfClass($newField->getInverseClass());
-                    $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
+                    $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite, $mappingDriver);
                 }
                 switch ($newField->getType()) {
                     case EntityRelation::MANY_TO_ONE:
@@ -247,7 +247,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                             // the new field being added to THIS entity is the inverse
                             $newFieldName = $newField->getInverseProperty();
                             $otherManipulatorFilename = $this->getPathOfClass($newField->getOwningClass());
-                            $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
+                            $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite, $mappingDriver);
 
                             // The *other* class will receive the ManyToOne
                             $otherManipulator->addManyToOneRelation($newField->getOwningRelation());
@@ -791,9 +791,13 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $io->askQuestion($question);
     }
 
-    private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite): ClassSourceManipulator
+    private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite, ?MappingDriver $mappingDriver = null): ClassSourceManipulator
     {
-        $manipulator = new ClassSourceManipulator($this->fileManager->getFileContents($path), $overwrite);
+        $useAnnotations = null === $mappingDriver || $mappingDriver instanceof AnnotationDriver && !$mappingDriver instanceof AttributeDriver;
+        $useAttributes = $mappingDriver instanceof AttributeDriver;
+
+        $manipulator = new ClassSourceManipulator($this->fileManager->getFileContents($path), $overwrite, $useAnnotations, true, $useAttributes);
+
         $manipulator->setIo($io);
 
         return $manipulator;
@@ -830,22 +834,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return array_map(function (\ReflectionProperty $prop) {
             return $prop->getName();
         }, $reflClass->getProperties());
-    }
-
-    private function doesEntityUseAnnotationMapping(string $className): bool
-    {
-        if (!class_exists($className)) {
-            $otherClassMetadatas = $this->doctrineHelper->getMetadata(Str::getNamespace($className).'\\', true);
-
-            // if we have no metadata, we should assume this is the first class being mapped
-            if (empty($otherClassMetadatas)) {
-                return false;
-            }
-
-            $className = reset($otherClassMetadatas)->getName();
-        }
-
-        return $this->doctrineHelper->isClassAnnotated($className);
     }
 
     private function getEntityNamespace(): string

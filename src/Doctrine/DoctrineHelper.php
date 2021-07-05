@@ -23,6 +23,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\AbstractClassMetadataFactory;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\Driver\AnnotationDriver;
+use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
@@ -267,5 +268,28 @@ final class DoctrineHelper
         $connection = $this->getRegistry()->getConnection();
 
         return $connection->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name);
+    }
+
+    /**
+     * this method try to find the correct MappingDriver for the given namespace/class
+     * To determine which MappingDriver belongs to the class we check the prefixes configured in Doctrine and use the
+     * prefix that has the closest match to the given $namespace.
+     */
+    public function getMappingDriverForNamespace(string $namespace): ?MappingDriver
+    {
+        $lowestCharacterDiff = null;
+        $foundDriver = null;
+
+        foreach ($this->annotatedPrefixes as $key => $mappings) {
+            foreach ($mappings as [$prefix, $driver]) {
+                $diff = substr_compare($namespace, $prefix, 0);
+
+                if (null === $lowestCharacterDiff || $diff < $lowestCharacterDiff) {
+                    $foundDriver = $driver;
+                }
+            }
+        }
+
+        return $foundDriver;
     }
 }
