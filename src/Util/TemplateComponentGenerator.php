@@ -44,6 +44,7 @@ final class TemplateComponentGenerator
         return $statements;
     }
 
+    /** @legacy Annotation Support can be dropped w/ Symfony 6 LTS */
     public function generateRouteForControllerMethod(string $routePath, string $routeName, array $methods = [], bool $indent = true, bool $trailingNewLine = true): string
     {
         if ($this->phpCompatUtil->canUseAttributes()) {
