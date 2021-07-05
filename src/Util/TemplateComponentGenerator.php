@@ -44,10 +44,10 @@ final class TemplateComponentGenerator
         return $statements;
     }
 
-    public function generateRouteForControllerMethod(string $routePath, string $routeName, array $methods = [], bool $ident = true, bool $trailingNewLine = true): string
+    public function generateRouteForControllerMethod(string $routePath, string $routeName, array $methods = [], bool $indent = true, bool $trailingNewLine = true): string
     {
         if ($this->phpCompatUtil->canUseAttributes()) {
-            $attribute = sprintf('%s#[Route(\'%s\', name: \'%s\'', $ident ? '    ' : null, $routePath, $routeName);
+            $attribute = sprintf('%s#[Route(\'%s\', name: \'%s\'', $indent ? '    ' : null, $routePath, $routeName);
 
             if (!empty($methods)) {
                 $attribute .= ', methods: [';
@@ -66,8 +66,8 @@ final class TemplateComponentGenerator
             return $attribute;
         }
 
-        $annotation = sprintf('%s/**%s', $ident ? '    ' : null, "\n");
-        $annotation .= sprintf('%s * @Route("%s", name="%s"', $ident ? '    ' : null, $routePath, $routeName);
+        $annotation = sprintf('%s/**%s', $indent ? '    ' : null, "\n");
+        $annotation .= sprintf('%s * @Route("%s", name="%s"', $indent ? '    ' : null, $routePath, $routeName);
 
         if (!empty($methods)) {
             $annotation .= ', methods={';
@@ -82,7 +82,7 @@ final class TemplateComponentGenerator
         }
 
         $annotation .= sprintf(')%s', "\n");
-        $annotation .= sprintf('%s */%s', $ident ? '    ' : null, $trailingNewLine ? "\n" : null);
+        $annotation .= sprintf('%s */%s', $indent ? '    ' : null, $trailingNewLine ? "\n" : null);
 
         return $annotation;
     }
