@@ -6,8 +6,10 @@ use Symfony\Bundle\MakerBundle\Str;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
+ *
+ * @internal
  */
-class TemplateClassDetails
+final class TemplateClassDetails
 {
     private $fullClassName;
     private $shortClassName;
