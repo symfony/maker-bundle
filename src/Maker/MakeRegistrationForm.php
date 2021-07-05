@@ -331,7 +331,7 @@ final class MakeRegistrationForm extends AbstractMaker
                     'firewall_name' => $this->firewallName,
                     'redirect_route_name' => $this->redirectRouteName,
                     'password_details' => new TemplateClassDetails($passwordHasher, $this->phpCompatUtil->canUseTypedProperties()),
-                    'use_password_hasher' => $passwordHasher === UserPasswordHasherInterface::class,
+                    'use_password_hasher' => UserPasswordHasherInterface::class === $passwordHasher,
                 ],
                 $userRepoVars
             )
