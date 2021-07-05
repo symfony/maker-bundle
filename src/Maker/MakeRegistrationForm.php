@@ -28,6 +28,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\TemplateClassDetails;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -42,6 +43,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -276,6 +278,12 @@ final class MakeRegistrationForm extends AbstractMaker
             'Controller\\'
         );
 
+        $passwordHasher = UserPasswordEncoderInterface::class;
+
+        if (interface_exists(UserPasswordHasherInterface::class)) {
+            $passwordHasher = UserPasswordHasherInterface::class;
+        }
+
         $useStatements = [
             Generator::getControllerBaseClass()->getFullName(),
             $formClassDetails->getFullName(),
@@ -283,7 +291,7 @@ final class MakeRegistrationForm extends AbstractMaker
             Request::class,
             Response::class,
             Route::class,
-            UserPasswordEncoderInterface::class,
+            $passwordHasher,
         ];
 
         if ($this->willVerifyEmail) {
@@ -322,6 +330,8 @@ final class MakeRegistrationForm extends AbstractMaker
                     'authenticator_full_class_name' => $this->autoLoginAuthenticator,
                     'firewall_name' => $this->firewallName,
                     'redirect_route_name' => $this->redirectRouteName,
+                    'password_details' => new TemplateClassDetails($passwordHasher, true),
+                    'use_password_hasher' => $passwordHasher === UserPasswordHasherInterface::class,
                 ],
                 $userRepoVars
             )

@@ -22,7 +22,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
      * @Route("<?= $route_path ?>", name="<?= $route_name ?>")
      */
 <?php } ?>
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder<?= $authenticator_full_class_name ? sprintf(', GuardAuthenticatorHandler $guardHandler, %s $authenticator', $authenticator_class_name) : '' ?>): Response
+    public function register(Request $request, <?= $password_details->getMethodArgument() ?><?= $authenticator_full_class_name ? sprintf(', GuardAuthenticatorHandler $guardHandler, %s $authenticator', $authenticator_class_name) : '' ?>): Response
     {
         $user = new <?= $user_class_name ?>();
         $form = $this->createForm(<?= $form_class_name ?>::class, $user);
@@ -31,7 +31,11 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
         if ($form->isSubmitted() && $form->isValid()) {
             // encode the plain password
             $user->set<?= ucfirst($password_field) ?>(
-                $passwordEncoder->encodePassword(
+<?php if ($use_password_hasher) : ?>
+                <?= $password_details->getVariable() ?>->hashPassword(
+<?php else: ?>
+                <?= $password_details->getVariable() ?>->encodePassword(
+<?php endif; ?>
                     $user,
                     $form->get('plainPassword')->getData()
                 )
