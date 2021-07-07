@@ -81,7 +81,7 @@ final class EntityClassGenerator
 
         $interfaceClassNameDetails = new ClassNameDetails($passwordUserInterfaceName, 'Symfony\Component\Security\Core\User');
 
-        $this->generator->generateClass(
+        return $this->generator->generateClass(
             $repositoryClass,
             'doctrine/Repository.tpl.php',
             [

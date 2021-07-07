@@ -334,6 +334,89 @@ final class ClassSourceManipulator
     public function addAnnotationToClass(string $annotationClass, array $options)
     {
         $annotationClassAlias = $this->addUseStatementIfNecessary($annotationClass);
+
+        $this->modifyClassDocBlock(function (array $docLines) use ($annotationClassAlias, $options) {
+            array_splice(
+                $docLines,
+                \count($docLines) - 1,
+                0,
+                ' * '.$this->buildAnnotationLine('@'.$annotationClassAlias, $options)
+            );
+
+            return $docLines;
+        });
+
+        $this->updateSourceCodeFromNewStmts();
+    }
+
+    public function addEntityRepositoryAtMethodDocBlock(string $propertyName, string $className)
+    {
+        $shortClassName = $this->addUseStatementIfNecessary($className);
+        $methodNameSuffix = Str::asCamelCase($propertyName);
+        $argumentName = Str::asLowerCamelCase($propertyName);
+
+        $methodTags = [
+            $methodName = 'findOneBy'.$methodNameSuffix => sprintf(
+                ' * @method %s|null %s($%s, array $orderBy = null)',
+                $shortClassName,
+                $methodName,
+                $argumentName
+            ),
+            $methodName = 'findBy'.$methodNameSuffix => sprintf(
+                ' * @method %s[]    %s($%s, array $orderBy = null, $limit = null, $offset = null)',
+                $shortClassName,
+                $methodName,
+                $argumentName
+            ),
+            $methodName = 'countBy'.$methodNameSuffix => sprintf(
+                ' * @method int%s   %s($%s)',
+                str_repeat(' ', \strlen($shortClassName)),
+                $methodName,
+                $argumentName
+            ),
+        ];
+
+        $this->modifyClassDocBlock(function (array $docLines) use ($methodTags) {
+            // Loop through the existing tags to avoid duplication
+            foreach ($docLines as &$docLine) {
+                if (empty($methodTags)) {
+                    break;
+                }
+
+                foreach ($methodTags as $methodName => $methodTag) {
+                    if (false === strpos($docLine, '@method') || false === strpos($docLine, $methodName.'(')) {
+                        continue;
+                    }
+
+                    // If overwrite is true, replace the existing tag
+                    if ($this->overwrite) {
+                        $docLine = $methodTag;
+                    }
+
+                    unset($methodTags[$methodName]);
+
+                    break;
+                }
+            }
+
+            // Append new tags
+            foreach ($methodTags as $methodTag) {
+                array_splice(
+                    $docLines,
+                    \count($docLines) - 1,
+                    0,
+                    $methodTag
+                );
+            }
+
+            return $docLines;
+        });
+
+        $this->updateSourceCodeFromNewStmts();
+    }
+
+    private function modifyClassDocBlock(callable $modifierCallback)
+    {
         $docComment = $this->getClassNode()->getDocComment();
 
         $docLines = $docComment ? explode("\n", $docComment->getText()) : [];
@@ -357,16 +440,10 @@ final class ClassSourceManipulator
             $docLines = $newDocLines;
         }
 
-        array_splice(
-            $docLines,
-            \count($docLines) - 1,
-            0,
-            ' * '.$this->buildAnnotationLine('@'.$annotationClassAlias, $options)
-        );
+        $docLines = $modifierCallback($docLines);
 
         $docComment = new Doc(implode("\n", $docLines));
         $this->getClassNode()->setDocComment($docComment);
-        $this->updateSourceCodeFromNewStmts();
     }
 
     private function addCustomGetter(string $propertyName, string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = [], $typeCast = null)

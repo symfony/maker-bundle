@@ -204,7 +204,15 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         $currentFields = $this->getPropertyNames($entityClassDetails->getFullName());
-        $manipulator = $this->createClassManipulator($entityPath, $io, $overwrite);
+        $entityManipulator = $this->createClassManipulator($entityPath, $io, $overwrite);
+
+        $entityMetadata = $this->doctrineHelper->getMetadata($entityClassDetails->getFullName());
+        $repositoryPath = null;
+        $repositoryManipulator = null;
+        if ($entityMetadata->customRepositoryClassName) {
+            $repositoryPath = $this->getPathOfClass($entityMetadata->customRepositoryClassName);
+            $repositoryManipulator = $this->createClassManipulator($repositoryPath, $io, $overwrite);
+        }
 
         $isFirstField = true;
         while (true) {
@@ -216,59 +224,82 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             }
 
             $fileManagerOperations = [];
-            $fileManagerOperations[$entityPath] = $manipulator;
+            $fileManagerOperations[$entityPath] = $entityManipulator;
+            if (null !== $repositoryManipulator) {
+                $fileManagerOperations[$repositoryPath] = $repositoryManipulator;
+            }
 
             if (\is_array($newField)) {
                 $annotationOptions = $newField;
                 unset($annotationOptions['fieldName']);
-                $manipulator->addEntityField($newField['fieldName'], $annotationOptions);
+                $entityManipulator->addEntityField($newField['fieldName'], $annotationOptions);
+                if (null !== $repositoryManipulator) {
+                    $repositoryManipulator->addEntityRepositoryAtMethodDocBlock($newField['fieldName'], $entityClassDetails->getFullName());
+                }
 
                 $currentFields[] = $newField['fieldName'];
             } elseif ($newField instanceof EntityRelation) {
                 // both overridden below for OneToMany
                 $newFieldName = $newField->getOwningProperty();
                 if ($newField->isSelfReferencing()) {
-                    $otherManipulatorFilename = $entityPath;
-                    $otherManipulator = $manipulator;
+                    $otherEntityManipulatorFilename = $entityPath;
+                    $otherEntityManipulator = $entityManipulator;
                 } else {
-                    $otherManipulatorFilename = $this->getPathOfClass($newField->getInverseClass());
-                    $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
+                    $otherEntityManipulatorFilename = $this->getPathOfClass($newField->getInverseClass());
+                    $otherEntityManipulator = $this->createClassManipulator($otherEntityManipulatorFilename, $io, $overwrite);
                 }
                 switch ($newField->getType()) {
                     case EntityRelation::MANY_TO_ONE:
                         if ($newField->getOwningClass() === $entityClassDetails->getFullName()) {
                             // THIS class will receive the ManyToOne
-                            $manipulator->addManyToOneRelation($newField->getOwningRelation());
+                            $entityManipulator->addManyToOneRelation($relation = $newField->getOwningRelation());
+                            if (null !== $repositoryManipulator) {
+                                $repositoryManipulator->addEntityRepositoryAtMethodDocBlock($relation->getPropertyName(), $newField->getOwningClass());
+                            }
 
                             if ($newField->getMapInverseRelation()) {
-                                $otherManipulator->addOneToManyRelation($newField->getInverseRelation());
+                                $otherEntityManipulator->addOneToManyRelation($newField->getInverseRelation());
                             }
                         } else {
                             // the new field being added to THIS entity is the inverse
                             $newFieldName = $newField->getInverseProperty();
-                            $otherManipulatorFilename = $this->getPathOfClass($newField->getOwningClass());
-                            $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
+                            $otherEntityManipulatorFilename = $this->getPathOfClass($newField->getOwningClass());
+                            $otherEntityManipulator = $this->createClassManipulator($otherEntityManipulatorFilename, $io, $overwrite);
 
                             // The *other* class will receive the ManyToOne
-                            $otherManipulator->addManyToOneRelation($newField->getOwningRelation());
+                            $otherEntityManipulator->addManyToOneRelation($relation = $newField->getOwningRelation());
+
+                            $otherEntityMetadata = $this->doctrineHelper->getMetadata($newField->getOwningClass());
+                            if ($otherEntityMetadata->customRepositoryClassName) {
+                                $otherRepositoryFilename = $this->getPathOfClass($otherEntityMetadata->customRepositoryClassName);
+                                $otherRepositoryManipulator = $this->createClassManipulator($otherRepositoryFilename, $io, $overwrite);
+                                $otherRepositoryManipulator->addEntityRepositoryAtMethodDocBlock($relation->getPropertyName(), $newField->getOwningClass());
+
+                                $fileManagerOperations[$otherRepositoryFilename] = $otherRepositoryManipulator;
+                            }
+
                             if (!$newField->getMapInverseRelation()) {
                                 throw new \Exception('Somehow a OneToMany relationship is being created, but the inverse side will not be mapped?');
                             }
-                            $manipulator->addOneToManyRelation($newField->getInverseRelation());
+                            $entityManipulator->addOneToManyRelation($newField->getInverseRelation());
                         }
 
                         break;
                     case EntityRelation::MANY_TO_MANY:
-                        $manipulator->addManyToManyRelation($newField->getOwningRelation());
+                        $entityManipulator->addManyToManyRelation($newField->getOwningRelation());
                         if ($newField->getMapInverseRelation()) {
-                            $otherManipulator->addManyToManyRelation($newField->getInverseRelation());
+                            $otherEntityManipulator->addManyToManyRelation($newField->getInverseRelation());
                         }
 
                         break;
                     case EntityRelation::ONE_TO_ONE:
-                        $manipulator->addOneToOneRelation($newField->getOwningRelation());
+                        $entityManipulator->addOneToOneRelation($relation = $newField->getOwningRelation());
+                        if (null !== $repositoryManipulator) {
+                            $repositoryManipulator->addEntityRepositoryAtMethodDocBlock($relation->getPropertyName(), $newField->getOwningClass());
+                        }
+
                         if ($newField->getMapInverseRelation()) {
-                            $otherManipulator->addOneToOneRelation($newField->getInverseRelation());
+                            $otherEntityManipulator->addOneToOneRelation($newField->getInverseRelation());
                         }
 
                         break;
@@ -278,7 +309,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
                 // save the inverse side if it's being mapped
                 if ($newField->getMapInverseRelation()) {
-                    $fileManagerOperations[$otherManipulatorFilename] = $otherManipulator;
+                    $fileManagerOperations[$otherEntityManipulatorFilename] = $otherEntityManipulator;
                 }
                 $currentFields[] = $newFieldName;
             } else {
