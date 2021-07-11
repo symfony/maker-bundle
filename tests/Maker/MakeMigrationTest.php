@@ -76,7 +76,15 @@ class MakeMigrationTest extends MakerTestCase
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('You have 1 available migrations to execute', $output);
                 $this->assertStringContainsString('Success', $output);
-                $this->assertCount(14, explode("\n", $output), 'Asserting that very specific output is shown - some should be hidden');
+
+                $output = explode("\n", $output);
+
+                $expectedCount = str_contains($output[0], 'php') ? 15 : 14;
+
+                $this->assertCount(
+                    $expectedCount,
+                    $output, 'Asserting that very specific output is shown - some should be hidden'
+                );
             }),
         ];
 
