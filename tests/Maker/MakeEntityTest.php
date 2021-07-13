@@ -506,7 +506,7 @@ class MakeEntityTest extends MakerTestCase
             ->configureDatabase(false)
             ->setCommandAllowedToFail(true)
             ->assert(function (string $output, string $directory) {
-                $this->assertStringContainsString('Only annotation mapping is supported', $output);
+                $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
             }),
         ];
 
@@ -529,7 +529,7 @@ class MakeEntityTest extends MakerTestCase
             ->configureDatabase(false)
             ->setCommandAllowedToFail(true)
             ->assert(function (string $output, string $directory) {
-                $this->assertStringContainsString('Only annotation mapping is supported', $output);
+                $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
             }),
         ];
 
