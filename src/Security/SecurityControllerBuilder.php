@@ -66,7 +66,7 @@ CODE
 
     public function addLogoutMethod(ClassSourceManipulator $manipulator)
     {
-        $logoutMethodBuilder = $manipulator->createMethodBuilder('logout', null, false, ['@Route("/logout", name="app_logout")']);
+        $logoutMethodBuilder = $manipulator->createMethodBuilder('logout', 'void', false, ['@Route("/logout", name="app_logout")']);
 
         $manipulator->addUseStatementIfNecessary(Route::class);
         $manipulator->addMethodBody($logoutMethodBuilder, <<<'CODE'
