@@ -34,6 +34,7 @@ class MakeRegistrationFormTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormEntity')
             ->configureDatabase()
+            ->addExtraDependencies('symfony/webpack-encore-bundle')
             ->updateSchemaAfterCommand()
             // workaround for a strange behavior where, every other
             // test run, the UniqueEntity would not be seen, because
@@ -69,6 +70,7 @@ class MakeRegistrationFormTest extends MakerTestCase
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormEntity')
             ->configureDatabase()
+            ->addExtraDependencies('symfony/webpack-encore-bundle')
             ->updateSchemaAfterCommand()
             // workaround for strange failure - see test case
             // registration_form_entity_guard_authenticate for details
@@ -122,6 +124,7 @@ class MakeRegistrationFormTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormVerifyEmailFunctionalTest')
             ->addExtraDependencies('symfonycasts/verify-email-bundle')
             ->configureDatabase()
+            ->addExtraDependencies('symfony/webpack-encore-bundle')
             ->updateSchemaAfterCommand()
             // needed for internal functional test
             ->addExtraDependencies('symfony/web-profiler-bundle')
@@ -143,6 +146,7 @@ class MakeRegistrationFormTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormVerifyEmailNoAuthFunctionalTest')
             ->addExtraDependencies('symfonycasts/verify-email-bundle')
             ->configureDatabase()
+            ->addExtraDependencies('symfony/webpack-encore-bundle')
             ->updateSchemaAfterCommand()
             // needed for internal functional test
             ->addExtraDependencies('symfony/web-profiler-bundle')
