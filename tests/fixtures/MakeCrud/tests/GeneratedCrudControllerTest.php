@@ -8,6 +8,11 @@ class GeneratedCrudControllerTest extends WebTestCase
 {
     public function testIndexAction()
     {
+        $arg = [];
+        exec('composer show', $arg);
+
+        dd($result, $arg);
+
         $client = self::createClient();
         $crawler = $client->request('GET', '/sweet/food/');
         $this->assertTrue($client->getResponse()->isSuccessful());
