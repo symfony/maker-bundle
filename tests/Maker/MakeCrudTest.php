@@ -67,7 +67,7 @@ class MakeCrudTest extends MakerTestCase
             ->changeRootNamespace('Custom')
             // need for crud web tests
             ->configureDatabase()
-            ->addExtraDependencies('symfony/webpack-encore-bundle')
+            ->addExtraDependencies('symfony/twig-bridge')
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
@@ -86,7 +86,7 @@ class MakeCrudTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudRepository')
             // need for crud web tests
             ->configureDatabase()
-            ->addExtraDependencies('symfony/webpack-encore-bundle')
+            ->addExtraDependencies('symfony/twig-bridge')
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
@@ -106,7 +106,7 @@ class MakeCrudTest extends MakerTestCase
             // need for crud web tests
             ->addExtraDependencies('symfony/css-selector')
             ->configureDatabase()
-            ->addExtraDependencies('symfony/webpack-encore-bundle')
+            ->addExtraDependencies('symfony/twig-bridge')
             ->deleteFile('templates/base.html.twig')
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
