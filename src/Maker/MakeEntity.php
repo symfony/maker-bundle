@@ -193,7 +193,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         if (
             !$this->doesEntityUseAnnotationMapping($entityClassDetails->getFullName())
-            xor !$this->doesEntityUseAttributeMapping($entityClassDetails->getFullName())
+            && !$this->doesEntityUseAttributeMapping($entityClassDetails->getFullName())
         ) {
             throw new RuntimeCommandException(sprintf('Only annotation or attribute mapping is supported by make:entity, but the <info>%s</info> class uses a different format. If you would like this command to generate the properties & getter/setter methods, add your mapping configuration, and then re-run this command with the <info>--regenerate</info> flag.', $entityClassDetails->getFullName()));
         }
