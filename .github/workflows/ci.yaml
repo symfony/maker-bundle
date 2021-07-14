@@ -142,4 +142,4 @@ jobs:
               run: vendor/bin/simple-phpunit --version
 
             - name: "Run tests"
-              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
+              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }} --filter=crud_with_no_base
