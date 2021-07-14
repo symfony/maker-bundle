@@ -11,7 +11,7 @@ class GeneratedCrudControllerTest extends WebTestCase
         $arg = [];
         exec('composer show', $arg);
 
-        dd($result, $arg);
+        dd($arg);
 
         $client = self::createClient();
         $crawler = $client->request('GET', '/sweet/food/');
