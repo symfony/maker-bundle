@@ -11,7 +11,6 @@ on:
 env:
     PHPUNIT_FLAGS: "-v"
     SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
-    SYMFONY_REQUIRE: ">=4.0"
 
 jobs:
     coding-standards:
