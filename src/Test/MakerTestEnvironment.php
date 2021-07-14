@@ -150,8 +150,11 @@ final class MakerTestEnvironment
                 // install any missing dependencies
                 $dependencies = $this->determineMissingDependencies();
                 if ($dependencies) {
-                    MakerTestProcess::create(sprintf('composer require %s', implode(' ', $dependencies)), $this->path)
-                        ->run();
+                    $process = MakerTestProcess::create(sprintf('composer require %s -vvv', implode(' ', $dependencies)), $this->path);
+                    $process->run();
+                    var_dump('============');
+                    echo $process->getOutput();
+                    echo $process->getErrorOutput();
                 }
 
                 $this->changeRootNamespaceIfNeeded();
