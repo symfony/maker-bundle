@@ -29,6 +29,12 @@ class MakeMigrationTest extends MakerTestCase
             // only requires doctrine/dbal. But we're testing with the ORM,
             // so let's install it
             ->addExtraDependencies('doctrine/orm:@stable')
+            /*
+             * @legacy doctrine/migrations does not support psr/log >=2
+             *         some symfony components use psr/log ^1 || ^2 || ^3
+             *         once doctrine/migrations supports psr log >= 2, this line can be removed.
+             */
+            ->addExtraDependencies('psr/log:^1.1.4')
             ->assert(function (string $output, string $directory) {
                 $this->assertStringContainsString('Success', $output);
 
@@ -54,6 +60,12 @@ class MakeMigrationTest extends MakerTestCase
             // sync the database, so no changes are needed
             ->configureDatabase()
             ->addExtraDependencies('doctrine/orm:@stable')
+            /*
+             * @legacy doctrine/migrations does not support psr/log >=2
+             *         some symfony components use psr/log ^1 || ^2 || ^3
+             *         once doctrine/migrations supports psr log >= 2, this line can be removed.
+             */
+            ->addExtraDependencies('psr/log:^1.1.4')
             ->assert(function (string $output, string $directory) {
                 $this->assertStringNotContainsString('Success', $output);
 
@@ -71,6 +83,12 @@ class MakeMigrationTest extends MakerTestCase
             ->configureDatabase(false)
             ->addRequiredPackageVersion('doctrine/doctrine-migrations-bundle', '>=3')
             ->addExtraDependencies('doctrine/orm:@stable')
+            /*
+             * @legacy doctrine/migrations does not support psr/log >=2
+             *         some symfony components use psr/log ^1 || ^2 || ^3
+             *         once doctrine/migrations supports psr log >= 2, this line can be removed.
+             */
+            ->addExtraDependencies('psr/log:^1.1.4')
             // generate a migration first
             ->addPreMakeCommand('php bin/console make:migration')
             ->assert(function (string $output, string $directory) {
@@ -90,6 +108,12 @@ class MakeMigrationTest extends MakerTestCase
             ->configureDatabase(false)
             ->addRequiredPackageVersion('doctrine/doctrine-migrations-bundle', '>=3')
             ->addExtraDependencies('doctrine/orm:@stable')
+            /*
+             * @legacy doctrine/migrations does not support psr/log >=2
+             *         some symfony components use psr/log ^1 || ^2 || ^3
+             *         once doctrine/migrations supports psr log >= 2, this line can be removed.
+             */
+            ->addExtraDependencies('psr/log:^1.1.4')
             // generate a migration first
             ->addPreMakeCommand('php bin/console make:migration')
             ->assert(function (string $output, string $directory) {
