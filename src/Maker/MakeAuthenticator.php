@@ -23,6 +23,7 @@ use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -207,7 +208,8 @@ final class MakeAuthenticator extends AbstractMaker
             $input->getArgument('authenticator-type'),
             $input->getArgument('authenticator-class'),
             $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
-            $input->hasArgument('username-field') ? $input->getArgument('username-field') : null
+            $input->hasArgument('username-field') ? $input->getArgument('username-field') : null,
+            $generator
         );
 
         // update security.yaml with guard config
@@ -257,7 +259,7 @@ final class MakeAuthenticator extends AbstractMaker
         );
     }
 
-    private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, $userClass, $userNameField)
+    private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, $userClass, $userNameField, Generator $generator)
     {
         // generate authenticator class
         if (self::AUTH_TYPE_EMPTY_AUTHENTICATOR === $authenticatorType) {
