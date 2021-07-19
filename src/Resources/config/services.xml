@@ -51,7 +51,6 @@
                 <argument /> <!-- root namespace -->
                 <argument type="service" id="maker.php_compat_util" />
                 <argument type="service" id="maker.template_component_generator" />
-                <argument type="service" id="maker.template_class_formatter" />
             </service>
 
             <service id="maker.entity_class_generator" class="Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator">
@@ -74,11 +73,5 @@
             <service id="maker.template_component_generator" class="Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator">
                 <argument type="service" id="maker.php_compat_util" />
             </service>
-
-            <service id="maker.template_class_formatter" class="Symfony\Bundle\MakerBundle\Util\TemplateClassFormatter">
-                <argument type="service" id="maker.php_compat_util" />
-            </service>
-
-            <service id="maker.security_compat_util" class="Symfony\Bundle\MakerBundle\Security\SecurityCompatUtil" />
         </services>
 </container>
