@@ -2,26 +2,28 @@
 
 namespace <?= $namespace ?>;
 
+<?= $use_statements; ?>
+
 <?= $user_is_entity ? "use $user_fully_qualified_class_name;\n" : null ?>
 <?= $user_is_entity ? "use Doctrine\\ORM\\EntityManagerInterface;\n" : null ?>
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
+<!--use Symfony\Component\HttpFoundation\RedirectResponse;-->
+<!--use Symfony\Component\HttpFoundation\Request;-->
 <?= ($user_needs_encoder && str_contains($password_encoder_details->getUseStatement() , 'Hasher')) ? $password_encoder_details->getUseStatement() : null ?>
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+<!--use Symfony\Component\Routing\Generator\UrlGeneratorInterface;-->
+<!--use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;-->
 <?= ($user_needs_encoder && str_contains($password_encoder_details->getUseStatement() , 'Encoder')) ? $password_encoder_details->getUseStatement() : null ?>
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
+<!--use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;-->
 <?= $user_needs_encoder ? "use Symfony\\Component\\Security\\Core\\Encoder\\UserPasswordEncoderInterface;\n" : null ?>
-use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
-use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
+<!--use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;-->
+<!--use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;-->
+<!--use Symfony\Component\Security\Core\Security;-->
+<!--use Symfony\Component\Security\Core\User\UserInterface;-->
+<!--use Symfony\Component\Security\Core\User\UserProviderInterface;-->
+<!--use Symfony\Component\Security\Csrf\CsrfToken;-->
+<!--use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;-->
+<!--use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;-->
 <?= ($password_authenticated = $user_needs_encoder && interface_exists('Symfony\Component\Security\Guard\PasswordAuthenticatedInterface')) ? "use Symfony\Component\Security\Guard\PasswordAuthenticatedInterface;\n" : '' ?>
-use Symfony\Component\Security\Http\Util\TargetPathTrait;
+<!--use Symfony\Component\Security\Http\Util\TargetPathTrait;-->
 
 class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_authenticated ? " implements PasswordAuthenticatedInterface\n" : "\n" ?>
 {
