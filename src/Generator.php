@@ -247,7 +247,7 @@ class Generator
 
     public static function getControllerBaseClass(): ClassNameDetails
     {
-        // Support for Controller::class can be dropped when FrameworkBundle minimum supported version is >=4.1
+        // @legacy Support for Controller::class can be dropped when FrameworkBundle minimum supported version is >=4.1
         $class = method_exists(AbstractController::class, 'getParameter') ? AbstractController::class : Controller::class;
 
         return new ClassNameDetails($class, '\\');
