@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -36,6 +37,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Yaml\Yaml;
@@ -259,7 +261,7 @@ final class MakeAuthenticator extends AbstractMaker
         );
     }
 
-    private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, $userClass, $userNameField, Generator $generator)
+    private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, $userClass, $userNameField, Generator $generator): void
     {
         // generate authenticator class
         if (self::AUTH_TYPE_EMPTY_AUTHENTICATOR === $authenticatorType) {
@@ -277,15 +279,6 @@ final class MakeAuthenticator extends AbstractMaker
             'Entity\\'
         );
 
-        $hasEncoder = $this->userClassHasEncoder($securityData, $userClass);
-        $userPasswordEncoder = null;
-
-        if ($hasEncoder) {
-            $encoderDetails = $this->securityCompatUtil->getPasswordEncoderClassNameDetails();
-            $userPasswordEncoder = $this->generator->getTemplateClassDetails($encoderDetails->getFullName());
-        }
-
-        // Classes shared by both Guard && Security52 Authenticators
         $useStatements = [
             \Symfony\Component\HttpFoundation\RedirectResponse::class,
             \Symfony\Component\HttpFoundation\Request::class,
@@ -296,7 +289,6 @@ final class MakeAuthenticator extends AbstractMaker
         ];
 
         $guardUseStatements = [
-            \Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException::class,
             \Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException::class,
             \Symfony\Component\Security\Core\Exception\UsernameNotFoundException::class,
             \Symfony\Component\Security\Core\User\UserInterface::class,
@@ -318,29 +310,37 @@ final class MakeAuthenticator extends AbstractMaker
 
         $useStatements = array_merge($useStatements, ($this->useSecurity52 ? $security53UseStatements : $guardUseStatements));
 
-//        $userPasswordEncoder = null;
+        $isEntity = $this->doctrineHelper->isClassAMappedEntity($userClass);
+        $hasEncoder = $this->userClassHasEncoder($securityData, $userClass);
 
+        if (!$this->useSecurity52 && $isEntity) {
+            $useStatements[] = $userClassNameDetails->getFullName();
+            $useStatements[] = EntityManagerInterface::class;
+        }
 
+        if (!$this->useSecurity52 && $hasEncoder) {
+            $useStatements[] = UserPasswordEncoderInterface::class;
+        }
 
-//        if ($hasEncoder) {
-//            $encoderDetails = $this->securityCompatUtil->getPasswordEncoderClassNameDetails();
-//            $userPasswordEncoder = $this->generator->getTemplateClassDetails($encoderDetails->getFullName());
-//        }
+        $guardPasswordAuthenticated = $hasEncoder && interface_exists(\Symfony\Component\Security\Guard\PasswordAuthenticatedInterface::class);
+
+        if (!$this->useSecurity52 && $guardPasswordAuthenticated) {
+            $useStatements[] = \Symfony\Component\Security\Guard\PasswordAuthenticatedInterface::class;
+        }
 
         $this->generator->generateClass(
             $authenticatorClass,
             sprintf('authenticator/%sLoginFormAuthenticator.tpl.php', $this->useSecurity52 ? 'Security52' : ''),
             [
                 'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
-                'user_fully_qualified_class_name' => trim($userClassNameDetails->getFullName(), '\\'),
                 'user_class_name' => $userClassNameDetails->getShortName(),
                 'username_field' => $userNameField,
                 'username_field_label' => Str::asHumanWords($userNameField),
                 'username_field_var' => Str::asLowerCamelCase($userNameField),
-                'user_needs_encoder' => $this->userClassHasEncoder($securityData, $userClass),
-                'password_encoder_details' => $userPasswordEncoder,
-                'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($userClass),
+                'user_needs_encoder' => $hasEncoder,
+                'user_is_entity' => $isEntity,
                 'provider_key_type_hint' => $this->providerKeyTypeHint(),
+                'password_authenticated' => $guardPasswordAuthenticated
             ]
         );
     }
