@@ -10,7 +10,7 @@ class <?= $class_name; ?> extends AbstractLoginFormAuthenticator
 
     public const LOGIN_ROUTE = 'app_login';
 
-    private <?= $use_typed_properties ? 'UrlGeneratorInterface ' : null ?>$urlGenerator;
+    private <?= $generator->getPropertyType($url_generator_class_details) ?>$urlGenerator;
 
     public function __construct(UrlGeneratorInterface $urlGenerator)
     {

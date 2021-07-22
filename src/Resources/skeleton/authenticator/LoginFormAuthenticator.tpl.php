@@ -10,9 +10,9 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
 
     public const LOGIN_ROUTE = 'app_login';
 
-<?= $user_is_entity ? "    private \$entityManager;\n" : null ?>
-    private $urlGenerator;
-    private $csrfTokenManager;
+<?= $user_is_entity ? sprintf("    private %s\$entityManager;\n", $generator->getPropertyType($entity_manager_class_details)) : null ?>
+    private <?= $generator->getPropertyType($url_generator_class_details) ?>$urlGenerator;
+    private <?= $generator->getPropertyType($csrf_token_class_details) ?>$csrfTokenManager;
 <?= $user_needs_encoder ? sprintf("    private %s$%s;\n", $generator->getPropertyType($password_class_details), $password_variable_name) : null?>
 
     public function __construct(<?= $user_is_entity ? 'EntityManagerInterface $entityManager, ' : null ?>UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager<?= $user_needs_encoder ? sprintf(', %s $%s', $password_class_details->getShortName(), $password_variable_name) : null ?>)

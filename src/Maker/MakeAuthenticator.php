@@ -336,6 +336,7 @@ final class MakeAuthenticator extends AbstractMaker
                 PasswordAuthenticatedInterface::class);
 
         $guardTemplateVariables = [
+            'csrf_token_class_details' => $generator->createClassNameDetails(CsrfTokenManagerInterface::class, '\\'),
             'user_class_name' => $userClassNameDetails->getShortName(),
             'user_needs_encoder' => $hasEncoder,
             'password_class_details' => $generator->createClassNameDetails(UserPasswordEncoderInterface::class, '\\'),
@@ -353,6 +354,7 @@ final class MakeAuthenticator extends AbstractMaker
             if ($isEntity) {
                 $useStatements[] = $userClassNameDetails->getFullName();
                 $useStatements[] = EntityManagerInterface::class;
+                $guardTemplateVariables['entity_manager_class_details'] = $generator->createClassNameDetails(EntityManagerInterface::class, '\\');
             }
 
             if ($hasEncoder) {
@@ -377,6 +379,7 @@ final class MakeAuthenticator extends AbstractMaker
             sprintf('authenticator/%sLoginFormAuthenticator.tpl.php', $this->useSecurity52 ? 'Security52' : ''),
             array_merge([
                 'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
+                'url_generator_class_details' => $generator->createClassNameDetails(UrlGeneratorInterface::class, '\\'),
                 'username_field' => $userNameField,
                 'username_field_label' => Str::asHumanWords($userNameField),
             ], ($this->useSecurity52 ? $security53TemplateVariables : $guardTemplateVariables)
