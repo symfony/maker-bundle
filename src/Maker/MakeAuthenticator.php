@@ -36,10 +36,29 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Form\Form;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
+use Symfony\Component\Security\Guard\PasswordAuthenticatedInterface;
+use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
+use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -280,68 +299,77 @@ final class MakeAuthenticator extends AbstractMaker
         );
 
         $useStatements = [
-            \Symfony\Component\HttpFoundation\RedirectResponse::class,
-            \Symfony\Component\HttpFoundation\Request::class,
-            \Symfony\Component\Routing\Generator\UrlGeneratorInterface::class,
-            \Symfony\Component\Security\Core\Authentication\Token\TokenInterface::class,
-            \Symfony\Component\Security\Core\Security::class,
-            \Symfony\Component\Security\Http\Util\TargetPathTrait::class,
+            RedirectResponse::class,
+            Request::class,
+            UrlGeneratorInterface::class,
+            TokenInterface::class,
+            Security::class,
+            TargetPathTrait::class,
         ];
 
         $guardUseStatements = [
-            \Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException::class,
-            \Symfony\Component\Security\Core\Exception\UsernameNotFoundException::class,
-            \Symfony\Component\Security\Core\User\UserInterface::class,
-            \Symfony\Component\Security\Core\User\UserProviderInterface::class,
-            \Symfony\Component\Security\Csrf\CsrfToken::class,
-            \Symfony\Component\Security\Csrf\CsrfTokenManagerInterface::class,
-            \Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator::class,
+            InvalidCsrfTokenException::class,
+            UsernameNotFoundException::class,
+            UserInterface::class,
+            UserProviderInterface::class,
+            CsrfToken::class,
+            CsrfTokenManagerInterface::class,
+            AbstractFormLoginAuthenticator::class,
         ];
 
         $security53UseStatements = [
-            \Symfony\Component\HttpFoundation\Response::class,
-            \Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator::class,
-            \Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge::class,
-            \Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge::class,
-            \Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials::class,
-            \Symfony\Component\Security\Http\Authenticator\Passport\Passport::class,
-            \Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface::class,
+            Response::class,
+            AbstractLoginFormAuthenticator::class,
+            CsrfTokenBadge::class,
+            UserBadge::class,
+            PasswordCredentials::class,
+            Passport::class,
+            PassportInterface::class,
         ];
 
         $useStatements = array_merge($useStatements, ($this->useSecurity52 ? $security53UseStatements : $guardUseStatements));
 
         $isEntity = $this->doctrineHelper->isClassAMappedEntity($userClass);
         $hasEncoder = $this->userClassHasEncoder($securityData, $userClass);
+        $guardPasswordAuthenticated = $hasEncoder && interface_exists(
+                PasswordAuthenticatedInterface::class);
 
-        if (!$this->useSecurity52 && $isEntity) {
-            $useStatements[] = $userClassNameDetails->getFullName();
-            $useStatements[] = EntityManagerInterface::class;
-        }
+        $guardTemplateVariables = [
+            'user_class_name' => $userClassNameDetails->getShortName(),
+            'user_needs_encoder' => $hasEncoder,
+            'user_is_entity' => $isEntity,
+            'provider_key_type_hint' => $this->providerKeyTypeHint(),
+            'password_authenticated' => $guardPasswordAuthenticated,
+        ];
 
-        if (!$this->useSecurity52 && $hasEncoder) {
-            $useStatements[] = UserPasswordEncoderInterface::class;
-        }
+        $security53TemplateVariables = [
+            'username_field_var' => Str::asLowerCamelCase($userNameField),
+        ];
 
-        $guardPasswordAuthenticated = $hasEncoder && interface_exists(\Symfony\Component\Security\Guard\PasswordAuthenticatedInterface::class);
+        if (!$this->useSecurity52) {
+            if ($isEntity) {
+                $useStatements[] = $userClassNameDetails->getFullName();
+                $useStatements[] = EntityManagerInterface::class;
+            }
 
-        if (!$this->useSecurity52 && $guardPasswordAuthenticated) {
-            $useStatements[] = \Symfony\Component\Security\Guard\PasswordAuthenticatedInterface::class;
+            if ($hasEncoder) {
+                $useStatements[] = UserPasswordEncoderInterface::class;
+            }
+
+            if ($guardPasswordAuthenticated) {
+                $useStatements[] = PasswordAuthenticatedInterface::class;
+            }
         }
 
         $this->generator->generateClass(
             $authenticatorClass,
             sprintf('authenticator/%sLoginFormAuthenticator.tpl.php', $this->useSecurity52 ? 'Security52' : ''),
-            [
+            array_merge([
                 'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
-                'user_class_name' => $userClassNameDetails->getShortName(),
                 'username_field' => $userNameField,
                 'username_field_label' => Str::asHumanWords($userNameField),
-                'username_field_var' => Str::asLowerCamelCase($userNameField),
-                'user_needs_encoder' => $hasEncoder,
-                'user_is_entity' => $isEntity,
-                'provider_key_type_hint' => $this->providerKeyTypeHint(),
-                'password_authenticated' => $guardPasswordAuthenticated
-            ]
+            ], ($this->useSecurity52 ? $security53TemplateVariables : $guardTemplateVariables)
+            )
         );
     }
 
