@@ -40,6 +40,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -337,6 +338,8 @@ final class MakeAuthenticator extends AbstractMaker
         $guardTemplateVariables = [
             'user_class_name' => $userClassNameDetails->getShortName(),
             'user_needs_encoder' => $hasEncoder,
+            'password_class_details' => $generator->createClassNameDetails(UserPasswordEncoderInterface::class, '\\'),
+            'password_variable_name' => 'passwordEncoder',
             'user_is_entity' => $isEntity,
             'provider_key_type_hint' => $this->providerKeyTypeHint(),
             'password_authenticated' => $guardPasswordAuthenticated,
@@ -353,7 +356,15 @@ final class MakeAuthenticator extends AbstractMaker
             }
 
             if ($hasEncoder) {
-                $useStatements[] = UserPasswordEncoderInterface::class;
+                $encoder = UserPasswordEncoderInterface::class;
+
+                if (interface_exists(UserPasswordHasherInterface::class)) {
+                    $encoder = UserPasswordHasherInterface::class;
+                    $guardTemplateVariables['password_class_details'] = $generator->createClassNameDetails(UserPasswordHasherInterface::class, '\\');
+                    $guardTemplateVariables['password_variable_name'] = 'passwordHasher';
+                }
+
+                $useStatements[] = $encoder;
             }
 
             if ($guardPasswordAuthenticated) {

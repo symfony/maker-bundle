@@ -13,14 +13,14 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
 <?= $user_is_entity ? "    private \$entityManager;\n" : null ?>
     private $urlGenerator;
     private $csrfTokenManager;
-<?= $user_needs_encoder ? "    private \$passwordEncoder;\n" : null ?>
+<?= $user_needs_encoder ? sprintf("    private %s$%s;\n", $generator->getPropertyType($password_class_details), $password_variable_name) : null?>
 
-    public function __construct(<?= $user_is_entity ? 'EntityManagerInterface $entityManager, ' : null ?>UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager<?= $user_needs_encoder ? ', UserPasswordEncoderInterface $passwordEncoder' : null ?>)
+    public function __construct(<?= $user_is_entity ? 'EntityManagerInterface $entityManager, ' : null ?>UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager<?= $user_needs_encoder ? sprintf(', %s $%s', $password_class_details->getShortName(), $password_variable_name) : null ?>)
     {
 <?= $user_is_entity ? "        \$this->entityManager = \$entityManager;\n" : null ?>
         $this->urlGenerator = $urlGenerator;
         $this->csrfTokenManager = $csrfTokenManager;
-<?= $user_needs_encoder ? "        \$this->passwordEncoder = \$passwordEncoder;\n" : null ?>
+<?= $user_needs_encoder ? sprintf("        \$this->%s = \$%s;\n", $password_variable_name, $password_variable_name) : null ?>
     }
 
     public function supports(Request $request)
@@ -65,10 +65,13 @@ class <?= $class_name; ?> extends AbstractFormLoginAuthenticator<?= $password_au
 
     public function checkCredentials($credentials, UserInterface $user)
     {
-        <?= $user_needs_encoder ? "return \$this->passwordEncoder->isPasswordValid(\$user, \$credentials['password']);\n"
-        : "// Check the user's password or other credentials and return true or false
+<?php if ($user_needs_encoder): ?>
+        return $this-><?= $password_variable_name ?>->isPasswordValid($user, $credentials['password']);
+<?php else : ?>
+        // Check the user's password or other credentials and return true or false
         // If there are no credentials to check, you can just return true
-        throw new \Exception('TODO: check the credentials inside '.__FILE__);\n" ?>
+        throw new \Exception('TODO: check the credentials inside '.__FILE__);
+<?php endif ?>
     }
 
 <?php if ($password_authenticated): ?>

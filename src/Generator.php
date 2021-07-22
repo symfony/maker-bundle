@@ -69,6 +69,7 @@ class Generator
         $variables = array_merge($variables, [
             'class_name' => Str::getShortClassName($className),
             'namespace' => Str::getNamespace($className),
+            'generator' => $this->templateComponentGenerator,
         ]);
 
         $this->addOperation($targetPath, $templateName, $variables);
