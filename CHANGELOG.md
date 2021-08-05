@@ -1,5 +1,26 @@
 # Changelog
 
+## [v1.34.0](https://github.com/symfony/maker-bundle/releases/tag/v1.34.0)
+
+*September 27th, 2021*
+
+### Feature
+
+- [#978](https://github.com/symfony/maker-bundle/pull/978) - Adding Entity attribute support - *@simonmarx*, *@geekimo*, *@adlpz*, *@weaverryan*, *@jrushlow*
+- [#970](https://github.com/symfony/maker-bundle/pull/970) - make PhpCompatUtil::getPhpVersion() public - *@nikophil*
+- [#968](https://github.com/symfony/maker-bundle/pull/968) - [make:entity] APIP: use new attribute if exists - *@nikophil*
+- [#963](https://github.com/symfony/maker-bundle/pull/963) - add return types for symfony 6 - *@jrushlow*
+- [#925](https://github.com/symfony/maker-bundle/pull/925) - [templates] Add void return types - *@seb-jean*
+- [#923](https://github.com/symfony/maker-bundle/pull/923) - use password hasher for make:registration & make:reset-password, includes other improvements - *@jrushlow*
+
+### Bug Fix
+
+- [#974](https://github.com/symfony/maker-bundle/pull/974) - Fix method call definition - *@ajgarlag*
+- [#973](https://github.com/symfony/maker-bundle/pull/973) - Fix we we typo - *@karser*
+- [#933](https://github.com/symfony/maker-bundle/pull/933) - [make:entity] Remove deprecated json_array type from available list types. - *@bdaler*
+- [#930](https://github.com/symfony/maker-bundle/pull/930) - Add all missed dependencies to make:reset-password - *@upyx*
+- [#870](https://github.com/symfony/maker-bundle/pull/870) - [make:crud] Fix templates path use in include - *@leblanc-simon*
+
 ## [v1.33.0](https://github.com/symfony/maker-bundle/releases/tag/v1.33.0)
 
 *June 30th, 2021*
