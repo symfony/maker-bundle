@@ -50,6 +50,8 @@ use SymfonyCasts\Bundle\ResetPassword\Persistence\ResetPasswordRequestRepository
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelper;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
+use Symfony\Component\Form\Forms;
+use Symfony\Component\Validator\Validation;
 
 /**
  * @author Romaric Drigon <romaric.drigon@gmail.com>
