@@ -102,6 +102,8 @@ class MakeResetPassword extends AbstractMaker
     {
         $dependencies->addClassDependency(SymfonyCastsResetPasswordBundle::class, 'symfonycasts/reset-password-bundle');
         $dependencies->addClassDependency(MailerInterface::class, 'symfony/mailer');
+        $dependencies->addClassDependency(Forms::class, 'symfony/form');
+        $dependencies->addClassDependency(Validation::class, 'symfony/validator');
 
         ORMDependencyBuilder::buildDependencies($dependencies);
 
