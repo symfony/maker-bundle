@@ -23,6 +23,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -96,8 +97,10 @@ final class MakeSubscriber extends AbstractMaker
             'event/Subscriber.tpl.php',
             [
                 'use_statements' => $useStatements,
-                'event' => class_exists($event) ? sprintf('%s::class', $eventClassName) : sprintf('\'%s\'', $event),
+                'event' =>  class_exists($event) ? sprintf('%s::class', $eventClassName) : $this->getEventConstant($event),
                 'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
+                'import_constant_class' => $this->isNeedImportConstantsClass($event),
+                'event_full_class_name' => $eventFullClassName,
                 'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
             ]
         );
@@ -114,5 +117,48 @@ final class MakeSubscriber extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
+    }
+
+    /**
+     * @param $event
+     * @return string
+     */
+    private function getEventConstant($event): string
+    {
+        $constants = $this->getKernelEventsConstants();
+
+        foreach ($constants as $name => $value) {
+            if ($value === $event) {
+                return 'KernelEvents::' . $name;
+            }
+        }
+
+        return sprintf('\'%s\'', $event);
+    }
+
+    /**
+     * @param $event
+     * @return bool
+     */
+    private function isNeedImportConstantsClass($event): bool
+    {
+        $constants = $this->getKernelEventsConstants();
+
+        foreach ($constants as $name => $value) {
+            if ($value === $event) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return array
+     */
+    private function getKernelEventsConstants(): array
+    {
+        $class = new \ReflectionClass(KernelEvents::class);
+        return $class->getConstants();
     }
 }
