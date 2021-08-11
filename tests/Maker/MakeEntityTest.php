@@ -621,5 +621,47 @@ class MakeEntityTest extends MakerTestCase
                 $this->assertFileExists($directory.'/src/Entity/User.php');
             }),
         ];
+
+        yield 'entity_new_base_entity_created' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // Mark the entity as an API Platform resource
+                'y',
+                // add not additional fields
+                '',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->assert(function (string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Entity/BaseEntity.php');
+
+                $content = file_get_contents($directory.'/src/Entity/BaseEntity.php');
+                $this->assertStringContainsString('abstract class BaseEntity', $content);
+            }),
+        ];
+
+        yield 'entity_new_extends_base_entity' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // Mark the entity as an API Platform resource
+                'y',
+                // add not additional fields
+                '',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->assert(function (string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Entity/User.php');
+
+                $content = file_get_contents($directory.'/src/Entity/User.php');
+                $this->assertStringContainsString('class User extends BaseEntity', $content);
+            }),
+        ];
     }
 }

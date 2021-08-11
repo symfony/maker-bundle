@@ -24,17 +24,7 @@ use Doctrine\ORM\Mapping as ORM;
 <?php if ($broadcast && $use_attributes): ?>
 #[Broadcast]
 <?php endif ?>
-class <?= $class_name."\n" ?>
+class <?= $class_name ?> extends BaseEntity
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 }

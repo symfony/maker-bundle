@@ -41,6 +41,15 @@ final class EntityClassGenerator
             'Repository'
         );
 
+        $abstractEntity = $this->generator->createClassNameDetails(
+            'BaseEntity',
+            'Entity\\'
+        );
+
+        if (!class_exists($abstractEntity->getFullName())) {
+            $this->generator->generateClass($abstractEntity->getFullName(), 'doctrine/BaseEntity.tpl.php');
+        }
+
         $tableName = $this->doctrineHelper->getPotentialTableName($entityClassDetails->getFullName());
 
         $entityPath = $this->generator->generateClass(
