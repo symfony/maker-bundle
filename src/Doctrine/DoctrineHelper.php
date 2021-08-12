@@ -309,7 +309,7 @@ final class DoctrineHelper
     }
 
     /**
-     * this method try to find the correct MappingDriver for the given namespace/class
+     * this method tries to find the correct MappingDriver for the given namespace/class
      * To determine which MappingDriver belongs to the class we check the prefixes configured in Doctrine and use the
      * prefix that has the closest match to the given $namespace.
      */
