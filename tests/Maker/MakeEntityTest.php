@@ -350,7 +350,7 @@ class MakeEntityTest extends MakerTestCase
                 // sanity checks on the generated code
                 $finder = new Finder();
                 $finder->in($directory.'/src/Entity')->files()->name('*.php');
-                $this->assertCount(1, $finder);
+                $this->assertCount(2, $finder);
 
                 $this->assertStringNotContainsString('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
             }),
@@ -627,12 +627,21 @@ class MakeEntityTest extends MakerTestCase
             [
                 // entity class name
                 'User',
-                // Mark the entity as an API Platform resource
-                'y',
                 // add not additional fields
+                'name',
+                'string',
+                '255', // length
+                // nullable
+                'y',
+                'createdAt',
+                // use default datetime
+                '',
+                // nullable
+                'y',
+                // finish adding fields
                 '',
             ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityExtendsBaseEntity')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
             ->assert(function (string $output, string $directory) {
@@ -648,9 +657,18 @@ class MakeEntityTest extends MakerTestCase
             [
                 // entity class name
                 'User',
-                // Mark the entity as an API Platform resource
-                'y',
                 // add not additional fields
+                'name',
+                'string',
+                '255', // length
+                // nullable
+                'y',
+                'createdAt',
+                // use default datetime
+                '',
+                // nullable
+                'y',
+                // finish adding fields
                 '',
             ])
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')

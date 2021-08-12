@@ -26,5 +26,4 @@ use Doctrine\ORM\Mapping as ORM;
 <?php endif ?>
 class <?= $class_name ?> extends BaseEntity
 {
-
 }
