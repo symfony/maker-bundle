@@ -322,7 +322,7 @@ final class DoctrineHelper
             foreach ($mappings as [$prefix, $driver]) {
                 $diff = substr_compare($namespace, $prefix, 0);
 
-                if (null === $lowestCharacterDiff || $diff < $lowestCharacterDiff) {
+                if ($diff >= 0 && (null === $lowestCharacterDiff || $diff < $lowestCharacterDiff)) {
                     $foundDriver = $driver;
                 }
             }
