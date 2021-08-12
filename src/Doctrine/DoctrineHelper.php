@@ -16,6 +16,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata as LegacyClassMetadata;
 use Doctrine\Common\Persistence\Mapping\MappingException as LegacyPersistenceMappingException;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Mapping\MappingException as ORMMappingException;
 use Doctrine\ORM\Mapping\NamingStrategy;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
@@ -117,6 +118,43 @@ final class DoctrineHelper
         foreach ($this->annotatedPrefixes[$managerName] as [$prefix, $annotationDriver]) {
             if (0 === strpos($className, $prefix)) {
                 return null !== $annotationDriver;
+            }
+        }
+
+        return false;
+    }
+
+    public function doesClassUsesAttributes(string $className): bool
+    {
+        /** @var EntityManagerInterface $em */
+        $em = $this->getRegistry()->getManagerForClass($className);
+
+        if (null === $em) {
+            throw new \InvalidArgumentException(sprintf('Cannot find the entity manager for class "%s"', $className));
+        }
+
+        if (null === $this->annotatedPrefixes) {
+            // doctrine-bundle <= 2.2
+            $metadataDriver = $em->getConfiguration()->getMetadataDriverImpl();
+
+            if (!$this->isInstanceOf($metadataDriver, MappingDriverChain::class)) {
+                return $metadataDriver instanceof AttributeDriver;
+            }
+
+            foreach ($metadataDriver->getDrivers() as $namespace => $driver) {
+                if (0 === strpos($className, $namespace)) {
+                    return $driver instanceof AttributeDriver;
+                }
+            }
+
+            return $metadataDriver->getDefaultDriver() instanceof AttributeDriver;
+        }
+
+        $managerName = array_search($em, $this->getRegistry()->getManagers(), true);
+
+        foreach ($this->annotatedPrefixes[$managerName] as [$prefix, $attributeDriver]) {
+            if (0 === strpos($className, $prefix)) {
+                return null !== $attributeDriver;
             }
         }
 

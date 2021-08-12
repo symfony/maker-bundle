@@ -50,6 +50,7 @@
                 <argument type="service" id="maker.file_manager" />
                 <argument /> <!-- root namespace -->
                 <argument type="service" id="maker.php_compat_util" />
+                <argument type="service" id="maker.template_component_generator" />
             </service>
 
             <service id="maker.entity_class_generator" class="Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator">
@@ -67,6 +68,10 @@
 
             <service id="maker.php_compat_util" class="Symfony\Bundle\MakerBundle\Util\PhpCompatUtil">
                 <argument type="service" id="maker.file_manager" />
+            </service>
+
+            <service id="maker.template_component_generator" class="Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator">
+                <argument type="service" id="maker.php_compat_util" />
             </service>
         </services>
 </container>
