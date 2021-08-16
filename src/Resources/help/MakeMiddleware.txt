@@ -1,5 +1,0 @@
-The <info>%command.name%</info> command generates a new Middleware class.
-
-<info>php %command.full_name% CustomMiddleware</info>
-
-If the argument is missing, the command will ask for the message class interactively.
