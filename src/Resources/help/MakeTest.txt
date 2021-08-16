@@ -1,7 +1,0 @@
-The <info>%command.name%</info> command generates a new test class.
-
-<info>php %command.full_name% TestCase BlogPostTest</info>
-
-If the first argument is missing, the command will ask for the test type interactively.
-
-If the second argument is missing, the command will ask for the class name interactively.
