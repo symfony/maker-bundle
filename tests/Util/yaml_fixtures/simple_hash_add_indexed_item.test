@@ -1,6 +1,0 @@
-mysql: '8'
-===
-$data[] = 'new key';
-===
-mysql: '8'
-0: 'new key'

@@ -1,3 +1,0 @@
-homepage:
-    path: /
-    controller: App\Controller\MainController::homepage
