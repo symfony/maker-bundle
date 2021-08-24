@@ -24,10 +24,11 @@ class MakeResetPasswordTest extends MakerTestCase
         yield 'reset_password_replaces_flex_config' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeResetPassword::class),
             [
-                'App\Entity\User',
-                'app_home',
-                'jr@rushlow.dev',
-                'SymfonyCasts',
+                'App\Entity\User', // User Entity
+                'app_home', // Redirect route after successful reset
+                'jr@rushlow.dev', // Email from address
+                'SymfonyCasts', // Email from name
+                'n', // Generate API templates
             ])
             ->setRequiredPhpVersion(70200)
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeResetPassword')
@@ -68,10 +69,11 @@ class MakeResetPasswordTest extends MakerTestCase
         yield 'reset_password_custom_config' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeResetPassword::class),
             [
-                'App\Entity\User',
-                'app_home',
-                'jr@rushlow.dev',
-                'SymfonyCasts',
+                'App\Entity\User', // User Entity
+                'app_home', // Redirect route after successful reset
+                'jr@rushlow.dev', // Email from address
+                'SymfonyCasts', // Email from name
+                'n', // Generate API templates
             ])
             ->setRequiredPhpVersion(70200)
             ->deleteFile('config/packages/reset_password.yaml')
@@ -93,10 +95,11 @@ class MakeResetPasswordTest extends MakerTestCase
         yield 'reset_password_amends_config' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeResetPassword::class),
             [
-                'App\Entity\User',
-                'app_home',
-                'jr@rushlow.dev',
-                'SymfonyCasts',
+                'App\Entity\User', // User Entity
+                'app_home', // Redirect route after successful reset
+                'jr@rushlow.dev', // Email from address
+                'SymfonyCasts', // Email from name
+                'n', // Generate API templates
             ])
             ->setRequiredPhpVersion(70200)
             ->addReplacement(
@@ -122,10 +125,11 @@ class MakeResetPasswordTest extends MakerTestCase
         yield 'reset_password_functional_test' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeResetPassword::class),
             [
-                'App\Entity\User',
-                'app_home',
-                'jr@rushlow.dev',
-                'SymfonyCasts',
+                'App\Entity\User', // User Entity
+                'app_home', // Redirect route after successful reset
+                'jr@rushlow.dev', // Email from address
+                'SymfonyCasts', // Email from name
+                'n', // Generate API templates
             ])
             ->setRequiredPhpVersion(70200)
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeResetPasswordFunctionalTest'),
@@ -134,12 +138,13 @@ class MakeResetPasswordTest extends MakerTestCase
         yield 'reset_password_custom_user' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeResetPassword::class),
             [
-                'App\Entity\UserCustom',
-                'emailAddress',
-                'setMyPassword',
-                'app_home',
-                'jr@rushlow.dev',
-                'SymfonyCasts',
+                'App\Entity\UserCustom', // User Entity
+                'emailAddress', // Email property
+                'setMyPassword', // Email setter
+                'app_home', // Redirect route after successful reset
+                'jr@rushlow.dev', // Email from address
+                'SymfonyCasts', // Email from name
+                'n', // Generate API Templates
             ])
             ->setRequiredPhpVersion(70200)
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeResetPasswordCustomUserAttribute')
@@ -164,6 +169,72 @@ class MakeResetPasswordTest extends MakerTestCase
                     $this->assertStringContainsString('{{ form_row(requestForm.emailAddress) }}', $contentRequestHtml);
                 }
             ),
+        ];
+
+        yield 'reset_password_api' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeResetPassword::class),
+            [
+                'App\Entity\User', // User Entity
+                'app_home', // Redirect route after successful reset
+                'jr@rushlow.dev', // Email from address
+                'SymfonyCasts', // Email from name
+                'y', // Generate API templates
+            ])
+            ->setRequiredPhpVersion(70200)
+            ->addExtraDependencies('api')
+            ->addExtraDependencies('security-bundle')
+            ->addExtraDependencies('twig')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeResetPasswordApi')
+            ->assert(
+                function (string $output, string $directory) {
+
+                    $this->assertStringContainsString('Success', $output);
+
+                    $fs = new Filesystem();
+
+                    $generatedFiles = [
+                        'src/DataPersister/ResetPasswordDataPersister.php',
+                        'src/DataTransformer/ResetPasswordInputDataTransformer.php',
+                        'src/Dto/ResetPasswordInput.php',
+                    ];
+
+                    foreach ($generatedFiles as $file) {
+                        $this->assertTrue($fs->exists(sprintf('%s/%s', $directory, $file)));
+                    }
+
+                    // check ResetPasswordDto
+                    $contentResetPasswordInput = file_get_contents($directory.'/src/Dto/ResetPasswordInput.php');
+                    $this->assertStringContainsString('@Groups({"reset-password:write"})', $contentResetPasswordInput);
+                    $this->assertStringContainsString('public ?string $email = null;', $contentResetPasswordInput);
+
+                    // check ResetPasswordInputDataTransformer
+                    $contentResetPasswordDataTransformer = file_get_contents($directory.'/src/DataTransformer/ResetPasswordInputDataTransformer.php');
+
+                    // check ResetPasswordDataPersister
+                    $contentResetPasswordRequestFormType = file_get_contents($directory.'/src/DataPersister/ResetPasswordDataPersister.php');
+                }
+            ),
+        ];
+
+        yield 'reset_password_api_functional_test' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeResetPassword::class),
+            [
+                'App\Entity\User', // User Entity
+                'app_home', // Redirect route after successful reset
+                'jr@rushlow.dev', // Email from address
+                'SymfonyCasts', // Email from name
+                'y', // Generate API templates
+            ])
+            ->setRequiredPhpVersion(70200)
+            ->addExtraDependencies('api-platform')
+            ->addExtraDependencies('doctrine')
+            ->addExtraDependencies('doctrine/annotations')
+            ->addExtraDependencies('mailer')
+            ->addExtraDependencies('security-bundle')
+            ->addExtraDependencies('symfony/form')
+            ->addExtraDependencies('symfony/validator')
+            ->addExtraDependencies('twig')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeResetPasswordApiFunctionalTest'),
         ];
     }
 }

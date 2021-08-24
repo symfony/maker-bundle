@@ -69,6 +69,7 @@ class MakeResetPassword extends AbstractMaker
     private $fileManager;
     private $doctrineHelper;
     private $entityClassGenerator;
+    private $generateApi = false;
 
     private $fromEmailAddress;
     private $fromEmailName;
@@ -172,6 +173,11 @@ class MakeResetPassword extends AbstractMaker
             null,
             [Validator::class, 'notBlank']
         );
+
+        $this->generateApi = $io->confirm('Do you want to implement API based Password Resets?', false);
+        
+        //@TODO Check if API Platform is installed, if true - continue, if false - alert user composer require api-platform
+        // @TODO May make more sense to ask this at the top and fail if yes and api platform is not installed. 
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
@@ -180,6 +186,26 @@ class MakeResetPassword extends AbstractMaker
             '\\'.$this->userClass,
             'Entity\\'
         );
+
+        $userDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($userClassNameDetails->getFullName());
+
+        $userRepoVars = [
+            'repository_full_class_name' => 'Doctrine\ORM\EntityManagerInterface',
+            'repository_class_name' => 'EntityManagerInterface',
+            'repository_property_var' => 'manager',
+            'repository_var' => '$manager',
+        ];
+
+        if (null !== $userDoctrineDetails && null !== ($userRepository = $userDoctrineDetails->getRepositoryClass())) {
+            $userRepoClassDetails = $generator->createClassNameDetails('\\'.$userRepository, 'Repository\\', 'Repository');
+
+            $userRepoVars = [
+                'repository_full_class_name' => $userRepoClassDetails->getFullName(),
+                'repository_class_name' => $userRepoClassDetails->getShortName(),
+                'repository_property_var' => lcfirst($userRepoClassDetails->getShortName()),
+                'repository_var' => sprintf('$%s', lcfirst($userRepoClassDetails->getShortName())),
+            ];
+        }
 
         $controllerClassNameDetails = $generator->createClassNameDetails(
             'ResetPasswordController',
@@ -293,6 +319,46 @@ class MakeResetPassword extends AbstractMaker
             'reset_password/reset.html.twig',
             'resetPassword/twig_reset.tpl.php'
         );
+
+        if ($this->generateApi) {
+            $dtoClassNameDetails = $generator->createClassNameDetails(
+                'ResetPasswordInput',
+                'Dto\\'
+            );
+
+            $generator->generateClass(
+                $dtoClassNameDetails->getFullName(),
+                'resetPassword/ResetPasswordInput.tpl.php'
+            );
+
+            $dataTransformerClassNameDetails = $generator->createClassNameDetails(
+                'ResetPasswordInputDataTransformer',
+                'DataTransformer\\'
+            );
+
+            $generator->generateClass(
+                $dataTransformerClassNameDetails->getFullName(),
+                'resetPassword/ResetPasswordInputDataTransformer.tpl.php',
+            );
+
+            $dataPersisterClassNameDetails = $generator->createClassNameDetails(
+                'ResetPasswordDataPersister',
+                'DataPersister\\'
+            );
+
+            $generator->generateClass(
+                $dataPersisterClassNameDetails->getFullName(),
+                'resetPassword/ResetPasswordDataPersister.tpl.php',
+                array_merge([
+                    'user_full_class_name' => $userClassNameDetails->getFullName(),
+                    'user_class_name' => $userClassNameDetails->getShortName(),
+                    ],
+                    $userRepoVars
+                )
+            );
+
+//             @TODO - Add API DocBlocks to Entity
+        }
 
         $generator->writeChanges();
 
