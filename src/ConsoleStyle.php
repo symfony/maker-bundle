@@ -30,12 +30,12 @@ final class ConsoleStyle extends SymfonyStyle
         parent::__construct($input, $output);
     }
 
-    public function success($message)
+    public function success($message): void
     {
         $this->writeln('<fg=green;options=bold,underscore>OK</> '.$message);
     }
 
-    public function comment($message)
+    public function comment($message): void
     {
         $this->text($message);
     }

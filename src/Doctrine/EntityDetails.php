@@ -31,7 +31,7 @@ final class EntityDetails
         $this->metadata = $metadata;
     }
 
-    public function getRepositoryClass()
+    public function getRepositoryClass(): ?string
     {
         return $this->metadata->customRepositoryClassName;
     }
@@ -41,12 +41,12 @@ final class EntityDetails
         return $this->metadata->identifier[0];
     }
 
-    public function getDisplayFields()
+    public function getDisplayFields(): array
     {
         return $this->metadata->fieldMappings;
     }
 
-    public function getFormFields()
+    public function getFormFields(): array
     {
         $fields = (array) $this->metadata->fieldNames;
         // Remove the primary key field if it's not managed manually
