@@ -50,12 +50,12 @@ final class MakerCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->maker->configureCommand($this, $this->inputConfig);
     }
 
-    protected function initialize(InputInterface $input, OutputInterface $output)
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->io = new ConsoleStyle($input, $output);
         $this->fileManager->setIO($this->io);
@@ -74,7 +74,7 @@ final class MakerCommand extends Command
         }
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function interact(InputInterface $input, OutputInterface $output): void
     {
         if (!$this->fileManager->isNamespaceConfiguredToAutoload($this->generator->getRootNamespace())) {
             $this->io->note([
@@ -111,7 +111,7 @@ final class MakerCommand extends Command
         return 0;
     }
 
-    public function setApplication(Application $application = null)
+    public function setApplication(Application $application = null): void
     {
         parent::setApplication($application);
 
@@ -127,7 +127,7 @@ final class MakerCommand extends Command
     /**
      * @internal Used for testing commands
      */
-    public function setCheckDependencies(bool $checkDeps)
+    public function setCheckDependencies(bool $checkDeps): void
     {
         $this->checkDependencies = $checkDeps;
     }

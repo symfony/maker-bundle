@@ -25,7 +25,7 @@ class MakeCommandRegistrationPass implements CompilerPassInterface
 {
     public const MAKER_TAG = 'maker.command';
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         foreach ($container->findTaggedServiceIds(self::MAKER_TAG) as $id => $tags) {
             $def = $container->getDefinition($id);

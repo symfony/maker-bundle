@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class SetDoctrineManagerRegistryClassPass implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         if ($container->hasAlias(ManagerRegistry::class)) {
             $definition = $container->getDefinition('maker.entity_class_generator');

@@ -34,7 +34,7 @@ final class PrettyPrinter extends Standard
      * also need to handle indent levels of 5, 9, etc: these
      * do not occur (at least in the code we generate);
      */
-    protected function setIndentLevel(int $level)
+    protected function setIndentLevel(int $level): void
     {
         if (1 === $level) {
             $level = 4;

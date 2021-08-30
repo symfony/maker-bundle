@@ -21,7 +21,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
  */
 final class SecurityControllerBuilder
 {
-    public function addLoginMethod(ClassSourceManipulator $manipulator)
+    public function addLoginMethod(ClassSourceManipulator $manipulator): void
     {
         $loginMethodBuilder = $manipulator->createMethodBuilder('login', 'Response', false, ['@Route("/login", name="app_login")']);
 
@@ -64,7 +64,7 @@ CODE
         $manipulator->addMethodBuilder($loginMethodBuilder);
     }
 
-    public function addLogoutMethod(ClassSourceManipulator $manipulator)
+    public function addLogoutMethod(ClassSourceManipulator $manipulator): void
     {
         $logoutMethodBuilder = $manipulator->createMethodBuilder('logout', null, false, ['@Route("/logout", name="app_logout")']);
 
