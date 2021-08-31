@@ -730,7 +730,7 @@ final class ClassSourceManipulator
 
     private function addStatementToConstructor(Node\Stmt $stmt): void
     {
-        $this->removeEmptyConstructorIfNecessary();
+        //$this->removeEmptyConstructorIfNecessary();
 
         if (!$this->getConstructorNode()) {
             $constructorNode = (new Builder\Method('__construct'))->makePublic()->getNode();
