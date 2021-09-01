@@ -1316,6 +1316,7 @@ final class ClassSourceManipulator
     {
         foreach ($params as $param) {
             $methodBuilder->addParam($param);
+        }
     }
 
     /**
