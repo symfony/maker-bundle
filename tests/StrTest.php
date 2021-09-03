@@ -62,12 +62,12 @@ class StrTest extends TestCase
     {
         yield ['', '', ''];
         yield ['GenerateCommand', '', 'GenerateCommand'];
-        yield ['GenerateCommand', 'Command', 'GenerateCommand'];
-        yield ['GenerateCommand', 'command', 'Generatecommand'];
-        yield ['Generatecommand', 'Command', 'GenerateCommand'];
-        yield ['Generatecommand', 'command', 'Generatecommand'];
-        yield ['GenerateCommandCommand', 'Command', 'GenerateCommandCommand'];
-        yield ['GenerateCommandcommand', 'Command', 'GenerateCommandCommand'];
+        yield ['GenerateCommand', 'Command', 'GenerateCommandCommand'];
+        yield ['GenerateCommand', 'command', 'GenerateCommandcommand'];
+        yield ['Generatecommand', 'Command', 'GeneratecommandCommand'];
+        yield ['Generatecommand', 'command', 'Generatecommandcommand'];
+        yield ['GenerateCommandCommand', 'Command', 'GenerateCommandCommandCommand'];
+        yield ['GenerateCommandcommand', 'Command', 'GenerateCommandcommandCommand'];
         yield ['Generate', 'command', 'Generatecommand'];
         yield ['Generate', 'Command', 'GenerateCommand'];
     }
@@ -95,7 +95,7 @@ class StrTest extends TestCase
         yield ['gen-erate:Co-mman-d', '', 'GenErateCoMmanD'];
         yield ['generate', 'Command', 'GenerateCommand'];
         yield ['app:generate', 'Command', 'AppGenerateCommand'];
-        yield ['app:generate:command', 'Command', 'AppGenerateCommand'];
+        yield ['app:generate:command', 'Command', 'AppGenerateCommandCommand'];
     }
 
     public function provideAsTwigVariable()
