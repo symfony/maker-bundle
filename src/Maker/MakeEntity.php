@@ -214,6 +214,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $currentFields = $this->getPropertyNames($entityClassDetails->getFullName());
         $manipulator = $this->createClassManipulator($entityPath, $io, $overwrite, $mappingDriver);
 
+        $useAttributes = $this->doctrineHelper->isDoctrineSupportingAttributes() && $mappingDriver instanceof AttributeDriver;
+
         $isFirstField = true;
         while (true) {
             $newField = $this->askForNextField($io, $currentFields, $entityClassDetails->getFullName(), $isFirstField);
@@ -229,7 +231,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             if (\is_array($newField)) {
                 $annotationOptions = $newField;
                 unset($annotationOptions['fieldName']);
-                $manipulator->addEntityField($newField['fieldName'], $annotationOptions);
+                $manipulator->addEntityField($newField['fieldName'], $annotationOptions, [], [], $useAttributes);
 
                 $currentFields[] = $newField['fieldName'];
             } elseif ($newField instanceof EntityRelation) {
@@ -246,7 +248,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                     case EntityRelation::MANY_TO_ONE:
                         if ($newField->getOwningClass() === $entityClassDetails->getFullName()) {
                             // THIS class will receive the ManyToOne
-                            $manipulator->addManyToOneRelation($newField->getOwningRelation());
+                            $manipulator->addManyToOneRelation($newField->getOwningRelation(), $useAttributes);
 
                             if ($newField->getMapInverseRelation()) {
                                 $otherManipulator->addOneToManyRelation($newField->getInverseRelation());
@@ -262,19 +264,19 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                             if (!$newField->getMapInverseRelation()) {
                                 throw new \Exception('Somehow a OneToMany relationship is being created, but the inverse side will not be mapped?');
                             }
-                            $manipulator->addOneToManyRelation($newField->getInverseRelation());
+                            $manipulator->addOneToManyRelation($newField->getInverseRelation(), $useAttributes);
                         }
 
                         break;
                     case EntityRelation::MANY_TO_MANY:
-                        $manipulator->addManyToManyRelation($newField->getOwningRelation());
+                        $manipulator->addManyToManyRelation($newField->getOwningRelation(), $useAttributes);
                         if ($newField->getMapInverseRelation()) {
                             $otherManipulator->addManyToManyRelation($newField->getInverseRelation());
                         }
 
                         break;
                     case EntityRelation::ONE_TO_ONE:
-                        $manipulator->addOneToOneRelation($newField->getOwningRelation());
+                        $manipulator->addOneToOneRelation($newField->getOwningRelation(), $useAttributes);
                         if ($newField->getMapInverseRelation()) {
                             $otherManipulator->addOneToOneRelation($newField->getInverseRelation());
                         }
@@ -802,9 +804,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite, ?MappingDriver $mappingDriver = null): ClassSourceManipulator
     {
         $useAnnotations = null === $mappingDriver || $mappingDriver instanceof AnnotationDriver && !$mappingDriver instanceof AttributeDriver;
-        $useAttributes = $mappingDriver instanceof AttributeDriver;
 
-        $manipulator = new ClassSourceManipulator($this->fileManager->getFileContents($path), $overwrite, $useAnnotations, true, $useAttributes);
+        $manipulator = new ClassSourceManipulator($this->fileManager->getFileContents($path), $overwrite, $useAnnotations, true);
 
         $manipulator->setIo($io);
 

@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
+use Composer\Semver\Comparator;
 use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata as LegacyClassMetadata;
 use Doctrine\Common\Persistence\Mapping\MappingException as LegacyPersistenceMappingException;
@@ -87,7 +88,7 @@ final class DoctrineHelper
         return $this->entityNamespace;
     }
 
-    public function isClassAnnotated(string $className): bool
+    public function doesClassUseDriver(string $className, string $driverClass): bool
     {
         /** @var EntityManagerInterface $em */
         $em = $this->getRegistry()->getManagerForClass($className);
@@ -101,16 +102,16 @@ final class DoctrineHelper
             $metadataDriver = $em->getConfiguration()->getMetadataDriverImpl();
 
             if (!$this->isInstanceOf($metadataDriver, MappingDriverChain::class)) {
-                return $metadataDriver instanceof AnnotationDriver;
+                return $metadataDriver instanceof $driverClass;
             }
 
             foreach ($metadataDriver->getDrivers() as $namespace => $driver) {
                 if (0 === strpos($className, $namespace)) {
-                    return $driver instanceof AnnotationDriver;
+                    return $driver instanceof $driverClass;
                 }
             }
 
-            return $metadataDriver->getDefaultDriver() instanceof AnnotationDriver;
+            return $metadataDriver->getDefaultDriver() instanceof $driverClass;
         }
 
         $managerName = array_search($em, $this->getRegistry()->getManagers(), true);
@@ -124,41 +125,14 @@ final class DoctrineHelper
         return false;
     }
 
+    public function isClassAnnotated(string $className): bool
+    {
+        return $this->doesClassUseDriver($className, AnnotationDriver::class);
+    }
+
     public function doesClassUsesAttributes(string $className): bool
     {
-        /** @var EntityManagerInterface $em */
-        $em = $this->getRegistry()->getManagerForClass($className);
-
-        if (null === $em) {
-            throw new \InvalidArgumentException(sprintf('Cannot find the entity manager for class "%s"', $className));
-        }
-
-        if (null === $this->annotatedPrefixes) {
-            // doctrine-bundle <= 2.2
-            $metadataDriver = $em->getConfiguration()->getMetadataDriverImpl();
-
-            if (!$this->isInstanceOf($metadataDriver, MappingDriverChain::class)) {
-                return $metadataDriver instanceof AttributeDriver;
-            }
-
-            foreach ($metadataDriver->getDrivers() as $namespace => $driver) {
-                if (0 === strpos($className, $namespace)) {
-                    return $driver instanceof AttributeDriver;
-                }
-            }
-
-            return $metadataDriver->getDefaultDriver() instanceof AttributeDriver;
-        }
-
-        $managerName = array_search($em, $this->getRegistry()->getManagers(), true);
-
-        foreach ($this->annotatedPrefixes[$managerName] as [$prefix, $attributeDriver]) {
-            if (0 === strpos($className, $prefix)) {
-                return null !== $attributeDriver;
-            }
-        }
-
-        return false;
+        return $this->doesClassUseDriver($className, AttributeDriver::class);
     }
 
     public function getEntitiesForAutocomplete(): array
@@ -272,7 +246,7 @@ final class DoctrineHelper
             return false;
         }
 
-        return (bool) $this->getMetadata($className);
+        return (bool)$this->getMetadata($className);
     }
 
     private function isInstanceOf($object, string $class): bool
@@ -323,11 +297,17 @@ final class DoctrineHelper
                 $diff = substr_compare($namespace, $prefix, 0);
 
                 if ($diff >= 0 && (null === $lowestCharacterDiff || $diff < $lowestCharacterDiff)) {
+                    $lowestCharacterDiff = $diff;
                     $foundDriver = $driver;
                 }
             }
         }
 
         return $foundDriver;
+    }
+
+    public function isDoctrineSupportingAttributes(): bool
+    {
+        return $this->isDoctrineInstalled() && Comparator::greaterThanOrEqualTo(constant('Doctrine\ORM\Version::VERSION'), '2.9.0') && Comparator::greaterThanOrEqualTo(PHP_VERSION, '8.0') ;
     }
 }
