@@ -251,7 +251,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                             $manipulator->addManyToOneRelation($newField->getOwningRelation(), $useAttributes);
 
                             if ($newField->getMapInverseRelation()) {
-                                $otherManipulator->addOneToManyRelation($newField->getInverseRelation());
+                                $otherManipulator->addOneToManyRelation($newField->getInverseRelation(), $useAttributes);
                             }
                         } else {
                             // the new field being added to THIS entity is the inverse
@@ -260,7 +260,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                             $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite, $mappingDriver);
 
                             // The *other* class will receive the ManyToOne
-                            $otherManipulator->addManyToOneRelation($newField->getOwningRelation());
+                            $otherManipulator->addManyToOneRelation($newField->getOwningRelation(), $useAttributes);
                             if (!$newField->getMapInverseRelation()) {
                                 throw new \Exception('Somehow a OneToMany relationship is being created, but the inverse side will not be mapped?');
                             }
@@ -271,14 +271,14 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                     case EntityRelation::MANY_TO_MANY:
                         $manipulator->addManyToManyRelation($newField->getOwningRelation(), $useAttributes);
                         if ($newField->getMapInverseRelation()) {
-                            $otherManipulator->addManyToManyRelation($newField->getInverseRelation());
+                            $otherManipulator->addManyToManyRelation($newField->getInverseRelation(), $useAttributes);
                         }
 
                         break;
                     case EntityRelation::ONE_TO_ONE:
                         $manipulator->addOneToOneRelation($newField->getOwningRelation(), $useAttributes);
                         if ($newField->getMapInverseRelation()) {
-                            $otherManipulator->addOneToOneRelation($newField->getInverseRelation());
+                            $otherManipulator->addOneToOneRelation($newField->getInverseRelation(), $useAttributes);
                         }
 
                         break;

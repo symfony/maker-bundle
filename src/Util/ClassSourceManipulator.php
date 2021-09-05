@@ -172,7 +172,7 @@ final class ClassSourceManipulator
         $this->addSingularRelation($manyToOne, $useAttributes);
     }
 
-    public function addOneToOneRelation(RelationOneToOne $oneToOne, bool $useAttributes = false)
+    public function addManyToManyRelationaddOneToOneRelation(RelationOneToOne $oneToOne, bool $useAttributes = false)
     {
         $this->addSingularRelation($oneToOne, $useAttributes);
     }
