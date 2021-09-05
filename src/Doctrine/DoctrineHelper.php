@@ -90,8 +90,17 @@ final class DoctrineHelper
 
     public function doesClassUseDriver(string $className, string $driverClass): bool
     {
-        /** @var EntityManagerInterface $em */
-        $em = $this->getRegistry()->getManagerForClass($className);
+        try {
+            /** @var EntityManagerInterface $em */
+            $em = $this->getRegistry()->getManagerForClass($className);
+        } catch (\ReflectionException $exception) {
+            // this exception will be thrown by the registry if the class isnt created yet.
+            // an example case is the "make:entity" command, which needs to know which driver is used for the class to determine
+            // if the class should be generated with attributes or annotations. If this exception is thrown, we will check based on the
+            // namespaces for the given $className and compare it with the doctrine configuration to get the correct MappingDriver
+
+            return $this->getMappingDriverForNamespace($className) instanceof $driverClass;
+        }
 
         if (null === $em) {
             throw new \InvalidArgumentException(sprintf('Cannot find the entity manager for class "%s"', $className));
@@ -286,6 +295,9 @@ final class DoctrineHelper
      * this method tries to find the correct MappingDriver for the given namespace/class
      * To determine which MappingDriver belongs to the class we check the prefixes configured in Doctrine and use the
      * prefix that has the closest match to the given $namespace.
+     *
+     * this helper function is needed to create entities with the configuration of doctrine if they are not yet been registered
+     * in the ManagerRegistry
      */
     public function getMappingDriverForNamespace(string $namespace): ?MappingDriver
     {

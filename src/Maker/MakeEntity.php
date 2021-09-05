@@ -164,6 +164,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         );
 
         $mappingDriver = $this->doctrineHelper->getMappingDriverForNamespace($entityClassDetails->getFullName());
+
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {
             $broadcast = $input->getOption('broadcast');
@@ -172,8 +173,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 $input->getOption('api-resource'),
                 false,
                 true,
-                $broadcast,
-                $mappingDriver instanceof AttributeDriver
+                $broadcast
             );
 
             if ($broadcast) {
