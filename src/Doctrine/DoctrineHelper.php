@@ -246,7 +246,7 @@ final class DoctrineHelper
             return false;
         }
 
-        return (bool)$this->getMetadata($className);
+        return (bool) $this->getMetadata($className);
     }
 
     private function isInstanceOf($object, string $class): bool
@@ -308,6 +308,6 @@ final class DoctrineHelper
 
     public function isDoctrineSupportingAttributes(): bool
     {
-        return $this->isDoctrineInstalled() && Comparator::greaterThanOrEqualTo(constant('Doctrine\ORM\Version::VERSION'), '2.9.0') && Comparator::greaterThanOrEqualTo(PHP_VERSION, '8.0') ;
+        return $this->isDoctrineInstalled() && Comparator::greaterThanOrEqualTo(\constant('Doctrine\ORM\Version::VERSION'), '2.9.0') && Comparator::greaterThanOrEqualTo(\PHP_VERSION, '8.0');
     }
 }
