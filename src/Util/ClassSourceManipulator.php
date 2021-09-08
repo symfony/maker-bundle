@@ -58,8 +58,6 @@ final class ClassSourceManipulator
     public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true)
     {
         $this->overwrite = $overwrite;
-        // is this needed? https://github.com/symfony/maker-bundle/pull/920 we discussed about moving "useAttributes" into the methods itselfs
-        // which would make "useAnnotations" obsolete
         $this->useAnnotations = $useAnnotations;
         $this->fluentMutators = $fluentMutators;
         $this->lexer = new Lexer\Emulative([
