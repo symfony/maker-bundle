@@ -85,13 +85,13 @@ final class ClassSourceManipulator
         return $this->sourceCode;
     }
 
-    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [], array $attributes = [], bool $useAttributes = false)
+    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [], array $attributes = [], bool $useAttributesForMapping = false)
     {
         $typeHint = $this->getEntityTypeHint($columnOptions['type']);
         $nullable = $columnOptions['nullable'] ?? false;
         $isId = (bool) ($columnOptions['id'] ?? false);
 
-        if ($useAttributes) {
+        if ($useAttributesForMapping) {
             $attributes[] = $this->buildAttributeNode('ORM\Column', $columnOptions);
         } else {
             $comments[] = $this->buildAnnotationLine('@ORM\Column', $columnOptions);
@@ -102,7 +102,7 @@ final class ClassSourceManipulator
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
         }
 
-        $this->addProperty($propertyName, $comments, $defaultValue, $attributes, $useAttributes);
+        $this->addProperty($propertyName, $comments, $defaultValue, $attributes, $useAttributesForMapping);
 
         $this->addGetter(
             $propertyName,
@@ -118,7 +118,7 @@ final class ClassSourceManipulator
         }
     }
 
-    public function addEmbeddedEntity(string $propertyName, string $className)
+    public function addEmbeddedEntity(string $propertyName, string $className, bool $useAttributesForMapping = false)
     {
         $typeHint = $this->addUseStatementIfNecessary($className);
 
@@ -140,7 +140,7 @@ final class ClassSourceManipulator
             ),
         ];
 
-        $this->addProperty($propertyName, $annotations, null, $attributes);
+        $this->addProperty($propertyName, $annotations, null, $attributes, $useAttributesForMapping);
 
         // logic to avoid re-adding the same ArrayCollection line
         $addEmbedded = true;
@@ -167,24 +167,24 @@ final class ClassSourceManipulator
         $this->addSetter($propertyName, $typeHint, false);
     }
 
-    public function addManyToOneRelation(RelationManyToOne $manyToOne, bool $useAttributes = false)
+    public function addManyToOneRelation(RelationManyToOne $manyToOne, bool $useAttributesForMapping = false)
     {
-        $this->addSingularRelation($manyToOne, $useAttributes);
+        $this->addSingularRelation($manyToOne, $useAttributesForMapping);
     }
 
-    public function addManyToManyRelationaddOneToOneRelation(RelationOneToOne $oneToOne, bool $useAttributes = false)
+    public function addManyToManyRelationaddOneToOneRelation(RelationOneToOne $oneToOne, bool $useAttributesForMapping = false)
     {
-        $this->addSingularRelation($oneToOne, $useAttributes);
+        $this->addSingularRelation($oneToOne, $useAttributesForMapping);
     }
 
-    public function addOneToManyRelation(RelationOneToMany $oneToMany, bool $useAttributes = false)
+    public function addOneToManyRelation(RelationOneToMany $oneToMany, bool $useAttributesForMapping = false)
     {
-        $this->addCollectionRelation($oneToMany, $useAttributes);
+        $this->addCollectionRelation($oneToMany, $useAttributesForMapping);
     }
 
-    public function addManyToManyRelation(RelationManyToMany $manyToMany, bool $useAttributes = false)
+    public function addManyToManyRelation(RelationManyToMany $manyToMany, bool $useAttributesForMapping = false)
     {
-        $this->addCollectionRelation($manyToMany, $useAttributes);
+        $this->addCollectionRelation($manyToMany, $useAttributesForMapping);
     }
 
     public function addInterface(string $interfaceName)
@@ -494,7 +494,7 @@ final class ClassSourceManipulator
         return sprintf('"%s"', $value);
     }
 
-    private function addSingularRelation(BaseRelation $relation, bool $useAttributes = false)
+    private function addSingularRelation(BaseRelation $relation, bool $useAttributesForMapping = false)
     {
         $typeHint = $this->addUseStatementIfNecessary($relation->getTargetClassName());
         if ($relation->getTargetClassName() == $this->getThisFullClassName()) {
@@ -540,7 +540,7 @@ final class ClassSourceManipulator
             ]);
         }
 
-        $this->addProperty($relation->getPropertyName(), $annotations, null, $attributes, $useAttributes);
+        $this->addProperty($relation->getPropertyName(), $annotations, null, $attributes, $useAttributesForMapping);
 
         $this->addGetter(
             $relation->getPropertyName(),
@@ -582,7 +582,7 @@ final class ClassSourceManipulator
         $this->addMethod($setterNodeBuilder->getNode());
     }
 
-    private function addCollectionRelation(BaseCollectionRelation $relation, bool $useAttributes = false)
+    private function addCollectionRelation(BaseCollectionRelation $relation, bool $useAttributesForMapping = false)
     {
         $typeHint = $relation->isSelfReferencing() ? 'self' : $this->addUseStatementIfNecessary($relation->getTargetClassName());
 
@@ -618,7 +618,7 @@ final class ClassSourceManipulator
             ),
         ];
 
-        $this->addProperty($relation->getPropertyName(), $annotations, null, $attributes, $useAttributes);
+        $this->addProperty($relation->getPropertyName(), $annotations, null, $attributes, $useAttributesForMapping);
 
         // logic to avoid re-adding the same ArrayCollection line
         $addArrayCollection = true;

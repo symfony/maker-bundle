@@ -38,6 +38,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 /**
@@ -51,8 +52,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     private $doctrineHelper;
     private $generator;
     private $entityClassGenerator;
+    /**
+     * @var bool
+     */
+    private $symfonySupportsAttributes;
 
-    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null, EntityClassGenerator $entityClassGenerator = null)
+    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null, EntityClassGenerator $entityClassGenerator = null, bool $symfonySupportsAttributes = false)
     {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
@@ -71,6 +76,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         } else {
             $this->entityClassGenerator = $entityClassGenerator;
         }
+        $this->symfonySupportsAttributes = $symfonySupportsAttributes;
     }
 
     public static function getCommandName(): string
@@ -91,8 +97,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             ->addOption('broadcast', 'b', InputOption::VALUE_NONE, 'Add the ability to broadcast entity updates using Symfony UX Turbo?')
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
-        ;
+            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'));
 
         $inputConf->setArgumentAsNonInteractive('name');
     }
@@ -164,6 +169,20 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         );
 
         $mappingDriver = $this->doctrineHelper->getMappingDriverForNamespace($entityClassDetails->getFullName());
+
+        if ($mappingDriver instanceof AttributeDriver) {
+            if (\PHP_VERSION_ID < 80000) {
+                throw new RuntimeCommandException(sprintf('Your PHP version (%s) does not supports attributes, PHP 8 is needed.', \PHP_VERSION));
+            }
+
+            if (!$this->doctrineHelper->isDoctrineSupportingAttributes()) {
+                throw new RuntimeCommandException('Your doctrine version does not supports attributes. You need at least doctrine in version 2.9');
+            }
+
+            if (Kernel::VERSION_ID < 50200) {
+                throw new RuntimeCommandException('Your symfony version does not support attributes.');
+            }
+        }
 
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {

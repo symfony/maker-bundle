@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
-use Composer\Semver\Comparator;
 use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata as LegacyClassMetadata;
 use Doctrine\Common\Persistence\Mapping\MappingException as LegacyPersistenceMappingException;
@@ -55,13 +54,19 @@ final class DoctrineHelper
     private $annotatedPrefixes;
 
     /**
+     * @var bool
+     */
+    private $attributeMappingSupport;
+
+    /**
      * @var ManagerRegistry|LegacyManagerRegistry
      */
-    public function __construct(string $entityNamespace, $registry = null, array $annotatedPrefixes = null)
+    public function __construct(string $entityNamespace, $registry = null, array $annotatedPrefixes = null, bool $attributeMappingSupport = false)
     {
         $this->entityNamespace = trim($entityNamespace, '\\');
         $this->registry = $registry;
         $this->annotatedPrefixes = $annotatedPrefixes;
+        $this->attributeMappingSupport = $attributeMappingSupport;
     }
 
     /**
@@ -320,6 +325,6 @@ final class DoctrineHelper
 
     public function isDoctrineSupportingAttributes(): bool
     {
-        return $this->isDoctrineInstalled() && Comparator::greaterThanOrEqualTo(\constant('Doctrine\ORM\Version::VERSION'), '2.9.0') && Comparator::greaterThanOrEqualTo(\PHP_VERSION, '8.0');
+        return $this->isDoctrineInstalled() && $this->attributeMappingSupport && \PHP_VERSION_ID >= 80000;
     }
 }
