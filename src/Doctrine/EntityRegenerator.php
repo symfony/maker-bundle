@@ -42,6 +42,8 @@ final class EntityRegenerator
 
     public function regenerateEntities(string $classOrNamespace)
     {
+        $useAttributesForMapping = $this->doctrineHelper->doesClassUsesAttributes($classOrNamespace);
+
         try {
             $metadata = $this->doctrineHelper->getMetadata($classOrNamespace);
         } catch (MappingException | LegacyCommonMappingException | PersistenceMappingException $mappingException) {
@@ -88,7 +90,7 @@ final class EntityRegenerator
 
                 $operations[$embeddedClasses[$fieldName]] = $this->createClassManipulator($embeddedClasses[$fieldName]);
 
-                $manipulator->addEmbeddedEntity($fieldName, $className, $this->doctrineHelper->doesClassUsesAttributes($className));
+                $manipulator->addEmbeddedEntity($fieldName, $className, $useAttributesForMapping);
             }
 
             foreach ($classMetadata->fieldMappings as $fieldName => $mapping) {
@@ -105,7 +107,7 @@ final class EntityRegenerator
                     continue;
                 }
 
-                $manipulator->addEntityField($fieldName, $mapping);
+                $manipulator->addEntityField($fieldName, $mapping, [], [], $useAttributesForMapping);
             }
 
             $getIsNullable = function (array $mapping) {
@@ -131,7 +133,7 @@ final class EntityRegenerator
                             ->setTargetPropertyName($mapping['inversedBy'])
                             ->setMapInverseRelation(null !== $mapping['inversedBy']);
 
-                        $manipulator->addManyToOneRelation($relation);
+                        $manipulator->addManyToOneRelation($relation, $useAttributesForMapping);
 
                         break;
                     case ClassMetadata::ONE_TO_MANY:
@@ -141,7 +143,7 @@ final class EntityRegenerator
                             ->setTargetPropertyName($mapping['mappedBy'])
                             ->setOrphanRemoval($mapping['orphanRemoval']);
 
-                        $manipulator->addOneToManyRelation($relation);
+                        $manipulator->addOneToManyRelation($relation, $useAttributesForMapping);
 
                         break;
                     case ClassMetadata::MANY_TO_MANY:
@@ -152,7 +154,7 @@ final class EntityRegenerator
                             ->setIsOwning($mapping['isOwningSide'])
                             ->setMapInverseRelation($mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true);
 
-                        $manipulator->addManyToManyRelation($relation);
+                        $manipulator->addManyToManyRelation($relation, $useAttributesForMapping);
 
                         break;
                     case ClassMetadata::ONE_TO_ONE:
@@ -164,7 +166,7 @@ final class EntityRegenerator
                             ->setMapInverseRelation($mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true)
                             ->setIsNullable($getIsNullable($mapping));
 
-                        $manipulator->addOneToOneRelation($relation);
+                        $manipulator->addOneToOneRelation($relation, $useAttributesForMapping);
 
                         break;
                     default:
