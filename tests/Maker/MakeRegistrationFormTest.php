@@ -58,6 +58,31 @@ class MakeRegistrationFormTest extends MakerTestCase
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormNoGuessing'),
         ];
 
+        // sanity check on all the interactive questions
+        yield 'registration_form_new_security_no_guessing' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeRegistrationForm::class),
+            [
+                'App\\Entity\\User',
+                'emailAlt', // username field
+                'passwordAlt', // password field
+                'n', // no UniqueEntity
+                'n', // no verify user
+                '', // yes authenticate after
+                'main', // firewall
+                '1', // authenticator
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeRegistrationFormNewSecurityNoGuessing')
+            ->assert(function (string $output, string $directory) {
+                $expectedOutput = <<< "EOT"
+ Which authenticator's onAuthenticationSuccess() should be used after logging in?:
+  [0] App\Security\AuthenticatorFirst
+  [1] App\Security\AuthenticatorSecond
+  [2] Symfony\Component\Security\Http\Authenticator\FormLoginAuthenticator
+EOT;
+                $this->assertStringContainsString($expectedOutput, $output);
+            }),
+        ];
+
         yield 'registration_form_entity_no_authenticate' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeRegistrationForm::class),
             [
