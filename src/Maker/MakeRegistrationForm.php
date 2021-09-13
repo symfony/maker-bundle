@@ -197,7 +197,7 @@ final class MakeRegistrationForm extends AbstractMaker
         $this->firewallName = $firewallName;
 
         // get list of guard authenticators
-        $authenticatorClasses = $interactiveSecurityHelper->getAuthenticatorClasses($firewallsData[$firewallName]);
+        $authenticatorClasses = $interactiveSecurityHelper->getAuthenticatorClasses($firewallsData[$firewallName], $securityData['security']['enable_authenticator_manager'] ?? false);
         if (empty($authenticatorClasses)) {
             $io->note('No Guard authenticators found - so your user won\'t be automatically authenticated after registering.');
         } else {

@@ -16,6 +16,8 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Authenticator\FormLoginAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\JsonLoginAuthenticator;
 
 /**
  * @internal
@@ -182,7 +184,36 @@ authenticators will be ignored, and can be blank.',
         );
     }
 
-    public function getAuthenticatorClasses(array $firewallData): array
+    public function getAuthenticatorClasses(array $firewallData, bool $newAuthSystem): array
+    {
+        if (!$newAuthSystem) {
+            return $this->getGuardAuthenticatorClasses($firewallData);
+        }
+
+        $knownAuthenticators = [
+            'form_login' => FormLoginAuthenticator::class,
+            'json_login' => JsonLoginAuthenticator::class,
+        ];
+
+        $authenticatorClasses = [];
+
+        if (isset($firewallData['custom_authenticator'])) {
+            foreach ($firewallData['custom_authenticator'] as $authenticator) {
+                $authenticatorClasses = $authenticator;
+            }
+        }
+
+        foreach ($knownAuthenticators as $authenticator) {
+            if (isset($firewallData[$authenticator])) {
+                $authenticatorClasses[] = $authenticator;
+            }
+        }
+
+        return $authenticatorClasses;
+    }
+
+    /** @legacy Guard Authenticator support can be dropped in Symfony X */
+    private function getGuardAuthenticatorClasses(array $firewallData): array
     {
         $authenticatorClasses = [];
 
