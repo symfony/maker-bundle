@@ -203,9 +203,9 @@ authenticators will be ignored, and can be blank.',
             }
         }
 
-        foreach ($knownAuthenticators as $authenticator) {
-            if (isset($firewallData[$authenticator])) {
-                $authenticatorClasses[] = $authenticator;
+        foreach ($knownAuthenticators as $yamlKey => $authenticatorClass) {
+            if (isset($firewallData[$yamlKey])) {
+                $authenticatorClasses[] = $authenticatorClass;
             }
         }
 
