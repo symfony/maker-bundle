@@ -130,6 +130,98 @@ class InteractiveSecurityHelperTest extends TestCase
     }
 
     /**
+     * @dataProvider authenticatorClassDataProvider
+     */
+    public function testGetAuthenticatorClasses(bool $newAuth, array $firewallData, array $expectedAuthenticators): void
+    {
+        $helper = new InteractiveSecurityHelper();
+        $result = $helper->getAuthenticatorClasses($firewallData, $newAuth);
+
+        self::assertSame($expectedAuthenticators, $result);
+    }
+
+    public function authenticatorClassDataProvider(): \Generator
+    {
+        yield [
+            false,
+            ['guard' => []],
+            [],
+        ];
+
+        yield [
+            false,
+            ['guard' => ['authenticators' => []]],
+            [],
+        ];
+
+        yield [
+            false,
+            ['guard' => ['authenticators' => [FixtureAuthenticator::class]]],
+            [FixtureAuthenticator::class],
+        ];
+
+        yield [
+            false,
+            ['guard' => ['authenticators' => [FixtureAuthenticator::class, FixtureAuthenticator2::class]]],
+            [FixtureAuthenticator::class, FixtureAuthenticator2::class],
+        ];
+
+        yield [
+            true,
+            ['guard' => ['authenticators' => [FixtureAuthenticator::class]]],
+            [],
+        ];
+
+        yield [
+            true,
+            ['guard' => ['authenticators' => [FixtureAuthenticator::class]], 'form_login' => null],
+            [\Symfony\Component\Security\Http\Authenticator\FormLoginAuthenticator::class],
+        ];
+
+        yield [
+            true,
+            ['form_login' => null],
+            [\Symfony\Component\Security\Http\Authenticator\FormLoginAuthenticator::class],
+        ];
+
+        yield [
+            true,
+            ['form_login' => null, 'json_login' => ['not-null-config']],
+            [
+                \Symfony\Component\Security\Http\Authenticator\FormLoginAuthenticator::class,
+                \Symfony\Component\Security\Http\Authenticator\JsonLoginAuthenticator::class,
+            ],
+        ];
+
+        yield [
+            true,
+            ['custom_authenticator' => [FixtureAuthenticator::class]],
+            [FixtureAuthenticator::class],
+        ];
+
+        yield [
+            true,
+            ['custom_authenticator' => [FixtureAuthenticator::class, FixtureAuthenticator2::class]],
+            [FixtureAuthenticator::class, FixtureAuthenticator2::class],
+        ];
+
+        yield [
+            true,
+            [
+                'form_login' => null,
+                'json_login' => null,
+                'custom_authenticator' => [FixtureAuthenticator::class, FixtureAuthenticator2::class],
+            ],
+            [
+                FixtureAuthenticator::class,
+                FixtureAuthenticator2::class,
+                \Symfony\Component\Security\Http\Authenticator\FormLoginAuthenticator::class,
+                \Symfony\Component\Security\Http\Authenticator\JsonLoginAuthenticator::class,
+            ],
+        ];
+    }
+
+    /**
      * @dataProvider getUserClassTests
      */
     public function testGuessUserClass(array $securityData, string $expectedUserClass, bool $userClassAutomaticallyGuessed)
@@ -388,4 +480,11 @@ class FixtureClass8
     public function getMyEmail()
     {
     }
+}
+
+class FixtureAuthenticator
+{
+}
+class FixtureAuthenticator2
+{
 }

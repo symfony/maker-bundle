@@ -199,12 +199,12 @@ authenticators will be ignored, and can be blank.',
 
         if (isset($firewallData['custom_authenticator'])) {
             foreach ($firewallData['custom_authenticator'] as $authenticator) {
-                $authenticatorClasses = $authenticator;
+                $authenticatorClasses[] = $authenticator;
             }
         }
 
         foreach ($knownAuthenticators as $yamlKey => $authenticatorClass) {
-            if (isset($firewallData[$yamlKey])) {
+            if (\array_key_exists($yamlKey, $firewallData)) {
                 $authenticatorClasses[] = $authenticatorClass;
             }
         }
