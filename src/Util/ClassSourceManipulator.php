@@ -88,7 +88,7 @@ final class ClassSourceManipulator
         return $this->sourceCode;
     }
 
-    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [], array $attributes = [])
+    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [], array $attributes = []): void
     {
         $typeHint = $this->getEntityTypeHint($columnOptions['type']);
         $nullable = $columnOptions['nullable'] ?? false;
@@ -335,7 +335,7 @@ final class ClassSourceManipulator
         return $this->createBlankLineNode(self::CONTEXT_CLASS_METHOD);
     }
 
-    public function addProperty(string $name, array $annotationLines = [], $defaultValue = null, array $attributes = [])
+    public function addProperty(string $name, array $annotationLines = [], $defaultValue = null, array $attributes = []): void
     {
         if ($this->propertyExists($name)) {
             // we never overwrite properties
