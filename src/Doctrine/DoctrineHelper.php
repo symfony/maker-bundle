@@ -240,10 +240,7 @@ final class DoctrineHelper
         return $metadata;
     }
 
-    /**
-     * @return EntityDetails|null
-     */
-    public function createDoctrineDetails(string $entityClassName)
+    public function createDoctrineDetails(string $entityClassName): ?EntityDetails
     {
         $metadata = $this->getMetadata($entityClassName);
 

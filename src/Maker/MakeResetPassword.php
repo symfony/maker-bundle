@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Common\Annotations\Annotation;
 use PhpParser\Builder\Param;
+use Symfony\Bridge\Twig\AppVariable;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -30,8 +31,10 @@ use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,6 +43,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Validator\Validation;
 use Symfony\Component\Yaml\Yaml;
 use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
 use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
@@ -102,6 +106,10 @@ class MakeResetPassword extends AbstractMaker
     {
         $dependencies->addClassDependency(SymfonyCastsResetPasswordBundle::class, 'symfonycasts/reset-password-bundle');
         $dependencies->addClassDependency(MailerInterface::class, 'symfony/mailer');
+        $dependencies->addClassDependency(Form::class, 'symfony/form');
+        $dependencies->addClassDependency(Validation::class, 'symfony/validator');
+        $dependencies->addClassDependency(SecurityBundle::class, 'security-bundle');
+        $dependencies->addClassDependency(AppVariable::class, 'twig');
 
         ORMDependencyBuilder::buildDependencies($dependencies);
 

@@ -123,7 +123,7 @@ class EventRegistry
     /**
      * Attempts to get the event class for a given event.
      */
-    public function getEventClassName(string $event)
+    public function getEventClassName(string $event): ?string
     {
         // if the event is already a class name, use it
         if (class_exists($event)) {
@@ -169,7 +169,7 @@ class EventRegistry
         return null;
     }
 
-    public function listActiveEvents(array $events)
+    public function listActiveEvents(array $events): array
     {
         foreach ($events as $key => $event) {
             $events[$key] = sprintf('%s (<fg=yellow>%s</>)', $event, self::$eventsMap[$event]);

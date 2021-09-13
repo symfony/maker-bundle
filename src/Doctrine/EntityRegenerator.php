@@ -40,11 +40,11 @@ final class EntityRegenerator
         $this->overwrite = $overwrite;
     }
 
-    public function regenerateEntities(string $classOrNamespace)
+    public function regenerateEntities(string $classOrNamespace): void
     {
         try {
             $metadata = $this->doctrineHelper->getMetadata($classOrNamespace);
-        } catch (MappingException | LegacyCommonMappingException | PersistenceMappingException $mappingException) {
+        } catch (MappingException|LegacyCommonMappingException|PersistenceMappingException $mappingException) {
             $metadata = $this->doctrineHelper->getMetadata($classOrNamespace, true);
         }
 
@@ -211,7 +211,7 @@ final class EntityRegenerator
         return (new \ReflectionClass($class))->getFileName();
     }
 
-    private function generateRepository(ClassMetadata $metadata)
+    private function generateRepository(ClassMetadata $metadata): void
     {
         if (!$metadata->customRepositoryClassName) {
             return;
@@ -231,7 +231,7 @@ final class EntityRegenerator
         $this->generator->writeChanges();
     }
 
-    private function getMappedFieldsInEntity(ClassMetadata $classMetadata)
+    private function getMappedFieldsInEntity(ClassMetadata $classMetadata): array
     {
         /* @var $classReflection \ReflectionClass */
         $classReflection = $classMetadata->reflClass;

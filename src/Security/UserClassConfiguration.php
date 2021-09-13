@@ -53,7 +53,7 @@ final class UserClassConfiguration
     /**
      * @deprecated since MakerBundle 1.12
      */
-    public function useArgon2(bool $shouldUse)
+    public function useArgon2(bool $shouldUse): void
     {
         $this->useArgon2 = $shouldUse;
     }
@@ -66,12 +66,12 @@ final class UserClassConfiguration
         return $this->useArgon2;
     }
 
-    public function getUserProviderClass()
+    public function getUserProviderClass(): string
     {
         return $this->userProviderClass;
     }
 
-    public function setUserProviderClass(string $userProviderClass)
+    public function setUserProviderClass(string $userProviderClass): void
     {
         if ($this->isEntity()) {
             throw new \LogicException('No custom user class allowed for entity user.');

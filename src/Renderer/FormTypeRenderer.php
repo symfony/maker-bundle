@@ -27,7 +27,7 @@ final class FormTypeRenderer
         $this->generator = $generator;
     }
 
-    public function render(ClassNameDetails $formClassDetails, array $formFields, ClassNameDetails $boundClassDetails = null, array $constraintClasses = [], array $extraUseClasses = [])
+    public function render(ClassNameDetails $formClassDetails, array $formFields, ClassNameDetails $boundClassDetails = null, array $constraintClasses = [], array $extraUseClasses = []): void
     {
         $fieldTypeUseStatements = [];
         $fields = [];

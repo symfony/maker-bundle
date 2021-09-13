@@ -25,7 +25,7 @@ final class DependencyBuilder
      * the user if other required dependencies are missing. An example
      * is the "validator" when trying to work with forms.
      */
-    public function addClassDependency(string $class, string $package, bool $required = true, bool $devDependency = false)
+    public function addClassDependency(string $class, string $package, bool $required = true, bool $devDependency = false): void
     {
         if ($devDependency) {
             $this->devDependencies[] = [
@@ -42,7 +42,7 @@ final class DependencyBuilder
         }
     }
 
-    public function requirePHP71()
+    public function requirePHP71(): void
     {
         // no-op - MakerBundle now required PHP 7.1
     }

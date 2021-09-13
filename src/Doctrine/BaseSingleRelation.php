@@ -27,7 +27,7 @@ abstract class BaseSingleRelation extends BaseRelation
         return false;
     }
 
-    public function setIsNullable($isNullable)
+    public function setIsNullable(bool $isNullable): self
     {
         $this->isNullable = $isNullable;
 
