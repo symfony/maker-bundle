@@ -44,7 +44,7 @@ final class EntityRegenerator
     {
         try {
             $metadata = $this->doctrineHelper->getMetadata($classOrNamespace);
-        } catch (MappingException | LegacyCommonMappingException | PersistenceMappingException $mappingException) {
+        } catch (MappingException|LegacyCommonMappingException|PersistenceMappingException $mappingException) {
             $metadata = $this->doctrineHelper->getMetadata($classOrNamespace, true);
         }
 
