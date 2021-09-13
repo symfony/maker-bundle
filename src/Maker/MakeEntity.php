@@ -52,12 +52,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     private $doctrineHelper;
     private $generator;
     private $entityClassGenerator;
-    /**
-     * @var bool
-     */
-    private $symfonySupportsAttributes;
 
-    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null, EntityClassGenerator $entityClassGenerator = null, bool $symfonySupportsAttributes = false)
+    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null, EntityClassGenerator $entityClassGenerator = null)
     {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
@@ -76,7 +72,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         } else {
             $this->entityClassGenerator = $entityClassGenerator;
         }
-        $this->symfonySupportsAttributes = $symfonySupportsAttributes;
     }
 
     public static function getCommandName(): string
@@ -180,7 +175,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             }
 
             if (Kernel::VERSION_ID < 50200) {
-                throw new RuntimeCommandException('Your symfony version does not support attributes.');
+                throw new RuntimeCommandException('Your symfony version does not support attributes. Attribute supports begins with >= Symfony 5.2 ');
             }
         }
 
@@ -233,8 +228,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $currentFields = $this->getPropertyNames($entityClassDetails->getFullName());
         $manipulator = $this->createClassManipulator($entityPath, $io, $overwrite, $mappingDriver);
 
-        $useAttributes = $this->doctrineHelper->isDoctrineSupportingAttributes() && $mappingDriver instanceof AttributeDriver;
-
         $isFirstField = true;
         while (true) {
             $newField = $this->askForNextField($io, $currentFields, $entityClassDetails->getFullName(), $isFirstField);
@@ -250,7 +243,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             if (\is_array($newField)) {
                 $annotationOptions = $newField;
                 unset($annotationOptions['fieldName']);
-                $manipulator->addEntityField($newField['fieldName'], $annotationOptions, [], [], $useAttributes);
+                $manipulator->addEntityField($newField['fieldName'], $annotationOptions, [], []);
 
                 $currentFields[] = $newField['fieldName'];
             } elseif ($newField instanceof EntityRelation) {
@@ -267,10 +260,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                     case EntityRelation::MANY_TO_ONE:
                         if ($newField->getOwningClass() === $entityClassDetails->getFullName()) {
                             // THIS class will receive the ManyToOne
-                            $manipulator->addManyToOneRelation($newField->getOwningRelation(), $useAttributes);
+                            $manipulator->addManyToOneRelation($newField->getOwningRelation());
 
                             if ($newField->getMapInverseRelation()) {
-                                $otherManipulator->addOneToManyRelation($newField->getInverseRelation(), $useAttributes);
+                                $otherManipulator->addOneToManyRelation($newField->getInverseRelation());
                             }
                         } else {
                             // the new field being added to THIS entity is the inverse
@@ -279,25 +272,25 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                             $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite, $mappingDriver);
 
                             // The *other* class will receive the ManyToOne
-                            $otherManipulator->addManyToOneRelation($newField->getOwningRelation(), $useAttributes);
+                            $otherManipulator->addManyToOneRelation($newField->getOwningRelation());
                             if (!$newField->getMapInverseRelation()) {
                                 throw new \Exception('Somehow a OneToMany relationship is being created, but the inverse side will not be mapped?');
                             }
-                            $manipulator->addOneToManyRelation($newField->getInverseRelation(), $useAttributes);
+                            $manipulator->addOneToManyRelation($newField->getInverseRelation());
                         }
 
                         break;
                     case EntityRelation::MANY_TO_MANY:
-                        $manipulator->addManyToManyRelation($newField->getOwningRelation(), $useAttributes);
+                        $manipulator->addManyToManyRelation($newField->getOwningRelation());
                         if ($newField->getMapInverseRelation()) {
-                            $otherManipulator->addManyToManyRelation($newField->getInverseRelation(), $useAttributes);
+                            $otherManipulator->addManyToManyRelation($newField->getInverseRelation());
                         }
 
                         break;
                     case EntityRelation::ONE_TO_ONE:
-                        $manipulator->addOneToOneRelation($newField->getOwningRelation(), $useAttributes);
+                        $manipulator->addOneToOneRelation($newField->getOwningRelation());
                         if ($newField->getMapInverseRelation()) {
-                            $otherManipulator->addOneToOneRelation($newField->getInverseRelation(), $useAttributes);
+                            $otherManipulator->addOneToOneRelation($newField->getInverseRelation());
                         }
 
                         break;
@@ -822,9 +815,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite, ?MappingDriver $mappingDriver = null): ClassSourceManipulator
     {
-        $useAnnotations = null === $mappingDriver || $mappingDriver instanceof AnnotationDriver && !$mappingDriver instanceof AttributeDriver;
+        $useAttributes = $mappingDriver instanceof AttributeDriver && $this->doctrineHelper->isDoctrineSupportingAttributes();
+        $useAnnotations = null === $mappingDriver || $mappingDriver instanceof AnnotationDriver && !$useAttributes;
 
-        $manipulator = new ClassSourceManipulator($this->fileManager->getFileContents($path), $overwrite, $useAnnotations, true);
+        $manipulator = new ClassSourceManipulator($this->fileManager->getFileContents($path), $overwrite, $useAnnotations, true, $useAttributes);
 
         $manipulator->setIo($io);
 

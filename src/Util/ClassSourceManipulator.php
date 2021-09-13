@@ -54,12 +54,17 @@ final class ClassSourceManipulator
     private $newStmts;
 
     private $pendingComments = [];
+    /**
+     * @var bool
+     */
+    private $useAttributesForDoctrineMapping;
 
-    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true)
+    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true, bool $useAttributesForDoctrineMapping = false)
     {
         $this->overwrite = $overwrite;
         $this->useAnnotations = $useAnnotations;
         $this->fluentMutators = $fluentMutators;
+        $this->useAttributesForDoctrineMapping = $useAttributesForDoctrineMapping;
         $this->lexer = new Lexer\Emulative([
             'usedAttributes' => [
                 'comments',
@@ -83,13 +88,13 @@ final class ClassSourceManipulator
         return $this->sourceCode;
     }
 
-    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [], array $attributes = [], bool $useAttributesForMapping = false)
+    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [], array $attributes = [])
     {
         $typeHint = $this->getEntityTypeHint($columnOptions['type']);
         $nullable = $columnOptions['nullable'] ?? false;
         $isId = (bool) ($columnOptions['id'] ?? false);
 
-        if ($useAttributesForMapping) {
+        if ($this->useAttributesForDoctrineMapping) {
             $attributes[] = $this->buildAttributeNode('ORM\Column', $columnOptions);
         } else {
             $comments[] = $this->buildAnnotationLine('@ORM\Column', $columnOptions);
@@ -100,7 +105,7 @@ final class ClassSourceManipulator
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
         }
 
-        $this->addProperty($propertyName, $comments, $defaultValue, $attributes, $useAttributesForMapping);
+        $this->addProperty($propertyName, $comments, $defaultValue, $attributes);
 
         $this->addGetter(
             $propertyName,
@@ -116,29 +121,34 @@ final class ClassSourceManipulator
         }
     }
 
-    public function addEmbeddedEntity(string $propertyName, string $className, bool $useAttributesForMapping = false)
+    public function addEmbeddedEntity(string $propertyName, string $className)
     {
         $typeHint = $this->addUseStatementIfNecessary($className);
 
-        $annotations = [
-            $this->buildAnnotationLine(
-                '@ORM\\Embedded',
-                [
-                    'class' => new ClassNameValue($className, $typeHint),
-                ]
-            ),
-        ];
+        $annotations = [];
+        $attributes = [];
 
-        $attributes = [
-            $this->buildAttributeNode(
-                'ORM\\Embedded',
-                [
-                    'class' => new ClassNameValue($className, $typeHint),
-                ]
-            ),
-        ];
+        if (!$this->useAttributesForDoctrineMapping) {
+            $annotations = [
+                $this->buildAnnotationLine(
+                    '@ORM\\Embedded',
+                    [
+                        'class' => new ClassNameValue($className, $typeHint),
+                    ]
+                ),
+            ];
+        } else {
+            $attributes = [
+                $this->buildAttributeNode(
+                    'ORM\\Embedded',
+                    [
+                        'class' => new ClassNameValue($className, $typeHint),
+                    ]
+                ),
+            ];
+        }
 
-        $this->addProperty($propertyName, $annotations, null, $attributes, $useAttributesForMapping);
+        $this->addProperty($propertyName, $annotations, null, $attributes);
 
         // logic to avoid re-adding the same ArrayCollection line
         $addEmbedded = true;
@@ -165,24 +175,24 @@ final class ClassSourceManipulator
         $this->addSetter($propertyName, $typeHint, false);
     }
 
-    public function addManyToOneRelation(RelationManyToOne $manyToOne, bool $useAttributesForMapping = false)
+    public function addManyToOneRelation(RelationManyToOne $manyToOne)
     {
-        $this->addSingularRelation($manyToOne, $useAttributesForMapping);
+        $this->addSingularRelation($manyToOne);
     }
 
-    public function addOneToOneRelation(RelationOneToOne $oneToOne, bool $useAttributesForMapping = false)
+    public function addOneToOneRelation(RelationOneToOne $oneToOne)
     {
-        $this->addSingularRelation($oneToOne, $useAttributesForMapping);
+        $this->addSingularRelation($oneToOne);
     }
 
-    public function addOneToManyRelation(RelationOneToMany $oneToMany, bool $useAttributesForMapping = false)
+    public function addOneToManyRelation(RelationOneToMany $oneToMany)
     {
-        $this->addCollectionRelation($oneToMany, $useAttributesForMapping);
+        $this->addCollectionRelation($oneToMany);
     }
 
-    public function addManyToManyRelation(RelationManyToMany $manyToMany, bool $useAttributesForMapping = false)
+    public function addManyToManyRelation(RelationManyToMany $manyToMany)
     {
-        $this->addCollectionRelation($manyToMany, $useAttributesForMapping);
+        $this->addCollectionRelation($manyToMany);
     }
 
     public function addInterface(string $interfaceName)
@@ -325,7 +335,7 @@ final class ClassSourceManipulator
         return $this->createBlankLineNode(self::CONTEXT_CLASS_METHOD);
     }
 
-    public function addProperty(string $name, array $annotationLines = [], $defaultValue = null, array $attributes = [], bool $useAttributes = false)
+    public function addProperty(string $name, array $annotationLines = [], $defaultValue = null, array $attributes = [])
     {
         if ($this->propertyExists($name)) {
             // we never overwrite properties
@@ -338,10 +348,8 @@ final class ClassSourceManipulator
             $newPropertyBuilder->setDocComment($this->createDocBlock($annotationLines));
         }
 
-        if ($attributes && $useAttributes) {
-            foreach ($attributes as $attribute) {
-                $newPropertyBuilder->addAttribute($attribute);
-            }
+        foreach ($attributes as $attribute) {
+            $newPropertyBuilder->addAttribute($attribute);
         }
 
         if (null !== $defaultValue) {
@@ -492,7 +500,7 @@ final class ClassSourceManipulator
         return sprintf('"%s"', $value);
     }
 
-    private function addSingularRelation(BaseRelation $relation, bool $useAttributesForMapping = false)
+    private function addSingularRelation(BaseRelation $relation)
     {
         $typeHint = $this->addUseStatementIfNecessary($relation->getTargetClassName());
         if ($relation->getTargetClassName() == $this->getThisFullClassName()) {
@@ -515,30 +523,38 @@ final class ClassSourceManipulator
             $annotationOptions['cascade'] = ['persist', 'remove'];
         }
 
-        $annotations = [
-            $this->buildAnnotationLine(
-                $relation instanceof RelationManyToOne ? '@ORM\\ManyToOne' : '@ORM\\OneToOne',
-                $annotationOptions
-            ),
-        ];
+        $annotations = [];
+        $attributes = [];
 
-        $attributes = [
-            $this->buildAttributeNode(
-                $relation instanceof RelationManyToOne ? 'ORM\\ManyToOne' : 'ORM\\OneToOne',
-                $annotationOptions
-            ),
-        ];
-
-        if (!$relation->isNullable() && $relation->isOwning()) {
-            $annotations[] = $this->buildAnnotationLine('@ORM\\JoinColumn', [
-                'nullable' => false,
-            ]);
-            $attributes[] = $this->buildAttributeNode('ORM\\JoinColumn', [
-                'nullable' => false,
-            ]);
+        if (!$this->useAttributesForDoctrineMapping) {
+            $annotations = [
+                $this->buildAnnotationLine(
+                    $relation instanceof RelationManyToOne ? '@ORM\\ManyToOne' : '@ORM\\OneToOne',
+                    $annotationOptions
+                ),
+            ];
+        } else {
+            $attributes = [
+                $this->buildAttributeNode(
+                    $relation instanceof RelationManyToOne ? 'ORM\\ManyToOne' : 'ORM\\OneToOne',
+                    $annotationOptions
+                ),
+            ];
         }
 
-        $this->addProperty($relation->getPropertyName(), $annotations, null, $attributes, $useAttributesForMapping);
+        if (!$relation->isNullable() && $relation->isOwning()) {
+            if (!$this->useAttributesForDoctrineMapping) {
+                $annotations[] = $this->buildAnnotationLine('@ORM\\JoinColumn', [
+                    'nullable' => false,
+                ]);
+            } else {
+                $attributes[] = $this->buildAttributeNode('ORM\\JoinColumn', [
+                    'nullable' => false,
+                ]);
+            }
+        }
+
+        $this->addProperty($relation->getPropertyName(), $annotations, null, $attributes);
 
         $this->addGetter(
             $relation->getPropertyName(),
@@ -580,7 +596,7 @@ final class ClassSourceManipulator
         $this->addMethod($setterNodeBuilder->getNode());
     }
 
-    private function addCollectionRelation(BaseCollectionRelation $relation, bool $useAttributesForMapping = false)
+    private function addCollectionRelation(BaseCollectionRelation $relation)
     {
         $typeHint = $relation->isSelfReferencing() ? 'self' : $this->addUseStatementIfNecessary($relation->getTargetClassName());
 
@@ -603,20 +619,26 @@ final class ClassSourceManipulator
             $annotationOptions['orphanRemoval'] = true;
         }
 
-        $annotations = [
-            $this->buildAnnotationLine(
-                $relation instanceof RelationManyToMany ? '@ORM\\ManyToMany' : '@ORM\\OneToMany',
-                $annotationOptions
-            ),
-        ];
-        $attributes = [
-            $this->buildAttributeNode(
-                $relation instanceof RelationManyToMany ? 'ORM\\ManyToMany' : 'ORM\\OneToMany',
-                $annotationOptions
-            ),
-        ];
+        $annotations = [];
+        $attributes = [];
 
-        $this->addProperty($relation->getPropertyName(), $annotations, null, $attributes, $useAttributesForMapping);
+        if (!$this->useAttributesForDoctrineMapping) {
+            $annotations = [
+                $this->buildAnnotationLine(
+                    $relation instanceof RelationManyToMany ? '@ORM\\ManyToMany' : '@ORM\\OneToMany',
+                    $annotationOptions
+                ),
+            ];
+        } else {
+            $attributes = [
+                $this->buildAttributeNode(
+                    $relation instanceof RelationManyToMany ? 'ORM\\ManyToMany' : 'ORM\\OneToMany',
+                    $annotationOptions
+                ),
+            ];
+        }
+
+        $this->addProperty($relation->getPropertyName(), $annotations, null, $attributes);
 
         // logic to avoid re-adding the same ArrayCollection line
         $addArrayCollection = true;
