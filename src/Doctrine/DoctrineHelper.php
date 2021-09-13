@@ -61,12 +61,12 @@ final class DoctrineHelper
     /**
      * @var ManagerRegistry|LegacyManagerRegistry
      */
-    public function __construct(string $entityNamespace, $registry = null, array $annotatedPrefixes = null, bool $attributeMappingSupport = false)
+    public function __construct(string $entityNamespace, $registry = null, bool $attributeMappingSupport = false, array $annotatedPrefixes = null)
     {
         $this->entityNamespace = trim($entityNamespace, '\\');
         $this->registry = $registry;
-        $this->annotatedPrefixes = $annotatedPrefixes;
         $this->attributeMappingSupport = $attributeMappingSupport;
+        $this->annotatedPrefixes = $annotatedPrefixes;
     }
 
     /**

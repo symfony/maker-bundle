@@ -18,7 +18,7 @@ class CompatibleCheckPass implements CompilerPassInterface
 {
     public const DOCTRINE_SUPPORTS_ATTRIBUTE = 'maker.compatible_check.doctrine.supports_attributes';
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $container->setParameter(
             self::DOCTRINE_SUPPORTS_ATTRIBUTE,
