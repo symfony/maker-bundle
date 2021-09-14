@@ -26,28 +26,7 @@ class PhpVersionTest extends TestCase
      */
     public function testUsesPhpPlatformFromComposerJsonFileForCanUseAttributes(string $version, bool $expectedResult): void
     {
-        $json = sprintf('{"platform-overrides": {"php": "%s"}}', $version);
-
-        $mockFileManager = $this->createMock(FileManager::class);
-        $mockFileManager
-            ->expects(self::once())
-            ->method('getRootDirectory')
-            ->willReturn('/test')
-        ;
-
-        $mockFileManager
-            ->expects(self::once())
-            ->method('fileExists')
-            ->with('/test/composer.lock')
-            ->willReturn(true)
-        ;
-
-        $mockFileManager
-            ->expects(self::once())
-            ->method('getFileContents')
-            ->with('/test/composer.lock')
-            ->willReturn($json)
-        ;
+        $mockFileManager = $this->mockFileManager(sprintf('{"platform-overrides": {"php": "%s"}}', $version));
 
         $version = new PhpCompatUtil($mockFileManager);
 
@@ -110,28 +89,7 @@ class PhpVersionTest extends TestCase
 
     public function testWithoutPlatformVersionSet(): void
     {
-        $json = '{"platform-overrides": {}}';
-
-        $mockFileManager = $this->createMock(FileManager::class);
-        $mockFileManager
-            ->expects(self::once())
-            ->method('getRootDirectory')
-            ->willReturn('/test')
-        ;
-
-        $mockFileManager
-            ->expects(self::once())
-            ->method('fileExists')
-            ->with('/test/composer.lock')
-            ->willReturn(true)
-        ;
-
-        $mockFileManager
-            ->expects(self::once())
-            ->method('getFileContents')
-            ->with('/test/composer.lock')
-            ->willReturn($json)
-        ;
+        $mockFileManager = $this->mockFileManager('{"platform-overrides": {}}');
 
         $util = new PhpCompatUtilTestFixture($mockFileManager);
 
@@ -145,28 +103,7 @@ class PhpVersionTest extends TestCase
      */
     public function testCanUseTypedProperties(string $version, bool $expectedResult): void
     {
-        $json = sprintf('{"platform-overrides": {"php": "%s"}}', $version);
-
-        $mockFileManager = $this->createMock(FileManager::class);
-        $mockFileManager
-            ->expects(self::once())
-            ->method('getRootDirectory')
-            ->willReturn('/test')
-        ;
-
-        $mockFileManager
-            ->expects(self::once())
-            ->method('fileExists')
-            ->with('/test/composer.lock')
-            ->willReturn(true)
-        ;
-
-        $mockFileManager
-            ->expects(self::once())
-            ->method('getFileContents')
-            ->with('/test/composer.lock')
-            ->willReturn($json)
-        ;
+        $mockFileManager = $this->mockFileManager(sprintf('{"platform-overrides": {"php": "%s"}}', $version));
 
         $version = new PhpCompatUtil($mockFileManager);
 
@@ -185,6 +122,61 @@ class PhpVersionTest extends TestCase
         yield ['7', false];
         yield ['7.0', false];
         yield ['5.7', false];
+    }
+
+    /**
+     * @dataProvider phpVersionForUnionTypesDataProvider
+     */
+    public function testCanUseUnionTypes(string $version, bool $expectedResult): void
+    {
+        $mockFileManager = $this->mockFileManager(sprintf('{"platform-overrides": {"php": "%s"}}', $version));
+
+        $version = new PhpCompatUtil($mockFileManager);
+
+        $result = $version->canUseUnionTypes();
+
+        self::assertSame($expectedResult, $result);
+    }
+
+    public function phpVersionForUnionTypesDataProvider(): \Generator
+    {
+        yield ['8', true];
+        yield ['8.0.1', true];
+        yield ['8RC1', true];
+        yield ['7.4', false];
+        yield ['7.4.6', false];
+        yield ['7', false];
+        yield ['7.0', false];
+        yield ['5.7', false];
+    }
+
+    /**
+     * @return \PHPUnit\Framework\MockObject\MockObject|FileManager
+     */
+    private function mockFileManager(string $json)
+    {
+        $mockFileManager = $this->createMock(FileManager::class);
+        $mockFileManager
+            ->expects(self::once())
+            ->method('getRootDirectory')
+            ->willReturn('/test')
+        ;
+
+        $mockFileManager
+            ->expects(self::once())
+            ->method('fileExists')
+            ->with('/test/composer.lock')
+            ->willReturn(true)
+        ;
+
+        $mockFileManager
+            ->expects(self::once())
+            ->method('getFileContents')
+            ->with('/test/composer.lock')
+            ->willReturn($json)
+        ;
+
+        return $mockFileManager;
     }
 }
 

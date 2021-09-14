@@ -173,6 +173,7 @@ class Generator
         $variables['relative_path'] = $this->fileManager->relativizePath($targetPath);
         $variables['use_attributes'] = $this->phpCompatUtil->canUseAttributes();
         $variables['use_typed_properties'] = $this->phpCompatUtil->canUseTypedProperties();
+        $variables['use_union_types'] = $this->phpCompatUtil->canUseUnionTypes();
 
         $templatePath = $templateName;
         if (!file_exists($templatePath)) {
