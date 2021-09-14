@@ -43,6 +43,13 @@ class PhpCompatUtil
         return version_compare($version, '7.4', '>=');
     }
 
+    public function canUseUnionTypes(): bool
+    {
+        $version = $this->getPhpVersion();
+
+        return version_compare($version, '8alpha', '>=');
+    }
+
     protected function getPhpVersion(): string
     {
         $rootDirectory = $this->fileManager->getRootDirectory();
