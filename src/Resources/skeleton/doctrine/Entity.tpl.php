@@ -23,7 +23,7 @@ use Doctrine\ORM\Mapping as ORM;
 <?php endif ?>
 <?php if ($doctrine_use_attributes): ?>
 #[ORM\Entity(repositoryClass: <?= $repository_class_name ?>::class)]
-<?php if($should_escape_table_name): ?>#[ORM\Table(name: '`<?= $table_name ?>`')]
+<?php if ($should_escape_table_name): ?>#[ORM\Table(name: '`<?= $table_name ?>`')]
 <?php endif ?>
 <?php endif?>
 <?php if ($api_resource && $use_attributes): ?>
