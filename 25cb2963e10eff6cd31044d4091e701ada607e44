@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by jrushlow at 2021-09-13T12:38:19Z
+
+We already have a global `use_attributes` & `use_typed_properties` variable available in the maker templates - https://github.com/symfony/maker-bundle/blob/203699de17bde367060f3ff12128cdea1fa783dd/src/Generator.php#L175
+
+What additional features are needed in PHP8 that are not covered by these 2 methods? If union return types is needed, adding a `public canUseUnionTypes(): bool` method would be the way to go (although redundant) vs. opening up the `getPhpVersion()` scope as the class itself is `internal`.
+
+---------------------------------------------------------------------------
+
+by nikophil at 2021-09-14T09:13:48Z
+
+Hello @jrushlow
+
+thanks for your feedback. I indeed felt it was a little bit redundant, and not flexible enough.
+
+Here is a fix. Cheers!
