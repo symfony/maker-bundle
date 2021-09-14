@@ -212,7 +212,7 @@ authenticators will be ignored, and can be blank.',
         return $authenticatorClasses;
     }
 
-    /** @legacy Guard Authenticator support can be dropped in Symfony X */
+    /** @legacy Guard Authenticator support can be dropped when Symfony 5 is no longer supported */
     private function getGuardAuthenticatorClasses(array $firewallData): array
     {
         $authenticatorClasses = [];
