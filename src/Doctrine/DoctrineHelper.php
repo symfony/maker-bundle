@@ -99,10 +99,10 @@ final class DoctrineHelper
             /** @var EntityManagerInterface $em */
             $em = $this->getRegistry()->getManagerForClass($className);
         } catch (\ReflectionException $exception) {
-            // this exception will be thrown by the registry if the class isnt created yet.
+            // this exception will be thrown by the registry if the class isn't created yet.
             // an example case is the "make:entity" command, which needs to know which driver is used for the class to determine
             // if the class should be generated with attributes or annotations. If this exception is thrown, we will check based on the
-            // namespaces for the given $className and compare it with the doctrine configuration to get the correct MappingDriver
+            // namespaces for the given $className and compare it with the doctrine configuration to get the correct MappingDriver.
 
             return $this->getMappingDriverForNamespace($className) instanceof $driverClass;
         }

@@ -14,7 +14,7 @@ namespace Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-class CompatibleCheckPass implements CompilerPassInterface
+class DoctrineAttributesCheckPass implements CompilerPassInterface
 {
     public const DOCTRINE_SUPPORTS_ATTRIBUTE = 'maker.compatible_check.doctrine.supports_attributes';
 
