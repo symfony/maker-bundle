@@ -54,7 +54,7 @@ the root namespace that is used to "guess" what classes you want to generate:
     # config/packages/dev/maker.yaml
     # create this file if you need to configure anything
     maker:
-        # tell MakerBundle that all of your classes lives in an
+        # tell MakerBundle that all of your classes live in an
         # Acme namespace, instead of the default App
         # (e.g. Acme\Entity\Article, Acme\Command\MyCommand, etc)
         root_namespace: 'Acme'
