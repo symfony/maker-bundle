@@ -42,6 +42,7 @@ final class ClassSourceManipulator
     private $overwrite;
     private $useAnnotations;
     private $fluentMutators;
+    private $useAttributesForDoctrineMapping;
     private $parser;
     private $lexer;
     private $printer;
@@ -54,10 +55,6 @@ final class ClassSourceManipulator
     private $newStmts;
 
     private $pendingComments = [];
-    /**
-     * @var bool
-     */
-    private $useAttributesForDoctrineMapping;
 
     public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true, bool $useAttributesForDoctrineMapping = false)
     {
