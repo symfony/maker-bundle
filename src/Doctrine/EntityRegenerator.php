@@ -105,7 +105,7 @@ final class EntityRegenerator
                     continue;
                 }
 
-                $manipulator->addEntityField($fieldName, $mapping, [], []);
+                $manipulator->addEntityField($fieldName, $mapping);
             }
 
             $getIsNullable = function (array $mapping) {
@@ -129,7 +129,8 @@ final class EntityRegenerator
                             ->setIsNullable($getIsNullable($mapping))
                             ->setTargetClassName($mapping['targetEntity'])
                             ->setTargetPropertyName($mapping['inversedBy'])
-                            ->setMapInverseRelation(null !== $mapping['inversedBy']);
+                            ->setMapInverseRelation(null !== $mapping['inversedBy'])
+                        ;
 
                         $manipulator->addManyToOneRelation($relation);
 
@@ -139,7 +140,8 @@ final class EntityRegenerator
                             ->setPropertyName($mapping['fieldName'])
                             ->setTargetClassName($mapping['targetEntity'])
                             ->setTargetPropertyName($mapping['mappedBy'])
-                            ->setOrphanRemoval($mapping['orphanRemoval']);
+                            ->setOrphanRemoval($mapping['orphanRemoval'])
+                        ;
 
                         $manipulator->addOneToManyRelation($relation);
 
@@ -150,7 +152,8 @@ final class EntityRegenerator
                             ->setTargetClassName($mapping['targetEntity'])
                             ->setTargetPropertyName($mapping['mappedBy'])
                             ->setIsOwning($mapping['isOwningSide'])
-                            ->setMapInverseRelation($mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true);
+                            ->setMapInverseRelation($mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true)
+                        ;
 
                         $manipulator->addManyToManyRelation($relation);
 
@@ -162,7 +165,8 @@ final class EntityRegenerator
                             ->setTargetPropertyName($mapping['isOwningSide'] ? $mapping['inversedBy'] : $mapping['mappedBy'])
                             ->setIsOwning($mapping['isOwningSide'])
                             ->setMapInverseRelation($mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true)
-                            ->setIsNullable($getIsNullable($mapping));
+                            ->setIsNullable($getIsNullable($mapping))
+                        ;
 
                         $manipulator->addOneToOneRelation($relation);
 
