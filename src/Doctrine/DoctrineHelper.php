@@ -53,9 +53,6 @@ final class DoctrineHelper
      */
     private $annotatedPrefixes;
 
-    /**
-     * @var bool
-     */
     private $attributeMappingSupport;
 
     /**
