@@ -610,64 +610,64 @@ class MakeEntityTest extends MakerTestCase
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
         ];
-//
-//        $broadCastTest = MakerTestDetails::createTest(
-//            $this->getMakerInstance(MakeEntity::class),
-//            [
-//                // entity class name
-//                'User',
-//                // Mark the entity as broadcasted
-//                'y',
-//                // add not additional fields
-//                '',
-//            ])
-//            ->setRequiredPhpVersion(70200)
-//            ->addExtraDependencies('ux-turbo-mercure')
-//            ->configureDatabase()
-//            ->addReplacement(
-//                '.env',
-//                'https://127.0.0.1:8000/.well-known/mercure',
-//                'http://127.0.0.1:1337/.well-known/mercure'
-//            )
-//            ->updateSchemaAfterCommand()
-//            ->assert(function (string $output, string $directory) {
-//                $this->assertFileExists($directory.'/src/Entity/User.php');
-//
-//                $content = file_get_contents($directory.'/src/Entity/User.php');
-//                $this->assertStringContainsString('use Symfony\UX\Turbo\Attribute\Broadcast;', $content);
-//                $this->assertStringContainsString(\PHP_VERSION_ID >= 80000 ? '#[Broadcast]' : '@Broadcast', $content);
-//            })
-//        ;
-//        // use the fixtures - which contains a test for Mercure - unless specified to skip those
-//        $skipMercureTest = $_SERVER['MAKER_SKIP_MERCURE_TEST'] ?? false;
-//        if (!$skipMercureTest) {
-//            $broadCastTest->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity');
-//        }
-//        yield 'entity_new_broadcast' => [$broadCastTest];
-//
-//        yield 'entity_new_with_api_and_broadcast_dependencies' => [MakerTestDetails::createTest(
-//            $this->getMakerInstance(MakeEntity::class),
-//            [
-//                // entity class name
-//                'User',
-//                // Mark the entity as not an API Platform resource
-//                'n',
-//                // Mark the entity as not broadcasted
-//                'n',
-//                // add not additional fields
-//                '',
-//            ])
-//            ->setRequiredPhpVersion(80000)
-//            ->useDoctrineAttributeMapping()
-////            ->setRequiredPhpVersion(70200)
-//            ->addExtraDependencies('api')
-//            ->addExtraDependencies('ux-turbo-mercure')
-//            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
-//            ->configureDatabase()
-//            ->updateSchemaAfterCommand()
-//            ->assert(function (string $output, string $directory) {
-//                $this->assertFileExists($directory.'/src/Entity/User.php');
-//            }),
-//        ];
+
+        $broadCastTest = MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // Mark the entity as broadcasted
+                'y',
+                // add not additional fields
+                '',
+            ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
+            ->addExtraDependencies('ux-turbo-mercure')
+            ->configureDatabase()
+            ->addReplacement(
+                '.env',
+                'https://127.0.0.1:8000/.well-known/mercure',
+                'http://127.0.0.1:1337/.well-known/mercure'
+            )
+            ->updateSchemaAfterCommand()
+            ->assert(function (string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Entity/User.php');
+
+                $content = file_get_contents($directory.'/src/Entity/User.php');
+                $this->assertStringContainsString('use Symfony\UX\Turbo\Attribute\Broadcast;', $content);
+                $this->assertStringContainsString('#[Broadcast]', $content);
+            })
+        ;
+        // use the fixtures - which contains a test for Mercure - unless specified to skip those
+        $skipMercureTest = $_SERVER['MAKER_SKIP_MERCURE_TEST'] ?? false;
+        if (!$skipMercureTest) {
+            $broadCastTest->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity');
+        }
+        yield 'entity_new_broadcast' => [$broadCastTest];
+
+        yield 'entity_new_with_api_and_broadcast_dependencies' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // entity class name
+                'User',
+                // Mark the entity as not an API Platform resource
+                'n',
+                // Mark the entity as not broadcasted
+                'n',
+                // add not additional fields
+                '',
+            ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
+            ->addExtraDependencies('api')
+            ->addExtraDependencies('ux-turbo-mercure')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
+            ->configureDatabase()
+            ->updateSchemaAfterCommand()
+            ->assert(function (string $output, string $directory) {
+                $this->assertFileExists($directory.'/src/Entity/User.php');
+            }),
+        ];
     }
 }
