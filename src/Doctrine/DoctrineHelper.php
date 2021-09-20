@@ -28,6 +28,7 @@ use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
@@ -42,6 +43,7 @@ final class DoctrineHelper
      * @var string
      */
     private $entityNamespace;
+    private $phpCompatUtil;
 
     /**
      * @var ManagerRegistry
@@ -58,9 +60,10 @@ final class DoctrineHelper
     /**
      * @var ManagerRegistry|LegacyManagerRegistry
      */
-    public function __construct(string $entityNamespace, $registry = null, bool $attributeMappingSupport = false, array $annotatedPrefixes = null)
+    public function __construct(string $entityNamespace, PhpCompatUtil $phpCompatUtil, $registry = null, bool $attributeMappingSupport = false, array $annotatedPrefixes = null)
     {
         $this->entityNamespace = trim($entityNamespace, '\\');
+        $this->phpCompatUtil = $phpCompatUtil;
         $this->registry = $registry;
         $this->attributeMappingSupport = $attributeMappingSupport;
         $this->annotatedPrefixes = $annotatedPrefixes;
@@ -144,6 +147,11 @@ final class DoctrineHelper
     public function doesClassUsesAttributes(string $className): bool
     {
         return $this->doesClassUseDriver($className, AttributeDriver::class);
+    }
+
+    public function canUseAttributes(): bool
+    {
+        return $this->phpCompatUtil->canUseAttributes();
     }
 
     public function getEntitiesForAutocomplete(): array

@@ -39,7 +39,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 /**
@@ -172,18 +171,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             throw new RuntimeCommandException(sprintf('Only annotation or attribute mapping is supported by make:entity, but the <info>%s</info> class uses a different format. If you would like this command to generate the properties & getter/setter methods, add your mapping configuration, and then re-run this command with the <info>--regenerate</info> flag.', $entityClassDetails->getFullName()));
         }
 
-        if ($mappingDriver instanceof AttributeDriver) {
-            if (\PHP_VERSION_ID < 80000) {
-                throw new RuntimeCommandException(sprintf('Your PHP version (%s) does not supports attributes, PHP 8 is needed.', \PHP_VERSION));
-            }
-
-            if (!$this->doctrineHelper->isDoctrineSupportingAttributes()) {
-                throw new RuntimeCommandException('Your doctrine version does not supports attributes. You need at least doctrine in version 2.9');
-            }
-
-            if (Kernel::VERSION_ID < 50200) {
-                throw new RuntimeCommandException('Your symfony version does not support attributes. Attribute supports begins with >= Symfony 5.2 ');
-            }
+        if ($mappingDriver instanceof AttributeDriver || !$this->doctrineHelper->canUseAttributes()) {
+            throw new RuntimeCommandException('To use attributes you\'ll need atleast PHP 8, Doctrine 2.9, and Symfony 5.2.');
         }
 
         $classExists = class_exists($entityClassDetails->getFullName());
