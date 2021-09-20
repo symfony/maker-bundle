@@ -56,7 +56,7 @@ class SetDoctrineAnnotatedPrefixesPass implements CompilerPassInterface
                     $id = sprintf('.%d_annotation_metadata_driver~%s', $i, ContainerBuilder::hash($arguments));
                     $container->setDefinition($id, $arguments[0]);
                     $arguments[0] = new Reference($id);
-                    $methodCalls[$i] = $arguments;
+                    $methodCalls[$i] = [$method, $arguments];
                 }
 
                 $isAnnotated = false !== strpos($arguments[0], '_annotation_metadata_driver');
