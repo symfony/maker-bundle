@@ -352,4 +352,13 @@ final class MakerTestDetails
     {
         return $this->skipMessage;
     }
+
+    public function useDoctrineAttributeMapping(): self
+    {
+        return $this->addReplacement(
+        'config/packages/doctrine.yaml',
+                'type: annotation',
+                'type: attribute'
+        );
+    }
 }

@@ -28,6 +28,8 @@ class MakeEntityTest extends MakerTestCase
                 // add not additional fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
@@ -43,6 +45,8 @@ class MakeEntityTest extends MakerTestCase
                 // add not additional fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->addExtraDependencies('api')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
             ->configureDatabase()
@@ -75,6 +79,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
@@ -94,6 +100,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityUpdate')
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
@@ -123,6 +131,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToOne')
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
@@ -148,6 +158,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToOneNoInverse')
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
@@ -177,6 +189,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntitySelfReferencing')
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
@@ -206,6 +220,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityExistsInRoot')
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
@@ -233,6 +249,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOneToMany')
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
@@ -258,6 +276,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToMany')
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
@@ -283,6 +303,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToManyInCustomNamespace')
             ->changeRootNamespace('Custom')
             ->configureDatabase()
@@ -311,6 +333,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOneToOne')
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
@@ -336,6 +360,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRelationVendorTarget')
             ->configureDatabase()
             ->addReplacement(
@@ -374,6 +400,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRelationVendorTarget')
             ->configureDatabase()
             ->addReplacement(
@@ -408,6 +436,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRelationVendorTarget')
             ->configureDatabase()
             ->addReplacement(
@@ -428,6 +458,8 @@ class MakeEntityTest extends MakerTestCase
                 // namespace: use default App\Entity
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setArgumentsString('--regenerate')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerate')
             ->configureDatabase(true),
@@ -439,6 +471,8 @@ class MakeEntityTest extends MakerTestCase
                 // namespace: use default App\Entity
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setArgumentsString('--regenerate')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateEmbeddableObject')
             ->configureDatabase(),
@@ -450,6 +484,8 @@ class MakeEntityTest extends MakerTestCase
                 // namespace: use default App\Entity
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setArgumentsString('--regenerate --overwrite')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateEmbedable')
             ->configureDatabase(),
@@ -461,77 +497,83 @@ class MakeEntityTest extends MakerTestCase
                 // namespace: use default App\Entity
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setArgumentsString('--regenerate --overwrite')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateOverwrite')
             ->configureDatabase(false),
         ];
 
-        yield 'entity_regenerate_xml' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // namespace: use default App\Entity
-                '',
-            ])
-            ->setArgumentsString('--regenerate')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateXml')
-            ->addReplacement(
-                'config/packages/doctrine.yaml',
-                'type: annotation',
-                'type: xml'
-            )
-            ->addReplacement(
-                'config/packages/doctrine.yaml',
-                "dir: '%kernel.project_dir%/src/Entity'",
-                "dir: '%kernel.project_dir%/config/doctrine'"
-            )
-            ->configureDatabase(false),
-        ];
-
-        yield 'entity_xml_mapping_error_existing' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                'User',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityXmlMappingError')
-            ->addReplacement(
-                'config/packages/doctrine.yaml',
-                'type: annotation',
-                'type: xml'
-            )
-            ->addReplacement(
-                'config/packages/doctrine.yaml',
-                "dir: '%kernel.project_dir%/src/Entity'",
-                "dir: '%kernel.project_dir%/config/doctrine'"
-            )
-            ->configureDatabase(false)
-            ->setCommandAllowedToFail(true)
-            ->assert(function (string $output, string $directory) {
-                $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
-            }),
-        ];
-
-        yield 'entity_xml_mapping_error_new_class' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                'UserAvatarPhoto',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityXmlMappingError')
-            ->addReplacement(
-                'config/packages/doctrine.yaml',
-                'type: annotation',
-                'type: xml'
-            )
-            ->addReplacement(
-                'config/packages/doctrine.yaml',
-                "dir: '%kernel.project_dir%/src/Entity'",
-                "dir: '%kernel.project_dir%/config/doctrine'"
-            )
-            ->configureDatabase(false)
-            ->setCommandAllowedToFail(true)
-            ->assert(function (string $output, string $directory) {
-                $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
-            }),
-        ];
+//        yield 'entity_regenerate_xml' => [MakerTestDetails::createTest(
+//            $this->getMakerInstance(MakeEntity::class),
+//            [
+//                // namespace: use default App\Entity
+//                '',
+//            ])
+//            ->setRequiredPhpVersion(80000)
+//            ->useDoctrineAttributeMapping()
+//            ->setArgumentsString('--regenerate')
+//            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateXml')
+//            ->addReplacement(
+//                'config/packages/doctrine.yaml',
+//                'type: annotation',
+//                'type: xml'
+//            )
+//            ->addReplacement(
+//                'config/packages/doctrine.yaml',
+//                "dir: '%kernel.project_dir%/src/Entity'",
+//                "dir: '%kernel.project_dir%/config/doctrine'"
+//            )
+//            ->configureDatabase(false),
+//        ];
+//
+//        yield 'entity_xml_mapping_error_existing' => [MakerTestDetails::createTest(
+//            $this->getMakerInstance(MakeEntity::class),
+//            [
+//                'User',
+//            ])
+//            ->setRequiredPhpVersion(80000)
+//            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityXmlMappingError')
+//            ->addReplacement(
+//                'config/packages/doctrine.yaml',
+//                'type: annotation',
+//                'type: xml'
+//            )
+//            ->addReplacement(
+//                'config/packages/doctrine.yaml',
+//                "dir: '%kernel.project_dir%/src/Entity'",
+//                "dir: '%kernel.project_dir%/config/doctrine'"
+//            )
+//            ->configureDatabase(false)
+//            ->setCommandAllowedToFail(true)
+//            ->assert(function (string $output, string $directory) {
+//                $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
+//            }),
+//        ];
+//
+//        yield 'entity_xml_mapping_error_new_class' => [MakerTestDetails::createTest(
+//            $this->getMakerInstance(MakeEntity::class),
+//            [
+//                'UserAvatarPhoto',
+//            ])
+//            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityXmlMappingError')
+//            ->addReplacement(
+//                'config/packages/doctrine.yaml',
+//                'type: annotation',
+//                'type: xml'
+//            )
+//            ->setRequiredPhpVersion(80000)
+//            ->addReplacement(
+//                'config/packages/doctrine.yaml',
+//                "dir: '%kernel.project_dir%/src/Entity'",
+//                "dir: '%kernel.project_dir%/config/doctrine'"
+//            )
+//            ->configureDatabase(false)
+//            ->setCommandAllowedToFail(true)
+//            ->assert(function (string $output, string $directory) {
+//                $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
+//            }),
+//        ];
 
         yield 'entity_updating_overwrite' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),
@@ -547,6 +589,8 @@ class MakeEntityTest extends MakerTestCase
                 // finish adding fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setArgumentsString('--overwrite')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOverwrite'),
         ];
@@ -560,66 +604,70 @@ class MakeEntityTest extends MakerTestCase
                 // add not additional fields
                 '',
             ])
+            ->setRequiredPhpVersion(80000)
+            ->useDoctrineAttributeMapping()
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntitySubNamespaceMatchingEntity')
             ->configureDatabase()
             ->updateSchemaAfterCommand(),
         ];
-
-        $broadCastTest = MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // Mark the entity as broadcasted
-                'y',
-                // add not additional fields
-                '',
-            ])
-            ->setRequiredPhpVersion(70200)
-            ->addExtraDependencies('ux-turbo-mercure')
-            ->configureDatabase()
-            ->addReplacement(
-                '.env',
-                'https://127.0.0.1:8000/.well-known/mercure',
-                'http://127.0.0.1:1337/.well-known/mercure'
-            )
-            ->updateSchemaAfterCommand()
-            ->assert(function (string $output, string $directory) {
-                $this->assertFileExists($directory.'/src/Entity/User.php');
-
-                $content = file_get_contents($directory.'/src/Entity/User.php');
-                $this->assertStringContainsString('use Symfony\UX\Turbo\Attribute\Broadcast;', $content);
-                $this->assertStringContainsString(\PHP_VERSION_ID >= 80000 ? '#[Broadcast]' : '@Broadcast', $content);
-            })
-        ;
-        // use the fixtures - which contains a test for Mercure - unless specified to skip those
-        $skipMercureTest = $_SERVER['MAKER_SKIP_MERCURE_TEST'] ?? false;
-        if (!$skipMercureTest) {
-            $broadCastTest->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity');
-        }
-        yield 'entity_new_broadcast' => [$broadCastTest];
-
-        yield 'entity_new_with_api_and_broadcast_dependencies' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // Mark the entity as not an API Platform resource
-                'n',
-                // Mark the entity as not broadcasted
-                'n',
-                // add not additional fields
-                '',
-            ])
-            ->setRequiredPhpVersion(70200)
-            ->addExtraDependencies('api')
-            ->addExtraDependencies('ux-turbo-mercure')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand()
-            ->assert(function (string $output, string $directory) {
-                $this->assertFileExists($directory.'/src/Entity/User.php');
-            }),
-        ];
+//
+//        $broadCastTest = MakerTestDetails::createTest(
+//            $this->getMakerInstance(MakeEntity::class),
+//            [
+//                // entity class name
+//                'User',
+//                // Mark the entity as broadcasted
+//                'y',
+//                // add not additional fields
+//                '',
+//            ])
+//            ->setRequiredPhpVersion(70200)
+//            ->addExtraDependencies('ux-turbo-mercure')
+//            ->configureDatabase()
+//            ->addReplacement(
+//                '.env',
+//                'https://127.0.0.1:8000/.well-known/mercure',
+//                'http://127.0.0.1:1337/.well-known/mercure'
+//            )
+//            ->updateSchemaAfterCommand()
+//            ->assert(function (string $output, string $directory) {
+//                $this->assertFileExists($directory.'/src/Entity/User.php');
+//
+//                $content = file_get_contents($directory.'/src/Entity/User.php');
+//                $this->assertStringContainsString('use Symfony\UX\Turbo\Attribute\Broadcast;', $content);
+//                $this->assertStringContainsString(\PHP_VERSION_ID >= 80000 ? '#[Broadcast]' : '@Broadcast', $content);
+//            })
+//        ;
+//        // use the fixtures - which contains a test for Mercure - unless specified to skip those
+//        $skipMercureTest = $_SERVER['MAKER_SKIP_MERCURE_TEST'] ?? false;
+//        if (!$skipMercureTest) {
+//            $broadCastTest->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity');
+//        }
+//        yield 'entity_new_broadcast' => [$broadCastTest];
+//
+//        yield 'entity_new_with_api_and_broadcast_dependencies' => [MakerTestDetails::createTest(
+//            $this->getMakerInstance(MakeEntity::class),
+//            [
+//                // entity class name
+//                'User',
+//                // Mark the entity as not an API Platform resource
+//                'n',
+//                // Mark the entity as not broadcasted
+//                'n',
+//                // add not additional fields
+//                '',
+//            ])
+//            ->setRequiredPhpVersion(80000)
+//            ->useDoctrineAttributeMapping()
+////            ->setRequiredPhpVersion(70200)
+//            ->addExtraDependencies('api')
+//            ->addExtraDependencies('ux-turbo-mercure')
+//            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
+//            ->configureDatabase()
+//            ->updateSchemaAfterCommand()
+//            ->assert(function (string $output, string $directory) {
+//                $this->assertFileExists($directory.'/src/Entity/User.php');
+//            }),
+//        ];
     }
 }
