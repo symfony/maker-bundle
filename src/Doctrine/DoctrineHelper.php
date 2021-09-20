@@ -53,7 +53,7 @@ final class DoctrineHelper
     /**
      * @var array|null
      */
-    private $annotatedPrefixes;
+    private $mappingDriversByPrefix;
 
     private $attributeMappingSupport;
 
@@ -66,7 +66,7 @@ final class DoctrineHelper
         $this->phpCompatUtil = $phpCompatUtil;
         $this->registry = $registry;
         $this->attributeMappingSupport = $attributeMappingSupport;
-        $this->annotatedPrefixes = $annotatedPrefixes;
+        $this->mappingDriversByPrefix = $annotatedPrefixes;
     }
 
     /**
@@ -111,7 +111,7 @@ final class DoctrineHelper
             throw new \InvalidArgumentException(sprintf('Cannot find the entity manager for class "%s"', $className));
         }
 
-        if (null === $this->annotatedPrefixes) {
+        if (null === $this->mappingDriversByPrefix) {
             // doctrine-bundle <= 2.2
             $metadataDriver = $em->getConfiguration()->getMetadataDriverImpl();
 
@@ -130,9 +130,9 @@ final class DoctrineHelper
 
         $managerName = array_search($em, $this->getRegistry()->getManagers(), true);
 
-        foreach ($this->annotatedPrefixes[$managerName] as [$prefix, $annotationDriver]) {
+        foreach ($this->mappingDriversByPrefix[$managerName] as [$prefix, $prefixDriver]) {
             if (0 === strpos($className, $prefix)) {
-                return $this->isInstanceOf($annotationDriver, $driverClass);
+                return $this->isInstanceOf($prefixDriver, $driverClass);
             }
         }
 
@@ -182,7 +182,7 @@ final class DoctrineHelper
         $classNames->setAccessible(true);
 
         // Invalidating the cached AnnotationDriver::$classNames to find new Entity classes
-        foreach ($this->annotatedPrefixes ?? [] as $managerName => $prefixes) {
+        foreach ($this->mappingDriversByPrefix ?? [] as $managerName => $prefixes) {
             foreach ($prefixes as [$prefix, $annotationDriver]) {
                 if (null !== $annotationDriver) {
                     $classNames->setValue($annotationDriver, null);
@@ -214,7 +214,7 @@ final class DoctrineHelper
                     $cmf->setMetadataFor($m->getName(), $m);
                 }
 
-                if (null === $this->annotatedPrefixes) {
+                if (null === $this->mappingDriversByPrefix) {
                     // Invalidating the cached AnnotationDriver::$classNames to find new Entity classes
                     $metadataDriver = $em->getConfiguration()->getMetadataDriverImpl();
                     if ($this->isInstanceOf($metadataDriver, MappingDriverChain::class)) {
@@ -311,7 +311,7 @@ final class DoctrineHelper
         $lowestCharacterDiff = null;
         $foundDriver = null;
 
-        foreach ($this->annotatedPrefixes as $key => $mappings) {
+        foreach ($this->mappingDriversByPrefix as $key => $mappings) {
             foreach ($mappings as [$prefix, $driver]) {
                 $diff = substr_compare($namespace, $prefix, 0);
 
