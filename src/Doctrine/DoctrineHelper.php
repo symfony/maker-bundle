@@ -132,7 +132,7 @@ final class DoctrineHelper
 
         foreach ($this->annotatedPrefixes[$managerName] as [$prefix, $annotationDriver]) {
             if (0 === strpos($className, $prefix)) {
-                return null !== $annotationDriver;
+                return $this->isInstanceOf($annotationDriver, $driverClass);
             }
         }
 

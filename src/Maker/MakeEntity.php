@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
-use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\Persistence\Mapping\Driver\AnnotationDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -165,11 +164,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         );
 
         $mappingDriver = $this->doctrineHelper->getMappingDriverForNamespace($entityClassDetails->getFullName());
-
-        // @TODO DRY THIS OUT - Same ex as blo
-        if ($mappingDriver instanceof XmlDriver) {
-            throw new RuntimeCommandException(sprintf('Only annotation or attribute mapping is supported by make:entity, but the <info>%s</info> class uses a different format. If you would like this command to generate the properties & getter/setter methods, add your mapping configuration, and then re-run this command with the <info>--regenerate</info> flag.', $entityClassDetails->getFullName()));
-        }
 
         if ($mappingDriver instanceof AttributeDriver && !$this->doctrineHelper->canUseAttributes()) {
             throw new RuntimeCommandException('To use attributes you\'ll need atleast PHP 8, Doctrine 2.9, and Symfony 5.2.');
