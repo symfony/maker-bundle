@@ -1,0 +1,9 @@
+---------------------------------------------------------------------------
+
+by ajgarlag at 2021-09-20T07:29:07Z
+
+> I'm just not sure why more people didn't hit this error after #847...
+
+I think most people are using XML or YAML mapping for bundle entities.
+
+ I hope this PR can be merged soon.
