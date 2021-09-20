@@ -49,11 +49,7 @@ class SetDoctrineAnnotatedPrefixesPass implements CompilerPassInterface
                     $class = $arguments[0]->getClass();
                     $namespace = substr($class, 0, strrpos($class, '\\'));
 
-                    if ('Doctrine\ORM\Mapping\Driver' === $namespace ? AnnotationDriver::class !== $class : !is_subclass_of($class, AbstractAnnotationDriver::class)) {
-                        continue;
-                    }
-
-                    $id = sprintf('.%d_annotation_metadata_driver~%s', $i, ContainerBuilder::hash($arguments));
+                    $id = sprintf('.%d_doctrine_metadata_driver~%s', $i, ContainerBuilder::hash($arguments));
                     $container->setDefinition($id, $arguments[0]);
                     $arguments[0] = new Reference($id);
                     $methodCalls[$i] = $arguments;
