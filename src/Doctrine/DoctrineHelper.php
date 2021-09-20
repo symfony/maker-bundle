@@ -104,7 +104,7 @@ final class DoctrineHelper
             // if the class should be generated with attributes or annotations. If this exception is thrown, we will check based on the
             // namespaces for the given $className and compare it with the doctrine configuration to get the correct MappingDriver.
 
-            return $this->getMappingDriverForNamespace($className) instanceof $driverClass;
+            return $this->isInstanceOf($this->getMappingDriverForNamespace($className), $driverClass);
         }
 
         if (null === $em) {
@@ -116,16 +116,16 @@ final class DoctrineHelper
             $metadataDriver = $em->getConfiguration()->getMetadataDriverImpl();
 
             if (!$this->isInstanceOf($metadataDriver, MappingDriverChain::class)) {
-                return $metadataDriver instanceof $driverClass;
+                return $this->isInstanceOf($metadataDriver, $driverClass);
             }
 
             foreach ($metadataDriver->getDrivers() as $namespace => $driver) {
                 if (0 === strpos($className, $namespace)) {
-                    return $driver instanceof $driverClass;
+                    return $this->isInstanceOf($driver, $driverClass);
                 }
             }
 
-            return $metadataDriver->getDefaultDriver() instanceof $driverClass;
+            return $this->isInstanceOf($metadataDriver->getDefaultDriver(), $driverClass);
         }
 
         $managerName = array_search($em, $this->getRegistry()->getManagers(), true);
