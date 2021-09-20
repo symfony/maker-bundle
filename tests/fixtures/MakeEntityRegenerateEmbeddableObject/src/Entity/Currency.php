@@ -4,16 +4,13 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Embeddable()
- */
+#[ORM\Embeddable]
 class Currency
 {
     /**
      * @var string
-     *
-     * @ORM\Column(name="currency", type="string")
      */
+    #[ORM\Column(type: 'string', name: 'currency')]
     private $currency;
 
     public function __construct($currency = null)
