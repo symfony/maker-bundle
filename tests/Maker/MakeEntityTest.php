@@ -504,76 +504,72 @@ class MakeEntityTest extends MakerTestCase
             ->configureDatabase(false),
         ];
 
-//        yield 'entity_regenerate_xml' => [MakerTestDetails::createTest(
-//            $this->getMakerInstance(MakeEntity::class),
-//            [
-//                // namespace: use default App\Entity
-//                '',
-//            ])
-//            ->setRequiredPhpVersion(80000)
-//            ->useDoctrineAttributeMapping()
-//            ->setArgumentsString('--regenerate')
-//            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateXml')
-//            ->addReplacement(
-//                'config/packages/doctrine.yaml',
-//                'type: annotation',
-//                'type: xml'
-//            )
-//            ->addReplacement(
-//                'config/packages/doctrine.yaml',
-//                "dir: '%kernel.project_dir%/src/Entity'",
-//                "dir: '%kernel.project_dir%/config/doctrine'"
-//            )
-//            ->configureDatabase(false),
-//        ];
-//
-//        yield 'entity_xml_mapping_error_existing' => [MakerTestDetails::createTest(
-//            $this->getMakerInstance(MakeEntity::class),
-//            [
-//                'User',
-//            ])
-//            ->setRequiredPhpVersion(80000)
-//            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityXmlMappingError')
-//            ->addReplacement(
-//                'config/packages/doctrine.yaml',
-//                'type: annotation',
-//                'type: xml'
-//            )
-//            ->addReplacement(
-//                'config/packages/doctrine.yaml',
-//                "dir: '%kernel.project_dir%/src/Entity'",
-//                "dir: '%kernel.project_dir%/config/doctrine'"
-//            )
-//            ->configureDatabase(false)
-//            ->setCommandAllowedToFail(true)
-//            ->assert(function (string $output, string $directory) {
-//                $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
-//            }),
-//        ];
-//
-//        yield 'entity_xml_mapping_error_new_class' => [MakerTestDetails::createTest(
-//            $this->getMakerInstance(MakeEntity::class),
-//            [
-//                'UserAvatarPhoto',
-//            ])
-//            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityXmlMappingError')
-//            ->addReplacement(
-//                'config/packages/doctrine.yaml',
-//                'type: annotation',
-//                'type: xml'
-//            )
-//            ->setRequiredPhpVersion(80000)
-//            ->addReplacement(
-//                'config/packages/doctrine.yaml',
-//                "dir: '%kernel.project_dir%/src/Entity'",
-//                "dir: '%kernel.project_dir%/config/doctrine'"
-//            )
-//            ->configureDatabase(false)
-//            ->setCommandAllowedToFail(true)
-//            ->assert(function (string $output, string $directory) {
-//                $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
-//            }),
-//        ];
+        yield 'entity_regenerate_xml' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                // namespace: use default App\Entity
+                '',
+            ])
+            ->setArgumentsString('--regenerate')
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateXml')
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                'type: annotation',
+                'type: xml'
+            )
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                "dir: '%kernel.project_dir%/src/Entity'",
+                "dir: '%kernel.project_dir%/config/doctrine'"
+            )
+            ->configureDatabase(false),
+        ];
+
+        yield 'entity_xml_mapping_error_existing' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                'User',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityXmlMappingError')
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                'type: annotation',
+                'type: xml'
+            )
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                "dir: '%kernel.project_dir%/src/Entity'",
+                "dir: '%kernel.project_dir%/config/doctrine'"
+            )
+            ->configureDatabase(false)
+            ->setCommandAllowedToFail(true)
+            ->assert(function (string $output, string $directory) {
+                $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
+            }),
+        ];
+
+        yield 'entity_xml_mapping_error_new_class' => [MakerTestDetails::createTest(
+            $this->getMakerInstance(MakeEntity::class),
+            [
+                'UserAvatarPhoto',
+            ])
+            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityXmlMappingError')
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                'type: annotation',
+                'type: xml'
+            )
+            ->addReplacement(
+                'config/packages/doctrine.yaml',
+                "dir: '%kernel.project_dir%/src/Entity'",
+                "dir: '%kernel.project_dir%/config/doctrine'"
+            )
+            ->configureDatabase(false)
+            ->setCommandAllowedToFail(true)
+            ->assert(function (string $output, string $directory) {
+                $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
+            }),
+        ];
 
         yield 'entity_updating_overwrite' => [MakerTestDetails::createTest(
             $this->getMakerInstance(MakeEntity::class),
