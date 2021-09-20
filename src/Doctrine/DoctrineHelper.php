@@ -327,6 +327,6 @@ final class DoctrineHelper
 
     public function isDoctrineSupportingAttributes(): bool
     {
-        return $this->isDoctrineInstalled() && $this->attributeMappingSupport && \PHP_VERSION_ID >= 80000;
+        return $this->isDoctrineInstalled() && $this->attributeMappingSupport && $this->phpCompatUtil->canUseAttributes();
     }
 }
