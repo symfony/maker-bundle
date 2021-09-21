@@ -85,11 +85,12 @@ final class ClassSourceManipulator
         return $this->sourceCode;
     }
 
-    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [], array $attributes = []): void
+    public function addEntityField(string $propertyName, array $columnOptions, array $comments = []): void
     {
         $typeHint = $this->getEntityTypeHint($columnOptions['type']);
         $nullable = $columnOptions['nullable'] ?? false;
         $isId = (bool) ($columnOptions['id'] ?? false);
+        $attributes = [];
 
         if ($this->useAttributesForDoctrineMapping) {
             $attributes[] = $this->buildAttributeNode('ORM\Column', $columnOptions);
@@ -1422,7 +1423,7 @@ final class ClassSourceManipulator
      * @param string $attributeClass the attribute class which should be used for the attribute
      * @param array  $options        the named arguments for the attribute ($key = argument name, $value = argument value)
      */
-    private function buildAttributeNode(string $attributeClass, array $options)
+    private function buildAttributeNode(string $attributeClass, array $options): Node\Attribute
     {
         $options = $this->sortOptionsByClassConstructorParameters($options, $attributeClass);
 

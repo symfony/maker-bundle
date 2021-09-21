@@ -38,7 +38,6 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -372,7 +371,7 @@ class MakeResetPassword extends AbstractMaker
 
         $generator->writeChanges();
 
-        $useAttributesForDoctrineMapping = $this->doctrineHelper->isDoctrineSupportingAttributes() && $this->doctrineHelper->doesClassUsesAttributes($requestClassNameDetails->getFullName()) && Kernel::VERSION_ID >= 50200;
+        $useAttributesForDoctrineMapping = $this->doctrineHelper->isDoctrineSupportingAttributes() && $this->doctrineHelper->doesClassUsesAttributes($requestClassNameDetails->getFullName()) && $this->doctrineHelper->canUseAttributes();
 
         $manipulator = new ClassSourceManipulator(
             $this->fileManager->getFileContents($requestEntityPath),
