@@ -4,15 +4,21 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+/**
+ * @ORM\Entity()
+ */
 class User
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
     private $id;
 
-    #[ORM\OneToOne(inversedBy: 'user', targetEntity: User::class, cascade: ['persist', 'remove'])]
+    /**
+     * @ORM\OneToOne(targetEntity=User::class, inversedBy="user", cascade={"persist", "remove"})
+     */
     private $embeddedUser;
 
     public function getId(): ?int

@@ -527,18 +527,39 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddOneToOneRelationTests
      */
-    public function testAddOneToOneRelation(string $sourceFilename, $expectedSourceFilename, RelationOneToOne $oneToOne)
+    public function testAddOneToOneRelation(string $sourceFilename, $expectedSourceFilename, RelationOneToOne $oneToOne): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_one_to_one_relation/'.$expectedSourceFilename);
+        $sourcePath = __DIR__.'/fixtures/source';
+        $expectedPath = __DIR__.'/fixtures/add_one_to_one_relation';
 
-        $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addOneToOneRelation($oneToOne);
+        // Legacy Annotation Tests
+        $this->runAddOneToOneRelation(
+            file_get_contents(sprintf('%s/legacy/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/legacy/%s', $expectedPath, $expectedSourceFilename)),
+            $oneToOne,
+            false
+        );
 
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        // Run Attribute Tests
+        if ((\PHP_VERSION_ID >= 80000)) {
+            $this->runAddOneToOneRelation(
+                file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+                file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+                $oneToOne,
+                true
+            );
+        }
     }
 
-    public function getAddOneToOneRelationTests()
+    private function runAddOneToOneRelation(string $source, string $expected, RelationOneToOne $oneToOne, bool $php8): void
+    {
+        $manipulator = new ClassSourceManipulator($source, false, !$php8, true, $php8);
+        $manipulator->addOneToOneRelation($oneToOne);
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function getAddOneToOneRelationTests(): \Generator
     {
         yield 'one_to_one_owning' => [
             'User_simple.php',
