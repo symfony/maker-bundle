@@ -385,18 +385,40 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddOneToManyRelationTests
      */
-    public function testAddOneToManyRelation(string $sourceFilename, $expectedSourceFilename, RelationOneToMany $oneToMany)
+    public function testAddOneToManyRelation(string $sourceFilename, string $expectedSourceFilename, RelationOneToMany $oneToMany)
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_one_to_many_relation/'.$expectedSourceFilename);
+        $sourcePath = __DIR__.'/fixtures/source';
+        $expectedPath = __DIR__.'/fixtures/add_one_to_many_relation';
 
-        $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addOneToManyRelation($oneToMany);
+        // Legacy Annotation Tests
+        $this->runAddOneToManyRelationTests(
+            file_get_contents(sprintf('%s/legacy/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/legacy/%s', $expectedPath, $expectedSourceFilename)),
+            $oneToMany,
+            false
+        );
 
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        // Run Attribute Tests
+        if ((\PHP_VERSION_ID >= 80000)) {
+            $this->runAddOneToManyRelationTests(
+                file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+                file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+                $oneToMany,
+                true
+            );
+        }
+
     }
 
-    public function getAddOneToManyRelationTests()
+    private function runAddOneToManyRelationTests(string $source, string $expected, RelationOneToMany $oneToMany, bool $php8): void
+    {
+        $manipulator = new ClassSourceManipulator($source, false, !$php8, true, $php8);
+        $manipulator->addOneToManyRelation($oneToMany);
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function getAddOneToManyRelationTests(): \Generator
     {
         yield 'one_to_many_simple' => [
             'User_simple.php',

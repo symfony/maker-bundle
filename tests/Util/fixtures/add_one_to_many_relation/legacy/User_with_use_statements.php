@@ -2,19 +2,27 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Some\Other\UserProfile;
+use Some\Other\FooCategory as Category;
 
-#[ORM\Entity]
+/**
+ * @ORM\Entity()
+ */
 class User
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
     private $id;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserAvatarPhoto::class)]
+    /**
+     * @ORM\OneToMany(targetEntity=UserAvatarPhoto::class, mappedBy="user")
+     */
     private $avatarPhotos;
 
     public function __construct()
