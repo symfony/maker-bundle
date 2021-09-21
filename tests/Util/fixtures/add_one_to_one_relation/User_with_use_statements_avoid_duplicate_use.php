@@ -15,7 +15,7 @@ class User
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\OneToOne(targetEntity: \App\OtherEntity\UserProfile::class, inversedBy: 'user', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'user', targetEntity: \App\OtherEntity\UserProfile::class, cascade: ['persist', 'remove'])]
     private $userProfile;
 
     public function getId(): ?int
