@@ -458,18 +458,39 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddManyToManyRelationTests
      */
-    public function testAddManyToManyRelation(string $sourceFilename, $expectedSourceFilename, RelationManyToMany $manyToMany)
+    public function testAddManyToManyRelation(string $sourceFilename, $expectedSourceFilename, RelationManyToMany $manyToMany): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_many_to_many_relation/'.$expectedSourceFilename);
+        $sourcePath = __DIR__.'/fixtures/source';
+        $expectedPath = __DIR__.'/fixtures/add_many_to_many_relation';
 
-        $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addManyToManyRelation($manyToMany);
+        // Legacy Annotation Tests
+        $this->runAddManyToManyRelationTest(
+            file_get_contents(sprintf('%s/legacy/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/legacy/%s', $expectedPath, $expectedSourceFilename)),
+            $manyToMany,
+            false
+        );
 
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        // Run Attribute Tests
+        if ((\PHP_VERSION_ID >= 80000)) {
+            $this->runAddManyToManyRelationTest(
+                file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+                file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+                $manyToMany,
+                true
+            );
+        }
     }
 
-    public function getAddManyToManyRelationTests()
+    private function runAddManyToManyRelationTest(string $source, string $expected, RelationManyToMany $manyToMany, bool $php8): void
+    {
+        $manipulator = new ClassSourceManipulator($source, false, !$php8, true, $php8);
+        $manipulator->addManyToManyRelation($manyToMany);
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function getAddManyToManyRelationTests(): \Generator
     {
         yield 'many_to_many_owning' => [
             'User_simple.php',
