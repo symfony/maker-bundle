@@ -65,7 +65,7 @@ class ClassSourceManipulatorTest extends TestCase
         ];
 
         yield 'property_empty_class' => [
-            'User_empty.php',
+            'legacy/User_empty.php',
             'fooProp',
             [],
             'User_empty.php',
@@ -110,7 +110,7 @@ class ClassSourceManipulatorTest extends TestCase
         ];
 
         yield 'getter_empty_class' => [
-            'User_empty.php',
+            'legacy/User_empty.php',
             'fooProp',
             'string',
             [],
@@ -158,7 +158,7 @@ class ClassSourceManipulatorTest extends TestCase
         ];
 
         yield 'setter_empty_class' => [
-            'User_empty.php',
+            'legacy/User_empty.php',
             'fooProp',
             'string',
             false,
@@ -695,7 +695,7 @@ class ClassSourceManipulatorTest extends TestCase
 
     public function testAddMethodBuilder()
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/legacy/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_method/UserEmpty_with_newMethod.php');
 
         $manipulator = new ClassSourceManipulator($source);
@@ -873,7 +873,7 @@ EOF
 
     public function testAddTraitInEmptyClass()
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/legacy/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_only_trait.php');
 
         $manipulator = new ClassSourceManipulator($source);
@@ -933,7 +933,7 @@ EOF
 
     public function testAddConstructor()
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/legacy/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserEmpty_with_constructor.php');
 
         $manipulator = new ClassSourceManipulator($source);
