@@ -202,18 +202,41 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddEntityFieldTests
      */
-    public function testAddEntityField(string $sourceFilename, string $propertyName, array $fieldOptions, $expectedSourceFilename)
+    public function testAddEntityField(string $sourceFilename, string $propertyName, array $fieldOptions, $expectedSourceFilename): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_entity_field/'.$expectedSourceFilename);
+        $sourcePath = __DIR__.'/fixtures/source';
+        $expectedPath = __DIR__.'/fixtures/add_entity_field';
 
-        $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addEntityField($propertyName, $fieldOptions);
+        // Legacy Annotation Tests
+        $this->runAddEntityFieldTests(
+            file_get_contents(sprintf('%s/legacy/%s', $sourcePath, $sourceFilename)),
+            $propertyName,
+            $fieldOptions,
+            file_get_contents(sprintf('%s/legacy/%s', $expectedPath, $expectedSourceFilename)),
+            false
+        );
 
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        // Run Attribute Tests
+        if ((PHP_VERSION_ID >= 80000)) {
+            $this->runAddEntityFieldTests(
+                file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+                $propertyName,
+                $fieldOptions,
+                file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+                true
+            );
+        }
     }
 
-    public function getAddEntityFieldTests()
+    private function runAddEntityFieldTests(string $source, string $propertyName, array $fieldOptions, string $expected, bool $php8): void
+    {
+        $manipulator = new ClassSourceManipulator($source, false, !$php8, true, $php8);
+        $manipulator->addEntityField($propertyName, $fieldOptions);
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function getAddEntityFieldTests(): \Generator
     {
         yield 'entity_normal_add' => [
             'User_simple.php',
