@@ -407,7 +407,6 @@ class ClassSourceManipulatorTest extends TestCase
                 true
             );
         }
-
     }
 
     private function runAddOneToManyRelationTests(string $source, string $expected, RelationOneToMany $oneToMany, bool $php8): void
@@ -673,7 +672,7 @@ class ClassSourceManipulatorTest extends TestCase
 
     public function testAddInterface()
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/legacy/User_simple.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/implements_interface/User_simple.php');
 
         $manipulator = new ClassSourceManipulator($source);
@@ -885,7 +884,7 @@ EOF
 
     public function testAddTraitWithProperty()
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/legacy/User_simple.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_prop_trait.php');
 
         $manipulator = new ClassSourceManipulator($source);
@@ -953,7 +952,7 @@ CODE
 
     public function testAddConstructorInClassContainsPropsAndMethods()
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/legacy/User_simple.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserSimple_with_constructor.php');
 
         $manipulator = new ClassSourceManipulator($source);
