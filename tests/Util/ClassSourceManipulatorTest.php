@@ -41,7 +41,7 @@ class ClassSourceManipulatorTest extends TestCase
     public function getAddPropertyTests()
     {
         yield 'normal_property_add' => [
-            'User_simple.php',
+            'legacy/User_simple.php',
             'fooProp',
             [],
             'User_simple.php',
@@ -91,7 +91,7 @@ class ClassSourceManipulatorTest extends TestCase
     public function getAddGetterTests()
     {
         yield 'normal_getter_add' => [
-            'User_simple.php',
+            'legacy/User_simple.php',
             'fooProp',
             'string',
             [],
@@ -137,7 +137,7 @@ class ClassSourceManipulatorTest extends TestCase
     public function getAddSetterTests()
     {
         yield 'normal_setter_add' => [
-            'User_simple.php',
+            'legacy/User_simple.php',
             'fooProp',
             'string',
             false,
@@ -217,7 +217,7 @@ class ClassSourceManipulatorTest extends TestCase
         );
 
         // Run Attribute Tests
-        if ((PHP_VERSION_ID >= 80000)) {
+        if ((\PHP_VERSION_ID >= 80000)) {
             $this->runAddEntityFieldTests(
                 file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
                 $propertyName,
@@ -286,18 +286,39 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddManyToOneRelationTests
      */
-    public function testAddManyToOneRelation(string $sourceFilename, $expectedSourceFilename, RelationManyToOne $manyToOne)
+    public function testAddManyToOneRelation(string $sourceFilename, $expectedSourceFilename, RelationManyToOne $manyToOne): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_many_to_one_relation/'.$expectedSourceFilename);
+        $sourcePath = __DIR__.'/fixtures/source';
+        $expectedPath = __DIR__.'/fixtures/add_many_to_one_relation';
 
-        $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addManyToOneRelation($manyToOne);
+        // Legacy Annotation Tests
+        $this->runAddManyToOneRelationTests(
+            file_get_contents(sprintf('%s/legacy/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/legacy/%s', $expectedPath, $expectedSourceFilename)),
+            $manyToOne,
+            false
+        );
 
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        // Run Attribute Tests
+        if ((\PHP_VERSION_ID >= 80000)) {
+            $this->runAddManyToOneRelationTests(
+                file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+                file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+                $manyToOne,
+                true
+            );
+        }
     }
 
-    public function getAddManyToOneRelationTests()
+    public function runAddManyToOneRelationTests(string $source, string $expected, RelationManyToOne $manyToOne, bool $php8): void
+    {
+        $manipulator = new ClassSourceManipulator($source, false, !$php8, true, $php8);
+        $manipulator->addManyToOneRelation($manyToOne);
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function getAddManyToOneRelationTests(): \Generator
     {
         yield 'many_to_one_not_nullable' => [
             'User_simple.php',
