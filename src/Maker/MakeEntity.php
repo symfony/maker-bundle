@@ -163,7 +163,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             'Entity\\'
         );
 
-        if (!$this->doctrineHelper->isDoctrineSupportingAttributes()) {
+        if (!$this->doctrineHelper->isDoctrineSupportingAttributes() && $this->doctrineHelper->doesClassUsesAttributes($entityClassDetails->getFullName())) {
             throw new RuntimeCommandException('To use attributes you\'ll need atleast PHP 8, Doctrine 2.9, and Symfony 5.2.');
         }
 
