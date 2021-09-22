@@ -306,7 +306,7 @@ final class DoctrineHelper
      * this helper function is needed to create entities with the configuration of doctrine if they are not yet been registered
      * in the ManagerRegistry
      */
-    public function getMappingDriverForNamespace(string $namespace): ?MappingDriver
+    private function getMappingDriverForNamespace(string $namespace): ?MappingDriver
     {
         $lowestCharacterDiff = null;
         $foundDriver = null;
