@@ -13,9 +13,6 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\Mapping\Driver\AttributeDriver;
-use Doctrine\Persistence\Mapping\Driver\AnnotationDriver;
-use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -805,8 +802,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite, string $className): ClassSourceManipulator
     {
-//        $useAttributes = $mappingDriver instanceof AttributeDriver && $this->doctrineHelper->isDoctrineSupportingAttributes();
-//        $useAnnotations = null === $mappingDriver || $mappingDriver instanceof AnnotationDriver && !$useAttributes;
         $useAttributes = $this->doctrineHelper->doesClassUsesAttributes($className) && $this->doctrineHelper->isDoctrineSupportingAttributes();
         $useAnnotations = $this->doctrineHelper->isClassAnnotated($className) || !$useAttributes;
 
