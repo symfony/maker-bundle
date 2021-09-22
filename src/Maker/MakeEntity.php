@@ -152,7 +152,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
             $input->setOption('api-resource', $isApiResource);
         }
-
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
