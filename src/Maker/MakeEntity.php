@@ -111,26 +111,35 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if ($input->getArgument('name')) {
-            return;
+            if (
+                !$input->getOption('broadcast') &&
+                class_exists(Broadcast::class) &&
+                !class_exists($this->generator->createClassNameDetails($entityClassName, 'Entity\\')->getFullName())
+            ) {
+                $description = $command->getDefinition()->getOption('broadcast')->getDescription();
+                $question = new ConfirmationQuestion($description, false);
+                $isBroadcast = $io->askQuestion($question);
+
+                $input->setOption('broadcast', $isBroadcast);
+            }
+            if ($input->getOption('regenerate')) {
+                $io->block([
+                    'This command will generate any missing methods (e.g. getters & setters) for a class or all classes in a namespace.',
+                    'To overwrite any existing methods, re-run this command with the --overwrite flag',
+                ], null, 'fg=yellow');
+                $classOrNamespace = $io->ask('Enter a class or namespace to regenerate', $this->getEntityNamespace(), [Validator::class, 'notBlank']);
+
+                $input->setArgument('name', $classOrNamespace);
+
+                return;
+            }
+
+            $argument = $command->getDefinition()->getArgument('name');
+            $question = $this->createEntityClassQuestion($argument->getDescription());
+            $entityClassName = $io->askQuestion($question);
+
+            $input->setArgument('name', $entityClassName);
         }
-
-        if ($input->getOption('regenerate')) {
-            $io->block([
-                'This command will generate any missing methods (e.g. getters & setters) for a class or all classes in a namespace.',
-                'To overwrite any existing methods, re-run this command with the --overwrite flag',
-            ], null, 'fg=yellow');
-            $classOrNamespace = $io->ask('Enter a class or namespace to regenerate', $this->getEntityNamespace(), [Validator::class, 'notBlank']);
-
-            $input->setArgument('name', $classOrNamespace);
-
-            return;
-        }
-
-        $argument = $command->getDefinition()->getArgument('name');
-        $question = $this->createEntityClassQuestion($argument->getDescription());
-        $entityClassName = $io->askQuestion($question);
-
-        $input->setArgument('name', $entityClassName);
 
         if (
             !$input->getOption('api-resource') &&
@@ -144,17 +153,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $input->setOption('api-resource', $isApiResource);
         }
 
-        if (
-            !$input->getOption('broadcast') &&
-            class_exists(Broadcast::class) &&
-            !class_exists($this->generator->createClassNameDetails($entityClassName, 'Entity\\')->getFullName())
-        ) {
-            $description = $command->getDefinition()->getOption('broadcast')->getDescription();
-            $question = new ConfirmationQuestion($description, false);
-            $isBroadcast = $io->askQuestion($question);
-
-            $input->setOption('broadcast', $isBroadcast);
-        }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
