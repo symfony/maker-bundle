@@ -371,7 +371,7 @@ class MakeResetPassword extends AbstractMaker
 
         $generator->writeChanges();
 
-        $useAttributesForDoctrineMapping = $this->doctrineHelper->isDoctrineSupportingAttributes() && $this->doctrineHelper->doesClassUsesAttributes($requestClassNameDetails->getFullName()) && $this->doctrineHelper->canUseAttributes();
+        $useAttributesForDoctrineMapping = $this->doctrineHelper->isDoctrineSupportingAttributes() && $this->doctrineHelper->doesClassUsesAttributes($requestClassNameDetails->getFullName());
 
         $manipulator = new ClassSourceManipulator(
             $this->fileManager->getFileContents($requestEntityPath),

@@ -149,9 +149,9 @@ final class DoctrineHelper
         return $this->doesClassUseDriver($className, AttributeDriver::class);
     }
 
-    public function canUseAttributes(): bool
+    public function isDoctrineSupportingAttributes(): bool
     {
-        return $this->phpCompatUtil->canUseAttributes();
+        return $this->isDoctrineInstalled() && $this->attributeMappingSupport && $this->phpCompatUtil->canUseAttributes();
     }
 
     public function getEntitiesForAutocomplete(): array
@@ -323,10 +323,5 @@ final class DoctrineHelper
         }
 
         return $foundDriver;
-    }
-
-    public function isDoctrineSupportingAttributes(): bool
-    {
-        return $this->isDoctrineInstalled() && $this->attributeMappingSupport && $this->phpCompatUtil->canUseAttributes();
     }
 }

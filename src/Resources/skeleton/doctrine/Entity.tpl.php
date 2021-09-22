@@ -2,8 +2,7 @@
 
 namespace <?= $namespace ?>;
 
-<?php if ($api_resource && class_exists(\ApiPlatform\Metadata\ApiResource::class)): ?>use ApiPlatform\Metadata\ApiResource;
-<?php elseif ($api_resource): ?>use ApiPlatform\Core\Annotation\ApiResource;
+<?php if ($api_resource): ?>use ApiPlatform\Core\Annotation\ApiResource;
 <?php endif ?>
 use <?= $repository_full_class_name ?>;
 use Doctrine\ORM\Mapping as ORM;

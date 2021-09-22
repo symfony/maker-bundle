@@ -165,7 +165,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $mappingDriver = $this->doctrineHelper->getMappingDriverForNamespace($entityClassDetails->getFullName());
 
-        if ($mappingDriver instanceof AttributeDriver && !$this->doctrineHelper->canUseAttributes()) {
+        if ($mappingDriver instanceof AttributeDriver && !$this->doctrineHelper->isDoctrineSupportingAttributes()) {
             throw new RuntimeCommandException('To use attributes you\'ll need atleast PHP 8, Doctrine 2.9, and Symfony 5.2.');
         }
 
