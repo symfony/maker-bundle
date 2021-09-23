@@ -37,6 +37,7 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
+use Symfony\Component\Security\Http\Authenticator\LoginLinkAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -49,8 +50,14 @@ use Symfony\Component\Yaml\Yaml;
  */
 final class MakeAuthenticator extends AbstractMaker
 {
-    private const AUTH_TYPE_EMPTY_AUTHENTICATOR = 'empty-authenticator';
     private const AUTH_TYPE_FORM_LOGIN = 'form-login';
+    private const AUTH_TYPE_JSON_LOGIN = 'json-login';
+    private const AUTH_TYPE_HTTP_BASIC = 'http-basic';
+    private const AUTH_TYPE_LOGIN_LINK = 'login-link';
+    private const AUTH_TYPE_X509 = 'x509';
+    private const AUTH_TYPE_REMOTE_USER = 'remote-user';
+    private const AUTH_TYPE_EMPTY_AUTHENTICATOR = 'empty-authenticator';
+    private const AUTH_TYPE_FORM_LOGIN_AUTHENTICATOR = 'form-login-authenticator';
 
     private $fileManager;
 
@@ -77,7 +84,7 @@ final class MakeAuthenticator extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a Guard authenticator of different flavors';
+        return 'Configures an authenticator of different flavors';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig)
@@ -95,18 +102,23 @@ final class MakeAuthenticator extends AbstractMaker
         $securityData = $manipulator->getData();
 
         // Determine if we should use new security features introduced in Symfony 5.2
-        if ($securityData['security']['enable_authenticator_manager'] ?? false) {
-            $this->useSecurity52 = true;
-        }
-
+        $this->useSecurity52 = $securityData['security']['enable_authenticator_manager'] ?? false;
         if ($this->useSecurity52 && !class_exists(UserBadge::class)) {
             throw new RuntimeCommandException('MakerBundle does not support generating authenticators using the new authenticator system before symfony/security-bundle 5.2. Please upgrade to 5.2 and try again.');
         }
 
         // authenticator type
         $authenticatorTypeValues = [
-            'Empty authenticator' => self::AUTH_TYPE_EMPTY_AUTHENTICATOR,
-            'Login form authenticator' => self::AUTH_TYPE_FORM_LOGIN,
+            'Login form' => self::AUTH_TYPE_FORM_LOGIN,
+            'JSON API login' => self::AUTH_TYPE_JSON_LOGIN,
+            'HTTP basic' => self::AUTH_TYPE_HTTP_BASIC,
+        ];
+        if (class_exists(LoginLinkAuthenticator::class)) {
+            $authenticatorTypeValues['Login link'] = self::AUTH_TYPE_LOGIN_LINK;
+        }
+        $authenticatorTypeValues += [
+            'Pre authenticated' => 'pre-authenticated',
+            'Custom authenticator' => self::AUTH_TYPE_EMPTY_AUTHENTICATOR,
         ];
         $command->addArgument('authenticator-type', InputArgument::REQUIRED);
         $authenticatorType = $io->choice(
@@ -114,43 +126,44 @@ final class MakeAuthenticator extends AbstractMaker
             array_keys($authenticatorTypeValues),
             key($authenticatorTypeValues)
         );
-        $input->setArgument(
-            'authenticator-type',
-            $authenticatorTypeValues[$authenticatorType]
-        );
+        $input->setArgument('authenticator-type', $authenticatorTypeValues[$authenticatorType]);
 
+        if ('pre-authenticated' === $input->getArgument('authenticator-type')) {
+            $preAuthenticatedTypes = [
+                'Remote user (e.g. Kerebos)' => self::AUTH_TYPE_REMOTE_USER,
+                'Client certificates (X.509)' => self::AUTH_TYPE_X509,
+            ];
+            $authenticatorType = $io->choice('Which pre-authenticated method do you want?', array_keys($preAuthenticatedTypes));
+            $input->setArgument('authenticator-type', $preAuthenticatedTypes[$authenticatorType]);
+        }
+
+        $formLoginAuthenticatorQuestion = null;
         if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {
-            $neededDependencies = [TwigBundle::class => 'twig'];
-            $missingPackagesMessage = 'Twig must be installed to display the login form.';
+            $formLoginAuthenticatorQuestion = 'Do you require other fields than user identifier (e.g. email) and password?';
+        } elseif (self::AUTH_TYPE_EMPTY_AUTHENTICATOR === $input->getArgument('authenticator-type')) {
+            $formLoginAuthenticatorQuestion = 'Do you want to use a login form?';
+        }
+        if (null !== $formLoginAuthenticatorQuestion && $io->confirm($formLoginAuthenticatorQuestion, false)) {
+            $input->setArgument('authenticator-type', self::AUTH_TYPE_FORM_LOGIN_AUTHENTICATOR);
+        }
 
-            if (Kernel::VERSION_ID < 40100) {
-                $neededDependencies[Form::class] = 'symfony/form';
-                $missingPackagesMessage = 'Twig and symfony/form must be installed to display the login form';
-            }
-
-            $missingPackagesMessage = $this->addDependencies($neededDependencies, $missingPackagesMessage);
-            if ($missingPackagesMessage) {
-                throw new RuntimeCommandException($missingPackagesMessage);
-            }
-
-            if (!isset($securityData['security']['providers']) || !$securityData['security']['providers']) {
-                throw new RuntimeCommandException('To generate a form login authentication, you must configure at least one entry under "providers" in "security.yaml".');
-            }
+        $isFormAuthenticator = \in_array($input->getArgument('authenticator-type'), [self::AUTH_TYPE_FORM_LOGIN, self::AUTH_TYPE_FORM_LOGIN_AUTHENTICATOR], true);
+        if ($isFormAuthenticator) {
+            $this->checkFormAuthenticatorRequirements($securityData);
         }
 
         // authenticator class
-        $command->addArgument('authenticator-class', InputArgument::REQUIRED);
-        $questionAuthenticatorClass = new Question('The class name of the authenticator to create (e.g. <fg=yellow>AppCustomAuthenticator</>)');
-        $questionAuthenticatorClass->setValidator(
-            function ($answer) {
+        $isCustomAuthenticator = \in_array($input->getArgument('authenticator-type'), [self::AUTH_TYPE_EMPTY_AUTHENTICATOR, self::AUTH_TYPE_FORM_LOGIN_AUTHENTICATOR], true);
+        if ($isCustomAuthenticator) {
+            $command->addArgument('authenticator-class', InputArgument::REQUIRED);
+            $questionAuthenticatorClass = new Question('The class name of the authenticator to create (e.g. <fg=yellow>AppCustomAuthenticator</>)');
+            $questionAuthenticatorClass->setValidator(function ($answer) {
                 Validator::notBlank($answer);
 
-                return Validator::classDoesNotExist(
-                    $this->generator->createClassNameDetails($answer, 'Security\\', 'Authenticator')->getFullName()
-                );
-            }
-        );
-        $input->setArgument('authenticator-class', $io->askQuestion($questionAuthenticatorClass));
+                return Validator::classDoesNotExist($this->generator->createClassNameDetails($answer, 'Security\\', 'Authenticator')->getFullName());
+            });
+            $input->setArgument('authenticator-class', $io->askQuestion($questionAuthenticatorClass));
+        }
 
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
         $command->addOption('firewall-name', null, InputOption::VALUE_OPTIONAL);
@@ -165,7 +178,13 @@ final class MakeAuthenticator extends AbstractMaker
             );
         }
 
-        if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {
+        $command->addArgument('user-class', InputArgument::REQUIRED);
+        $input->setArgument(
+            'user-class',
+            $userClass = $interactiveSecurityHelper->guessUserClass($io, $securityData['security']['providers'])
+        );
+
+        if ($isFormAuthenticator || self::AUTH_TYPE_JSON_LOGIN === $input->getArgument('authenticator-type')) {
             $command->addArgument('controller-class', InputArgument::REQUIRED);
             $input->setArgument(
                 'controller-class',
@@ -176,26 +195,28 @@ final class MakeAuthenticator extends AbstractMaker
                 )
             );
 
-            $command->addArgument('user-class', InputArgument::REQUIRED);
-            $input->setArgument(
-                'user-class',
-                $userClass = $interactiveSecurityHelper->guessUserClass($io, $securityData['security']['providers'])
-            );
-
             $command->addArgument('username-field', InputArgument::REQUIRED);
             $input->setArgument(
                 'username-field',
                 $interactiveSecurityHelper->guessUserNameField($io, $userClass, $securityData['security']['providers'])
             );
+        }
 
-            $command->addArgument('logout-setup', InputArgument::REQUIRED);
-            $input->setArgument(
-                'logout-setup',
-                $io->confirm(
-                    'Do you want to generate a \'/logout\' URL?',
-                    true
-                )
-            );
+        if (self::AUTH_TYPE_HTTP_BASIC !== $input->getArgument('authenticator-type')) {
+            $command->addOption('logout-setup', null, InputOption::VALUE_NEGATABLE, '', true);
+            $input->setOption('logout-setup', $io->confirm('Do you want to generate a \'/logout\' URL?', true));
+        }
+    }
+
+    private function checkFormAuthenticatorRequirements(array $securityData)
+    {
+        $missingPackagesMessage = $this->addDependencies([TwigBundle::class => 'twig'], 'Twig must be installed to display the login form');
+        if ($missingPackagesMessage) {
+            throw new RuntimeCommandException($missingPackagesMessage);
+        }
+
+        if (!isset($securityData['security']['providers']) || !$securityData['security']['providers']) {
+            throw new RuntimeCommandException('To generate a form login authentication, you must configure at least one entry under "providers" in "security.yaml".');
         }
     }
 
@@ -203,43 +224,73 @@ final class MakeAuthenticator extends AbstractMaker
     {
         $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents('config/packages/security.yaml'));
         $securityData = $manipulator->getData();
+        $authenticatorType = $input->getArgument('authenticator-type');
 
-        $this->generateAuthenticatorClass(
-            $securityData,
-            $input->getArgument('authenticator-type'),
-            $input->getArgument('authenticator-class'),
-            $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
-            $input->hasArgument('username-field') ? $input->getArgument('username-field') : null
-        );
+        $isCustomAuthenticator = \in_array($authenticatorType, [self::AUTH_TYPE_EMPTY_AUTHENTICATOR, self::AUTH_TYPE_FORM_LOGIN_AUTHENTICATOR], true);
+        if ($isCustomAuthenticator) {
+            $this->generateAuthenticatorClass(
+                $securityData,
+                $input->getArgument('authenticator-type'),
+                $input->getArgument('authenticator-class'),
+                $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
+                $input->hasArgument('username-field') ? $input->getArgument('username-field') : null
+            );
+        }
 
         // update security.yaml with guard config
         $securityYamlUpdated = false;
 
         $entryPoint = $input->getOption('entry-point');
 
-        if ($this->useSecurity52 && self::AUTH_TYPE_FORM_LOGIN !== $input->getArgument('authenticator-type')) {
+        if ($this->useSecurity52 && self::AUTH_TYPE_FORM_LOGIN !== $authenticatorType) {
             $entryPoint = false;
         }
 
-        try {
-            $newYaml = $this->configUpdater->updateForAuthenticator(
-                $this->fileManager->getFileContents($path = 'config/packages/security.yaml'),
-                $input->getOption('firewall-name'),
-                $entryPoint,
-                $input->getArgument('authenticator-class'),
-                $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false,
-                $this->useSecurity52
-            );
-            $generator->dumpFile($path, $newYaml);
-            $securityYamlUpdated = true;
-        } catch (YamlManipulationFailedException $e) {
+        $securityYamlSource = $this->fileManager->getFileContents($path = 'config/packages/security.yaml');
+        if ($isCustomAuthenticator) {
+            try {
+                $newYaml = $this->configUpdater->updateForCustomAuthenticator(
+                    $securityYamlSource,
+                    $input->getOption('firewall-name'),
+                    $entryPoint,
+                    $input->getArgument('authenticator-class'),
+                    $input->hasOption('logout-setup') ? $input->getOption('logout-setup') : false,
+                    $this->useSecurity52
+                );
+                $generator->dumpFile($path, $newYaml);
+                $securityYamlUpdated = true;
+            } catch (YamlManipulationFailedException $e) {
+            }
+        } else {
+            $newYaml = null;
+            switch ($authenticatorType) {
+                case self::AUTH_TYPE_HTTP_BASIC:
+                    $newYaml = $this->configUpdater->updateForAuthenticator(
+                        $securityYamlSource,
+                        $input->getOption('firewall-name'),
+                        'http_basic',
+                        true,
+                        $input->hasOption('logout-setup') ? $input->getOption('logout-setup') : false,
+                        $this->useSecurity52
+                    );
+
+                    break;
+
+                default:
+                    throw new \Exception('TODO: '.$authenticatorType);
+            }
+
+            if ($newYaml) {
+                $generator->dumpFile($path, $newYaml);
+                $securityYamlUpdated = true;
+            }
         }
 
         if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {
             $this->generateFormLoginFiles(
                 $input->getArgument('controller-class'),
                 $input->getArgument('username-field'),
-                $input->getArgument('logout-setup')
+                $input->getOption('logout-setup')
             );
         }
 
@@ -247,16 +298,19 @@ final class MakeAuthenticator extends AbstractMaker
 
         $this->writeSuccessMessage($io);
 
-        $io->text(
-            $this->generateNextMessage(
-                $securityYamlUpdated,
-                $input->getArgument('authenticator-type'),
-                $input->getArgument('authenticator-class'),
-                $securityData,
-                $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
-                $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false
-            )
-        );
+        if ($isCustomAuthenticator) {
+            // TODO there is enough to say when we're not building a custom authenticator :)
+            $io->text(
+                $this->generateNextMessage(
+                    $securityYamlUpdated,
+                    $input->getArgument('authenticator-type'),
+                    $input->getArgument('authenticator-class'),
+                    $securityData,
+                    $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
+                    $input->hasOption('logout-setup') ? $input->getOption('logout-setup') : false
+                )
+            );
+        }
     }
 
     private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, $userClass, $userNameField)
@@ -350,7 +404,7 @@ final class MakeAuthenticator extends AbstractMaker
         $nextTexts[] = '- Customize your new authenticator.';
 
         if (!$securityYamlUpdated) {
-            $yamlExample = $this->configUpdater->updateForAuthenticator(
+            $yamlExample = $this->configUpdater->updateForCustomAuthenticator(
                 'security: {}',
                 'main',
                 null,

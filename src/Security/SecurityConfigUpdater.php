@@ -40,13 +40,7 @@ final class SecurityConfigUpdater
      */
     public function updateForUserClass(string $yamlSource, UserClassConfiguration $userConfig, string $userClass): string
     {
-        $this->manipulator = new YamlSourceManipulator($yamlSource);
-
-        if (null !== $this->ysmLogger) {
-            $this->manipulator->setLogger($this->ysmLogger);
-        }
-
-        $this->normalizeSecurityYamlFile();
+        $this->setupManipulator($yamlSource);
 
         $this->updateProviders($userConfig, $userClass);
 
@@ -61,35 +55,13 @@ final class SecurityConfigUpdater
         return $contents;
     }
 
-    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup, bool $useSecurity52): string
+    public function updateForCustomAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup, bool $useSecurity52): string
     {
-        $this->manipulator = new YamlSourceManipulator($yamlSource);
-
-        if (null !== $this->ysmLogger) {
-            $this->manipulator->setLogger($this->ysmLogger);
-        }
-
-        $this->normalizeSecurityYamlFile();
+        $this->setupManipulator($yamlSource);
 
         $newData = $this->manipulator->getData();
 
-        if (!isset($newData['security']['firewalls'])) {
-            if ($newData['security']) {
-                $newData['security']['_firewalls'] = $this->manipulator->createEmptyLine();
-            }
-
-            $newData['security']['firewalls'] = [];
-        }
-
-        if (!isset($newData['security']['firewalls'][$firewallName])) {
-            if ($useSecurity52) {
-                $newData['security']['firewalls'][$firewallName] = ['lazy' => true];
-            } else {
-                $newData['security']['firewalls'][$firewallName] = ['anonymous' => 'lazy'];
-            }
-        }
-
-        $firewall = $newData['security']['firewalls'][$firewallName];
+        $firewall = $this->getFirewallConfig($newData, $firewallName, $useSecurity52);
 
         if ($useSecurity52) {
             if (isset($firewall['custom_authenticator'])) {
@@ -128,14 +100,8 @@ final class SecurityConfigUpdater
             }
         }
 
-        if (!isset($firewall['logout']) && $logoutSetup) {
-            $firewall['logout'] = ['path' => 'app_logout'];
-            $firewall['logout'][] = $this->manipulator->createCommentLine(
-                ' where to redirect after logout'
-            );
-            $firewall['logout'][] = $this->manipulator->createCommentLine(
-                ' target: app_any_route'
-            );
+        if ($logoutSetup) {
+            $this->addLogoutSetup($firewall);
         }
 
         $newData['security']['firewalls'][$firewallName] = $firewall;
@@ -145,8 +111,77 @@ final class SecurityConfigUpdater
         return $this->manipulator->getContents();
     }
 
-    private function normalizeSecurityYamlFile(): void
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, string $authenticatorKey, $authenticatorOptions, bool $logoutSetup, bool $useSecurity52)
     {
+        $this->setupManipulator($yamlSource);
+
+        $newData = $this->manipulator->getData();
+
+        $firewall = $this->getFirewallConfig($newData, $firewallName, $useSecurity52);
+
+        if (!isset($firewall[$authenticatorKey])) {
+            $firewall[$authenticatorKey] = $authenticatorOptions;
+        } elseif (!\is_array($authenticatorOptions)) {
+            // noop
+        } else {
+            $firewall[$authenticatorKey] = array_merge($authenticatorOptions, $firewall[$authenticatorKey]);
+        }
+
+        if ($logoutSetup) {
+            $this->addLogoutSetup($firewall);
+        }
+
+        $newData['security']['firewalls'][$firewallName] = $firewall;
+
+        $this->manipulator->setData($newData);
+
+        return $this->manipulator->getContents();
+    }
+
+    private function addLogoutSetup(array $firewall): array
+    {
+        if (!isset($firewall['logout'])) {
+            $firewall['logout'] = ['path' => 'app_logout'];
+            $firewall['logout'][] = $this->manipulator->createCommentLine(
+                ' where to redirect after logout'
+            );
+            $firewall['logout'][] = $this->manipulator->createCommentLine(
+                ' target: app_any_route'
+            );
+        }
+
+        return $firewall;
+    }
+
+    private function getFirewallConfig(array $data, string $firewallName, bool $useSecurity52): array
+    {
+        if (!isset($data['security']['firewalls'])) {
+            if ($data['security']) {
+                $data['security']['_firewalls'] = $this->manipulator->createEmptyLine();
+            }
+
+            $data['security']['firewalls'] = [];
+        }
+
+        if (!isset($data['security']['firewalls'][$firewallName])) {
+            if ($useSecurity52) {
+                $data['security']['firewalls'][$firewallName] = ['lazy' => true];
+            } else {
+                $data['security']['firewalls'][$firewallName] = ['anonymous' => 'lazy'];
+            }
+        }
+
+        return $data['security']['firewalls'][$firewallName];
+    }
+
+    private function setupManipulator(string $yamlSource): void
+    {
+        $this->manipulator = new YamlSourceManipulator($yamlSource);
+
+        if (null !== $this->ysmLogger) {
+            $this->manipulator->setLogger($this->ysmLogger);
+        }
+
         if (!isset($this->manipulator->getData()['security'])) {
             $newData = $this->manipulator->getData();
             $newData['security'] = [];
