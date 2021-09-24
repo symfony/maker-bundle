@@ -4,21 +4,15 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class UserProfile
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\OneToOne(targetEntity=User::class, mappedBy="userProfile", cascade={"persist", "remove"})
-     */
+    #[ORM\OneToOne(mappedBy: 'userProfile', targetEntity: User::class, cascade: ['persist', 'remove'])]
     private $user;
 
     public function getId(): ?int

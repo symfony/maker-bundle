@@ -113,7 +113,7 @@ class EntityRegeneratorTest extends TestCase
             });
 
         $fileManager = new FileManager($fs, $autoloaderUtil, new MakerFileLinkFormatter(null), $tmpDir);
-        $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
+        $doctrineHelper = new DoctrineHelper('App\\Entity', new PhpCompatUtil($fileManager), $container->get('doctrine'));
         $phpCompatUtil = new PhpCompatUtil($fileManager);
         $generator = new Generator($fileManager, 'App\\', $phpCompatUtil);
         $entityClassGenerator = new EntityClassGenerator($generator, $doctrineHelper);

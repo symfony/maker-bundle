@@ -6,21 +6,15 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class User
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\OneToMany(targetEntity=UserAvatarPhoto::class, mappedBy="user")
-     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserAvatarPhoto::class)]
     private $avatarPhotos;
 
     public function __construct()
