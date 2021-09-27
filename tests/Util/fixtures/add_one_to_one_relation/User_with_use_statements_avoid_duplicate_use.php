@@ -7,21 +7,15 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Some\Other\UserProfile;
 use Some\Other\FooCategory as Category;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class User
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\OneToOne(targetEntity=\App\OtherEntity\UserProfile::class, inversedBy="user", cascade={"persist", "remove"})
-     */
+    #[ORM\OneToOne(inversedBy: 'user', targetEntity: \App\OtherEntity\UserProfile::class, cascade: ['persist', 'remove'])]
     private $userProfile;
 
     public function getId(): ?int

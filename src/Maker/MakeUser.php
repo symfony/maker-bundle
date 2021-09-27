@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
@@ -53,12 +54,15 @@ final class MakeUser extends AbstractMaker
 
     private $entityClassGenerator;
 
-    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, EntityClassGenerator $entityClassGenerator)
+    private $doctrineHelper;
+
+    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, EntityClassGenerator $entityClassGenerator, DoctrineHelper $doctrineHelper)
     {
         $this->fileManager = $fileManager;
         $this->userClassBuilder = $userClassBuilder;
         $this->configUpdater = $configUpdater;
         $this->entityClassGenerator = $entityClassGenerator;
+        $this->doctrineHelper = $doctrineHelper;
     }
 
     public static function getCommandName(): string
@@ -79,8 +83,7 @@ final class MakeUser extends AbstractMaker
             ->addOption('identity-property-name', null, InputOption::VALUE_REQUIRED, 'Enter a property name that will be the unique "display" name for the user (e.g. <comment>email, username, uuid</comment>)')
             ->addOption('with-password', null, InputOption::VALUE_NONE, 'Will this app be responsible for checking the password? Choose <comment>No</comment> if the password is actually checked by some other system (e.g. a single sign-on server)')
             ->addOption('use-argon2', null, InputOption::VALUE_NONE, 'Use the Argon2i password encoder? (deprecated)')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeUser.txt'))
-        ;
+            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeUser.txt'));
 
         $inputConf->setArgumentAsNonInteractive('name');
     }
@@ -160,11 +163,17 @@ final class MakeUser extends AbstractMaker
         // need to write changes early so we can modify the contents below
         $generator->writeChanges();
 
+        $useAttributesForDoctrineMapping = $userClassConfiguration->isEntity() && ($this->doctrineHelper->isDoctrineSupportingAttributes()) && $this->doctrineHelper->doesClassUsesAttributes($userClassNameDetails->getFullName());
+
         // B) Implement UserInterface
         $manipulator = new ClassSourceManipulator(
             $this->fileManager->getFileContents($classPath),
-            true
+            true,
+            !$useAttributesForDoctrineMapping,
+            true,
+            $useAttributesForDoctrineMapping
         );
+
         $manipulator->setIo($io);
 
         $this->userClassBuilder->addUserInterfaceImplementation($manipulator, $userClassConfiguration);

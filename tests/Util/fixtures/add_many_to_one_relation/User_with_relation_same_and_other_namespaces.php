@@ -3,17 +3,15 @@
 namespace App\Entity;
 
 use App\Entity\Category;
+use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\Entity]
 class User
 {
-    /**
-     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="foods")
-     */
+    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'foods')]
     private $category;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=\App\Entity\SubDirectory\Category::class, inversedBy="foods")
-     */
+    #[ORM\ManyToOne(targetEntity: \App\Entity\SubDirectory\Category::class, inversedBy: 'foods')]
     private $subCategory;
 
     public function getCategory(): ?Category
