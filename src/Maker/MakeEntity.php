@@ -131,14 +131,14 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
                 $input->setArgument('name', $classOrNamespace);
 
+                $argument = $command->getDefinition()->getArgument('name');
+                $question = $this->createEntityClassQuestion($argument->getDescription());
+                $entityClassName = $io->askQuestion($question);
+
+                $input->setArgument('name', $entityClassName);
+
                 return;
             }
-
-            $argument = $command->getDefinition()->getArgument('name');
-            $question = $this->createEntityClassQuestion($argument->getDescription());
-            $entityClassName = $io->askQuestion($question);
-
-            $input->setArgument('name', $entityClassName);
         }
 
         if (
