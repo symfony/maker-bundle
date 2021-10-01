@@ -68,6 +68,10 @@
                 <argument type="service" id="maker.generator" />
             </service>
 
+            <service id="maker.security_controller_builder" class="Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder">
+                <argument type="service" id="maker.php_compat_util" />
+            </service>
+
             <service id="maker.php_compat_util" class="Symfony\Bundle\MakerBundle\Util\PhpCompatUtil">
                 <argument type="service" id="maker.file_manager" />
             </service>

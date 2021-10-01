@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -21,9 +22,28 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
  */
 final class SecurityControllerBuilder
 {
+    private $phpCompatUtil;
+
+    public function __construct(PhpCompatUtil $phpCompatUtil)
+    {
+        $this->phpCompatUtil = $phpCompatUtil;
+    }
+
     public function addLoginMethod(ClassSourceManipulator $manipulator): void
     {
-        $loginMethodBuilder = $manipulator->createMethodBuilder('login', 'Response', false, ['@Route("/login", name="app_login")']);
+        $loginMethodBuilder = $manipulator->createMethodBuilder('login', 'Response', false);
+
+        // @legacy Refactor when annotations are no longer supported
+        if ($this->phpCompatUtil->canUseAttributes()) {
+            $loginMethodBuilder->addAttribute($manipulator->buildAttributeNode(Route::class, ['path' => '/login', 'name' => 'app_login']));
+        } else {
+            $loginMethodBuilder->setDocComment(<<< 'EOT'
+/**
+ * @Route("/login", name="app_login")
+ */
+EOT
+            );
+        }
 
         $manipulator->addUseStatementIfNecessary(Response::class);
         $manipulator->addUseStatementIfNecessary(Route::class);
@@ -66,7 +86,19 @@ CODE
 
     public function addLogoutMethod(ClassSourceManipulator $manipulator): void
     {
-        $logoutMethodBuilder = $manipulator->createMethodBuilder('logout', 'void', false, ['@Route("/logout", name="app_logout")']);
+        $logoutMethodBuilder = $manipulator->createMethodBuilder('logout', 'void', false);
+
+        // @legacy Refactor when annotations are no longer supported
+        if ($this->phpCompatUtil->canUseAttributes()) {
+            $logoutMethodBuilder->addAttribute($manipulator->buildAttributeNode(Route::class, ['path' => '/logout', 'name' => 'app_logout']));
+        } else {
+            $logoutMethodBuilder->setDocComment(<<< 'EOT'
+/**
+ * @Route("/logout", name="app_logout")
+ */
+EOT
+            );
+        }
 
         $manipulator->addUseStatementIfNecessary(Route::class);
         $manipulator->addMethodBody($logoutMethodBuilder, <<<'CODE'
