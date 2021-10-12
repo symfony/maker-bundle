@@ -248,8 +248,8 @@ class MakeResetPassword extends AbstractMaker
                 'from_email_name' => $this->fromEmailName,
                 'email_getter' => $this->emailGetterMethodName,
                 'email_field' => $this->emailPropertyName,
-                'password_class_details' => ($passwordClassDetails = $generator->createClassNameDetails($passwordHasher, '\\')),
-                'password_variable_name' => sprintf('$%s', lcfirst($passwordClassDetails->getShortName())), // @legacy see passwordHasher conditional above
+                'password_hasher_class_details' => ($passwordClassDetails = $generator->createClassNameDetails($passwordHasher, '\\')),
+                'password_hasher_variable_name' => str_replace('Interface', '', sprintf('$%s', lcfirst($passwordClassDetails->getShortName()))), // @legacy see passwordHasher conditional above
                 'use_password_hasher' => UserPasswordHasherInterface::class === $passwordHasher, // @legacy see passwordHasher conditional above
             ]
         );
