@@ -619,7 +619,7 @@ class MakeEntityTest extends MakerTestCase
             ])
             ->setRequiredPhpVersion(80000)
             ->useDoctrineAttributeMapping()
-            ->addExtraDependencies('ux-turbo-mercure')
+            ->addExtraDependencies('symfony/ux-turbo-mercure')
             ->configureDatabase()
             ->addReplacement(
                 '.env',
@@ -657,7 +657,7 @@ class MakeEntityTest extends MakerTestCase
             ->setRequiredPhpVersion(80000)
             ->useDoctrineAttributeMapping()
             ->addExtraDependencies('api')
-            ->addExtraDependencies('ux-turbo-mercure')
+            ->addExtraDependencies('symfony/ux-turbo-mercure')
             ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
             ->configureDatabase()
             ->updateSchemaAfterCommand()
