@@ -1,5 +1,14 @@
 # Changelog
 
+## [v1.34.1](https://github.com/symfony/maker-bundle/releases/tag/v1.34.1)
+
+*October 17th, 2021*
+
+### Bug Fix
+
+- [#991](https://github.com/symfony/maker-bundle/pull/991) - Check if json_array type exists before unsetting it - *@HypeMC*
+- [#988](https://github.com/symfony/maker-bundle/pull/988) - Fixed typo in Security52EmptyAuthenticator - *@lyrixx*
+
 ## [v1.34.0](https://github.com/symfony/maker-bundle/releases/tag/v1.34.0)
 
 *September 27th, 2021*
