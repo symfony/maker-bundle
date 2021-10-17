@@ -623,7 +623,7 @@ class MakeEntityTest extends MakerTestCase
             ->configureDatabase()
             ->addReplacement(
                 '.env',
-                'https://127.0.0.1:8000/.well-known/mercure',
+                'https://example.com/.well-known/mercure',
                 'http://127.0.0.1:1337/.well-known/mercure'
             )
             ->updateSchemaAfterCommand()
