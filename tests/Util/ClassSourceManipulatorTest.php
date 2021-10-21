@@ -101,7 +101,7 @@ class ClassSourceManipulatorTest extends TestCase
         ];
 
         yield 'normal_getter_add_bool' => [
-            'User_simple.php',
+            'legacy/User_simple.php',
             'fooProp',
             'bool',
             [],
