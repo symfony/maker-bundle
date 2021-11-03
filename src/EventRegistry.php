@@ -31,8 +31,8 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
-use Symfony\Component\Security\Core\Event\AuthenticationEvent;
 use Symfony\Component\Security\Core\Event\AuthenticationFailureEvent;
+use Symfony\Component\Security\Core\Event\AuthenticationSuccessEvent;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -65,7 +65,7 @@ class EventRegistry
         'kernel.response' => FilterResponseEvent::class,
         'kernel.terminate' => PostResponseEvent::class,
         'kernel.finish_request' => FinishRequestEvent::class,
-        'security.authentication.success' => AuthenticationEvent::class,
+        'security.authentication.success' => AuthenticationSuccessEvent::class,
         'security.authentication.failure' => AuthenticationFailureEvent::class,
         'security.interactive_login' => InteractiveLoginEvent::class,
         'security.switch_user' => SwitchUserEvent::class,
