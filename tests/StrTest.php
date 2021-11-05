@@ -200,4 +200,19 @@ class StrTest extends TestCase
         yield [' FooBar', 'Foo Bar'];
         yield [' Foo Bar ', 'Foo Bar'];
     }
+
+    /**
+     * @dataProvider provideAsRouteName
+     */
+    public function testAsRouteName(string $value, string $expectedRouteName)
+    {
+        $this->assertSame($expectedRouteName, Str::asRouteName($value));
+    }
+
+    public function provideAsRouteName()
+    {
+        yield ['Example', 'app_example'];
+        yield ['AppExample', 'app_example'];
+        yield ['Apple', 'app_apple'];
+    }
 }
