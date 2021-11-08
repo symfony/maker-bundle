@@ -139,7 +139,7 @@ final class MakerTestDetails
         $this
             ->addReplacement(
                 '.env',
-                'postgresql://db_user:db_password@127.0.0.1:5432/db_name?serverVersion=13&charset=utf8',
+                'postgresql://symfony:ChangeMe@127.0.0.1:5432/app?serverVersion=13&charset=utf8',
                 getenv('TEST_DATABASE_DSN')
             )
         ;
