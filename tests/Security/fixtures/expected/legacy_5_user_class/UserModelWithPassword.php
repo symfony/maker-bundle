@@ -1,36 +1,20 @@
 <?php
 
-namespace App\Entity;
+namespace App\Security;
 
-use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * @ORM\Entity()
- */
-class User implements UserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-
-    /**
-     * @ORM\Column(type="string", length=180, unique=true)
-     */
     private $userIdentifier;
 
-    /**
-     * @ORM\Column(type="json")
-     */
     private $roles = [];
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    /**
+     * @var string The hashed password
+     */
+    private $password;
 
     /**
      * A visual identifier that represents this user.
@@ -50,6 +34,14 @@ class User implements UserInterface
     }
 
     /**
+     * @deprecated since Symfony 5.3, use getUserIdentifier instead
+     */
+    public function getUsername(): string
+    {
+        return (string) $this->userIdentifier;
+    }
+
+    /**
      * @see UserInterface
      */
     public function getRoles(): array
@@ -66,6 +58,32 @@ class User implements UserInterface
         $this->roles = $roles;
 
         return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): self
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * Returning a salt is only needed, if you are not using a modern
+     * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
+     *
+     * @see UserInterface
+     */
+    public function getSalt(): ?string
+    {
+        return null;
     }
 
     /**

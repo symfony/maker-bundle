@@ -47,8 +47,14 @@ jobs:
                     composer-options: "--no-scripts"
 
             -
+                name: "Composer install php-cs-fixer"
+                uses: "ramsey/composer-install@v1"
+                with:
+                    composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
+
+            -
                 name: "Run friendsofphp/php-cs-fixer"
-                run: "vendor/bin/php-cs-fixer fix --dry-run --diff"
+                run: "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --dry-run --diff"
 
     test:
         name: "PHP ${{ matrix.php-version }} + symfony/skeleton@${{ matrix.symfony-skeleton-stability }}"
@@ -89,14 +95,12 @@ jobs:
                     - '7.2'
                     - '7.3'
                     - '7.4'
+                    - '8.0'
                 symfony-skeleton-stability:
                     - 'stable'
                 composer-options: ['--no-suggest']
                 allow-failures: [false]
                 include:
-                    - php-version: '7.4'
-                      symfony-skeleton-stability: 'dev'
-                      allow-failures: true
                     - php-version: '8.0'
                       symfony-skeleton-stability: 'dev'
                       allow-failures: true
@@ -139,6 +143,16 @@ jobs:
               uses: "ramsey/composer-install@v1"
               with:
                   composer-options: "${{ matrix.composer-options }}"
+
+            - name: "Composer install php-cs-fixer"
+              uses: "ramsey/composer-install@v1"
+              with:
+                  composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
+
+            - name: "Composer install twigcs"
+              uses: "ramsey/composer-install@v1"
+              with:
+                  composer-options: "--no-scripts --working-dir=tools/twigcs"
 
             - name: "Install PHPUnit"
               run: vendor/bin/simple-phpunit install

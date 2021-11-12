@@ -3,12 +3,13 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity()
  */
-class User implements UserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @ORM\Id
@@ -20,12 +21,18 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      */
-    private $userIdentifier;
+    private $user_identifier;
 
     /**
      * @ORM\Column(type="json")
      */
     private $roles = [];
+
+    /**
+     * @var string The hashed password
+     * @ORM\Column(type="string")
+     */
+    private $password;
 
     public function getId(): ?int
     {
@@ -39,14 +46,22 @@ class User implements UserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->userIdentifier;
+        return (string) $this->user_identifier;
     }
 
-    public function setUserIdentifier(string $userIdentifier): self
+    public function setUserIdentifier(string $user_identifier): self
     {
-        $this->userIdentifier = $userIdentifier;
+        $this->user_identifier = $user_identifier;
 
         return $this;
+    }
+
+    /**
+     * @deprecated since Symfony 5.3, use getUserIdentifier instead
+     */
+    public function getUsername(): string
+    {
+        return (string) $this->user_identifier;
     }
 
     /**
@@ -66,6 +81,32 @@ class User implements UserInterface
         $this->roles = $roles;
 
         return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): self
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * Returning a salt is only needed, if you are not using a modern
+     * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
+     *
+     * @see UserInterface
+     */
+    public function getSalt(): ?string
+    {
+        return null;
     }
 
     /**

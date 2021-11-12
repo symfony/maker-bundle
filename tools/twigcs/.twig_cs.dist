@@ -1,7 +1,7 @@
 <?php
 
 use FriendsOfTwig\Twigcs\Config\Config;
-use Symfony\Bundle\MakerBundle\Test\MakerTwigRuleSet;
+use Symfony\Bundle\MakerBundle\Tools\TwigCS\MakerTwigRuleSet;
 
 return Config::create()
     ->setRuleSet(MakerTwigRuleSet::class)

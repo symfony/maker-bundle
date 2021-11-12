@@ -55,6 +55,8 @@ install:
     - cd C:\projects\maker-bundle
     - composer global require --no-progress --no-scripts --no-plugins symfony/flex
     - IF %dependencies%==highest appveyor-retry composer update --no-progress --no-suggest --ansi
+    - composer install --no-interaction --no-progress --ansi --no-scripts --working-dir=tools/twigcs
+    - composer install --no-interaction --no-progress --ansi --no-scripts --working-dir=tools/php-cs-fixer
     - vendor/bin/simple-phpunit install
 
 test_script:
