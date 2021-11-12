@@ -16,7 +16,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 
 <?php endif; ?>
 <?= $generator->generateRouteForControllerMethod($route_path, $route_name) ?>
-    public function register(Request $request, <?= $password_class_details->getShortName() ?> <?= $password_variable_name ?><?= $authenticator_full_class_name ? sprintf(', GuardAuthenticatorHandler $guardHandler, %s $authenticator', $authenticator_class_name) : '' ?>): Response
+    public function register(Request $request, <?= $password_hasher_class_details->getShortName() ?> <?= $password_hasher_variable_name ?><?= $authenticator_full_class_name ? sprintf(', GuardAuthenticatorHandler $guardHandler, %s $authenticator', $authenticator_class_name) : '' ?>): Response
     {
         $user = new <?= $user_class_name ?>();
         $form = $this->createForm(<?= $form_class_name ?>::class, $user);
@@ -25,7 +25,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
         if ($form->isSubmitted() && $form->isValid()) {
             // encode the plain password
             $user->set<?= ucfirst($password_field) ?>(
-            <?= $password_variable_name ?>-><?= $use_password_hasher ? 'hashPassword' : 'encodePassword' ?>(
+            <?= $password_hasher_variable_name ?>-><?= $use_password_hasher ? 'hashPassword' : 'encodePassword' ?>(
                     $user,
                     $form->get('plainPassword')->getData()
                 )

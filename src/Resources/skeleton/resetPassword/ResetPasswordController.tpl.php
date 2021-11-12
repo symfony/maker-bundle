@@ -82,7 +82,7 @@ class <?= $class_name ?> extends AbstractController
      * @Route("/reset/{token}", name="app_reset_password")
      */
 <?php } ?>
-    public function reset(Request $request, <?= $password_class_details->getShortName() ?> <?= $password_variable_name ?>, string $token = null): Response
+    public function reset(Request $request, <?= $password_hasher_class_details->getShortName() ?> <?= $password_hasher_variable_name ?>, string $token = null): Response
     {
         if ($token) {
             // We store the token in session and remove it from the URL, to avoid the URL being
@@ -117,7 +117,7 @@ class <?= $class_name ?> extends AbstractController
             $this->resetPasswordHelper->removeResetRequest($token);
 
             // Encode(hash) the plain password, and set it.
-            $encodedPassword = <?= $password_variable_name ?>-><?= $use_password_hasher ? 'hashPassword' : 'encodePassword' ?>(
+            $encodedPassword = <?= $password_hasher_variable_name ?>-><?= $use_password_hasher ? 'hashPassword' : 'encodePassword' ?>(
                 $user,
                 $form->get('plainPassword')->getData()
             );
