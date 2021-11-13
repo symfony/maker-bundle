@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Tests;
+
+use App\Entity\User;
+use Doctrine\ORM\EntityManager;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+
+class GeneratedEntityTest extends KernelTestCase
+{
+    public function testGeneratedEntity()
+    {
+        self::bootKernel();
+        /** @var EntityManager $em */
+        $em = self::$kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
+
+        $em->createQuery('DELETE FROM App\\Entity\\User u')
+            ->execute();
+
+        $user = new User();
+        {% for field, value in data %}
+        $user->set{{ field|title }}('{{ value }}');
+        {% endfor %}
+        $em->persist($user);
+        $em->flush();
+
+        $actualUser = $em->getRepository(User::class)
+            ->findAll();
+
+        $this->assertcount(1, $actualUser);
+    }
+}

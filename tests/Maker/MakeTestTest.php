@@ -13,54 +13,97 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeTest;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
+use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
 class MakeTestTest extends MakerTestCase
 {
+    protected function getMakerClass(): string
+    {
+        return MakeTest::class;
+    }
+
     public function getTestDetails()
     {
-        yield 'TestCase' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeTest::class),
-            [
-                // type
-                'TestCase',
-                // class name
-                'FooBar',
-            ]),
+        yield 'it_makes_TestCase_type' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // type
+                        'TestCase',
+                        // class name
+                        'FooBar',
+                    ]
+                );
+
+                $runner->runTests();
+            }),
         ];
 
-        yield 'KernelTestCase' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeTest::class),
-            [
-                // type
-                'KernelTestCase',
-                // functional test class name
-                'FooBar',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional'),
+        yield 'it_makes_KernelTestCase_type' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-test/basic_setup',
+                    ''
+                );
+
+                $runner->runMaker(
+                    [
+                        // type
+                        'KernelTestCase',
+                        // functional test class name
+                        'FooBar',
+                    ]
+                );
+
+                $runner->runTests();
+            }),
         ];
 
-        yield 'WebTestCase' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeTest::class),
-            [
-                // type
-                'WebTestCase',
-                // functional test class name
-                'FooBar',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional'),
+        yield 'it_makes_WebTestCase_type' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-test/basic_setup',
+                    ''
+                );
+
+                $runner->runMaker(
+                    [
+                        // type
+                        'WebTestCase',
+                        // functional test class name
+                        'FooBar',
+                    ]
+                );
+
+                $runner->runTests();
+            }),
         ];
 
-        yield 'PantherTestCase' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeTest::class),
-            [
-                // type
-                'PantherTestCase',
-                // functional test class name
-                'FooBar',
-            ])
+        yield 'it_makes_PantherTestCase_type' => [$this->createMakerTest()
             ->addExtraDependencies('panther')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional'),
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-test/basic_setup',
+                    ''
+                );
+
+                $runner->runMaker(
+                    [
+                        // type
+                        'PantherTestCase',
+                        // functional test class name
+                        'FooBar',
+                    ]
+                );
+
+                // bdi requires 7.2 at this time
+                if (\PHP_VERSION_ID >= 70200) {
+                    $runner->runProcess('composer require --dev dbrekelmans/bdi');
+                    $runner->runProcess('php vendor/dbrekelmans/bdi/bdi detect drivers');
+
+                    $runner->runTests();
+                }
+            }),
         ];
     }
 }

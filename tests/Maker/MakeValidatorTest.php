@@ -13,18 +13,26 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeValidator;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
+use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
 class MakeValidatorTest extends MakerTestCase
 {
+    protected function getMakerClass(): string
+    {
+        return MakeValidator::class;
+    }
+
     public function getTestDetails()
     {
-        yield 'validator' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeValidator::class),
-            [
-                // validator name
-                'FooBar',
-            ]),
+        yield 'it_makes_validator' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // validator name
+                        'FooBar',
+                    ]
+                );
+            }),
         ];
     }
 }

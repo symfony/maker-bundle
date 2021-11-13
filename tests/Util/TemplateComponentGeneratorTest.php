@@ -146,8 +146,8 @@ EOT;
     {
         yield ["    #[Route('/', name: 'app_home', methods: ['GET'])]\n", true, ['GET']];
         yield ["     * @Route(\"/\", name=\"app_home\", methods={\"GET\"})\n", false, ['GET']];
-        yield ["    #[Route('/', name: 'app_home', methods: ['GET','POST'])]\n", true, ['GET', 'POST']];
-        yield ["     * @Route(\"/\", name=\"app_home\", methods={\"GET\",\"POST\"})\n", false, ['GET', 'POST']];
+        yield ["    #[Route('/', name: 'app_home', methods: ['GET', 'POST'])]\n", true, ['GET', 'POST']];
+        yield ["     * @Route(\"/\", name=\"app_home\", methods={\"GET\", \"POST\"})\n", false, ['GET', 'POST']];
     }
 
     /**

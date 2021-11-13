@@ -13,18 +13,23 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeFixtures;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
+use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
 class MakeFixturesTest extends MakerTestCase
 {
+    protected function getMakerClass(): string
+    {
+        return MakeFixtures::class;
+    }
+
     public function getTestDetails()
     {
-        yield 'fixtures' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeFixtures::class),
-            [
-                'FooFixtures',
-            ])
-            ->assert(function (string $output, string $directory) {
+        yield 'it_generates_fixtures' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([
+                    'FooFixtures',
+                ]);
+
                 $this->assertStringContainsString('created: src/DataFixtures/FooFixtures.php', $output);
             }),
         ];

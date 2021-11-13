@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Common\Annotations\Annotation;
+use Doctrine\ORM\EntityManagerInterface;
 use PhpParser\Builder\Param;
 use Symfony\Bridge\Twig\AppVariable;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -232,6 +233,7 @@ class MakeResetPassword extends AbstractMaker
             ResetPasswordExceptionInterface::class,
             ResetPasswordHelperInterface::class,
             $passwordHasher,
+            EntityManagerInterface::class,
         ];
 
         $generator->generateController(

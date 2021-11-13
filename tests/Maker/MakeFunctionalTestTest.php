@@ -13,33 +13,39 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
+use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
 /**
  * @group legacy
  */
 class MakeFunctionalTestTest extends MakerTestCase
 {
+    protected function getMakerClass(): string
+    {
+        return MakeFunctionalTest::class;
+    }
+
     public function getTestDetails()
     {
-        yield 'functional_maker' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeFunctionalTest::class),
-            [
-                // functional test class name
-                'FooBar',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional')
-            ->skip('See https://github.com/symfony/maker-bundle/pull/807/files#r571308250'),
-        ];
-
-        yield 'functional_with_panther' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeFunctionalTest::class),
-            [
-                // functional test class name
-                'FooBar',
-            ])
+        yield 'it_generates_test_with_panther' => [$this->createMakerTest()
             ->addExtraDependencies('panther')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeFunctional'),
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-functional/MainController.php',
+                    'src/Controller/MainController.php'
+                );
+                $runner->copy(
+                    'make-functional/routes.yaml',
+                    'config/routes.yaml'
+                );
+
+                $runner->runMaker([
+                    // functional test class name
+                    'FooBar',
+                ]);
+
+                $runner->runTests();
+            }),
         ];
     }
 }

@@ -13,48 +13,73 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeCommand;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
+use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
+use Symfony\Component\Yaml\Yaml;
 
 class MakeCommandTest extends MakerTestCase
 {
+    protected function getMakerClass(): string
+    {
+        return MakeCommand::class;
+    }
+
     public function getTestDetails(): \Generator
     {
-        yield 'command' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeCommand::class),
-            [
-                // command name
-                'app:foo',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommand'),
+        yield 'it_makes_a_command_no_attributes' => [$this->createMakerTest()
+            ->addRequiredPackageVersion('symfony/console', '<5.3')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    // command name
+                    'app:foo',
+                ]);
+
+                $this->runCommandTest($runner, 'it_makes_a_command.php');
+            }),
         ];
 
-        yield 'command_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeCommand::class),
-            [
-                // command name
-                'app:foo',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommandInCustomRootNamespace')
-            ->changeRootNamespace('Custom'),
-        ];
-
-        yield 'command_with_attributes' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeCommand::class),
-            [
-                // command name
-                'app:foo',
-            ])
+        yield 'it_makes_a_command_with_attributes' => [$this->createMakerTest()
             ->setRequiredPhpVersion(80000)
             ->addRequiredPackageVersion('symfony/console', '>=5.3')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCommand')
-            ->assert(
-                static function (string $output, string $directory) {
-                    $commandFileContents = file_get_contents(sprintf('%s/src/Command/FooCommand.php', $directory));
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    // command name
+                    'app:foo',
+                ]);
 
-                    self::assertStringContainsString('use Symfony\Component\Console\Attribute\AsCommand;', $commandFileContents);
-                    self::assertStringContainsString('#[AsCommand(', $commandFileContents);
-                }
-            ),
+                $this->runCommandTest($runner, 'it_makes_a_command.php');
+
+                $commandFileContents = file_get_contents($runner->getPath('src/Command/FooCommand.php'));
+
+                self::assertStringContainsString('use Symfony\Component\Console\Attribute\AsCommand;', $commandFileContents);
+                self::assertStringContainsString('#[AsCommand(', $commandFileContents);
+            }),
         ];
+
+        yield 'it_makes_a_command_in_custom_namespace' => [$this->createMakerTest()
+            ->changeRootNamespace('Custom')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->writeFile(
+                    'config/packages/dev/maker.yaml',
+                    Yaml::dump(['maker' => ['root_namespace' => 'Custom']])
+                );
+
+                $runner->runMaker([
+                    // command name
+                    'app:foo',
+                ]);
+
+                $this->runCommandTest($runner, 'it_makes_a_command_in_custom_namespace.php');
+            }),
+        ];
+    }
+
+    private function runCommandTest(MakerTestRunner $runner, string $filename)
+    {
+        $runner->copy(
+            'make-command/tests/'.$filename,
+            'tests/GeneratedCommandTest.php'
+        );
+
+        $runner->runTests();
     }
 }

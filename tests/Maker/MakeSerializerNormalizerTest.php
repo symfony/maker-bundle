@@ -13,18 +13,26 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeSerializerNormalizer;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
+use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
 class MakeSerializerNormalizerTest extends MakerTestCase
 {
+    protected function getMakerClass(): string
+    {
+        return MakeSerializerNormalizer::class;
+    }
+
     public function getTestDetails()
     {
-        yield 'serializer_normalizer' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeSerializerNormalizer::class),
-            [
-                // normalizer class name
-                'FooBarNormalizer',
-            ]),
+        yield 'it_makes_serializer_normalizer' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // normalizer class name
+                        'FooBarNormalizer',
+                    ]
+                );
+            }),
         ];
     }
 }

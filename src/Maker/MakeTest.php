@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestAssertionsTrait;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -144,7 +145,10 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
         $generator->generateClass(
             $testClassNameDetails->getFullName(),
             "test/$type.tpl.php",
-            ['web_assertions_are_available' => trait_exists(WebTestAssertionsTrait::class)]
+            [
+                'web_assertions_are_available' => trait_exists(WebTestAssertionsTrait::class),
+                'use_legacy_container_property' => $this->useLegacyContainerProperty(),
+            ]
         );
 
         $generator->writeChanges();
@@ -219,5 +223,11 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
                 $io->warning('The "make:functional-test" command is deprecated, use "make:test" instead.');
                 break;
         }
+    }
+
+    private function useLegacyContainerProperty(): bool
+    {
+        // for 5.2 and lower
+        return !method_exists(KernelTestCase::class, 'getContainer');
     }
 }
