@@ -1,5 +1,17 @@
 # Changelog
 
+## [v1.35.9](https://github.com/symfony/maker-bundle/releases/tag/v1.35.0)
+
+*November 12th, 2021*
+
+### Feature
+
+- [#1006](https://github.com/symfony/maker-bundle/pull/1006) - Allowing Symfony 6 - *@tacman*
+
+### Bug Fix
+
+- [#992](https://github.com/symfony/maker-bundle/pull/992) - Renaming variable $userPasswordHasherInterface -> $userPasswordHasher - *@weaverryan*
+
 ## [v1.34.1](https://github.com/symfony/maker-bundle/releases/tag/v1.34.1)
 
 *October 17th, 2021*
