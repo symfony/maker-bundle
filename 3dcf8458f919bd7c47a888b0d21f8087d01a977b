@@ -1,0 +1,19 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2021-11-08T01:27:14Z
+
+Yup, time to get this going - thanks for getting us kicked off @tacman!
+
+---------------------------------------------------------------------------
+
+by derrabus at 2021-11-11T23:21:34Z
+
+This is the single remaining package that needs to be updated to make `symfony/website-skeleton` work for the 6.0 branch.
+
+But… no pressure. 😉
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2021-11-12T01:43:36Z
+
+Thanks for getting this going @tacman (it's been on my list!). I'm taking over now - these final details are complex, and often due to how I designed the bundle in the past ;).
