@@ -15,8 +15,9 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\UserClassBuilder;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\User;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserClassBuilderTest extends TestCase
 {
@@ -34,9 +35,11 @@ class UserClassBuilderTest extends TestCase
         $classBuilder = new UserClassBuilder();
         $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig);
 
-        $expectedPath = $this->getExpectedPath($expectedFilename);
+        $isSymfony5 = method_exists(UserInterface::class, 'getSalt');
+        $expectedPath = $this->getExpectedPath($expectedFilename, $isSymfony5 ? 'legacy_5_user_class' : null);
+        $expectedSource = file_get_contents($expectedPath);
 
-        self::assertStringEqualsFile($expectedPath, $manipulator->getSourceCode());
+        self::assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
     public function getUserInterfaceTests(): \Generator
@@ -86,7 +89,7 @@ class UserClassBuilderTest extends TestCase
      */
     public function testLegacyUserInterfaceGetUsername(UserClassConfiguration $userClassConfig, string $expectedFilename): void
     {
-        if (method_exists(User::class, 'getUserIdentifier')) {
+        if (method_exists(InMemoryUser::class, 'getUserIdentifier')) {
             self::markTestSkipped();
         }
 

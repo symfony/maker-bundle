@@ -100,6 +100,7 @@ final class UserClassBuilder
 
         // Check if we're using Symfony 5.3+ - UserInterface::getUsername() was replaced with UserInterface::getUserIdentifier()
         $symfony53GTE = class_exists(InMemoryUser::class);
+        $symfony6GTE = !method_exists(UserInterface::class, 'getSalt');
         $getterIdentifierName = $symfony53GTE ? 'getUserIdentifier' : 'getUsername';
 
         // define getUsername (if it was defined above, this will override)
@@ -116,7 +117,7 @@ final class UserClassBuilder
             true
         );
 
-        if ($symfony53GTE) {
+        if ($symfony53GTE && !$symfony6GTE) {
             // also add the deprecated getUsername method
             $manipulator->addAccessorMethod(
                 $userClassConfig->getIdentityPropertyName(),

@@ -3,4 +3,6 @@
 /vendor/
 /tests/tmp/*
 /.php-cs-fixer.cache
+/tools/*/vendor
+/tools/*/composer.lock
 /.phpunit.result.cache
