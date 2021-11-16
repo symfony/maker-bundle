@@ -2,7 +2,7 @@
 
 namespace <?= $namespace; ?>;
 
-use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use <?= $api_test_case_fqcn; ?>;
 
 class <?= $class_name ?> extends ApiTestCase
 {
