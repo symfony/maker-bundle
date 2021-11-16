@@ -26,7 +26,9 @@ class MakerCommandTest extends TestCase
     public function testExceptionOnMissingDependencies(): void
     {
         $this->expectException(RuntimeCommandException::class);
-        $this->expectExceptionMessageMatches('/composer require foo-package/');
+        if (method_exists($this, 'expectExceptionMessageMatches')) {
+            $this->expectExceptionMessageMatches('/composer require foo-package/');
+        }
 
         $maker = $this->createMock(MakerInterface::class);
         $maker
@@ -61,6 +63,11 @@ class MakerCommandTest extends TestCase
         $tester = new CommandTester($command);
         $tester->execute([]);
 
-        self::assertStringContainsString('using a namespace other than "Unknown"', $tester->getDisplay());
+        if (method_exists(self::class, 'assertStringContainsString')) {
+            self::assertStringContainsString('using a namespace other than "Unknown"', $tester->getDisplay());
+        } else {
+            // legacy for older phpunit versions (e.g. older php version on CI)
+            self::assertContains('using a namespace other than "Unknown"', $tester->getDisplay());
+        }
     }
 }

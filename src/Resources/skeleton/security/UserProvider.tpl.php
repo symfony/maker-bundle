@@ -4,6 +4,7 @@ namespace <?= $namespace; ?>;
 
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\<?= $uses_user_identifier ? 'UserNotFoundException' : 'UsernameNotFoundException' ?>;
+<?= $use_legacy_password_upgrader_type ? '' : "use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;\n" ?>
 <?= ($password_upgrader = interface_exists('Symfony\Component\Security\Core\User\PasswordUpgraderInterface')) ? "use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;\n" : '' ?>
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -48,10 +49,8 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
      *
      * If your firewall is "stateless: true" (for a pure API), this
      * method is not called.
-     *
-     * @return UserInterface
      */
-    public function refreshUser(UserInterface $user)
+    public function refreshUser(UserInterface $user): UserInterface
     {
         if (!$user instanceof <?= $user_short_name ?>) {
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
@@ -65,7 +64,7 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
     /**
      * Tells Symfony to use this provider for this User class.
      */
-    public function supportsClass($class)
+    public function supportsClass($class): bool
     {
         return <?= $user_short_name ?>::class === $class || is_subclass_of($class, <?= $user_short_name ?>::class);
     }
@@ -74,7 +73,7 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
     /**
      * Upgrades the hashed password of a user, typically for using a better hash algorithm.
      */
-    public function upgradePassword(UserInterface $user, string $newHashedPassword): void
+    public function upgradePassword(<?= $use_legacy_password_upgrader_type ? 'UserInterface' : 'PasswordAuthenticatedUserInterface'; ?> $user, string $newHashedPassword): void
     {
         // TODO: when hashed passwords are in use, this method should:
         // 1. persist the new password in the user storage

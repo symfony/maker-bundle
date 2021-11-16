@@ -11,6 +11,7 @@ $finder = (new PhpCsFixer\Finder())
     ->exclude('fixtures')
     // the PHP template files are a bit special
     ->notName('*.tpl.php')
+    ->notPath('src/Console/MigrationDiffFilteredOutput_php8.php')
 ;
 
 return (new PhpCsFixer\Config())

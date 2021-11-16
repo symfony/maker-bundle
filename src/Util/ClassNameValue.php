@@ -29,11 +29,16 @@ final class ClassNameValue
 
     public function getShortName(): string
     {
-        if ('self' === $this->typeHint) {
+        if ($this->isSelf()) {
             return Str::getShortClassName($this->fullClassName);
         }
 
         return $this->typeHint;
+    }
+
+    public function isSelf(): bool
+    {
+        return 'self' === $this->typeHint;
     }
 
     public function __toString()

@@ -11,659 +11,699 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
+use Doctrine\ORM\Mapping\Driver\AttributeReader;
 use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
+use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Yaml\Yaml;
 
 class MakeEntityTest extends MakerTestCase
 {
+    protected function getMakerClass(): string
+    {
+        return MakeEntity::class;
+    }
+
+    private function createMakeEntityTest(bool $withDatabase = true): MakerTestDetails
+    {
+        return $this->createMakerTest()
+            ->preRun(function (MakerTestRunner $runner) use ($withDatabase) {
+                if ($this->useAttributes($runner)) {
+                    // use attributes
+                    $runner->replaceInFile(
+                        'config/packages/doctrine.yaml',
+                        'type: annotation',
+                        'type: attribute'
+                    );
+                }
+
+                if ($withDatabase) {
+                    $runner->configureDatabase();
+                }
+            });
+    }
+
+    private function createMakeEntityTestForMercure(): MakerTestDetails
+    {
+        return $this->createMakeEntityTest()
+            ->setRequiredPhpVersion(70250)
+            // technically we need twig-bundle >= 5.2, but this is a good proxy
+            // using twig-bundle doesn't work because it's only installed via ux-turbo-mercure
+            ->addRequiredPackageVersion('symfony/framework-bundle', '>=5.2.0')
+            ->preRun(function (MakerTestRunner $runner) {
+                // installed manually later so that the compatibility check can run fist
+                $runner->runProcess('composer require symfony/ux-turbo-mercure');
+            });
+    }
+
     public function getTestDetails()
     {
-        yield 'entity_new' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // add not additional fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
-        ];
+        yield 'it_creates_a_new_class_basic' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // add not additional fields
+                    '',
+                ]);
 
-        yield 'entity_new_api_resource' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // Mark the entity as an API Platform resource
-                'y',
-                // add not additional fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->addExtraDependencies('api')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand()
-            ->assert(function (string $output, string $directory) {
-                $this->assertFileExists($directory.'/src/Entity/User.php');
-
-                $content = file_get_contents($directory.'/src/Entity/User.php');
-                $this->assertStringContainsString('use ApiPlatform\Core\Annotation\ApiResource;', $content);
-                $this->assertStringContainsString(\PHP_VERSION_ID >= 80000 ? '#[ApiResource]' : '@ApiResource', $content);
+                $this->runEntityTest($runner);
             }),
         ];
 
-        yield 'entity_with_fields' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // add not additional fields
-                'name',
-                'string',
-                '255', // length
-                // nullable
-                'y',
-                'createdAt',
-                // use default datetime
-                '',
-                // nullable
-                'y',
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+        yield 'it_creates_a_new_class_and_api_resource' => [$this->createMakeEntityTest()
+            ->addExtraDependencies('api')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // Mark the entity as an API Platform resource
+                    'y',
+                    // add not additional fields
+                    '',
+                ]);
+
+                $this->assertFileExists($runner->getPath('src/Entity/User.php'));
+
+                $content = file_get_contents($runner->getPath('src/Entity/User.php'));
+                $this->assertStringContainsString('use ApiPlatform\Core\Annotation\ApiResource;', $content);
+                $this->assertStringContainsString($this->useAttributes($runner) ? '#[ApiResource]' : '@ApiResource', $content);
+
+                $this->runEntityTest($runner);
+            }),
         ];
 
-        yield 'entity_updating_main' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // add additional fields
-                'lastName',
-                'string',
-                '', // length (default 255)
-                // nullable
-                'y',
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityUpdate')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+        yield 'it_creates_a_new_class_with_fields' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // add not additional fields
+                    'name',
+                    'string',
+                    '255', // length
+                    // nullable
+                    'y',
+                    'createdAt',
+                    // use default datetime
+                    '',
+                    // nullable
+                    'y',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runEntityTest($runner);
+            }),
         ];
 
-        yield 'entity_many_to_one_simple_with_inverse' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'UserAvatarPhoto',
-                // field name
-                'user',
-                // add a relationship field
-                'relation',
-                // the target entity
-                'User',
-                // relation type
-                'ManyToOne',
-                // nullable
-                'n',
-                // do you want to generate an inverse relation? (default to yes)
-                '',
-                // field name on opposite side - use default 'userAvatarPhotos'
-                '',
-                // orphanRemoval (default to no)
-                '',
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToOne')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+        yield 'it_updates_existing_entity' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // add additional fields
+                    'lastName',
+                    'string',
+                    '', // length (default 255)
+                    // nullable
+                    'y',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runEntityTest($runner, [
+                    // existing field
+                    'firstName' => 'Mr. Chocolate',
+                    // new field
+                    'lastName' => 'Cake',
+                ]);
+            }),
         ];
 
-        yield 'entity_many_to_one_simple_no_inverse' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'UserAvatarPhoto',
-                // field name
-                'user',
-                // add a relationship field
-                'relation',
-                // the target entity
-                'User',
-                // relation type
-                'ManyToOne',
-                // nullable
-                'n',
-                // do you want to generate an inverse relation? (default to yes)
-                'n',
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToOneNoInverse')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+        yield 'it_updates_entity_many_to_one_no_inverse' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'UserAvatarPhoto',
+                    // field name
+                    'user',
+                    // add a relationship field
+                    'relation',
+                    // the target entity
+                    'User',
+                    // relation type
+                    'ManyToOne',
+                    // nullable
+                    'n',
+                    // do you want to generate an inverse relation? (default to yes)
+                    'n',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runCustomTest($runner, 'it_updates_entity_many_to_one_no_inverse.php');
+            }),
         ];
 
-        yield 'entity_many_to_one_self_referencing' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // field name
-                'guardian',
-                // add a relationship field
-                'relation',
-                // the target entity
-                'User',
-                // relation type
-                'ManyToOne',
-                // nullable
-                'y',
-                // do you want to generate an inverse relation? (default to yes)
-                '',
-                // field name on opposite side
-                'dependants',
-                // orphanRemoval (default to no)
-                '',
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntitySelfReferencing')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+        yield 'it_adds_many_to_one_self_referencing' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // field name
+                    'guardian',
+                    // add a relationship field
+                    'relation',
+                    // the target entity
+                    'User',
+                    // relation type
+                    'ManyToOne',
+                    // nullable
+                    'y',
+                    // do you want to generate an inverse relation? (default to yes)
+                    '',
+                    // field name on opposite side
+                    'dependants',
+                    // orphanRemoval (default to no)
+                    '',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runCustomTest($runner, 'it_adds_many_to_one_self_referencing.php');
+            }),
         ];
 
-        yield 'entity_exists_in_root' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'Directory',
-                // field name
-                'parentDirectory',
-                // add a relationship field
-                'relation',
-                // the target entity
-                'Directory',
-                // relation type
-                'ManyToOne',
-                // nullable
-                'y',
-                // do you want to generate an inverse relation? (default to yes)
-                '',
-                // field name on opposite side
-                'childDirectories',
-                // orphanRemoval (default to no)
-                '',
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityExistsInRoot')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+        yield 'it_adds_one_to_many_simple' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'UserAvatarPhoto-basic.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // field name
+                    'photos',
+                    // add a relationship field
+                    'relation',
+                    // the target entity
+                    'UserAvatarPhoto',
+                    // relation type
+                    'OneToMany',
+                    // field name on opposite side - use default 'user'
+                    '',
+                    // nullable
+                    'n',
+                    // orphanRemoval
+                    'y',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runCustomTest($runner, 'it_adds_one_to_many_simple.php');
+            }),
         ];
 
-        yield 'entity_one_to_many_simple' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // field name
-                'photos',
-                // add a relationship field
-                'relation',
-                // the target entity
-                'UserAvatarPhoto',
-                // relation type
-                'OneToMany',
-                // field name on opposite side - use default 'user'
-                '',
-                // nullable
-                'n',
-                // orphanRemoval
-                'y',
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOneToMany')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+        yield 'it_adds_many_to_many_simple' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'Course',
+                    // field name
+                    'students',
+                    // add a relationship field
+                    'relation',
+                    // the target entity
+                    'User',
+                    // relation type
+                    'ManyToMany',
+                    // inverse side?
+                    'y',
+                    // field name on opposite side - use default 'courses'
+                    '',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runCustomTest($runner, 'it_adds_many_to_many_simple.php');
+            }),
         ];
 
-        yield 'entity_many_to_many_simple' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'Course',
-                // field name
-                'students',
-                // add a relationship field
-                'relation',
-                // the target entity
-                'User',
-                // relation type
-                'ManyToMany',
-                // inverse side?
-                'y',
-                // field name on opposite side - use default 'courses'
-                '',
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToMany')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
-        ];
-
-        yield 'entity_many_to_many_simple_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'Course',
-                // field name
-                'students',
-                // add a relationship field
-                'relation',
-                // the target entity
-                'User',
-                // relation type
-                'ManyToMany',
-                // inverse side?
-                'y',
-                // field name on opposite side - use default 'courses'
-                '',
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityManyToManyInCustomNamespace')
+        yield 'it_adds_many_to_many_with_custom_root_namespace' => [$this->createMakeEntityTest()
             ->changeRootNamespace('Custom')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-custom-namespace.php');
+
+                $runner->writeFile(
+                    'config/packages/dev/maker.yaml',
+                    Yaml::dump(['maker' => ['root_namespace' => 'Custom']])
+                );
+
+                $runner->runMaker([
+                    // entity class name
+                    'Course',
+                    // field name
+                    'students',
+                    // add a relationship field
+                    'relation',
+                    // the target entity
+                    'User',
+                    // relation type
+                    'ManyToMany',
+                    // inverse side?
+                    'y',
+                    // field name on opposite side - use default 'courses'
+                    '',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runCustomTest($runner, 'it_adds_many_to_many_with_custom_root_namespace.php');
+            }),
         ];
 
-        yield 'entity_one_to_one_simple' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'UserProfile',
-                // field name
-                'user',
-                // add a relationship field
-                'relation',
-                // the target entity
-                'User',
-                // relation type
-                'OneToOne',
-                // nullable
-                'n',
-                // inverse side?
-                'y',
-                // field name on opposite side - use default 'userProfile'
-                '',
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOneToOne')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+        yield 'it_adds_one_to_one_simple' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'UserProfile',
+                    // field name
+                    'user',
+                    // add a relationship field
+                    'relation',
+                    // the target entity
+                    'User',
+                    // relation type
+                    'OneToOne',
+                    // nullable
+                    'n',
+                    // inverse side?
+                    'y',
+                    // field name on opposite side - use default 'userProfile'
+                    '',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runCustomTest($runner, 'it_adds_one_to_one_simple.php');
+            }),
         ];
 
-        yield 'entity_many_to_one_vendor_target' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // field name
-                'userGroup',
-                // add a relationship field
-                'ManyToOne',
-                // the target entity
-                'Some\\Vendor\\Group',
-                // nullable
-                '',
-                /*
-                 * normally, we ask for the field on the *other* side, but we
-                 * do not here, since the other side won't be mapped.
-                 */
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRelationVendorTarget')
-            ->configureDatabase()
-            ->addReplacement(
-                'composer.json',
-                '"App\\\Tests\\\": "tests/",',
-                '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
-            )
-            ->assert(function (string $output, string $directory) {
+        yield 'it_adds_many_to_one_to_vendor_target' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+                $this->setupGroupEntityInVendor($runner);
+
+                $output = $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // field name
+                    'userGroup',
+                    // add a relationship field
+                    'ManyToOne',
+                    // the target entity
+                    'Some\\Vendor\\Group',
+                    // nullable
+                    '',
+                    /*
+                     * normally, we ask for the field on the *other* side, but we
+                     * do not here, since the other side won't be mapped.
+                     */
+                    // finish adding fields
+                    '',
+                ]);
+
                 $this->assertStringContainsString('updated: src/Entity/User.php', $output);
                 $this->assertStringNotContainsString('updated: vendor/', $output);
 
                 // sanity checks on the generated code
                 $finder = new Finder();
-                $finder->in($directory.'/src/Entity')->files()->name('*.php');
+                $finder->in($runner->getPath('src/Entity'))->files()->name('*.php');
                 $this->assertCount(1, $finder);
 
-                $this->assertStringNotContainsString('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
+                $this->assertStringNotContainsString('inversedBy', file_get_contents($runner->getPath('src/Entity/User.php')));
             }),
         ];
 
-        yield 'entity_many_to_many_vendor_target' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // field name
-                'userGroups',
-                // add a relationship field
-                'ManyToMany',
-                // the target entity
-                'Some\Vendor\Group',
-                /*
-                 * normally, we ask for the field on the *other* side, but we
-                 * do not here, since the other side won't be mapped.
-                 */
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRelationVendorTarget')
-            ->configureDatabase()
-            ->addReplacement(
-                'composer.json',
-                '"App\\\Tests\\\": "tests/",',
-                '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
-            )
-            ->assert(function (string $output, string $directory) {
+        yield 'it_adds_many_to_many_to_vendor_target' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+                $this->setupGroupEntityInVendor($runner);
+
+                $output = $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // field name
+                    'userGroups',
+                    // add a relationship field
+                    'ManyToMany',
+                    // the target entity
+                    'Some\Vendor\Group',
+                    /*
+                     * normally, we ask for the field on the *other* side, but we
+                     * do not here, since the other side won't be mapped.
+                     */
+                    // finish adding fields
+                    '',
+                ]);
+
                 $this->assertStringNotContainsString('updated: vendor/', $output);
 
-                $this->assertStringNotContainsString('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
+                $this->assertStringNotContainsString('inversedBy', file_get_contents($runner->getPath('src/Entity/User.php')));
             }),
         ];
 
-        yield 'entity_one_to_one_vendor_target' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // field name
-                'userGroup',
-                // add a relationship field
-                'OneToOne',
-                // the target entity
-                'Some\Vendor\Group',
-                // nullable,
-                '',
-                /*
-                 * normally, we ask for the field on the *other* side, but we
-                 * do not here, since the other side won't be mapped.
-                 */
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRelationVendorTarget')
-            ->configureDatabase()
-            ->addReplacement(
-                'composer.json',
-                '"App\\\Tests\\\": "tests/",',
-                '"App\\\Tests\\\": "tests/",'."\n".'            "Some\\\Vendor\\\": "vendor/some-vendor/src",'
-            )
-            ->assert(function (string $output, string $directory) {
+        yield 'it_adds_one_to_one_to_vendor_target' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+                $this->setupGroupEntityInVendor($runner);
+
+                $output = $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // field name
+                    'userGroup',
+                    // add a relationship field
+                    'OneToOne',
+                    // the target entity
+                    'Some\Vendor\Group',
+                    // nullable,
+                    '',
+                    /*
+                     * normally, we ask for the field on the *other* side, but we
+                     * do not here, since the other side won't be mapped.
+                     */
+                    // finish adding fields
+                    '',
+                ]);
+
                 $this->assertStringNotContainsString('updated: vendor/', $output);
 
-                $this->assertStringNotContainsString('inversedBy', file_get_contents($directory.'/src/Entity/User.php'));
+                $this->assertStringNotContainsString('inversedBy', file_get_contents($runner->getPath('src/Entity/User.php')));
             }),
         ];
 
-        yield 'entity_regenerate' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // namespace: use default App\Entity
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setArgumentsString('--regenerate')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerate')
-            ->configureDatabase(true),
+        yield 'it_regenerates_entities' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntityDirectory($runner, 'regenerate');
+
+                $runner->runMaker([
+                    // namespace: use default App\Entity
+                    '',
+                ], '--regenerate');
+
+                $this->runCustomTest($runner, 'it_regenerates_entities.php');
+            }),
         ];
 
-        yield 'entity_regenerate_embeddable_object' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // namespace: use default App\Entity
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setArgumentsString('--regenerate')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateEmbeddableObject')
-            ->configureDatabase(),
+        yield 'it_regenerates_embedded_entities' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntityDirectory($runner, 'regenerate-embedded');
+
+                $runner->runMaker([
+                    // namespace: use default App\Entity
+                    '',
+                ], '--regenerate');
+
+                $this->runCustomTest($runner, 'it_regenerates_embedded_entities.php');
+            }),
         ];
 
-        yield 'entity_regenerate_embeddable' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // namespace: use default App\Entity
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setArgumentsString('--regenerate --overwrite')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateEmbedable')
-            ->configureDatabase(),
+        yield 'it_regenerates_embeddable_entity' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntityDirectory($runner, 'regenerate-embeddable');
+
+                $runner->runMaker([
+                    // namespace: use default App\Entity
+                    '',
+                ], '--regenerate');
+
+                $this->runCustomTest($runner, 'it_regenerates_embeddable_entity.php');
+            }),
         ];
 
-        yield 'entity_regenerate_overwrite' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // namespace: use default App\Entity
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setArgumentsString('--regenerate --overwrite')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateOverwrite')
-            ->configureDatabase(false),
+        yield 'it_regenerates_with_overwrite' => [$this->createMakeEntityTest(false)
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-invalid-method.php');
+
+                $runner->runMaker([
+                    // namespace: use default App\Entity
+                    '',
+                ], '--regenerate --overwrite');
+
+                $this->runCustomTest($runner, 'it_regenerates_with_overwrite.php', false);
+            }),
         ];
 
-        yield 'entity_regenerate_xml' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // namespace: use default App\Entity
-                '',
-            ])
-            ->setArgumentsString('--regenerate')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityRegenerateXml')
-            ->addReplacement(
-                'config/packages/doctrine.yaml',
-                'type: annotation',
-                'type: xml'
-            )
-            ->addReplacement(
-                'config/packages/doctrine.yaml',
-                "dir: '%kernel.project_dir%/src/Entity'",
-                "dir: '%kernel.project_dir%/config/doctrine'"
-            )
-            ->configureDatabase(false),
+        yield 'it_regenerates_from_xml' => [$this->createMakeEntityTest(false)
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+
+                $runner->copy(
+                    'make-entity/regenerate-xml',
+                    ''
+                );
+
+                $this->changeToXmlMapping($runner);
+
+                $runner->runMaker([
+                    // namespace: use default App\Entity
+                    '',
+                ], '--regenerate');
+
+                $this->runCustomTest($runner, 'it_regenerates_from_xml.php', false);
+            }),
         ];
 
-        yield 'entity_xml_mapping_error_existing' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                'User',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityXmlMappingError')
-            ->addReplacement(
-                'config/packages/doctrine.yaml',
-                'type: annotation',
-                'type: xml'
-            )
-            ->addReplacement(
-                'config/packages/doctrine.yaml',
-                "dir: '%kernel.project_dir%/src/Entity'",
-                "dir: '%kernel.project_dir%/config/doctrine'"
-            )
-            ->configureDatabase(false)
-            ->setCommandAllowedToFail(true)
-            ->assert(function (string $output, string $directory) {
+        yield 'it_display_an_error_using_with_xml' => [$this->createMakeEntityTest(false)
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+
+                $runner->copy(
+                    'make-entity/xml-mapping',
+                    ''
+                );
+
+                $this->changeToXmlMapping($runner);
+
+                $output = $runner->runMaker([
+                    'User',
+                    '',
+                ], '', true /* allow failure */);
+
                 $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
             }),
         ];
 
-        yield 'entity_xml_mapping_error_new_class' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                'UserAvatarPhoto',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityXmlMappingError')
-            ->addReplacement(
-                'config/packages/doctrine.yaml',
-                'type: annotation',
-                'type: xml'
-            )
-            ->addReplacement(
-                'config/packages/doctrine.yaml',
-                "dir: '%kernel.project_dir%/src/Entity'",
-                "dir: '%kernel.project_dir%/config/doctrine'"
-            )
-            ->configureDatabase(false)
-            ->setCommandAllowedToFail(true)
-            ->assert(function (string $output, string $directory) {
+        yield 'it_display_an_error_using_with_xml_with_new_class' => [$this->createMakeEntityTest(false)
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+
+                $runner->copy(
+                    'make-entity/xml-mapping',
+                    ''
+                );
+
+                $this->changeToXmlMapping($runner);
+
+                $output = $runner->runMaker([
+                    'UserAvatarPhoto',
+                    '',
+                ], '', true /* allow failure */);
+
                 $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
             }),
         ];
 
-        yield 'entity_updating_overwrite' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // field name
-                'firstName',
-                'string',
-                '', // length (default 255)
-                // nullable
-                '',
-                // finish adding fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setArgumentsString('--overwrite')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntityOverwrite'),
+        yield 'it_can_overwrite_while_adding_fields' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-invalid-method-no-property.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // field name
+                    'firstName',
+                    'string',
+                    '', // length (default 255)
+                    // nullable
+                    '',
+                    // finish adding fields
+                    '',
+                ], '--overwrite');
+
+                $this->runCustomTest($runner, 'it_regenerates_with_overwrite.php');
+            }),
         ];
 
         // see #192
-        yield 'entity_into_sub_namespace_matching_entity' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'Product\\Category',
-                // add not additional fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntitySubNamespaceMatchingEntity')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
-        ];
+        yield 'it_creates_class_that_matches_existing_namespace' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
 
-        $broadCastTest = MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // Mark the entity as broadcasted
-                'y',
-                // add not additional fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->addExtraDependencies('symfony/ux-turbo-mercure')
-            ->configureDatabase()
-            ->addReplacement(
-                '.env',
-                'https://example.com/.well-known/mercure',
-                'http://127.0.0.1:1337/.well-known/mercure'
-            )
-            ->updateSchemaAfterCommand()
-            ->assert(function (string $output, string $directory) {
-                $this->assertFileExists($directory.'/src/Entity/User.php');
+                $runner->runMaker([
+                    // entity class name
+                    'User\\Category',
+                    // add not additional fields
+                    '',
+                ]);
 
-                $content = file_get_contents($directory.'/src/Entity/User.php');
-                $this->assertStringContainsString('use Symfony\UX\Turbo\Attribute\Broadcast;', $content);
-                $this->assertStringContainsString('#[Broadcast]', $content);
-            })
-        ;
-        // use the fixtures - which contains a test for Mercure - unless specified to skip those
-        $skipMercureTest = $_SERVER['MAKER_SKIP_MERCURE_TEST'] ?? false;
-        if (!$skipMercureTest) {
-            $broadCastTest->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity');
-        }
-        yield 'entity_new_broadcast' => [$broadCastTest];
-
-        yield 'entity_new_with_api_and_broadcast_dependencies' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeEntity::class),
-            [
-                // entity class name
-                'User',
-                // Mark the entity as not an API Platform resource
-                'n',
-                // Mark the entity as not broadcasted
-                'n',
-                // add not additional fields
-                '',
-            ])
-            ->setRequiredPhpVersion(80000)
-            ->useDoctrineAttributeMapping()
-            ->addExtraDependencies('api')
-            ->addExtraDependencies('symfony/ux-turbo-mercure')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeEntity')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand()
-            ->assert(function (string $output, string $directory) {
-                $this->assertFileExists($directory.'/src/Entity/User.php');
+                $this->runCustomTest($runner, 'it_creates_class_that_matches_existing_namespace.php');
             }),
         ];
+
+        yield 'it_makes_new_entity_with_mercure_broadcast' => [$this->createMakeEntityTestForMercure()
+            // special setup done in createMakeEntityTestForMercure()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->replaceInFile(
+                    '.env',
+                    'https://example.com/.well-known/mercure',
+                    'http://127.0.0.1:1337/.well-known/mercure'
+                );
+
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // Mark the entity as broadcasted
+                    'y',
+                    // add not additional fields
+                    '',
+                ]);
+
+                $this->assertFileExists($runner->getPath('src/Entity/User.php'));
+
+                $content = file_get_contents($runner->getPath('src/Entity/User.php'));
+                $this->assertStringContainsString('use Symfony\UX\Turbo\Attribute\Broadcast;', $content);
+                $this->assertStringContainsString($this->useAttributes($runner) ? '#[Broadcast]' : '@Broadcast', $content);
+
+                $skipMercureTest = $_SERVER['MAKER_SKIP_MERCURE_TEST'] ?? false;
+                if (!$skipMercureTest) {
+                    $this->runEntityTest($runner);
+                }
+            }),
+        ];
+
+        yield 'it_makes_new_entity_no_to_all_extras' => [$this->createMakeEntityTestForMercure()
+            ->addExtraDependencies('api')
+            // special setup done in createMakeEntityTestForMercure()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // Mark the entity as not an API Platform resource
+                    'n',
+                    // Mark the entity as not broadcasted
+                    'n',
+                    // add not additional fields
+                    '',
+                ]);
+
+                $this->assertFileExists($runner->getPath('src/Entity/User.php'));
+                $this->runEntityTest($runner);
+            }),
+        ];
+    }
+
+    private function runEntityTest(MakerTestRunner $runner, array $data = [])
+    {
+        $runner->renderTemplateFile(
+            'make-entity/GeneratedEntityTest.php.twig',
+            'tests/GeneratedEntityTest.php',
+            [
+                'data' => $data,
+            ]
+        );
+
+        $runner->updateSchema();
+        $runner->runTests();
+    }
+
+    private function runCustomTest(MakerTestRunner $runner, string $filename, bool $withDatabase = true)
+    {
+        $runner->copy(
+            'make-entity/tests/'.$filename,
+            'tests/GeneratedEntityTest.php'
+        );
+
+        if ($withDatabase) {
+            $runner->updateSchema();
+        }
+        $runner->runTests();
+    }
+
+    private function setupGroupEntityInVendor(MakerTestRunner $runner)
+    {
+        $runner->copy(
+            'make-entity/Group-vendor.php',
+            'vendor/some-vendor/src/Group.php'
+        );
+
+        $runner->addToAutoloader(
+            'Some\\\Vendor\\\\',
+            'vendor/some-vendor/src'
+        );
+    }
+
+    private function changeToXmlMapping(MakerTestRunner $runner)
+    {
+        $runner->replaceInFile(
+            'config/packages/doctrine.yaml',
+            $this->useAttributes($runner) ? 'type: attribute' : 'type: annotation',
+            'type: xml'
+        );
+        $runner->replaceInFile(
+            'config/packages/doctrine.yaml',
+            "dir: '%kernel.project_dir%/src/Entity'",
+            "dir: '%kernel.project_dir%/config/doctrine'"
+        );
+    }
+
+    private function useAttributes(MakerTestRunner $runner): bool
+    {
+        return \PHP_VERSION_ID >= 80000
+            && $runner->doesClassExist(AttributeReader::class)
+            && $runner->getSymfonyVersion() >= 50200;
+    }
+
+    private function copyEntity(MakerTestRunner $runner, string $filename)
+    {
+        $entityClassName = substr(
+            $filename,
+            0,
+            strpos($filename, '-')
+        );
+
+        $runner->copy(
+            sprintf(
+                'make-entity/entities/%s/%s',
+                $this->useAttributes($runner) ? 'attributes' : 'annotations',
+                $filename
+            ),
+            sprintf('src/Entity/%s.php', $entityClassName)
+        );
+    }
+
+    private function copyEntityDirectory(MakerTestRunner $runner, string $directory)
+    {
+        $runner->copy(
+            sprintf(
+                'make-entity/%s/%s',
+                $directory,
+                $this->useAttributes($runner) ? 'attributes' : 'annotations'
+            ),
+            ''
+        );
     }
 }

@@ -13,21 +13,31 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeUnitTest;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
+use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
 /**
  * @group legacy
  */
 class MakeUnitTestTest extends MakerTestCase
 {
+    protected function getMakerClass(): string
+    {
+        return MakeUnitTest::class;
+    }
+
     public function getTestDetails()
     {
-        yield 'unit_test' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeUnitTest::class),
-            [
-                // class name
-                'FooBar',
-            ]),
+        yield 'it_makes_unit_test' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // class name
+                        'FooBar',
+                    ]
+                );
+
+                $runner->runTests();
+            }),
         ];
     }
 }

@@ -1408,7 +1408,11 @@ final class ClassSourceManipulator
 
         if (null === $nodeValue) {
             if ($value instanceof ClassNameValue) {
-                $nodeValue = new Node\Expr\ConstFetch(new Node\Name(sprintf('%s::class', $value->getShortName())));
+                $nodeValue = new Node\Expr\ConstFetch(
+                    new Node\Name(
+                        sprintf('%s::class', $value->isSelf() ? 'self' : $value->getShortName())
+                    )
+                );
             } else {
                 throw new \Exception(sprintf('Cannot build a node expr for value of type "%s"', \gettype($value)));
             }

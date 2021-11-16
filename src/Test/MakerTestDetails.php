@@ -18,27 +18,11 @@ final class MakerTestDetails
 {
     private $maker;
 
-    private $inputs;
+    private $runCallback;
 
-    private $fixtureFilesPath;
-
-    private $deletedFiles = [];
-
-    private $replacements = [];
-
-    private $postMakeReplacements = [];
-
-    private $preMakeCommands = [];
-
-    private $postMakeCommands = [];
-
-    private $assert;
+    private $preRunCallbacks = [];
 
     private $extraDependencies = [];
-
-    private $argumentsString = '';
-
-    private $commandAllowedToFail = false;
 
     private $rootNamespace = 'App';
 
@@ -46,28 +30,21 @@ final class MakerTestDetails
 
     private $requiredPackageVersions = [];
 
-    private $guardAuthenticators = [];
-
-    private $shouldSkip = false;
-    private $skipMessage;
-
-    /**
-     * @return static
-     */
-    public static function createTest(MakerInterface $maker, array $inputs)
+    public function __construct(MakerInterface $maker)
     {
-        return new static($maker, $inputs);
-    }
-
-    private function __construct(MakerInterface $maker, array $inputs)
-    {
-        $this->inputs = $inputs;
         $this->maker = $maker;
     }
 
-    public function setFixtureFilesPath(string $fixtureFilesPath): self
+    public function run(\Closure $callback): self
     {
-        $this->fixtureFilesPath = $fixtureFilesPath;
+        $this->runCallback = $callback;
+
+        return $this;
+    }
+
+    public function preRun(\Closure $callback): self
+    {
+        $this->preRunCallbacks[] = $callback;
 
         return $this;
     }
@@ -84,133 +61,9 @@ final class MakerTestDetails
         return $this;
     }
 
-    public function addPreMakeCommand(string $preMakeCommand): self
+    public function addExtraDependencies(string ...$packages): self
     {
-        $this->preMakeCommands[] = $preMakeCommand;
-
-        return $this;
-    }
-
-    public function addPostMakeCommand(string $postMakeCommand): self
-    {
-        $this->postMakeCommands[] = $postMakeCommand;
-
-        return $this;
-    }
-
-    public function deleteFile(string $filename): self
-    {
-        $this->deletedFiles[] = $filename;
-
-        return $this;
-    }
-
-    public function getFilesToDelete(): array
-    {
-        return $this->deletedFiles;
-    }
-
-    public function addReplacement(string $filename, string $find, string $replace): self
-    {
-        $this->replacements[] = [
-            'filename' => $filename,
-            'find' => $find,
-            'replace' => $replace,
-        ];
-
-        return $this;
-    }
-
-    public function addPostMakeReplacement(string $filename, string $find, string $replace): self
-    {
-        $this->postMakeReplacements[] = [
-            'filename' => $filename,
-            'find' => $find,
-            'replace' => $replace,
-        ];
-
-        return $this;
-    }
-
-    public function configureDatabase(bool $createSchema = true): self
-    {
-        // currently, we need to replace this in *both* files so we can also
-        // run bin/console commands
-        $this
-            ->addReplacement(
-                '.env',
-                'postgresql://symfony:ChangeMe@127.0.0.1:5432/app?serverVersion=13&charset=utf8',
-                getenv('TEST_DATABASE_DSN')
-            )
-        ;
-
-        // Flex includes a recipe to suffix the dbname w/ "_test" - lets keep
-        // things simple for these tests and not do that.
-        $this->addReplacement(
-            'config/packages/test/doctrine.yaml',
-            "dbname_suffix: '_test%env(default::TEST_TOKEN)%'",
-            '')
-        ;
-
-        // this looks silly, but it's the only way to drop the database *for sure*,
-        // as doctrine:database:drop will error if there is no database
-        // also, skip for SQLITE, as it does not support --if-not-exists
-        if (0 !== strpos(getenv('TEST_DATABASE_DSN'), 'sqlite://')) {
-            $this->addPreMakeCommand('php bin/console doctrine:database:create --env=test --if-not-exists');
-        }
-        $this->addPreMakeCommand('php bin/console doctrine:database:drop --env=test --force');
-
-        $this->addPreMakeCommand('php bin/console doctrine:database:create --env=test');
-        if ($createSchema) {
-            $this->addPreMakeCommand('php bin/console doctrine:schema:create --env=test');
-        }
-
-        return $this;
-    }
-
-    public function updateSchemaAfterCommand(): self
-    {
-        $this->addPostMakeCommand('php bin/console doctrine:schema:update --env=test --force');
-
-        return $this;
-    }
-
-    /**
-     * Pass a callable that will be called after the maker command has been run.
-     *
-     *      $test->assert(function(string $output, string $directory) {
-     *          // $output is the command output text
-     *          // $directory is the directory where the project lives
-     *      })
-     *
-     * @param callable $assert
-     *
-     * @return MakerTestDetails
-     */
-    public function assert($assert): self
-    {
-        $this->assert = $assert;
-
-        return $this;
-    }
-
-    public function addExtraDependencies(string $packageName): self
-    {
-        $this->extraDependencies[] = $packageName;
-
-        return $this;
-    }
-
-    public function setArgumentsString(string $argumentsString): self
-    {
-        $this->argumentsString = $argumentsString;
-
-        return $this;
-    }
-
-    public function setCommandAllowedToFail(bool $commandAllowedToFail): self
-    {
-        $this->commandAllowedToFail = $commandAllowedToFail;
+        $this->extraDependencies += $packages;
 
         return $this;
     }
@@ -229,23 +82,6 @@ final class MakerTestDetails
         return $this;
     }
 
-    public function setGuardAuthenticator(string $firewallName, string $id): self
-    {
-        $this->guardAuthenticators[$firewallName] = $id;
-
-        return $this;
-    }
-
-    public function getInputs(): array
-    {
-        return $this->inputs;
-    }
-
-    public function getFixtureFilesPath()
-    {
-        return $this->fixtureFilesPath;
-    }
-
     public function getUniqueCacheDirectoryName(): string
     {
         // for cache purposes, only the dependencies are important!
@@ -253,40 +89,12 @@ final class MakerTestDetails
         return 'maker_'.strtolower($this->getRootNamespace()).'_'.md5(serialize($this->getDependencies()));
     }
 
-    public function getPreMakeCommands(): array
-    {
-        return $this->preMakeCommands;
-    }
-
-    public function getPostMakeCommands(): array
-    {
-        return $this->postMakeCommands;
-    }
-
-    public function getReplacements(): array
-    {
-        return $this->replacements;
-    }
-
-    public function getPostMakeReplacements(): array
-    {
-        return $this->postMakeReplacements;
-    }
-
     public function getMaker(): MakerInterface
     {
         return $this->maker;
     }
 
-    /**
-     * @return callable
-     */
-    public function getAssert()
-    {
-        return $this->assert;
-    }
-
-    public function getDependencies()
+    public function getDependencies(): array
     {
         $depBuilder = $this->getDependencyBuilder();
 
@@ -297,7 +105,7 @@ final class MakerTestDetails
         );
     }
 
-    public function getExtraDependencies()
+    public function getExtraDependencies(): array
     {
         return $this->extraDependencies;
     }
@@ -310,24 +118,9 @@ final class MakerTestDetails
         return $depBuilder;
     }
 
-    public function getArgumentsString(): string
-    {
-        return $this->argumentsString;
-    }
-
-    public function isCommandAllowedToFail(): bool
-    {
-        return $this->commandAllowedToFail;
-    }
-
     public function isSupportedByCurrentPhpVersion(): bool
     {
         return null === $this->requiredPhpVersion || \PHP_VERSION_ID >= $this->requiredPhpVersion;
-    }
-
-    public function getGuardAuthenticators(): array
-    {
-        return $this->guardAuthenticators;
     }
 
     public function getRequiredPackageVersions(): array
@@ -335,30 +128,20 @@ final class MakerTestDetails
         return $this->requiredPackageVersions;
     }
 
-    public function skip(string $message)
+    public function getRunCallback(): \Closure
     {
-        $this->shouldSkip = true;
-        $this->skipMessage = $message;
+        if (!$this->runCallback) {
+            throw new \Exception('Don\'t forget to call ->run()');
+        }
 
-        return $this;
+        return $this->runCallback;
     }
 
-    public function shouldSkip(): bool
+    /**
+     * @return \Closure[]
+     */
+    public function getPreRunCallbacks(): array
     {
-        return $this->shouldSkip;
-    }
-
-    public function getSkipMessage(): ?string
-    {
-        return $this->skipMessage;
-    }
-
-    public function useDoctrineAttributeMapping(): self
-    {
-        return $this->addReplacement(
-        'config/packages/doctrine.yaml',
-                'type: annotation',
-                'type: attribute'
-        );
+        return $this->preRunCallbacks;
     }
 }

@@ -57,7 +57,7 @@ jobs:
                 run: "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --dry-run --diff"
 
     test:
-        name: "PHP ${{ matrix.php-version }} + symfony/skeleton@${{ matrix.symfony-skeleton-stability }}"
+        name: "PHP ${{ matrix.php-version }} + @${{ matrix.symfony-version }} ${{ matrix.dependency-versions }} deps"
 
         runs-on: ubuntu-18.04
 
@@ -82,28 +82,30 @@ jobs:
                 ports:
                     - 1337:1337
 
-        continue-on-error: ${{ matrix.allow-failures }}
-
         env:
-            SYMFONY_SKELETON_STABILITY: ${{ matrix.symfony-skeleton-stability }}
+            SYMFONY_VERSION: ${{ matrix.symfony-version }}
 
         strategy:
             fail-fast: false
             matrix:
                 php-version:
-                    - '7.1.3'
-                    - '7.2'
-                    - '7.3'
-                    - '7.4'
                     - '8.0'
-                symfony-skeleton-stability:
-                    - 'stable'
-                composer-options: ['--no-suggest']
-                allow-failures: [false]
+                symfony-version:
+                    - '4.4.*'
+                    - '5.3.*'
+                    - '5.4.x-dev'
+                    - '6.0.x-dev'
+                dependency-versions: ['highest']
                 include:
-                    - php-version: '8.0'
-                      symfony-skeleton-stability: 'dev'
-                      allow-failures: true
+                    # testing lowest PHP version with LTS
+                    - php-version: '7.1.3'
+                      symfony-version: '4.4.*'
+                      # not important - does not affect each app's dependencies
+                      dependency-versions: 'highest'
+                    # testing lowest php version with highest 5.x stable
+                    - php-version: '7.2.5'
+                      symfony-version: '5.3.*'
+                      dependency-versions: 'lowest'
 
         steps:
             - name: "Checkout code"
@@ -132,17 +134,12 @@ jobs:
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
             - name: "Require symfony/flex"
-              if: contains('stable', env.SYMFONY_SKELETON_STABILITY)
               run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
-
-            - name: "Require symfony/flex dev-main"
-              if: contains('dev', env.SYMFONY_SKELETON_STABILITY)
-              run: composer global require --no-progress --no-scripts --no-plugins symfony/flex dev-main
 
             - name: "Composer install"
               uses: "ramsey/composer-install@v1"
               with:
-                  composer-options: "${{ matrix.composer-options }}"
+                  dependency-versions: "${{ matrix.dependency-versions }}"
 
             - name: "Composer install php-cs-fixer"
               uses: "ramsey/composer-install@v1"

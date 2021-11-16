@@ -54,10 +54,10 @@ final class TemplateComponentGenerator
                 $attribute .= ', methods: [';
 
                 foreach ($methods as $method) {
-                    $attribute .= sprintf('\'%s\',', $method);
+                    $attribute .= sprintf('\'%s\', ', $method);
                 }
 
-                $attribute = rtrim($attribute, ',');
+                $attribute = rtrim($attribute, ', ');
 
                 $attribute .= ']';
             }
@@ -74,10 +74,10 @@ final class TemplateComponentGenerator
             $annotation .= ', methods={';
 
             foreach ($methods as $method) {
-                $annotation .= sprintf('"%s",', $method);
+                $annotation .= sprintf('"%s", ', $method);
             }
 
-            $annotation = rtrim($annotation, ',');
+            $annotation = rtrim($annotation, ', ');
 
             $annotation .= '}';
         }

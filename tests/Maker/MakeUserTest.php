@@ -13,60 +13,107 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeUser;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
+use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class MakeUserTest extends MakerTestCase
 {
+    protected function getMakerClass(): string
+    {
+        return MakeUser::class;
+    }
+
     public function getTestDetails()
     {
-        yield 'user_security_entity_with_password' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeUser::class),
-            [
-                // user class name
-                'User',
-                'y', // entity
-                'email', // identity property
-                'y', // with password
-                'y', // argon   @TODO This should only be done in <5.0
-            ])
+        yield 'it_generates_entity_with_password' => [$this->createMakerTest()
             ->addExtraDependencies('doctrine')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeUserEntityPassword')
-            ->configureDatabase()
-            ->addExtraDependencies('doctrine')
-            ->setGuardAuthenticator('main', 'App\\Security\\AutomaticAuthenticator')
-            ->updateSchemaAfterCommand(),
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-user/standard_setup',
+                    ''
+                );
+                $runner->adjustAuthenticatorForLegacyPassportInterface('src/Security/AutomaticAuthenticator.php');
+
+                $runner->runMaker([
+                    // user class name
+                    'User',
+                    'y', // entity
+                    'email', // identity property
+                    'y', // with password
+                ]);
+
+                // require 5.3 so we can use password hasher
+                if ($runner->getSymfonyVersion() >= 50300) {
+                    $this->runUserTest($runner, 'it_generates_entity_with_password.php');
+                }
+            }),
         ];
 
-        yield 'user_security_entity_with_password_authenticated_user_interface' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeUser::class),
-            [
-                // user class name
-                'User',
-                'y', // entity
-                'email', // identity property
-                'y', // with password
-            ])
-            ->addRequiredPackageVersion('symfony/security-bundle', '>=5.3')
+        yield 'it_generates_non_entity_no_password' => [$this->createMakerTest()
             ->addExtraDependencies('doctrine')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeUserEntityPasswordAuthenticatedUserInterface'),
-        ];
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-user/standard_setup',
+                    ''
+                );
+                $runner->adjustAuthenticatorForLegacyPassportInterface('src/Security/AutomaticAuthenticator.php');
 
-        yield 'user_security_model_no_password' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeUser::class),
-            [
-                // user class name (with non-traditional name)
-                'FunUser',
-                'n', // entity
-                'username', // identity property
-                'n', // login with password?
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeUserModelNoPassword')
-            ->setGuardAuthenticator('main', 'App\\Security\\AutomaticAuthenticator')
-            ->addPostMakeReplacement(
-                'src/Security/UserProvider.php',
-                'throw new \Exception(\'TODO: fill in refreshUser() inside \'.__FILE__);',
-                'return $user;'
-            ),
+                $runner->runMaker([
+                    // user class name (with non-traditional name)
+                    'FunUser',
+                    'n', // entity
+                    'username', // identity property
+                    'n', // login with password?
+                ]);
+
+                // simplification: allows us to assume loadUserByIdentifier in test
+                if ($runner->getSymfonyVersion() >= 50300) {
+                    $runner->replaceInFile(
+                        'src/Security/UserProvider.php',
+                        'throw new \Exception(\'TODO: fill in refreshUser() inside \'.__FILE__);',
+                        'return $user;'
+                    );
+
+                    $runner->replaceInFile(
+                        'src/Security/UserProvider.php',
+                        'throw new \Exception(\'TODO: fill in loadUserByIdentifier() inside \'.__FILE__);',
+                        'return (new FunUser())->setUsername($identifier);'
+                    );
+
+                    $this->runUserTest($runner, 'it_generates_non_entity_no_password.php');
+                }
+            }),
         ];
+    }
+
+    private function runUserTest(MakerTestRunner $runner, string $filename, bool $withDatabase = true)
+    {
+        $runner->copy(
+            'make-user/tests/'.$filename,
+            'tests/GeneratedUserTest.php'
+        );
+
+        $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
+            $config['security']['firewalls']['main']['custom_authenticator'] = 'App\Security\AutomaticAuthenticator';
+
+            return $config;
+        });
+
+        // make a service accessible in the test
+        // (the real one is removed as it's never used in the app)
+        $runner->modifyYamlFile('config/services.yaml', function (array $config) {
+            $config['services']['test_password_hasher'] = [
+                'public' => true,
+                'alias' => UserPasswordHasherInterface::class,
+            ];
+
+            return $config;
+        });
+
+        if ($withDatabase) {
+            $runner->configureDatabase();
+        }
+
+        $runner->runTests();
     }
 }

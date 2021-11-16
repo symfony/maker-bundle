@@ -11,11 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Test;
 
-use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\InputStream;
 
 /**
@@ -32,7 +28,6 @@ final class MakerTestEnvironment
     private $cachePath;
     private $flexPath;
     private $path;
-    private $targetSkeletonVersion;
 
     /**
      * @var MakerTestProcess
@@ -56,7 +51,12 @@ final class MakerTestEnvironment
         $targetVersion = $this->getTargetSkeletonVersion();
         $this->flexPath = $this->cachePath.'/flex_project'.$targetVersion;
 
-        $this->path = $this->cachePath.\DIRECTORY_SEPARATOR.$testDetails->getUniqueCacheDirectoryName().$targetVersion;
+        $directoryName = $targetVersion ?: 'current';
+        if (str_ends_with($directoryName, '.*')) {
+            $directoryName = substr($directoryName, 0, -2);
+        }
+
+        $this->path = $this->cachePath.\DIRECTORY_SEPARATOR.$testDetails->getUniqueCacheDirectoryName().'_'.$directoryName;
     }
 
     public static function create(MakerTestDetails $testDetails): self
@@ -126,9 +126,10 @@ final class MakerTestEnvironment
         }
 
         $this->processReplacements($replacements, $this->path);
+        $this->runCommand('composer dump-autoload');
     }
 
-    public function prepare(): void
+    public function prepareDirectory(): void
     {
         if (!$this->fs->exists($this->flexPath)) {
             $this->buildFlexSkeleton();
@@ -161,7 +162,7 @@ final class MakerTestEnvironment
                 MakerTestProcess::create('git diff --quiet || ( git config user.name "symfony" && git config user.email "test@symfony.com" && git add . && git commit -a -m "second commit" )',
                     $this->path
                 )->run();
-            } catch (ProcessFailedException $e) {
+            } catch (\Exception $e) {
                 $this->fs->remove($this->path);
 
                 throw $e;
@@ -169,81 +170,25 @@ final class MakerTestEnvironment
         } else {
             MakerTestProcess::create('git reset --hard && git clean -fd', $this->path)->run();
         }
-
-        if (null !== $this->testDetails->getFixtureFilesPath()) {
-            // move fixture files into directory
-            $finder = new Finder();
-            $finder->in($this->testDetails->getFixtureFilesPath())->files();
-
-            foreach ($finder as $file) {
-                if ($file->getPath() === $this->testDetails->getFixtureFilesPath()) {
-                    continue;
-                }
-
-                $this->fs->copy($file->getPathname(), $this->path.'/'.$file->getRelativePathname(), true);
-            }
-        }
-
-        $this->processReplacements($this->testDetails->getReplacements(), $this->path);
-
-        if ($ignoredFiles = $this->testDetails->getFilesToDelete()) {
-            foreach ($ignoredFiles as $file) {
-                if (file_exists($this->path.'/'.$file)) {
-                    $this->fs->remove($this->path.'/'.$file);
-                }
-            }
-        }
-
-        MakerTestProcess::create('composer dump-autoload', $this->path)
-            ->run();
     }
 
-    private function preMake(): void
+    public function runCommand(string $command): MakerTestProcess
     {
-        foreach ($this->testDetails->getPreMakeCommands() as $preCommand) {
-            MakerTestProcess::create($preCommand, $this->path)
-                            ->run();
-        }
+        return MakerTestProcess::create($command, $this->path)->run();
     }
 
-    public function runMaker(): MakerTestProcess
+    public function runMaker(array $inputs, string $argumentsString = '', bool $allowedToFail = false): MakerTestProcess
     {
-        // Lets remove cache
+        // Let's remove cache
         $this->fs->remove($this->path.'/var/cache');
 
-        $this->preMake();
-
-        // We don't need ansi coloring in tests!
-        $testProcess = MakerTestProcess::create(
-            sprintf('php bin/console %s %s --no-ansi', $this->testDetails->getMaker()::getCommandName(), $this->testDetails->getArgumentsString()),
-            $this->path,
-            [
-                'SHELL_INTERACTIVE' => '1',
-            ],
-            10
+        $testProcess = $this->createInteractiveCommandProcess(
+            $this->testDetails->getMaker()::getCommandName(),
+            $inputs,
+            $argumentsString
         );
 
-        if ($userInputs = $this->testDetails->getInputs()) {
-            $inputStream = new InputStream();
-
-            // start the command with some input
-            $inputStream->write(current($userInputs)."\n");
-
-            $inputStream->onEmpty(function () use ($inputStream, &$userInputs) {
-                $nextInput = next($userInputs);
-                if (false === $nextInput) {
-                    $inputStream->close();
-                } else {
-                    $inputStream->write($nextInput."\n");
-                }
-            });
-
-            $testProcess->setInput($inputStream);
-        }
-
-        $this->runnedMakerProcess = $testProcess->run($this->testDetails->isCommandAllowedToFail());
-
-        $this->postMake();
+        $this->runnedMakerProcess = $testProcess->run($allowedToFail);
 
         return $this->runnedMakerProcess;
     }
@@ -284,48 +229,6 @@ final class MakerTestEnvironment
                                ->run(true);
     }
 
-    public function runInternalTests(): ?MakerTestProcess
-    {
-        $finder = new Finder();
-        $finder->in($this->path.'/tests')->files();
-        if ($finder->count() > 0) {
-            // execute the tests that were moved into the project!
-            return MakerTestProcess::create(sprintf('php %s', $this->path.'/bin/phpunit'), $this->path)
-                                   ->run(true);
-        }
-
-        return null;
-    }
-
-    private function postMake(): void
-    {
-        $this->processReplacements($this->testDetails->getPostMakeReplacements(), $this->path);
-
-        $guardAuthenticators = $this->testDetails->getGuardAuthenticators();
-        if (!empty($guardAuthenticators)) {
-            $yaml = file_get_contents($this->path.'/config/packages/security.yaml');
-            $manipulator = new YamlSourceManipulator($yaml);
-            $data = $manipulator->getData();
-
-            foreach ($guardAuthenticators as $firewallName => $id) {
-                if (!isset($data['security']['firewalls'][$firewallName])) {
-                    throw new \Exception(sprintf('Could not find firewall "%s"', $firewallName));
-                }
-
-                $data['security']['firewalls'][$firewallName]['guard'] = [
-                    'authenticators' => [$id],
-                ];
-            }
-            $manipulator->setData($data);
-            file_put_contents($this->path.'/config/packages/security.yaml', $manipulator->getContents());
-        }
-
-        foreach ($this->testDetails->getPostMakeCommands() as $postCommand) {
-            MakerTestProcess::create($postCommand, $this->path)
-                            ->run();
-        }
-    }
-
     private function buildFlexSkeleton(): void
     {
         $targetVersion = $this->getTargetSkeletonVersion();
@@ -335,18 +238,6 @@ final class MakerTestEnvironment
             sprintf('composer create-project symfony/skeleton%s flex_project%s --prefer-dist --no-progress', $versionString, $targetVersion),
             $this->cachePath
         )->run();
-
-        if (false !== strpos($targetVersion, 'dev')) {
-            // make sure that dev versions allow dev deps
-            // for the current stable minor of Symfony, by default,
-            // minimum-stability is NOT dev, even when getting the -dev version
-            // of symfony/skeleton
-            MakerTestProcess::create('composer config minimum-stability dev', $this->flexPath)
-                ->run();
-
-            MakerTestProcess::create(['composer', 'update'], $this->flexPath)
-                ->run();
-        }
 
         $rootPath = str_replace('\\', '\\\\', realpath(__DIR__.'/../..'));
 
@@ -405,22 +296,83 @@ final class MakerTestEnvironment
         )->run();
     }
 
-    private function processReplacements(array $replacements, $rootDir): void
+    private function processReplacements(array $replacements, string $rootDir): void
     {
         foreach ($replacements as $replacement) {
-            $path = realpath($rootDir.'/'.$replacement['filename']);
-
-            if (!$this->fs->exists($path)) {
-                throw new \Exception(sprintf('Could not find file "%s" to process replacements inside "%s"', $replacement['filename'], $rootDir));
-            }
-
-            $contents = file_get_contents($path);
-            if (false === strpos($contents, $replacement['find'])) {
-                throw new \Exception(sprintf('Could not find "%s" inside "%s"', $replacement['find'], $replacement['filename']));
-            }
-
-            file_put_contents($path, str_replace($replacement['find'], $replacement['replace'], $contents));
+            $this->processReplacement($rootDir, $replacement['filename'], $replacement['find'], $replacement['replace']);
         }
+    }
+
+    public function processReplacement(string $rootDir, string $filename, string $find, string $replace, bool $allowNotFound = false): void
+    {
+        $path = realpath($rootDir.'/'.$filename);
+
+        if (!$this->fs->exists($path)) {
+            if ($allowNotFound) {
+                return;
+            }
+
+            throw new \Exception(sprintf('Could not find file "%s" to process replacements inside "%s"', $filename, $rootDir));
+        }
+
+        $contents = file_get_contents($path);
+        if (false === strpos($contents, $find)) {
+            if ($allowNotFound) {
+                return;
+            }
+
+            throw new \Exception(sprintf('Could not find "%s" inside "%s"', $find, $filename));
+        }
+
+        file_put_contents($path, str_replace($find, $replace, $contents));
+    }
+
+    public function createInteractiveCommandProcess(string $commandName, array $userInputs, string $argumentsString = ''): MakerTestProcess
+    {
+        // We don't need ansi coloring in tests!
+        $process = MakerTestProcess::create(
+            sprintf('php bin/console %s %s --no-ansi', $commandName, $argumentsString),
+            $this->path,
+            [
+                'SHELL_INTERACTIVE' => '1',
+            ],
+            10
+        );
+
+        if ($userInputs) {
+            $inputStream = new InputStream();
+
+            // start the command with some input
+            $inputStream->write(current($userInputs)."\n");
+
+            $inputStream->onEmpty(function () use ($inputStream, &$userInputs) {
+                $nextInput = next($userInputs);
+                if (false === $nextInput) {
+                    $inputStream->close();
+                } else {
+                    $inputStream->write($nextInput."\n");
+                }
+            });
+
+            $process->setInput($inputStream);
+        }
+
+        return $process;
+    }
+
+    public function getSymfonyVersionInApp(): int
+    {
+        $contents = file_get_contents($this->getPath().'/vendor/symfony/http-kernel/Kernel.php');
+        $position = strpos($contents, 'VERSION_ID = ');
+
+        return (int) substr($contents, $position + 13, 5);
+    }
+
+    public function doesClassExistInApp(string $class): bool
+    {
+        $classMap = require $this->getPath().'/vendor/composer/autoload_classmap.php';
+
+        return isset($classMap[$class]);
     }
 
     /**
@@ -455,45 +407,8 @@ echo json_encode($missingDependencies);
         return array_merge($data, $this->testDetails->getExtraDependencies());
     }
 
-    private function getTargetSkeletonVersion(): string
+    private function getTargetSkeletonVersion(): ?string
     {
-        if (null === $this->targetSkeletonVersion) {
-            $stability = $_SERVER['SYMFONY_SKELETON_STABILITY'] ?? 'stable';
-
-            if ('stable' === $stability) {
-                $this->targetSkeletonVersion = '';
-
-                return $this->targetSkeletonVersion;
-            }
-
-            switch ($stability) {
-                case 'stable-dev':
-                    $version = ($this->getSymfonyVersions())['latest'];
-                    $parts = explode('.', $version);
-
-                    $this->targetSkeletonVersion = sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
-
-                    break;
-                case 'dev':
-                    $version = ($this->getSymfonyVersions())['dev'];
-                    $parts = explode('.', $version);
-
-                    $this->targetSkeletonVersion = sprintf('%s.%s.x-dev', $parts[0], $parts[1]);
-
-                    break;
-                default:
-                    throw new \InvalidArgumentException('Invalid stability');
-            }
-        }
-
-        return $this->targetSkeletonVersion;
-    }
-
-    private function getSymfonyVersions(): array
-    {
-        $httpClient = HttpClient::create();
-        $response = $httpClient->request('GET', 'https://symfony.com/versions.json');
-
-        return $response->toArray();
+        return $_SERVER['SYMFONY_VERSION'] ?? '';
     }
 }
