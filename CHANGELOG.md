@@ -1,6 +1,20 @@
 # Changelog
 
-## [v1.35.9](https://github.com/symfony/maker-bundle/releases/tag/v1.35.0)
+## [v1.36.0](https://github.com/symfony/maker-bundle/releases/tag/v1.36.0)
+
+*November 16th, 2021*
+
+### Feature
+
+- [#1010](https://github.com/symfony/maker-bundle/pull/1010) - Raising minimum Symfony version to 4.4 & refactoring of internal test classes - *@weaverryan*
+
+### Bug Fix
+
+- [#1010](https://github.com/symfony/maker-bundle/pull/1010) - Various fixes for deprecated code that was generated & fixes for Symfony 6 - *@weaverryan*
+- [#993](https://github.com/symfony/maker-bundle/pull/993) - Avoid iterating on null for DoctrineBundle 2.2 and lower - *@weaverryan*
+- [#1004](https://github.com/symfony/maker-bundle/pull/1004) - Fix FQCN of 'security.authentication.success' event - *@AlexBevilacqua*
+
+## [v1.35.0](https://github.com/symfony/maker-bundle/releases/tag/v1.35.0)
 
 *November 12th, 2021*
 
