@@ -106,6 +106,10 @@ jobs:
                     - php-version: '7.2.5'
                       symfony-version: '5.3.*'
                       dependency-versions: 'lowest'
+                    # testing bleeding edge PHP with highest 5.x stable
+                    - php-version: '8.1'
+                      symfony-version: '5.3.*'
+                      dependency-versions: 'highest'
 
         steps:
             - name: "Checkout code"
