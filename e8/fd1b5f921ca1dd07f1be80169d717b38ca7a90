@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2021-11-16T01:59:52Z
+
+This is ready! Though I don't seriously expect any detailed review :).
+
+This is HUGE - sorry. It is 95% test refactoring and 3% fixing our test matrix to test a wider variety of Symfony versions and 2% fixing minor real bugs for different versions of Symfony that these enhanced matrix found.
+
+The remaining failures for Symfony 6 are due to 10 tests where the package we're testing is not yet installable on Symfony 6. So, not much we can do there :). Those tests should start passing when those packages add Sf6 compat. If they continue failing, we'll then know we have a bug to track down.
+
+Cheers!
