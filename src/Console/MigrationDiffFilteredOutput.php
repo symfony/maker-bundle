@@ -42,7 +42,7 @@ if (\PHP_VERSION_ID < 80000
         }
     }
 } else {
-    require __DIR__.'/MigrationDiffFilteredOutput_php8.php';
+    require __DIR__.'/MigrationDiffFilteredOutput_php8';
 }
 
 trait BaseMakerMigrationDiffFilteredOuputTrait
