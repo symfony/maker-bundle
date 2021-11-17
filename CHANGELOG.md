@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.36.1](https://github.com/symfony/maker-bundle/releases/tag/v1.36.1)
+
+*November 16th, 2021*
+
+### Bug Fix
+
+- [#1014](https://github.com/symfony/maker-bundle/pull/1014) - hiding php8 file so it doesn't throw autoloading warning - *@weaverryan*
+
 ## [v1.36.0](https://github.com/symfony/maker-bundle/releases/tag/v1.36.0)
 
 *November 16th, 2021*
