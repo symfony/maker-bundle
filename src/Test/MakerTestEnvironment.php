@@ -215,8 +215,11 @@ final class MakerTestEnvironment
             throw new \Exception('php-cs-fixer not found: run: "composer install --working-dir=tools/php-cs-fixer".');
         }
 
-        return MakerTestProcess::create(sprintf('php tools/php-cs-fixer/vendor/bin/php-cs-fixer --config=%s fix --dry-run --diff %s', __DIR__.'/../Resources/test/.php_cs.test', $this->path.'/'.$file), $this->rootPath)
-                               ->run(true);
+        return MakerTestProcess::create(
+            sprintf('php tools/php-cs-fixer/vendor/bin/php-cs-fixer --config=%s fix --dry-run --diff %s', __DIR__.'/../Resources/test/.php_cs.test', $this->path.'/'.$file),
+            $this->rootPath,
+            ['PHP_CS_FIXER_IGNORE_ENV' => '1']
+        )->run(true);
     }
 
     public function runTwigCSLint(string $file): MakerTestProcess
