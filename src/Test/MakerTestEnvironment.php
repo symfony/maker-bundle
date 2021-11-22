@@ -215,8 +215,11 @@ final class MakerTestEnvironment
             throw new \Exception('php-cs-fixer not found: run: "composer install --working-dir=tools/php-cs-fixer".');
         }
 
-        return MakerTestProcess::create(sprintf('php tools/php-cs-fixer/vendor/bin/php-cs-fixer --config=%s fix --dry-run --diff %s', __DIR__.'/../Resources/test/.php_cs.test', $this->path.'/'.$file), $this->rootPath)
-                               ->run(true);
+        return MakerTestProcess::create(
+            sprintf('php tools/php-cs-fixer/vendor/bin/php-cs-fixer --config=%s fix --dry-run --diff %s', __DIR__.'/../Resources/test/.php_cs.test', $this->path.'/'.$file),
+            $this->rootPath,
+            ['PHP_CS_FIXER_IGNORE_ENV' => '1']
+        )->run(true);
     }
 
     public function runTwigCSLint(string $file): MakerTestProcess
@@ -261,6 +264,11 @@ final class MakerTestEnvironment
             ],
         ];
         $this->processReplacements($replacements, $this->flexPath);
+
+        if ($_SERVER['MAKER_ALLOW_DEV_DEPS_IN_APP'] ?? false) {
+            MakerTestProcess::create('composer config minimum-stability dev', $this->flexPath)->run();
+            MakerTestProcess::create('composer config prefer-stable true', $this->flexPath)->run();
+        }
 
         // fetch a few packages needed for testing
         MakerTestProcess::create('composer require phpunit browser-kit symfony/css-selector --prefer-dist --no-progress --no-suggest', $this->flexPath)

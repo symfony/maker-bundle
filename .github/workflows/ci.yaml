@@ -84,6 +84,7 @@ jobs:
 
         env:
             SYMFONY_VERSION: ${{ matrix.symfony-version }}
+            MAKER_ALLOW_DEV_DEPS_IN_APP: ${{ matrix.allow-dev-deps-in-apps }}
 
         strategy:
             fail-fast: false
@@ -96,6 +97,7 @@ jobs:
                     - '5.4.x-dev'
                     - '6.0.x-dev'
                 dependency-versions: ['highest']
+                allow-dev-deps-in-apps: ['0']
                 include:
                     # testing lowest PHP version with LTS
                     - php-version: '7.1.3'
@@ -106,6 +108,12 @@ jobs:
                     - php-version: '7.2.5'
                       symfony-version: '5.3.*'
                       dependency-versions: 'lowest'
+                    # testing bleeding edge PHP with highest 5.x stable
+                    - php-version: '8.1'
+                      symfony-version: '5.3.*'
+                      dependency-versions: 'highest'
+                      # temporarily needed until some packages support php 8.1
+                      allow-dev-deps-in-apps: '1'
 
         steps:
             - name: "Checkout code"
