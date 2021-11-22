@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.36.3](https://github.com/symfony/maker-bundle/releases/tag/v1.36.3)
+
+*November 22nd, 2021*
+
+### Bug Fix
+
+- [#1017](https://github.com/symfony/maker-bundle/pull/1017) - [reset-password] fix missing entity manager di - *@jrushlow*
+
 ## [v1.36.2](https://github.com/symfony/maker-bundle/releases/tag/v1.36.2)
 
 *November 22nd, 2021*
