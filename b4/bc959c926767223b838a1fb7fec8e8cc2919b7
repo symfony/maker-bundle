@@ -1,0 +1,47 @@
+---------------------------------------------------------------------------
+
+by derrabus at 2021-11-16T17:17:14Z
+
+Oh well, Laminas Code apparently hasn't tagged a stable release for PHP 8.1 yet. Is there a way we can allow installing a dev version of `laminas/lamias-code`  for the failing tests?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2021-11-16T19:27:45Z
+
+Hmm, maybe not easily. It gets installed when we run `composer require other-stuff` inside our test projects. And so, we would need a way to say "please allow laminas-code at a dev version but not other stuff". If we can pull that off, then we definitely could :)
+
+---------------------------------------------------------------------------
+
+by derrabus at 2021-11-16T19:31:27Z
+
+Would the good old `"minimum-stability": "dev"` + `"prefer-stable": true` trick work here? 🤔
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2021-11-18T01:50:52Z
+
+Haha, well, that SORT of worked. I mean, it did work, but the tests exploded... for several reasons. One is a super odd `NormalizerAwareTrait` not being found. Another is that php-cs-fixer doesn't like that PHP 8.1 is being used. I haven't had any time yet to look into these.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2021-11-19T01:23:57Z
+
+This "should" now be "healthy". Not yet passing, but most (if not all) of the issues are legitimate (the 2 I know of already have PR's and just need a Symfony 5.3 release and DoctrineBundle merge + release).
+
+---------------------------------------------------------------------------
+
+by derrabus at 2021-11-20T18:37:32Z
+
+> Haha, well, that SORT of worked. I mean, it did work, but the tests exploded... for several reasons.
+
+The output is already pretty insightful, thanks. 🙂
+
+> Another is that php-cs-fixer doesn't like that PHP 8.1 is being used.
+
+~~We should be able to silence that by setting the env variable `PHP_CS_FIXER_IGNORE_ENV` to something truthy.~~ I just noticed that you did that already. 🙈
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2021-11-22T15:06:26Z
+
+I've just rebased so we can see what the tests think after #1016 :)
