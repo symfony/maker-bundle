@@ -714,7 +714,7 @@ class YamlSourceManipulator
     private function convertToYaml($data)
     {
         $indent = $this->depth > 0 && isset($this->indentationForDepths[$this->depth])
-            ? $this->indentationForDepths[$this->depth] / $this->depth
+            ? intdiv($this->indentationForDepths[$this->depth], $this->depth)
             : 4;
 
         $newDataString = Yaml::dump($data, 4, $indent);
@@ -1132,7 +1132,7 @@ class YamlSourceManipulator
                 unset($data[$key]);
             }
 
-            if (0 === strpos($val, self::COMMENT_PLACEHOLDER_VALUE)) {
+            if (null !== $val && 0 === strpos($val, self::COMMENT_PLACEHOLDER_VALUE)) {
                 unset($data[$key]);
             }
         }
