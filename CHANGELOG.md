@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.36.2](https://github.com/symfony/maker-bundle/releases/tag/v1.36.2)
+
+*November 22nd, 2021*
+
+### Bug Fix
+
+- [#1016](https://github.com/symfony/maker-bundle/pull/1016) - Fix PHP 8.1 deprecations - *@derrabus*
+
 ## [v1.36.1](https://github.com/symfony/maker-bundle/releases/tag/v1.36.1)
 
 *November 16th, 2021*
