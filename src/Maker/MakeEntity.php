@@ -801,7 +801,14 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $useAttributes = $this->doctrineHelper->doesClassUsesAttributes($className) && $this->doctrineHelper->isDoctrineSupportingAttributes();
         $useAnnotations = $this->doctrineHelper->isClassAnnotated($className) || !$useAttributes;
 
-        $manipulator = new ClassSourceManipulator($this->fileManager->getFileContents($path), $overwrite, $useAnnotations, true, $useAttributes);
+        $manipulator = new ClassSourceManipulator(
+            $this->fileManager->getFileContents($path),
+            $overwrite,
+            $useAnnotations,
+            true,
+            $useAttributes,
+            $this->doctrineHelper->getCustomTypeHints()
+        );
 
         $manipulator->setIo($io);
 

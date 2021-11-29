@@ -32,6 +32,11 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('root_namespace')->defaultValue('App')->end()
+                ->arrayNode('custom_type_hints')
+                    ->fixXmlConfig('custom_type_hints')
+                    ->useAttributeAsKey('name')
+                    ->prototype('scalar')->end()
+                ->end()
             ->end()
         ;
 

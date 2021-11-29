@@ -63,7 +63,8 @@ class MakerExtension extends Extension
         $makeCommandDefinition->replaceArgument(1, $rootNamespace);
 
         $doctrineHelperDefinition = $container->getDefinition('maker.doctrine_helper');
-        $doctrineHelperDefinition->replaceArgument(0, $rootNamespace.'\\Entity');
+        $doctrineHelperDefinition->replaceArgument('$entityNamespace', $rootNamespace.'\\Entity');
+        $doctrineHelperDefinition->replaceArgument('$customTypeHints', $config['custom_type_hints']);
 
         $container->registerForAutoconfiguration(MakerInterface::class)
             ->addTag(MakeCommandRegistrationPass::MAKER_TAG);

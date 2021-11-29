@@ -380,7 +380,8 @@ class MakeResetPassword extends AbstractMaker
             false,
             !$useAttributesForDoctrineMapping,
             true,
-            $useAttributesForDoctrineMapping
+            $useAttributesForDoctrineMapping,
+            $this->doctrineHelper->getCustomTypeHints()
         );
 
         $manipulator->addInterface(ResetPasswordRequestInterface::class);

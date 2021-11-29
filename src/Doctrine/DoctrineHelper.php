@@ -57,16 +57,19 @@ final class DoctrineHelper
 
     private $attributeMappingSupport;
 
+    private $customTypeHints;
+
     /**
      * @var ManagerRegistry|LegacyManagerRegistry
      */
-    public function __construct(string $entityNamespace, PhpCompatUtil $phpCompatUtil, $registry = null, bool $attributeMappingSupport = false, array $annotatedPrefixes = null)
+    public function __construct(string $entityNamespace, PhpCompatUtil $phpCompatUtil, $registry = null, bool $attributeMappingSupport = false, array $annotatedPrefixes = null, array $customTypeHints = [])
     {
         $this->entityNamespace = trim($entityNamespace, '\\');
         $this->phpCompatUtil = $phpCompatUtil;
         $this->registry = $registry;
         $this->attributeMappingSupport = $attributeMappingSupport;
         $this->mappingDriversByPrefix = $annotatedPrefixes;
+        $this->customTypeHints = $customTypeHints;
     }
 
     /**
@@ -323,5 +326,10 @@ final class DoctrineHelper
         }
 
         return $foundDriver;
+    }
+
+    public function getCustomTypeHints(): array
+    {
+        return $this->customTypeHints;
     }
 }

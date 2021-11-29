@@ -172,7 +172,8 @@ final class MakeUser extends AbstractMaker
             true,
             !$useAttributesForDoctrineMapping,
             true,
-            $useAttributesForDoctrineMapping
+            $useAttributesForDoctrineMapping,
+            $this->doctrineHelper->getCustomTypeHints()
         );
 
         $manipulator->setIo($io);

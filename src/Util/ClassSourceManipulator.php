@@ -56,7 +56,9 @@ final class ClassSourceManipulator
 
     private $pendingComments = [];
 
-    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true, bool $useAttributesForDoctrineMapping = false)
+    private $customTypeHints = [];
+
+    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true, bool $useAttributesForDoctrineMapping = false, array $customTypeHints = [])
     {
         $this->overwrite = $overwrite;
         $this->useAnnotations = $useAnnotations;
@@ -71,6 +73,7 @@ final class ClassSourceManipulator
         ]);
         $this->parser = new Parser\Php7($this->lexer);
         $this->printer = new PrettyPrinter();
+        $this->customTypeHints = $customTypeHints;
 
         $this->setSourceCode($sourceCode);
     }
@@ -1158,6 +1161,12 @@ final class ClassSourceManipulator
             case 'binary':
             case 'blob':
             default:
+                if (isset($this->customTypeHints[$doctrineType])) {
+                   $type = $this->customTypeHints[$doctrineType];
+
+                   return '\\'.\ltrim($type, '\\');
+                }
+
                 return null;
         }
     }
