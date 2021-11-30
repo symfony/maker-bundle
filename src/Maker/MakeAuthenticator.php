@@ -35,7 +35,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
@@ -408,7 +408,7 @@ final class MakeAuthenticator extends AbstractMaker
 
     private function providerKeyTypeHint(): string
     {
-        $reflectionMethod = new \ReflectionMethod(AbstractFormLoginAuthenticator::class, 'onAuthenticationSuccess');
+        $reflectionMethod = new \ReflectionMethod(AbstractLoginFormAuthenticator::class, 'onAuthenticationSuccess');
         $type = $reflectionMethod->getParameters()[2]->getType();
 
         if (!$type instanceof \ReflectionNamedType) {
