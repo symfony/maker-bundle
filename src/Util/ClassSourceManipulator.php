@@ -1162,9 +1162,9 @@ final class ClassSourceManipulator
             case 'blob':
             default:
                 if (isset($this->customTypeHints[$doctrineType])) {
-                   $type = $this->customTypeHints[$doctrineType];
+                    $type = $this->customTypeHints[$doctrineType];
 
-                   return '\\'.\ltrim($type, '\\');
+                    return '\\'.ltrim($type, '\\');
                 }
 
                 return null;
