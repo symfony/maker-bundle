@@ -1,0 +1,19 @@
+---------------------------------------------------------------------------
+
+by derrabus at 2021-11-30T09:54:24Z
+
+I think, we have to release DoctrineBundle to fix the CI here.
+
+---------------------------------------------------------------------------
+
+by derrabus at 2021-11-30T09:58:13Z
+
+Done, let's try this again.
+
+---------------------------------------------------------------------------
+
+by derrabus at 2021-11-30T10:29:43Z
+
+Okay, that rabbit hole is a bit deeper than I thought.
+
+symfony/panther#519
