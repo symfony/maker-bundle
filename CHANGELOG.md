@@ -1,5 +1,14 @@
 # Changelog
 
+## [v1.36.4](https://github.com/symfony/maker-bundle/releases/tag/v1.36.4)
+
+*November 30th, 2021*
+
+### Bug Fix
+
+- [#1023](https://github.com/symfony/maker-bundle/pull/1023) - Allow deprecation-contracts 3 - *@derrabus*
+- [#1026](https://github.com/symfony/maker-bundle/pull/1026) - preventing Guard auth method from exploding in 6.0 - *@weaverryan*
+
 ## [v1.36.3](https://github.com/symfony/maker-bundle/releases/tag/v1.36.3)
 
 *November 22nd, 2021*
