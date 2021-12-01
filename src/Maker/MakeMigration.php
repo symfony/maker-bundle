@@ -127,7 +127,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
 
         $io->text([
             sprintf('Next: Review the new migration <info>%s</info>', $migrationName),
-            'Then: Run the migration with <info>php bin/console doctrine:migrations:migrate</info>',
+            'Then: Run the migration with <info>php bin/console doctrine:migrations:migrate --all-or-nothing</info>',
             'See <fg=yellow>https://symfony.com/doc/current/bundles/DoctrineMigrationsBundle/index.html</>',
         ]);
     }
