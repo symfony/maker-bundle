@@ -368,7 +368,8 @@ final class MakeAuthenticator extends AbstractMaker
                 $nextTexts[] = sprintf('- Review <info>%s::getUser()</info> to make sure it matches your needs.', $authenticatorClass);
             }
 
-            if (!$this->userClassHasEncoder($securityData, $userClass)) {
+            // this only applies to Guard authentication AND if the user does not have a hasher configured
+            if (!$this->useSecurity52 && !$this->userClassHasEncoder($securityData, $userClass)) {
                 $nextTexts[] = sprintf('- Check the user\'s password in <info>%s::checkCredentials()</info>.', $authenticatorClass);
             }
 
@@ -381,11 +382,11 @@ final class MakeAuthenticator extends AbstractMaker
     private function userClassHasEncoder(array $securityData, string $userClass): bool
     {
         $userNeedsEncoder = false;
-        if (isset($securityData['security']['encoders']) && $securityData['security']['encoders']) {
-            foreach ($securityData['security']['encoders'] as $userClassWithEncoder => $encoder) {
-                if ($userClass === $userClassWithEncoder || is_subclass_of($userClass, $userClassWithEncoder)) {
-                    $userNeedsEncoder = true;
-                }
+        $hashersData = $securityData['security']['encoders'] ?? $securityData['security']['encoders'] ?? [];
+
+        foreach ($hashersData as $userClassWithEncoder => $encoder) {
+            if ($userClass === $userClassWithEncoder || is_subclass_of($userClass, $userClassWithEncoder) || class_implements($userClass, $userClassWithEncoder)) {
+                $userNeedsEncoder = true;
             }
         }
 
