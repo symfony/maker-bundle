@@ -17,7 +17,7 @@ class <?= $class_name."\n" ?>
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: Types::INTEGER)]
     private int $id;
 
     public function getId(): ?int

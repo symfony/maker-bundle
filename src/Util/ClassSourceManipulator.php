@@ -1040,6 +1040,39 @@ final class ClassSourceManipulator
         };
     }
 
+    private function getTypeConstant(string $type): string
+    {
+        $typesMapping = [
+            'array' => 'Types::ARRAY',
+            'ascii_string' => 'Types::ASCII_STRING',
+            'bigint' => 'Types::BIGINT',
+            'binary' => 'Types::BINARY',
+            'blob' => 'Types::BLOB',
+            'boolean' => 'Types::BOOLEAN',
+            'date' => 'Types::DATE_MUTABLE',
+            'date_immutable' => 'Types::DATE_IMMUTABLE',
+            'dateinterval' => 'Types::DATEINTERVAL',
+            'datetime' => 'Types::DATETIME_MUTABLE',
+            'datetime_immutable' => 'Types::DATETIME_IMMUTABLE',
+            'datetimetz' => 'Types::DATETIMETZ_MUTABLE',
+            'datetimetz_immutable' => 'Types::DATETIMETZ_IMMUTABLE',
+            'decimal' => 'Types::DECIMAL',
+            'float' => 'Types::FLOAT',
+            'guid' => 'Types::GUID',
+            'integer' => 'Types::INTEGER',
+            'json' => 'Types::JSON',
+            'object' => 'Types::OBJECT',
+            'simple_array' => 'Types::SIMPLE_ARRAY',
+            'smallint' => 'Types::SMALLINT',
+            'string' => 'Types::STRING',
+            'text' => 'Types::TEXT',
+            'time' => 'Types::TIME_MUTABLE',
+            'time_immutable' => 'Types::TIME_IMMUTABLE',
+        ];
+
+        return $typesMapping[$type] ?? $type;
+    }
+
     private function isInSameNamespace(string $class): bool
     {
         $namespace = substr($class, 0, strrpos($class, '\\'));
