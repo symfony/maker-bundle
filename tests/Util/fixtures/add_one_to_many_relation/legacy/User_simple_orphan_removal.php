@@ -34,7 +34,7 @@ class User
     }
 
     /**
-     * @return Collection|UserAvatarPhoto[]
+     * @return Collection<int, UserAvatarPhoto>
      */
     public function getAvatarPhotos(): Collection
     {
