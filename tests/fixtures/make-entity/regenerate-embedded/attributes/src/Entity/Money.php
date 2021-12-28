@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Embeddable]
@@ -16,7 +17,7 @@ class Money
     /**
      * @var int
      */
-    #[ORM\Column(name: 'amount', type: 'integer')]
+    #[ORM\Column(name: 'amount', type: Types::INTEGER)]
     private $amount;
 
     public function __construct($amount = null, Currency $currency = null)

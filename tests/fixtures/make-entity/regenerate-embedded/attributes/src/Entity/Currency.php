@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Embeddable]
@@ -10,7 +11,7 @@ class Currency
     /**
      * @var string
      */
-    #[ORM\Column(type: 'string', name: 'currency')]
+    #[ORM\Column(type: Types::STRING, name: 'currency')]
     private $currency;
 
     public function __construct($currency = null)
