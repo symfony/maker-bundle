@@ -512,6 +512,13 @@ final class ClassSourceManipulator
             throw new \Exception('Invalid value: loop before quoting.');
         }
 
+        if (\PHP_VERSION_ID >= 80000) {
+            // do we have an enum ?
+            if (is_object($value) && enum_exists(get_class($value))) {
+                $value = $value->value;
+            }
+        }
+
         return sprintf('"%s"', $value);
     }
 
