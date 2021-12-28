@@ -30,7 +30,9 @@ class MakeEntityTest extends MakerTestCase
     {
         return $this->createMakerTest()
             ->preRun(function (MakerTestRunner $runner) use ($withDatabase) {
-                if ($this->useAttributes($runner)) {
+                $config = $runner->readYaml('config/packages/doctrine.yaml');
+
+                if (isset($config['doctrine']['orm']['mappings']['App']['type']) && $this->useAttributes($runner)) {
                     // use attributes
                     $runner->replaceInFile(
                         'config/packages/doctrine.yaml',
@@ -656,13 +658,14 @@ class MakeEntityTest extends MakerTestCase
         );
     }
 
-    private function changeToXmlMapping(MakerTestRunner $runner)
+    private function changeToXmlMapping(MakerTestRunner $runner): void
     {
-        $runner->replaceInFile(
-            'config/packages/doctrine.yaml',
-            $this->useAttributes($runner) ? 'type: attribute' : 'type: annotation',
-            'type: xml'
-        );
+        $runner->modifyYamlFile('config/packages/doctrine.yaml', function (array $data) {
+            $data['doctrine']['orm']['mappings']['App']['type'] = 'xml';
+
+            return $data;
+        });
+
         $runner->replaceInFile(
             'config/packages/doctrine.yaml',
             "dir: '%kernel.project_dir%/src/Entity'",
