@@ -3,3 +3,4 @@
 appveyor.yml
 phpunit.xml.dist
 /tests export-ignore
+* text=auto eol=lf
