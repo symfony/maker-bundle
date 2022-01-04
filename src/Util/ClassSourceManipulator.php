@@ -56,10 +56,11 @@ final class ClassSourceManipulator
 
     private $pendingComments = [];
 
-    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true, bool $useAttributesForDoctrineMapping = false)
+    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true, bool $useAttributesForDoctrineMapping = false, bool $addGettersSetters = true)
     {
         $this->overwrite = $overwrite;
         $this->useAnnotations = $useAnnotations;
+        $this->addGettersSetters = $addGettersSetters;
         $this->fluentMutators = $fluentMutators;
         $this->useAttributesForDoctrineMapping = $useAttributesForDoctrineMapping;
         $this->lexer = new Lexer\Emulative([
@@ -85,17 +86,20 @@ final class ClassSourceManipulator
         return $this->sourceCode;
     }
 
-    public function addEntityField(string $propertyName, array $columnOptions, array $comments = []): void
+    public function addEntityField(string $propertyName, array $columnOptions, array $comments = [], bool $classDto = false): void
     {
         $typeHint = $this->getEntityTypeHint($columnOptions['type']);
         $nullable = $columnOptions['nullable'] ?? false;
         $isId = (bool) ($columnOptions['id'] ?? false);
         $attributes = [];
+        $comments = [];
 
-        if ($this->useAttributesForDoctrineMapping) {
-            $attributes[] = $this->buildAttributeNode('ORM\Column', $columnOptions);
-        } else {
-            $comments[] = $this->buildAnnotationLine('@ORM\Column', $columnOptions);
+        if(!$classDto){
+            if ($this->useAttributesForDoctrineMapping) {
+                $attributes[] = $this->buildAttributeNode('ORM\Column', $columnOptions);
+            } else {
+                $comments[] = $this->buildAnnotationLine('@ORM\Column', $columnOptions);
+            }
         }
 
         $defaultValue = null;
@@ -103,7 +107,12 @@ final class ClassSourceManipulator
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
         }
 
-        $this->addProperty($propertyName, $comments, $defaultValue, $attributes);
+        $this->addProperty($propertyName, $comments, $defaultValue, $attributes, $classDto, $typeHint);
+
+        // return early when setters/getters should not be added.
+        if (!$this->addGettersSetters) {
+            return;
+        }
 
         $this->addGetter(
             $propertyName,
@@ -115,7 +124,7 @@ final class ClassSourceManipulator
 
         // don't generate setters for id fields
         if (!$isId) {
-            $this->addSetter($propertyName, $typeHint, $nullable);
+            $this->addSetter($propertyName, $typeHint, $nullable, [], $classDto);
         }
     }
 
@@ -252,15 +261,19 @@ final class ClassSourceManipulator
         $this->addCustomGetter($propertyName, $methodName, $returnType, $isReturnTypeNullable, $commentLines);
     }
 
-    public function addSetter(string $propertyName, $type, bool $isNullable, array $commentLines = []): void
+    public function addSetter(string $propertyName, $type, bool $isNullable, array $commentLines = [], $classDto = false): void
     {
         $builder = $this->createSetterNodeBuilder($propertyName, $type, $isNullable, $commentLines);
-        $builder->addStmt(
-            new Node\Stmt\Expression(new Node\Expr\Assign(
-                new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $propertyName),
-                new Node\Expr\Variable($propertyName)
-            ))
-        );
+
+        if(!$classDto){
+            $builder->addStmt(
+                new Node\Stmt\Expression(new Node\Expr\Assign(
+                    new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $propertyName),
+                    new Node\Expr\Variable($propertyName)
+                ))
+            );
+        }
+
         $this->makeMethodFluent($builder);
         $this->addMethod($builder->getNode());
     }
@@ -287,12 +300,14 @@ final class ClassSourceManipulator
     /**
      * @param Node[] $params
      */
-    public function addMethodBuilder(Builder\Method $methodBuilder, array $params = [], string $methodBody = null): void
+    public function addMethodBuilder(Builder\Method $methodBuilder, array $params = [], string $methodBody = null, $classDto = false): void
     {
-        $this->addMethodParams($methodBuilder, $params);
+        if(!$classDto){
+            $this->addMethodParams($methodBuilder, $params);
 
-        if ($methodBody) {
-            $this->addMethodBody($methodBuilder, $methodBody);
+            if ($methodBody) {
+                $this->addMethodBody($methodBuilder, $methodBody);
+            }
         }
 
         $this->addMethod($methodBuilder->getNode());
@@ -304,13 +319,13 @@ final class ClassSourceManipulator
         $methodBuilder->addStmts($nodes);
     }
 
-    public function createMethodBuilder(string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = []): Builder\Method
+    public function createMethodBuilder(string $methodName, $returnType, bool $isReturnTypeNullable, array $commentLines = [], $classDto = false): Builder\Method
     {
         $methodNodeBuilder = (new Builder\Method($methodName))
             ->makePublic();
 
         if (null !== $returnType) {
-            if (class_exists($returnType) || interface_exists($returnType)) {
+            if (!$classDto && (class_exists($returnType) || interface_exists($returnType))) {
                 $returnType = $this->addUseStatementIfNecessary($returnType);
             }
             $methodNodeBuilder->setReturnType($isReturnTypeNullable ? new Node\NullableType($returnType) : $returnType);
@@ -333,21 +348,31 @@ final class ClassSourceManipulator
         return $this->createBlankLineNode(self::CONTEXT_CLASS_METHOD);
     }
 
-    public function addProperty(string $name, array $annotationLines = [], $defaultValue = null, array $attributes = []): void
+    public function addProperty(string $name, array $annotationLines = [], $defaultValue = null, array $attributes = [], $classDto = false, $typeHint = null): void
     {
         if ($this->propertyExists($name)) {
             // we never overwrite properties
             return;
         }
 
-        $newPropertyBuilder = (new Builder\Property($name))->makePrivate();
+        $newPropertyBuilder = new Builder\Property($name);
+
+        if($typeHint !== null && PHP_VERSION_ID >= 70400) {
+            $newPropertyBuilder->setType($typeHint);
+        }
+
+        if(!$classDto){
+            $newPropertyBuilder->makePrivate();
+
+            foreach ($attributes as $attribute) {
+                $newPropertyBuilder->addAttribute($attribute);
+            }
+        } else {
+            $newPropertyBuilder->makePublic();
+        }
 
         if ($annotationLines && $this->useAnnotations) {
             $newPropertyBuilder->setDocComment($this->createDocBlock($annotationLines));
-        }
-
-        foreach ($attributes as $attribute) {
-            $newPropertyBuilder->addAttribute($attribute);
         }
 
         if (null !== $defaultValue) {
@@ -355,7 +380,7 @@ final class ClassSourceManipulator
         }
         $newPropertyNode = $newPropertyBuilder->getNode();
 
-        $this->addNodeAfterProperties($newPropertyNode);
+        $this->addNodeAfterProperties($newPropertyNode, $classDto);
     }
 
     public function addAnnotationToClass(string $annotationClass, array $options): void
@@ -428,7 +453,7 @@ final class ClassSourceManipulator
         $this->addMethod($getterNodeBuilder->getNode());
     }
 
-    private function createSetterNodeBuilder(string $propertyName, $type, bool $isNullable, array $commentLines = []): Builder\Method
+    private function createSetterNodeBuilder(string $propertyName, $type, bool $isNullable, array $commentLines = [], $classDto = true): Builder\Method
     {
         $methodName = 'set'.Str::asCamelCase($propertyName);
         $setterNodeBuilder = (new Builder\Method($methodName))->makePublic();
@@ -443,6 +468,15 @@ final class ClassSourceManipulator
         }
         $setterNodeBuilder->addParam($paramBuilder->getNode());
 
+        if($classDto){
+            $setterNodeBuilder->addStmt(
+                new Node\Stmt\Expression(new Node\Expr\Assign(
+                    new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $propertyName),
+                    new Node\Expr\Variable($propertyName)
+                ))
+            );
+        }
+
         return $setterNodeBuilder;
     }
 
@@ -450,7 +484,7 @@ final class ClassSourceManipulator
      * @param string $annotationClass The annotation: e.g. "@ORM\Column"
      * @param array  $options         Key-value pair of options for the annotation
      */
-    private function buildAnnotationLine(string $annotationClass, array $options): string
+    public function buildAnnotationLine(string $annotationClass, array $options): string
     {
         $formattedOptions = array_map(function ($option, $value) {
             if (\is_array($value)) {
@@ -471,7 +505,7 @@ final class ClassSourceManipulator
         return sprintf('%s(%s)', $annotationClass, implode(', ', $formattedOptions));
     }
 
-    private function quoteAnnotationValue($value)
+    private function quoteAnnotationValue($value, $classDto = false)
     {
         if (\is_bool($value)) {
             return $value ? 'true' : 'false';
@@ -485,7 +519,7 @@ final class ClassSourceManipulator
             return $value;
         }
 
-        if ($value instanceof ClassNameValue) {
+        if ($value instanceof ClassNameValue && !$classDto) {
             return sprintf('%s::class', $value->getShortName());
         }
 
@@ -1116,6 +1150,10 @@ final class ClassSourceManipulator
     private function getEntityTypeHint($doctrineType): ?string
     {
         switch ($doctrineType) {
+            case 'uuid':
+            case 'ulid':
+                return ucfirst($doctrineType);
+
             case 'string':
             case 'text':
             case 'guid':
@@ -1179,7 +1217,7 @@ final class ClassSourceManipulator
      *
      * Useful for adding properties, or adding a constructor.
      */
-    private function addNodeAfterProperties(Node $newNode): void
+    private function addNodeAfterProperties(Node $newNode, $classDto = false): void
     {
         $classNode = $this->getClassNode();
 
@@ -1195,11 +1233,13 @@ final class ClassSourceManipulator
             }, [$classNode]);
         }
 
-        // otherwise, try to add after the last trait
-        if (!$targetNode) {
-            $targetNode = $this->findLastNode(function ($node) {
-                return $node instanceof Node\Stmt\TraitUse;
-            }, [$classNode]);
+        if(!$classDto){
+            // otherwise, try to add after the last trait
+            if (!$targetNode) {
+                $targetNode = $this->findLastNode(function ($node) {
+                    return $node instanceof Node\Stmt\TraitUse;
+                }, [$classNode]);
+            }
         }
 
         // add the new property after this node
@@ -1232,7 +1272,7 @@ final class ClassSourceManipulator
         return new Node\Expr\ConstFetch(new Node\Name('null'));
     }
 
-    private function addNodesToSetOtherSideOfOneToOne(RelationOneToOne $relation, Builder\Method $setterNodeBuilder): void
+    private function addNodesToSetOtherSideOfOneToOne(RelationOneToOne $relation, Builder\Method $setterNodeBuilder, $classDto = false): void
     {
         if (!$relation->isNullable()) {
             $setterNodeBuilder->addStmt($this->createSingleLineCommentNode(
@@ -1258,7 +1298,10 @@ final class ClassSourceManipulator
                 )),
             ];
             $setterNodeBuilder->addStmt($ifNode);
-            $setterNodeBuilder->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD));
+
+            if(!$classDto){
+                $setterNodeBuilder->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD));
+            }
 
             return;
         }
@@ -1269,63 +1312,100 @@ final class ClassSourceManipulator
             self::CONTEXT_CLASS_METHOD
         ));
 
-        // if ($user !== null && $user->getUserProfile() !== $this)
-        $ifNode = new Node\Stmt\If_(new Node\Expr\BinaryOp\BooleanAnd(
-            new Node\Expr\BinaryOp\Identical(
-                new Node\Expr\Variable($relation->getPropertyName()),
-                $this->createNullConstant()
-            ),
-            new Node\Expr\BinaryOp\NotIdentical(
-                new Node\Expr\PropertyFetch(
-                    new Node\Expr\Variable('this'),
-                    $relation->getPropertyName()
+        if(!$classDto){
+            // if ($user !== null && $user->getUserProfile() !== $this)
+            $ifNode = new Node\Stmt\If_(new Node\Expr\BinaryOp\BooleanAnd(
+                new Node\Expr\BinaryOp\Identical(
+                    new Node\Expr\Variable($relation->getPropertyName()),
+                    $this->createNullConstant()
                 ),
-                $this->createNullConstant()
-            )
-        ));
-        $ifNode->stmts = [
-            // $this->user->setUserProfile(null)
-            new Node\Stmt\Expression(new Node\Expr\MethodCall(
-                new Node\Expr\PropertyFetch(
-                    new Node\Expr\Variable('this'),
-                    $relation->getPropertyName()
+                new Node\Expr\BinaryOp\NotIdentical(
+                    new Node\Expr\PropertyFetch(
+                        new Node\Expr\Variable('this'),
+                        $relation->getPropertyName()
+                    ),
+                    $this->createNullConstant()
+                )
+            ));
+            $ifNode->stmts = [
+                // $this->user->setUserProfile(null)
+                new Node\Stmt\Expression(new Node\Expr\MethodCall(
+                    new Node\Expr\PropertyFetch(
+                        new Node\Expr\Variable('this'),
+                        $relation->getPropertyName()
+                    ),
+                    $relation->getTargetSetterMethodName(),
+                    [new Node\Arg($this->createNullConstant())]
+                )),
+            ];
+            $setterNodeBuilder->addStmt($ifNode);
+
+            $setterNodeBuilder->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD));
+            $setterNodeBuilder->addStmt($this->createSingleLineCommentNode(
+                'set the owning side of the relation if necessary',
+                self::CONTEXT_CLASS_METHOD
+            ));
+
+            // if ($user === null && $this->user !== null)
+            $ifNode = new Node\Stmt\If_(new Node\Expr\BinaryOp\BooleanAnd(
+                new Node\Expr\BinaryOp\NotIdentical(
+                    new Node\Expr\Variable($relation->getPropertyName()),
+                    $this->createNullConstant()
                 ),
-                $relation->getTargetSetterMethodName(),
-                [new Node\Arg($this->createNullConstant())]
-            )),
-        ];
-        $setterNodeBuilder->addStmt($ifNode);
+                new Node\Expr\BinaryOp\NotIdentical(
+                    new Node\Expr\MethodCall(
+                        new Node\Expr\Variable($relation->getPropertyName()),
+                        $relation->getTargetGetterMethodName()
+                    ),
+                    new Node\Expr\Variable('this')
+                )
+            ));
+            $ifNode->stmts = [
+                new Node\Stmt\Expression(new Node\Expr\MethodCall(
+                    new Node\Expr\Variable($relation->getPropertyName()),
+                    $relation->getTargetSetterMethodName(),
+                    [new Node\Arg(new Node\Expr\Variable('this'))]
+                )),
+            ];
+            $setterNodeBuilder->addStmt($ifNode);
 
-        $setterNodeBuilder->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD));
-        $setterNodeBuilder->addStmt($this->createSingleLineCommentNode(
-            'set the owning side of the relation if necessary',
-            self::CONTEXT_CLASS_METHOD
-        ));
+            $setterNodeBuilder->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD));
+        }else{
+            $varName = 'new'.ucfirst($relation->getTargetPropertyName());
+            // $newUserProfile = null === $user ? null : $this;
+            $setterNodeBuilder->addStmt(
+                new Node\Stmt\Expression(new Node\Expr\Assign(
+                    new Node\Expr\Variable($varName),
+                    new Node\Expr\Ternary(
+                        new Node\Expr\BinaryOp\Identical(
+                            new Node\Expr\Variable($relation->getPropertyName()),
+                            $this->createNullConstant()
+                        ),
+                        $this->createNullConstant(),
+                        new Node\Expr\Variable('this')
+                    )
+                ))
+            );
 
-        // if ($user === null && $this->user !== null)
-        $ifNode = new Node\Stmt\If_(new Node\Expr\BinaryOp\BooleanAnd(
-            new Node\Expr\BinaryOp\NotIdentical(
-                new Node\Expr\Variable($relation->getPropertyName()),
-                $this->createNullConstant()
-            ),
-            new Node\Expr\BinaryOp\NotIdentical(
+            // if ($newUserProfile !== $user->getUserProfile()) {
+            $ifNode = new Node\Stmt\If_(new Node\Expr\BinaryOp\NotIdentical(
+                new Node\Expr\Variable($varName),
                 new Node\Expr\MethodCall(
                     new Node\Expr\Variable($relation->getPropertyName()),
                     $relation->getTargetGetterMethodName()
-                ),
-                new Node\Expr\Variable('this')
-            )
-        ));
-        $ifNode->stmts = [
-            new Node\Stmt\Expression(new Node\Expr\MethodCall(
-                new Node\Expr\Variable($relation->getPropertyName()),
-                $relation->getTargetSetterMethodName(),
-                [new Node\Arg(new Node\Expr\Variable('this'))]
-            )),
-        ];
-        $setterNodeBuilder->addStmt($ifNode);
+                )
+            ));
 
-        $setterNodeBuilder->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD));
+            // $user->setUserProfile($newUserProfile);
+            $ifNode->stmts = [
+                new Node\Stmt\Expression(new Node\Expr\MethodCall(
+                    new Node\Expr\Variable($relation->getPropertyName()),
+                    $relation->getTargetSetterMethodName(),
+                    [new Node\Arg(new Node\Expr\Variable($varName))]
+                )),
+            ];
+            $setterNodeBuilder->addStmt($ifNode);
+        }
     }
 
     private function methodExists(string $methodName): bool

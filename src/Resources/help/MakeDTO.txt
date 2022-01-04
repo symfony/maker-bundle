@@ -1,0 +1,5 @@
+The <info>%command.name%</info> command generates a new data transfer object class.
+
+<info>php %command.full_name% Name Entity</info>
+
+If the argument is missing, the command will ask for the classname and entity interactively.
