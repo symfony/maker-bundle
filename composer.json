@@ -35,7 +35,6 @@
         "symfony/polyfill-php80": "^1.16.0",
         "symfony/process": "^4.4|^5.0|^6.0",
         "symfony/security-core": "^4.4|^5.0|^6.0",
-        "symfony/yaml": "^4.4|^5.0|^6.0",
         "twig/twig": "^2.0|^3.0"
     },
     "config": {
