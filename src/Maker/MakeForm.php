@@ -84,7 +84,7 @@ final class MakeForm extends AbstractMaker
     {
         $formClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Form\\Type\\',
+            'Form\\',
             'Type'
         );
 

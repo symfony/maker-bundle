@@ -33,7 +33,7 @@ final class EntityClassGenerator
         $this->doctrineHelper = $doctrineHelper;
     }
 
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $uuid, bool $ulid, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false): string
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false): string
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -50,8 +50,6 @@ final class EntityClassGenerator
                 'repository_full_class_name' => $repoClassDetails->getFullName(),
                 'repository_class_name' => $repoClassDetails->getShortName(),
                 'api_resource' => $apiResource,
-                'id_uuid' => $uuid,
-                'id_ulid' => $ulid,
                 'broadcast' => $broadcast,
                 'should_escape_table_name' => $this->doctrineHelper->isKeyword($tableName),
                 'table_name' => $tableName,

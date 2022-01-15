@@ -44,14 +44,6 @@
                 <tag name="maker.command" />
             </service>
 
-            <service id="maker.maker.make_dto" class="Symfony\Bundle\MakerBundle\Maker\MakeDTO">
-                <argument type="service" id="maker.doctrine_helper" />
-                <argument type="service" id="maker.file_manager" />
-                <argument type="service" id="doctrine.orm.entity_manager" />
-                <argument>%kernel.project_dir%</argument>
-                <tag name="maker.command" />
-            </service>
-
             <service id="maker.maker.make_fixtures" class="Symfony\Bundle\MakerBundle\Maker\MakeFixtures">
                 <tag name="maker.command" />
             </service>

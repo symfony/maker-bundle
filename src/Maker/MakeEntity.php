@@ -36,8 +36,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\UX\Turbo\Attribute\Broadcast;
-use Symfony\Component\Uid\Uuid;
-use Symfony\Component\Uid\Ulid;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -90,8 +88,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             ->addOption('broadcast', 'b', InputOption::VALUE_NONE, 'Add the ability to broadcast entity updates using Symfony UX Turbo?')
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
-            ->addOption('uuid', null, InputOption::VALUE_NONE, 'Create entity with uuid')
-            ->addOption('ulid', null, InputOption::VALUE_NONE, 'Create entity with ulid')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
         ;
 
@@ -100,16 +96,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
-        if($input->getOption('uuid')){
-            if ($input->getOption('ulid')){
-                throw new RuntimeCommandException('To use uuid you don´t put option ulid');
-            }
-        }elseif ($input->getOption('ulid')){
-            if ($input->getOption('uuid')){
-                throw new RuntimeCommandException('To use ulid you don´t put option uuid');
-            }
-        }
-
         if ($input->getArgument('name')) {
             return;
         }
@@ -159,8 +145,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $uuid = $input->getOption('uuid');
-        $ulid = $input->getOption('ulid');
         $overwrite = $input->getOption('overwrite');
 
         // the regenerate option has entirely custom behavior
@@ -186,8 +170,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $entityPath = $this->entityClassGenerator->generateEntityClass(
                 $entityClassDetails,
                 $input->getOption('api-resource'),
-                $uuid,
-                $ulid,
                 false,
                 true,
                 $broadcast
@@ -335,19 +317,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             );
         }
 
-        if (null !== $input && $input->getOption('uuid') || $input->getOption('ulid')) {
-
-            $class = null;
-
-            if ($input->getOption('uuid')) {
-                $class = Uuid::class;
-            }else if ($input->getOption('ulid')) {
-                $class = Ulid::class;
-            }
-
+        if (null !== $input && $input->getOption('broadcast')) {
             $dependencies->addClassDependency(
-                $class,
-                'uid'
+                Broadcast::class,
+                'ux-turbo-mercure'
             );
         }
 
