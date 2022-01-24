@@ -8,11 +8,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class <?= $class_name ?> extends Voter
 {
+    public const EDIT = 'POST_EDIT';
+    public const VIEW = 'POST_VIEW';
+
     protected function supports(<?= $use_type_hints ? 'string ' : null ?>$attribute, $subject): bool
     {
         // replace with your own logic
         // https://symfony.com/doc/current/security/voters.html
-        return in_array($attribute, ['POST_EDIT', 'POST_VIEW'])
+        return in_array($attribute, [self::EDIT, self::VIEW])
             && $subject instanceof \App\Entity\<?= str_replace('Voter', null, $class_name) ?>;
     }
 
@@ -26,11 +29,11 @@ class <?= $class_name ?> extends Voter
 
         // ... (check conditions and return true to grant permission) ...
         switch ($attribute) {
-            case 'POST_EDIT':
+            case self::EDIT:
                 // logic to determine if the user can EDIT
                 // return true or false
                 break;
-            case 'POST_VIEW':
+            case self::VIEW:
                 // logic to determine if the user can VIEW
                 // return true or false
                 break;
