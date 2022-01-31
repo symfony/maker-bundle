@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\Column;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -370,24 +371,40 @@ final class MakeRegistrationForm extends AbstractMaker
             );
             $userManipulator->setIo($io);
 
-            $userManipulator->addAnnotationToClass(
-                UniqueEntity::class,
-                [
-                    'fields' => [$usernameField],
-                    'message' => sprintf('There is already an account with this %s', $usernameField),
-                ]
-            );
+            if ($this->doctrineHelper->isDoctrineSupportingAttributes()) {
+                $userManipulator->addAttributeToClass(
+                    UniqueEntity::class,
+                    ['fields' => [$usernameField], 'message' => sprintf('There is already an account with this %s', $usernameField)]
+                );
+            } else {
+                $userManipulator->addAnnotationToClass(
+                    UniqueEntity::class,
+                    [
+                        'fields' => [$usernameField],
+                        'message' => sprintf('There is already an account with this %s', $usernameField),
+                    ]
+                );
+            }
             $this->fileManager->dumpFile($classDetails->getPath(), $userManipulator->getSourceCode());
         }
 
         if ($this->willVerifyEmail) {
             $classDetails = new ClassDetails($this->userClass);
             $userManipulator = new ClassSourceManipulator(
-                file_get_contents($classDetails->getPath())
+                file_get_contents($classDetails->getPath()),
+                false,
+                $this->doctrineHelper->isClassAnnotated($this->userClass),
+                true,
+                $this->doctrineHelper->doesClassUsesAttributes($this->userClass)
             );
             $userManipulator->setIo($io);
 
-            $userManipulator->addProperty('isVerified', ['@ORM\Column(type="boolean")'], false);
+            $userManipulator->addProperty(
+                'isVerified',
+                ['@ORM\Column(type="boolean")'],
+                false,
+                [$userManipulator->buildAttributeNode(Column::class, ['type' => 'boolean'], 'ORM')]
+            );
             $userManipulator->addAccessorMethod('isVerified', 'isVerified', 'bool', false);
             $userManipulator->addSetter('isVerified', 'bool', false);
 

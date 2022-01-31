@@ -44,8 +44,10 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
 use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestInterface;
@@ -236,6 +238,18 @@ class MakeResetPassword extends AbstractMaker
             EntityManagerInterface::class,
         ];
 
+        // Namespace for ResetPasswordExceptionInterface was imported above
+        $problemValidateMessageOrConstant = \defined('SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface::MESSAGE_PROBLEM_VALIDATE')
+            ? 'ResetPasswordExceptionInterface::MESSAGE_PROBLEM_VALIDATE'
+            : "'There was a problem validating your password reset request'";
+        $problemHandleMessageOrConstant = \defined('SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface::MESSAGE_PROBLEM_HANDLE')
+            ? 'ResetPasswordExceptionInterface::MESSAGE_PROBLEM_HANDLE'
+            : "'There was a problem handling your password reset request'";
+
+        if ($isTranslatorAvailable = class_exists(Translator::class)) {
+            $useStatements[] = TranslatorInterface::class;
+        }
+
         $generator->generateController(
             $controllerClassNameDetails->getFullName(),
             'resetPassword/ResetPasswordController.tpl.php',
@@ -253,6 +267,9 @@ class MakeResetPassword extends AbstractMaker
                 'password_hasher_class_details' => ($passwordClassDetails = $generator->createClassNameDetails($passwordHasher, '\\')),
                 'password_hasher_variable_name' => str_replace('Interface', '', sprintf('$%s', lcfirst($passwordClassDetails->getShortName()))), // @legacy see passwordHasher conditional above
                 'use_password_hasher' => UserPasswordHasherInterface::class === $passwordHasher, // @legacy see passwordHasher conditional above
+                'problem_validate_message_or_constant' => $problemValidateMessageOrConstant,
+                'problem_handle_message_or_constant' => $problemHandleMessageOrConstant,
+                'translator_available' => $isTranslatorAvailable,
             ]
         );
 

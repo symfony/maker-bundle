@@ -170,18 +170,38 @@ class MakerTestRunner
 
     public function configureDatabase(bool $createSchema = true): void
     {
-        $this->replaceInFile(
-            '.env',
-            'postgresql://symfony:ChangeMe@127.0.0.1:5432/app?serverVersion=13&charset=utf8',
-            getenv('TEST_DATABASE_DSN')
-        );
+        // @legacy Drop conditional when Symfony 4.4 is no longer supported.
+        if (50000 > $this->environment->getSymfonyVersionInApp()) {
+            $this->replaceInFile(
+                '.env',
+                'postgresql://db_user:db_password@127.0.0.1:5432/db_name?serverVersion=13&charset=utf8',
+                getenv('TEST_DATABASE_DSN')
+            );
+        } else {
+            $this->replaceInFile(
+                '.env',
+                'postgresql://symfony:ChangeMe@127.0.0.1:5432/app?serverVersion=13&charset=utf8',
+                getenv('TEST_DATABASE_DSN')
+            );
+        }
 
         // Flex includes a recipe to suffix the dbname w/ "_test" - lets keep
         // things simple for these tests and not do that.
-        $this->removeFromFile(
-            'config/packages/test/doctrine.yaml',
-            "dbname_suffix: '_test%env(default::TEST_TOKEN)%'"
-        );
+        $this->modifyYamlFile('config/packages/doctrine.yaml', function (array $config) {
+            if (isset($config['when@test']['doctrine']['dbal']['dbname_suffix'])) {
+                unset($config['when@test']['doctrine']['dbal']['dbname_suffix']);
+            }
+
+            return $config;
+        });
+
+        // @legacy DoctrineBundle 2.4 recipe uses when@test instead of a test/doctrine.yaml config
+        if ($this->filesystem->exists('config/packages/test/doctrine.yaml')) {
+            $this->removeFromFile(
+                'config/packages/test/doctrine.yaml',
+                "dbname_suffix: '_test%env(default::TEST_TOKEN)%'"
+            );
+        }
 
         // this looks silly, but it's the only way to drop the database *for sure*,
         // as doctrine:database:drop will error if there is no database

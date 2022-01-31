@@ -25,6 +25,11 @@ class MakeSerializerNormalizerTest extends MakerTestCase
     public function getTestDetails()
     {
         yield 'it_makes_serializer_normalizer' => [$this->createMakerTest()
+            // serializer-pack 1.1 requires symfony/property-info >= 5.4
+            // adding symfony/serializer-pack:* as an extra depends allows
+            // us to use serializer-pack < 1.1 which does not conflict with
+            // property-info < 5.4. E.g. Symfony 5.3 tests. See PR 1063
+            ->addExtraDependencies('symfony/serializer-pack:*')
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
                     [
