@@ -228,7 +228,8 @@ final class MakeAuthenticator extends AbstractMaker
                 $entryPoint,
                 $input->getArgument('authenticator-class'),
                 $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false,
-                $this->useSecurity52
+                $this->useSecurity52,
+                self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')
             );
             $generator->dumpFile($path, $newYaml);
             $securityYamlUpdated = true;
