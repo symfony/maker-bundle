@@ -32,13 +32,15 @@ class MakeEntityTest extends MakerTestCase
             ->preRun(function (MakerTestRunner $runner) use ($withDatabase) {
                 $config = $runner->readYaml('config/packages/doctrine.yaml');
 
-                if (isset($config['doctrine']['orm']['mappings']['App']['type']) && $this->useAttributes($runner)) {
-                    // use attributes
-                    $runner->replaceInFile(
-                        'config/packages/doctrine.yaml',
-                        'type: annotation',
-                        'type: attribute'
-                    );
+                /* @legacy Refactor when annotations are no longer supported. */
+                if (isset($config['doctrine']['orm']['mappings']['App']) && !$this->useAttributes($runner)) {
+                    // Attributes are only supported w/ PHP 8, FrameworkBundle >=5.2,
+                    // ORM >=2.9, & DoctrineBundle >=2.4
+                    $runner->modifyYamlFile('config/packages/doctrine.yaml', function (array $data) {
+                        $data['doctrine']['orm']['mappings']['App']['type'] = 'annotation';
+
+                        return $data;
+                    });
                 }
 
                 if ($withDatabase) {
