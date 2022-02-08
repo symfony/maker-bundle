@@ -80,7 +80,8 @@ class MakeTestTest extends MakerTestCase
         ];
 
         yield 'it_makes_PantherTestCase_type' => [$this->createMakerTest()
-            ->addExtraDependencies('panther')
+            /* @legacy Allows Panther >= 1.x to be installed. (PHP <8.0 support) */
+            ->addExtraDependencies('panther:*')
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
                     'make-test/basic_setup',

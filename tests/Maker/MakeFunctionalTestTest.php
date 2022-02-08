@@ -28,7 +28,8 @@ class MakeFunctionalTestTest extends MakerTestCase
     public function getTestDetails()
     {
         yield 'it_generates_test_with_panther' => [$this->createMakerTest()
-            ->addExtraDependencies('panther')
+            /* @legacy Allows Panther >= 1.x to be installed. (PHP <8.0 support) */
+            ->addExtraDependencies('panther:*')
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
                     'make-functional/MainController.php',
