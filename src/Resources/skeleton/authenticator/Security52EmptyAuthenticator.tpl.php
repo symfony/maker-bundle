@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
-<?= $use_legacy_passport_interface ? 'use Symfony\\Component\\Security\\Http\\Authenticator\\Passport\\PassportInterface;'."\n" : '' ?>
+use <?= $use_legacy_passport_interface ? 'Symfony\\Component\\Security\\Http\\Authenticator\\Passport\\PassportInterface' : 'Symfony\\Component\\Security\\Http\\Authenticator\\Passport\\Passport' ?>;
 
 class <?php echo $class_name ?> extends AbstractAuthenticator
 {
