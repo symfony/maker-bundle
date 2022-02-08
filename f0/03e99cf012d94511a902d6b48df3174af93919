@@ -1,0 +1,45 @@
+---------------------------------------------------------------------------
+
+by jrushlow at 2022-02-07T23:16:13Z
+
+```
+1) Symfony\Bundle\MakerBundle\Tests\Maker\MakeSerializerEncoderTest::testExecute with data set "it_makes_serializer_encoder" (Symfony\Bundle\MakerBundle\Test\MakerTestDetails Object (...))
+Exception: Error running command: "composer require serializer". Output: "". Error: "Using version ^1.1 for symfony/serializer-pack
+composer.json has been updated
+Running composer update symfony/serializer-pack
+Loading composer repositories with package information
+Restricting packages listed in "symfony/symfony" to "5.3.*"
+Updating dependencies
+Your requirements could not be resolved to an installable set of packages.
+
+  Problem 1
+    - symfony/serializer-pack v1.1.0 requires symfony/property-info * -> satisfiable by symfony/property-info[v5.3.0, ..., v5.3.14].
+    - symfony/serializer-pack v1.1.0 conflicts with symfony/property-info v5.3.14.
+    - symfony/serializer-pack v1.1.0 conflicts with symfony/property-info v5.3.8.
+    - symfony/serializer-pack v1.1.0 conflicts with symfony/property-info v5.3.1.
+    - Root composer.json requires symfony/serializer-pack ^1.1 -> satisfiable by symfony/serializer-pack[v1.1.0].
+
+You can also try re-running composer require with an explicit version constraint, e.g. "composer require symfony/serializer-pack:*" to figure out if any version is installable, or "composer require symfony/serializer-pack:^2.1" if you know which you need.
+
+Installation failed, reverting composer.json and composer.lock to their original content.
+"
+
+/var/htdocs/src/Test/MakerTestProcess.php:51
+/var/htdocs/src/Test/MakerTestEnvironment.php:155
+/var/htdocs/src/Test/MakerTestCase.php:58
+/var/htdocs/src/Test/MakerTestCase.php:33
+```
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2022-02-07T23:32:37Z
+
+ci failures are related make:entity & registration form.. the latter is getting a fix over in #1062
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2022-02-08T13:58:51Z
+
+The underlying problem is that 1.1 of the `serializer-pack` requires 5.4 or greater of `symfony/property-info`, so it has problems installing: https://github.com/symfony/serializer-pack/blob/main/composer.json#L15
+
+I'm not sure of the best fix. If the user has Symfony 5.3, it's true that running the `composer require` line - that the command would tell you to run - will fail (just as it does in the CI). However, I don't think we should try to "figure out" in MakerBundle what version of the serializer-pack would be compatible so we can tweak our `composer require` line accordingly. That just seems nuts. So, this is probably the best solution, though it's not ideal. We should at least add a comment above the new lines in the test to explain what's going on.
