@@ -1,0 +1,5 @@
+---------------------------------------------------------------------------
+
+by jrushlow at 2022-02-14T18:48:27Z
+
+Test failures are related to MakeRegistrationTests and a flex issue specific to Symfony 4.4.
