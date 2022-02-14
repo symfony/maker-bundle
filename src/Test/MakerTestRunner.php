@@ -178,10 +178,21 @@ class MakerTestRunner
 
         // Flex includes a recipe to suffix the dbname w/ "_test" - lets keep
         // things simple for these tests and not do that.
-        $this->removeFromFile(
-            'config/packages/test/doctrine.yaml',
-            "dbname_suffix: '_test%env(default::TEST_TOKEN)%'"
-        );
+        $this->modifyYamlFile('config/packages/doctrine.yaml', function (array $config) {
+            if (isset($config['when@test']['doctrine']['dbal']['dbname_suffix'])) {
+                unset($config['when@test']['doctrine']['dbal']['dbname_suffix']);
+            }
+
+            return $config;
+        });
+
+        // @legacy DoctrineBundle 2.4 recipe uses when@test instead of a test/doctrine.yaml config
+        if ($this->filesystem->exists('config/packages/test/doctrine.yaml')) {
+            $this->removeFromFile(
+                'config/packages/test/doctrine.yaml',
+                "dbname_suffix: '_test%env(default::TEST_TOKEN)%'"
+            );
+        }
 
         // this looks silly, but it's the only way to drop the database *for sure*,
         // as doctrine:database:drop will error if there is no database
