@@ -60,14 +60,17 @@ final class MakeAuthenticator extends AbstractMaker
 
     private $doctrineHelper;
 
+    private $securityControllerBuilder;
+
     private $useSecurity52 = false;
 
-    public function __construct(FileManager $fileManager, SecurityConfigUpdater $configUpdater, Generator $generator, DoctrineHelper $doctrineHelper)
+    public function __construct(FileManager $fileManager, SecurityConfigUpdater $configUpdater, Generator $generator, DoctrineHelper $doctrineHelper, SecurityControllerBuilder $securityControllerBuilder)
     {
         $this->fileManager = $fileManager;
         $this->configUpdater = $configUpdater;
         $this->generator = $generator;
         $this->doctrineHelper = $doctrineHelper;
+        $this->securityControllerBuilder = $securityControllerBuilder;
     }
 
     public static function getCommandName(): string
@@ -323,10 +326,10 @@ final class MakeAuthenticator extends AbstractMaker
 
         $manipulator = new ClassSourceManipulator($controllerSourceCode, true);
 
-        $securityControllerBuilder = new SecurityControllerBuilder();
-        $securityControllerBuilder->addLoginMethod($manipulator);
+        $this->securityControllerBuilder->addLoginMethod($manipulator);
+
         if ($logoutSetup) {
-            $securityControllerBuilder->addLogoutMethod($manipulator);
+            $this->securityControllerBuilder->addLogoutMethod($manipulator);
         }
 
         $this->generator->dumpFile($controllerPath, $manipulator->getSourceCode());

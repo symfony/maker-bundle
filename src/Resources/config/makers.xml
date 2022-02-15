@@ -12,6 +12,7 @@
                 <argument type="service" id="maker.security_config_updater" />
                 <argument type="service" id="maker.generator" />
                 <argument type="service" id="maker.doctrine_helper" />
+                <argument type="service" id="maker.security_controller_builder" />
                 <tag name="maker.command" />
             </service>
 
