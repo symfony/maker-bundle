@@ -1,4 +1,5 @@
 /composer.lock
+/fake
 /phpunit.xml
 /vendor/
 /tests/tmp/*
