@@ -1,8 +1,9 @@
-/composer.lock
-/phpunit.xml
-/vendor/
-/tests/tmp/*
 /.php-cs-fixer.cache
-/tools/*/vendor
-/tools/*/composer.lock
 /.phpunit.result.cache
+/composer.lock
+/fake
+/phpunit.xml
+/tests/tmp/*
+/tools/*/composer.lock
+/tools/*/vendor
+/vendor/
