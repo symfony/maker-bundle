@@ -2,14 +2,14 @@
 
 ## [v1.37.0](https://github.com/symfony/maker-bundle/releases/tag/v1.37.0)
 
-*February 15th, 2022*
+*February 16th, 2022*
 
 ### Feature
 
 - [#1062](https://github.com/symfony/maker-bundle/pull/1062) - [MakeRegistration] add support for verify email attributes - *@jrushlow*
 - [#1059](https://github.com/symfony/maker-bundle/pull/1059) - [make:reset-password] Translate exception reasons provided by ResetPasswordBundle - *@bocharsky-bw*
 - [#1057](https://github.com/symfony/maker-bundle/pull/1057) - [Voter] Refactor attributes - *@mdoutreluingne*
-- [#1040](https://github.com/symfony/maker-bundle/pull/1040) - [make:entity] Chaing getter PHPDoc return type on Collection - *@mehdibo*
+- [#1040](https://github.com/symfony/maker-bundle/pull/1040) - [make:entity] Changing getter PHPDoc return type on Collection - *@mehdibo*
 
 ### Bug Fix
 
