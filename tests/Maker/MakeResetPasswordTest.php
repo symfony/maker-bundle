@@ -76,6 +76,22 @@ class MakeResetPasswordTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_generates_with_translator_installed' => [$this->createResetPasswordTest()
+            ->addExtraDependencies('symfony/translation')
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner);
+
+                $output = $runner->runMaker([
+                    'App\Entity\User',
+                    'app_home',
+                    'victor@symfonycasts.com',
+                    'SymfonyCasts',
+                ]);
+
+                $this->assertStringContainsString('Success', $output);
+            }),
+        ];
+
         yield 'it_generates_with_custom_config' => [$this->createResetPasswordTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->deleteFile('config/packages/reset_password.yaml');

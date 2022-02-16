@@ -34,7 +34,7 @@ class <?= $class_name ?> extends AbstractController
      * @Route("", name="app_forgot_password_request")
      */
 <?php } ?>
-    public function request(Request $request, MailerInterface $mailer): Response
+    public function request(Request $request, MailerInterface $mailer<?php if ($translator_available): ?>, TranslatorInterface $translator<?php endif ?>): Response
     {
         $form = $this->createForm(<?= $request_form_type_class_name ?>::class);
         $form->handleRequest($request);
@@ -42,7 +42,8 @@ class <?= $class_name ?> extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             return $this->processSendingPasswordResetEmail(
                 $form->get('<?= $email_field ?>')->getData(),
-                $mailer
+                $mailer<?php if ($translator_available): ?>,
+                $translator<?php endif ?><?= "\n" ?>
             );
         }
 
@@ -84,7 +85,7 @@ class <?= $class_name ?> extends AbstractController
      * @Route("/reset/{token}", name="app_reset_password")
      */
 <?php } ?>
-    public function reset(Request $request, <?= $password_hasher_class_details->getShortName() ?> <?= $password_hasher_variable_name ?>, string $token = null): Response
+    public function reset(Request $request, <?= $password_hasher_class_details->getShortName() ?> <?= $password_hasher_variable_name ?><?php if ($translator_available): ?>, TranslatorInterface $translator<?php endif ?>, string $token = null): Response
     {
         if ($token) {
             // We store the token in session and remove it from the URL, to avoid the URL being
@@ -103,8 +104,9 @@ class <?= $class_name ?> extends AbstractController
             $user = $this->resetPasswordHelper->validateTokenAndFetchUser($token);
         } catch (ResetPasswordExceptionInterface $e) {
             $this->addFlash('reset_password_error', sprintf(
-                'There was a problem validating your reset request - %s',
-                $e->getReason()
+                '%s - %s',
+                <?php if ($translator_available): ?>$translator->trans(<?= $problem_validate_message_or_constant ?>, [], 'ResetPasswordBundle')<?php else: ?><?= $problem_validate_message_or_constant ?><?php endif ?>,
+                <?php if ($translator_available): ?>$translator->trans($e->getReason(), [], 'ResetPasswordBundle')<?php else: ?>$e->getReason()<?php endif ?><?= "\n" ?>
             ));
 
             return $this->redirectToRoute('app_forgot_password_request');
@@ -138,7 +140,7 @@ class <?= $class_name ?> extends AbstractController
         ]);
     }
 
-    private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer): RedirectResponse
+    private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer<?php if ($translator_available): ?>, TranslatorInterface $translator<?php endif ?>): RedirectResponse
     {
         $user = $this->entityManager->getRepository(<?= $user_class_name ?>::class)->findOneBy([
             '<?= $email_field ?>' => $emailFormData,
@@ -157,8 +159,9 @@ class <?= $class_name ?> extends AbstractController
             // Caution: This may reveal if a user is registered or not.
             //
             // $this->addFlash('reset_password_error', sprintf(
-            //     'There was a problem handling your password reset request - %s',
-            //     $e->getReason()
+            //     '%s - %s',
+            //     <?php if ($translator_available): ?>$translator->trans(<?= $problem_handle_message_or_constant ?>, [], 'ResetPasswordBundle')<?php else: ?><?= $problem_handle_message_or_constant ?><?php endif ?>,
+            //     <?php if ($translator_available): ?>$translator->trans($e->getReason(), [], 'ResetPasswordBundle')<?php else: ?>$e->getReason()<?php endif ?><?= "\n" ?>
             // ));
 
             return $this->redirectToRoute('app_check_email');
