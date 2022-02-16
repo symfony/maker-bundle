@@ -1,0 +1,34 @@
+---------------------------------------------------------------------------
+
+by bocharsky-bw at 2022-02-11T14:58:03Z
+
+Thank you for the review, @codedmonkey !
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2022-02-14T16:20:22Z
+
+https://github.com/symfonycasts/reset-password-bundle/releases/tag/v1.12.0 implements translation support for translations
+
+---------------------------------------------------------------------------
+
+by bocharsky-bw at 2022-02-15T20:03:42Z
+
+> I think the <?php PHP_EOL ?> is causing issues on windows (appveyor tests).. try removing those EOL tags and we should be good to go
+
+@jrushlow Thanks for the tip! Hm, I tried to replace PHP_EOL with "\n" to see if tests will pass. But without that new line char at the end the line pops up to the previous in the rendered HTML, i.e. something like:
+```php
+        if ($form->isSubmitted() && $form->isValid()) {
+            return $this->processSendingPasswordResetEmail(
+                $form->get('email')->getData(),
+                $mailer,                $translator            );
+        }
+```
+
+Let's see if "\n" helps
+
+---------------------------------------------------------------------------
+
+by bocharsky-bw at 2022-02-15T21:10:44Z
+
+Tests are green! Though this question is still open probably: https://github.com/symfony/maker-bundle/pull/1059#discussion_r807231653
