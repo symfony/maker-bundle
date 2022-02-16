@@ -1,5 +1,24 @@
 # Changelog
 
+## [v1.37.0](https://github.com/symfony/maker-bundle/releases/tag/v1.37.0)
+
+*February 15th, 2022*
+
+### Feature
+
+- [#1062](https://github.com/symfony/maker-bundle/pull/1062) - [MakeRegistration] add support for verify email attributes - *@jrushlow*
+- [#1059](https://github.com/symfony/maker-bundle/pull/1059) - [make:reset-password] Translate exception reasons provided by ResetPasswordBundle - *@bocharsky-bw*
+- [#1057](https://github.com/symfony/maker-bundle/pull/1057) - [Voter] Refactor attributes - *@mdoutreluingne*
+- [#1040](https://github.com/symfony/maker-bundle/pull/1040) - [make:entity] Chaing getter PHPDoc return type on Collection - *@mehdibo*
+
+### Bug Fix
+
+- [#1060](https://github.com/symfony/maker-bundle/pull/1060) - Add missing Passport use statement - *@bocharsky-bw*
+- [#1032](https://github.com/symfony/maker-bundle/pull/1032) - [reset-password] Coding standards - Twig - *@seb-jean*
+- [#1031](https://github.com/symfony/maker-bundle/pull/1031) - [verify-email] Coding standards - Twig - *@seb-jean*
+- [#1027](https://github.com/symfony/maker-bundle/pull/1027) - Fixing wrong messaging in make:auth about checking password in final steps - *@weaverryan*
+- [#985](https://github.com/symfony/maker-bundle/pull/985) - [make:auth] fix security controller attributes - *@jrushlow*
+
 ## [v1.36.4](https://github.com/symfony/maker-bundle/releases/tag/v1.36.4)
 
 *November 30th, 2021*
