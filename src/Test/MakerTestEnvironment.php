@@ -403,6 +403,12 @@ $missingDependencies = array_merge(
 echo json_encode($missingDependencies);
         ');
 
+        // The "git clone" command do not copy vendor/ dir because it's in the .gitignore.
+        // Copy vendor/ dir manually if it does not exist before running "dep_runner.php"
+        // that requires vendor/autoload.php
+        if (!$this->fs->exists($this->path.'/vendor')) {
+            MakerTestProcess::create(sprintf('cp -R %s %s', $this->flexPath.'/vendor', $this->path.'/vendor'), $this->path)->run();
+        }
         $process = MakerTestProcess::create('php dep_runner.php', $this->path)->run();
         $data = json_decode($process->getOutput(), true);
         if (null === $data) {
