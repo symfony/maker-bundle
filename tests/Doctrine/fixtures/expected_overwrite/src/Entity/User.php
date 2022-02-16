@@ -67,7 +67,7 @@ class User
     }
 
     /**
-     * @return Collection|UserAvatar[]
+     * @return Collection<int, UserAvatar>
      */
     public function getAvatars(): Collection
     {
@@ -102,7 +102,7 @@ class User
     }
 
     /**
-     * @return Collection|Tag[]
+     * @return Collection<int, Tag>
      */
     public function getTags(): Collection
     {

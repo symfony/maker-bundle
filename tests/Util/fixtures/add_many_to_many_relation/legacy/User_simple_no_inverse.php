@@ -34,7 +34,7 @@ class User
     }
 
     /**
-     * @return Collection|Recipe[]
+     * @return Collection<int, Recipe>
      */
     public function getRecipes(): Collection
     {
