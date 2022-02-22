@@ -50,7 +50,9 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Validation;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Model\VerifyEmailSignatureComponents;
 use SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle;
@@ -324,6 +326,10 @@ final class MakeRegistrationForm extends AbstractMaker
             }
         }
 
+        if ($isTranslatorAvailable = class_exists(Translator::class)) {
+            $useStatements[] = TranslatorInterface::class;
+        }
+
         $generator->generateController(
             $controllerClassNameDetails->getFullName(),
             'registration/RegistrationController.tpl.php',
@@ -348,6 +354,7 @@ final class MakeRegistrationForm extends AbstractMaker
                     'password_hasher_class_details' => ($passwordClassDetails = $generator->createClassNameDetails($passwordHasher, '\\')),
                     'password_hasher_variable_name' => str_replace('Interface', '', sprintf('$%s', lcfirst($passwordClassDetails->getShortName()))), // @legacy see passwordHasher conditional above
                     'use_password_hasher' => UserPasswordHasherInterface::class === $passwordHasher, // @legacy see passwordHasher conditional above
+                    'translator_available' => $isTranslatorAvailable,
                 ],
                 $userRepoVars
             )

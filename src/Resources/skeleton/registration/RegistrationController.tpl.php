@@ -73,7 +73,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 <?php if ($will_verify_email): ?>
 
 <?= $generator->generateRouteForControllerMethod('/verify/email', 'app_verify_email') ?>
-    public function verifyUserEmail(Request $request<?= $verify_email_anonymously ? sprintf(', %s %s', $repository_class_name, $repository_var) : null ?>): Response
+    public function verifyUserEmail(Request $request<?php if ($translator_available): ?>, TranslatorInterface $translator<?php endif ?><?= $verify_email_anonymously ? sprintf(', %s %s', $repository_class_name, $repository_var) : null ?>): Response
     {
 <?php if (!$verify_email_anonymously): ?>
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
@@ -101,7 +101,7 @@ class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
         try {
             $this->emailVerifier->handleEmailConfirmation($request, <?= $verify_email_anonymously ? '$user' : '$this->getUser()' ?>);
         } catch (VerifyEmailExceptionInterface $exception) {
-            $this->addFlash('verify_email_error', $exception->getReason());
+            $this->addFlash('verify_email_error', <?php if ($translator_available): ?>$translator->trans($exception->getReason(), [], 'VerifyEmailBundle')<?php else: ?>$exception->getReason()<?php endif ?>);
 
             return $this->redirectToRoute('<?= $route_name ?>');
         }
