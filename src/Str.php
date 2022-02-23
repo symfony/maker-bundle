@@ -102,7 +102,9 @@ final class Str
 
     public static function asRouteName(string $value): string
     {
-        return self::asTwigVariable($value);
+        $routeName = self::asTwigVariable($value);
+
+        return str_starts_with($routeName, 'app_') ? $routeName : 'app_'.$routeName;
     }
 
     public static function asSnakeCase(string $value): string
