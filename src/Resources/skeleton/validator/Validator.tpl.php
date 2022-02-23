@@ -9,7 +9,7 @@ class <?= $class_name ?> extends ConstraintValidator
 {
     public function validate($value, Constraint $constraint)
     {
-        /* @var $constraint \<?= $constraint_class_name ?> */
+        /* @var <?= $constraint_class_name ?> $constraint */
 
         if (null === $value || '' === $value) {
             return;
