@@ -6,7 +6,7 @@ use <?= $entity_full_class_name ?>;
 use <?= $form_full_class_name ?>;
 <?php if (isset($repository_full_class_name)): ?>
 use <?= $repository_full_class_name ?>;
-<?php else ?>
+<?php else: ?>
 use Doctrine\ORM\EntityManagerInterface;
 <?php endif; ?>
 use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name ?>;
@@ -48,7 +48,7 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 <?php if (isset($repository_full_class_name) && $generator->repositoryHasAddRemoveMethods($repository_full_class_name)) { ?>
     public function new(Request $request, <?= $repository_class_name ?> $<?= $repository_var ?>): Response
 <?php } else { ?>
-    public function new(Request $request): Response
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
 <?php } ?>
     {
         $<?= $entity_var_singular ?> = new <?= $entity_class_name ?>();
