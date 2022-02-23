@@ -88,6 +88,10 @@ final class EntityRegenerator
 
                 $operations[$embeddedClasses[$fieldName]] = $this->createClassManipulator($embeddedClasses[$fieldName]);
 
+                if (!\in_array($fieldName, $mappedFields)) {
+                    continue;
+                }
+
                 $manipulator->addEmbeddedEntity($fieldName, $className);
             }
 
@@ -242,7 +246,8 @@ final class EntityRegenerator
 
         $targetFields = array_merge(
             array_keys($classMetadata->fieldMappings),
-            array_keys($classMetadata->associationMappings)
+            array_keys($classMetadata->associationMappings),
+            array_keys($classMetadata->embeddedClasses)
         );
 
         if ($classReflection) {
