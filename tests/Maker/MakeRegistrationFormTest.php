@@ -33,6 +33,24 @@ class MakeRegistrationFormTest extends MakerTestCase
                     ''
                 );
                 $runner->adjustAuthenticatorForLegacyPassportInterface('src/Security/StubAuthenticator.php');
+
+                if (60000 > $runner->getSymfonyVersion()) {
+                    /*
+                     * @Legacy - Drop when Symfony 6.0 is LTS
+                     *
+                     * This is a round about way to handle empty yaml files and YamlSourceManipulator.
+                     * Prior to Symfony 6.0, the routes.yaml was empty w/ a comment line. YSM
+                     * requires a top level array structure to manipulate them.
+                     */
+                    $runner->writeFile('config/routes.yaml', 'app_homepage:');
+                }
+
+                $runner->modifyYamlFile('config/routes.yaml', function (array $yaml) {
+                    $yaml['app_homepage'] = ['path' => '/', 'controller' => 'App\Controller\TestingController::homepage'];
+                    $yaml['app_anonymous'] = ['path' => '/anonymous', 'controller' => 'App\Controller\TestingController::anonymous'];
+
+                    return $yaml;
+                });
             })
         ;
     }
