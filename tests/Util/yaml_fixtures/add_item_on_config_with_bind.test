@@ -10,6 +10,7 @@ services:
     arguments:
       - argument_1: something
         argument_2: something
+
 ===
 $data['services']['app.service']['arguments'][0]['argument_3'] = 'something_new';
 ===
@@ -26,4 +27,3 @@ services:
       - argument_1: something
         argument_2: something
         argument_3: something_new
-        
