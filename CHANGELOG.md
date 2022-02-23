@@ -1,5 +1,22 @@
 # Changelog
 
+## [v1.38.0](https://github.com/symfony/maker-bundle/releases/tag/v1.38.0)
+
+*February 24th, 2022*
+
+### Feature
+
+- [#1076](https://github.com/symfony/maker-bundle/pull/1076) - [make:registration-form] Translate reasons for VerifyEmailBundle if translator available - *@bocharsky-bw*
+- [#1015](https://github.com/symfony/maker-bundle/pull/1015) - Update ApiTestCase to be compliant with ApiPlatform v3.0 - *@laryjulien*
+- [#1007](https://github.com/symfony/maker-bundle/pull/1007) - [make:controller][make:crud] Make route names start with 'app_' - *@robmeijer*
+- [#939](https://github.com/symfony/maker-bundle/pull/939) - [make:crud] Improve controller generation - *@bdaler*
+
+### Bug Fix
+
+- [#1046](https://github.com/symfony/maker-bundle/pull/1046) - [make:entity] Exclude inherited embedded class properties - *@Vincz*
+- [#910](https://github.com/symfony/maker-bundle/pull/910) - [YamlSourceManipulator] Tweak regex pattern for regex key - *@lubo13*
+- [#830](https://github.com/symfony/maker-bundle/pull/830) - [make:validator] Fix @var typehint comments - *@mmarton*
+
 ## [v1.37.0](https://github.com/symfony/maker-bundle/releases/tag/v1.37.0)
 
 *February 16th, 2022*
