@@ -8,11 +8,45 @@
             <defaults public="false" />
 
             <service id="maker.maker.make_authenticator" class="Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator">
+                <argument type="tagged_iterator" tag="maker.authenticator_maker" index-by="type" />
                 <argument type="service" id="maker.file_manager" />
-                <argument type="service" id="maker.security_config_updater" />
                 <argument type="service" id="maker.generator" />
-                <argument type="service" id="maker.doctrine_helper" />
                 <tag name="maker.command" />
+            </service>
+
+            <service id="maker.abstract_authenticator" abstract="true">
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.generator" />
+                <argument type="service" id="maker.security_config_updater" />
+            </service>
+
+            <service id="maker.authenticator_login_form_maker" class="Symfony\Bundle\MakerBundle\Security\Authenticator\LoginFormAuthenticatorMaker" parent="maker.abstract_authenticator">
+                <tag name="maker.authenticator_maker" type="login-form" />
+            </service>
+
+            <service id="maker.authenticator_json_login_form_maker" class="Symfony\Bundle\MakerBundle\Security\Authenticator\JsonLoginAuthenticatorMaker" parent="maker.abstract_authenticator">
+                <tag name="maker.authenticator_maker" type="json-login" />
+            </service>
+
+            <service id="maker.authenticator_login_link_maker" class="Symfony\Bundle\MakerBundle\Security\Authenticator\LoginLinkAuthenticatorMaker" parent="maker.abstract_authenticator">
+                <tag name="maker.authenticator_maker" type="login-link" />
+            </service>
+
+            <service id="maker.authenticator_pre_authenticated_maker" class="Symfony\Bundle\MakerBundle\Security\Authenticator\PreAuthenticatedAuthenticatorMaker" parent="maker.abstract_authenticator">
+                <tag name="maker.authenticator_maker" type="pre-authenticated" />
+            </service>
+
+            <service id="maker.authenticator_http_baic_maker" class="Symfony\Bundle\MakerBundle\Security\Authenticator\HttpBasicAuthenticatorMaker" parent="maker.abstract_authenticator">
+                <tag name="maker.authenticator_maker" type="http-basic" />
+            </service>
+
+            <service id="maker.authenticator_custom_authenticator_maker" class="Symfony\Bundle\MakerBundle\Security\Authenticator\CustomAuthenticatorMaker" parent="maker.abstract_authenticator">
+                <tag name="maker.authenticator_maker" type="custom-authenticator" />
+            </service>
+
+            <service id="maker.authenticator_custom_form_login_authenticator_maker" class="Symfony\Bundle\MakerBundle\Security\Authenticator\CustomLoginFormAuthenticatorMaker" parent="maker.abstract_authenticator">
+                <argument type="service" id="maker.doctrine_helper" />
+                <tag name="maker.authenticator_maker" type="form-login-authenticator" />
             </service>
 
             <service id="maker.maker.make_command" class="Symfony\Bundle\MakerBundle\Maker\MakeCommand">
