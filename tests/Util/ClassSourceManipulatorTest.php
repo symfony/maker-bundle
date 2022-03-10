@@ -648,7 +648,7 @@ class ClassSourceManipulatorTest extends TestCase
             (new RelationOneToOne())
                 ->setPropertyName('userProfile')
                 ->setTargetClassName('App\Entity\UserProfile')
-                //->setTargetPropertyName('user')
+                // ->setTargetPropertyName('user')
                 ->setIsNullable(true)
                 ->setIsOwning(true)
                 ->setMapInverseRelation(false),
@@ -660,7 +660,7 @@ class ClassSourceManipulatorTest extends TestCase
             (new RelationOneToOne())
                 ->setPropertyName('userProfile')
                 ->setTargetClassName('App\Entity\UserProfile')
-                //->setTargetPropertyName('user')
+                // ->setTargetPropertyName('user')
                 ->setIsNullable(false)
                 ->setIsOwning(true)
                 ->setMapInverseRelation(false),
