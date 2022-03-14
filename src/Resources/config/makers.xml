@@ -42,6 +42,7 @@
                 <argument>%kernel.project_dir%</argument>
                 <argument type="service" id="maker.generator" />
                 <argument type="service" id="maker.entity_class_generator" />
+                <argument /> <!-- generate repository examples -->
                 <tag name="maker.command" />
             </service>
 
