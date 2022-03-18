@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
 use PhpParser\Builder\Param;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
@@ -164,6 +166,41 @@ class ClassSourceManipulatorTest extends TestCase
             false,
             [],
             'User_empty.php',
+        ];
+    }
+
+    /**
+     * @dataProvider getAttributeClassTests
+     */
+    public function testAddAttributeToClass(string $sourceFilename, string $expectedSourceFilename, string $attributeClass, array $attributeOptions, string $attributePrefix = null): void
+    {
+        // @legacy Remove conditional when PHP < 8.0 support is dropped.
+        if ((\PHP_VERSION_ID < 80000)) {
+            $this->markTestSkipped('Requires PHP >= PHP 8.0');
+        }
+
+        $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_class_attribute/'.$expectedSourceFilename);
+        $manipulator = new ClassSourceManipulator($source);
+        $manipulator->addAttributeToClass($attributeClass, $attributeOptions, $attributePrefix);
+
+        self::assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function getAttributeClassTests(): \Generator
+    {
+        yield 'Empty class' => [
+            'User_empty.php',
+            'User_empty.php',
+            Entity::class,
+            [],
+        ];
+
+        yield 'Class already has attributes' => [
+            'User_simple.php',
+            'User_simple.php',
+            Column::class,
+            ['message' => 'We use this attribute for class level tests so we dont have to add additional test dependencies.'],
         ];
     }
 
@@ -611,7 +648,6 @@ class ClassSourceManipulatorTest extends TestCase
             (new RelationOneToOne())
                 ->setPropertyName('userProfile')
                 ->setTargetClassName('App\Entity\UserProfile')
-                //->setTargetPropertyName('user')
                 ->setIsNullable(true)
                 ->setIsOwning(true)
                 ->setMapInverseRelation(false),
@@ -623,7 +659,6 @@ class ClassSourceManipulatorTest extends TestCase
             (new RelationOneToOne())
                 ->setPropertyName('userProfile')
                 ->setTargetClassName('App\Entity\UserProfile')
-                //->setTargetPropertyName('user')
                 ->setIsNullable(false)
                 ->setIsOwning(true)
                 ->setMapInverseRelation(false),

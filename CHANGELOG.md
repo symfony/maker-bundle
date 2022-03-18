@@ -1,5 +1,50 @@
 # Changelog
 
+## [v1.38.0](https://github.com/symfony/maker-bundle/releases/tag/v1.38.0)
+
+*February 24th, 2022*
+
+### Feature
+
+- [#1076](https://github.com/symfony/maker-bundle/pull/1076) - [make:registration-form] Translate reasons for VerifyEmailBundle if translator available - *@bocharsky-bw*
+- [#1015](https://github.com/symfony/maker-bundle/pull/1015) - Update ApiTestCase to be compliant with ApiPlatform v3.0 - *@laryjulien*
+- [#1007](https://github.com/symfony/maker-bundle/pull/1007) - [make:controller][make:crud] Make route names start with 'app_' - *@robmeijer*
+- [#939](https://github.com/symfony/maker-bundle/pull/939) - [make:crud] Improve controller generation - *@bdaler*
+
+### Bug Fix
+
+- [#1046](https://github.com/symfony/maker-bundle/pull/1046) - [make:entity] Exclude inherited embedded class properties - *@Vincz*
+- [#910](https://github.com/symfony/maker-bundle/pull/910) - [YamlSourceManipulator] Tweak regex pattern for regex key - *@lubo13*
+- [#830](https://github.com/symfony/maker-bundle/pull/830) - [make:validator] Fix @var typehint comments - *@mmarton*
+
+## [v1.37.0](https://github.com/symfony/maker-bundle/releases/tag/v1.37.0)
+
+*February 16th, 2022*
+
+### Feature
+
+- [#1062](https://github.com/symfony/maker-bundle/pull/1062) - [MakeRegistration] add support for verify email attributes - *@jrushlow*
+- [#1059](https://github.com/symfony/maker-bundle/pull/1059) - [make:reset-password] Translate exception reasons provided by ResetPasswordBundle - *@bocharsky-bw*
+- [#1057](https://github.com/symfony/maker-bundle/pull/1057) - [Voter] Refactor attributes - *@mdoutreluingne*
+- [#1040](https://github.com/symfony/maker-bundle/pull/1040) - [make:entity] Changing getter PHPDoc return type on Collection - *@mehdibo*
+
+### Bug Fix
+
+- [#1060](https://github.com/symfony/maker-bundle/pull/1060) - Add missing Passport use statement - *@bocharsky-bw*
+- [#1032](https://github.com/symfony/maker-bundle/pull/1032) - [reset-password] Coding standards - Twig - *@seb-jean*
+- [#1031](https://github.com/symfony/maker-bundle/pull/1031) - [verify-email] Coding standards - Twig - *@seb-jean*
+- [#1027](https://github.com/symfony/maker-bundle/pull/1027) - Fixing wrong messaging in make:auth about checking password in final steps - *@weaverryan*
+- [#985](https://github.com/symfony/maker-bundle/pull/985) - [make:auth] fix security controller attributes - *@jrushlow*
+
+## [v1.36.4](https://github.com/symfony/maker-bundle/releases/tag/v1.36.4)
+
+*November 30th, 2021*
+
+### Bug Fix
+
+- [#1023](https://github.com/symfony/maker-bundle/pull/1023) - Allow deprecation-contracts 3 - *@derrabus*
+- [#1026](https://github.com/symfony/maker-bundle/pull/1026) - preventing Guard auth method from exploding in 6.0 - *@weaverryan*
+
 ## [v1.36.3](https://github.com/symfony/maker-bundle/releases/tag/v1.36.3)
 
 *November 22nd, 2021*

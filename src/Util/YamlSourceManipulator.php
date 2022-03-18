@@ -684,7 +684,7 @@ class YamlSourceManipulator
 
     private function getKeyRegex($key)
     {
-        return sprintf('#\b%s\'?( )*:#', preg_quote($key));
+        return sprintf('#(?<!\w)\$?%s\'?( )*:#', preg_quote($key));
     }
 
     private function updateContents(string $newContents, array $newData, int $newPosition)
@@ -835,7 +835,7 @@ class YamlSourceManipulator
             return $endKeyPosition;
         }
 
-        if (is_scalar($value) || null === $value) {
+        if (\is_scalar($value) || null === $value) {
             $offset = null === $offset ? $this->currentPosition : $offset;
 
             if (\is_bool($value)) {

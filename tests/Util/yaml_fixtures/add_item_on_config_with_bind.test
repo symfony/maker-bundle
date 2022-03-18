@@ -1,0 +1,29 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    bind:
+      $httpClient: '@http.client'
+
+  app.service:
+    class: App\Services\Service
+    arguments:
+      - argument_1: something
+        argument_2: something
+
+===
+$data['services']['app.service']['arguments'][0]['argument_3'] = 'something_new';
+===
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    bind:
+      $httpClient: '@http.client'
+
+  app.service:
+    class: App\Services\Service
+    arguments:
+      - argument_1: something
+        argument_2: something
+        argument_3: something_new

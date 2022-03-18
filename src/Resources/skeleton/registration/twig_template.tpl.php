@@ -2,8 +2,8 @@
 
 {% block body %}
 <?php if ($will_verify_email): ?>
-    {% for flashError in app.flashes('verify_email_error') %}
-        <div class="alert alert-danger" role="alert">{{ flashError }}</div>
+    {% for flash_error in app.flashes('verify_email_error') %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
     {% endfor %}
 
 <?php endif; ?>

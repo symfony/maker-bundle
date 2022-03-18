@@ -79,7 +79,7 @@ class EventRegistry
 
         // Loop through the new event classes
         foreach (self::$newEventsMap as $eventName => $newEventClass) {
-            //Check if the new event classes exist, if so replace the old one with the new.
+            // Check if the new event classes exist, if so replace the old one with the new.
             if (isset(self::$eventsMap[$eventName]) && class_exists($newEventClass)) {
                 self::$eventsMap[$eventName] = $newEventClass;
             }

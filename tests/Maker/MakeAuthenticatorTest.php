@@ -342,6 +342,12 @@ class MakeAuthenticatorTest extends MakerTestCase
 
         // plaintext password: needed for entities, simplifies overall
         $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
+            if (isset($config['when@test']['security']['password_hashers'])) {
+                $config['when@test']['security']['password_hashers'] = [PasswordAuthenticatedUserInterface::class => 'plaintext'];
+
+                return $config;
+            }
+
             // legacy check for 5.2 and lower "encoders"
             if (isset($config['security']['password_hashers'])) {
                 $config['security']['password_hashers'] = [PasswordAuthenticatedUserInterface::class => 'plaintext'];

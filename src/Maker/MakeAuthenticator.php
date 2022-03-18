@@ -60,14 +60,17 @@ final class MakeAuthenticator extends AbstractMaker
 
     private $doctrineHelper;
 
+    private $securityControllerBuilder;
+
     private $useSecurity52 = false;
 
-    public function __construct(FileManager $fileManager, SecurityConfigUpdater $configUpdater, Generator $generator, DoctrineHelper $doctrineHelper)
+    public function __construct(FileManager $fileManager, SecurityConfigUpdater $configUpdater, Generator $generator, DoctrineHelper $doctrineHelper, SecurityControllerBuilder $securityControllerBuilder)
     {
         $this->fileManager = $fileManager;
         $this->configUpdater = $configUpdater;
         $this->generator = $generator;
         $this->doctrineHelper = $doctrineHelper;
+        $this->securityControllerBuilder = $securityControllerBuilder;
     }
 
     public static function getCommandName(): string
@@ -267,7 +270,7 @@ final class MakeAuthenticator extends AbstractMaker
                 $authenticatorClass,
                 sprintf('authenticator/%sEmptyAuthenticator.tpl.php', $this->useSecurity52 ? 'Security52' : ''),
                 [
-                    'provider_key_type_hint' => $this->providerKeyTypeHint(),
+                    'provider_key_type_hint' => $this->getGuardProviderKeyTypeHint(),
                     'use_legacy_passport_interface' => $this->shouldUseLegacyPassportInterface(),
                 ]
             );
@@ -291,7 +294,7 @@ final class MakeAuthenticator extends AbstractMaker
                 'username_field_var' => Str::asLowerCamelCase($userNameField),
                 'user_needs_encoder' => $this->userClassHasEncoder($securityData, $userClass),
                 'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($userClass),
-                'provider_key_type_hint' => $this->providerKeyTypeHint(),
+                'provider_key_type_hint' => $this->getGuardProviderKeyTypeHint(),
                 'use_legacy_passport_interface' => $this->shouldUseLegacyPassportInterface(),
             ]
         );
@@ -323,10 +326,10 @@ final class MakeAuthenticator extends AbstractMaker
 
         $manipulator = new ClassSourceManipulator($controllerSourceCode, true);
 
-        $securityControllerBuilder = new SecurityControllerBuilder();
-        $securityControllerBuilder->addLoginMethod($manipulator);
+        $this->securityControllerBuilder->addLoginMethod($manipulator);
+
         if ($logoutSetup) {
-            $securityControllerBuilder->addLogoutMethod($manipulator);
+            $this->securityControllerBuilder->addLogoutMethod($manipulator);
         }
 
         $this->generator->dumpFile($controllerPath, $manipulator->getSourceCode());
@@ -368,7 +371,8 @@ final class MakeAuthenticator extends AbstractMaker
                 $nextTexts[] = sprintf('- Review <info>%s::getUser()</info> to make sure it matches your needs.', $authenticatorClass);
             }
 
-            if (!$this->userClassHasEncoder($securityData, $userClass)) {
+            // this only applies to Guard authentication AND if the user does not have a hasher configured
+            if (!$this->useSecurity52 && !$this->userClassHasEncoder($securityData, $userClass)) {
                 $nextTexts[] = sprintf('- Check the user\'s password in <info>%s::checkCredentials()</info>.', $authenticatorClass);
             }
 
@@ -381,11 +385,11 @@ final class MakeAuthenticator extends AbstractMaker
     private function userClassHasEncoder(array $securityData, string $userClass): bool
     {
         $userNeedsEncoder = false;
-        if (isset($securityData['security']['encoders']) && $securityData['security']['encoders']) {
-            foreach ($securityData['security']['encoders'] as $userClassWithEncoder => $encoder) {
-                if ($userClass === $userClassWithEncoder || is_subclass_of($userClass, $userClassWithEncoder)) {
-                    $userNeedsEncoder = true;
-                }
+        $hashersData = $securityData['security']['encoders'] ?? $securityData['security']['encoders'] ?? [];
+
+        foreach ($hashersData as $userClassWithEncoder => $encoder) {
+            if ($userClass === $userClassWithEncoder || is_subclass_of($userClass, $userClassWithEncoder) || class_implements($userClass, $userClassWithEncoder)) {
+                $userNeedsEncoder = true;
             }
         }
 
@@ -406,8 +410,16 @@ final class MakeAuthenticator extends AbstractMaker
         );
     }
 
-    private function providerKeyTypeHint(): string
+    /**
+     * Calculates the type-hint used for the $provider argument (string or nothing) for Guard.
+     */
+    private function getGuardProviderKeyTypeHint(): string
     {
+        // doesn't matter: this only applies to non-Guard authenticators
+        if (!class_exists(AbstractFormLoginAuthenticator::class)) {
+            return '';
+        }
+
         $reflectionMethod = new \ReflectionMethod(AbstractFormLoginAuthenticator::class, 'onAuthenticationSuccess');
         $type = $reflectionMethod->getParameters()[2]->getType();
 

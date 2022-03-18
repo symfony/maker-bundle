@@ -14,46 +14,98 @@ namespace Symfony\Bundle\MakerBundle\Tests\Security;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 
 class SecurityControllerBuilderTest extends TestCase
 {
-    public function testAddLoginMethod()
+    private $expectedBasePath = __DIR__.'/fixtures/expected';
+
+    public function testLoginMethod(): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/SecurityController.php');
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/expected/SecurityController_login.php');
+        /* @legacy Can be dropped when PHP 7.x support is dropped in MakerBundle */
+        $this->runMethodTest(
+            'addLoginMethod',
+            true,
+            sprintf('%s/legacy_add_login_method/%s', $this->expectedBasePath, 'SecurityController_login.php')
+        );
 
-        $manipulator = new ClassSourceManipulator($source);
-
-        $securityControllerBuilder = new SecurityControllerBuilder();
-        $securityControllerBuilder->addLoginMethod($manipulator);
-
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        if ((\PHP_VERSION_ID >= 80000)) {
+            $this->runMethodTest(
+                'addLoginMethod',
+                false,
+                sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_login.php')
+            );
+        }
     }
 
-    public function testLogoutMethod()
+    public function testLogoutMethod(): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/SecurityController.php');
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/expected/SecurityController_logout.php');
+        /* @legacy Can be dropped when PHP 7.x support is dropped in MakerBundle */
+        $this->runMethodTest(
+            'addLogoutMethod',
+            true,
+            sprintf('%s/legacy_add_logout_method/%s', $this->expectedBasePath, 'SecurityController_logout.php')
+        );
 
-        $manipulator = new ClassSourceManipulator($source);
-
-        $securityControllerBuilder = new SecurityControllerBuilder();
-        $securityControllerBuilder->addLogoutMethod($manipulator);
-
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        if ((\PHP_VERSION_ID >= 80000)) {
+            $this->runMethodTest(
+                'addLogoutMethod',
+                false,
+                sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_logout.php')
+            );
+        }
     }
 
-    public function testLoginAndLogoutMethod()
+    public function testLoginAndLogoutMethod(): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/SecurityController.php');
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/expected/SecurityController_login_logout.php');
+        /** @legacy Can be dropped when PHP 7.x support is dropped in MakerBundle */
+        $builder = $this->getSecurityControllerBuilder(true);
+        $csm = $this->getClassSourceManipulator();
 
-        $manipulator = new ClassSourceManipulator($source);
+        $builder->addLoginMethod($csm);
+        $builder->addLogoutMethod($csm);
 
-        $securityControllerBuilder = new SecurityControllerBuilder();
-        $securityControllerBuilder->addLoginMethod($manipulator);
-        $securityControllerBuilder->addLogoutMethod($manipulator);
+        $this->assertStringEqualsFile(
+            sprintf('%s/legacy_add_login_logout_method/%s', $this->expectedBasePath, 'SecurityController_login_logout.php'),
+            $csm->getSourceCode()
+        );
 
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        if ((\PHP_VERSION_ID >= 80000)) {
+            $builder = $this->getSecurityControllerBuilder(false);
+            $csm = $this->getClassSourceManipulator();
+
+            $builder->addLoginMethod($csm);
+            $builder->addLogoutMethod($csm);
+
+            $this->assertStringEqualsFile(
+                sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_login_logout.php'),
+                $csm->getSourceCode()
+            );
+        }
+    }
+
+    private function runMethodTest(string $builderMethod, bool $isLegacyTest, string $expectedFilePath): void
+    {
+        $builder = $this->getSecurityControllerBuilder($isLegacyTest);
+        $csm = $this->getClassSourceManipulator();
+
+        $builder->$builderMethod($csm);
+        $this->assertStringEqualsFile($expectedFilePath, $csm->getSourceCode());
+    }
+
+    private function getClassSourceManipulator(): ClassSourceManipulator
+    {
+        return new ClassSourceManipulator(file_get_contents(__DIR__.'/fixtures/source/SecurityController.php'));
+    }
+
+    private function getSecurityControllerBuilder(bool $isLegacyTest): SecurityControllerBuilder
+    {
+        $compatUtil = $this->createMock(PhpCompatUtil::class);
+        $compatUtil
+            ->method('canUseAttributes')
+            ->willReturn(!$isLegacyTest)
+        ;
+
+        return new SecurityControllerBuilder($compatUtil);
     }
 }

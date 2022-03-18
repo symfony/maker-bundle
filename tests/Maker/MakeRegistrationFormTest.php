@@ -33,6 +33,24 @@ class MakeRegistrationFormTest extends MakerTestCase
                     ''
                 );
                 $runner->adjustAuthenticatorForLegacyPassportInterface('src/Security/StubAuthenticator.php');
+
+                if (60000 > $runner->getSymfonyVersion()) {
+                    /*
+                     * @Legacy - Drop when Symfony 6.0 is LTS
+                     *
+                     * This is a round about way to handle empty yaml files and YamlSourceManipulator.
+                     * Prior to Symfony 6.0, the routes.yaml was empty w/ a comment line. YSM
+                     * requires a top level array structure to manipulate them.
+                     */
+                    $runner->writeFile('config/routes.yaml', 'app_homepage:');
+                }
+
+                $runner->modifyYamlFile('config/routes.yaml', function (array $yaml) {
+                    $yaml['app_homepage'] = ['path' => '/', 'controller' => 'App\Controller\TestingController::homepage'];
+                    $yaml['app_anonymous'] = ['path' => '/anonymous', 'controller' => 'App\Controller\TestingController::anonymous'];
+
+                    return $yaml;
+                });
             })
         ;
     }
@@ -161,6 +179,37 @@ class MakeRegistrationFormTest extends MakerTestCase
                 foreach ($generatedFiles as $file) {
                     $this->assertFileExists($runner->getPath($file));
                 }
+
+                $this->runRegistrationTest($runner, 'it_generates_registration_form_with_verification.php');
+            }),
+        ];
+
+        yield 'it_generates_registration_form_with_verification_and_translator' => [$this->createRegistrationFormTest()
+            ->setRequiredPhpVersion(70200)
+            ->addExtraDependencies('symfonycasts/verify-email-bundle')
+            // needed for internal functional test
+            ->addExtraDependencies('symfony/web-profiler-bundle', 'mailer', 'symfony/translation')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->writeFile(
+                    'config/packages/mailer.yaml',
+                    Yaml::dump(['framework' => [
+                        'mailer' => ['dsn' => 'null://null'],
+                    ]])
+                );
+
+                $this->makeUser($runner);
+
+                $output = $runner->runMaker([
+                    'n', // add UniqueEntity
+                    'y', // verify user
+                    'y', // require authentication to verify user email
+                    'victor@symfonycasts.com', // from email address
+                    'SymfonyCasts', // From Name
+                    'n', // no authenticate after
+                    0, // route number to redirect to
+                ]);
+
+                $this->assertStringContainsString('Success', $output);
 
                 $this->runRegistrationTest($runner, 'it_generates_registration_form_with_verification.php');
             }),

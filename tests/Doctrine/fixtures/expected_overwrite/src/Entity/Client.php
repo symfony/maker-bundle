@@ -61,7 +61,7 @@ class Client extends BaseClient
     }
 
     /**
-     * @return Collection|Tag[]
+     * @return Collection<int, Tag>
      */
     public function getTags(): Collection
     {

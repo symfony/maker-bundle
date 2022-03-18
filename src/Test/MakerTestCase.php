@@ -106,7 +106,7 @@ abstract class MakerTestCase extends TestCase
         }
 
         // a cheap way to guess the service id
-        $serviceId = $serviceId ?? sprintf('maker.maker.%s', Str::asRouteName((new \ReflectionClass($makerClass))->getShortName()));
+        $serviceId = $serviceId ?? sprintf('maker.maker.%s', Str::asSnakeCase((new \ReflectionClass($makerClass))->getShortName()));
 
         return $this->kernel->getContainer()->get($serviceId);
     }

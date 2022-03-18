@@ -30,7 +30,7 @@ class YamlSourceManipulatorTest extends TestCase
 
         $logger = $this->createLogger();
         // uncomment to enhance debugging
-        //$manipulator->setLogger($logger);
+        // $manipulator->setLogger($logger);
 
         $manipulator->setData($newData);
 

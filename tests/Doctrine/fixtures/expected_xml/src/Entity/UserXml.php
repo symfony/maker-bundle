@@ -37,7 +37,7 @@ class UserXml
     }
 
     /**
-     * @return Collection|UserAvatar[]
+     * @return Collection<int, UserAvatar>
      */
     public function getAvatars(): Collection
     {

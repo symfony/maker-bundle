@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
+use Doctrine\ORM\Mapping\Driver\AttributeReader;
 use Symfony\Bundle\MakerBundle\Maker\MakeResetPassword;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
@@ -72,6 +73,22 @@ class MakeResetPasswordTest extends MakerTestCase
                 $this->assertSame('App\Repository\ResetPasswordRequestRepository', $resetPasswordConfig['symfonycasts_reset_password']['request_password_repository']);
 
                 $this->runResetPasswordTest($runner, 'it_generates_with_normal_setup.php');
+            }),
+        ];
+
+        yield 'it_generates_with_translator_installed' => [$this->createResetPasswordTest()
+            ->addExtraDependencies('symfony/translation')
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner);
+
+                $output = $runner->runMaker([
+                    'App\Entity\User',
+                    'app_home',
+                    'victor@symfonycasts.com',
+                    'SymfonyCasts',
+                ]);
+
+                $this->assertStringContainsString('Success', $output);
             }),
         ];
 
@@ -159,9 +176,17 @@ class MakeResetPasswordTest extends MakerTestCase
                 $this->assertStringContainsString('\'emailAddress\' => $emailFormData,', $contentResetPasswordController);
                 $this->assertStringContainsString('$user->setMyPassword($encodedPassword);', $contentResetPasswordController);
                 $this->assertStringContainsString('->to($user->getEmailAddress())', $contentResetPasswordController);
+
                 // check ResetPasswordRequest
                 $contentResetPasswordRequest = file_get_contents($runner->getPath('src/Entity/ResetPasswordRequest.php'));
-                $this->assertStringContainsString('ORM\ManyToOne(targetEntity=UserCustom::class)', $contentResetPasswordRequest);
+
+                /* @legacy Drop annotation test when annotations are no longer supported. */
+                if ($this->useAttributes($runner)) {
+                    $this->assertStringContainsString('ORM\ManyToOne(targetEntity: UserCustom::class)', $contentResetPasswordRequest);
+                } else {
+                    $this->assertStringContainsString('ORM\ManyToOne(targetEntity=UserCustom::class)', $contentResetPasswordRequest);
+                }
+
                 // check ResetPasswordRequestFormType
                 $contentResetPasswordRequestFormType = file_get_contents($runner->getPath('/src/Form/ResetPasswordRequestFormType.php'));
                 $this->assertStringContainsString('->add(\'emailAddress\', EmailType::class, [', $contentResetPasswordRequestFormType);
@@ -197,5 +222,12 @@ class MakeResetPasswordTest extends MakerTestCase
             $identifier, // identifier
             $checkPassword ? 'y' : 'n', // password
         ]);
+    }
+
+    private function useAttributes(MakerTestRunner $runner): bool
+    {
+        return \PHP_VERSION_ID >= 80000
+            && $runner->doesClassExist(AttributeReader::class)
+            && $runner->getSymfonyVersion() >= 50200;
     }
 }
