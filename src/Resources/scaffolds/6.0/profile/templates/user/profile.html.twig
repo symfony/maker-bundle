@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Profile{% endblock %}
+
+{% block body %}
+    <h1>Manage Profile</h1>
+
+    {{ form_start(profileForm) }}
+        {{ form_row(profileForm.name) }}
+
+        <button type="submit" class="btn">Save</button>
+    {{ form_end(profileForm) }}
+{% endblock %}
