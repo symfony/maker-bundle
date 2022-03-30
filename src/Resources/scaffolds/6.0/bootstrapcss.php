@@ -11,8 +11,13 @@ return [
     ],
     'configure' => function(FileManager $files) {
         $packageJson = json_decode($files->getFileContents('package.json'), true);
-        $packageJson['devDependencies']['bootstrap'] = '^5.0.0';
-        $packageJson['devDependencies']['@popperjs/core'] = '^2.0.0';
+        $devDeps = $packageJson['devDependencies'];
+        $devDeps['bootstrap'] = '^5.0.0';
+        $devDeps['@popperjs/core'] = '^2.0.0';
+
+        ksort($devDeps);
+
+        $packageJson['devDependencies'] = $devDeps;
         $files->dumpFile('package.json', json_encode($packageJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         $twig = new YamlSourceManipulator($files->getFileContents('config/packages/twig.yaml'));
