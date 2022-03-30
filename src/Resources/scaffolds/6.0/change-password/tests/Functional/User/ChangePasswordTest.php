@@ -33,7 +33,7 @@ final class ChangePasswordTest extends KernelTestCase
             ->click('Change Password')
             ->assertSuccessful()
             ->assertOn('/')
-            ->assertSeeIn('.flash', 'You\'ve successfully changed your password.')
+            ->assertSeeIn('.alert', 'You\'ve successfully changed your password.')
             ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
             ->visit('/logout')
             ->visit('/login')

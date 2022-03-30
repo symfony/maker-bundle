@@ -129,9 +129,11 @@ final class MakeScaffold extends AbstractMaker
             }
         }
 
-        $io->text('Copying scaffold files...');
+        if (is_dir($scaffold['dir'])) {
+            $io->text('Copying scaffold files...');
 
-        (new Filesystem())->mirror($scaffold['dir'], $this->files->getRootDirectory());
+            (new Filesystem())->mirror($scaffold['dir'], $this->files->getRootDirectory());
+        }
 
         if (isset($scaffold['configure'])) {
             $io->text('Executing configuration...');

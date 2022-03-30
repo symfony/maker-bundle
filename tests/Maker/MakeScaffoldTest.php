@@ -58,8 +58,14 @@ class MakeScaffoldTest extends MakerTestCase
 
     private static function scaffoldProvider(): iterable
     {
+        $excluded = ['bootstrapcss', 'starter-kit'];
+
         foreach (Finder::create()->in(__DIR__.'/../../src/Resources/scaffolds/6.0')->name('*.php')->depth(0) as $file) {
-            yield $file->getFilenameWithoutExtension();
+            if (\in_array($name = $file->getFilenameWithoutExtension(), $excluded, true)) {
+                continue;
+            }
+
+            yield $name;
         }
     }
 }

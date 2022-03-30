@@ -57,7 +57,7 @@ final class ResetPasswordTest extends KernelTestCase
             ->fillField('Repeat Password', 'new-password')
             ->click('Reset password')
             ->assertOn('/')
-            ->assertSeeIn('.flash', 'Your password was successfully reset, you are now logged in.')
+            ->assertSeeIn('.alert', 'Your password was successfully reset, you are now logged in.')
             ->use(Authentication::assertAuthenticatedAs('john@example.com'))
             ->visit('/logout')
             ->visit('/login')
@@ -118,7 +118,7 @@ final class ResetPasswordTest extends KernelTestCase
             ->fillField('Email', 'john@example.com')
             ->click('Send password reset email')
             ->assertOn('/')
-            ->assertSeeIn('.flash', 'You have already requested a reset password email. Please check your email or try again soon.')
+            ->assertSeeIn('.alert', 'You have already requested a reset password email. Please check your email or try again soon.')
         ;
 
         $this->mailer()->assertSentEmailCount(1);
@@ -254,7 +254,7 @@ final class ResetPasswordTest extends KernelTestCase
         $this->browser()
             ->visit('/reset-password/reset/invalid-token')
             ->assertOn('/')
-            ->assertSeeIn('.flash', 'The reset password link is invalid. Please try to reset your password again.')
+            ->assertSeeIn('.alert', 'The reset password link is invalid. Please try to reset your password again.')
         ;
     }
 
@@ -321,7 +321,7 @@ final class ResetPasswordTest extends KernelTestCase
             ->visit($this->mailer()->sentEmails()->first()->getHeaders()->get('X-CTA')->getBody())
             ->assertOn('/')
             ->assertSuccessful()
-            ->assertSeeIn('.flash', 'The link in your email is expired. Please try to reset your password again.')
+            ->assertSeeIn('.alert', 'The link in your email is expired. Please try to reset your password again.')
         ;
     }
 
@@ -343,12 +343,12 @@ final class ResetPasswordTest extends KernelTestCase
             ->fillField('Repeat Password', 'new-password')
             ->click('Reset password')
             ->assertOn('/')
-            ->assertSeeIn('.flash', 'Your password was successfully reset, you are now logged in.')
+            ->assertSeeIn('.alert', 'Your password was successfully reset, you are now logged in.')
             ->visit('/logout')
             ->visit($resetUrl)
             ->assertOn('/')
             ->assertSuccessful()
-            ->assertSeeIn('.flash', 'The reset password link is invalid. Please try to reset your password again.')
+            ->assertSeeIn('.alert', 'The reset password link is invalid. Please try to reset your password again.')
         ;
     }
 

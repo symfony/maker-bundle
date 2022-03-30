@@ -28,7 +28,7 @@ class RegisterTest extends KernelTestCase
             ->fillField('Password', 'password')
             ->click('Register')
             ->assertOn('/')
-            ->assertSeeIn('.flash', 'You\'ve successfully registered and are now logged in.')
+            ->assertSeeIn('.alert', 'You\'ve successfully registered and are now logged in.')
             ->use(Authentication::assertAuthenticatedAs('madison@example.com'))
             ->visit('/logout')
             ->use(Authentication::assertNotAuthenticated())

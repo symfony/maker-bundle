@@ -32,7 +32,7 @@ final class ProfileTest extends KernelTestCase
             ->click('Save')
             ->assertOn('/')
             ->assertSuccessful()
-            ->assertSeeIn('.flash', 'You\'ve successfully updated your profile.')
+            ->assertSeeIn('.alert', 'You\'ve successfully updated your profile.')
         ;
 
         $this->assertSame('John Smith', $user->getName());

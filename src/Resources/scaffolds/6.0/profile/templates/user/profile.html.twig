@@ -3,11 +3,15 @@
 {% block title %}Manage Profile{% endblock %}
 
 {% block body %}
-    <h1>Manage Profile</h1>
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <h1>Manage Profile</h1>
 
-    {{ form_start(profileForm) }}
-        {{ form_row(profileForm.name) }}
+        {{ form_start(profileForm) }}
+            {{ form_row(profileForm.name) }}
 
-        <button type="submit" class="btn">Save</button>
-    {{ form_end(profileForm) }}
+            <button type="submit" class="btn btn-primary">Save</button>
+        {{ form_end(profileForm) }}
+    </div>
+</div>
 {% endblock %}
