@@ -58,7 +58,7 @@ class MakeScaffoldTest extends MakerTestCase
 
     private static function scaffoldProvider(): iterable
     {
-        foreach (Finder::create()->in(__DIR__.'/../../src/Resources/scaffolds/6.0')->name('*.json') as $file) {
+        foreach (Finder::create()->in(__DIR__.'/../../src/Resources/scaffolds/6.0')->name('*.php')->depth(0) as $file) {
             yield $file->getFilenameWithoutExtension();
         }
     }

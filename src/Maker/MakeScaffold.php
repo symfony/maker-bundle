@@ -148,14 +148,15 @@ final class MakeScaffold extends AbstractMaker
         $finder = Finder::create()
             // todo, improve versioning system
             ->in(\sprintf('%s/../Resources/scaffolds/%s.0', __DIR__, Kernel::MAJOR_VERSION))
-            ->name('*.json')
+            ->name('*.php')
+            ->depth(0)
         ;
 
         foreach ($finder as $file) {
             $name = $file->getFilenameWithoutExtension();
 
             $this->availableScaffolds[$name] = array_merge(
-                json_decode(file_get_contents($file), true),
+                require $file,
                 ['dir' => dirname($file->getRealPath()).'/'.$name]
             );
         }
