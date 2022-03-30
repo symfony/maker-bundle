@@ -26,7 +26,7 @@
             </service>
 
             <service id="maker.maker.make_scaffold" class="Symfony\Bundle\MakerBundle\Maker\MakeScaffold">
-                <argument>%kernel.project_dir%</argument>
+                <argument type="service" id="maker.file_manager" />
                 <tag name="maker.command" />
             </service>
 

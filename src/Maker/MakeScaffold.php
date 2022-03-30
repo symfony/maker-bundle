@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Composer\InstalledVersions;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Component\Console\Command\Command;
@@ -29,14 +30,14 @@ use Symfony\Component\Process\Process;
  */
 final class MakeScaffold extends AbstractMaker
 {
-    private $projectDir;
+    private $files;
     private $availableScaffolds;
     private $installedScaffolds = [];
     private $installedPackages = [];
 
-    public function __construct($projectDir)
+    public function __construct(FileManager $files)
     {
-        $this->projectDir = $projectDir;
+        $this->files = $files;
     }
 
     public static function getCommandName(): string
@@ -116,7 +117,7 @@ final class MakeScaffold extends AbstractMaker
 
                 // todo composer bin detection
                 $command = ['composer', 'require', '--no-scripts', 'dev' === $env ? '--dev' : null, $package];
-                $process = new Process(array_filter($command), $this->projectDir);
+                $process = new Process(array_filter($command), $this->files->getRootDirectory());
 
                 $process->run();
 
@@ -130,7 +131,13 @@ final class MakeScaffold extends AbstractMaker
 
         $io->text('Copying scaffold files...');
 
-        (new Filesystem())->mirror($scaffold['dir'], $this->projectDir, null, ['override' => true]);
+        (new Filesystem())->mirror($scaffold['dir'], $this->files->getRootDirectory());
+
+        if (isset($scaffold['configure'])) {
+            $io->text('Executing configuration...');
+
+            $scaffold['configure']($this->files);
+        }
 
         $io->text("Successfully installed scaffold <info>{$name}</info>.");
         $io->newLine();

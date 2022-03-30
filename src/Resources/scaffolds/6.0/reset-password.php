@@ -1,5 +1,7 @@
 <?php
 
+use Symfony\Bundle\MakerBundle\FileManager;
+
 return [
     'description' => 'Reset password system using symfonycasts/reset-password-bundle with tests.',
     'dependents' => [
@@ -11,5 +13,11 @@ return [
         'mailer' => 'all',
         'symfonycasts/reset-password-bundle' => 'all',
         'zenstruck/mailer-test' => 'dev',
-    ]
+    ],
+    'configure' => function(FileManager $files) {
+        $files->dumpFile(
+            'config/packages/reset_password.yaml',
+            file_get_contents(__DIR__.'/reset-password/config/packages/reset_password.yaml')
+        );
+    },
 ];
