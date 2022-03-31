@@ -19,8 +19,6 @@ use Symfony\Component\HttpKernel\Kernel;
 
 class MakeScaffoldTest extends MakerTestCase
 {
-    private const STARTER_KITS = ['starter-kit'];
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -45,12 +43,6 @@ class MakeScaffoldTest extends MakerTestCase
                 )
                 ->run(function (MakerTestRunner $runner) use ($name) {
                     $runner->runMaker([$name]);
-
-                    if (in_array($name, self::STARTER_KITS, true)) {
-                        $runner->runProcess('yarn install');
-                        $runner->runProcess('yarn dev');
-                    }
-
                     $runner->runTests();
 
                     $this->assertTrue(true); // successfully ran tests

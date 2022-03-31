@@ -345,7 +345,7 @@ final class MakerTestEnvironment
             [
                 'SHELL_INTERACTIVE' => '1',
             ],
-            30
+            40
         );
 
         if ($userInputs) {

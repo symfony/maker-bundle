@@ -9,17 +9,11 @@ return [
         'twig' => 'all',
         'encore' => 'all',
     ],
+    'js_packages' => [
+        'bootstrap' => '^5.0.0',
+        '@popperjs/core' => '^2.0.0',
+    ],
     'configure' => function(FileManager $files) {
-        $packageJson = json_decode($files->getFileContents('package.json'), true);
-        $devDeps = $packageJson['devDependencies'];
-        $devDeps['bootstrap'] = '^5.0.0';
-        $devDeps['@popperjs/core'] = '^2.0.0';
-
-        ksort($devDeps);
-
-        $packageJson['devDependencies'] = $devDeps;
-        $files->dumpFile('package.json', json_encode($packageJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-
         $twig = new YamlSourceManipulator($files->getFileContents('config/packages/twig.yaml'));
         $data = $twig->getData();
         $data['twig']['form_themes'] = ['bootstrap_5_layout.html.twig'];

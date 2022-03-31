@@ -17,12 +17,14 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\JsPackageManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
@@ -31,13 +33,17 @@ use Symfony\Component\Process\Process;
 final class MakeScaffold extends AbstractMaker
 {
     private $files;
+    private $jsPackageManager;
     private $availableScaffolds;
+    private $composerBin;
     private $installedScaffolds = [];
     private $installedPackages = [];
+    private $installedJsPackages = [];
 
     public function __construct(FileManager $files)
     {
         $this->files = $files;
+        $this->jsPackageManager = new JsPackageManager($files);
     }
 
     public static function getCommandName(): string
@@ -75,6 +81,18 @@ final class MakeScaffold extends AbstractMaker
         foreach ($names as $name) {
             $this->generateScaffold($name, $io);
         }
+
+        if ($this->installedJsPackages) {
+            if ($this->jsPackageManager->isAvailable()) {
+                $io->comment('Installing JS packages...');
+                $this->jsPackageManager->install();
+
+                $io->comment('Running Webpack Encore...');
+                $this->jsPackageManager->run('dev');
+            } else {
+                $io->warning('Unable to detect JS package manager, you need to run "yarn/npm install".');
+            }
+        }
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
@@ -108,15 +126,14 @@ final class MakeScaffold extends AbstractMaker
             $this->generateScaffold($dependent, $io);
         }
 
-        $io->text("Generating <info>{$name}</info> Scaffold...");
+        $io->text("Installing <info>{$name}</info> Scaffold...");
 
         // install required packages
         foreach ($scaffold['packages'] ?? [] as $package => $env) {
             if (!$this->isPackageInstalled($package)) {
-                $io->text("Installing <comment>{$package}</comment>...");
+                $io->text("Installing Composer package: <comment>{$package}</comment>...");
 
-                // todo composer bin detection
-                $command = ['composer', 'require', '--no-scripts', 'dev' === $env ? '--dev' : null, $package];
+                $command = [$this->composerBin(), 'require', '--no-scripts', 'dev' === $env ? '--dev' : null, $package];
                 $process = new Process(array_filter($command), $this->files->getRootDirectory());
 
                 $process->run();
@@ -126,6 +143,16 @@ final class MakeScaffold extends AbstractMaker
                 }
 
                 $this->installedPackages[] = $package;
+            }
+        }
+
+        // install required js packages
+        foreach ($scaffold['js_packages'] ?? [] as $package => $version) {
+            if (!\in_array($package, $this->installedJsPackages, true)) {
+                $io->text("Installing JS package: <comment>{$package}@{$version}</comment>...");
+
+                $this->jsPackageManager->add($package, $version);
+                $this->installedJsPackages[] = $package;
             }
         }
 
@@ -189,5 +216,18 @@ final class MakeScaffold extends AbstractMaker
     private function isScaffoldInstalled(string $name): bool
     {
         return \in_array($name, $this->installedScaffolds, true);
+    }
+
+    private function composerBin(): string
+    {
+        if ($this->composerBin) {
+            return $this->composerBin;
+        }
+
+        if (!$this->composerBin = (new ExecutableFinder())->find('composer')) {
+            throw new \RuntimeException('Unable to detect composer binary.');
+        }
+
+        return $this->composerBin;
     }
 }
