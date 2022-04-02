@@ -25,10 +25,10 @@ class UserRepository extends ServiceEntityRepository
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function add(UserXml $entity, bool $flush = true): void
+    public function add(UserXml $entity, bool $flush = false): void
     {
         $this->_em->persist($entity);
-        if ($flush) {
+        if (!$flush) {
             $this->_em->flush();
         }
     }
@@ -37,10 +37,10 @@ class UserRepository extends ServiceEntityRepository
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function remove(UserXml $entity, bool $flush = true): void
+    public function remove(UserXml $entity, bool $flush = false): void
     {
         $this->_em->remove($entity);
-        if ($flush) {
+        if (!$flush) {
             $this->_em->flush();
         }
     }
