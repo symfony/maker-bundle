@@ -28,7 +28,7 @@ class XOtherRepository extends ServiceEntityRepository
     public function add(XOther $entity, bool $flush = false): void
     {
         $this->_em->persist($entity);
-        if (!$flush) {
+        if ($flush) {
             $this->_em->flush();
         }
     }
@@ -40,7 +40,7 @@ class XOtherRepository extends ServiceEntityRepository
     public function remove(XOther $entity, bool $flush = false): void
     {
         $this->_em->remove($entity);
-        if (!$flush) {
+        if ($flush) {
             $this->_em->flush();
         }
     }

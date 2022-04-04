@@ -32,7 +32,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
     public function add(<?= $entity_class_name ?> $entity, bool $flush = false): void
     {
         $this->_em->persist($entity);
-        if (!$flush) {
+        if ($flush) {
             $this->_em->flush();
         }
     }
@@ -44,7 +44,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
     public function remove(<?= $entity_class_name ?> $entity, bool $flush = false): void
     {
         $this->_em->remove($entity);
-        if (!$flush) {
+        if ($flush) {
             $this->_em->flush();
         }
     }
