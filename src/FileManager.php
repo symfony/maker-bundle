@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
+use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -84,6 +85,16 @@ class FileManager
                 $this->makerFileLinkFormatter->makeLinkedPath($absolutePath, $relativePath)
             ));
         }
+    }
+
+    /**
+     * @param callable(array):array $manipulator
+     */
+    public function manipulateYaml(string $filename, callable $manipulator): void
+    {
+        $yaml = new YamlSourceManipulator($this->getFileContents($filename));
+        $yaml->setData($manipulator($yaml->getData()));
+        $this->dumpFile($filename, $yaml->getContents());
     }
 
     public function fileExists($path): bool

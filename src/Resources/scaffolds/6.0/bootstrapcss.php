@@ -1,7 +1,6 @@
 <?php
 
 use Symfony\Bundle\MakerBundle\FileManager;
-use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 
 return [
     'description' => 'Add bootstrap css/js.',
@@ -14,14 +13,17 @@ return [
         '@popperjs/core' => '^2.0.0',
     ],
     'configure' => function(FileManager $files) {
-        $twig = new YamlSourceManipulator($files->getFileContents('config/packages/twig.yaml'));
-        $data = $twig->getData();
-        $data['twig']['form_themes'] = ['bootstrap_5_layout.html.twig'];
-        $twig->setData($data);
-        $files->dumpFile('config/packages/twig.yaml', $twig->getContents());
+        // add bootstrap form theme
+        $files->manipulateYaml('config/packages/twig.yaml', function(array $data) {
+            $data['twig']['form_themes'] = ['bootstrap_5_layout.html.twig'];
 
+            return $data;
+        });
+
+        // add bootstrap to app.css
         $files->dumpFile('assets/styles/app.css', "@import \"~bootstrap/dist/css/bootstrap.css\";\n");
 
+        // add bootstrap to app.js
         $appJs = $files->getFileContents('assets/app.js');
 
         if (str_contains($appJs, "require('bootstrap');")) {
