@@ -3,9 +3,11 @@
 return [
     'description' => 'Create a basic user and unit test.',
     'packages' => [
-        'orm' => 'all',
-        'security' => 'all',
-        'phpunit' => 'dev',
+        'doctrine/orm' => 'all',
+        'doctrine/doctrine-bundle' => 'all',
+        'symfony/security-bundle' => 'all',
+        'phpunit/phpunit' => 'dev',
+        'symfony/phpunit-bridge' => 'dev',
         'zenstruck/foundry' => 'dev',
     ]
 ];

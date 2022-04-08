@@ -10,7 +10,8 @@ return [
         'homepage',
     ],
     'packages' => [
-        'profiler' => 'dev',
+        'symfony/web-profiler-bundle' => 'dev',
+        'symfony/stopwatch' => 'dev',
     ],
     'configure' => function(FileManager $files) {
         $services = new YamlSourceManipulator($files->getFileContents('config/services.yaml'));

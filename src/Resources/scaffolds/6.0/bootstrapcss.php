@@ -6,8 +6,8 @@ use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 return [
     'description' => 'Add bootstrap css/js.',
     'packages' => [
-        'twig' => 'all',
-        'encore' => 'all',
+        'symfony/twig-bundle' => 'all',
+        'symfony/webpack-encore-bundle' => 'all',
     ],
     'js_packages' => [
         'bootstrap' => '^5.0.0',

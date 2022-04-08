@@ -6,7 +6,7 @@ return [
         'auth',
     ],
     'packages' => [
-        'form' => 'all',
-        'validator' => 'all',
+        'symfony/form' => 'all',
+        'symfony/validator' => 'all',
     ]
 ];

@@ -8,9 +8,9 @@ return [
         'auth',
     ],
     'packages' => [
-        'form' => 'all',
-        'validator' => 'all',
-        'mailer' => 'all',
+        'symfony/form' => 'all',
+        'symfony/validator' => 'all',
+        'symfony/mailer' => 'all',
         'symfonycasts/reset-password-bundle' => 'all',
         'zenstruck/mailer-test' => 'dev',
     ],

@@ -8,8 +8,8 @@ return [
         'auth',
     ],
     'packages' => [
-        'form' => 'all',
-        'validator' => 'all',
+        'symfony/form' => 'all',
+        'symfony/validator' => 'all',
     ],
     'configure' => function(FileManager $files) {
         $userEntity = $files->getFileContents('src/Entity/User.php');
