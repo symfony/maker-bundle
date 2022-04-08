@@ -3,8 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\ResetPassword\RequestResetFormType;
-use App\Form\ResetPassword\ResetPasswordFormType;
+use App\Form\RequestResetFormType;
+use App\Form\ResetPasswordFormType;
 use App\Repository\UserRepository;
 use App\Security\LoginUser;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;

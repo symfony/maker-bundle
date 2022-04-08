@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Functional\User;
+namespace App\Tests\Functional;
 
 use App\Factory\UserFactory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

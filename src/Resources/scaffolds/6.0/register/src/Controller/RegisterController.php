@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Controller\User;
+namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\User\RegistrationFormType;
+use App\Form\RegistrationFormType;
 use App\Repository\UserRepository;
 use App\Security\LoginUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
