@@ -20,8 +20,7 @@ class RegisterController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         UserRepository $userRepository,
         LoginUser $login,
-    ): Response
-    {
+    ): Response {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);

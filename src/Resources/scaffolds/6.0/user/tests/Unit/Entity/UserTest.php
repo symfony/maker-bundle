@@ -7,10 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class UserTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function always_has_role_user(): void
+    public function testAlwaysHasRoleUser(): void
     {
         $this->assertSame(['ROLE_USER'], (new User())->getRoles());
         $this->assertSame(['ROLE_ADMIN', 'ROLE_USER'], (new User())->setRoles(['ROLE_ADMIN'])->getRoles());

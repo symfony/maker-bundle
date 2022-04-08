@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 use Symfony\Bundle\MakerBundle\FileManager;
 
 return [
@@ -12,9 +21,9 @@ return [
         'bootstrap' => '^5.0.0',
         '@popperjs/core' => '^2.0.0',
     ],
-    'configure' => function(FileManager $files) {
+    'configure' => function (FileManager $files) {
         // add bootstrap form theme
-        $files->manipulateYaml('config/packages/twig.yaml', function(array $data) {
+        $files->manipulateYaml('config/packages/twig.yaml', function (array $data) {
             $data['twig']['form_themes'] = ['bootstrap_5_layout.html.twig'];
 
             return $data;

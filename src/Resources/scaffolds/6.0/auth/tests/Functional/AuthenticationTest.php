@@ -11,12 +11,11 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 
 class AuthenticationTest extends KernelTestCase
 {
-    use HasBrowser, Factories, ResetDatabase;
+    use Factories;
+    use HasBrowser;
+    use ResetDatabase;
 
-    /**
-     * @test
-     */
-    public function can_login_and_logout(): void
+    public function testCanLoginAndLogout(): void
     {
         UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
@@ -35,10 +34,7 @@ class AuthenticationTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function login_with_target(): void
+    public function testLoginWithTarget(): void
     {
         UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
@@ -53,10 +49,7 @@ class AuthenticationTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function login_with_invalid_password(): void
+    public function testLoginWithInvalidPassword(): void
     {
         UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
@@ -73,10 +66,7 @@ class AuthenticationTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function login_with_invalid_email(): void
+    public function testLoginWithInvalidEmail(): void
     {
         $this->browser()
             ->visit('/login')
@@ -91,10 +81,7 @@ class AuthenticationTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function login_with_invalid_csrf(): void
+    public function testLoginWithInvalidCsrf(): void
     {
         UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
@@ -108,10 +95,7 @@ class AuthenticationTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function remember_me_enabled_by_default(): void
+    public function testRememberMeEnabledByDefault(): void
     {
         UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
@@ -128,10 +112,7 @@ class AuthenticationTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function can_disable_remember_me(): void
+    public function testCanDisableRememberMe(): void
     {
         UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
@@ -149,10 +130,7 @@ class AuthenticationTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function fully_authenticated_login_redirect(): void
+    public function testFullyAuthenticatedLoginRedirect(): void
     {
         UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
@@ -169,10 +147,7 @@ class AuthenticationTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function fully_authenticated_login_target(): void
+    public function testFullyAuthenticatedLoginTarget(): void
     {
         UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
@@ -189,10 +164,7 @@ class AuthenticationTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function can_fully_authenticate_if_only_remembered(): void
+    public function testCanFullyAuthenticateIfOnlyRemembered(): void
     {
         UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
@@ -213,10 +185,7 @@ class AuthenticationTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function legacy_password_hash_is_automatically_migrated_on_login(): void
+    public function testLegacyPasswordHashIsAutomaticallyMigratedOnLogin(): void
     {
         $user = UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
@@ -224,7 +193,7 @@ class AuthenticationTest extends KernelTestCase
         $user->setPassword('$argon2id$v=19$m=10,t=3,p=1$K9AFR15goJiUD6AdpK0a6Q$RsP6y+FRnYUBovBmhVZO7wN6Caj2eI8dMTnm3+5aTxk');
         $user->save();
 
-        $this->assertSame(\PASSWORD_ARGON2ID, \password_get_info($user->getPassword())['algo']);
+        $this->assertSame(\PASSWORD_ARGON2ID, password_get_info($user->getPassword())['algo']);
 
         $this->browser()
             ->use(Authentication::assertNotAuthenticated())
@@ -237,22 +206,16 @@ class AuthenticationTest extends KernelTestCase
             ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
         ;
 
-        $this->assertSame(\PASSWORD_DEFAULT, \password_get_info($user->getPassword())['algo']);
+        $this->assertSame(\PASSWORD_DEFAULT, password_get_info($user->getPassword())['algo']);
     }
 
-    /**
-     * @test
-     */
-    public function auto_redirected_to_authenticated_resource_after_login(): void
+    public function testAutoRedirectedToAuthenticatedResourceAfterLogin(): void
     {
         // complete this test when you have a page that requires authentication
         $this->markTestIncomplete();
     }
 
-    /**
-     * @test
-     */
-    public function auto_redirected_to_fully_authenticated_resource_after_fully_authenticated(): void
+    public function testAutoRedirectedToFullyAuthenticatedResourceAfterFullyAuthenticated(): void
     {
         // complete this test when/if you have a page that requires the user be "fully authenticated"
         $this->markTestIncomplete();

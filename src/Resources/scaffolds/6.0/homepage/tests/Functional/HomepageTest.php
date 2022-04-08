@@ -9,10 +9,7 @@ class HomepageTest extends KernelTestCase
 {
     use HasBrowser;
 
-    /**
-     * @test
-     */
-    public function visit_homepage(): void
+    public function testVisitHomepage(): void
     {
         $this->browser()
             ->visit('/')

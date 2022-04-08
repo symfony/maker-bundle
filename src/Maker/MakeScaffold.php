@@ -59,7 +59,7 @@ final class MakeScaffold extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->addArgument('name', InputArgument::OPTIONAL|InputArgument::IS_ARRAY, 'Scaffold name(s) to create')
+            ->addArgument('name', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, 'Scaffold name(s) to create')
         ;
 
         $inputConfig->setArgumentAsNonInteractive('name');
@@ -103,7 +103,7 @@ final class MakeScaffold extends AbstractMaker
 
         $availableScaffolds = array_combine(
             array_keys($this->availableScaffolds()),
-            array_map(fn(array $scaffold) => $scaffold['description'], $this->availableScaffolds())
+            array_map(fn (array $scaffold) => $scaffold['description'], $this->availableScaffolds())
         );
 
         $input->setArgument('name', [$io->choice('Available scaffolds', $availableScaffolds)]);
@@ -176,14 +176,14 @@ final class MakeScaffold extends AbstractMaker
 
     private function availableScaffolds(): array
     {
-        if (is_array($this->availableScaffolds)) {
+        if (\is_array($this->availableScaffolds)) {
             return $this->availableScaffolds;
         }
 
         $this->availableScaffolds = [];
         $finder = Finder::create()
             // todo, improve versioning system
-            ->in(\sprintf('%s/../Resources/scaffolds/%s.0', __DIR__, Kernel::MAJOR_VERSION))
+            ->in(sprintf('%s/../Resources/scaffolds/%s.0', __DIR__, Kernel::MAJOR_VERSION))
             ->name('*.php')
             ->depth(0)
         ;
@@ -193,7 +193,7 @@ final class MakeScaffold extends AbstractMaker
 
             $this->availableScaffolds[$name] = array_merge(
                 require $file,
-                ['dir' => dirname($file->getRealPath()).'/'.$name]
+                ['dir' => \dirname($file->getRealPath()).'/'.$name]
             );
         }
 

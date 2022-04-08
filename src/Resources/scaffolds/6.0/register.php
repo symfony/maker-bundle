@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 use Symfony\Bundle\MakerBundle\FileManager;
 
 return [
@@ -11,7 +20,7 @@ return [
         'symfony/form' => 'all',
         'symfony/validator' => 'all',
     ],
-    'configure' => function(FileManager $files) {
+    'configure' => function (FileManager $files) {
         $userEntity = $files->getFileContents('src/Entity/User.php');
 
         if (str_contains($userEntity, $attribute = "#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]")) {
@@ -22,7 +31,7 @@ return [
         $userEntity = str_replace(
             [
                 '#[ORM\Entity(repositoryClass: UserRepository::class)]',
-                'use Doctrine\ORM\Mapping as ORM;'
+                'use Doctrine\ORM\Mapping as ORM;',
             ],
             [
                 "#[ORM\Entity(repositoryClass: UserRepository::class)]\n{$attribute}",

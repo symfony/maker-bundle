@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 use Symfony\Bundle\MakerBundle\FileManager;
 
 return [
@@ -12,16 +21,16 @@ return [
         'symfony/web-profiler-bundle' => 'dev',
         'symfony/stopwatch' => 'dev',
     ],
-    'configure' => function(FileManager $files) {
+    'configure' => function (FileManager $files) {
         // add LoginUser service
-        $files->manipulateYaml('config/services.yaml', function(array $data) {
-            $data['services']['App\Security\LoginUser']['$authenticator'] ='@security.authenticator.form_login.main';
+        $files->manipulateYaml('config/services.yaml', function (array $data) {
+            $data['services']['App\Security\LoginUser']['$authenticator'] = '@security.authenticator.form_login.main';
 
             return $data;
         });
 
         // make security.yaml adjustments
-        $files->manipulateYaml('config/packages/security.yaml', function(array $data) {
+        $files->manipulateYaml('config/packages/security.yaml', function (array $data) {
             $data['security']['providers'] = [
                 'app_user_provider' => [
                     'entity' => [

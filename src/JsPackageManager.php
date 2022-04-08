@@ -85,6 +85,6 @@ final class JsPackageManager
 
         $packageJson['devDependencies'] = $devDeps;
 
-        $this->files->dumpFile('package.json', json_encode($packageJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $this->files->dumpFile('package.json', json_encode($packageJson, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES));
     }
 }

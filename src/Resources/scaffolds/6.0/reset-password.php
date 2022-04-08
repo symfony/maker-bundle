@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 use Symfony\Bundle\MakerBundle\FileManager;
 
 return [
@@ -14,7 +23,7 @@ return [
         'symfonycasts/reset-password-bundle' => 'all',
         'zenstruck/mailer-test' => 'dev',
     ],
-    'configure' => function(FileManager $files) {
+    'configure' => function (FileManager $files) {
         $files->dumpFile(
             'config/packages/reset_password.yaml',
             file_get_contents(__DIR__.'/reset-password/config/packages/reset_password.yaml')

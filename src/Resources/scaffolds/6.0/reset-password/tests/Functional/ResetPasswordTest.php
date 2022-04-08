@@ -16,12 +16,12 @@ use Zenstruck\Mailer\Test\InteractsWithMailer;
  */
 final class ResetPasswordTest extends KernelTestCase
 {
-    use HasBrowser, Factories, ResetDatabase, InteractsWithMailer;
+    use Factories;
+    use HasBrowser;
+    use InteractsWithMailer;
+    use ResetDatabase;
 
-    /**
-     * @test
-     */
-    public function can_reset_password(): void
+    public function testCanResetPassword(): void
     {
         UserFactory::createOne(['email' => 'john@example.com', 'name' => 'John', 'password' => '1234']);
 
@@ -69,10 +69,7 @@ final class ResetPasswordTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function request_email_is_required(): void
+    public function testRequestEmailIsRequired(): void
     {
         $this->browser()
             ->visit('/reset-password')
@@ -84,10 +81,7 @@ final class ResetPasswordTest extends KernelTestCase
         $this->mailer()->assertNoEmailSent();
     }
 
-    /**
-     * @test
-     */
-    public function request_email_must_be_an_email(): void
+    public function testRequestEmailMustBeAnEmail(): void
     {
         $this->browser()
             ->visit('/reset-password')
@@ -100,10 +94,7 @@ final class ResetPasswordTest extends KernelTestCase
         $this->mailer()->assertNoEmailSent();
     }
 
-    /**
-     * @test
-     */
-    public function requests_are_throttled(): void
+    public function testRequestsAreThrottled(): void
     {
         UserFactory::createOne(['email' => 'john@example.com']);
 
@@ -126,10 +117,7 @@ final class ResetPasswordTest extends KernelTestCase
         ResetPasswordRequestFactory::assert()->count(1);
     }
 
-    /**
-     * @test
-     */
-    public function can_request_again_after_throttle_expires(): void
+    public function testCanRequestAgainAfterThrottleExpires(): void
     {
         UserFactory::createOne(['email' => 'john@example.com']);
 
@@ -140,7 +128,7 @@ final class ResetPasswordTest extends KernelTestCase
             ->assertOn('/reset-password/check-email')
             ->assertSuccessful()
             ->assertSee('Password Reset Email Sent')
-            ->use(function() {
+            ->use(function () {
                 ResetPasswordRequestFactory::first()
                     ->forceSet('requestedAt', new \DateTimeImmutable('-16 minutes'))
                     ->save()
@@ -159,10 +147,7 @@ final class ResetPasswordTest extends KernelTestCase
         ResetPasswordRequestFactory::assert()->count(2);
     }
 
-    /**
-     * @test
-     */
-    public function request_does_not_expose_if_user_was_not_found(): void
+    public function testRequestDoesNotExposeIfUserWasNotFound(): void
     {
         $this->browser()
             ->visit('/reset-password')
@@ -176,10 +161,7 @@ final class ResetPasswordTest extends KernelTestCase
         $this->mailer()->assertNoEmailSent();
     }
 
-    /**
-     * @test
-     */
-    public function reset_password_is_required(): void
+    public function testResetPasswordIsRequired(): void
     {
         $user = UserFactory::createOne(['email' => 'john@example.com']);
         $currentPassword = $user->getPassword();
@@ -198,10 +180,7 @@ final class ResetPasswordTest extends KernelTestCase
         $this->assertSame($currentPassword, UserFactory::find(['email' => 'john@example.com'])->getPassword());
     }
 
-    /**
-     * @test
-     */
-    public function reset_passwords_must_match(): void
+    public function testResetPasswordsMustMatch(): void
     {
         $user = UserFactory::createOne(['email' => 'john@example.com']);
         $currentPassword = $user->getPassword();
@@ -222,10 +201,7 @@ final class ResetPasswordTest extends KernelTestCase
         $this->assertSame($currentPassword, UserFactory::find(['email' => 'john@example.com'])->getPassword());
     }
 
-    /**
-     * @test
-     */
-    public function reset_password_must_be_min_length(): void
+    public function testResetPasswordMustBeMinLength(): void
     {
         $user = UserFactory::createOne(['email' => 'john@example.com']);
         $currentPassword = $user->getPassword();
@@ -246,10 +222,7 @@ final class ResetPasswordTest extends KernelTestCase
         $this->assertSame($currentPassword, UserFactory::find(['email' => 'john@example.com'])->getPassword());
     }
 
-    /**
-     * @test
-     */
-    public function cannot_reset_with_invalid_token(): void
+    public function testCannotResetWithInvalidToken(): void
     {
         $this->browser()
             ->visit('/reset-password/reset/invalid-token')
@@ -258,10 +231,7 @@ final class ResetPasswordTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function can_use_old_token_even_after_requesting_another(): void
+    public function testCanUseOldTokenEvenAfterRequestingAnother(): void
     {
         UserFactory::createOne(['email' => 'john@example.com']);
 
@@ -272,7 +242,7 @@ final class ResetPasswordTest extends KernelTestCase
             ->assertOn('/reset-password/check-email')
             ->assertSuccessful()
             ->assertSee('Password Reset Email Sent')
-            ->use(function() {
+            ->use(function () {
                 ResetPasswordRequestFactory::first()
                     ->forceSet('requestedAt', new \DateTimeImmutable('-16 minutes'))
                     ->save()
@@ -284,7 +254,7 @@ final class ResetPasswordTest extends KernelTestCase
             ->assertOn('/reset-password/check-email')
             ->assertSuccessful()
             ->assertSee('Password Reset Email Sent')
-            ->use(function() {
+            ->use(function () {
                 ResetPasswordRequestFactory::assert()->count(2);
             })
             ->visit($this->mailer()->sentEmails()->first()->getHeaders()->get('X-CTA')->getBody())
@@ -298,10 +268,7 @@ final class ResetPasswordTest extends KernelTestCase
         ResetPasswordRequestFactory::assert()->empty();
     }
 
-    /**
-     * @test
-     */
-    public function reset_tokens_expire(): void
+    public function testResetTokensExpire(): void
     {
         UserFactory::createOne(['email' => 'john@example.com']);
 
@@ -312,7 +279,7 @@ final class ResetPasswordTest extends KernelTestCase
             ->assertOn('/reset-password/check-email')
             ->assertSuccessful()
             ->assertSee('Password Reset Email Sent')
-            ->use(function() {
+            ->use(function () {
                 ResetPasswordRequestFactory::first()
                     ->forceSet('expiresAt', new \DateTimeImmutable('-10 minutes'))
                     ->save()
@@ -325,10 +292,7 @@ final class ResetPasswordTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function cannot_use_token_after_password_change(): void
+    public function testCannotUseTokenAfterPasswordChange(): void
     {
         UserFactory::createOne(['email' => 'john@example.com']);
 
@@ -352,10 +316,7 @@ final class ResetPasswordTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function old_tokens_are_garbage_collected(): void
+    public function testOldTokensAreGarbageCollected(): void
     {
         $user = UserFactory::createOne(['email' => 'jane@example.com']);
 

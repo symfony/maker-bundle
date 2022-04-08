@@ -11,12 +11,11 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 
 class RegisterTest extends KernelTestCase
 {
-    use HasBrowser, Factories, ResetDatabase;
+    use Factories;
+    use HasBrowser;
+    use ResetDatabase;
 
-    /**
-     * @test
-     */
-    public function can_register(): void
+    public function testCanRegister(): void
     {
         UserFactory::assert()->empty();
 
@@ -44,10 +43,7 @@ class RegisterTest extends KernelTestCase
         UserFactory::assert()->exists(['name' => 'Madison', 'email' => 'madison@example.com']);
     }
 
-    /**
-     * @test
-     */
-    public function name_is_required(): void
+    public function testNameIsRequired(): void
     {
         $this->browser()
             ->throwExceptions()
@@ -62,10 +58,7 @@ class RegisterTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function email_is_required(): void
+    public function testEmailIsRequired(): void
     {
         $this->browser()
             ->throwExceptions()
@@ -80,10 +73,7 @@ class RegisterTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function email_must_be_email_address(): void
+    public function testEmailMustBeEmailAddress(): void
     {
         $this->browser()
             ->throwExceptions()
@@ -99,10 +89,7 @@ class RegisterTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function email_must_be_unique(): void
+    public function testEmailMustBeUnique(): void
     {
         UserFactory::createOne(['email' => 'madison@example.com']);
 
@@ -120,10 +107,7 @@ class RegisterTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function password_is_required(): void
+    public function testPasswordIsRequired(): void
     {
         $this->browser()
             ->throwExceptions()
@@ -138,10 +122,7 @@ class RegisterTest extends KernelTestCase
         ;
     }
 
-    /**
-     * @test
-     */
-    public function password_must_be_min_length(): void
+    public function testPasswordMustBeMinLength(): void
     {
         $this->browser()
             ->throwExceptions()

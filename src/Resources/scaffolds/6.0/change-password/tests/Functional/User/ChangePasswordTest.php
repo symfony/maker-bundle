@@ -14,12 +14,11 @@ use Zenstruck\Foundry\Test\ResetDatabase;
  */
 final class ChangePasswordTest extends KernelTestCase
 {
-    use HasBrowser, Factories, ResetDatabase;
+    use Factories;
+    use HasBrowser;
+    use ResetDatabase;
 
-    /**
-     * @test
-     */
-    public function can_change_password(): void
+    public function testCanChangePassword(): void
     {
         $user = UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
         $currentPassword = $user->getPassword();
@@ -48,10 +47,7 @@ final class ChangePasswordTest extends KernelTestCase
         $this->assertNotSame($currentPassword, $user->getPassword());
     }
 
-    /**
-     * @test
-     */
-    public function current_password_must_be_correct(): void
+    public function testCurrentPasswordMustBeCorrect(): void
     {
         $user = UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
         $currentPassword = $user->getPassword();
@@ -72,10 +68,7 @@ final class ChangePasswordTest extends KernelTestCase
         $this->assertSame($currentPassword, $user->getPassword());
     }
 
-    /**
-     * @test
-     */
-    public function current_password_is_required(): void
+    public function testCurrentPasswordIsRequired(): void
     {
         $user = UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
         $currentPassword = $user->getPassword();
@@ -95,10 +88,7 @@ final class ChangePasswordTest extends KernelTestCase
         $this->assertSame($currentPassword, $user->getPassword());
     }
 
-    /**
-     * @test
-     */
-    public function new_password_is_required(): void
+    public function testNewPasswordIsRequired(): void
     {
         $user = UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
         $currentPassword = $user->getPassword();
@@ -117,10 +107,7 @@ final class ChangePasswordTest extends KernelTestCase
         $this->assertSame($currentPassword, $user->getPassword());
     }
 
-    /**
-     * @test
-     */
-    public function new_passwords_must_match(): void
+    public function testNewPasswordsMustMatch(): void
     {
         $user = UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
         $currentPassword = $user->getPassword();
@@ -141,10 +128,7 @@ final class ChangePasswordTest extends KernelTestCase
         $this->assertSame($currentPassword, $user->getPassword());
     }
 
-    /**
-     * @test
-     */
-    public function new_password_must_be_min_length(): void
+    public function testNewPasswordMustBeMinLength(): void
     {
         $user = UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
         $currentPassword = $user->getPassword();
@@ -165,10 +149,7 @@ final class ChangePasswordTest extends KernelTestCase
         $this->assertSame($currentPassword, $user->getPassword());
     }
 
-    /**
-     * @test
-     */
-    public function cannot_access_change_password_page_if_not_logged_in(): void
+    public function testCannotAccessChangePasswordPageIfNotLoggedIn(): void
     {
         $this->browser()
             ->visit('/user/change-password')

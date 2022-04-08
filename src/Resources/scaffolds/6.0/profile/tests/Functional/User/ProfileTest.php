@@ -13,12 +13,11 @@ use Zenstruck\Foundry\Test\ResetDatabase;
  */
 final class ProfileTest extends KernelTestCase
 {
-    use HasBrowser, Factories, ResetDatabase;
+    use Factories;
+    use HasBrowser;
+    use ResetDatabase;
 
-    /**
-     * @test
-     */
-    public function can_update_profile(): void
+    public function testCanUpdateProfile(): void
     {
         $user = UserFactory::createOne(['name' => 'Mary Edwards']);
 
@@ -38,10 +37,7 @@ final class ProfileTest extends KernelTestCase
         $this->assertSame('John Smith', $user->getName());
     }
 
-    /**
-     * @test
-     */
-    public function name_is_required(): void
+    public function testNameIsRequired(): void
     {
         $user = UserFactory::createOne(['name' => 'Mary Edwards']);
 
@@ -60,10 +56,7 @@ final class ProfileTest extends KernelTestCase
         UserFactory::assert()->exists(['name' => 'Mary Edwards']);
     }
 
-    /**
-     * @test
-     */
-    public function cannot_access_profile_page_if_not_logged_in(): void
+    public function testCannotAccessProfilePageIfNotLoggedIn(): void
     {
         $this->browser()
             ->visit('/user')

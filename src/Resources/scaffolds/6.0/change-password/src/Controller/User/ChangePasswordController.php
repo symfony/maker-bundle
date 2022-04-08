@@ -20,8 +20,7 @@ class ChangePasswordController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         UserRepository $userRepository,
         ?UserInterface $user = null,
-    ): Response
-    {
+    ): Response {
         if (!$user) {
             throw $this->createAccessDeniedException();
         }
@@ -49,7 +48,7 @@ class ChangePasswordController extends AbstractController
         }
 
         return $this->render('user/change_password.html.twig', [
-            'changePasswordForm' => $form->createView()
+            'changePasswordForm' => $form->createView(),
         ]);
     }
 }

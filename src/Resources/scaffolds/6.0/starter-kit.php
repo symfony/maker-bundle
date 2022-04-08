@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 use Symfony\Bundle\MakerBundle\FileManager;
 
 return [
@@ -11,7 +20,7 @@ return [
         'change-password',
         'profile',
     ],
-    'configure' => function(FileManager $files) {
+    'configure' => function (FileManager $files) {
         $files->dumpFile('templates/base.html.twig', file_get_contents(__DIR__.'/starter-kit/templates/base.html.twig'));
     },
 ];
