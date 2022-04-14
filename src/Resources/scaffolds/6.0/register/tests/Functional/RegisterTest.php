@@ -3,7 +3,6 @@
 namespace App\Tests\Functional;
 
 use App\Factory\UserFactory;
-use App\Tests\Browser\Authentication;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Zenstruck\Browser\Test\HasBrowser;
 use Zenstruck\Foundry\Test\Factories;
@@ -28,15 +27,15 @@ class RegisterTest extends KernelTestCase
             ->click('Register')
             ->assertOn('/')
             ->assertSeeIn('.alert', 'You\'ve successfully registered and are now logged in.')
-            ->use(Authentication::assertAuthenticatedAs('madison@example.com'))
+            ->assertAuthenticated('madison@example.com')
             ->visit('/logout')
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
             ->visit('/login')
             ->fillField('Email', 'madison@example.com')
             ->fillField('Password', 'password')
             ->click('Sign in')
             ->assertOn('/')
-            ->use(Authentication::assertAuthenticatedAs('madison@example.com'))
+            ->assertAuthenticated('madison@example.com')
         ;
 
         UserFactory::assert()->count(1);
@@ -54,7 +53,7 @@ class RegisterTest extends KernelTestCase
             ->click('Register')
             ->assertOn('/register')
             ->assertSee('Name is required')
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
         ;
     }
 
@@ -69,7 +68,7 @@ class RegisterTest extends KernelTestCase
             ->click('Register')
             ->assertOn('/register')
             ->assertSee('Email is required')
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
         ;
     }
 
@@ -85,7 +84,7 @@ class RegisterTest extends KernelTestCase
             ->click('Register')
             ->assertOn('/register')
             ->assertSee('This is not a valid email address')
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
         ;
     }
 
@@ -103,7 +102,7 @@ class RegisterTest extends KernelTestCase
             ->click('Register')
             ->assertOn('/register')
             ->assertSee('There is already an account with this email')
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
         ;
     }
 
@@ -118,7 +117,7 @@ class RegisterTest extends KernelTestCase
             ->click('Register')
             ->assertOn('/register')
             ->assertSee('Please enter a password')
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
         ;
     }
 
@@ -134,7 +133,7 @@ class RegisterTest extends KernelTestCase
             ->click('Register')
             ->assertOn('/register')
             ->assertSee('Your password should be at least 6 characters')
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
         ;
     }
 }

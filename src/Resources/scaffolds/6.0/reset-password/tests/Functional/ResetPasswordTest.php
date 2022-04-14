@@ -4,7 +4,6 @@ namespace App\Tests\Functional;
 
 use App\Factory\ResetPasswordRequestFactory;
 use App\Factory\UserFactory;
-use App\Tests\Browser\Authentication;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Zenstruck\Browser\Test\HasBrowser;
 use Zenstruck\Foundry\Test\Factories;
@@ -58,14 +57,14 @@ final class ResetPasswordTest extends KernelTestCase
             ->click('Reset password')
             ->assertOn('/')
             ->assertSeeIn('.alert', 'Your password was successfully reset, you are now logged in.')
-            ->use(Authentication::assertAuthenticatedAs('john@example.com'))
+            ->assertAuthenticated('john@example.com')
             ->visit('/logout')
             ->visit('/login')
             ->fillField('Email', 'john@example.com')
             ->fillField('Password', 'new-password')
             ->click('Sign in')
             ->assertOn('/')
-            ->use(Authentication::assertAuthenticatedAs('john@example.com'))
+            ->assertAuthenticated('john@example.com')
         ;
     }
 

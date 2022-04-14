@@ -3,8 +3,8 @@
 namespace App\Tests\Functional;
 
 use App\Factory\UserFactory;
-use App\Tests\Browser\Authentication;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\BrowserKit\CookieJar;
 use Zenstruck\Browser\Test\HasBrowser;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -20,17 +20,17 @@ class AuthenticationTest extends KernelTestCase
         UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
         $this->browser()
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
             ->visit('/login')
             ->fillField('Email', 'mary@example.com')
             ->fillField('Password', '1234')
             ->click('Sign in')
             ->assertOn('/')
             ->assertSuccessful()
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
+            ->assertAuthenticated('mary@example.com')
             ->visit('/logout')
             ->assertOn('/')
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
         ;
     }
 
@@ -39,13 +39,14 @@ class AuthenticationTest extends KernelTestCase
         UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
         $this->browser()
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
             ->visit('/login?target=/some/page')
             ->fillField('Email', 'mary@example.com')
             ->fillField('Password', '1234')
             ->click('Sign in')
             ->assertOn('/some/page')
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
+            ->visit('/')
+            ->assertAuthenticated('mary@example.com')
         ;
     }
 
@@ -62,7 +63,7 @@ class AuthenticationTest extends KernelTestCase
             ->assertSuccessful()
             ->assertFieldEquals('Email', 'mary@example.com')
             ->assertSee('Invalid credentials.')
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
         ;
     }
 
@@ -77,7 +78,7 @@ class AuthenticationTest extends KernelTestCase
             ->assertSuccessful()
             ->assertFieldEquals('Email', 'invalid@example.com')
             ->assertSee('Invalid credentials.')
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
         ;
     }
 
@@ -86,12 +87,12 @@ class AuthenticationTest extends KernelTestCase
         UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
 
         $this->browser()
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
             ->post('/login', ['body' => ['email' => 'mary@example.com', 'password' => '1234']])
             ->assertOn('/login')
             ->assertSuccessful()
             ->assertSee('Invalid CSRF token.')
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
         ;
     }
 
@@ -106,9 +107,13 @@ class AuthenticationTest extends KernelTestCase
             ->click('Sign in')
             ->assertOn('/')
             ->assertSuccessful()
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
-            ->use(Authentication::expireSession())
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
+            ->assertAuthenticated('mary@example.com')
+            ->use(function(CookieJar $cookieJar) {
+                $cookieJar->expire('MOCKSESSID');
+            })
+            ->withProfiling()
+            ->visit('/')
+            ->assertAuthenticated('mary@example.com')
         ;
     }
 
@@ -124,9 +129,12 @@ class AuthenticationTest extends KernelTestCase
             ->click('Sign in')
             ->assertOn('/')
             ->assertSuccessful()
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
-            ->use(Authentication::expireSession())
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertAuthenticated('mary@example.com')
+            ->use(function(CookieJar $cookieJar) {
+                $cookieJar->expire('MOCKSESSID');
+            })
+            ->visit('/')
+            ->assertNotAuthenticated()
         ;
     }
 
@@ -140,10 +148,10 @@ class AuthenticationTest extends KernelTestCase
             ->fillField('Password', '1234')
             ->click('Sign in')
             ->assertOn('/')
-            ->use(Authentication::assertAuthenticated())
+            ->assertAuthenticated()
             ->visit('/login')
             ->assertOn('/')
-            ->use(Authentication::assertAuthenticated())
+            ->assertAuthenticated()
         ;
     }
 
@@ -157,10 +165,11 @@ class AuthenticationTest extends KernelTestCase
             ->fillField('Password', '1234')
             ->click('Sign in')
             ->assertOn('/')
-            ->use(Authentication::assertAuthenticated())
+            ->assertAuthenticated()
             ->visit('/login?target=/some/page')
             ->assertOn('/some/page')
-            ->use(Authentication::assertAuthenticated())
+            ->visit('/')
+            ->assertAuthenticated()
         ;
     }
 
@@ -174,14 +183,16 @@ class AuthenticationTest extends KernelTestCase
             ->fillField('Password', '1234')
             ->click('Sign in')
             ->assertOn('/')
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
-            ->use(Authentication::expireSession())
+            ->assertAuthenticated('mary@example.com')
+            ->use(function(CookieJar $cookieJar) {
+                $cookieJar->expire('MOCKSESSID');
+            })
             ->visit('/login')
             ->assertOn('/login')
             ->fillField('Password', '1234')
             ->click('Sign in')
             ->assertOn('/')
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
+            ->assertAuthenticated('mary@example.com')
         ;
     }
 
@@ -196,14 +207,14 @@ class AuthenticationTest extends KernelTestCase
         $this->assertSame(\PASSWORD_ARGON2ID, password_get_info($user->getPassword())['algo']);
 
         $this->browser()
-            ->use(Authentication::assertNotAuthenticated())
+            ->assertNotAuthenticated()
             ->visit('/login')
             ->fillField('Email', 'mary@example.com')
             ->fillField('Password', '1234')
             ->click('Sign in')
             ->assertOn('/')
             ->assertSuccessful()
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
+            ->assertAuthenticated('mary@example.com')
         ;
 
         $this->assertSame(\PASSWORD_DEFAULT, password_get_info($user->getPassword())['algo']);

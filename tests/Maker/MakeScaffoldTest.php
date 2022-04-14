@@ -23,7 +23,7 @@ class MakeScaffoldTest extends MakerTestCase
     {
         parent::setUp();
 
-        if (Kernel::MAJOR_VERSION < 6) {
+        if (Kernel::VERSION_ID < 60000) {
             $this->markTestSkipped('Only available on Symfony 6+.');
         }
     }

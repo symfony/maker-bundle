@@ -3,7 +3,6 @@
 namespace App\Tests\Functional;
 
 use App\Factory\UserFactory;
-use App\Tests\Browser\Authentication;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Zenstruck\Browser\Test\HasBrowser;
 use Zenstruck\Foundry\Test\Factories;
@@ -33,7 +32,7 @@ final class ChangePasswordTest extends KernelTestCase
             ->assertSuccessful()
             ->assertOn('/')
             ->assertSeeIn('.alert', 'You\'ve successfully changed your password.')
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
+            ->assertAuthenticated('mary@example.com')
             ->visit('/logout')
             ->visit('/login')
             ->fillField('Email', 'mary@example.com')
@@ -41,7 +40,7 @@ final class ChangePasswordTest extends KernelTestCase
             ->click('Sign in')
             ->assertOn('/')
             ->assertSuccessful()
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
+            ->assertAuthenticated('mary@example.com')
         ;
 
         $this->assertNotSame($currentPassword, $user->getPassword());
@@ -62,7 +61,7 @@ final class ChangePasswordTest extends KernelTestCase
             ->assertSuccessful()
             ->assertOn('/user/change-password')
             ->assertSee('This is not your current password.')
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
+            ->assertAuthenticated('mary@example.com')
         ;
 
         $this->assertSame($currentPassword, $user->getPassword());
@@ -82,7 +81,7 @@ final class ChangePasswordTest extends KernelTestCase
             ->assertSuccessful()
             ->assertOn('/user/change-password')
             ->assertSee('This is not your current password.')
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
+            ->assertAuthenticated('mary@example.com')
         ;
 
         $this->assertSame($currentPassword, $user->getPassword());
@@ -101,7 +100,7 @@ final class ChangePasswordTest extends KernelTestCase
             ->assertSuccessful()
             ->assertOn('/user/change-password')
             ->assertSee('Please enter a password.')
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
+            ->assertAuthenticated('mary@example.com')
         ;
 
         $this->assertSame($currentPassword, $user->getPassword());
@@ -122,7 +121,7 @@ final class ChangePasswordTest extends KernelTestCase
             ->assertSuccessful()
             ->assertOn('/user/change-password')
             ->assertSee('The password fields must match.')
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
+            ->assertAuthenticated('mary@example.com')
         ;
 
         $this->assertSame($currentPassword, $user->getPassword());
@@ -143,7 +142,7 @@ final class ChangePasswordTest extends KernelTestCase
             ->assertSuccessful()
             ->assertOn('/user/change-password')
             ->assertSee('Your password should be at least 6 characters')
-            ->use(Authentication::assertAuthenticatedAs('mary@example.com'))
+            ->assertAuthenticated('mary@example.com')
         ;
 
         $this->assertSame($currentPassword, $user->getPassword());
