@@ -42,32 +42,17 @@ class RegisterTest extends KernelTestCase
         UserFactory::assert()->exists(['name' => 'Madison', 'email' => 'madison@example.com']);
     }
 
-    public function testNameIsRequired(): void
+    public function testValidation(): void
     {
         $this->browser()
             ->throwExceptions()
             ->visit('/register')
             ->assertSuccessful()
-            ->fillField('Email', 'madison@example.com')
-            ->fillField('Password', 'password')
-            ->click('Register')
-            ->assertOn('/register')
-            ->assertSee('Name is required')
-            ->assertNotAuthenticated()
-        ;
-    }
-
-    public function testEmailIsRequired(): void
-    {
-        $this->browser()
-            ->throwExceptions()
-            ->visit('/register')
-            ->assertSuccessful()
-            ->fillField('Name', 'Madison')
-            ->fillField('Password', 'password')
             ->click('Register')
             ->assertOn('/register')
             ->assertSee('Email is required')
+            ->assertSee('Please enter a password')
+            ->assertSee('Name is required')
             ->assertNotAuthenticated()
         ;
     }
@@ -102,37 +87,6 @@ class RegisterTest extends KernelTestCase
             ->click('Register')
             ->assertOn('/register')
             ->assertSee('There is already an account with this email')
-            ->assertNotAuthenticated()
-        ;
-    }
-
-    public function testPasswordIsRequired(): void
-    {
-        $this->browser()
-            ->throwExceptions()
-            ->visit('/register')
-            ->assertSuccessful()
-            ->fillField('Name', 'Madison')
-            ->fillField('Email', 'madison@example.com')
-            ->click('Register')
-            ->assertOn('/register')
-            ->assertSee('Please enter a password')
-            ->assertNotAuthenticated()
-        ;
-    }
-
-    public function testPasswordMustBeMinLength(): void
-    {
-        $this->browser()
-            ->throwExceptions()
-            ->visit('/register')
-            ->assertSuccessful()
-            ->fillField('Name', 'Madison')
-            ->fillField('Email', 'madison@example.com')
-            ->fillField('Password', '1234')
-            ->click('Register')
-            ->assertOn('/register')
-            ->assertSee('Your password should be at least 6 characters')
             ->assertNotAuthenticated()
         ;
     }

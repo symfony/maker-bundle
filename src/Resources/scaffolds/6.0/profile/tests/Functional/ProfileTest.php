@@ -37,7 +37,7 @@ final class ProfileTest extends KernelTestCase
         $this->assertSame('John Smith', $user->getName());
     }
 
-    public function testNameIsRequired(): void
+    public function testValidation(): void
     {
         $user = UserFactory::createOne(['name' => 'Mary Edwards']);
 

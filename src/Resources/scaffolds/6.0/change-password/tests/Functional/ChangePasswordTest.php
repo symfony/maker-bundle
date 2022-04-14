@@ -127,27 +127,6 @@ final class ChangePasswordTest extends KernelTestCase
         $this->assertSame($currentPassword, $user->getPassword());
     }
 
-    public function testNewPasswordMustBeMinLength(): void
-    {
-        $user = UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
-        $currentPassword = $user->getPassword();
-
-        $this->browser()
-            ->actingAs($user->object())
-            ->visit('/user/change-password')
-            ->fillField('Current Password', '1234')
-            ->fillField('New Password', '4321')
-            ->fillField('Repeat New Password', '4321')
-            ->click('Change Password')
-            ->assertSuccessful()
-            ->assertOn('/user/change-password')
-            ->assertSee('Your password should be at least 6 characters')
-            ->assertAuthenticated('mary@example.com')
-        ;
-
-        $this->assertSame($currentPassword, $user->getPassword());
-    }
-
     public function testCannotAccessChangePasswordPageIfNotLoggedIn(): void
     {
         $this->browser()
