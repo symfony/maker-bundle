@@ -108,7 +108,7 @@ class AuthenticationTest extends KernelTestCase
             ->assertOn('/')
             ->assertSuccessful()
             ->assertAuthenticated('mary@example.com')
-            ->use(function(CookieJar $cookieJar) {
+            ->use(function (CookieJar $cookieJar) {
                 $cookieJar->expire('MOCKSESSID');
             })
             ->withProfiling()
@@ -130,7 +130,7 @@ class AuthenticationTest extends KernelTestCase
             ->assertOn('/')
             ->assertSuccessful()
             ->assertAuthenticated('mary@example.com')
-            ->use(function(CookieJar $cookieJar) {
+            ->use(function (CookieJar $cookieJar) {
                 $cookieJar->expire('MOCKSESSID');
             })
             ->visit('/')
@@ -184,7 +184,7 @@ class AuthenticationTest extends KernelTestCase
             ->click('Sign in')
             ->assertOn('/')
             ->assertAuthenticated('mary@example.com')
-            ->use(function(CookieJar $cookieJar) {
+            ->use(function (CookieJar $cookieJar) {
                 $cookieJar->expire('MOCKSESSID');
             })
             ->visit('/login')

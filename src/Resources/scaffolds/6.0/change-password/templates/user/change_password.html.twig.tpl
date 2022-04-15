@@ -8,9 +8,9 @@
         <h1>Change Password</h1>
 
         {{ form_start(changePasswordForm) }}
-            {{ form_row(changePasswordForm.currentPassword, { label: 'Current Password' }) }}
-            {{ form_row(changePasswordForm.plainPassword.first, { label: 'New Password' }) }}
-            {{ form_row(changePasswordForm.plainPassword.second, { label: 'Repeat New Password' }) }}
+            {{ form_row(changePasswordForm.currentPassword, {label: 'Current Password'}) }}
+            {{ form_row(changePasswordForm.plainPassword.first, {label: 'New Password'}) }}
+            {{ form_row(changePasswordForm.plainPassword.second, {label: 'Repeat New Password'}) }}
 
             <button type="submit" class="btn btn-primary">Change Password</button>
         {{ form_end(changePasswordForm) }}

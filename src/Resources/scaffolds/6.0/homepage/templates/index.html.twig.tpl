@@ -7,7 +7,7 @@
 
     {% for type, messages in app.flashes %}
         {% for message in messages %}
-            <div class="alert alert-{{ type|replace({ error: 'danger' }) }}">
+            <div class="alert alert-{{ type|replace({error: 'danger'}) }}">
                 {{ message }}
             </div>
         {% endfor %}
