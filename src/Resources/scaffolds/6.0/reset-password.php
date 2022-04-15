@@ -24,11 +24,6 @@ return [
         'zenstruck/mailer-test' => 'dev',
     ],
     'configure' => function (FileManager $files) {
-        $files->dumpFile(
-            'config/packages/reset_password.yaml',
-            file_get_contents(__DIR__.'/reset-password/config/packages/reset_password.yaml')
-        );
-
         $login = $files->getFileContents('templates/login.html.twig');
         $forgotPassword = "</button>\n        <a class=\"btn btn-link\" href=\"{{ path('reset_password_request') }}\">Forgot your password?</a>";
 

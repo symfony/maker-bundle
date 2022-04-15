@@ -21,7 +21,6 @@ use Symfony\Bundle\MakerBundle\JsPackageManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Process\ExecutableFinder;
@@ -159,7 +158,12 @@ final class MakeScaffold extends AbstractMaker
         if (is_dir($scaffold['dir'])) {
             $io->text('Copying scaffold files...');
 
-            (new Filesystem())->mirror($scaffold['dir'], $this->files->getRootDirectory());
+            foreach (Finder::create()->files()->in($scaffold['dir']) as $file) {
+                $this->files->dumpFile(
+                    "{$file->getRelativePath()}/{$file->getFilenameWithoutExtension()}",
+                    $file->getContents()
+                );
+            }
         }
 
         if (isset($scaffold['configure'])) {
