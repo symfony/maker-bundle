@@ -181,7 +181,7 @@ final class DoctrineHelper
         foreach ($this->mappingDriversByPrefix ?? [] as $managerName => $prefixes) {
             foreach ($prefixes as [$prefix, $annotationDriver]) {
                 if (null !== $annotationDriver) {
-                    $classNames = (new \ReflectionClass(get_class($annotationDriver)))->getProperty('classNames');
+                    $classNames = (new \ReflectionClass(\get_class($annotationDriver)))->getProperty('classNames');
                     $classNames->setAccessible(true);
                     $classNames->setValue($annotationDriver, null);
                 }
@@ -218,7 +218,7 @@ final class DoctrineHelper
                     if ($this->isInstanceOf($metadataDriver, MappingDriverChain::class)) {
                         foreach ($metadataDriver->getDrivers() as $driver) {
                             if ($this->isInstanceOf($driver, AnnotationDriver::class)) {
-                                $classNames = (new \ReflectionClass(get_class($driver)))->getProperty('classNames');
+                                $classNames = (new \ReflectionClass(\get_class($driver)))->getProperty('classNames');
                                 $classNames->setAccessible(true);
                                 $classNames->setValue($driver, null);
                             }
