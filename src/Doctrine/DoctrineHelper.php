@@ -177,13 +177,12 @@ final class DoctrineHelper
      */
     public function getMetadata(string $classOrNamespace = null, bool $disconnected = false)
     {
-        $classNames = (new \ReflectionClass(AnnotationDriver::class))->getProperty('classNames');
-        $classNames->setAccessible(true);
-
         // Invalidating the cached AnnotationDriver::$classNames to find new Entity classes
         foreach ($this->mappingDriversByPrefix ?? [] as $managerName => $prefixes) {
             foreach ($prefixes as [$prefix, $annotationDriver]) {
                 if (null !== $annotationDriver) {
+                    $classNames = (new \ReflectionClass($annotationDriver::class))->getProperty('classNames');
+                    $classNames->setAccessible(true);
                     $classNames->setValue($annotationDriver, null);
                 }
             }
@@ -219,6 +218,8 @@ final class DoctrineHelper
                     if ($this->isInstanceOf($metadataDriver, MappingDriverChain::class)) {
                         foreach ($metadataDriver->getDrivers() as $driver) {
                             if ($this->isInstanceOf($driver, AnnotationDriver::class)) {
+                                $classNames = (new \ReflectionClass($driver::class))->getProperty('classNames');
+                                $classNames->setAccessible(true);
                                 $classNames->setValue($driver, null);
                             }
                         }
