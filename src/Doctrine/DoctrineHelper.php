@@ -24,6 +24,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\AbstractClassMetadataFactory;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\Driver\AnnotationDriver;
+use Doctrine\Persistence\Mapping\Driver\ColocatedMappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
@@ -177,13 +178,39 @@ final class DoctrineHelper
      */
     public function getMetadata(string $classOrNamespace = null, bool $disconnected = false)
     {
-        $classNames = (new \ReflectionClass(AnnotationDriver::class))->getProperty('classNames');
-        $classNames->setAccessible(true);
+//        $aDriver = (new \ReflectionClass(\Doctrine\ORM\Mapping\Driver\AnnotationDriver::class))->getProperty('classNames');
+//        $aDriver->setAccessible(true);
+//
+//        $bDriver = (new \ReflectionClass(AttributeDriver::class))->getProperty('classNames');
+//        $bDriver->setAccessible(true);
+//
+//        if ($this->attributeMappingSupport && $this->isDoctrineSupportingAttributes()) {
+//            $classNames = $aDriver;
+//        } else {
+//            $classNames = $bDriver;
+//        }
+
+//        $colocated = new \ReflectionClass(ColocatedMappingDriver::class);
+//        $colocated->('classNames');
+
+//        dd($this->mappingDriversByPrefix, $this->attributeMappingSupport, $this->isDoctrineSupportingAttributes());
+
+
+//        $classNames = (new \ReflectionClass(AttributeDriver::class))->getProperty('classNames');
+//        $classNames->setAccessible(true);
 
         // Invalidating the cached AnnotationDriver::$classNames to find new Entity classes
         foreach ($this->mappingDriversByPrefix ?? [] as $managerName => $prefixes) {
             foreach ($prefixes as [$prefix, $annotationDriver]) {
                 if (null !== $annotationDriver) {
+                    if ($annotationDriver instanceof \Doctrine\ORM\Mapping\Driver\AnnotationDriver) {
+                        $classNames = (new \ReflectionClass(\Doctrine\ORM\Mapping\Driver\AnnotationDriver::class))->getProperty('classNames');
+                        $classNames->setAccessible(true);
+                    } else {
+                        $classNames = (new \ReflectionClass(AttributeDriver::class))->getProperty('classNames');
+                        $classNames->setAccessible(true);
+                    }
+
                     $classNames->setValue($annotationDriver, null);
                 }
             }
