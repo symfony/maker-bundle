@@ -140,7 +140,7 @@ jobs:
                   tools: composer:v2
 
             - name: "legacy Composer"
-              if: ${{ matrix.legacy-composer === '2.2' }}
+              if: ${{ matrix.legacy-composer == '2.2' }}
               run: composer self-update --2.2
 
             - name: "Add PHPUnit matcher"
