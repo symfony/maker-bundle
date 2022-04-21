@@ -1,5 +1,17 @@
 # Changelog
 
+## [v1.39.0](https://github.com/symfony/maker-bundle/releases/tag/v1.39.0)
+
+*April 21st, 2022*
+
+### Feature
+
+- [#1088](https://github.com/symfony/maker-bundle/pull/1088) - Add `@extends` tag to Doctrine repository template. - *@hhamon*
+- [#1080](https://github.com/symfony/maker-bundle/pull/1080) - [make:twig-extension] reference twig 3.x docs in generated extension - *@BahmanMD*
+### Bug
+
+- [#1084](https://github.com/symfony/maker-bundle/pull/1084) - [make:docker:database] Fix link docker compose file ports - *@mdoutreluingne*
+
 ## [v1.38.0](https://github.com/symfony/maker-bundle/releases/tag/v1.38.0)
 
 *February 24th, 2022*
