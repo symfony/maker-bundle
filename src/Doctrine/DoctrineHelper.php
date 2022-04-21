@@ -16,7 +16,6 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata as LegacyClassMetadata;
 use Doctrine\Common\Persistence\Mapping\MappingException as LegacyPersistenceMappingException;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Annotation;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Mapping\MappingException as ORMMappingException;
 use Doctrine\ORM\Mapping\NamingStrategy;
@@ -179,13 +178,11 @@ final class DoctrineHelper
      */
     public function getMetadata(string $classOrNamespace = null, bool $disconnected = false)
     {
-        $driverName = AnnotationDriver::class;
-
-        if (class_exists(\Doctrine\ORM\Mapping\Driver\AnnotationDriver::class)) {
-            $driverName = \Doctrine\ORM\Mapping\Driver\AnnotationDriver::class;
+        if (class_exists(AttributeDriver::class)) {
+            $classNames = (new \ReflectionClass(AttributeDriver::class))->getProperty('classNames');
+        } else {
+            $classNames = (new \ReflectionClass(AnnotationDriver::class))->getProperty('classNames');
         }
-
-        $classNames = (new \ReflectionClass($driverName))->getProperty('classNames');
         $classNames->setAccessible(true);
 
         // Invalidating the cached AnnotationDriver::$classNames to find new Entity classes
