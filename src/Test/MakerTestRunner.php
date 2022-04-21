@@ -170,20 +170,11 @@ class MakerTestRunner
 
     public function configureDatabase(bool $createSchema = true): void
     {
-        // @legacy Drop conditional when Symfony 4.4 is no longer supported.
-        if (50000 > $this->environment->getSymfonyVersionInApp()) {
-            $this->replaceInFile(
-                '.env',
-                'postgresql://db_user:db_password@127.0.0.1:5432/db_name?serverVersion=13&charset=utf8',
-                getenv('TEST_DATABASE_DSN')
-            );
-        } else {
-            $this->replaceInFile(
-                '.env',
-                'postgresql://symfony:ChangeMe@127.0.0.1:5432/app?serverVersion=13&charset=utf8',
-                getenv('TEST_DATABASE_DSN')
-            );
-        }
+        $this->replaceInFile(
+            '.env',
+            'postgresql://symfony:ChangeMe@127.0.0.1:5432/app?serverVersion=13&charset=utf8',
+            getenv('TEST_DATABASE_DSN')
+        );
 
         // Flex includes a recipe to suffix the dbname w/ "_test" - lets keep
         // things simple for these tests and not do that.

@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
-use Doctrine\Common\Inflector\Inflector as LegacyInflector;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use Symfony\Component\DependencyInjection\Container;
@@ -220,20 +219,12 @@ final class Str
 
     private static function pluralize(string $word): string
     {
-        if (class_exists(Inflector::class)) {
-            return static::getInflector()->pluralize($word);
-        }
-
-        return LegacyInflector::pluralize($word);
+        return static::getInflector()->pluralize($word);
     }
 
     private static function singularize(string $word): string
     {
-        if (class_exists(Inflector::class)) {
-            return static::getInflector()->singularize($word);
-        }
-
-        return LegacyInflector::singularize($word);
+        return static::getInflector()->singularize($word);
     }
 
     private static function getInflector(): Inflector
