@@ -1,4 +1,6 @@
 security:
+    enable_authenticator_manager: true
+
     password_hashers:
         App\Entity\User:
             algorithm: {BCRYPT_OR_AUTO}
@@ -14,5 +16,5 @@ security:
     firewalls:
         dev: ~
         main:
-            anonymous: lazy
+            lazy: true
             provider: app_user_provider

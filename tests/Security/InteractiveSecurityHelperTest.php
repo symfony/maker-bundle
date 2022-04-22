@@ -75,60 +75,6 @@ class InteractiveSecurityHelperTest extends TestCase
         ];
     }
 
-    public function testGuessEntryPointWithNonExistingFirewallThrowsException()
-    {
-        $this->expectException(\Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException::class);
-
-        /** @var SymfonyStyle|\PHPUnit_Framework_MockObject_MockObject $io */
-        $io = $this->createMock(SymfonyStyle::class);
-
-        $helper = new InteractiveSecurityHelper();
-        $helper->guessEntryPoint($io, [], '', 'foo');
-    }
-
-    /**
-     * @dataProvider getEntryPointTests
-     */
-    public function testGuestEntryPoint(array $securityData, string $firewallName, bool $multipleAuthenticators = false)
-    {
-        /** @var SymfonyStyle|\PHPUnit_Framework_MockObject_MockObject $io */
-        $io = $this->createMock(SymfonyStyle::class);
-        $io->expects($this->exactly(false === $multipleAuthenticators ? 0 : 1))
-            ->method('choice');
-
-        $helper = new InteractiveSecurityHelper();
-        $helper->guessEntryPoint($io, $securityData, 'App\\Security\\NewAuthenticator', $firewallName);
-    }
-
-    public function getEntryPointTests()
-    {
-        yield 'no_guard' => [
-            ['security' => ['firewalls' => ['main' => []]]],
-            'main',
-        ];
-
-        yield 'no_authenticators_key' => [
-            ['security' => ['firewalls' => ['main' => ['guard' => []]]]],
-            'main',
-        ];
-
-        yield 'no_authenticator' => [
-            ['security' => ['firewalls' => ['main' => ['guard' => ['authenticators' => []]]]]],
-            'main',
-        ];
-
-        yield 'one_authenticator' => [
-            ['security' => ['firewalls' => ['main' => ['guard' => ['authenticators' => ['App\\Security\\Authenticator']]]]]],
-            'main',
-            true,
-        ];
-
-        yield 'one_authenticator_entry_point' => [
-            ['security' => ['firewalls' => ['main' => ['guard' => ['entry_point' => 'App\\Security\\Authenticator', 'authenticators' => ['App\\Security\\Authenticator']]]]]],
-            'main',
-        ];
-    }
-
     /**
      * @dataProvider getUserClassTests
      */

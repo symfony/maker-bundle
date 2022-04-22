@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
@@ -229,7 +228,6 @@ class Generator
             $parameters +
             [
                 'generator' => $this->templateComponentGenerator,
-                'parent_class_name' => static::getControllerBaseClass()->getShortName(),
             ]
         );
     }
@@ -246,8 +244,13 @@ class Generator
         );
     }
 
+    /**
+     * @deprecated MakerBundle only supports AbstractController::class. This method will be removed in the future.
+     */
     public static function getControllerBaseClass(): ClassNameDetails
     {
+        trigger_deprecation('symfony/maker-bundle', 'v1.41.0', 'MakerBundle only supports AbstractController. This method will be removed in the future.');
+
         return new ClassNameDetails(AbstractController::class, '\\');
     }
 }
