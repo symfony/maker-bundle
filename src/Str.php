@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\String\Inflector\EnglishInflector;
+use function Symfony\Component\String\u;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -35,7 +36,9 @@ final class Str
      */
     public static function addSuffix(string $value, string $suffix): string
     {
-        return self::removeSuffix($value, $suffix).$suffix;
+        $string = u($value)->ignoreCase();
+
+        return $string->trimSuffix($suffix)->append($suffix);
     }
 
     /**
@@ -45,7 +48,7 @@ final class Str
      */
     public static function removeSuffix(string $value, string $suffix): string
     {
-        return self::hasSuffix($value, $suffix) ? substr($value, 0, -\strlen($suffix)) : $value;
+        return u($value)->ignoreCase()->trimSuffix($suffix);
     }
 
     /**
@@ -82,12 +85,12 @@ final class Str
 
     public static function asLowerCamelCase(string $str): string
     {
-        return lcfirst(self::asCamelCase($str));
+        return u($str)->camel();
     }
 
     public static function asCamelCase(string $str): string
     {
-        return strtr(ucwords(strtr($str, ['_' => ' ', '.' => ' ', '\\' => ' '])), [' ' => '']);
+        return u($str)->camel()->title();
     }
 
     public static function asRoutePath(string $value): string
@@ -104,7 +107,7 @@ final class Str
 
     public static function asSnakeCase(string $value): string
     {
-        return self::asTwigVariable($value);
+        return u($value)->snake();
     }
 
     public static function asCommand(string $value): string
@@ -141,8 +144,7 @@ final class Str
 
     public static function singularCamelCaseToPluralCamelCase(string $camelCase): string
     {
-        $snake = self::asSnakeCase($camelCase);
-        $words = explode('_', $snake);
+        $words = explode('_', u($camelCase)->snake());
         $words[\count($words) - 1] = self::pluralize($words[\count($words) - 1]);
         $reSnaked = implode('_', $words);
 
@@ -151,8 +153,7 @@ final class Str
 
     public static function pluralCamelCaseToSingular(string $camelCase): string
     {
-        $snake = self::asSnakeCase($camelCase);
-        $words = explode('_', $snake);
+        $words = explode('_', u($camelCase)->snake());
         $words[\count($words) - 1] = self::singularize($words[\count($words) - 1]);
         $reSnaked = implode('_', $words);
 
