@@ -859,7 +859,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function doesEntityUseAttributeMapping(string $className): bool
     {
-        if (\PHP_VERSION < 80000) {
+        if (\PHP_MAJOR_VERSION < 8) {
             return false;
         }
 
