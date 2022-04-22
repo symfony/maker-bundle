@@ -51,5 +51,8 @@
         "branch-alias": {
             "dev-main": "1.0-dev"
         }
+    },
+    "conflict": {
+        "doctrine/orm": "2.12.0"
     }
 }
