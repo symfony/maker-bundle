@@ -11,9 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
-use Doctrine\Inflector\Inflector;
-use Doctrine\Inflector\InflectorFactory;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\String\Inflector\EnglishInflector;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -21,9 +20,6 @@ use Symfony\Component\DependencyInjection\Container;
  */
 final class Str
 {
-    /** @var Inflector|null */
-    private static $inflector;
-
     /**
      * Looks for suffixes in strings in a case-insensitive way.
      */
@@ -219,20 +215,15 @@ final class Str
 
     private static function pluralize(string $word): string
     {
-        return static::getInflector()->pluralize($word);
+        $result = (new EnglishInflector())->pluralize($word);
+
+        return $result[0];
     }
 
     private static function singularize(string $word): string
     {
-        return static::getInflector()->singularize($word);
-    }
+        $result = (new EnglishInflector())->singularize($word);
 
-    private static function getInflector(): Inflector
-    {
-        if (null === static::$inflector) {
-            static::$inflector = InflectorFactory::create()->build();
-        }
-
-        return static::$inflector;
+        return $result[0];
     }
 }

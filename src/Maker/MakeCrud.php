@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
-use Doctrine\Inflector\InflectorFactory;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -31,6 +30,7 @@ use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
+use Symfony\Component\String\Inflector\EnglishInflector;
 use Symfony\Component\Validator\Validation;
 
 /**
@@ -50,7 +50,8 @@ final class MakeCrud extends AbstractMaker
     {
         $this->doctrineHelper = $doctrineHelper;
         $this->formTypeRenderer = $formTypeRenderer;
-        $this->inflector = InflectorFactory::create()->build();
+
+        $this->inflector = new EnglishInflector();
     }
 
     public static function getCommandName(): string
@@ -120,7 +121,7 @@ final class MakeCrud extends AbstractMaker
             $repositoryVars = [
                 'repository_full_class_name' => $repositoryClassDetails->getFullName(),
                 'repository_class_name' => $repositoryClassDetails->getShortName(),
-                'repository_var' => lcfirst($this->inflector->singularize($repositoryClassDetails->getShortName())),
+                'repository_var' => lcfirst($this->inflector->singularize($repositoryClassDetails->getShortName())[0]),
             ];
         }
 
@@ -140,8 +141,8 @@ final class MakeCrud extends AbstractMaker
             ++$iter;
         } while (class_exists($formClassDetails->getFullName()));
 
-        $entityVarPlural = lcfirst($this->inflector->pluralize($entityClassDetails->getShortName()));
-        $entityVarSingular = lcfirst($this->inflector->singularize($entityClassDetails->getShortName()));
+        $entityVarPlural = lcfirst($this->inflector->pluralize($entityClassDetails->getShortName())[0]);
+        $entityVarSingular = lcfirst($this->inflector->singularize($entityClassDetails->getShortName())[0]);
 
         $entityTwigVarPlural = Str::asTwigVariable($entityVarPlural);
         $entityTwigVarSingular = Str::asTwigVariable($entityVarSingular);
