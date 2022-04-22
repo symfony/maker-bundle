@@ -1,5 +1,14 @@
 # Changelog
 
+## [v1.40.0](https://github.com/symfony/maker-bundle/releases/tag/v1.40.0)
+
+*April 22nd, 2022*
+
+### Feature
+
+- [#1098](https://github.com/symfony/maker-bundle/pull/1098) - drop symfony 4.4 support bump minimum Symfony version to 5.4.7 - *@jrushlow*
+
+
 ## [v1.39.0](https://github.com/symfony/maker-bundle/releases/tag/v1.39.0)
 
 *April 21st, 2022*
