@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.40.1](https://github.com/symfony/maker-bundle/releases/tag/v1.40.1)
+
+*April 23rd, 2022*
+
+### Bug
+
+- [#1102](https://github.com/symfony/maker-bundle/pull/1102) - Lower symfony/finder & symfony/yaml requirements - *@bobvandevijver*
+
 ## [v1.40.0](https://github.com/symfony/maker-bundle/releases/tag/v1.40.0)
 
 *April 22nd, 2022*
