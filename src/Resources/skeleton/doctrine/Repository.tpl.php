@@ -31,7 +31,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function add(<?= $entity_class_name ?> $entity, bool $flush = true): void
+    public function add(<?= $entity_class_name ?> $entity, bool $flush = false): void
     {
         $this->_em->persist($entity);
         if ($flush) {
@@ -43,7 +43,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function remove(<?= $entity_class_name ?> $entity, bool $flush = true): void
+    public function remove(<?= $entity_class_name ?> $entity, bool $flush = false): void
     {
         $this->_em->remove($entity);
         if ($flush) {

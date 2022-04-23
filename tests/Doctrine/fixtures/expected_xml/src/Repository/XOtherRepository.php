@@ -27,7 +27,7 @@ class XOtherRepository extends ServiceEntityRepository
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function add(XOther $entity, bool $flush = true): void
+    public function add(XOther $entity, bool $flush = false): void
     {
         $this->_em->persist($entity);
         if ($flush) {
@@ -39,7 +39,7 @@ class XOtherRepository extends ServiceEntityRepository
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function remove(XOther $entity, bool $flush = true): void
+    public function remove(XOther $entity, bool $flush = false): void
     {
         $this->_em->remove($entity);
         if ($flush) {
