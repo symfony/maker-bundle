@@ -28,7 +28,7 @@
     "require-dev": {
         "composer/semver": "^3.0",
         "doctrine/doctrine-bundle": "^2.4",
-        "doctrine/orm": "^2.3",
+        "doctrine/orm": "^2.10.0",
         "symfony/http-client": "^5.4.7|^6.0",
         "symfony/phpunit-bridge": "^5.4.7|^6.0",
         "symfony/polyfill-php80": "^1.16.0",
@@ -40,6 +40,9 @@
     "config": {
         "preferred-install": "dist",
         "sort-packages": true
+    },
+    "conflict": {
+        "doctrine/orm": "<2.10"
     },
     "autoload": {
         "psr-4": { "Symfony\\Bundle\\MakerBundle\\": "src/" }

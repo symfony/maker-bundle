@@ -15,8 +15,6 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\UserClassBuilder;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Component\Security\Core\User\InMemoryUser;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserClassBuilderTest extends TestCase
@@ -26,10 +24,6 @@ class UserClassBuilderTest extends TestCase
      */
     public function testAddUserInterfaceImplementation(UserClassConfiguration $userClassConfig, string $expectedFilename): void
     {
-        if (!interface_exists(PasswordAuthenticatedUserInterface::class)) {
-            self::markTestSkipped('Requires Symfony >= 5.3');
-        }
-
         $manipulator = $this->getClassSourceManipulator($userClassConfig);
 
         $classBuilder = new UserClassBuilder();
@@ -77,94 +71,6 @@ class UserClassBuilderTest extends TestCase
         yield 'model_without_password' => [
             new UserClassConfiguration(false, 'userIdentifier', false),
             'UserModelWithoutPassword.php',
-        ];
-    }
-
-    /**
-     * Covers Symfony <= 5.2 UserInterface::getUsername().
-     *
-     * In Symfony 5.3, getUsername was replaced with getUserIdentifier()
-     *
-     * @dataProvider legacyUserInterfaceGetUsernameDataProvider
-     */
-    public function testLegacyUserInterfaceGetUsername(UserClassConfiguration $userClassConfig, string $expectedFilename): void
-    {
-        if (method_exists(InMemoryUser::class, 'getUserIdentifier')) {
-            self::markTestSkipped();
-        }
-
-        $manipulator = $this->getClassSourceManipulator($userClassConfig);
-
-        $classBuilder = new UserClassBuilder();
-        $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig);
-
-        $expectedPath = $this->getExpectedPath($expectedFilename, 'legacy_get_username');
-
-        self::assertStringEqualsFile($expectedPath, $manipulator->getSourceCode());
-    }
-
-    public function legacyUserInterfaceGetUsernameDataProvider(): \Generator
-    {
-        yield 'entity_with_get_username' => [
-            new UserClassConfiguration(true, 'username', false),
-            'UserEntityGetUsername.php',
-        ];
-
-        yield 'model_with_get_username' => [
-            new UserClassConfiguration(false, 'username', false),
-            'UserModelGetUsername.php',
-        ];
-
-        yield 'model_with_email_as_username' => [
-            new UserClassConfiguration(false, 'email', false),
-            'UserModelWithEmailAsUsername.php',
-        ];
-    }
-
-    /**
-     * Covers Symfony <= 5.2 UserInterface::getPassword().
-     *
-     * In Symfony 5.3, getPassword was moved from UserInterface::class to the
-     * new PasswordAuthenticatedUserInterface::class.
-     *
-     * @dataProvider legacyUserInterfaceGetPasswordDataProvider
-     */
-    public function testLegacyUserInterfaceGetPassword(UserClassConfiguration $userClassConfig, string $expectedFilename): void
-    {
-        if (interface_exists(PasswordAuthenticatedUserInterface::class)) {
-            self::markTestSkipped();
-        }
-
-        $manipulator = $this->getClassSourceManipulator($userClassConfig);
-
-        $classBuilder = new UserClassBuilder();
-        $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig);
-
-        $expectedPath = $this->getExpectedPath($expectedFilename, 'legacy_get_password');
-
-        self::assertStringEqualsFile($expectedPath, $manipulator->getSourceCode());
-    }
-
-    public function legacyUserInterfaceGetPasswordDataProvider(): \Generator
-    {
-        yield 'entity_with_password' => [
-            new UserClassConfiguration(true, 'username', true),
-            'UserEntityWithPassword.php',
-        ];
-
-        yield 'entity_without_password' => [
-            new UserClassConfiguration(true, 'username', false),
-            'UserEntityNoPassword.php',
-        ];
-
-        yield 'model_with_password' => [
-            new UserClassConfiguration(false, 'username', true),
-            'UserModelWithPassword.php',
-        ];
-
-        yield 'model_without_password' => [
-            new UserClassConfiguration(false, 'username', false),
-            'UserModelNoPassword.php',
         ];
     }
 

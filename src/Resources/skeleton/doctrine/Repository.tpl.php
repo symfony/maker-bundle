@@ -2,15 +2,7 @@
 
 namespace <?= $namespace; ?>;
 
-use <?= $entity_full_class_name; ?>;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use <?= $doctrine_registry_class; ?>;
-<?= $with_password_upgrade ? "use Symfony\Component\Security\Core\Exception\UnsupportedUserException;\n" : '' ?>
-<?= ($with_password_upgrade && str_contains($password_upgrade_user_interface->getFullName(), 'Password')) ? sprintf("use %s;\n", $password_upgrade_user_interface->getFullName()) : null ?>
-<?= $with_password_upgrade ? "use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;\n" : '' ?>
-<?= ($with_password_upgrade && str_contains($password_upgrade_user_interface->getFullName(), '\UserInterface')) ? sprintf("use %s;\n", $password_upgrade_user_interface->getFullName()) : null ?>
+<?= $use_statements; ?>
 
 /**
  * @extends ServiceEntityRepository<<?= $entity_class_name; ?>>

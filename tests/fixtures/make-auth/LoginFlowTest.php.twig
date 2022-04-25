@@ -73,11 +73,8 @@ class LoginFlowTest extends WebTestCase
     */
    private function getToken(): ?TokenInterface
    {
-       $tokenStorage = static::{{ useLegacyContainerProperty ? '$container' : 'getContainer()' }}->get('security.token_storage');
-
-       if (Kernel::VERSION_ID >= 50300) {
-           $tokenStorage->disableUsageTracking();
-       }
+       $tokenStorage = static::getContainer()->get('security.token_storage');
+       $tokenStorage->disableUsageTracking();
 
        return $tokenStorage->getToken();
    }

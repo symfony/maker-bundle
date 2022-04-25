@@ -13,8 +13,6 @@ namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\HttpKernel\Log\Logger;
-use Symfony\Component\PasswordHasher\Hasher\NativePasswordHasher;
-use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
@@ -52,8 +50,7 @@ final class SecurityConfigUpdater
         $this->updateProviders($userConfig, $userClass);
 
         if ($userConfig->hasPassword()) {
-            $symfonyGte53 = class_exists(NativePasswordHasher::class);
-            $this->updatePasswordHashers($userConfig, $userClass, $symfonyGte53 ? 'password_hashers' : 'encoders');
+            $this->updatePasswordHashers($userConfig, $userClass);
         }
 
         $contents = $this->manipulator->getContents();
@@ -166,38 +163,37 @@ final class SecurityConfigUpdater
         $this->manipulator->setData($newData);
     }
 
-    private function updatePasswordHashers(UserClassConfiguration $userConfig, string $userClass, string $keyName = 'password_hashers'): void
+    private function updatePasswordHashers(UserClassConfiguration $userConfig, string $userClass): void
     {
         $newData = $this->manipulator->getData();
-        if ('password_hashers' === $keyName && isset($newData['security']['encoders'])) {
-            // fallback to "encoders" if the user already defined encoder config
-            $this->updatePasswordHashers($userConfig, $userClass, 'encoders');
 
+        if (isset($newData['security']['encoders'])) {
+            throw new \RuntimeException('Password Encoders are no longer supported by MakerBundle. Please update your "config/packages/security.yaml" file to use Password Hashers instead.');
+        }
+
+        // The security-bundle recipe sets the password hasher via Flex. If it exists, move on...
+        if (isset($newData['security']['password_hashers'][PasswordAuthenticatedUserInterface::class])) {
             return;
         }
 
-        if (isset($newData['security'][$keyName][PasswordAuthenticatedUserInterface::class])) {
-            return;
+        // by convention, password_hashers are put before the user provider option
+        $providersIndex = array_search('providers', array_keys($newData['security']));
+
+        if (false === $providersIndex) {
+            $newData['security'] = ['password_hashers' => []] + $newData['security'];
+        } else {
+            $newData['security'] = array_merge(
+                \array_slice($newData['security'], 0, $providersIndex),
+                ['password_hashers' => []],
+                \array_slice($newData['security'], $providersIndex)
+            );
         }
 
-        if (!isset($newData['security'][$keyName])) {
-            // by convention, password_hashers are put before the user provider option
-            $providersIndex = array_search('providers', array_keys($newData['security']));
-            if (false === $providersIndex) {
-                $newData['security'] = [$keyName => []] + $newData['security'];
-            } else {
-                $newData['security'] = array_merge(
-                    \array_slice($newData['security'], 0, $providersIndex),
-                    [$keyName => []],
-                    \array_slice($newData['security'], $providersIndex)
-                );
-            }
-        }
-
-        $newData['security'][$keyName][$userClass] = [
-            'algorithm' => $userConfig->shouldUseArgon2() ? 'argon2i' : ((class_exists(NativePasswordHasher::class) || class_exists(NativePasswordEncoder::class)) ? 'auto' : 'bcrypt'),
+        $newData['security']['password_hashers'][$userClass] = [
+            'algorithm' => 'auto',
         ];
-        $newData['security'][$keyName]['_'] = $this->manipulator->createEmptyLine();
+
+        $newData['security']['password_hashers']['_'] = $this->manipulator->createEmptyLine();
 
         $this->manipulator->setData($newData);
     }
