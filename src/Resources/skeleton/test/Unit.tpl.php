@@ -3,7 +3,7 @@
 
 namespace <?= $namespace; ?>;
 
-use PHPUnit\Framework\TestCase;
+<?= $use_statements; ?>
 
 class <?= $class_name ?> extends TestCase
 {

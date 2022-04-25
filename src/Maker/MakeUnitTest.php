@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -39,7 +40,7 @@ final class MakeUnitTest extends AbstractMaker
         return 'Creates a new unit test class';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the unit test class (e.g. <fg=yellow>UtilTest</>)')
@@ -47,7 +48,7 @@ final class MakeUnitTest extends AbstractMaker
         ;
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $testClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -55,10 +56,12 @@ final class MakeUnitTest extends AbstractMaker
             'Test'
         );
 
+        $this->useStatements = [TestCase::class];
+
         $generator->generateClass(
             $testClassNameDetails->getFullName(),
             'test/Unit.tpl.php',
-            []
+            ['use_statements' => $this->getFormattedUseStatements()]
         );
 
         $generator->writeChanges();
@@ -71,7 +74,7 @@ final class MakeUnitTest extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
     }
 }

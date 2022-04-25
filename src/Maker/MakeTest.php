@@ -70,7 +70,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
         return 'Creates a new test class';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $typesDesc = [];
         $typesHelp = [];
@@ -84,11 +84,11 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the test class (e.g. <fg=yellow>BlogPostTest</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeTest.txt').implode("\n", $typesHelp));
 
-        $inputConf->setArgumentAsNonInteractive('name');
-        $inputConf->setArgumentAsNonInteractive('type');
+        $inputConfig->setArgumentAsNonInteractive('name');
+        $inputConfig->setArgumentAsNonInteractive('type');
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         /* @deprecated remove the following block when removing make:unit-test and make:functional-test */
         $this->handleDeprecatedMakerCommands($input, $io);
@@ -133,7 +133,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
         }
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $testClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
