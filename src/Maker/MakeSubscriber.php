@@ -17,8 +17,6 @@ use Symfony\Bundle\MakerBundle\EventRegistry;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
-use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -33,12 +31,10 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 final class MakeSubscriber extends AbstractMaker
 {
     private $eventRegistry;
-    private $phpCompatUtil;
 
-    public function __construct(EventRegistry $eventRegistry, PhpCompatUtil $phpCompatUtil)
+    public function __construct(EventRegistry $eventRegistry)
     {
         $this->eventRegistry = $eventRegistry;
-        $this->phpCompatUtil = $phpCompatUtil;
     }
 
     public static function getCommandName(): string
@@ -89,19 +85,19 @@ final class MakeSubscriber extends AbstractMaker
         $eventFullClassName = $this->eventRegistry->getEventClassName($event);
         $eventClassName = $eventFullClassName ? Str::getShortClassName($eventFullClassName) : null;
 
-        $useStatements = [
+        $this->useStatements = [
             EventSubscriberInterface::class,
         ];
 
         if (null !== $eventFullClassName) {
-            $useStatements[] = $eventFullClassName;
+            $this->useStatements[] = $eventFullClassName;
         }
 
         $generator->generateClass(
             $subscriberClassNameDetails->getFullName(),
             'event/Subscriber.tpl.php',
             [
-                'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
+                'use_statements' => $this->getFormattedUseStatements(),
                 'event' => class_exists($event) ? sprintf('%s::class', $eventClassName) : sprintf('\'%s\'', $event),
                 'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
                 'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),

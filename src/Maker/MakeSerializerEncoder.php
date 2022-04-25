@@ -15,7 +15,6 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -56,7 +55,7 @@ final class MakeSerializerEncoder extends AbstractMaker
         );
         $format = $input->getArgument('format');
 
-        $useStatements = [
+        $this->useStatements = [
             DecoderInterface::class,
             EncoderInterface::class,
         ];
@@ -65,7 +64,7 @@ final class MakeSerializerEncoder extends AbstractMaker
             $encoderClassNameDetails->getFullName(),
             'serializer/Encoder.tpl.php',
             [
-                'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
+                'use_statements' => $this->getFormattedUseStatements(),
                 'format' => $format,
             ]
         );

@@ -2,9 +2,7 @@
 
 namespace <?= $namespace; ?>;
 
-use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
+<?= $use_statements ?>
 
 class <?= $class_name ?> extends AbstractExtension
 {

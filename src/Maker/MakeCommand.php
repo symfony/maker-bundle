@@ -17,7 +17,6 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
-use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LazyCommand;
@@ -70,7 +69,7 @@ final class MakeCommand extends AbstractMaker
             sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, Str::asClassName($commandName, 'Command'))
         );
 
-        $useStatements = [
+        $this->useStatements = [
             Command::class,
             InputArgument::class,
             InputInterface::class,
@@ -79,20 +78,17 @@ final class MakeCommand extends AbstractMaker
             SymfonyStyle::class,
         ];
 
-        $canUseCommandAttribute = class_exists(AsCommand::class) && $this->phpCompatUtil->canUseAttributes();
-
-        if ($canUseCommandAttribute) {
-            $useStatements[] = AsCommand::class;
+        if ($this->phpCompatUtil->canUseAttributes()) {
+            $this->useStatements[] = AsCommand::class;
         }
 
         $generator->generateClass(
             $commandClassNameDetails->getFullName(),
             'command/Command.tpl.php',
             [
-                'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
+                'use_statements' => $this->getFormattedUseStatements(),
                 'command_name' => $commandName,
                 'set_description' => !class_exists(LazyCommand::class),
-                'use_command_attribute' => $canUseCommandAttribute,
             ]
         );
 

@@ -4,7 +4,7 @@ namespace <?= $namespace; ?>;
 
 <?= $use_statements; ?>
 
-<?php if ($use_command_attribute): ?>
+<?php if ($use_attributes): ?>
 #[AsCommand(
     name: '<?= $command_name; ?>',
     description: 'Add a short description for your command',
@@ -12,7 +12,7 @@ namespace <?= $namespace; ?>;
 <?php endif; ?>
 class <?= $class_name; ?> extends Command
 {
-<?php if (!$use_command_attribute): ?>
+<?php if (!$use_attributes): ?>
     protected static $defaultName = '<?= $command_name; ?>';
     protected static $defaultDescription = 'Add a short description for your command';
 
@@ -41,6 +41,6 @@ class <?= $class_name; ?> extends Command
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 
-        return <?= defined('Symfony\Component\Console\Command\Command::SUCCESS') ? 'Command::SUCCESS' : '0' ?>;
+        return Command::SUCCESS;
     }
 }

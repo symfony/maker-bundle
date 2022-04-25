@@ -18,8 +18,6 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
-use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -34,13 +32,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 final class MakeController extends AbstractMaker
 {
-    private $phpCompatUtil;
-
-    public function __construct(PhpCompatUtil $phpCompatUtil)
-    {
-        $this->phpCompatUtil = $phpCompatUtil;
-    }
-
     public static function getCommandName(): string
     {
         return 'make:controller';
@@ -68,7 +59,7 @@ final class MakeController extends AbstractMaker
             'Controller'
         );
 
-        $useStatements = [
+        $this->useStatements = [
             AbstractController::class,
             Response::class,
             Route::class,
@@ -80,7 +71,7 @@ final class MakeController extends AbstractMaker
             $controllerClassNameDetails->getFullName(),
             'controller/Controller.tpl.php',
             [
-                'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
+                'use_statements' => $this->getFormattedUseStatements(),
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'with_template' => $this->isTwigInstalled() && !$noTemplate,

@@ -2,7 +2,7 @@
 
 namespace <?= $namespace; ?>;
 
-<?= $use_statements; ?>;
+<?= $use_statements; ?>
 
 final class <?= $class_name; ?> implements MiddlewareInterface
 {

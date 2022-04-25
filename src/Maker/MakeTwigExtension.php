@@ -19,6 +19,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
+use Twig\TwigFunction;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -36,7 +38,7 @@ final class MakeTwigExtension extends AbstractMaker
         return 'Creates a new Twig extension class';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the Twig extension class (e.g. <fg=yellow>AppExtension</>)')
@@ -44,7 +46,7 @@ final class MakeTwigExtension extends AbstractMaker
         ;
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $extensionClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -52,10 +54,16 @@ final class MakeTwigExtension extends AbstractMaker
             'Extension'
         );
 
+        $this->useStatements = [
+            AbstractExtension::class,
+            TwigFilter::class,
+            TwigFunction::class,
+        ];
+
         $generator->generateClass(
             $extensionClassNameDetails->getFullName(),
             'twig/Extension.tpl.php',
-            []
+            ['use_statements' => $this->getFormattedUseStatements()]
         );
 
         $generator->writeChanges();
@@ -68,7 +76,7 @@ final class MakeTwigExtension extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             AbstractExtension::class,

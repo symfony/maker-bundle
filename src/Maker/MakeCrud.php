@@ -23,8 +23,6 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
-use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -45,15 +43,13 @@ final class MakeCrud extends AbstractMaker
 {
     private $doctrineHelper;
     private $formTypeRenderer;
-    private $phpCompatUtil;
     private $inflector;
     private $controllerClassName;
 
-    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer, PhpCompatUtil $phpCompatUtil)
+    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer)
     {
         $this->doctrineHelper = $doctrineHelper;
         $this->formTypeRenderer = $formTypeRenderer;
-        $this->phpCompatUtil = $phpCompatUtil;
         $this->inflector = InflectorFactory::create()->build();
     }
 
@@ -110,7 +106,7 @@ final class MakeCrud extends AbstractMaker
         $entityDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($entityClassDetails->getFullName());
 
         $repositoryVars = [];
-        $repositoryClassName = null;
+        $repositoryClassName = EntityManagerInterface::class;
 
         if (null !== $entityDoctrineDetails->getRepositoryClass()) {
             $repositoryClassDetails = $generator->createClassNameDetails(
@@ -152,10 +148,10 @@ final class MakeCrud extends AbstractMaker
         $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
         $templatesPath = Str::asFilePath($controllerClassDetails->getRelativeNameWithoutSuffix());
 
-        $useStatements = [
+        $this->useStatements = [
             $entityClassDetails->getFullName(),
             $formClassDetails->getFullName(),
-            $repositoryClassName ?? EntityManagerInterface::class,
+            $repositoryClassName,
             AbstractController::class,
             Request::class,
             Response::class,
@@ -166,7 +162,7 @@ final class MakeCrud extends AbstractMaker
             $controllerClassDetails->getFullName(),
             'crud/controller/Controller.tpl.php',
             array_merge([
-                    'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
+                    'use_statements' => $this->getFormattedUseStatements(),
                     'entity_class_name' => $entityClassDetails->getShortName(),
                     'form_class_name' => $formClassDetails->getShortName(),
                     'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
