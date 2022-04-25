@@ -35,16 +35,24 @@ use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Form;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Translation\Translator;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -277,17 +285,37 @@ class MakeResetPassword extends AbstractMaker
 
         $this->setBundleConfig($io, $generator, $repositoryClassNameDetails->getFullName());
 
+        $useStatements = [
+            AbstractType::class,
+            EmailType::class,
+            FormBuilderInterface::class,
+            OptionsResolver::class,
+            NotBlank::class,
+        ];
+
         $generator->generateClass(
             $requestFormTypeClassNameDetails->getFullName(),
             'resetPassword/ResetPasswordRequestFormType.tpl.php',
             [
+                'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
                 'email_field' => $this->emailPropertyName,
             ]
         );
 
+        $useStatements = [
+            AbstractType::class,
+            PasswordType::class,
+            RepeatedType::class,
+            FormBuilderInterface::class,
+            OptionsResolver::class,
+            Length::class,
+            NotBlank::class,
+        ];
+
         $generator->generateClass(
             $changePasswordFormTypeClassNameDetails->getFullName(),
-            'resetPassword/ChangePasswordFormType.tpl.php'
+            'resetPassword/ChangePasswordFormType.tpl.php',
+            ['use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements)]
         );
 
         $generator->generateTemplate(
