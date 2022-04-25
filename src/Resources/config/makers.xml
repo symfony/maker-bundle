@@ -17,6 +17,7 @@
             </service>
 
             <service id="maker.maker.make_command" class="Symfony\Bundle\MakerBundle\Maker\MakeCommand">
+                <argument type="service" id="maker.php_compat_util" />
                 <tag name="maker.command" />
             </service>
 
