@@ -96,6 +96,7 @@
             <service id="maker.maker.make_subscriber" class="Symfony\Bundle\MakerBundle\Maker\MakeSubscriber">
                 <tag name="maker.command" />
                 <argument type="service" id="maker.event_registry" />
+                <argument type="service" id="maker.php_compat_util" />
             </service>
 
             <service id="maker.maker.make_twig_extension" class="Symfony\Bundle\MakerBundle\Maker\MakeTwigExtension">

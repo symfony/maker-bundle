@@ -2,8 +2,7 @@
 
 namespace <?= $namespace; ?>;
 
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-<?= $event_full_class_name ? "use $event_full_class_name;\n" : '' ?>
+<?= $use_statements; ?>
 
 class <?= $class_name ?> implements EventSubscriberInterface
 {
