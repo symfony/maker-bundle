@@ -2,8 +2,7 @@
 
 namespace <?= $namespace; ?>;
 
-use <?= $message_full_class_name ?>;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+<?= $use_statements; ?>
 
 final class <?= $class_name ?> implements MessageHandlerInterface
 {
