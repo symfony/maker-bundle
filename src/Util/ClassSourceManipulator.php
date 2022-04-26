@@ -1199,6 +1199,8 @@ final class ClassSourceManipulator
                 return '\\'.\DateInterval::class;
 
             case 'object':
+                return 'object';
+
             case 'binary':
             case 'blob':
             default:
