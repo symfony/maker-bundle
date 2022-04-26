@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Column;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -30,7 +31,6 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -47,8 +47,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Validation;
@@ -56,6 +55,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Model\VerifyEmailSignatureComponents;
 use SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle;
+use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
 /**
  * @author Ryan Weaver   <ryan@symfonycasts.com>
@@ -253,10 +253,21 @@ final class MakeRegistrationForm extends AbstractMaker
         );
 
         if ($this->willVerifyEmail) {
+            $this->useStatements = [
+                EntityManagerInterface::class,
+                TemplatedEmail::class,
+                Request::class,
+                MailerInterface::class,
+                UserInterface::class,
+                VerifyEmailExceptionInterface::class,
+                VerifyEmailHelperInterface::class,
+            ];
+
             $generator->generateClass(
                 $verifyEmailServiceClassNameDetails->getFullName(),
                 'verifyEmail/EmailVerifier.tpl.php',
                 array_merge([
+                        'use_statements' => $this->getFormattedUseStatements(),
                         'id_getter' => $this->idGetter,
                         'email_getter' => $this->emailGetter,
                         'verify_email_anonymously' => $this->verifyEmailAnonymously,
@@ -285,56 +296,46 @@ final class MakeRegistrationForm extends AbstractMaker
             'Controller\\'
         );
 
-        /*
-         * @legacy Conditional can be removed when MakerBundle no longer
-         *         supports Symfony < 5.2
-         */
-        $passwordHasher = UserPasswordEncoderInterface::class;
-
-        if (interface_exists(UserPasswordHasherInterface::class)) {
-            $passwordHasher = UserPasswordHasherInterface::class;
-        }
-
-        $useStatements = [
-            Generator::getControllerBaseClass()->getFullName(),
+        $this->useStatements = [
+            AbstractController::class,
             $formClassDetails->getFullName(),
             $userClassNameDetails->getFullName(),
             Request::class,
             Response::class,
             Route::class,
-            $passwordHasher,
+            UserPasswordHasherInterface::class,
             EntityManagerInterface::class,
         ];
 
         if ($this->willVerifyEmail) {
-            $useStatements[] = $verifyEmailServiceClassNameDetails->getFullName();
-            $useStatements[] = TemplatedEmail::class;
-            $useStatements[] = Address::class;
-            $useStatements[] = VerifyEmailExceptionInterface::class;
+            $this->useStatements = array_merge([
+                $verifyEmailServiceClassNameDetails->getFullName(),
+                TemplatedEmail::class,
+                Address::class,
+                VerifyEmailExceptionInterface::class,
+            ],
+                $this->useStatements
+            );
 
             if ($this->verifyEmailAnonymously) {
-                $useStatements[] = $userRepoVars['repository_full_class_name'];
+                $this->useStatements[] = $userRepoVars['repository_full_class_name'];
             }
         }
 
         if ($this->autoLoginAuthenticator) {
-            $useStatements[] = $this->autoLoginAuthenticator;
-            if ($this->useNewAuthenticatorSystem) {
-                $useStatements[] = UserAuthenticatorInterface::class;
-            } else {
-                $useStatements[] = GuardAuthenticatorHandler::class;
-            }
+            $this->useStatements[] = $this->autoLoginAuthenticator;
+            $this->useStatements[] = UserAuthenticatorInterface::class;
         }
 
         if ($isTranslatorAvailable = class_exists(Translator::class)) {
-            $useStatements[] = TranslatorInterface::class;
+            $this->useStatements[] = TranslatorInterface::class;
         }
 
         $generator->generateController(
             $controllerClassNameDetails->getFullName(),
             'registration/RegistrationController.tpl.php',
             array_merge([
-                    'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
+                    'use_statements' => $this->getFormattedUseStatements(),
                     'route_path' => '/register',
                     'route_name' => 'app_register',
                     'form_class_name' => $formClassDetails->getShortName(),
@@ -351,9 +352,9 @@ final class MakeRegistrationForm extends AbstractMaker
                     'use_new_authenticator_system' => $this->useNewAuthenticatorSystem,
                     'firewall_name' => $this->firewallName,
                     'redirect_route_name' => $this->redirectRouteName,
-                    'password_hasher_class_details' => ($passwordClassDetails = $generator->createClassNameDetails($passwordHasher, '\\')),
+                    'password_hasher_class_details' => ($passwordClassDetails = $generator->createClassNameDetails(UserPasswordHasherInterface::class, '\\')),
                     'password_hasher_variable_name' => str_replace('Interface', '', sprintf('$%s', lcfirst($passwordClassDetails->getShortName()))), // @legacy see passwordHasher conditional above
-                    'use_password_hasher' => UserPasswordHasherInterface::class === $passwordHasher, // @legacy see passwordHasher conditional above
+                    'use_password_hasher' => true,
                     'translator_available' => $isTranslatorAvailable,
                 ],
                 $userRepoVars
