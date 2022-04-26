@@ -318,6 +318,15 @@ class ClassSourceManipulatorTest extends TestCase
             ],
             'User_simple_prop_zero.php',
         ];
+
+        yield 'entity_add_object' => [
+            'User_simple.php',
+            'someObject',
+            [
+                'type' => 'object',
+            ],
+            'User_simple_object.php',
+        ];
     }
 
     /**
