@@ -32,9 +32,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\PasswordHasher\Hasher\NativePasswordHasher;
-use Symfony\Component\Security\Core\Encoder\Argon2iPasswordEncoder;
-use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -76,7 +73,7 @@ final class MakeUser extends AbstractMaker
         return 'Creates a new security user class';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the security user class (e.g. <fg=yellow>User</>)')
@@ -86,10 +83,10 @@ final class MakeUser extends AbstractMaker
             ->addOption('use-argon2', null, InputOption::VALUE_NONE, 'Use the Argon2i password encoder? (deprecated)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeUser.txt'));
 
-        $inputConf->setArgumentAsNonInteractive('name');
+        $inputConfig->setArgumentAsNonInteractive('name');
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if (null === $input->getArgument('name')) {
             $name = $io->ask(
@@ -120,21 +117,9 @@ final class MakeUser extends AbstractMaker
         $io->text('Will this app need to hash/check user passwords? Choose <comment>No</comment> if passwords are not needed or will be checked/hashed by some other system (e.g. a single sign-on server).');
         $userWillHavePassword = $io->confirm('Does this app need to hash/check user passwords?');
         $input->setOption('with-password', $userWillHavePassword);
-
-        $symfonyGte53 = class_exists(NativePasswordHasher::class);
-        if ($symfonyGte53) {
-            return;
-        }
-
-        if ($userWillHavePassword && !class_exists(NativePasswordEncoder::class) && Argon2iPasswordEncoder::isSupported()) {
-            $io->writeln('The newer <comment>Argon2i</comment> password hasher requires PHP 7.2, libsodium or paragonie/sodium_compat. Your system DOES support this algorithm.');
-            $io->writeln('You should use <comment>Argon2i</comment> unless your production system will not support it.');
-            $useArgon2Encoder = $io->confirm('Use <comment>Argon2i</comment> as your password hasher (bcrypt will be used otherwise)?');
-            $input->setOption('use-argon2', $useArgon2Encoder);
-        }
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $userClassConfiguration = new UserClassConfiguration(
             $input->getOption('is-entity'),
@@ -248,7 +233,7 @@ final class MakeUser extends AbstractMaker
         $io->text($nextSteps);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)
+    public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null): void
     {
         // checking for SecurityBundle guarantees security.yaml is present
         $dependencies->addClassDependency(

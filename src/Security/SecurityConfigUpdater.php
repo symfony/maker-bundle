@@ -61,7 +61,7 @@ final class SecurityConfigUpdater
         return $contents;
     }
 
-    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup, bool $useSecurity52): string
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup): string
     {
         $this->manipulator = new YamlSourceManipulator($yamlSource);
 
@@ -82,50 +82,30 @@ final class SecurityConfigUpdater
         }
 
         if (!isset($newData['security']['firewalls'][$firewallName])) {
-            if ($useSecurity52) {
-                $newData['security']['firewalls'][$firewallName] = ['lazy' => true];
-            } else {
-                $newData['security']['firewalls'][$firewallName] = ['anonymous' => 'lazy'];
-            }
+            $newData['security']['firewalls'][$firewallName] = ['lazy' => true];
         }
 
         $firewall = $newData['security']['firewalls'][$firewallName];
 
-        if ($useSecurity52) {
-            if (isset($firewall['custom_authenticator'])) {
-                if (\is_array($firewall['custom_authenticator'])) {
-                    $firewall['custom_authenticator'][] = $authenticatorClass;
-                } else {
-                    $stringValue = $firewall['custom_authenticator'];
-                    $firewall['custom_authenticator'] = [];
-                    $firewall['custom_authenticator'][] = $stringValue;
-                    $firewall['custom_authenticator'][] = $authenticatorClass;
-                }
+        if (isset($firewall['custom_authenticator'])) {
+            if (\is_array($firewall['custom_authenticator'])) {
+                $firewall['custom_authenticator'][] = $authenticatorClass;
             } else {
-                $firewall['custom_authenticator'] = $authenticatorClass;
-            }
-
-            if (!isset($firewall['entry_point']) && $chosenEntryPoint) {
-                $firewall['entry_point_empty_line'] = $this->manipulator->createEmptyLine();
-                $firewall['entry_point_comment'] = $this->manipulator->createCommentLine(
-                    ' the entry_point start() method determines what happens when an anonymous user accesses a protected page'
-                );
-                $firewall['entry_point'] = $authenticatorClass;
+                $stringValue = $firewall['custom_authenticator'];
+                $firewall['custom_authenticator'] = [];
+                $firewall['custom_authenticator'][] = $stringValue;
+                $firewall['custom_authenticator'][] = $authenticatorClass;
             }
         } else {
-            if (!isset($firewall['guard'])) {
-                $firewall['guard'] = [];
-            }
+            $firewall['custom_authenticator'] = $authenticatorClass;
+        }
 
-            if (!isset($firewall['guard']['authenticators'])) {
-                $firewall['guard']['authenticators'] = [];
-            }
-
-            $firewall['guard']['authenticators'][] = $authenticatorClass;
-
-            if (\count($firewall['guard']['authenticators']) > 1) {
-                $firewall['guard']['entry_point'] = $chosenEntryPoint ?? current($firewall['guard']['authenticators']);
-            }
+        if (!isset($firewall['entry_point']) && $chosenEntryPoint) {
+            $firewall['entry_point_empty_line'] = $this->manipulator->createEmptyLine();
+            $firewall['entry_point_comment'] = $this->manipulator->createCommentLine(
+                ' the entry_point start() method determines what happens when an anonymous user accesses a protected page'
+            );
+            $firewall['entry_point'] = $authenticatorClass;
         }
 
         if (!isset($firewall['logout']) && $logoutSetup) {

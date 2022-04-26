@@ -9,7 +9,7 @@ use <?= $repository_full_class_name ?>;
 <?php else: ?>
 use Doctrine\ORM\EntityManagerInterface;
 <?php endif; ?>
-use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name ?>;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("<?= $route_path ?>")
  */
 <?php } ?>
-class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
+class <?= $class_name ?> extends AbstractController
 {
 <?= $generator->generateRouteForControllerMethod('/', sprintf('%s_index', $route_name), ['GET']) ?>
 <?php if (isset($repository_full_class_name)): ?>

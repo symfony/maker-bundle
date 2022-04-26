@@ -15,7 +15,6 @@ use Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 class MakeAuthenticatorTest extends MakerTestCase
 {
@@ -24,10 +23,9 @@ class MakeAuthenticatorTest extends MakerTestCase
         return MakeAuthenticator::class;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'auth_empty_one_firewall' => [$this->createMakerTest()
-            ->addRequiredPackageVersion('symfony/security-bundle', '>=5.2')
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([
                     // authenticator type => empty-auth
@@ -47,7 +45,6 @@ class MakeAuthenticatorTest extends MakerTestCase
         ];
 
         yield 'auth_empty_multiple_firewalls' => [$this->createMakerTest()
-            ->addRequiredPackageVersion('symfony/security-bundle', '>=5.2')
             ->run(function (MakerTestRunner $runner) {
                 $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
                     $config['security']['firewalls']['second']['lazy'] = true;
@@ -74,7 +71,6 @@ class MakeAuthenticatorTest extends MakerTestCase
         ];
 
         yield 'auth_empty_existing_authenticator' => [$this->createMakerTest()
-            ->addRequiredPackageVersion('symfony/security-bundle', '>=5.2')
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
                     'make-auth/BlankAuthenticator.php',
@@ -108,7 +104,6 @@ class MakeAuthenticatorTest extends MakerTestCase
         ];
 
         yield 'auth_empty_multiple_firewalls_existing_authenticator' => [$this->createMakerTest()
-            ->addRequiredPackageVersion('symfony/security-bundle', '>=5.2')
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
                     'make-auth/BlankAuthenticator.php',
@@ -173,7 +168,6 @@ class MakeAuthenticatorTest extends MakerTestCase
         ];
 
         yield 'auth_login_form_no_entity_custom_username_field' => [$this->createMakerTest()
-            ->addRequiredPackageVersion('symfony/security-bundle', '>=5.2')
             ->addExtraDependencies('doctrine/annotations', 'twig', 'symfony/form')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'userEmail', false);
@@ -203,7 +197,6 @@ class MakeAuthenticatorTest extends MakerTestCase
         ];
 
         yield 'auth_login_form_user_not_entity_with_hasher' => [$this->createMakerTest()
-            ->addRequiredPackageVersion('symfony/security-bundle', '>=5.2')
             ->addExtraDependencies('doctrine/annotations', 'twig', 'symfony/form')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'email', false);
@@ -223,7 +216,6 @@ class MakeAuthenticatorTest extends MakerTestCase
         ];
 
         yield 'auth_login_form_existing_controller' => [$this->createMakerTest()
-            ->addRequiredPackageVersion('symfony/security-bundle', '>=5.2')
             ->addExtraDependencies('doctrine', 'twig', 'symfony/form')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'email');
@@ -248,7 +240,6 @@ class MakeAuthenticatorTest extends MakerTestCase
         ];
 
         yield 'auth_login_form_user_entity_with_logout' => [$this->createMakerTest()
-            ->addRequiredPackageVersion('symfony/security-bundle', '>=5.2')
             ->addExtraDependencies('doctrine', 'twig', 'symfony/form')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'userEmail');
@@ -279,54 +270,9 @@ class MakeAuthenticatorTest extends MakerTestCase
                 );
             }),
         ];
-
-        yield 'auth_legacy_guard_empty_one_firewall' => [$this->createMakerTest()
-            ->addRequiredPackageVersion('symfony/security-bundle', '<5.2')
-            ->run(function (MakerTestRunner $runner) {
-                $output = $runner->runMaker([
-                    // authenticator type => empty-auth
-                    0,
-                    // authenticator class name
-                    'AppCustomAuthenticator',
-                ]);
-
-                $this->assertStringContainsString('Success', $output);
-
-                $this->assertFileExists($runner->getPath('src/Security/AppCustomAuthenticator.php'));
-
-                $securityConfig = $runner->readYaml('config/packages/security.yaml');
-                $this->assertEquals(
-                    'App\\Security\\AppCustomAuthenticator',
-                    $securityConfig['security']['firewalls']['main']['guard']['authenticators'][0]
-                );
-            }),
-        ];
-
-        yield 'auth_legacy_guard_login_form_user_entity_with_encoder' => [$this->createMakerTest()
-            ->addRequiredPackageVersion('symfony/security-bundle', '<5.2')
-            ->addExtraDependencies('doctrine', 'twig', 'symfony/form')
-            ->run(function (MakerTestRunner $runner) {
-                $this->makeUser($runner, 'userEmail');
-
-                $output = $runner->runMaker([
-                    // authenticator type => login-form
-                    1,
-                    // class name
-                    'AppCustomAuthenticator',
-                    // controller name
-                    'SecurityController',
-                    // field name
-                    'userEmail',
-                    'no', // log out
-                ]);
-
-                $this->assertStringContainsString('Success', $output);
-                $this->runLoginTest($runner, 'userEmail');
-            }),
-        ];
     }
 
-    private function runLoginTest(MakerTestRunner $runner, string $userIdentifier, bool $isEntity = true, string $userClass = 'App\\Entity\\User', bool $testLogin = false)
+    private function runLoginTest(MakerTestRunner $runner, string $userIdentifier, bool $isEntity = true, string $userClass = 'App\\Entity\\User', bool $testLogin = false): void
     {
         $runner->renderTemplateFile(
             'make-auth/LoginFlowTest.php.twig',
@@ -348,13 +294,6 @@ class MakeAuthenticatorTest extends MakerTestCase
                 return $config;
             }
 
-            // legacy check for 5.2 and lower "encoders"
-            if (isset($config['security']['password_hashers'])) {
-                $config['security']['password_hashers'] = [PasswordAuthenticatedUserInterface::class => 'plaintext'];
-            } else {
-                $config['security']['encoders'] = [UserInterface::class => 'plaintext'];
-            }
-
             return $config;
         });
 
@@ -364,13 +303,13 @@ class MakeAuthenticatorTest extends MakerTestCase
         $runner->runTests();
     }
 
-    private function makeUser(MakerTestRunner $runner, string $userIdentifier, bool $isEntity = true, bool $checkPassword = true)
+    private function makeUser(MakerTestRunner $runner, string $userIdentifier, bool $isEntity = true): void
     {
         $runner->runConsole('make:user', [
             'User', // class name
             $isEntity ? 'y' : 'n', // entity
             $userIdentifier, // identifier
-            $checkPassword ? 'y' : 'n', // password
+            'y', // password
         ]);
 
         if (!$isEntity) {

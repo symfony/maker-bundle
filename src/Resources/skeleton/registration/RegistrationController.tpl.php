@@ -4,7 +4,7 @@ namespace <?= $namespace; ?>;
 
 <?= $use_statements; ?>
 
-class <?= $class_name; ?> extends <?= $parent_class_name; ?><?= "\n" ?>
+class <?= $class_name; ?> extends AbstractController
 {
 <?php if ($will_verify_email): ?>
     private <?= $generator->getPropertyType($email_verifier_class_details) ?>$emailVerifier;

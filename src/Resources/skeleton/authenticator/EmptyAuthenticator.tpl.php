@@ -2,52 +2,38 @@
 
 namespace <?= $namespace ?>;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
+<?= $use_statements; ?>
 
-class <?= $class_name ?> extends AbstractGuardAuthenticator
+class <?= $class_name ?> extends AbstractAuthenticator
 {
-    public function supports(Request $request)
+    public function supports(Request $request): ?bool
     {
-        // todo
+        // TODO: Implement supports() method.
     }
 
-    public function getCredentials(Request $request)
+    public function authenticate(Request $request): Passport
     {
-        // todo
+        // TODO: Implement authenticate() method.
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        // todo
+        // TODO: Implement onAuthenticationSuccess() method.
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        // todo
+        // TODO: Implement onAuthenticationFailure() method.
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
-    {
-        // todo
-    }
-
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, <?= $provider_key_type_hint ?>$providerKey)
-    {
-        // todo
-    }
-
-    public function start(Request $request, AuthenticationException $authException = null)
-    {
-        // todo
-    }
-
-    public function supportsRememberMe()
-    {
-        // todo
-    }
+//    public function start(Request $request, AuthenticationException $authException = null): Response
+//    {
+//        /*
+//         * If you would like this class to control what happens when an anonymous user accesses a
+//         * protected page (e.g. redirect to /login), uncomment this method and make this class
+//         * implement Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface.
+//         *
+//         * For more details, see https://symfony.com/doc/current/security/experimental_authenticators.html#configuring-the-authentication-entry-point
+//         */
+//    }
 }

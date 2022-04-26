@@ -16,8 +16,6 @@ use Psr\Log\LogLevel;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
 use Symfony\Component\HttpKernel\Log\Logger;
-use Symfony\Component\PasswordHasher\Hasher\NativePasswordHasher;
-use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
 
 class SecurityConfigUpdaterTest extends TestCase
 {
@@ -37,7 +35,7 @@ class SecurityConfigUpdaterTest extends TestCase
     /**
      * @dataProvider getUserClassTests
      */
-    public function testUpdateForUserClass(UserClassConfiguration $userConfig, string $expectedSourceFilename, string $startingSourceFilename = 'simple_security.yaml')
+    public function testUpdateForUserClass(UserClassConfiguration $userConfig, string $expectedSourceFilename, string $startingSourceFilename = 'simple_security.yaml'): void
     {
         $this->createLogger();
 
@@ -49,16 +47,14 @@ class SecurityConfigUpdaterTest extends TestCase
         $updater = new SecurityConfigUpdater($this->ysmLogger);
         $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
         $actualSource = $updater->updateForUserClass($source, $userConfig, $userClass);
-        $symfonyVersion = class_exists(NativePasswordHasher::class) ? '5.3' : 'legacy';
-        $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_user_class/'.$symfonyVersion.'/'.$expectedSourceFilename);
+        $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_user_class/5.3/'.$expectedSourceFilename);
 
-        $bcryptOrAuto = ('5.3' === $symfonyVersion || class_exists(NativePasswordEncoder::class)) ? 'auto' : 'bcrypt';
-        $expectedSource = str_replace('{BCRYPT_OR_AUTO}', $bcryptOrAuto, $expectedSource);
+        $expectedSource = str_replace('{BCRYPT_OR_AUTO}', 'auto', $expectedSource);
 
         $this->assertSame($expectedSource, $actualSource);
     }
 
-    public function getUserClassTests()
+    public function getUserClassTests(): \Generator
     {
         yield 'entity_email_password' => [
             new UserClassConfiguration(true, 'email', true),
@@ -101,39 +97,38 @@ class SecurityConfigUpdaterTest extends TestCase
         yield 'security_52_empty_security' => [
             new UserClassConfiguration(true, 'email', true),
             'security_52_entity_email_with_password.yaml',
-            'security_52_empty_security.yaml',
+            'empty_security.yaml',
         ];
 
         yield 'security_52_with_firewalls_and_logout' => [
             new UserClassConfiguration(true, 'email', true),
             'security_52_complex_entity_email_with_password.yaml',
-            'security_52_with_firewalls_and_logout.yaml',
+            'simple_security_with_firewalls_and_logout.yaml',
         ];
     }
 
     /**
      * @dataProvider getAuthenticatorTests
      */
-    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename, bool $logoutSetup, bool $useSecurity51)
+    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename, bool $logoutSetup): void
     {
         $this->createLogger();
 
         $updater = new SecurityConfigUpdater($this->ysmLogger);
         $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
-        $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator', $logoutSetup, $useSecurity51);
+        $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator', $logoutSetup);
         $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_authenticator/'.$expectedSourceFilename);
 
         $this->assertSame($expectedSource, $actualSource);
     }
 
-    public function getAuthenticatorTests()
+    public function getAuthenticatorTests(): \Generator
     {
         yield 'empty_source' => [
             'main',
             null,
             'empty_source.yaml',
             'empty_security.yaml',
-            false,
             false,
         ];
 
@@ -143,7 +138,6 @@ class SecurityConfigUpdaterTest extends TestCase
             'simple_security_source.yaml',
             'simple_security.yaml',
             false,
-            false,
         ];
 
         yield 'simple_security_with_firewalls' => [
@@ -151,7 +145,6 @@ class SecurityConfigUpdaterTest extends TestCase
             null,
             'simple_security_with_firewalls.yaml',
             'simple_security_with_firewalls.yaml',
-            false,
             false,
         ];
 
@@ -161,7 +154,6 @@ class SecurityConfigUpdaterTest extends TestCase
             'simple_security_with_firewalls_and_authenticator.yaml',
             'simple_security_with_firewalls_and_authenticator.yaml',
             false,
-            false,
         ];
 
         yield 'simple_security_with_firewalls_and_logout' => [
@@ -170,34 +162,14 @@ class SecurityConfigUpdaterTest extends TestCase
             'simple_security_with_firewalls_and_logout.yaml',
             'simple_security_with_firewalls_and_logout.yaml',
             true,
-            false,
-        ];
-
-        yield 'security_52_empty_source' => [
-            'main',
-            null,
-            'security_52_empty_source.yaml',
-            'security_52_empty_security.yaml',
-            false,
-            true,
-        ];
-
-        yield 'security_52_simple_security_with_firewalls_and_logout' => [
-            'main',
-            'App\\Security\\AppCustomAuthenticator',
-            'security_52_with_firewalls_and_logout.yaml',
-            'security_52_with_firewalls_and_logout.yaml',
-            true,
-            true,
         ];
 
         yield 'security_52_with_multiple_authenticators' => [
             'main',
             'App\\Security\\AppCustomAuthenticator',
-            'security_52_with_multiple_authenticators.yaml',
-            'security_52_with_multiple_authenticators.yaml',
+            'multiple_authenticators.yaml',
+            'multiple_authenticators.yaml',
             false,
-            true,
         ];
     }
 
