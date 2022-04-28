@@ -1,7 +1,15 @@
 <?php
 
-namespace Symfony\Bundle\MakerBundle\Util;
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
+namespace Symfony\Bundle\MakerBundle\Util;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
@@ -28,15 +36,14 @@ class UseStatementCollection implements \ArrayAccess, \IteratorAggregate
      */
     public function addUseStatement($className): void
     {
-        if (is_array($className)) {
+        if (\is_array($className)) {
             $this->useStatements = array_merge($this->useStatements, $className);
 
             return;
         }
 
-
         // Let's not add the class again if it already exists.
-        if (in_array($className, $this->useStatements, true)) {
+        if (\in_array($className, $this->useStatements, true)) {
             return;
         }
 
@@ -45,7 +52,7 @@ class UseStatementCollection implements \ArrayAccess, \IteratorAggregate
 
     public function offsetExists($offset): bool
     {
-        return array_key_exists($offset, $this->useStatements);
+        return \array_key_exists($offset, $this->useStatements);
     }
 
     /**
