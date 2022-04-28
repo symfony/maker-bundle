@@ -15,6 +15,7 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -55,17 +56,17 @@ final class MakeMessengerMiddleware extends AbstractMaker
             'Middleware'
         );
 
-        $this->useStatements = [
+        $useStatements = new UseStatementCollection([
             Envelope::class,
             MiddlewareInterface::class,
             StackInterface::class,
-        ];
+        ]);
 
         $generator->generateClass(
             $middlewareClassNameDetails->getFullName(),
             'middleware/Middleware.tpl.php',
             [
-                'use_statements' => $this->getFormattedUseStatements(),
+                'use_statements' => $this->getFormattedUseStatements($useStatements),
             ]
         );
 

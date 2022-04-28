@@ -15,6 +15,7 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -54,16 +55,16 @@ final class MakeTwigExtension extends AbstractMaker
             'Extension'
         );
 
-        $this->useStatements = [
+        $useStatements = new UseStatementCollection([
             AbstractExtension::class,
             TwigFilter::class,
             TwigFunction::class,
-        ];
+        ]);
 
         $generator->generateClass(
             $extensionClassNameDetails->getFullName(),
             'twig/Extension.tpl.php',
-            ['use_statements' => $this->getFormattedUseStatements()]
+            ['use_statements' => $this->getFormattedUseStatements($useStatements)]
         );
 
         $generator->writeChanges();

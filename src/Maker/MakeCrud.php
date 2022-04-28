@@ -23,6 +23,7 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -148,7 +149,7 @@ final class MakeCrud extends AbstractMaker
         $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
         $templatesPath = Str::asFilePath($controllerClassDetails->getRelativeNameWithoutSuffix());
 
-        $this->useStatements = [
+        $useStatements = new UseStatementCollection([
             $entityClassDetails->getFullName(),
             $formClassDetails->getFullName(),
             $repositoryClassName,
@@ -156,13 +157,13 @@ final class MakeCrud extends AbstractMaker
             Request::class,
             Response::class,
             Route::class,
-        ];
+        ]);
 
         $generator->generateController(
             $controllerClassDetails->getFullName(),
             'crud/controller/Controller.tpl.php',
             array_merge([
-                    'use_statements' => $this->getFormattedUseStatements(),
+                    'use_statements' => $this->getFormattedUseStatements($useStatements),
                     'entity_class_name' => $entityClassDetails->getShortName(),
                     'form_class_name' => $formClassDetails->getShortName(),
                     'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),

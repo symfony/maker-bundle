@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PhpParser\Builder\Param;
 use Symfony\Bridge\Twig\AppVariable;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -29,6 +30,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -226,8 +228,8 @@ class MakeResetPassword extends AbstractMaker
             $passwordHasher = UserPasswordHasherInterface::class;
         }
 
-        $this->useStatements = [
-            Generator::getControllerBaseClass()->getFullName(), // @legacy see getControllerBaseClass comment
+        $useStatements = new UseStatementCollection([
+            AbstractController::class,
             $userClassNameDetails->getFullName(),
             $changePasswordFormTypeClassNameDetails->getFullName(),
             $requestFormTypeClassNameDetails->getFullName(),
@@ -243,7 +245,7 @@ class MakeResetPassword extends AbstractMaker
             ResetPasswordHelperInterface::class,
             $passwordHasher,
             EntityManagerInterface::class,
-        ];
+        ]);
 
         // Namespace for ResetPasswordExceptionInterface was imported above
         $problemValidateMessageOrConstant = \defined('SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface::MESSAGE_PROBLEM_VALIDATE')
@@ -254,14 +256,14 @@ class MakeResetPassword extends AbstractMaker
             : "'There was a problem handling your password reset request'";
 
         if ($isTranslatorAvailable = class_exists(Translator::class)) {
-            $this->useStatements[] = TranslatorInterface::class;
+            $useStatements->addUseStatement(TranslatorInterface::class);
         }
 
         $generator->generateController(
             $controllerClassNameDetails->getFullName(),
             'resetPassword/ResetPasswordController.tpl.php',
             [
-                'use_statements' => $this->getFormattedUseStatements(),
+                'use_statements' => $this->getFormattedUseStatements($useStatements),
                 'user_class_name' => $userClassNameDetails->getShortName(),
                 'request_form_type_class_name' => $requestFormTypeClassNameDetails->getShortName(),
                 'reset_form_type_class_name' => $changePasswordFormTypeClassNameDetails->getShortName(),
@@ -284,24 +286,24 @@ class MakeResetPassword extends AbstractMaker
 
         $this->setBundleConfig($io, $generator, $repositoryClassNameDetails->getFullName());
 
-        $this->useStatements = [
+        $useStatements = new UseStatementCollection([
             AbstractType::class,
             EmailType::class,
             FormBuilderInterface::class,
             OptionsResolver::class,
             NotBlank::class,
-        ];
+        ]);
 
         $generator->generateClass(
             $requestFormTypeClassNameDetails->getFullName(),
             'resetPassword/ResetPasswordRequestFormType.tpl.php',
             [
-                'use_statements' => $this->getFormattedUseStatements(),
+                'use_statements' => $this->getFormattedUseStatements($useStatements),
                 'email_field' => $this->emailPropertyName,
             ]
         );
 
-        $this->useStatements = [
+        $useStatements = new UseStatementCollection([
             AbstractType::class,
             PasswordType::class,
             RepeatedType::class,
@@ -309,12 +311,12 @@ class MakeResetPassword extends AbstractMaker
             OptionsResolver::class,
             Length::class,
             NotBlank::class,
-        ];
+        ]);
 
         $generator->generateClass(
             $changePasswordFormTypeClassNameDetails->getFullName(),
             'resetPassword/ChangePasswordFormType.tpl.php',
-            ['use_statements' => $this->getFormattedUseStatements()]
+            ['use_statements' => $this->getFormattedUseStatements($useStatements)]
         );
 
         $generator->generateTemplate(

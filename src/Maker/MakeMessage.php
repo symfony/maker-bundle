@@ -16,6 +16,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -102,16 +103,16 @@ final class MakeMessage extends AbstractMaker
             'message/Message.tpl.php'
         );
 
-        $this->useStatements = [
+        $useStatements = new UseStatementCollection([
             MessageHandlerInterface::class,
             $messageClassNameDetails->getFullName(),
-        ];
+        ]);
 
         $generator->generateClass(
             $handlerClassNameDetails->getFullName(),
             'message/MessageHandler.tpl.php',
             [
-                'use_statements' => $this->getFormattedUseStatements(),
+                'use_statements' => $this->getFormattedUseStatements($useStatements),
                 'message_class_name' => $messageClassNameDetails->getShortName(),
             ]
         );

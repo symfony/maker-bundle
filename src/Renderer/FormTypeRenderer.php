@@ -15,6 +15,7 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
+use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -46,19 +47,20 @@ final class FormTypeRenderer
             $fields[$name] = $fieldTypeOptions;
         }
 
-        $mergedTypeUseStatements = array_unique(array_merge($fieldTypeUseStatements, $extraUseClasses));
-
-        $useStatements = array_merge([
-                AbstractType::class,
-                FormBuilderInterface::class,
-                OptionsResolver::class,
-            ],
-            $mergedTypeUseStatements,
+        $useStatements = new UseStatementCollection(array_unique(array_merge(
+            $fieldTypeUseStatements,
+            $extraUseClasses,
             $constraintClasses
-        );
+        )));
+
+        $useStatements->addUseStatement([
+            AbstractType::class,
+            FormBuilderInterface::class,
+            OptionsResolver::class,
+        ]);
 
         if ($boundClassDetails) {
-            $useStatements[] = $boundClassDetails->getFullName();
+            $useStatements->addUseStatement($boundClassDetails->getFullName());
         }
 
         $this->generator->generateClass(

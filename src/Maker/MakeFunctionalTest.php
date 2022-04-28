@@ -17,6 +17,7 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
 use Symfony\Component\BrowserKit\History;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -63,15 +64,15 @@ class MakeFunctionalTest extends AbstractMaker
 
         $pantherAvailable = trait_exists(PantherTestCaseTrait::class);
 
-        $this->useStatements = [
+        $useStatements = new UseStatementCollection([
             ($pantherAvailable ? PantherTestCase::class : WebTestCase::class),
-        ];
+        ]);
 
         $generator->generateClass(
             $testClassNameDetails->getFullName(),
             'test/Functional.tpl.php',
             [
-                'use_statements' => $this->getFormattedUseStatements(),
+                'use_statements' => $this->getFormattedUseStatements($useStatements),
                 'web_assertions_are_available' => trait_exists(WebTestAssertionsTrait::class),
                 'panther_is_available' => $pantherAvailable,
             ]

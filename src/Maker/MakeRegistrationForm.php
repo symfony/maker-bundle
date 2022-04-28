@@ -31,6 +31,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -253,7 +254,7 @@ final class MakeRegistrationForm extends AbstractMaker
         );
 
         if ($this->willVerifyEmail) {
-            $this->useStatements = [
+            $useStatements = new UseStatementCollection([
                 EntityManagerInterface::class,
                 TemplatedEmail::class,
                 Request::class,
@@ -261,13 +262,13 @@ final class MakeRegistrationForm extends AbstractMaker
                 UserInterface::class,
                 VerifyEmailExceptionInterface::class,
                 VerifyEmailHelperInterface::class,
-            ];
+            ]);
 
             $generator->generateClass(
                 $verifyEmailServiceClassNameDetails->getFullName(),
                 'verifyEmail/EmailVerifier.tpl.php',
                 array_merge([
-                        'use_statements' => $this->getFormattedUseStatements(),
+                        'use_statements' => $this->getFormattedUseStatements($useStatements),
                         'id_getter' => $this->idGetter,
                         'email_getter' => $this->emailGetter,
                         'verify_email_anonymously' => $this->verifyEmailAnonymously,
@@ -296,7 +297,7 @@ final class MakeRegistrationForm extends AbstractMaker
             'Controller\\'
         );
 
-        $this->useStatements = [
+        $useStatements = new UseStatementCollection([
             AbstractController::class,
             $formClassDetails->getFullName(),
             $userClassNameDetails->getFullName(),
@@ -305,37 +306,37 @@ final class MakeRegistrationForm extends AbstractMaker
             Route::class,
             UserPasswordHasherInterface::class,
             EntityManagerInterface::class,
-        ];
+        ]);
 
         if ($this->willVerifyEmail) {
-            $this->useStatements = array_merge([
+            $useStatements->addUseStatement([
                 $verifyEmailServiceClassNameDetails->getFullName(),
                 TemplatedEmail::class,
                 Address::class,
                 VerifyEmailExceptionInterface::class,
-            ],
-                $this->useStatements
-            );
+            ]);
 
             if ($this->verifyEmailAnonymously) {
-                $this->useStatements[] = $userRepoVars['repository_full_class_name'];
+                $useStatements->addUseStatement($userRepoVars['repository_full_class_name']);
             }
         }
 
         if ($this->autoLoginAuthenticator) {
-            $this->useStatements[] = $this->autoLoginAuthenticator;
-            $this->useStatements[] = UserAuthenticatorInterface::class;
+            $useStatements->addUseStatement([
+                $this->autoLoginAuthenticator,
+                UserAuthenticatorInterface::class,
+            ]);
         }
 
         if ($isTranslatorAvailable = class_exists(Translator::class)) {
-            $this->useStatements[] = TranslatorInterface::class;
+            $useStatements->addUseStatement(TranslatorInterface::class);
         }
 
         $generator->generateController(
             $controllerClassNameDetails->getFullName(),
             'registration/RegistrationController.tpl.php',
             array_merge([
-                    'use_statements' => $this->getFormattedUseStatements(),
+                    'use_statements' => $this->getFormattedUseStatements($useStatements),
                     'route_path' => '/register',
                     'route_name' => 'app_register',
                     'form_class_name' => $formClassDetails->getShortName(),

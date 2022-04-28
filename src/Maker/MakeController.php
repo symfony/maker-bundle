@@ -18,6 +18,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -59,11 +60,11 @@ final class MakeController extends AbstractMaker
             'Controller'
         );
 
-        $this->useStatements = [
+        $useStatements = new UseStatementCollection([
             AbstractController::class,
             Response::class,
             Route::class,
-        ];
+        ]);
 
         $noTemplate = $input->getOption('no-template');
         $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()).'/index.html.twig';
@@ -71,7 +72,7 @@ final class MakeController extends AbstractMaker
             $controllerClassNameDetails->getFullName(),
             'controller/Controller.tpl.php',
             [
-                'use_statements' => $this->getFormattedUseStatements(),
+                'use_statements' => $this->getFormattedUseStatements($useStatements),
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'with_template' => $this->isTwigInstalled() && !$noTemplate,
