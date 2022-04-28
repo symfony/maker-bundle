@@ -28,11 +28,18 @@ final class TemplateComponentGenerator
         $this->phpCompatUtil = $phpCompatUtil;
     }
 
-    public static function generateUseStatements(array $classesToBeImported): string
+    public static function generateUseStatements(UseStatementCollection $classesToBeImported): string
     {
         $transformed = [];
+        $aliases = [];
 
         foreach ($classesToBeImported as $key => $class) {
+            if (\is_array($class)) {
+                $aliasClass = key($class);
+                $aliases[$aliasClass] = $class[$aliasClass];
+                $class = $aliasClass;
+            }
+
             $transformed[$key] = str_replace('\\', ' ', $class);
         }
 
@@ -41,7 +48,15 @@ final class TemplateComponentGenerator
         $statements = '';
 
         foreach ($transformed as $key => $class) {
-            $statements .= sprintf("use %s;\n", $classesToBeImported[$key]);
+            $importedClass = $classesToBeImported[$key];
+
+            if (!\is_array($importedClass)) {
+                $statements .= sprintf("use %s;\n", $importedClass);
+                continue;
+            }
+
+            $aliasClass = key($importedClass);
+            $statements .= sprintf("use %s as %s;\n", $aliasClass, $aliases[$aliasClass]);
         }
 
         return $statements;

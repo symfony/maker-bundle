@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\Sorter;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
+use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
@@ -23,12 +24,12 @@ class TemplateComponentGeneratorTest extends TestCase
 {
     public function testUseStatements(): void
     {
-        $unsorted = [
+        $unsorted = new UseStatementCollection([
             Sorter::class,
             \App\Controller\SomeController::class,
             \SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelper::class,
             \Symfony\Bundle\MakerBundle\Test\MakerTestCase::class,
-        ];
+        ]);
 
         $result = TemplateComponentGenerator::generateUseStatements($unsorted);
 
@@ -44,7 +45,7 @@ EOT;
 
     public function testComplexStatements(): void
     {
-        $unsorted = [
+        $unsorted = new UseStatementCollection([
             \Symfony\Bundle\FrameworkBundle\Controller\AbstractController::class,
             \App\Form\RegistrationFormType::class,
             \App\Entity\User::class,
@@ -57,7 +58,7 @@ EOT;
             \Symfony\Component\Mime\Address::class,
             \SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface::class,
             \Doctrine\ORM\EntityManagerInterface::class,
-        ];
+        ]);
 
         $result = TemplateComponentGenerator::generateUseStatements($unsorted);
 
@@ -74,6 +75,25 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
+
+EOT;
+        self::assertSame($expected, $result);
+    }
+
+    public function testUseStatementsWithAliases(): void
+    {
+        $unsorted = new UseStatementCollection([
+            \Symfony\UX\Turbo\Attribute\Broadcast::class,
+            \ApiPlatform\Core\Annotation\ApiResource::class,
+            [\Doctrine\ORM\Mapping::class => 'ORM'],
+        ]);
+
+        $result = TemplateComponentGenerator::generateUseStatements($unsorted);
+
+        $expected = <<< 'EOT'
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\UX\Turbo\Attribute\Broadcast;
 
 EOT;
         self::assertSame($expected, $result);

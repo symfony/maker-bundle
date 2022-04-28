@@ -15,6 +15,7 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
+use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 
@@ -23,9 +24,6 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 abstract class AbstractMaker implements MakerInterface
 {
-    /** @var array Fully Qualified Classnames for Use Statements */
-    protected $useStatements = [];
-
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
     }
@@ -56,8 +54,8 @@ abstract class AbstractMaker implements MakerInterface
     /**
      * Transforms an array of classes into sorted use statements for templates.
      */
-    protected function getFormattedUseStatements(): string
+    protected function getFormattedUseStatements(UseStatementCollection $useStatements): string
     {
-        return TemplateComponentGenerator::generateUseStatements($this->useStatements);
+        return TemplateComponentGenerator::generateUseStatements($useStatements);
     }
 }
