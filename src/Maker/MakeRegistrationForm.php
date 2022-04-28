@@ -268,7 +268,7 @@ final class MakeRegistrationForm extends AbstractMaker
                 $verifyEmailServiceClassNameDetails->getFullName(),
                 'verifyEmail/EmailVerifier.tpl.php',
                 array_merge([
-                        'use_statements' => $useStatements->generateUseStatements(),
+                        'use_statements' => $useStatements,
                         'id_getter' => $this->idGetter,
                         'email_getter' => $this->emailGetter,
                         'verify_email_anonymously' => $this->verifyEmailAnonymously,
@@ -336,7 +336,7 @@ final class MakeRegistrationForm extends AbstractMaker
             $controllerClassNameDetails->getFullName(),
             'registration/RegistrationController.tpl.php',
             array_merge([
-                    'use_statements' => $useStatements->generateUseStatements(),
+                    'use_statements' => $useStatements,
                     'route_path' => '/register',
                     'route_name' => 'app_register',
                     'form_class_name' => $formClassDetails->getShortName(),

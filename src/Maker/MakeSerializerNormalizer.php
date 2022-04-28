@@ -68,7 +68,7 @@ final class MakeSerializerNormalizer extends AbstractMaker
             $normalizerClassNameDetails->getFullName(),
             'serializer/Normalizer.tpl.php',
             [
-                'use_statements' => $useStatements->generateUseStatements(),
+                'use_statements' => $useStatements,
                 'cacheable_interface' => $cacheable,
             ]
         );

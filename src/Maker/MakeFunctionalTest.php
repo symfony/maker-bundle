@@ -72,7 +72,7 @@ class MakeFunctionalTest extends AbstractMaker
             $testClassNameDetails->getFullName(),
             'test/Functional.tpl.php',
             [
-                'use_statements' => $useStatements->generateUseStatements(),
+                'use_statements' => $useStatements,
                 'web_assertions_are_available' => trait_exists(WebTestAssertionsTrait::class),
                 'panther_is_available' => $pantherAvailable,
             ]

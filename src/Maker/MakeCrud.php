@@ -163,7 +163,7 @@ final class MakeCrud extends AbstractMaker
             $controllerClassDetails->getFullName(),
             'crud/controller/Controller.tpl.php',
             array_merge([
-                    'use_statements' => $useStatements->generateUseStatements(),
+                    'use_statements' => $useStatements,
                     'entity_class_name' => $entityClassDetails->getShortName(),
                     'form_class_name' => $formClassDetails->getShortName(),
                     'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),

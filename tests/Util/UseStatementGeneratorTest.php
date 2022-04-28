@@ -36,7 +36,7 @@ use Symfony\Bundle\MakerBundle\Util\Sorter;
 use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelper;
 
 EOT;
-        self::assertSame($expected, $unsorted->generateUseStatements());
+        self::assertSame($expected, $unsorted);
     }
 
     public function testComplexStatements(): void
@@ -71,7 +71,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 
 EOT;
-        self::assertSame($expected, $unsorted->generateUseStatements());
+        self::assertSame($expected, $unsorted);
     }
 
     public function testUseStatementsWithAliases(): void
@@ -88,6 +88,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 EOT;
-        self::assertSame($expected, $unsorted->generateUseStatements());
+        self::assertSame($expected, $unsorted);
     }
 }

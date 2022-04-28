@@ -18,7 +18,7 @@ namespace Symfony\Bundle\MakerBundle\Util;
  *
  * @internal
  */
-final class UseStatementGenerator
+final class UseStatementGenerator implements \Stringable
 {
     private $classesToBeImported;
 
@@ -35,7 +35,7 @@ final class UseStatementGenerator
         $this->classesToBeImported = $classesToBeImported;
     }
 
-    public function generateUseStatements(): string
+    public function __toString(): string
     {
         $transformed = [];
         $aliases = [];

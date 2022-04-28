@@ -66,7 +66,7 @@ final class MakeMessengerMiddleware extends AbstractMaker
             $middlewareClassNameDetails->getFullName(),
             'middleware/Middleware.tpl.php',
             [
-                'use_statements' => $useStatements->generateUseStatements(),
+                'use_statements' => $useStatements,
             ]
         );
 

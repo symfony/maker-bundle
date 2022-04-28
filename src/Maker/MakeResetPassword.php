@@ -263,7 +263,7 @@ class MakeResetPassword extends AbstractMaker
             $controllerClassNameDetails->getFullName(),
             'resetPassword/ResetPasswordController.tpl.php',
             [
-                'use_statements' => $useStatements->generateUseStatements(),
+                'use_statements' => $useStatements,
                 'user_class_name' => $userClassNameDetails->getShortName(),
                 'request_form_type_class_name' => $requestFormTypeClassNameDetails->getShortName(),
                 'reset_form_type_class_name' => $changePasswordFormTypeClassNameDetails->getShortName(),
@@ -298,7 +298,7 @@ class MakeResetPassword extends AbstractMaker
             $requestFormTypeClassNameDetails->getFullName(),
             'resetPassword/ResetPasswordRequestFormType.tpl.php',
             [
-                'use_statements' => $useStatements->generateUseStatements(),
+                'use_statements' => $useStatements,
                 'email_field' => $this->emailPropertyName,
             ]
         );
@@ -316,7 +316,7 @@ class MakeResetPassword extends AbstractMaker
         $generator->generateClass(
             $changePasswordFormTypeClassNameDetails->getFullName(),
             'resetPassword/ChangePasswordFormType.tpl.php',
-            ['use_statements' => $useStatements->generateUseStatements()]
+            ['use_statements' => $useStatements]
         );
 
         $generator->generateTemplate(

@@ -87,7 +87,7 @@ final class MakeCommand extends AbstractMaker
             $commandClassNameDetails->getFullName(),
             'command/Command.tpl.php',
             [
-                'use_statements' => $useStatements->generateUseStatements(),
+                'use_statements' => $useStatements,
                 'command_name' => $commandName,
                 'set_description' => !class_exists(LazyCommand::class),
             ]

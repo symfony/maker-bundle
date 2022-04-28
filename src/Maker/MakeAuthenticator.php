@@ -268,7 +268,7 @@ final class MakeAuthenticator extends AbstractMaker
             $this->generator->generateClass(
                 $authenticatorClass,
                 'authenticator/EmptyAuthenticator.tpl.php',
-                ['use_statements' => $useStatements->generateUseStatements()]
+                ['use_statements' => $useStatements]
             );
 
             return;
@@ -294,7 +294,7 @@ final class MakeAuthenticator extends AbstractMaker
             $authenticatorClass,
             'authenticator/LoginFormAuthenticator.tpl.php',
             [
-                'use_statements' => $useStatements->generateUseStatements(),
+                'use_statements' => $useStatements,
                 'user_fully_qualified_class_name' => trim($userClassNameDetails->getFullName(), '\\'),
                 'user_class_name' => $userClassNameDetails->getShortName(),
                 'username_field' => $userNameField,
@@ -324,7 +324,7 @@ final class MakeAuthenticator extends AbstractMaker
             $controllerPath = $this->generator->generateController(
                 $controllerClassNameDetails->getFullName(),
                 'authenticator/EmptySecurityController.tpl.php',
-                ['use_statements' => $useStatements->generateUseStatements()]
+                ['use_statements' => $useStatements]
             );
 
             $controllerSourceCode = $this->generator->getFileContentsForPendingOperation($controllerPath);

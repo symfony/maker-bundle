@@ -60,7 +60,7 @@ final class MakeUnitTest extends AbstractMaker
         $generator->generateClass(
             $testClassNameDetails->getFullName(),
             'test/Unit.tpl.php',
-            ['use_statements' => (new UseStatementGenerator([TestCase::class]))->generateUseStatements()]
+            ['use_statements' => new UseStatementGenerator([TestCase::class])]
         );
 
         $generator->writeChanges();

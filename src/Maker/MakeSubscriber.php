@@ -98,7 +98,7 @@ final class MakeSubscriber extends AbstractMaker
             $subscriberClassNameDetails->getFullName(),
             'event/Subscriber.tpl.php',
             [
-                'use_statements' => $useStatements->generateUseStatements(),
+                'use_statements' => $useStatements,
                 'event' => class_exists($event) ? sprintf('%s::class', $eventClassName) : sprintf('\'%s\'', $event),
                 'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
                 'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),

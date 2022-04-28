@@ -64,7 +64,7 @@ final class MakeTwigExtension extends AbstractMaker
         $generator->generateClass(
             $extensionClassNameDetails->getFullName(),
             'twig/Extension.tpl.php',
-            ['use_statements' => $useStatements->generateUseStatements()]
+            ['use_statements' => $useStatements]
         );
 
         $generator->writeChanges();

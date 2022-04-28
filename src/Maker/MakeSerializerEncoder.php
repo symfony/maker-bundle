@@ -65,7 +65,7 @@ final class MakeSerializerEncoder extends AbstractMaker
             $encoderClassNameDetails->getFullName(),
             'serializer/Encoder.tpl.php',
             [
-                'use_statements' => $useStatements->generateUseStatements(),
+                'use_statements' => $useStatements,
                 'format' => $format,
             ]
         );

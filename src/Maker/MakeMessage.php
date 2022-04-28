@@ -112,7 +112,7 @@ final class MakeMessage extends AbstractMaker
             $handlerClassNameDetails->getFullName(),
             'message/MessageHandler.tpl.php',
             [
-                'use_statements' => $useStatements->generateUseStatements(),
+                'use_statements' => $useStatements,
                 'message_class_name' => $messageClassNameDetails->getShortName(),
             ]
         );
