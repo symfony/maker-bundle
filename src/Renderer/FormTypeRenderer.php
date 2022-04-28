@@ -14,8 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Renderer;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
-use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
-use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -47,7 +46,7 @@ final class FormTypeRenderer
             $fields[$name] = $fieldTypeOptions;
         }
 
-        $useStatements = new UseStatementCollection(array_unique(array_merge(
+        $useStatements = new UseStatementGenerator(array_unique(array_merge(
             $fieldTypeUseStatements,
             $extraUseClasses,
             $constraintClasses
@@ -67,7 +66,7 @@ final class FormTypeRenderer
             $formClassDetails->getFullName(),
             'form/Type.tpl.php',
             [
-                'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
+                'use_statements' => $useStatements->generateUseStatements(),
                 'bounded_class_name' => $boundClassDetails ? $boundClassDetails->getShortName() : null,
                 'form_fields' => $fields,
             ]

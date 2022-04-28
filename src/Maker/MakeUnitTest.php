@@ -16,7 +16,7 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -60,7 +60,7 @@ final class MakeUnitTest extends AbstractMaker
         $generator->generateClass(
             $testClassNameDetails->getFullName(),
             'test/Unit.tpl.php',
-            ['use_statements' => $this->getFormattedUseStatements(new UseStatementCollection([TestCase::class]))]
+            ['use_statements' => (new UseStatementGenerator([TestCase::class]))->generateUseStatements()]
         );
 
         $generator->writeChanges();

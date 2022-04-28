@@ -15,7 +15,7 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -55,7 +55,7 @@ final class MakeSerializerNormalizer extends AbstractMaker
             'Normalizer'
         );
 
-        $useStatements = new UseStatementCollection([
+        $useStatements = new UseStatementGenerator([
             NormalizerInterface::class,
             ObjectNormalizer::class,
         ]);
@@ -68,7 +68,7 @@ final class MakeSerializerNormalizer extends AbstractMaker
             $normalizerClassNameDetails->getFullName(),
             'serializer/Normalizer.tpl.php',
             [
-                'use_statements' => $this->getFormattedUseStatements($useStatements),
+                'use_statements' => $useStatements->generateUseStatements(),
                 'cacheable_interface' => $cacheable,
             ]
         );

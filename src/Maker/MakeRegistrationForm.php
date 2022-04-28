@@ -31,7 +31,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -254,7 +254,7 @@ final class MakeRegistrationForm extends AbstractMaker
         );
 
         if ($this->willVerifyEmail) {
-            $useStatements = new UseStatementCollection([
+            $useStatements = new UseStatementGenerator([
                 EntityManagerInterface::class,
                 TemplatedEmail::class,
                 Request::class,
@@ -268,7 +268,7 @@ final class MakeRegistrationForm extends AbstractMaker
                 $verifyEmailServiceClassNameDetails->getFullName(),
                 'verifyEmail/EmailVerifier.tpl.php',
                 array_merge([
-                        'use_statements' => $this->getFormattedUseStatements($useStatements),
+                        'use_statements' => $useStatements->generateUseStatements(),
                         'id_getter' => $this->idGetter,
                         'email_getter' => $this->emailGetter,
                         'verify_email_anonymously' => $this->verifyEmailAnonymously,
@@ -297,7 +297,7 @@ final class MakeRegistrationForm extends AbstractMaker
             'Controller\\'
         );
 
-        $useStatements = new UseStatementCollection([
+        $useStatements = new UseStatementGenerator([
             AbstractController::class,
             $formClassDetails->getFullName(),
             $userClassNameDetails->getFullName(),
@@ -336,7 +336,7 @@ final class MakeRegistrationForm extends AbstractMaker
             $controllerClassNameDetails->getFullName(),
             'registration/RegistrationController.tpl.php',
             array_merge([
-                    'use_statements' => $this->getFormattedUseStatements($useStatements),
+                    'use_statements' => $useStatements->generateUseStatements(),
                     'route_path' => '/register',
                     'route_name' => 'app_register',
                     'form_class_name' => $formClassDetails->getShortName(),

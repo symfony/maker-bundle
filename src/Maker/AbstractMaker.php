@@ -14,8 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\MakerInterface;
-use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
-use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 
@@ -49,13 +47,5 @@ abstract class AbstractMaker implements MakerInterface
             $this->getCommandName(),
             $message
         );
-    }
-
-    /**
-     * Transforms an array of classes into sorted use statements for templates.
-     */
-    protected function getFormattedUseStatements(UseStatementCollection $useStatements): string
-    {
-        return TemplateComponentGenerator::generateUseStatements($useStatements);
     }
 }

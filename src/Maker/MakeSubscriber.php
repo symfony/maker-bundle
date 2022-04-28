@@ -17,7 +17,7 @@ use Symfony\Bundle\MakerBundle\EventRegistry;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -86,7 +86,7 @@ final class MakeSubscriber extends AbstractMaker
         $eventFullClassName = $this->eventRegistry->getEventClassName($event);
         $eventClassName = $eventFullClassName ? Str::getShortClassName($eventFullClassName) : null;
 
-        $useStatements = new UseStatementCollection([
+        $useStatements = new UseStatementGenerator([
             EventSubscriberInterface::class,
         ]);
 
@@ -98,7 +98,7 @@ final class MakeSubscriber extends AbstractMaker
             $subscriberClassNameDetails->getFullName(),
             'event/Subscriber.tpl.php',
             [
-                'use_statements' => $this->getFormattedUseStatements($useStatements),
+                'use_statements' => $useStatements->generateUseStatements(),
                 'event' => class_exists($event) ? sprintf('%s::class', $eventClassName) : sprintf('\'%s\'', $event),
                 'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
                 'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),

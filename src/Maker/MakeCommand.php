@@ -17,7 +17,7 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
-use Symfony\Bundle\MakerBundle\Util\UseStatementCollection;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LazyCommand;
@@ -70,7 +70,7 @@ final class MakeCommand extends AbstractMaker
             sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, Str::asClassName($commandName, 'Command'))
         );
 
-        $useStatements = new UseStatementCollection([
+        $useStatements = new UseStatementGenerator([
             Command::class,
             InputArgument::class,
             InputInterface::class,
@@ -87,7 +87,7 @@ final class MakeCommand extends AbstractMaker
             $commandClassNameDetails->getFullName(),
             'command/Command.tpl.php',
             [
-                'use_statements' => $this->getFormattedUseStatements($useStatements),
+                'use_statements' => $useStatements->generateUseStatements(),
                 'command_name' => $commandName,
                 'set_description' => !class_exists(LazyCommand::class),
             ]
