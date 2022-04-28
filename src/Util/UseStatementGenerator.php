@@ -12,13 +12,22 @@
 namespace Symfony\Bundle\MakerBundle\Util;
 
 /**
+ * Converts fully qualified class names into sorted use statements for templates.
+ *
  * @author Jesse Rushlow <jr@rushlow.dev>
+ *
+ * @internal
  */
-class UseStatementGenerator
+final class UseStatementGenerator
 {
     private $classesToBeImported;
 
     /**
+     * For use statements that contain aliases, the $classesToBeImported array
+     * may contain an array(s) like [\Some\Class::class => 'ZYX']. The generated
+     * use statement would appear as "use Some\Class::class as 'ZXY'". It is ok
+     * to mix non-aliases classes with aliases.
+     *
      * @param string[]|array<string, string> $classesToBeImported
      */
     public function __construct(array $classesToBeImported)
