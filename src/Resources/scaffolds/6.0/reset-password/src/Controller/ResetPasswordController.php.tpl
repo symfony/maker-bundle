@@ -50,8 +50,8 @@ class ResetPasswordController extends AbstractController
             );
         }
 
-        return $this->render('reset_password/request.html.twig', [
-            'requestForm' => $form->createView(),
+        return $this->renderForm('reset_password/request.html.twig', [
+            'requestForm' => $form,
         ]);
     }
 
@@ -76,7 +76,7 @@ class ResetPasswordController extends AbstractController
      * Validates and process the reset URL that the user clicked in their email.
      */
     #[Route('/reset/{token}', name: 'reset_password')]
-    public function reset(Request $request, LoginUser $login, UserPasswordHasherInterface $userPasswordHasher, string $token = null): Response
+    public function reset(Request $request, LoginUser $loginUser, UserPasswordHasherInterface $userPasswordHasher, string $token = null): Response
     {
         if ($token) {
             // We store the token in session and remove it from the URL, to avoid the URL being
@@ -110,21 +110,21 @@ class ResetPasswordController extends AbstractController
             // Encode(hash) the plain password, and set it.
             $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('plainPassword')->getData()));
 
-            $this->userRepository->save($user);
+            $this->userRepository->add($user);
 
             // The session is cleaned up after the password has been changed.
             $this->cleanSessionAfterReset();
 
             // programmatic user login
-            $login($user, $request);
+            $loginUser($user, $request);
 
             $this->addFlash('success', 'Your password was successfully reset, you are now logged in.');
 
             return $this->redirectToRoute('homepage');
         }
 
-        return $this->render('reset_password/reset.html.twig', [
-            'resetForm' => $form->createView(),
+        return $this->renderForm('reset_password/reset.html.twig', [
+            'resetForm' => $form,
         ]);
     }
 

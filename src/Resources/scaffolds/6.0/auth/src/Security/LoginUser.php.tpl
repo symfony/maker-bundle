@@ -7,6 +7,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 
+/**
+ * Service to programatically login a user.
+ */
 class LoginUser
 {
     public function __construct(

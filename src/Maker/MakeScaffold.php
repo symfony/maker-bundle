@@ -31,7 +31,7 @@ use Symfony\Component\Process\Process;
  */
 final class MakeScaffold extends AbstractMaker
 {
-    private $files;
+    private $fileManager;
     private $jsPackageManager;
     private $availableScaffolds;
     private $composerBin;
@@ -41,7 +41,7 @@ final class MakeScaffold extends AbstractMaker
 
     public function __construct(FileManager $files)
     {
-        $this->files = $files;
+        $this->fileManager = $files;
         $this->jsPackageManager = new JsPackageManager($files);
     }
 
@@ -133,7 +133,7 @@ final class MakeScaffold extends AbstractMaker
                 $io->text("Installing Composer package: <comment>{$package}</comment>...");
 
                 $command = [$this->composerBin(), 'require', '--no-scripts', 'dev' === $env ? '--dev' : null, $package];
-                $process = new Process(array_filter($command), $this->files->getRootDirectory());
+                $process = new Process(array_filter($command), $this->fileManager->getRootDirectory());
 
                 $process->run();
 
@@ -147,7 +147,7 @@ final class MakeScaffold extends AbstractMaker
 
         // install required js packages
         foreach ($scaffold['js_packages'] ?? [] as $package => $version) {
-            if (!\in_array($package, $this->installedJsPackages, true)) {
+            if (!$this->isJsPackageInstalled($package)) {
                 $io->text("Installing JS package: <comment>{$package}@{$version}</comment>...");
 
                 $this->jsPackageManager->add($package, $version);
@@ -159,7 +159,7 @@ final class MakeScaffold extends AbstractMaker
             $io->text('Copying scaffold files...');
 
             foreach (Finder::create()->files()->in($scaffold['dir']) as $file) {
-                $this->files->dumpFile(
+                $this->fileManager->dumpFile(
                     "{$file->getRelativePath()}/{$file->getFilenameWithoutExtension()}",
                     $file->getContents()
                 );
@@ -169,7 +169,7 @@ final class MakeScaffold extends AbstractMaker
         if (isset($scaffold['configure'])) {
             $io->text('Executing configuration...');
 
-            $scaffold['configure']($this->files);
+            $scaffold['configure']($this->fileManager);
         }
 
         $io->text("Successfully installed scaffold <info>{$name}</info>.");
@@ -211,6 +211,11 @@ final class MakeScaffold extends AbstractMaker
     private function isPackageInstalled(string $package): bool
     {
         return InstalledVersions::isInstalled($package) || \in_array($package, $this->installedPackages, true);
+    }
+
+    private function isJsPackageInstalled(string $package): bool
+    {
+        return $this->jsPackageManager->isInstalled($package) || \in_array($package, $this->installedJsPackages, true);
     }
 
     /**

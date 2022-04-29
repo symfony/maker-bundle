@@ -55,8 +55,6 @@ return [
                 ],
                 'remember_me' => [
                     'secret' => '%kernel.secret%',
-                    'secure' => 'auto',
-                    'samesite' => 'lax',
                 ],
             ];
 

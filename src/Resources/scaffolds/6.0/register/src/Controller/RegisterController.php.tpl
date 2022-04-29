@@ -19,7 +19,7 @@ class RegisterController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         UserRepository $userRepository,
-        LoginUser $login,
+        LoginUser $loginUser,
     ): Response {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -34,11 +34,11 @@ class RegisterController extends AbstractController
                 )
             );
 
-            $userRepository->save($user);
+            $userRepository->add($user);
             // do anything else you need here, like send an email
 
             // authenticate the user
-            $login($user, $request);
+            $loginUser($user, $request);
             $this->addFlash('success', 'You\'ve successfully registered and are now logged in.');
 
             return $this->redirectToRoute('homepage');

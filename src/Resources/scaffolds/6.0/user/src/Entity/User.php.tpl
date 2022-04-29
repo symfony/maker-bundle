@@ -12,20 +12,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column]
+    private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 180, unique: true)]
-    private $email;
+    #[ORM\Column(unique: true)]
+    private ?string $email = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    private $name;
+    #[ORM\Column]
+    private ?string $name = null;
 
     #[ORM\Column(type: 'json')]
-    private $roles = [];
+    private array $roles = [];
 
-    #[ORM\Column(type: 'string')]
-    private $password;
+    #[ORM\Column()]
+    private ?string $password = null;
 
     public function getId(): ?int
     {

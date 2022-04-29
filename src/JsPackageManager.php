@@ -28,6 +28,14 @@ final class JsPackageManager
         $this->files = $fileManager;
     }
 
+    public function isInstalled(string $package): bool
+    {
+        $packageJson = $this->packageJson();
+        $deps = \array_merge($packageJson['dependencies'] ?? [], $packageJson['devDependencies'] ?? []);
+
+        return \array_key_exists($package, $deps);
+    }
+
     public function add(string $package, string $version): void
     {
         $packageWithVersion = "{$package}@{$version}";
@@ -77,7 +85,7 @@ final class JsPackageManager
 
     private function addToPackageJson(string $package, string $version): void
     {
-        $packageJson = json_decode($this->files->getFileContents('package.json'), true);
+        $packageJson = $this->packageJson();
         $devDeps = $packageJson['devDependencies'] ?? [];
         $devDeps[$package] = $version;
 
@@ -86,5 +94,10 @@ final class JsPackageManager
         $packageJson['devDependencies'] = $devDeps;
 
         $this->files->dumpFile('package.json', json_encode($packageJson, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES));
+    }
+
+    private function packageJson(): array
+    {
+        return json_decode($this->files->getFileContents('package.json'), true);
     }
 }

@@ -28,7 +28,7 @@ class ProfileController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $userRepository->save($user);
+            $userRepository->add($user);
             $this->addFlash('success', 'You\'ve successfully updated your profile.');
 
             return $this->redirectToRoute('homepage');

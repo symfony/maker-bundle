@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 #[Route('/user/change-password', name: 'change_password')]
 class ChangePasswordController extends AbstractController
@@ -19,11 +18,10 @@ class ChangePasswordController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         UserRepository $userRepository,
-        ?UserInterface $user = null,
     ): Response {
-        if (!$user) {
-            throw $this->createAccessDeniedException();
-        }
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_REMEMBERED');
+
+        $user = $this->getUser();
 
         if (!$user instanceof User) {
             throw new \LogicException('Invalid user type.');
@@ -41,14 +39,14 @@ class ChangePasswordController extends AbstractController
                 )
             );
 
-            $userRepository->save($user);
+            $userRepository->add($user);
             $this->addFlash('success', 'You\'ve successfully changed your password.');
 
             return $this->redirectToRoute('homepage');
         }
 
-        return $this->render('user/change_password.html.twig', [
-            'changePasswordForm' => $form->createView(),
+        return $this->renderForm('user/change_password.html.twig', [
+            'changePasswordForm' => $form,
         ]);
     }
 }

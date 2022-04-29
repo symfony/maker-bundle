@@ -8,7 +8,8 @@
         <h1>Reset your password</h1>
 
         {{ form_start(resetForm) }}
-            {{ form_row(resetForm.plainPassword) }}
+            {{ form_row(resetForm.plainPassword.first, {label: 'New Password'}) }}
+            {{ form_row(resetForm.plainPassword.second, {label: 'Repeat New Password'}) }}
             <button class="btn btn-primary">Reset password</button>
         {{ form_end(resetForm) }}
     </div>
