@@ -58,7 +58,7 @@ final class MakeSerializerNormalizer extends AbstractMaker
         $useStatements = new UseStatementGenerator([
             NormalizerInterface::class,
             ObjectNormalizer::class,
-            CacheableSupportsMethodInterface::class
+            CacheableSupportsMethodInterface::class,
         ]);
 
         $generator->generateClass(

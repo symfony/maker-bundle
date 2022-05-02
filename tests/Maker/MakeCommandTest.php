@@ -26,12 +26,8 @@ class MakeCommandTest extends MakerTestCase
     public function getTestDetails(): \Generator
     {
         yield 'it_makes_a_command_no_attributes' => [$this->createMakerTest()
+            ->setRequiredPhpVersion(80000)
             ->run(function (MakerTestRunner $runner) {
-                if (\PHP_MAJOR_VERSION < 8) {
-                    // @legacy Remove when PHP 7 is now longer supported.
-                    $this->markTestSkipped('Test only runs on PHP < 8');
-                }
-
                 $runner->runMaker([
                     // command name
                     'app:foo',
