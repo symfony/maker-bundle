@@ -31,7 +31,7 @@ final class JsPackageManager
     public function isInstalled(string $package): bool
     {
         $packageJson = $this->packageJson();
-        $deps = \array_merge($packageJson['dependencies'] ?? [], $packageJson['devDependencies'] ?? []);
+        $deps = array_merge($packageJson['dependencies'] ?? [], $packageJson['devDependencies'] ?? []);
 
         return \array_key_exists($package, $deps);
     }

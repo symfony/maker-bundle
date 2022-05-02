@@ -105,7 +105,12 @@ final class MakeScaffold extends AbstractMaker
         while (true) {
             $name = $io->choice('Available scaffolds', array_combine(
                 array_keys($scaffolds),
-                array_map(fn (array $scaffold) => $scaffold['description'], $scaffolds)
+                array_map(
+                    function (array $scaffold) {
+                        return $scaffold['description'];
+                    },
+                    $scaffolds
+                )
             ));
             $scaffold = $scaffolds[$name];
 
@@ -116,19 +121,24 @@ final class MakeScaffold extends AbstractMaker
             if ($scaffold['dependents'] ?? []) {
                 $io->text('This scaffold will also install the following scaffolds:');
                 $io->newLine();
-                $io->listing(\array_map(fn($s) => \sprintf('%s - %s', $s, $scaffolds[$s]['description']), $scaffold['dependents']));
+                $io->listing(array_map(
+                    function ($s) use ($scaffolds) {
+                        return sprintf('%s - %s', $s, $scaffolds[$s]['description']);
+                    },
+                    $scaffold['dependents'])
+                );
             }
 
             if ($scaffold['packages'] ?? []) {
                 $io->text('This scaffold will install the following composer packages:');
                 $io->newLine();
-                $io->listing(\array_keys($scaffold['packages']));
+                $io->listing(array_keys($scaffold['packages']));
             }
 
             if ($scaffold['js_packages'] ?? []) {
                 $io->text('This scaffold will install the following node packages:');
                 $io->newLine();
-                $io->listing(\array_keys($scaffold['js_packages']));
+                $io->listing(array_keys($scaffold['js_packages']));
             }
 
             if (!$io->confirm("Would your like to create the \"{$name}\" scaffold?")) {
