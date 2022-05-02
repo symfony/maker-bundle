@@ -100,12 +100,47 @@ final class MakeScaffold extends AbstractMaker
             return;
         }
 
-        $availableScaffolds = array_combine(
-            array_keys($this->availableScaffolds()),
-            array_map(fn (array $scaffold) => $scaffold['description'], $this->availableScaffolds())
-        );
+        $scaffolds = $this->availableScaffolds();
 
-        $input->setArgument('name', [$io->choice('Available scaffolds', $availableScaffolds)]);
+        while (true) {
+            $name = $io->choice('Available scaffolds', array_combine(
+                array_keys($scaffolds),
+                array_map(fn (array $scaffold) => $scaffold['description'], $scaffolds)
+            ));
+            $scaffold = $scaffolds[$name];
+
+            $io->title($name);
+            $io->text($scaffold['description']);
+            $io->newLine();
+
+            if ($scaffold['dependents'] ?? []) {
+                $io->text('This scaffold will also install the following scaffolds:');
+                $io->newLine();
+                $io->listing(\array_map(fn($s) => \sprintf('%s - %s', $s, $scaffolds[$s]['description']), $scaffold['dependents']));
+            }
+
+            if ($scaffold['packages'] ?? []) {
+                $io->text('This scaffold will install the following composer packages:');
+                $io->newLine();
+                $io->listing(\array_keys($scaffold['packages']));
+            }
+
+            if ($scaffold['js_packages'] ?? []) {
+                $io->text('This scaffold will install the following node packages:');
+                $io->newLine();
+                $io->listing(\array_keys($scaffold['js_packages']));
+            }
+
+            if (!$io->confirm("Would your like to create the \"{$name}\" scaffold?")) {
+                $io->text('Going back to main menu...');
+
+                continue;
+            }
+
+            $input->setArgument('name', [$name]);
+
+            return;
+        }
     }
 
     private function generateScaffold(string $name, ConsoleStyle $io): void
