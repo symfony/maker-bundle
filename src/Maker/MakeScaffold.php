@@ -159,10 +159,11 @@ final class MakeScaffold extends AbstractMaker
             $io->text('Copying scaffold files...');
 
             foreach (Finder::create()->files()->in($scaffold['dir']) as $file) {
-                $this->fileManager->dumpFile(
-                    "{$file->getRelativePath()}/{$file->getFilenameWithoutExtension()}",
-                    $file->getContents()
-                );
+                $filename = "{$file->getRelativePath()}/{$file->getFilenameWithoutExtension()}";
+
+                if (!$this->fileManager->fileExists($filename) || $io->confirm("Overwrite \"{$filename}\"?")) {
+                    $this->fileManager->dumpFile($filename, $file->getContents());
+                }
             }
         }
 
