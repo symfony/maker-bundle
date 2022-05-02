@@ -32,6 +32,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -88,6 +89,10 @@ final class MakeUser extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
+        if (Kernel::VERSION_ID >= 60000) {
+            $io->warning('make:user is deprecated in favor of "make:scaffold user".');
+        }
+
         if (null === $input->getArgument('name')) {
             $name = $io->ask(
                 $command->getDefinition()->getArgument('name')->getDescription(),
