@@ -4,7 +4,7 @@ namespace <?= $namespace; ?>;
 
 <?= $use_statements; ?>
 
-class <?= $class_name ?> implements NormalizerInterface<?= $cacheable_interface ? ', CacheableSupportsMethodInterface' : '' ?><?= "\n" ?>
+class <?= $class_name ?> implements NormalizerInterface, CacheableSupportsMethodInterface
 {
     private $normalizer;
 
@@ -26,11 +26,9 @@ class <?= $class_name ?> implements NormalizerInterface<?= $cacheable_interface 
     {
         return $data instanceof \App\Entity\<?= str_replace('Normalizer', null, $class_name) ?>;
     }
-<?php if ($cacheable_interface): ?>
 
     public function hasCacheableSupportsMethod(): bool
     {
         return true;
     }
-<?php endif; ?>
 }

@@ -58,18 +58,14 @@ final class MakeSerializerNormalizer extends AbstractMaker
         $useStatements = new UseStatementGenerator([
             NormalizerInterface::class,
             ObjectNormalizer::class,
+            CacheableSupportsMethodInterface::class
         ]);
-
-        if ($cacheable = interface_exists(CacheableSupportsMethodInterface::class)) {
-            $useStatements->addUseStatement(CacheableSupportsMethodInterface::class);
-        }
 
         $generator->generateClass(
             $normalizerClassNameDetails->getFullName(),
             'serializer/Normalizer.tpl.php',
             [
                 'use_statements' => $useStatements,
-                'cacheable_interface' => $cacheable,
             ]
         );
 
