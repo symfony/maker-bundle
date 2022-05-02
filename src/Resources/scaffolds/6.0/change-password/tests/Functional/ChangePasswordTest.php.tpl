@@ -27,7 +27,6 @@ final class ChangePasswordTest extends KernelTestCase
             ->visit('/user/change-password')
             ->fillField('Current Password', '1234')
             ->fillField('New Password', 'new-password')
-            ->fillField('Repeat New Password', 'new-password')
             ->click('Change Password')
             ->assertSuccessful()
             ->assertOn('/')
@@ -56,7 +55,6 @@ final class ChangePasswordTest extends KernelTestCase
             ->visit('/user/change-password')
             ->fillField('Current Password', 'invalid')
             ->fillField('New Password', 'new-password')
-            ->fillField('Repeat New Password', 'new-password')
             ->click('Change Password')
             ->assertStatus(422)
             ->assertOn('/user/change-password')
@@ -76,7 +74,6 @@ final class ChangePasswordTest extends KernelTestCase
             ->actingAs($user->object())
             ->visit('/user/change-password')
             ->fillField('New Password', 'new-password')
-            ->fillField('Repeat New Password', 'new-password')
             ->click('Change Password')
             ->assertStatus(422)
             ->assertOn('/user/change-password')
@@ -100,27 +97,6 @@ final class ChangePasswordTest extends KernelTestCase
             ->assertStatus(422)
             ->assertOn('/user/change-password')
             ->assertSee('Please enter a password.')
-            ->assertAuthenticated('mary@example.com')
-        ;
-
-        $this->assertSame($currentPassword, $user->getPassword());
-    }
-
-    public function testNewPasswordsMustMatch(): void
-    {
-        $user = UserFactory::createOne(['email' => 'mary@example.com', 'password' => '1234']);
-        $currentPassword = $user->getPassword();
-
-        $this->browser()
-            ->actingAs($user->object())
-            ->visit('/user/change-password')
-            ->fillField('Current Password', '1234')
-            ->fillField('New Password', 'new-password')
-            ->fillField('Repeat New Password', 'different-new-password')
-            ->click('Change Password')
-            ->assertStatus(422)
-            ->assertOn('/user/change-password')
-            ->assertSee('The password fields must match.')
             ->assertAuthenticated('mary@example.com')
         ;
 

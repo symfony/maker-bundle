@@ -27,7 +27,7 @@ class ChangePasswordController extends AbstractController
             throw new \LogicException('Invalid user type.');
         }
 
-        $form = $this->createForm(ChangePasswordFormType::class, $user);
+        $form = $this->createForm(ChangePasswordFormType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

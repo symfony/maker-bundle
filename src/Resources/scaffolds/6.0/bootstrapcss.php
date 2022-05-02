@@ -29,9 +29,6 @@ return [
             return $data;
         });
 
-        // add bootstrap to app.css
-        $files->dumpFile('assets/styles/app.css', "@import \"~bootstrap/dist/css/bootstrap.css\";\n");
-
         // add bootstrap to app.js
         $appJs = $files->getFileContents('assets/app.js');
 

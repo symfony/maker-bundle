@@ -16,6 +16,5 @@ return [
     ],
     'packages' => [
         'symfony/form' => 'all',
-        'symfony/validator' => 'all',
     ],
 ];

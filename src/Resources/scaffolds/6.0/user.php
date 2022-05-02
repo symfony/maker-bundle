@@ -15,6 +15,7 @@ return [
         'doctrine/orm' => 'all',
         'doctrine/doctrine-bundle' => 'all',
         'symfony/security-bundle' => 'all',
+        'symfony/validator' => 'all',
         'phpunit/phpunit' => 'dev',
         'symfony/phpunit-bridge' => 'dev',
         'zenstruck/foundry' => 'dev',

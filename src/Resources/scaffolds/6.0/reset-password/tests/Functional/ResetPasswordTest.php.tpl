@@ -52,7 +52,6 @@ final class ResetPasswordTest extends KernelTestCase
         $this->browser()
             ->visit($resetUrl)
             ->fillField('New Password', 'new-password')
-            ->fillField('Repeat New Password', 'new-password')
             ->click('Reset password')
             ->assertOn('/')
             ->assertSeeIn('.alert', 'Your password was successfully reset, you are now logged in.')
