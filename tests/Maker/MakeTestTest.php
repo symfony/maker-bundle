@@ -22,7 +22,7 @@ class MakeTestTest extends MakerTestCase
         return MakeTest::class;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_makes_TestCase_type' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
@@ -97,13 +97,10 @@ class MakeTestTest extends MakerTestCase
                     ]
                 );
 
-                // bdi requires 7.2 at this time
-                if (\PHP_VERSION_ID >= 70200) {
-                    $runner->runProcess('composer require --dev dbrekelmans/bdi');
-                    $runner->runProcess('php vendor/dbrekelmans/bdi/bdi detect drivers');
+                $runner->runProcess('composer require --dev dbrekelmans/bdi');
+                $runner->runProcess('php vendor/dbrekelmans/bdi/bdi detect drivers');
 
-                    $runner->runTests();
-                }
+                $runner->runTests();
             }),
         ];
     }

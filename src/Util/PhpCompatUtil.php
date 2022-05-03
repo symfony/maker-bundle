@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Util;
 
 use Symfony\Bundle\MakerBundle\FileManager;
-use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
@@ -33,7 +32,7 @@ class PhpCompatUtil
     {
         $version = $this->getPhpVersion();
 
-        return version_compare($version, '8alpha', '>=') && Kernel::VERSION_ID >= 50200;
+        return version_compare($version, '8alpha', '>=');
     }
 
     public function canUseTypedProperties(): bool

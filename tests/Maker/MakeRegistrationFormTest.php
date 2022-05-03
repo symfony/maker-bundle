@@ -55,43 +55,14 @@ class MakeRegistrationFormTest extends MakerTestCase
         ;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_generates_registration_with_entity_and_authenticator' => [$this->createRegistrationFormTest()
-            ->addRequiredPackageVersion('symfony/security-bundle', '>=5.2')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner);
 
                 $runner->modifyYamlFile('config/packages/security.yaml', function (array $data) {
                     $data['security']['firewalls']['main']['custom_authenticator'] = 'App\\Security\\StubAuthenticator';
-
-                    return $data;
-                });
-
-                $runner->runMaker([
-                    // user class guessed,
-                    // username field guessed
-                    // password guessed
-                    '', // yes to add UniqueEntity
-                    'n', // verify user
-                    // firewall name guessed
-                    '', // yes authenticate after
-                    // 1 authenticator will be guessed
-                ]);
-
-                $this->runRegistrationTest($runner, 'it_generates_registration_with_entity_and_authenticator.php');
-            }),
-        ];
-
-        yield 'it_generates_registration_with_entity_and_legacy_guard_authenticator' => [$this->createRegistrationFormTest()
-            ->addRequiredPackageVersion('symfony/security-bundle', '<5.2')
-            ->run(function (MakerTestRunner $runner) {
-                $this->makeUser($runner);
-
-                $runner->modifyYamlFile('config/packages/security.yaml', function (array $data) {
-                    $data['security']['firewalls']['main']['guard'] = [
-                        'authenticators' => ['App\\Security\\LegacyGuardStubAuthenticator'],
-                    ];
 
                     return $data;
                 });
@@ -145,7 +116,6 @@ class MakeRegistrationFormTest extends MakerTestCase
         ];
 
         yield 'it_generates_registration_form_with_verification' => [$this->createRegistrationFormTest()
-            ->setRequiredPhpVersion(70200)
             ->addExtraDependencies('symfonycasts/verify-email-bundle')
             // needed for internal functional test
             ->addExtraDependencies('symfony/web-profiler-bundle', 'mailer')
@@ -185,7 +155,6 @@ class MakeRegistrationFormTest extends MakerTestCase
         ];
 
         yield 'it_generates_registration_form_with_verification_and_translator' => [$this->createRegistrationFormTest()
-            ->setRequiredPhpVersion(70200)
             ->addExtraDependencies('symfonycasts/verify-email-bundle')
             // needed for internal functional test
             ->addExtraDependencies('symfony/web-profiler-bundle', 'mailer', 'symfony/translation')
@@ -216,7 +185,7 @@ class MakeRegistrationFormTest extends MakerTestCase
         ];
     }
 
-    private function makeUser(MakerTestRunner $runner, string $identifier = 'email')
+    private function makeUser(MakerTestRunner $runner, string $identifier = 'email'): void
     {
         $runner->runConsole('make:user', [
             'User', // class name
@@ -226,7 +195,7 @@ class MakeRegistrationFormTest extends MakerTestCase
         ]);
     }
 
-    private function runRegistrationTest(MakerTestRunner $runner, string $filename)
+    private function runRegistrationTest(MakerTestRunner $runner, string $filename): void
     {
         $runner->copy(
             'make-registration-form/tests/'.$filename,
