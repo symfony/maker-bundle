@@ -149,7 +149,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
             [
                 'web_assertions_are_available' => trait_exists(WebTestAssertionsTrait::class),
                 'use_legacy_container_property' => $this->useLegacyContainerProperty(),
-                'api_test_case_fqcn' => \PHP_VERSION_ID < 80100 && !class_exists(ApiTestCase::class) ? LegacyApiTestCase::class : ApiTestCase::class,
+                'api_test_case_fqcn' => !class_exists(ApiTestCase::class) ? LegacyApiTestCase::class : ApiTestCase::class,
             ]
         );
 
@@ -188,7 +188,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
 
             case 'ApiTestCase':
                 $dependencies->addClassDependency(
-                    \PHP_VERSION_ID < 80100 && !class_exists(ApiTestCase::class) ? LegacyApiTestCase::class : ApiTestCase::class,
+                    !class_exists(ApiTestCase::class) ? LegacyApiTestCase::class : ApiTestCase::class,
                     'api',
                     true,
                     false
