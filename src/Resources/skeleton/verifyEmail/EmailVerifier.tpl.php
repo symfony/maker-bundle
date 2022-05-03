@@ -6,9 +6,9 @@ namespace <?= $namespace; ?>;
 
 class <?= $class_name; ?><?= "\n" ?>
 {
-    private VerifyEmailHelperInterface $verifyEmailHelper;
-    private MailerInterface $mailer;
-    private EntityManagerInterface $entityManager;
+    private <?= $use_typed_properties ? 'VerifyEmailHelperInterface ' : null ?>$verifyEmailHelper;
+    private <?= $use_typed_properties ? 'MailerInterface ' : null ?>$mailer;
+    private <?= $use_typed_properties ? 'EntityManagerInterface ' : null ?>$entityManager;
 
     public function __construct(VerifyEmailHelperInterface $helper, MailerInterface $mailer, EntityManagerInterface $manager)
     {
