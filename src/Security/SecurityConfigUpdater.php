@@ -15,6 +15,7 @@ use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\HttpKernel\Log\Logger;
 use Symfony\Component\PasswordHasher\Hasher\NativePasswordHasher;
 use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
  * @author Ryan Weaver   <ryan@symfonycasts.com>
@@ -172,6 +173,10 @@ final class SecurityConfigUpdater
             // fallback to "encoders" if the user already defined encoder config
             $this->updatePasswordHashers($userConfig, $userClass, 'encoders');
 
+            return;
+        }
+
+        if (isset($newData['security'][$keyName][PasswordAuthenticatedUserInterface::class])) {
             return;
         }
 
