@@ -42,7 +42,7 @@ class MakeMigrationTest extends MakerTestCase
         ;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_generates_migration_with_changes' => [$this->createMakeMigrationTest()
             ->run(function (MakerTestRunner $runner) {

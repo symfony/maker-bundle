@@ -52,17 +52,13 @@ class MakeEntityTest extends MakerTestCase
     private function createMakeEntityTestForMercure(): MakerTestDetails
     {
         return $this->createMakeEntityTest()
-            ->setRequiredPhpVersion(70250)
-            // technically we need twig-bundle >= 5.2, but this is a good proxy
-            // using twig-bundle doesn't work because it's only installed via ux-turbo-mercure
-            ->addRequiredPackageVersion('symfony/framework-bundle', '>=5.2.0')
             ->preRun(function (MakerTestRunner $runner) {
                 // installed manually later so that the compatibility check can run fist
                 $runner->runProcess('composer require symfony/ux-turbo-mercure');
             });
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_creates_a_new_class_basic' => [$this->createMakeEntityTest()
             ->run(function (MakerTestRunner $runner) {
@@ -620,7 +616,7 @@ class MakeEntityTest extends MakerTestCase
         ];
     }
 
-    private function runEntityTest(MakerTestRunner $runner, array $data = [])
+    private function runEntityTest(MakerTestRunner $runner, array $data = []): void
     {
         $runner->renderTemplateFile(
             'make-entity/GeneratedEntityTest.php.twig',
@@ -634,7 +630,7 @@ class MakeEntityTest extends MakerTestCase
         $runner->runTests();
     }
 
-    private function runCustomTest(MakerTestRunner $runner, string $filename, bool $withDatabase = true)
+    private function runCustomTest(MakerTestRunner $runner, string $filename, bool $withDatabase = true): void
     {
         $runner->copy(
             'make-entity/tests/'.$filename,
@@ -647,7 +643,7 @@ class MakeEntityTest extends MakerTestCase
         $runner->runTests();
     }
 
-    private function setupGroupEntityInVendor(MakerTestRunner $runner)
+    private function setupGroupEntityInVendor(MakerTestRunner $runner): void
     {
         $runner->copy(
             'make-entity/Group-vendor.php',
@@ -682,7 +678,7 @@ class MakeEntityTest extends MakerTestCase
             && $runner->getSymfonyVersion() >= 50200;
     }
 
-    private function copyEntity(MakerTestRunner $runner, string $filename)
+    private function copyEntity(MakerTestRunner $runner, string $filename): void
     {
         $entityClassName = substr(
             $filename,
@@ -700,7 +696,7 @@ class MakeEntityTest extends MakerTestCase
         );
     }
 
-    private function copyEntityDirectory(MakerTestRunner $runner, string $directory)
+    private function copyEntityDirectory(MakerTestRunner $runner, string $directory): void
     {
         $runner->copy(
             sprintf(

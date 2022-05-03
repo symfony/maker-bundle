@@ -13,7 +13,6 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeCrud;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 use Symfony\Component\Yaml\Yaml;
 
@@ -24,16 +23,9 @@ class MakeCrudTest extends MakerTestCase
         return MakeCrud::class;
     }
 
-    private function createMakeCrudTest(): MakerTestDetails
+    public function getTestDetails(): \Generator
     {
-        return $this->createMakerTest()
-            // workaround for segfault in PHP 7.1 CI :/
-            ->setRequiredPhpVersion(70200);
-    }
-
-    public function getTestDetails()
-    {
-        yield 'it_generates_basic_crud' => [$this->createMakeCrudTest()
+        yield 'it_generates_basic_crud' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
                     'make-crud/SweetFood.php',
@@ -53,7 +45,7 @@ class MakeCrudTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_crud_with_custom_controller' => [$this->createMakeCrudTest()
+        yield 'it_generates_crud_with_custom_controller' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
                     'make-crud/SweetFood.php',
@@ -73,7 +65,7 @@ class MakeCrudTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_crud_with_custom_root_namespace' => [$this->createMakeCrudTest()
+        yield 'it_generates_crud_with_custom_root_namespace' => [$this->createMakerTest()
             ->changeRootNamespace('Custom')
             ->run(function (MakerTestRunner $runner) {
                 $runner->writeFile(
@@ -99,7 +91,7 @@ class MakeCrudTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_crud_using_custom_repository' => [$this->createMakeCrudTest()
+        yield 'it_generates_crud_using_custom_repository' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
                     'make-crud/SweetFood.php',
@@ -123,7 +115,7 @@ class MakeCrudTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_crud_with_no_base_template' => [$this->createMakeCrudTest()
+        yield 'it_generates_crud_with_no_base_template' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
                     'make-crud/SweetFood.php',
@@ -146,7 +138,7 @@ class MakeCrudTest extends MakerTestCase
         ];
     }
 
-    private function runCrudTest(MakerTestRunner $runner, string $filename)
+    private function runCrudTest(MakerTestRunner $runner, string $filename): void
     {
         $runner->copy(
             'make-crud/tests/'.$filename,

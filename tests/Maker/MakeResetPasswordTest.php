@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 use Doctrine\ORM\Mapping\Driver\AttributeReader;
 use Symfony\Bundle\MakerBundle\Maker\MakeResetPassword;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Component\Yaml\Yaml;
@@ -26,15 +25,9 @@ class MakeResetPasswordTest extends MakerTestCase
         return MakeResetPassword::class;
     }
 
-    private function createResetPasswordTest(): MakerTestDetails
+    public function getTestDetails(): \Generator
     {
-        return $this->createMakerTest()
-            ->setRequiredPhpVersion(70200);
-    }
-
-    public function getTestDetails()
-    {
-        yield 'it_generates_with_normal_setup' => [$this->createResetPasswordTest()
+        yield 'it_generates_with_normal_setup' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner);
 
@@ -76,7 +69,7 @@ class MakeResetPasswordTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_with_translator_installed' => [$this->createResetPasswordTest()
+        yield 'it_generates_with_translator_installed' => [$this->createMakerTest()
             ->addExtraDependencies('symfony/translation')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner);
@@ -92,7 +85,7 @@ class MakeResetPasswordTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_with_custom_config' => [$this->createResetPasswordTest()
+        yield 'it_generates_with_custom_config' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->deleteFile('config/packages/reset_password.yaml');
                 $runner->writeFile(
@@ -125,7 +118,7 @@ class MakeResetPasswordTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_amends_configuration' => [$this->createResetPasswordTest()
+        yield 'it_amends_configuration' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->modifyYamlFile('config/packages/reset_password.yaml', function (array $config) {
                     $config['symfonycasts_reset_password']['lifetime'] = 9999;
@@ -151,7 +144,7 @@ class MakeResetPasswordTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_with_custom_user' => [$this->createResetPasswordTest()
+        yield 'it_generates_with_custom_user' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'emailAddress', 'UserCustom', false);
 
@@ -197,7 +190,7 @@ class MakeResetPasswordTest extends MakerTestCase
         ];
     }
 
-    private function runResetPasswordTest(MakerTestRunner $runner, string $filename)
+    private function runResetPasswordTest(MakerTestRunner $runner, string $filename): void
     {
         $runner->writeFile(
             'config/packages/mailer.yaml',
@@ -214,7 +207,7 @@ class MakeResetPasswordTest extends MakerTestCase
         $runner->runTests();
     }
 
-    private function makeUser(MakerTestRunner $runner, string $identifier = 'email', string $userClass = 'User', bool $checkPassword = true)
+    private function makeUser(MakerTestRunner $runner, string $identifier = 'email', string $userClass = 'User', bool $checkPassword = true): void
     {
         $runner->runConsole('make:user', [
             $userClass, // class name

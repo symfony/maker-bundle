@@ -139,8 +139,6 @@ class MakeAuthenticatorTest extends MakerTestCase
         ];
 
         yield 'auth_login_form_user_entity_with_hasher' => [$this->createMakerTest()
-            // we use new security + depend on hasher
-            ->addRequiredPackageVersion('symfony/security-bundle', '>=5.3')
             ->addExtraDependencies('doctrine', 'twig', 'symfony/form')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'userEmail');
