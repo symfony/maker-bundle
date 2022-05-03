@@ -6,12 +6,12 @@ namespace <?= $namespace; ?>;
 
 class <?= $class_name ?> implements EventSubscriberInterface
 {
-    public function <?= $method_name ?>(<?= $event_arg ?>)
+    public function <?= $method_name ?>(<?= $event_arg ?>): void
     {
         // ...
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             <?= $event ?> => '<?= $method_name ?>',

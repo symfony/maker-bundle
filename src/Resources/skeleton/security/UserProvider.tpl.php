@@ -57,7 +57,7 @@ class <?= $class_name ?> implements UserProviderInterface, PasswordUpgraderInter
     /**
      * Tells Symfony to use this provider for this User class.
      */
-    public function supportsClass($class): bool
+    public function supportsClass(string $class): bool
     {
         return <?= $user_short_name ?>::class === $class || is_subclass_of($class, <?= $user_short_name ?>::class);
     }

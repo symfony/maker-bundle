@@ -13,16 +13,16 @@ class <?= $class_name ?> implements NormalizerInterface, CacheableSupportsMethod
         $this->normalizer = $normalizer;
     }
 
-    public function normalize($object, $format = null, array $context = []): array
+    public function normalize($object, string $format = null, array $context = []): array
     {
         $data = $this->normalizer->normalize($object, $format, $context);
 
-        // Here: add, edit, or delete some data
+        // TODO: add, edit, or delete some data
 
         return $data;
     }
 
-    public function supportsNormalization($data, $format = null): bool
+    public function supportsNormalization($data, string $format = null, array $context = []): bool
     {
         return $data instanceof \App\Entity\<?= str_replace('Normalizer', null, $class_name) ?>;
     }

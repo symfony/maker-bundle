@@ -18,7 +18,6 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
@@ -56,9 +55,7 @@ final class MakeVoter extends AbstractMaker
         $generator->generateClass(
             $voterClassNameDetails->getFullName(),
             'security/Voter.tpl.php',
-            [
-                'use_type_hints' => 50000 <= Kernel::VERSION_ID,
-            ]
+            []
         );
 
         $generator->writeChanges();
