@@ -25,6 +25,7 @@ use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\UserClassBuilder;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -32,9 +33,12 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -45,13 +49,9 @@ use Symfony\Component\Yaml\Yaml;
 final class MakeUser extends AbstractMaker
 {
     private $fileManager;
-
     private $userClassBuilder;
-
     private $configUpdater;
-
     private $entityClassGenerator;
-
     private $doctrineHelper;
 
     public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, EntityClassGenerator $entityClassGenerator, DoctrineHelper $doctrineHelper)
@@ -141,7 +141,7 @@ final class MakeUser extends AbstractMaker
             $classPath = $this->entityClassGenerator->generateEntityClass(
                 $userClassNameDetails,
                 false, // api resource
-                $userClassConfiguration->hasPassword() && interface_exists(PasswordUpgraderInterface::class) // security user
+                $userClassConfiguration->hasPassword() // security user
             );
         } else {
             $classPath = $generator->generateClass($userClassNameDetails->getFullName(), 'Class.tpl.php');
@@ -169,13 +169,22 @@ final class MakeUser extends AbstractMaker
         // C) Generate a custom user provider, if necessary
         if (!$userClassConfiguration->isEntity()) {
             $userClassConfiguration->setUserProviderClass($generator->getRootNamespace().'\\Security\\UserProvider');
+
+            $useStatements = new UseStatementGenerator([
+                UnsupportedUserException::class,
+                UserNotFoundException::class,
+                PasswordAuthenticatedUserInterface::class,
+                PasswordUpgraderInterface::class,
+                UserInterface::class,
+                UserProviderInterface::class,
+            ]);
+
             $customProviderPath = $generator->generateClass(
                 $userClassConfiguration->getUserProviderClass(),
                 'security/UserProvider.tpl.php',
                 [
-                    'uses_user_identifier' => class_exists(UserNotFoundException::class),
+                    'use_statements' => $useStatements,
                     'user_short_name' => $userClassNameDetails->getShortName(),
-                    'use_legacy_password_upgrader_type' => !interface_exists(PasswordAuthenticatedUserInterface::class),
                 ]
             );
         }

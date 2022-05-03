@@ -23,7 +23,7 @@ class MakeUserTest extends MakerTestCase
         return MakeUser::class;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_generates_entity_with_password' => [$this->createMakerTest()
             ->addExtraDependencies('doctrine')
@@ -42,10 +42,7 @@ class MakeUserTest extends MakerTestCase
                     'y', // with password
                 ]);
 
-                // require 5.3 so we can use password hasher
-                if ($runner->getSymfonyVersion() >= 50300) {
-                    $this->runUserTest($runner, 'it_generates_entity_with_password.php');
-                }
+                $this->runUserTest($runner, 'it_generates_entity_with_password.php');
             }),
         ];
 
@@ -67,26 +64,24 @@ class MakeUserTest extends MakerTestCase
                 ]);
 
                 // simplification: allows us to assume loadUserByIdentifier in test
-                if ($runner->getSymfonyVersion() >= 50300) {
-                    $runner->replaceInFile(
-                        'src/Security/UserProvider.php',
-                        'throw new \Exception(\'TODO: fill in refreshUser() inside \'.__FILE__);',
-                        'return $user;'
-                    );
+                $runner->replaceInFile(
+                    'src/Security/UserProvider.php',
+                    'throw new \Exception(\'TODO: fill in refreshUser() inside \'.__FILE__);',
+                    'return $user;'
+                );
 
-                    $runner->replaceInFile(
-                        'src/Security/UserProvider.php',
-                        'throw new \Exception(\'TODO: fill in loadUserByIdentifier() inside \'.__FILE__);',
-                        'return (new FunUser())->setUsername($identifier);'
-                    );
+                $runner->replaceInFile(
+                    'src/Security/UserProvider.php',
+                    'throw new \Exception(\'TODO: fill in loadUserByIdentifier() inside \'.__FILE__);',
+                    'return (new FunUser())->setUsername($identifier);'
+                );
 
-                    $this->runUserTest($runner, 'it_generates_non_entity_no_password.php');
-                }
+                $this->runUserTest($runner, 'it_generates_non_entity_no_password.php');
             }),
         ];
     }
 
-    private function runUserTest(MakerTestRunner $runner, string $filename, bool $withDatabase = true)
+    private function runUserTest(MakerTestRunner $runner, string $filename): void
     {
         $runner->copy(
             'make-user/tests/'.$filename,
@@ -110,9 +105,7 @@ class MakeUserTest extends MakerTestCase
             return $config;
         });
 
-        if ($withDatabase) {
-            $runner->configureDatabase();
-        }
+        $runner->configureDatabase();
 
         $runner->runTests();
     }

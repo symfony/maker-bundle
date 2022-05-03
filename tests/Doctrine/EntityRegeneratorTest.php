@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Doctrine;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
-use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -42,17 +41,6 @@ class EntityRegeneratorTest extends TestCase
      */
     public function testRegenerateEntities(string $expectedDirName, bool $overwrite): void
     {
-        /*
-         * Prior to symfony/doctrine-bridge 5.0 (which require
-         * PHP 7.3), the deprecated Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain
-         * is used when our test container. This shows up as a *direct*
-         * deprecation. We're choosing to silence it here, instead of
-         * ignoring all direct deprecations.
-         */
-        if (\PHP_VERSION_ID < 70300) {
-            $this->setGroups(['@legacy']);
-        }
-
         $kernel = new TestEntityRegeneratorKernel('dev', true);
         $this->doTestRegeneration(
             __DIR__.'/fixtures/source_project',
@@ -117,7 +105,6 @@ class EntityRegeneratorTest extends TestCase
         $phpCompatUtil = new PhpCompatUtil($fileManager);
         $generator = new Generator($fileManager, 'App\\', $phpCompatUtil);
         $entityClassGenerator = new EntityClassGenerator($generator, $doctrineHelper);
-        $entityClassGenerator->setMangerRegistryClassName(ManagerRegistry::class);
         $regenerator = new EntityRegenerator(
             $doctrineHelper,
             $fileManager,

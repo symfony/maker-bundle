@@ -2,14 +2,9 @@
 
 namespace <?= $namespace; ?>;
 
-use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
-use Symfony\Component\Security\Core\Exception\<?= $uses_user_identifier ? 'UserNotFoundException' : 'UsernameNotFoundException' ?>;
-<?= $use_legacy_password_upgrader_type ? '' : "use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;\n" ?>
-<?= ($password_upgrader = interface_exists('Symfony\Component\Security\Core\User\PasswordUpgraderInterface')) ? "use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;\n" : '' ?>
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
+<?= $use_statements; ?>
 
-class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader ? ", PasswordUpgraderInterface\n" : "\n" ?>
+class <?= $class_name ?> implements UserProviderInterface, PasswordUpgraderInterface
 {
     /**
      * Symfony calls this method if you use features like switch_user
@@ -18,18 +13,17 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
      * If you're not using these features, you do not need to implement
      * this method.
      *
-     * @throws <?= $uses_user_identifier ? 'UserNotFoundException' :  'UsernameNotFoundException' ?> if the user is not found
+     * @throws UserNotFoundException if the user is not found
      */
-    public function <?= $uses_user_identifier ? 'loadUserByIdentifier($identifier)' : 'loadUserByUsername($username)' ?>: UserInterface
+    public function loadUserByIdentifier($identifier): UserInterface
     {
-        // Load a User object from your data source or throw <?= $uses_user_identifier ? 'UserNotFoundException' :  'UsernameNotFoundException' ?>.
-        // The <?= $uses_user_identifier ? '$identifier' :  '$username' ?> argument may not actually be a username:
-        // it is whatever value is being returned by the <?= $uses_user_identifier ? 'getUserIdentifier' :  'getUsername' ?>()
+        // Load a User object from your data source or throw UserNotFoundException.
+        // The $identifier argument may not actually be a username:
+        // it is whatever value is being returned by the getUserIdentifier()
         // method in your User class.
-        throw new \Exception('TODO: fill in <?= $uses_user_identifier ? 'loadUserByIdentifier()' : 'loadUserByUsername()' ?> inside '.__FILE__);
+        throw new \Exception('TODO: fill in loadUserByIdentifier() inside '.__FILE__);
     }
 
-<?php if ($uses_user_identifier) : ?>
     /**
      * @deprecated since Symfony 5.3, loadUserByIdentifier() is used instead
      */
@@ -38,7 +32,6 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
         return $this->loadUserByIdentifier($username);
     }
 
-<?php endif ?>
     /**
      * Refreshes the user after being reloaded from the session.
      *
@@ -68,16 +61,14 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
     {
         return <?= $user_short_name ?>::class === $class || is_subclass_of($class, <?= $user_short_name ?>::class);
     }
-<?php if ($password_upgrader): ?>
 
     /**
      * Upgrades the hashed password of a user, typically for using a better hash algorithm.
      */
-    public function upgradePassword(<?= $use_legacy_password_upgrader_type ? 'UserInterface' : 'PasswordAuthenticatedUserInterface'; ?> $user, string $newHashedPassword): void
+    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
         // TODO: when hashed passwords are in use, this method should:
         // 1. persist the new password in the user storage
         // 2. update the $user object with $user->setPassword($newHashedPassword);
     }
-<?php endif ?>
 }

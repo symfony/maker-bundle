@@ -28,6 +28,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -48,12 +49,22 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     private $doctrineHelper;
     private $generator;
     private $entityClassGenerator;
+    private $phpCompatUtil;
 
-    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, string $projectDirectory, Generator $generator = null, EntityClassGenerator $entityClassGenerator = null)
-    {
+    public function __construct(
+        FileManager $fileManager,
+        DoctrineHelper $doctrineHelper,
+        string $projectDirectory = null,
+        Generator $generator = null,
+        EntityClassGenerator $entityClassGenerator = null,
+        PhpCompatUtil $phpCompatUtil = null
+    ) {
         $this->fileManager = $fileManager;
         $this->doctrineHelper = $doctrineHelper;
-        // $projectDirectory is unused, argument kept for BC
+
+        if (null !== $projectDirectory) {
+            @trigger_error('The $projectDirectory constructor argument is no longer used since 1.41.0', \E_USER_DEPRECATED);
+        }
 
         if (null === $generator) {
             @trigger_error(sprintf('Passing a "%s" instance as 4th argument is mandatory since version 1.5.', Generator::class), \E_USER_DEPRECATED);
@@ -68,6 +79,13 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         } else {
             $this->entityClassGenerator = $entityClassGenerator;
         }
+
+        if (null === $phpCompatUtil) {
+            @trigger_error(sprintf('Passing a "%s" instance as 6th argument is mandatory since version 1.41.0', PhpCompatUtil::class), \E_USER_DEPRECATED);
+            $this->phpCompatUtil = new PhpCompatUtil($this->fileManager);
+        } else {
+            $this->phpCompatUtil = $phpCompatUtil;
+        }
     }
 
     public static function getCommandName(): string
@@ -80,7 +98,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return 'Creates or updates a Doctrine entity class, and optionally an API Platform resource';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('Class name of the entity to create or update (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
@@ -91,10 +109,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
         ;
 
-        $inputConf->setArgumentAsNonInteractive('name');
+        $inputConfig->setArgumentAsNonInteractive('name');
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if ($input->getArgument('name')) {
             return;
@@ -143,7 +161,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $overwrite = $input->getOption('overwrite');
 
@@ -308,7 +326,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null)
+    public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null): void
     {
         if (null !== $input && $input->getOption('api-resource')) {
             $dependencies->addClassDependency(
@@ -424,7 +442,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $data;
     }
 
-    private function printAvailableTypes(ConsoleStyle $io)
+    private function printAvailableTypes(ConsoleStyle $io): void
     {
         $allTypes = $this->getTypesMap();
 
@@ -810,9 +828,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function getPathOfClass(string $class): string
     {
-        $classDetails = new ClassDetails($class);
-
-        return $classDetails->getPath();
+        return (new ClassDetails($class))->getPath();
     }
 
     private function isClassInVendor(string $class): bool
@@ -822,7 +838,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $this->fileManager->isPathInVendor($path);
     }
 
-    private function regenerateEntities(string $classOrNamespace, bool $overwrite, Generator $generator)
+    private function regenerateEntities(string $classOrNamespace, bool $overwrite, Generator $generator): void
     {
         $regenerator = new EntityRegenerator($this->doctrineHelper, $this->fileManager, $generator, $this->entityClassGenerator, $overwrite);
         $regenerator->regenerateEntities($classOrNamespace);
@@ -841,6 +857,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }, $reflClass->getProperties());
     }
 
+    /** @legacy Drop when Annotations are no longer supported */
     private function doesEntityUseAnnotationMapping(string $className): bool
     {
         if (!class_exists($className)) {
@@ -857,9 +874,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $this->doctrineHelper->isClassAnnotated($className);
     }
 
+    /** @legacy Drop when Annotations are no longer supported */
     private function doesEntityUseAttributeMapping(string $className): bool
     {
-        if (\PHP_MAJOR_VERSION < 8) {
+        if (!$this->phpCompatUtil->canUseAttributes()) {
             return false;
         }
 
