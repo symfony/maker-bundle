@@ -53,7 +53,7 @@ final class MakeForm extends AbstractMaker
         return 'Creates a new form class';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('The name of the form class (e.g. <fg=yellow>%sType</>)', Str::asClassName(Str::getRandomTerm())))
@@ -61,10 +61,10 @@ final class MakeForm extends AbstractMaker
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeForm.txt'))
         ;
 
-        $inputConf->setArgumentAsNonInteractive('bound-class');
+        $inputConfig->setArgumentAsNonInteractive('bound-class');
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if (null === $input->getArgument('bound-class')) {
             $argument = $command->getDefinition()->getArgument('bound-class');
@@ -80,7 +80,7 @@ final class MakeForm extends AbstractMaker
         }
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $formClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -125,7 +125,7 @@ final class MakeForm extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             AbstractType::class,

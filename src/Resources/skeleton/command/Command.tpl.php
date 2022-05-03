@@ -2,17 +2,9 @@
 
 namespace <?= $namespace; ?>;
 
-<?php if ($use_attributes && $use_command_attribute): ?>
-use Symfony\Component\Console\Attribute\AsCommand;
-<?php endif; ?>
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
+<?= $use_statements; ?>
 
-<?php if ($use_attributes && $use_command_attribute): ?>
+<?php if ($use_attributes): ?>
 #[AsCommand(
     name: '<?= $command_name; ?>',
     description: 'Add a short description for your command',
@@ -20,7 +12,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 <?php endif; ?>
 class <?= $class_name; ?> extends Command
 {
-<?php if (!$use_attributes || !$use_command_attribute): ?>
+<?php if (!$use_attributes): ?>
     protected static $defaultName = '<?= $command_name; ?>';
     protected static $defaultDescription = 'Add a short description for your command';
 
@@ -49,6 +41,6 @@ class <?= $class_name; ?> extends Command
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 
-        return <?= defined('Symfony\Component\Console\Command\Command::SUCCESS') ? 'Command::SUCCESS' : '0' ?>;
+        return Command::SUCCESS;
     }
 }

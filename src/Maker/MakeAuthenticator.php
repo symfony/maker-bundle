@@ -24,7 +24,7 @@ use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -251,16 +251,16 @@ final class MakeAuthenticator extends AbstractMaker
 
     private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, $userClass, $userNameField): void
     {
-        $useStatements = [
+        $useStatements = new UseStatementGenerator([
             Request::class,
             Response::class,
             TokenInterface::class,
             Passport::class,
-        ];
+        ]);
 
         // generate authenticator class
         if (self::AUTH_TYPE_EMPTY_AUTHENTICATOR === $authenticatorType) {
-            $emptyAuthUseStatements = array_merge($useStatements, [
+            $useStatements->addUseStatement([
                 AuthenticationException::class,
                 AbstractAuthenticator::class,
             ]);
@@ -268,13 +268,13 @@ final class MakeAuthenticator extends AbstractMaker
             $this->generator->generateClass(
                 $authenticatorClass,
                 'authenticator/EmptyAuthenticator.tpl.php',
-                ['use_statements' => TemplateComponentGenerator::generateUseStatements($emptyAuthUseStatements)]
+                ['use_statements' => $useStatements]
             );
 
             return;
         }
 
-        $useStatements = array_merge($useStatements, [
+        $useStatements->addUseStatement([
             RedirectResponse::class,
             UrlGeneratorInterface::class,
             Security::class,
@@ -294,7 +294,7 @@ final class MakeAuthenticator extends AbstractMaker
             $authenticatorClass,
             'authenticator/LoginFormAuthenticator.tpl.php',
             [
-                'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
+                'use_statements' => $useStatements,
                 'user_fully_qualified_class_name' => trim($userClassNameDetails->getFullName(), '\\'),
                 'user_class_name' => $userClassNameDetails->getShortName(),
                 'username_field' => $userNameField,
@@ -315,16 +315,16 @@ final class MakeAuthenticator extends AbstractMaker
         );
 
         if (!class_exists($controllerClassNameDetails->getFullName())) {
-            $useStatements = [
+            $useStatements = new UseStatementGenerator([
                 AbstractController::class,
                 Route::class,
                 AuthenticationUtils::class,
-            ];
+            ]);
 
             $controllerPath = $this->generator->generateController(
                 $controllerClassNameDetails->getFullName(),
                 'authenticator/EmptySecurityController.tpl.php',
-                ['use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements)]
+                ['use_statements' => $useStatements]
             );
 
             $controllerSourceCode = $this->generator->getFileContentsForPendingOperation($controllerPath);

@@ -17,11 +17,13 @@ use Symfony\Bundle\MakerBundle\EventRegistry;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -46,7 +48,7 @@ final class MakeSubscriber extends AbstractMaker
         return 'Creates a new event subscriber class';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'Choose a class name for your event subscriber (e.g. <fg=yellow>ExceptionSubscriber</>)')
@@ -54,10 +56,10 @@ final class MakeSubscriber extends AbstractMaker
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeSubscriber.txt'))
         ;
 
-        $inputConf->setArgumentAsNonInteractive('event');
+        $inputConfig->setArgumentAsNonInteractive('event');
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if (!$input->getArgument('event')) {
             $events = $this->eventRegistry->getAllActiveEvents();
@@ -72,7 +74,7 @@ final class MakeSubscriber extends AbstractMaker
         }
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $subscriberClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -84,12 +86,20 @@ final class MakeSubscriber extends AbstractMaker
         $eventFullClassName = $this->eventRegistry->getEventClassName($event);
         $eventClassName = $eventFullClassName ? Str::getShortClassName($eventFullClassName) : null;
 
+        $useStatements = new UseStatementGenerator([
+            EventSubscriberInterface::class,
+        ]);
+
+        if (null !== $eventFullClassName) {
+            $useStatements->addUseStatement($eventFullClassName);
+        }
+
         $generator->generateClass(
             $subscriberClassNameDetails->getFullName(),
             'event/Subscriber.tpl.php',
             [
+                'use_statements' => $useStatements,
                 'event' => class_exists($event) ? sprintf('%s::class', $eventClassName) : sprintf('\'%s\'', $event),
-                'event_full_class_name' => $eventFullClassName,
                 'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
                 'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
             ]
@@ -105,7 +115,7 @@ final class MakeSubscriber extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
     }
 }

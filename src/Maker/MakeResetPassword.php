@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PhpParser\Builder\Param;
 use Symfony\Bridge\Twig\AppVariable;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -29,22 +30,30 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Form;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Translation\Translator;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -219,8 +228,8 @@ class MakeResetPassword extends AbstractMaker
             $passwordHasher = UserPasswordHasherInterface::class;
         }
 
-        $useStatements = [
-            Generator::getControllerBaseClass()->getFullName(), // @legacy see getControllerBaseClass comment
+        $useStatements = new UseStatementGenerator([
+            AbstractController::class,
             $userClassNameDetails->getFullName(),
             $changePasswordFormTypeClassNameDetails->getFullName(),
             $requestFormTypeClassNameDetails->getFullName(),
@@ -236,7 +245,7 @@ class MakeResetPassword extends AbstractMaker
             ResetPasswordHelperInterface::class,
             $passwordHasher,
             EntityManagerInterface::class,
-        ];
+        ]);
 
         // Namespace for ResetPasswordExceptionInterface was imported above
         $problemValidateMessageOrConstant = \defined('SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface::MESSAGE_PROBLEM_VALIDATE')
@@ -247,14 +256,14 @@ class MakeResetPassword extends AbstractMaker
             : "'There was a problem handling your password reset request'";
 
         if ($isTranslatorAvailable = class_exists(Translator::class)) {
-            $useStatements[] = TranslatorInterface::class;
+            $useStatements->addUseStatement(TranslatorInterface::class);
         }
 
         $generator->generateController(
             $controllerClassNameDetails->getFullName(),
             'resetPassword/ResetPasswordController.tpl.php',
             [
-                'use_statements' => TemplateComponentGenerator::generateUseStatements($useStatements),
+                'use_statements' => $useStatements,
                 'user_class_name' => $userClassNameDetails->getShortName(),
                 'request_form_type_class_name' => $requestFormTypeClassNameDetails->getShortName(),
                 'reset_form_type_class_name' => $changePasswordFormTypeClassNameDetails->getShortName(),
@@ -277,17 +286,37 @@ class MakeResetPassword extends AbstractMaker
 
         $this->setBundleConfig($io, $generator, $repositoryClassNameDetails->getFullName());
 
+        $useStatements = new UseStatementGenerator([
+            AbstractType::class,
+            EmailType::class,
+            FormBuilderInterface::class,
+            OptionsResolver::class,
+            NotBlank::class,
+        ]);
+
         $generator->generateClass(
             $requestFormTypeClassNameDetails->getFullName(),
             'resetPassword/ResetPasswordRequestFormType.tpl.php',
             [
+                'use_statements' => $useStatements,
                 'email_field' => $this->emailPropertyName,
             ]
         );
 
+        $useStatements = new UseStatementGenerator([
+            AbstractType::class,
+            PasswordType::class,
+            RepeatedType::class,
+            FormBuilderInterface::class,
+            OptionsResolver::class,
+            Length::class,
+            NotBlank::class,
+        ]);
+
         $generator->generateClass(
             $changePasswordFormTypeClassNameDetails->getFullName(),
-            'resetPassword/ChangePasswordFormType.tpl.php'
+            'resetPassword/ChangePasswordFormType.tpl.php',
+            ['use_statements' => $useStatements]
         );
 
         $generator->generateTemplate(

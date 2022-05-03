@@ -26,7 +26,7 @@ class MakeCommandTest extends MakerTestCase
     public function getTestDetails(): \Generator
     {
         yield 'it_makes_a_command_no_attributes' => [$this->createMakerTest()
-            ->addRequiredPackageVersion('symfony/console', '<5.3')
+            ->setRequiredPhpVersion(80000)
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([
                     // command name
@@ -39,7 +39,6 @@ class MakeCommandTest extends MakerTestCase
 
         yield 'it_makes_a_command_with_attributes' => [$this->createMakerTest()
             ->setRequiredPhpVersion(80000)
-            ->addRequiredPackageVersion('symfony/console', '>=5.3')
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([
                     // command name
@@ -73,7 +72,7 @@ class MakeCommandTest extends MakerTestCase
         ];
     }
 
-    private function runCommandTest(MakerTestRunner $runner, string $filename)
+    private function runCommandTest(MakerTestRunner $runner, string $filename): void
     {
         $runner->copy(
             'make-command/tests/'.$filename,

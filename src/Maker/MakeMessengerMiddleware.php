@@ -15,10 +15,14 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
+use Symfony\Component\Messenger\Middleware\StackInterface;
 
 /**
  * @author Imad ZAIRIG <imadzairig@gmail.com>
@@ -37,14 +41,14 @@ final class MakeMessengerMiddleware extends AbstractMaker
         return 'Creates a new messenger middleware';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConfig)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the middleware class (e.g. <fg=yellow>CustomMiddleware</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeMessage.txt'));
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $middlewareClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -52,9 +56,18 @@ final class MakeMessengerMiddleware extends AbstractMaker
             'Middleware'
         );
 
+        $useStatements = new UseStatementGenerator([
+            Envelope::class,
+            MiddlewareInterface::class,
+            StackInterface::class,
+        ]);
+
         $generator->generateClass(
             $middlewareClassNameDetails->getFullName(),
-            'middleware/Middleware.tpl.php'
+            'middleware/Middleware.tpl.php',
+            [
+                'use_statements' => $useStatements,
+            ]
         );
 
         $generator->writeChanges();
@@ -69,7 +82,7 @@ final class MakeMessengerMiddleware extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             MessageBusInterface::class,

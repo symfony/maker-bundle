@@ -12,16 +12,20 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Common\Annotations\Annotation;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -39,7 +43,7 @@ final class MakeController extends AbstractMaker
         return 'Creates a new controller class';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('controller-class', InputArgument::OPTIONAL, sprintf('Choose a name for your controller class (e.g. <fg=yellow>%sController</>)', Str::asClassName(Str::getRandomTerm())))
@@ -48,7 +52,7 @@ final class MakeController extends AbstractMaker
         ;
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $controllerClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('controller-class'),
@@ -56,12 +60,19 @@ final class MakeController extends AbstractMaker
             'Controller'
         );
 
+        $useStatements = new UseStatementGenerator([
+            AbstractController::class,
+            Response::class,
+            Route::class,
+        ]);
+
         $noTemplate = $input->getOption('no-template');
         $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()).'/index.html.twig';
         $controllerPath = $generator->generateController(
             $controllerClassNameDetails->getFullName(),
             'controller/Controller.tpl.php',
             [
+                'use_statements' => $useStatements,
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'with_template' => $this->isTwigInstalled() && !$noTemplate,
@@ -87,7 +98,7 @@ final class MakeController extends AbstractMaker
         $io->text('Next: Open your new controller class and add some pages!');
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Annotation::class,
@@ -95,7 +106,7 @@ final class MakeController extends AbstractMaker
         );
     }
 
-    private function isTwigInstalled()
+    private function isTwigInstalled(): bool
     {
         return class_exists(TwigBundle::class);
     }

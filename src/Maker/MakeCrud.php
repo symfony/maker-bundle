@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Inflector\InflectorFactory;
+use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -22,6 +23,7 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -29,6 +31,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Validation;
@@ -39,11 +43,8 @@ use Symfony\Component\Validator\Validation;
 final class MakeCrud extends AbstractMaker
 {
     private $doctrineHelper;
-
     private $formTypeRenderer;
-
     private $inflector;
-
     private $controllerClassName;
 
     public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer)
@@ -63,10 +64,7 @@ final class MakeCrud extends AbstractMaker
         return 'Creates CRUD for Doctrine entity class';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function configureCommand(Command $command, InputConfiguration $inputConfig)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('entity-class', InputArgument::OPTIONAL, sprintf('The class name of the entity to create CRUD (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
@@ -76,7 +74,7 @@ final class MakeCrud extends AbstractMaker
         $inputConfig->setArgumentAsNonInteractive('entity-class');
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if (null === $input->getArgument('entity-class')) {
             $argument = $command->getDefinition()->getArgument('entity-class');
@@ -99,7 +97,7 @@ final class MakeCrud extends AbstractMaker
         );
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $entityClassDetails = $generator->createClassNameDetails(
             Validator::entityExists($input->getArgument('entity-class'), $this->doctrineHelper->getEntitiesForAutocomplete()),
@@ -109,6 +107,7 @@ final class MakeCrud extends AbstractMaker
         $entityDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($entityClassDetails->getFullName());
 
         $repositoryVars = [];
+        $repositoryClassName = EntityManagerInterface::class;
 
         if (null !== $entityDoctrineDetails->getRepositoryClass()) {
             $repositoryClassDetails = $generator->createClassNameDetails(
@@ -117,8 +116,9 @@ final class MakeCrud extends AbstractMaker
                 'Repository'
             );
 
+            $repositoryClassName = $repositoryClassDetails->getFullName();
+
             $repositoryVars = [
-                'repository_full_class_name' => $repositoryClassDetails->getFullName(),
                 'repository_class_name' => $repositoryClassDetails->getShortName(),
                 'repository_var' => lcfirst($this->inflector->singularize($repositoryClassDetails->getShortName())),
             ];
@@ -149,13 +149,22 @@ final class MakeCrud extends AbstractMaker
         $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
         $templatesPath = Str::asFilePath($controllerClassDetails->getRelativeNameWithoutSuffix());
 
+        $useStatements = new UseStatementGenerator([
+            $entityClassDetails->getFullName(),
+            $formClassDetails->getFullName(),
+            $repositoryClassName,
+            AbstractController::class,
+            Request::class,
+            Response::class,
+            Route::class,
+        ]);
+
         $generator->generateController(
             $controllerClassDetails->getFullName(),
             'crud/controller/Controller.tpl.php',
             array_merge([
-                    'entity_full_class_name' => $entityClassDetails->getFullName(),
+                    'use_statements' => $useStatements,
                     'entity_class_name' => $entityClassDetails->getShortName(),
-                    'form_full_class_name' => $formClassDetails->getFullName(),
                     'form_class_name' => $formClassDetails->getShortName(),
                     'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
                     'route_name' => $routeName,
@@ -229,10 +238,7 @@ final class MakeCrud extends AbstractMaker
         $io->text(sprintf('Next: Check your new CRUD by going to <fg=yellow>%s/</>', Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix())));
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Route::class,

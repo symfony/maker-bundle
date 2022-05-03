@@ -28,25 +28,6 @@ final class TemplateComponentGenerator
         $this->phpCompatUtil = $phpCompatUtil;
     }
 
-    public static function generateUseStatements(array $classesToBeImported): string
-    {
-        $transformed = [];
-
-        foreach ($classesToBeImported as $key => $class) {
-            $transformed[$key] = str_replace('\\', ' ', $class);
-        }
-
-        asort($transformed);
-
-        $statements = '';
-
-        foreach ($transformed as $key => $class) {
-            $statements .= sprintf("use %s;\n", $classesToBeImported[$key]);
-        }
-
-        return $statements;
-    }
-
     /** @legacy Annotation Support can be dropped w/ Symfony 6 LTS */
     public function generateRouteForControllerMethod(string $routePath, string $routeName, array $methods = [], bool $indent = true, bool $trailingNewLine = true): string
     {

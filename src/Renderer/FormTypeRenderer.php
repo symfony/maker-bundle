@@ -14,6 +14,10 @@ namespace Symfony\Bundle\MakerBundle\Renderer;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * @internal
@@ -42,18 +46,29 @@ final class FormTypeRenderer
             $fields[$name] = $fieldTypeOptions;
         }
 
-        $mergedTypeUseStatements = array_unique(array_merge($fieldTypeUseStatements, $extraUseClasses));
-        sort($mergedTypeUseStatements);
+        $useStatements = new UseStatementGenerator(array_unique(array_merge(
+            $fieldTypeUseStatements,
+            $extraUseClasses,
+            $constraintClasses
+        )));
+
+        $useStatements->addUseStatement([
+            AbstractType::class,
+            FormBuilderInterface::class,
+            OptionsResolver::class,
+        ]);
+
+        if ($boundClassDetails) {
+            $useStatements->addUseStatement($boundClassDetails->getFullName());
+        }
 
         $this->generator->generateClass(
             $formClassDetails->getFullName(),
             'form/Type.tpl.php',
             [
-                'bounded_full_class_name' => $boundClassDetails ? $boundClassDetails->getFullName() : null,
+                'use_statements' => $useStatements,
                 'bounded_class_name' => $boundClassDetails ? $boundClassDetails->getShortName() : null,
                 'form_fields' => $fields,
-                'field_type_use_statements' => $mergedTypeUseStatements,
-                'constraint_use_statements' => $constraintClasses,
             ]
         );
     }

@@ -2,8 +2,7 @@
 
 namespace <?= $namespace; ?>;
 
-use Symfony\Component\Serializer\Encoder\DecoderInterface;
-use Symfony\Component\Serializer\Encoder\EncoderInterface;
+<?= $use_statements; ?>
 
 class <?= $class_name ?> implements EncoderInterface, DecoderInterface
 {

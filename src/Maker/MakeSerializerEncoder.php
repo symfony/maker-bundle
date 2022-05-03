@@ -15,9 +15,12 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Serializer\Encoder\DecoderInterface;
+use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Serializer;
 
 /**
@@ -35,7 +38,7 @@ final class MakeSerializerEncoder extends AbstractMaker
         return 'Creates a new serializer encoder class';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'Choose a class name for your encoder (e.g. <fg=yellow>YamlEncoder</>)')
@@ -44,7 +47,7 @@ final class MakeSerializerEncoder extends AbstractMaker
         ;
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $encoderClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -53,10 +56,16 @@ final class MakeSerializerEncoder extends AbstractMaker
         );
         $format = $input->getArgument('format');
 
+        $useStatements = new UseStatementGenerator([
+            DecoderInterface::class,
+            EncoderInterface::class,
+        ]);
+
         $generator->generateClass(
             $encoderClassNameDetails->getFullName(),
             'serializer/Encoder.tpl.php',
             [
+                'use_statements' => $useStatements,
                 'format' => $format,
             ]
         );
@@ -71,7 +80,7 @@ final class MakeSerializerEncoder extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Serializer::class,

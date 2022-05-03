@@ -2,17 +2,7 @@
 
 namespace <?= $namespace ?>;
 
-use <?= $entity_full_class_name ?>;
-use <?= $form_full_class_name ?>;
-<?php if (isset($repository_full_class_name)): ?>
-use <?= $repository_full_class_name ?>;
-<?php else: ?>
-use Doctrine\ORM\EntityManagerInterface;
-<?php endif; ?>
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+<?= $use_statements; ?>
 
 <?php if ($use_attributes) { ?>
 #[Route('<?= $route_path ?>')]

@@ -3,11 +3,7 @@
 
 namespace <?= $namespace; ?>;
 
-<?php if ($panther_is_available): ?>
-use Symfony\Component\Panther\PantherTestCase;
-<?php else: ?>
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-<?php endif ?>
+<?= $use_statements ?>
 
 class <?= $class_name ?> extends <?= $panther_is_available ? 'PantherTestCase' : 'WebTestCase' ?><?= "\n" ?>
 {

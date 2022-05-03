@@ -2,9 +2,7 @@
 
 namespace <?= $namespace; ?>;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+<?= $use_statements; ?>
 
 class <?= $class_name; ?> extends AbstractController
 {

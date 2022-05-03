@@ -16,11 +16,16 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LazyCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -28,6 +33,13 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 final class MakeCommand extends AbstractMaker
 {
+    private $phpCompatUtil;
+
+    public function __construct(PhpCompatUtil $phpCompatUtil)
+    {
+        $this->phpCompatUtil = $phpCompatUtil;
+    }
+
     public static function getCommandName(): string
     {
         return 'make:command';
@@ -38,7 +50,7 @@ final class MakeCommand extends AbstractMaker
         return 'Creates a new console command class';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
@@ -46,7 +58,7 @@ final class MakeCommand extends AbstractMaker
         ;
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $commandName = trim($input->getArgument('name'));
         $commandNameHasAppPrefix = 0 === strpos($commandName, 'app:');
@@ -58,13 +70,26 @@ final class MakeCommand extends AbstractMaker
             sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, Str::asClassName($commandName, 'Command'))
         );
 
+        $useStatements = new UseStatementGenerator([
+            Command::class,
+            InputArgument::class,
+            InputInterface::class,
+            InputOption::class,
+            OutputInterface::class,
+            SymfonyStyle::class,
+        ]);
+
+        if ($this->phpCompatUtil->canUseAttributes()) {
+            $useStatements->addUseStatement(AsCommand::class);
+        }
+
         $generator->generateClass(
             $commandClassNameDetails->getFullName(),
             'command/Command.tpl.php',
             [
+                'use_statements' => $useStatements,
                 'command_name' => $commandName,
                 'set_description' => !class_exists(LazyCommand::class),
-                'use_command_attribute' => 80000 <= \PHP_VERSION_ID && class_exists(AsCommand::class),
             ]
         );
 
@@ -77,7 +102,7 @@ final class MakeCommand extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Command::class,
