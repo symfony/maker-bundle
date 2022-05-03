@@ -15,7 +15,6 @@ use Doctrine\Common\Annotations\Annotation;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
-use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
@@ -38,10 +37,10 @@ final class MakeController extends AbstractMaker
 {
     private $phpCompatUtil;
 
-    public function __construct(FileManager $fileManager, PhpCompatUtil $phpCompatUtil = null)
+    public function __construct(PhpCompatUtil $phpCompatUtil = null)
     {
         if (null === $phpCompatUtil) {
-            $phpCompatUtil = new PhpCompatUtil($fileManager);
+            @trigger_error(sprintf('Passing a "%s" instance is mandatory since version 1.42.0', PhpCompatUtil::class), \E_USER_DEPRECATED);
         }
 
         $this->phpCompatUtil = $phpCompatUtil;
@@ -114,7 +113,8 @@ final class MakeController extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
-        if (60000 <= Kernel::VERSION_ID && $this->phpCompatUtil->canUseAttributes()) {
+        // @legacy - Remove method when support for Symfony 5.4 is dropped
+        if (null !== $this->phpCompatUtil && 60000 <= Kernel::VERSION_ID && $this->phpCompatUtil->canUseAttributes()) {
             return;
         }
 
