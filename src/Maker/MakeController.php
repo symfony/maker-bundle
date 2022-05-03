@@ -27,6 +27,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -113,7 +114,7 @@ final class MakeController extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
-        if ($this->phpCompatUtil->canUseAttributes()) {
+        if (60000 <= Kernel::VERSION_ID && $this->phpCompatUtil->canUseAttributes()) {
             return;
         }
 
