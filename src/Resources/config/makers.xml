@@ -25,6 +25,11 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_scaffold" class="Symfony\Bundle\MakerBundle\Maker\MakeScaffold">
+                <argument type="service" id="maker.file_manager" />
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_crud" class="Symfony\Bundle\MakerBundle\Maker\MakeCrud">
                 <argument type="service" id="maker.doctrine_helper" />
                 <argument type="service" id="maker.renderer.form_type_renderer" />

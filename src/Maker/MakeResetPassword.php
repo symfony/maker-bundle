@@ -45,6 +45,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -136,6 +137,10 @@ class MakeResetPassword extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
+        if (Kernel::VERSION_ID >= 60000) {
+            $io->warning('make:reset-password is deprecated in favor or "make:scaffold reset-password".');
+        }
+
         $io->title('Let\'s make a password reset feature!');
 
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
