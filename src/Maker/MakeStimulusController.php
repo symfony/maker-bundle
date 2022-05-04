@@ -39,14 +39,14 @@ final class MakeStimulusController extends AbstractMaker
         return 'Creates a new Stimulus controller';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConfig)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the Stimulus controller (e.g. <fg=yellow>hello</>)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeStimulusController.txt'));
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         $command->addArgument('extension', InputArgument::OPTIONAL);
         $command->addArgument('targets', InputArgument::OPTIONAL, '', []);
@@ -62,10 +62,10 @@ final class MakeStimulusController extends AbstractMaker
 
         $input->setArgument('extension', $chosenExtension);
 
-        $includeTargets = $io->confirm('Do you want to include targets?');
-        if ($includeTargets) {
+        if ($io->confirm('Do you want to include targets?')) {
             $targets = [];
             $isFirstTarget = true;
+
             while (true) {
                 $newTarget = $this->askForNextTarget($io, $targets, $isFirstTarget);
                 $isFirstTarget = false;
@@ -80,8 +80,7 @@ final class MakeStimulusController extends AbstractMaker
             $input->setArgument('targets', $targets);
         }
 
-        $includeValues = $io->confirm('Do you want to include values?');
-        if ($includeValues) {
+        if ($io->confirm('Do you want to include values?')) {
             $values = [];
             $isFirstValue = true;
             while (true) {
@@ -99,7 +98,7 @@ final class MakeStimulusController extends AbstractMaker
         }
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $controllerName = Str::asSnakeCase($input->getArgument('name'));
         $chosenExtension = $input->getArgument('extension');
@@ -131,15 +130,15 @@ final class MakeStimulusController extends AbstractMaker
         ]);
     }
 
-    private function askForNextTarget(ConsoleStyle $io, array $targets, bool $isFirstTarget)
+    private function askForNextTarget(ConsoleStyle $io, array $targets, bool $isFirstTarget): ?string
     {
-        if ($isFirstTarget) {
-            $questionText = 'New target name (press <return> to stop adding targets)';
-        } else {
+        $questionText = 'New target name (press <return> to stop adding targets)';
+
+        if (!$isFirstTarget) {
             $questionText = 'Add another target? Enter the target name (or press <return> to stop adding targets)';
         }
 
-        $targetName = $io->ask($questionText, null, function ($name) use ($targets) {
+        $targetName = $io->ask($questionText, null, function (?string $name) use ($targets) {
             if (\in_array($name, $targets)) {
                 throw new \InvalidArgumentException(sprintf('The "%s" target already exists.', $name));
             }
@@ -147,18 +146,14 @@ final class MakeStimulusController extends AbstractMaker
             return $name;
         });
 
-        if (!$targetName) {
-            return null;
-        }
-
-        return $targetName;
+        return !$targetName ? null : $targetName;
     }
 
-    private function askForNextValue(ConsoleStyle $io, array $values, bool $isFirstValue)
+    private function askForNextValue(ConsoleStyle $io, array $values, bool $isFirstValue): ?array
     {
-        if ($isFirstValue) {
-            $questionText = 'New value name (press <return> to stop adding values)';
-        } else {
+        $questionText = 'New value name (press <return> to stop adding values)';
+
+        if (!$isFirstValue) {
             $questionText = 'Add another value? Enter the value name (or press <return> to stop adding values)';
         }
 
@@ -189,6 +184,7 @@ final class MakeStimulusController extends AbstractMaker
 
         $type = null;
         $types = $this->getValuesTypes();
+
         while (null === $type) {
             $question = new Question('Value type (enter <comment>?</comment> to see all types)', $defaultType);
             $question->setAutocompleterValues($types);
@@ -211,10 +207,9 @@ final class MakeStimulusController extends AbstractMaker
         return ['name' => $valueName, 'type' => $type];
     }
 
-    private function printAvailableTypes(ConsoleStyle $io)
+    private function printAvailableTypes(ConsoleStyle $io): void
     {
-        $allTypes = $this->getValuesTypes();
-        foreach ($allTypes as $type) {
+        foreach ($this->getValuesTypes() as $type) {
             $io->writeln(sprintf('<info>%s</info>', $type));
         }
     }
@@ -230,7 +225,7 @@ final class MakeStimulusController extends AbstractMaker
         ];
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             WebpackEncoreBundle::class,

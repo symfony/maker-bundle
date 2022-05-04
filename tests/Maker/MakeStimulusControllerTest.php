@@ -22,7 +22,7 @@ class MakeStimulusControllerTest extends MakerTestCase
         return MakeStimulusController::class;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_generates_stimulus_controller_with_targets' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
