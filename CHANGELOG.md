@@ -1,5 +1,27 @@
 # Changelog
 
+## [v1.41.0](https://github.com/symfony/maker-bundle/releases/tag/v1.41.0)
+
+*May 4th, 2022*
+
+### Feature
+
+- [#1110](https://github.com/symfony/maker-bundle/pull/1110) - [make:user] Don't add to passwork_hashers if default recipe is in use - *@nicolas-grekas*
+- [#1109](https://github.com/symfony/maker-bundle/pull/1109) - Add missing types in code templates - *@nicolas-grekas*
+- [#1107](https://github.com/symfony/maker-bundle/pull/1107) - [make:user] Legacy <= 5.3 & Doctrine Cleanup - *@jrushlow*
+- [#1104](https://github.com/symfony/maker-bundle/pull/1104) - [make:auth] drop guard support and legacy code cleanup  - *@jrushlow*
+- [#1075](https://github.com/symfony/maker-bundle/pull/1075) - [make:stimulus-controller] New Stimulus controller Maker command - *@JabriAbdelilah*
+- [#1028](https://github.com/symfony/maker-bundle/pull/1028) - Add typed properties for make:reset-password and make:registration - *@seb-jean*
+- [#872](https://github.com/symfony/maker-bundle/pull/872) - Use object typehint when generating entities - *@HypeMC*
+- [#858](https://github.com/symfony/maker-bundle/pull/858) - [make:controller] avoid require doctrine/annotation when can use attributes - *@Jibbarth*
+
+### Bug
+
+- [#1108](https://github.com/symfony/maker-bundle/pull/1108) - [make:test] Removal of the condition requiring a php version < 8.1 - *@mdoutreluingne*
+- [#1087](https://github.com/symfony/maker-bundle/pull/1087) - change signature method add/remove repository - *@JB-oclock*
+- [#1054](https://github.com/symfony/maker-bundle/pull/1054) - make:entity Use the namespace instead of the full class name for MappingDriver - *@michaelphillpotts*
+- [#903](https://github.com/symfony/maker-bundle/pull/903) - [make:auth] use userIdentifier instead of username on login_form - *@seb-jean*
+
 ## [v1.40.1](https://github.com/symfony/maker-bundle/releases/tag/v1.40.1)
 
 *April 23rd, 2022*
