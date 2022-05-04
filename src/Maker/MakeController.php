@@ -18,6 +18,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -25,6 +26,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -33,6 +35,17 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 final class MakeController extends AbstractMaker
 {
+    private $phpCompatUtil;
+
+    public function __construct(PhpCompatUtil $phpCompatUtil = null)
+    {
+        if (null === $phpCompatUtil) {
+            @trigger_error(sprintf('Passing a "%s" instance is mandatory since version 1.42.0', PhpCompatUtil::class), \E_USER_DEPRECATED);
+        }
+
+        $this->phpCompatUtil = $phpCompatUtil;
+    }
+
     public static function getCommandName(): string
     {
         return 'make:controller';
@@ -100,6 +113,11 @@ final class MakeController extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
+        // @legacy - Remove method when support for Symfony 5.4 is dropped
+        if (null !== $this->phpCompatUtil && 60000 <= Kernel::VERSION_ID && $this->phpCompatUtil->canUseAttributes()) {
+            return;
+        }
+
         $dependencies->addClassDependency(
             Annotation::class,
             'doctrine/annotations'

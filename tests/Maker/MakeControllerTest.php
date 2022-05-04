@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeController;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
+use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
 class MakeControllerTest extends MakerTestCase
@@ -22,9 +23,23 @@ class MakeControllerTest extends MakerTestCase
         return MakeController::class;
     }
 
-    public function getTestDetails()
+    // @legacy Remove when Symfony 5.4 is no longer supported
+    private function getControllerTest(): MakerTestDetails
     {
-        yield 'it_generates_a_controller' => [$this->createMakerTest()
+        return $this
+            ->createMakerTest()
+            ->preRun(function (MakerTestRunner $runner) {
+                if ($runner->getSymfonyVersion() < 60000) {
+                    // Because MakeController::configureDependencies() is executed in the main thread,
+                    // we need to manually add in `doctrine/annotations` for Symfony 5.4 tests.
+                    $runner->runProcess('composer require doctrine/annotations');
+                }
+            });
+    }
+
+    public function getTestDetails(): \Generator
+    {
+        yield 'it_generates_a_controller' => [$this->getControllerTest()
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([
                     // controller class name
@@ -37,7 +52,7 @@ class MakeControllerTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_a_controller_with_twig' => [$this->createMakerTest()
+        yield 'it_generates_a_controller_with_twig' => [$this->getControllerTest()
             ->addExtraDependencies('twig')
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([
@@ -49,7 +64,7 @@ class MakeControllerTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_a_controller_with_twig_no_base_template' => [$this->createMakerTest()
+        yield 'it_generates_a_controller_with_twig_no_base_template' => [$this->getControllerTest()
             ->addExtraDependencies('twig')
             ->run(function (MakerTestRunner $runner) {
                 $runner->deleteFile('templates/base.html.twig');
@@ -63,7 +78,7 @@ class MakeControllerTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_a_controller_with_without_template' => [$this->createMakerTest()
+        yield 'it_generates_a_controller_with_without_template' => [$this->getControllerTest()
             ->addExtraDependencies('twig')
             ->run(function (MakerTestRunner $runner) {
                 $runner->deleteFile('templates/base.html.twig');
@@ -80,7 +95,7 @@ class MakeControllerTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_a_controller_in_sub_namespace' => [$this->createMakerTest()
+        yield 'it_generates_a_controller_in_sub_namespace' => [$this->getControllerTest()
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([
                     // controller class name
@@ -92,7 +107,7 @@ class MakeControllerTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_a_controller_in_sub_namespace_with_template' => [$this->createMakerTest()
+        yield 'it_generates_a_controller_in_sub_namespace_with_template' => [$this->getControllerTest()
             ->addExtraDependencies('twig')
            ->run(function (MakerTestRunner $runner) {
                $output = $runner->runMaker([
@@ -104,7 +119,7 @@ class MakeControllerTest extends MakerTestCase
            }),
        ];
 
-        yield 'it_generates_a_controller_with_full_custom_namespace' => [$this->createMakerTest()
+        yield 'it_generates_a_controller_with_full_custom_namespace' => [$this->getControllerTest()
             ->addExtraDependencies('twig')
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([
@@ -118,7 +133,7 @@ class MakeControllerTest extends MakerTestCase
         ];
     }
 
-    private function runControllerTest(MakerTestRunner $runner, string $filename)
+    private function runControllerTest(MakerTestRunner $runner, string $filename): void
     {
         $runner->copy(
             'make-controller/tests/'.$filename,
