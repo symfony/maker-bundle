@@ -28,13 +28,13 @@ class MakeStimulusControllerTest extends MakerTestCase
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
                     [
-                        'with_targets', //controller name
-                        'js', //controller language
-                        'yes', //add targets
-                        'results', //first target
-                        'messages', //second target
-                        'errors', //third target
-                        '', //empty input to stop adding targets
+                        'with_targets', // controller name
+                        'js', // controller language
+                        'yes', // add targets
+                        'results', // first target
+                        'messages', // second target
+                        'errors', // third target
+                        '', // empty input to stop adding targets
                     ]);
 
                 $generatedFilePath = $runner->getPath('assets/controllers/with_targets_controller.js');
@@ -55,9 +55,9 @@ class MakeStimulusControllerTest extends MakerTestCase
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
                     [
-                        'without_targets', //controller name
-                        'js', //controller language
-                        'no', //do not add targets
+                        'without_targets', // controller name
+                        'js', // controller language
+                        'no', // do not add targets
                     ]);
 
                 $generatedFilePath = $runner->getPath('assets/controllers/without_targets_controller.js');
@@ -78,9 +78,9 @@ class MakeStimulusControllerTest extends MakerTestCase
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
                     [
-                        'typescript', //controller name
-                        'ts', //controller language
-                        'no', //do not add targets
+                        'typescript', // controller name
+                        'ts', // controller language
+                        'no', // do not add targets
                     ]);
 
                 $this->assertFileExists($runner->getPath('assets/controllers/typescript_controller.ts'));
