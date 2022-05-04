@@ -91,7 +91,14 @@ final class DoctrineHelper
             // if the class should be generated with attributes or annotations. If this exception is thrown, we will check based on the
             // namespaces for the given $className and compare it with the doctrine configuration to get the correct MappingDriver.
 
-            return $this->isInstanceOf($this->getMappingDriverForNamespace($className), $driverClass);
+            // extract the new class's namespace from the full $className to check the namespace of the new class against the doctrine configuration.
+            $classNameComponents = explode('\\', $className);
+            if (1 < \count($classNameComponents)) {
+                array_pop($classNameComponents);
+            }
+            $classNamespace = implode('\\', $classNameComponents);
+
+            return $this->isInstanceOf($this->getMappingDriverForNamespace($classNamespace), $driverClass);
         }
 
         if (null === $em) {
