@@ -67,9 +67,14 @@ class MakeCrudTest extends MakerTestCase
             }),
         ];
 
-        yield 'crud_basic_tests' => [$this->createMakerTest()
+        yield 'it_generates_crud_with_tests' => [$this->createMakerTest()
             ->addExtraDependencies('symfony/css-selector', 'symfony/browser-kit')
             ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-crud/SweetFood.php',
+                    'src/Entity/SweetFood.php'
+                );
+
                 $output = $runner->runMaker([
                     'SweetFood', // Entity Class Name
                     '',          // Default Controller
