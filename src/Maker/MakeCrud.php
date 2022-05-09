@@ -283,8 +283,6 @@ final class MakeCrud extends AbstractMaker
                     'form_field_prefix' => strtolower(Str::asSnakeCase($entityTwigVarSingular)),
                 ]
             );
-        } else {
-            $io->note('Skipping test generation because the test dependencies (symfony/test-pack) is not installed.');
         }
 
         $generator->writeChanges();
