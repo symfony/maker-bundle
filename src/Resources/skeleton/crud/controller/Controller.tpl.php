@@ -47,7 +47,8 @@ class <?= $class_name ?> extends AbstractController
 
 <?php if (isset($repository_full_class_name) && $generator->repositoryHasAddRemoveMethods($repository_full_class_name)) { ?>
         if ($form->isSubmitted() && $form->isValid()) {
-            $<?= $repository_var ?>->add($<?= $entity_var_singular ?>);
+            $<?= $repository_var ?>->add($<?= $entity_var_singular ?>, true);
+
             return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
         }
 <?php } else { ?>
@@ -92,7 +93,8 @@ class <?= $class_name ?> extends AbstractController
 
 <?php if (isset($repository_full_class_name) && $generator->repositoryHasAddRemoveMethods($repository_full_class_name)) { ?>
         if ($form->isSubmitted() && $form->isValid()) {
-            $<?= $repository_var ?>->add($<?= $entity_var_singular ?>);
+            $<?= $repository_var ?>->add($<?= $entity_var_singular ?>, true);
+
             return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
         }
 <?php } else { ?>
@@ -125,7 +127,7 @@ class <?= $class_name ?> extends AbstractController
     {
 <?php if (isset($repository_full_class_name) && $generator->repositoryHasAddRemoveMethods($repository_full_class_name)) { ?>
         if ($this->isCsrfTokenValid('delete'.$<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(), $request->request->get('_token'))) {
-            $<?= $repository_var ?>->remove($<?= $entity_var_singular ?>);
+            $<?= $repository_var ?>->remove($<?= $entity_var_singular ?>, true);
         }
 <?php } else { ?>
         if ($this->isCsrfTokenValid('delete'.$<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(), $request->request->get('_token'))) {

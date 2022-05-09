@@ -18,6 +18,8 @@ use Symfony\Component\Yaml\Yaml;
 
 class MakeCrudTest extends MakerTestCase
 {
+    use TestHelpersTrait;
+
     protected function getMakerClass(): string
     {
         return MakeCrud::class;
@@ -28,7 +30,7 @@ class MakeCrudTest extends MakerTestCase
         yield 'it_generates_basic_crud' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
-                    'make-crud/SweetFood.php',
+                    $this->getFixturePath('SweetFood.php', $runner),
                     'src/Entity/SweetFood.php'
                 );
 
@@ -48,7 +50,7 @@ class MakeCrudTest extends MakerTestCase
         yield 'it_generates_crud_with_custom_controller' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
-                    'make-crud/SweetFood.php',
+                    $this->getFixturePath('SweetFood.php', $runner),
                     'src/Entity/SweetFood.php'
                 );
 
@@ -74,7 +76,7 @@ class MakeCrudTest extends MakerTestCase
                 );
 
                 $runner->copy(
-                    'make-crud/SweetFood-custom-namespace.php',
+                    $this->getFixturePath('SweetFood-custom-namespace.php', $runner),
                     'src/Entity/SweetFood.php'
                 );
 
@@ -94,7 +96,7 @@ class MakeCrudTest extends MakerTestCase
         yield 'it_generates_crud_using_custom_repository' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
-                    'make-crud/SweetFood.php',
+                    $this->getFixturePath('SweetFoodCustomRepository.php', $runner),
                     'src/Entity/SweetFood.php'
                 );
                 $runner->copy(
@@ -112,13 +114,18 @@ class MakeCrudTest extends MakerTestCase
                 $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
 
                 $this->runCrudTest($runner, 'it_generates_basic_crud.php');
+
+                self::assertFileEquals(
+                    sprintf('%s/fixtures/%s', \dirname(__DIR__), $this->getFixturePath('expected/WithCustomRepository.php', $runner)),
+                    $runner->getPath('src/Controller/SweetFoodController.php')
+                );
             }),
         ];
 
         yield 'it_generates_crud_with_no_base_template' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
-                    'make-crud/SweetFood.php',
+                    $this->getFixturePath('SweetFood.php', $runner),
                     'src/Entity/SweetFood.php'
                 );
 
@@ -136,6 +143,14 @@ class MakeCrudTest extends MakerTestCase
                 $this->runCrudTest($runner, 'it_generates_basic_crud.php');
             }),
         ];
+    }
+
+    // @legacy - remove when annotations are no longer supported
+    private function getFixturePath(string $sourceName, MakerTestRunner $runner): string
+    {
+        $path = $this->useAttributes($runner) ? 'make-crud' : 'make-crud/legacy';
+
+        return sprintf('%s/%s', $path, $sourceName);
     }
 
     private function runCrudTest(MakerTestRunner $runner, string $filename): void
