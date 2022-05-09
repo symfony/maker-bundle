@@ -101,9 +101,7 @@ final class MakeCrud extends AbstractMaker
             $defaultControllerClass
         );
 
-        if (class_exists(CssSelectorConverter::class)) {
-            $this->generateTests = $io->confirm('Do you want to generate tests for the controller? [Experimental]', false);
-        }
+        $this->generateTests = $io->confirm('Do you want to generate tests for the controller?. [Experimental]', false);
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
@@ -278,6 +276,10 @@ final class MakeCrud extends AbstractMaker
                     'form_field_prefix' => strtolower(Str::asSnakeCase($entityTwigVarSingular)),
                 ]
             );
+
+            if (!class_exists(CssSelectorConverter::class)) {
+                $io->caution('You\'ll need to install the `symfony/test-pack` to execute the tests for your new controller.');
+            }
         }
 
         $generator->writeChanges();
