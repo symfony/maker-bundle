@@ -14,8 +14,11 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -46,6 +49,7 @@ final class MakeCrud extends AbstractMaker
     private $formTypeRenderer;
     private $inflector;
     private $controllerClassName;
+    private $generateTests = false;
 
     public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer)
     {
@@ -95,6 +99,8 @@ final class MakeCrud extends AbstractMaker
             sprintf('Choose a name for your controller class (e.g. <fg=yellow>%s</>)', $defaultControllerClass),
             $defaultControllerClass
         );
+
+        $this->generateTests = $io->confirm('Do you want to generate tests for the controller?. [Experimental]', false);
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
@@ -230,6 +236,49 @@ final class MakeCrud extends AbstractMaker
                 'crud/templates/'.$template.'.tpl.php',
                 $variables
             );
+        }
+
+        if ($this->generateTests) {
+            $testClassDetails = $generator->createClassNameDetails(
+                $entityClassDetails->getRelativeNameWithoutSuffix(),
+                'Test\\Controller\\',
+                'ControllerTest'
+            );
+
+            $useStatements = new UseStatementGenerator([
+                $entityClassDetails->getFullName(),
+                WebTestCase::class,
+                KernelBrowser::class,
+                $repositoryClassName,
+            ]);
+
+            $usesEntityManager = EntityManagerInterface::class === $repositoryClassName;
+
+            if ($usesEntityManager) {
+                $useStatements->addUseStatement(EntityRepository::class);
+            }
+
+            $generator->generateFile(
+                'tests/Controller/'.$testClassDetails->getShortName().'.php',
+                $usesEntityManager ? 'crud/test/Test.EntityManager.tpl.php' : 'crud/test/Test.tpl.php',
+                [
+                    'use_statements' => $useStatements,
+                    'entity_full_class_name' => $entityClassDetails->getFullName(),
+                    'entity_class_name' => $entityClassDetails->getShortName(),
+                    'entity_var_singular' => $entityVarSingular,
+                    'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
+                    'route_name' => $routeName,
+                    'class_name' => Str::getShortClassName($testClassDetails->getFullName()),
+                    'namespace' => Str::getNamespace($testClassDetails->getFullName()),
+                    'form_fields' => $entityDoctrineDetails->getFormFields(),
+                    'repository_class_name' => $usesEntityManager ? EntityManagerInterface::class : $repositoryVars['repository_class_name'],
+                    'form_field_prefix' => strtolower(Str::asSnakeCase($entityTwigVarSingular)),
+                ]
+            );
+
+            if (!class_exists(WebTestCase::class)) {
+                $io->caution('You\'ll need to install the `symfony/test-pack` to execute the tests for your new controller.');
+            }
         }
 
         $generator->writeChanges();

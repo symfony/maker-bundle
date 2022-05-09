@@ -35,9 +35,9 @@ class MakeCrudTest extends MakerTestCase
                 );
 
                 $output = $runner->runMaker([
-                    // entity class name
-                    'SweetFood',
-                    '', // default controller
+                    'SweetFood', // entity class name
+                    '',          // default controller,
+                    'n',         // Generate Tests
                 ]);
 
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
@@ -55,15 +55,64 @@ class MakeCrudTest extends MakerTestCase
                 );
 
                 $output = $runner->runMaker([
-                    // entity class name
-                    'SweetFood',
-                    'SweetFoodAdminController', // default controller
+                    'SweetFood',                // entity class name
+                    'SweetFoodAdminController', // default controller,
+                    'y',                        // Generate Tests
                 ]);
 
                 $this->assertStringContainsString('created: src/Controller/SweetFoodAdminController.php', $output);
                 $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
 
                 $this->runCrudTest($runner, 'it_generates_crud_with_custom_controller.php');
+            }),
+        ];
+
+        yield 'it_generates_crud_with_tests' => [$this->createMakerTest()
+            ->addExtraDependencies('symfony/test-pack')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    $this->getFixturePath('SweetFood.php', $runner),
+                    'src/Entity/SweetFood.php'
+                );
+
+                $output = $runner->runMaker([
+                    'SweetFood', // Entity Class Name
+                    '',          // Default Controller,
+                    'y',         // Generate Tests
+                ]);
+
+                $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
+                $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('created: tests/Controller/SweetFoodControllerTest.php', $output);
+
+                $this->runCrudTest($runner, 'it_generates_basic_crud.php');
+            }),
+        ];
+
+        yield 'it_generates_crud_custom_repository_with_test' => [$this->createMakerTest()
+            ->addExtraDependencies('symfony/test-pack')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    $this->getFixturePath('SweetFoodCustomRepository.php', $runner),
+                    'src/Entity/SweetFood.php'
+                );
+
+                $runner->copy(
+                    'make-crud/SweetFoodRepository.php',
+                    'src/Repository/SweetFoodRepository.php'
+                );
+
+                $output = $runner->runMaker([
+                    'SweetFood', // Entity Class Name
+                    '',          // Default Controller,
+                    'y',         // Generate Tests
+                ]);
+
+                $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
+                $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('created: tests/Controller/SweetFoodControllerTest.php', $output);
+
+                $this->runCrudTest($runner, 'it_generates_basic_crud.php');
             }),
         ];
 
@@ -81,9 +130,9 @@ class MakeCrudTest extends MakerTestCase
                 );
 
                 $output = $runner->runMaker([
-                    // entity class name
-                    'SweetFood',
-                    '', // default controller
+                    'SweetFood', // entity class name
+                    '',          // default controller,
+                    'n',         // Generate Tests
                 ]);
 
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
@@ -105,9 +154,9 @@ class MakeCrudTest extends MakerTestCase
                 );
 
                 $output = $runner->runMaker([
-                    // entity class name
-                    'SweetFood',
-                    '', // default controller
+                    'SweetFood', // entity class name
+                    '',          // default controller,
+                    'n',         // Generate Tests
                 ]);
 
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
@@ -132,9 +181,9 @@ class MakeCrudTest extends MakerTestCase
                 $runner->deleteFile('templates/base.html.twig');
 
                 $output = $runner->runMaker([
-                    // entity class name
-                    'SweetFood',
-                    '', // default controller
+                    'SweetFood', // entity class name
+                    '',          // default controller,
+                    'n',         // Generate Tests
                 ]);
 
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
