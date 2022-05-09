@@ -77,7 +77,7 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
         $this->markTestIncomplete();
         $fixture = new <?= $entity_class_name; ?>();
 <?php foreach ($form_fields as $form_field => $typeOptions): ?>
-        $fixture->set<?= ucfirst($form_field); ?>('My Title');
+        $fixture->set<?= ucfirst($form_field); ?>('Value');
 <?php endforeach; ?>
 
         $this->manager->persist($fixture);
@@ -105,13 +105,13 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
         $this->markTestIncomplete();
         $fixture = new <?= $entity_class_name; ?>();
 <?php foreach ($form_fields as $form_field => $typeOptions): ?>
-        $fixture->set<?= ucfirst($form_field); ?>('My Title');
+        $fixture->set<?= ucfirst($form_field); ?>('Value');
 <?php endforeach; ?>
 
         $$this->manager->remove($fixture);
         $this->manager->flush();
 
-        $this->client->request('GET', '/sweet/food/'.$fixture->getId());
+        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         $this->client->submitForm('Delete');
 
         self::assertResponseRedirects('<?= $route_path; ?>/');

@@ -105,7 +105,7 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
 
         $this->repository->add($fixture, true);
 
-        $this->client->request('GET', '/sweet/food/'.$fixture->getId());
+        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         $this->client->submitForm('Delete');
 
         self::assertResponseRedirects('<?= $route_path; ?>/');

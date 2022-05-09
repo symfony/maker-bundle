@@ -248,11 +248,6 @@ final class MakeCrud extends AbstractMaker
                 'ControllerTest'
             );
 
-            $entityFields = $entityDoctrineDetails->getDisplayFields();
-            $entityFields = array_filter($entityFields, static function ($field) use ($entityDoctrineDetails) {
-                return $field['fieldName'] !== $entityDoctrineDetails->getIdentifier();
-            });
-
             $useStatements = new UseStatementGenerator([
                 $entityClassDetails->getFullName(),
                 WebTestCase::class,
@@ -277,9 +272,7 @@ final class MakeCrud extends AbstractMaker
                     'class_name' => Str::getShortClassName($testClassDetails->getFullName()),
                     'namespace' => Str::getNamespace($testClassDetails->getFullName()),
                     'form_fields' => $entityDoctrineDetails->getFormFields(),
-                    'entity_fields' => $entityFields,
-                    'use_entity_manager' => EntityManagerInterface::class === $repositoryClassName,
-                    'repository_class_name' => EntityManagerInterface::class === $repositoryClassName ? 'EntityManagerInterface' : $repositoryVars['repository_class_name'],
+                    'repository_class_name' => $repositoryVars['repository_class_name'],
                     'form_field_prefix' => strtolower(Str::asSnakeCase($entityTwigVarSingular)),
                 ]
             );
