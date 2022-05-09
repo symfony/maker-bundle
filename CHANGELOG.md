@@ -1,5 +1,19 @@
 # Changelog
 
+## [v1.42.0](https://github.com/symfony/maker-bundle/releases/tag/v1.42.0)
+
+*May 9th, 2022*
+
+### Feature
+
+- [#1114](https://github.com/symfony/maker-bundle/pull/1114) - [make:entity] _em will be private in ORM 3.0, use getEntityManager() - *@jrushlow*
+- [#456](https://github.com/symfony/maker-bundle/pull/456) - Use prefix "is" for getters on boolean fields - *@MaximePinot*
+- [#307](https://github.com/symfony/maker-bundle/pull/307) - [make:crud][experimental] Add generated tests to make:crud - *@ckrack*
+
+### Bug
+
+- [#1115](https://github.com/symfony/maker-bundle/pull/1115) - [make:crud] fix broken controller with custom repository - *@jrushlow*
+
 ## [v1.41.0](https://github.com/symfony/maker-bundle/releases/tag/v1.41.0)
 
 *May 4th, 2022*
