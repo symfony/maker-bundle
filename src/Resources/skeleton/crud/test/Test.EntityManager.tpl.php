@@ -54,7 +54,7 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
 
         self::assertResponseRedirects('/sweet/food/');
 
-        self::assertSame(1, $this->manager->getRepository()->count([]));
+        self::assertSame(1, $this->getRepository()->count([]));
     }
 
     public function testShow(): void
