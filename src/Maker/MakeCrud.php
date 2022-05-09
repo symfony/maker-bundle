@@ -14,8 +14,11 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -26,7 +29,6 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
-use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -48,6 +50,7 @@ final class MakeCrud extends AbstractMaker
     private $formTypeRenderer;
     private $inflector;
     private $controllerClassName;
+    private $generateTests = false;
 
     public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer)
     {
@@ -97,6 +100,10 @@ final class MakeCrud extends AbstractMaker
             sprintf('Choose a name for your controller class (e.g. <fg=yellow>%s</>)', $defaultControllerClass),
             $defaultControllerClass
         );
+
+        if (class_exists(CssSelectorConverter::class)) {
+            $this->generateTests = $io->confirm('Do you want to generate tests for the controller? [Experimental]', false);
+        }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
@@ -183,25 +190,6 @@ final class MakeCrud extends AbstractMaker
             )
         );
 
-        $testClassDetails = $generator->createClassNameDetails(
-            $entityClassDetails->getRelativeNameWithoutSuffix(),
-            'Test\\Controller\\',
-            'ControllerTest'
-        );
-
-        $generator->generateFile(
-            'tests/Controller/'.$testClassDetails->getShortName().'.php',
-            'crud/test/Test.tpl.php',
-            [
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
-                'route_name' => $routeName,
-                'class_name' => Str::getShortClassName($testClassDetails->getFullName()),
-                'namespace' => Str::getNamespace($testClassDetails->getFullName()),
-                'form_fields' => $entityDoctrineDetails->getFormFields(),
-            ]
-        );
-
         $this->formTypeRenderer->render(
             $formClassDetails,
             $entityDoctrineDetails->getFormFields(),
@@ -253,7 +241,7 @@ final class MakeCrud extends AbstractMaker
             );
         }
 
-        if (class_exists(CssSelectorConverter::class) && class_exists(AbstractBrowser::class)) {
+        if ($this->generateTests) {
             $testClassDetails = $generator->createClassNameDetails(
                 $entityClassDetails->getRelativeNameWithoutSuffix(),
                 'Test\\Controller\\',
@@ -261,14 +249,26 @@ final class MakeCrud extends AbstractMaker
             );
 
             $entityFields = $entityDoctrineDetails->getDisplayFields();
-            $entityFields = array_filter($entityFields, function ($field) use ($entityDoctrineDetails) {
+            $entityFields = array_filter($entityFields, static function ($field) use ($entityDoctrineDetails) {
                 return $field['fieldName'] !== $entityDoctrineDetails->getIdentifier();
             });
 
+            $useStatements = new UseStatementGenerator([
+                $entityClassDetails->getFullName(),
+                WebTestCase::class,
+                KernelBrowser::class,
+                $repositoryClassName,
+            ]);
+
+            if (EntityManagerInterface::class === $repositoryClassName) {
+                $useStatements->addUseStatement(EntityRepository::class);
+            }
+
             $generator->generateFile(
                 'tests/Controller/'.$testClassDetails->getShortName().'.php',
-                'crud/test/Test.tpl.php',
+                EntityManagerInterface::class === $repositoryClassName ? 'crud/test/Test.EntityManager.tpl.php' : 'crud/test/Test.tpl.php',
                 [
+                    'use_statements' => $useStatements,
                     'entity_full_class_name' => $entityClassDetails->getFullName(),
                     'entity_class_name' => $entityClassDetails->getShortName(),
                     'entity_var_singular' => $entityVarSingular,
@@ -278,11 +278,13 @@ final class MakeCrud extends AbstractMaker
                     'namespace' => Str::getNamespace($testClassDetails->getFullName()),
                     'form_fields' => $entityDoctrineDetails->getFormFields(),
                     'entity_fields' => $entityFields,
+                    'use_entity_manager' => EntityManagerInterface::class === $repositoryClassName,
+                    'repository_class_name' => EntityManagerInterface::class === $repositoryClassName ? 'EntityManagerInterface' : $repositoryVars['repository_class_name'],
+                    'form_field_prefix' => strtolower(Str::asSnakeCase($entityTwigVarSingular)),
                 ]
             );
         } else {
-            var_dump(CssSelectorConverter::class, class_exists(CssSelectorConverter::class), AbstractBrowser::class, class_exists(AbstractBrowser::class));
-            $io->note('Skipping test generation because the test dependencies (css-selector and browser-kit) are not installed.');
+            $io->note('Skipping test generation because the test dependencies (symfony/test-pack) is not installed.');
         }
 
         $generator->writeChanges();

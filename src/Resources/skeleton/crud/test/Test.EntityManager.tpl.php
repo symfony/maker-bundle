@@ -8,17 +8,21 @@ namespace <?= $namespace ?>;
 class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
 {
     private KernelBrowser $client;
-    private <?= $repository_class_name; ?> $repository;
+    private EntityManagerInterface $manager;
+    private EntityRepository $repository;
     private string $path = '<?= $route_path; ?>/';
 
     protected function setUp(): void
     {
         $this->client = static::createClient();
-        $this->repository = (static::getContainer()->get('doctrine'))->getRepository(<?= $entity_class_name; ?>::class);
+        $this->manager = (static::getContainer()->get('doctrine'))->getManager();
+        $this->repository = $this->manager->getRepository(<?= $entity_class_name; ?>::class);
 
         foreach ($this->repository->findAll() as $object) {
-            $this->repository->remove($object, true);
+            $this->manager->remove($object);
         }
+
+        $this->manager->flush();
     }
 
     public function testIndex(): void
@@ -47,7 +51,7 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
 
         self::assertResponseRedirects('/sweet/food/');
 
-        self::assertSame(1, $this->repository->count([]));
+        self::assertSame(1, $this->manager->getRepository()->count([]));
     }
 
     public function testShow(): void
@@ -76,7 +80,8 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
         $fixture->set<?= ucfirst($form_field); ?>('My Title');
 <?php endforeach; ?>
 
-        $this->repository->add($fixture, true);
+        $this->manager->persist($fixture);
+        $this->manager->flush();
 
         $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
 
@@ -103,7 +108,8 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
         $fixture->set<?= ucfirst($form_field); ?>('My Title');
 <?php endforeach; ?>
 
-        $this->repository->add($fixture, true);
+        $$this->manager->remove($fixture);
+        $this->manager->flush();
 
         $this->client->request('GET', '/sweet/food/'.$fixture->getId());
         $this->client->submitForm('Delete');

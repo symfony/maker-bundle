@@ -68,7 +68,7 @@ class MakeCrudTest extends MakerTestCase
         ];
 
         yield 'it_generates_crud_with_tests' => [$this->createMakerTest()
-            ->addExtraDependencies('symfony/css-selector', 'symfony/browser-kit')
+            ->addExtraDependencies('symfony/test-pack')
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
                     $this->getFixturePath('SweetFood.php', $runner),
@@ -77,7 +77,35 @@ class MakeCrudTest extends MakerTestCase
 
                 $output = $runner->runMaker([
                     'SweetFood', // Entity Class Name
-                    '',          // Default Controller
+                    '',          // Default Controller,
+                    'y', // Generate Tests
+                ]);
+
+                $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
+                $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('created: tests/Controller/SweetFoodControllerTest.php', $output);
+
+                $this->runCrudTest($runner, 'it_generates_basic_crud.php');
+            }),
+        ];
+
+        yield 'it_generates_crud_custom_repository_with_test' => [$this->createMakerTest()
+            ->addExtraDependencies('symfony/test-pack')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    $this->getFixturePath('SweetFoodCustomRepository.php', $runner),
+                    'src/Entity/SweetFood.php'
+                );
+
+                $runner->copy(
+                    'make-crud/SweetFoodRepository.php',
+                    'src/Repository/SweetFoodRepository.php'
+                );
+
+                $output = $runner->runMaker([
+                    'SweetFood', // Entity Class Name
+                    '',          // Default Controller,
+                    'y', // Generate Tests
                 ]);
 
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
