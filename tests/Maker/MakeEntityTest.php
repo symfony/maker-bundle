@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
-use Doctrine\ORM\Mapping\Driver\AttributeReader;
 use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
@@ -21,6 +20,8 @@ use Symfony\Component\Yaml\Yaml;
 
 class MakeEntityTest extends MakerTestCase
 {
+    use TestHelpersTrait;
+
     protected function getMakerClass(): string
     {
         return MakeEntity::class;
@@ -669,13 +670,6 @@ class MakeEntityTest extends MakerTestCase
             "dir: '%kernel.project_dir%/src/Entity'",
             "dir: '%kernel.project_dir%/config/doctrine'"
         );
-    }
-
-    private function useAttributes(MakerTestRunner $runner): bool
-    {
-        return \PHP_VERSION_ID >= 80000
-            && $runner->doesClassExist(AttributeReader::class)
-            && $runner->getSymfonyVersion() >= 50200;
     }
 
     private function copyEntity(MakerTestRunner $runner, string $filename): void

@@ -119,6 +119,7 @@ final class MakeCrud extends AbstractMaker
             $repositoryClassName = $repositoryClassDetails->getFullName();
 
             $repositoryVars = [
+                'repository_full_class_name' => $repositoryClassName,
                 'repository_class_name' => $repositoryClassDetails->getShortName(),
                 'repository_var' => lcfirst($this->inflector->singularize($repositoryClassDetails->getShortName())),
             ];
