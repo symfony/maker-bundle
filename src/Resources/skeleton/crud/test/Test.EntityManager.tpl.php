@@ -7,8 +7,11 @@ namespace <?= $namespace ?>;
 
 class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
 {
+<?= $use_typed_properties ? null : "    /** @var KernelBrowser */\n" ?>
     private <?= $use_typed_properties ? 'KernelBrowser ' : null ?>$client;
+<?= $use_typed_properties ? null : "    /** @var EntityManagerInterface */\n" ?>
     private <?= $use_typed_properties ? 'EntityManagerInterface ' : null ?>$manager;
+<?= $use_typed_properties ? null : "    /** @var EntityRepository */\n" ?>
     private <?= $use_typed_properties ? 'EntityRepository ' : null ?>$repository;
     private <?= $use_typed_properties ? 'string ' : null ?>$path = '<?= $route_path; ?>/';
 
