@@ -33,7 +33,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
-use Symfony\Component\CssSelector\CssSelectorConverter;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -277,7 +276,7 @@ final class MakeCrud extends AbstractMaker
                 ]
             );
 
-            if (!class_exists(CssSelectorConverter::class)) {
+            if (!class_exists(WebTestCase::class)) {
                 $io->caution('You\'ll need to install the `symfony/test-pack` to execute the tests for your new controller.');
             }
         }
