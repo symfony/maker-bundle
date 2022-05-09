@@ -67,34 +67,23 @@ class MakeCrudTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_crud_with_custom_root_namespace' => [$this->createMakerTest()
-        yield 'crud_basic_tests' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeCrud::class),
-            [
-                // entity class name
-                'SweetFood',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
-            ->addExtraDependencies('symfony/css-selector')
-            ->addExtraDependencies('symfony/browser-kit')
-            // need for crud web tests
-            ->configureDatabase()
-            ->assert(function (string $output, string $directory) {
+        yield 'crud_basic_tests' => [$this->createMakerTest()
+            ->addExtraDependencies('symfony/css-selector', 'symfony/browser-kit')
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([
+                    'SweetFood', // Entity Class Name
+                    '',          // Default Controller
+                ]);
+
                 $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
                 $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
                 $this->assertStringContainsString('created: tests/Controller/SweetFoodControllerTest.php', $output);
-            })
-            // workaround for segfault in PHP 7.1 CI :/
-            ->setRequiredPhpVersion(70200),
+
+                $this->runCrudTest($runner, 'it_generates_basic_crud.php');
+            }),
         ];
 
-        yield 'crud_basic_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeCrud::class),
-            [
-                // entity class name
-                'SweetFood',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudInCustomRootNamespace')
+        yield 'it_generates_crud_with_custom_root_namespace' => [$this->createMakerTest()
             ->changeRootNamespace('Custom')
             ->run(function (MakerTestRunner $runner) {
                 $runner->writeFile(
