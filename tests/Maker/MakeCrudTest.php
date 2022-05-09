@@ -71,7 +71,7 @@ class MakeCrudTest extends MakerTestCase
             ->addExtraDependencies('symfony/css-selector', 'symfony/browser-kit')
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
-                    'make-crud/SweetFood.php',
+                    $this->getFixturePath('SweetFood.php', $runner),
                     'src/Entity/SweetFood.php'
                 );
 
