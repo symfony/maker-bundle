@@ -7,10 +7,10 @@ namespace <?= $namespace ?>;
 
 class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
 {
-    private KernelBrowser $client;
-    private EntityManagerInterface $manager;
-    private EntityRepository $repository;
-    private string $path = '<?= $route_path; ?>/';
+    private <?= $use_typed_properties ? 'KernelBrowser ' : null ?>$client;
+    private <?= $use_typed_properties ? 'EntityManagerInterface ' : null ?>$manager;
+    private <?= $use_typed_properties ? 'EntityRepository ' : null ?>$repository;
+    private <?= $use_typed_properties ? 'string ' : null ?>$path = '<?= $route_path; ?>/';
 
     protected function setUp(): void
     {

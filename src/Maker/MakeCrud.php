@@ -255,13 +255,15 @@ final class MakeCrud extends AbstractMaker
                 $repositoryClassName,
             ]);
 
-            if (EntityManagerInterface::class === $repositoryClassName) {
+            $usesEntityManager = EntityManagerInterface::class === $repositoryClassName;
+
+            if ($usesEntityManager) {
                 $useStatements->addUseStatement(EntityRepository::class);
             }
 
             $generator->generateFile(
                 'tests/Controller/'.$testClassDetails->getShortName().'.php',
-                EntityManagerInterface::class === $repositoryClassName ? 'crud/test/Test.EntityManager.tpl.php' : 'crud/test/Test.tpl.php',
+                $usesEntityManager ? 'crud/test/Test.EntityManager.tpl.php' : 'crud/test/Test.tpl.php',
                 [
                     'use_statements' => $useStatements,
                     'entity_full_class_name' => $entityClassDetails->getFullName(),
@@ -272,7 +274,7 @@ final class MakeCrud extends AbstractMaker
                     'class_name' => Str::getShortClassName($testClassDetails->getFullName()),
                     'namespace' => Str::getNamespace($testClassDetails->getFullName()),
                     'form_fields' => $entityDoctrineDetails->getFormFields(),
-                    'repository_class_name' => $repositoryVars['repository_class_name'],
+                    'repository_class_name' => $usesEntityManager ? EntityManagerInterface::class : $repositoryVars['repository_class_name'],
                     'form_field_prefix' => strtolower(Str::asSnakeCase($entityTwigVarSingular)),
                 ]
             );

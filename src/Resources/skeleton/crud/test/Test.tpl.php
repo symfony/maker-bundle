@@ -7,9 +7,9 @@ namespace <?= $namespace ?>;
 
 class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
 {
-    private KernelBrowser $client;
-    private <?= $repository_class_name; ?> $repository;
-    private string $path = '<?= $route_path; ?>/';
+    private <?= $use_typed_properties ? 'KernelBrowser ' : null ?>$client;
+    private <?= $use_typed_properties ? "$repository_class_name " : null ?>$repository;
+    private <?= $use_typed_properties ? 'string ' : null ?>$path = '<?= $route_path; ?>/';
 
     protected function setUp(): void
     {
