@@ -100,6 +100,9 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
     public function testRemove(): void
     {
         $this->markTestIncomplete();
+
+        $originalNumObjectsInRepository = count($this->repository->findAll());
+
         $fixture = new <?= $entity_class_name; ?>();
 <?php foreach ($form_fields as $form_field => $typeOptions): ?>
         $fixture->set<?= ucfirst($form_field); ?>('My Title');
@@ -107,10 +110,13 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
 
         $this->repository->add($fixture, true);
 
+        $this->assertSame($originalNumObjectsInRepository + 1, count($this->repository->findAll()));
+
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         $this->client->submitForm('Delete');
 
+        self::assertSame($originalNumObjectsInRepository, count($this->repository->findAll()));
+
         self::assertResponseRedirects('<?= $route_path; ?>/');
-        self::assertSame(0, $this->repository->count([]));
     }
 }
