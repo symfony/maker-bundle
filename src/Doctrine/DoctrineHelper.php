@@ -306,17 +306,108 @@ final class DoctrineHelper
         $lowestCharacterDiff = null;
         $foundDriver = null;
 
+        $mappedDrivers = [];
+
         foreach ($this->mappingDriversByPrefix ?? [] as $mappings) {
             foreach ($mappings as [$prefix, $driver]) {
-                $diff = substr_compare($namespace, $prefix, 0);
-
-                if ($diff >= 0 && (null === $lowestCharacterDiff || $diff < $lowestCharacterDiff)) {
-                    $lowestCharacterDiff = $diff;
-                    $foundDriver = $driver;
-                }
+                $mappedDrivers[$prefix] = $driver;
             }
         }
 
-        return $foundDriver;
+        return $this->findByNamespace($namespace, $mappedDrivers);
+    }
+
+    public function hasMultipleManagers(): bool
+    {
+        return count($this->registry->getManagers()) > 0;
+    }
+
+    public function getEntityNamespaces(?string $managerName = null): array
+    {
+        $namespaces = [];
+
+        /** @var EntityManagerInterface $em */
+        foreach ($this->getRegistry()->getManagers() as $name => $em) {
+            $namespaces[$name] = $em->getConfiguration()->getEntityNamespaces();
+        }
+
+        if ($managerName) {
+            if (!\array_key_exists($managerName, $namespaces)) {
+                throw new \InvalidArgumentException(sprintf('No mappings for entity manager "%s" found', $managerName));
+            }
+
+            return $namespaces[$managerName];
+        }
+
+        return $namespaces;
+    }
+
+    public function hasMultipleMappings(string $managerName = null): bool
+    {
+        $mappingCount = 0;
+
+        foreach ($this->getEntityNamespaces() as $name => $mappings) {
+            if (null !== $managerName && $name !== $managerName) {
+                continue;
+            }
+
+            $mappingCount += \count($mappings);
+        }
+
+        return $mappingCount > 1;
+    }
+
+    public function getNamespaceByMapping(string $managerName, string $mappingName)
+    {
+        $namespaces = $this->getEntityNamespaces($managerName);
+
+        if (!\array_key_exists($mappingName, $namespaces)) {
+            throw new \InvalidArgumentException(sprintf('Could not find mapping "%s" for manager "%s"', $mappingName, $managerName));
+        }
+
+        return $namespaces[$mappingName];
+    }
+
+    public function getMappingByNamespace(string $namespace): array
+    {
+        $matchingMappings = [];
+
+        foreach ($this->getEntityNamespaces() as $managerName => $mappings) {
+            $closestMapping = $this->findByNamespace($namespace, array_flip($mappings));
+
+            if ($closestMapping) {
+                $mappingNamespace = $mappings[$closestMapping];
+                $matchingMappings[$mappingNamespace] = array_merge(['manager' => $managerName, 'mapping' => $closestMapping]);
+            }
+        }
+
+        $finalMatch = $this->findByNamespace($namespace, $matchingMappings);
+
+        if (!$finalMatch) {
+            throw new \InvalidArgumentException(sprintf('Could not find manager for namespace %s', $namespace));
+        }
+
+        return $finalMatch;
+    }
+
+    /**
+     * @param array<string, mixed> $data key represents the prefix namespace, while the value is the data which is
+     *                                   returned when the key is the closest match to the given $fullNamespace param
+     */
+    private function findByNamespace(string $namespace, array $data)
+    {
+        $lowestCharacterDiff = null;
+        $result = null;
+
+        foreach ($data as $prefix => $return) {
+            $diff = substr_compare($namespace, $prefix, 0);
+
+            if ($diff >= 0 && (null === $lowestCharacterDiff || $diff < $lowestCharacterDiff)) {
+                $lowestCharacterDiff = $diff;
+                $result = $return;
+            }
+        }
+
+        return $result;
     }
 }
