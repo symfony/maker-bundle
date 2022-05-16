@@ -25,6 +25,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Annotation\Route;
@@ -73,13 +74,14 @@ final class MakeController extends AbstractMaker
             'Controller'
         );
 
+        $withTemplate = $this->isTwigInstalled() && !$input->getOption('no-template');
+
         $useStatements = new UseStatementGenerator([
             AbstractController::class,
-            Response::class,
+            $withTemplate ? Response::class : JsonResponse::class,
             Route::class,
         ]);
 
-        $noTemplate = $input->getOption('no-template');
         $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()).'/index.html.twig';
         $controllerPath = $generator->generateController(
             $controllerClassNameDetails->getFullName(),
@@ -88,12 +90,12 @@ final class MakeController extends AbstractMaker
                 'use_statements' => $useStatements,
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
-                'with_template' => $this->isTwigInstalled() && !$noTemplate,
+                'with_template' => $withTemplate,
                 'template_name' => $templateName,
             ]
         );
 
-        if ($this->isTwigInstalled() && !$noTemplate) {
+        if ($withTemplate) {
             $generator->generateTemplate(
                 $templateName,
                 'controller/twig_template.tpl.php',
