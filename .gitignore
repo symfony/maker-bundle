@@ -7,4 +7,3 @@
 /tools/*/composer.lock
 /tools/*/vendor
 /vendor/
-/.idea/

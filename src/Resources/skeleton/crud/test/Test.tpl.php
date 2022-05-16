@@ -36,6 +36,8 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
 
     public function testNew(): void
     {
+        $originalNumObjectsInRepository = count($this->repository->findAll());
+
         $this->markTestIncomplete();
         $this->client->request('GET', sprintf('%snew', $this->path));
 
@@ -47,9 +49,9 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
 <?php endforeach; ?>
         ]);
 
-        self::assertResponseRedirects('/sweet/food/');
+        self::assertResponseRedirects('<?= $route_path; ?>/');
 
-        self::assertSame(1, $this->repository->count([]));
+        self::assertSame($originalNumObjectsInRepository + 1, count($this->repository->findAll()));
     }
 
     public function testShow(): void
@@ -110,13 +112,12 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
 
         $this->repository->add($fixture, true);
 
-        $this->assertSame($originalNumObjectsInRepository + 1, count($this->repository->findAll()));
+        self::assertSame($originalNumObjectsInRepository + 1, count($this->repository->findAll()));
 
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         $this->client->submitForm('Delete');
 
         self::assertSame($originalNumObjectsInRepository, count($this->repository->findAll()));
-
         self::assertResponseRedirects('<?= $route_path; ?>/');
     }
 }
