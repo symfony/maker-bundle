@@ -12,5 +12,7 @@ class GeneratedControllerTest extends WebTestCase
         $client->request('GET', '/foo/bar');
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertSame('application/json', $client->getResponse()->headers->get('Content-Type'));
+        $this->assertSame('{"message":"Welcome to your new controller!","path":"src\/Controller\/FooBarController.php"}', $client->getResponse()->getContent());
     }
 }
