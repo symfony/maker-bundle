@@ -22,34 +22,9 @@ class TemplateComponentGeneratorTest extends TestCase
 {
     public function testRouteAttributes(): void
     {
-        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
-        $mockPhpCompatUtil
-            ->expects(self::once())
-            ->method('canUseAttributes')
-            ->willReturn(true)
-        ;
-
-        $generator = new TemplateComponentGenerator($mockPhpCompatUtil);
+        $generator = new TemplateComponentGenerator($this->createMock(PhpCompatUtil::class));
 
         $expected = "    #[Route('/', name: 'app_home')]\n";
-
-        self::assertSame($expected, $generator->generateRouteForControllerMethod('/', 'app_home'));
-    }
-
-    public function testRouteAnnotations(): void
-    {
-        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
-        $mockPhpCompatUtil
-            ->expects(self::once())
-            ->method('canUseAttributes')
-            ->willReturn(false)
-        ;
-
-        $generator = new TemplateComponentGenerator($mockPhpCompatUtil);
-
-        $expected = "    /**\n";
-        $expected .= "     * @Route(\"/\", name=\"app_home\")\n";
-        $expected .= "     */\n";
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod('/', 'app_home'));
     }
@@ -57,24 +32,9 @@ class TemplateComponentGeneratorTest extends TestCase
     /**
      * @dataProvider routeMethodDataProvider
      */
-    public function testRouteMethods(string $expected, bool $useAttribute, array $methods): void
+    public function testRouteMethods(string $expected, array $methods): void
     {
-        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
-        $mockPhpCompatUtil
-            ->expects(self::once())
-            ->method('canUseAttributes')
-            ->willReturn($useAttribute)
-        ;
-
-        $generator = new TemplateComponentGenerator($mockPhpCompatUtil);
-
-        if (!$useAttribute) {
-            $annotation = "    /**\n";
-            $annotation .= $expected;
-            $annotation .= "     */\n";
-
-            $expected = $annotation;
-        }
+        $generator = new TemplateComponentGenerator($this->createMock(PhpCompatUtil::class));
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod(
             '/',
@@ -85,25 +45,16 @@ class TemplateComponentGeneratorTest extends TestCase
 
     public function routeMethodDataProvider(): \Generator
     {
-        yield ["    #[Route('/', name: 'app_home', methods: ['GET'])]\n", true, ['GET']];
-        yield ["     * @Route(\"/\", name=\"app_home\", methods={\"GET\"})\n", false, ['GET']];
-        yield ["    #[Route('/', name: 'app_home', methods: ['GET', 'POST'])]\n", true, ['GET', 'POST']];
-        yield ["     * @Route(\"/\", name=\"app_home\", methods={\"GET\", \"POST\"})\n", false, ['GET', 'POST']];
+        yield ["    #[Route('/', name: 'app_home', methods: ['GET'])]\n", ['GET']];
+        yield ["    #[Route('/', name: 'app_home', methods: ['GET', 'POST'])]\n", ['GET', 'POST']];
     }
 
     /**
      * @dataProvider routeIndentationDataProvider
      */
-    public function testRouteIndentation(string $expected, bool $useAttribute): void
+    public function testRouteIndentation(string $expected): void
     {
-        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
-        $mockPhpCompatUtil
-            ->expects(self::once())
-            ->method('canUseAttributes')
-            ->willReturn($useAttribute)
-        ;
-
-        $generator = new TemplateComponentGenerator($mockPhpCompatUtil);
+        $generator = new TemplateComponentGenerator($this->createMock(PhpCompatUtil::class));
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod(
             '/',
@@ -115,23 +66,15 @@ class TemplateComponentGeneratorTest extends TestCase
 
     public function routeIndentationDataProvider(): \Generator
     {
-        yield ["#[Route('/', name: 'app_home')]\n", true];
-        yield ["/**\n * @Route(\"/\", name=\"app_home\")\n */\n", false];
+        yield ["#[Route('/', name: 'app_home')]\n"];
     }
 
     /**
      * @dataProvider routeTrailingNewLineDataProvider
      */
-    public function testRouteTrailingNewLine(string $expected, bool $useAttribute): void
+    public function testRouteTrailingNewLine(string $expected): void
     {
-        $mockPhpCompatUtil = $this->createMock(PhpCompatUtil::class);
-        $mockPhpCompatUtil
-            ->expects(self::once())
-            ->method('canUseAttributes')
-            ->willReturn($useAttribute)
-        ;
-
-        $generator = new TemplateComponentGenerator($mockPhpCompatUtil);
+        $generator = new TemplateComponentGenerator($this->createMock(PhpCompatUtil::class));
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod(
             '/',
@@ -145,6 +88,5 @@ class TemplateComponentGeneratorTest extends TestCase
     public function routeTrailingNewLineDataProvider(): \Generator
     {
         yield ["#[Route('/', name: 'app_home')]", true];
-        yield ["/**\n * @Route(\"/\", name=\"app_home\")\n */", false];
     }
 }
