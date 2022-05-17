@@ -49,6 +49,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Guard\AuthenticatorInterface as GuardAuthenticatorInterface;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Validation;
@@ -124,7 +125,8 @@ final class MakeRegistrationForm extends AbstractMaker
         $providersData = $securityData['security']['providers'] ?? [];
 
         // Determine if we should use new security features introduced in Symfony 5.2
-        if ($securityData['security']['enable_authenticator_manager'] ?? false) {
+        // @legacy - Can be removed when Symfony 5.4 support is dropped
+        if (!interface_exists(GuardAuthenticatorInterface::class) || ($securityData['security']['enable_authenticator_manager'] ?? false)) {
             $this->useNewAuthenticatorSystem = true;
         }
 
