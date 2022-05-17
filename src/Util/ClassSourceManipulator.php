@@ -514,7 +514,7 @@ final class ClassSourceManipulator
 
         if (\function_exists('enum_exists')) {
             // do we have an enum ?
-            if (is_object($value) && enum_exists(get_class($value))) {
+            if (\is_object($value) && enum_exists(\get_class($value))) {
                 $value = $value->value;
             }
         }
