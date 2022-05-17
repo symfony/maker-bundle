@@ -4,36 +4,21 @@ namespace <?= $namespace ?>;
 
 <?= $use_statements; ?>
 
-<?php if ($use_attributes) { ?>
 #[Route('/reset-password')]
-<?php } else { ?>
-/**
- * @Route("/reset-password")
- */
-<?php } ?>
 class <?= $class_name ?> extends AbstractController
 {
     use ResetPasswordControllerTrait;
 
-    private <?= $use_typed_properties ? 'ResetPasswordHelperInterface ' : null ?>$resetPasswordHelper;
-    private <?= $use_typed_properties ? 'EntityManagerInterface ' : null ?>$entityManager;
-
-    public function __construct(ResetPasswordHelperInterface $resetPasswordHelper, EntityManagerInterface $entityManager)
-    {
-        $this->resetPasswordHelper = $resetPasswordHelper;
-        $this->entityManager = $entityManager;
+    public function __construct(
+        private ResetPasswordHelperInterface $resetPasswordHelper,
+        private EntityManagerInterface $entityManager
+    ) {
     }
 
     /**
      * Display & process form to request a password reset.
-<?php if ($use_attributes) { ?>
      */
     #[Route('', name: 'app_forgot_password_request')]
-<?php } else { ?>
-     *
-     * @Route("", name="app_forgot_password_request")
-     */
-<?php } ?>
     public function request(Request $request, MailerInterface $mailer<?php if ($translator_available): ?>, TranslatorInterface $translator<?php endif ?>): Response
     {
         $form = $this->createForm(<?= $request_form_type_class_name ?>::class);
@@ -54,14 +39,8 @@ class <?= $class_name ?> extends AbstractController
 
     /**
      * Confirmation page after a user has requested a password reset.
-<?php if ($use_attributes) { ?>
      */
     #[Route('/check-email', name: 'app_check_email')]
-<?php } else { ?>
-     *
-     * @Route("/check-email", name="app_check_email")
-     */
-<?php } ?>
     public function checkEmail(): Response
     {
         // Generate a fake token if the user does not exist or someone hit this page directly.
@@ -77,14 +56,8 @@ class <?= $class_name ?> extends AbstractController
 
     /**
      * Validates and process the reset URL that the user clicked in their email.
-<?php if ($use_attributes) { ?>
      */
     #[Route('/reset/{token}', name: 'app_reset_password')]
-<?php } else { ?>
-     *
-     * @Route("/reset/{token}", name="app_reset_password")
-     */
-<?php } ?>
     public function reset(Request $request, <?= $password_hasher_class_details->getShortName() ?> <?= $password_hasher_variable_name ?><?php if ($translator_available): ?>, TranslatorInterface $translator<?php endif ?>, string $token = null): Response
     {
         if ($token) {

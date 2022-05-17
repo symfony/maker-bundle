@@ -4,13 +4,7 @@ namespace <?= $namespace ?>;
 
 <?= $use_statements; ?>
 
-<?php if ($use_attributes) { ?>
 #[Route('<?= $route_path ?>')]
-<?php } else { ?>
-/**
- * @Route("<?= $route_path ?>")
- */
-<?php } ?>
 class <?= $class_name ?> extends AbstractController
 {
 <?= $generator->generateRouteForControllerMethod('/', sprintf('%s_index', $route_name), ['GET']) ?>
