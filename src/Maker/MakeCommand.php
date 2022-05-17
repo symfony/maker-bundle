@@ -33,11 +33,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 final class MakeCommand extends AbstractMaker
 {
-    private $phpCompatUtil;
-
-    public function __construct(PhpCompatUtil $phpCompatUtil)
+    public function __construct(private PhpCompatUtil $phpCompatUtil)
     {
-        $this->phpCompatUtil = $phpCompatUtil;
     }
 
     public static function getCommandName(): string

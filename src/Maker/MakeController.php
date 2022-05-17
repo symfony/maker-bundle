@@ -36,7 +36,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 final class MakeController extends AbstractMaker
 {
-    private $phpCompatUtil;
+    private PhpCompatUtil $phpCompatUtil;
 
     public function __construct(PhpCompatUtil $phpCompatUtil = null)
     {

@@ -78,23 +78,19 @@ use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
  */
 class MakeResetPassword extends AbstractMaker
 {
-    private $fileManager;
-    private $doctrineHelper;
-    private $entityClassGenerator;
+    private string $fromEmailAddress;
+    private string $fromEmailName;
+    private string $controllerResetSuccessRedirect;
+    private string $userClass;
+    private string $emailPropertyName;
+    private string $emailGetterMethodName;
+    private string $passwordSetterMethodName;
 
-    private $fromEmailAddress;
-    private $fromEmailName;
-    private $controllerResetSuccessRedirect;
-    private $userClass;
-    private $emailPropertyName;
-    private $emailGetterMethodName;
-    private $passwordSetterMethodName;
-
-    public function __construct(FileManager $fileManager, DoctrineHelper $doctrineHelper, EntityClassGenerator $entityClassGenerator)
-    {
-        $this->fileManager = $fileManager;
-        $this->doctrineHelper = $doctrineHelper;
-        $this->entityClassGenerator = $entityClassGenerator;
+    public function __construct(
+        private FileManager $fileManager,
+        private DoctrineHelper $doctrineHelper,
+        private EntityClassGenerator $entityClassGenerator
+    ) {
     }
 
     public static function getCommandName(): string

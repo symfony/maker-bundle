@@ -32,11 +32,8 @@ use Symfony\Component\Messenger\MessageBusInterface;
  */
 final class MakeMessage extends AbstractMaker
 {
-    private $fileManager;
-
-    public function __construct(FileManager $fileManager)
+    public function __construct(private FileManager $fileManager)
     {
-        $this->fileManager = $fileManager;
     }
 
     public static function getCommandName(): string

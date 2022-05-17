@@ -48,19 +48,13 @@ use Symfony\Component\Yaml\Yaml;
  */
 final class MakeUser extends AbstractMaker
 {
-    private $fileManager;
-    private $userClassBuilder;
-    private $configUpdater;
-    private $entityClassGenerator;
-    private $doctrineHelper;
-
-    public function __construct(FileManager $fileManager, UserClassBuilder $userClassBuilder, SecurityConfigUpdater $configUpdater, EntityClassGenerator $entityClassGenerator, DoctrineHelper $doctrineHelper)
-    {
-        $this->fileManager = $fileManager;
-        $this->userClassBuilder = $userClassBuilder;
-        $this->configUpdater = $configUpdater;
-        $this->entityClassGenerator = $entityClassGenerator;
-        $this->doctrineHelper = $doctrineHelper;
+    public function __construct(
+        private FileManager $fileManager,
+        private UserClassBuilder $userClassBuilder,
+        private SecurityConfigUpdater $configUpdater,
+        private EntityClassGenerator $entityClassGenerator,
+        private DoctrineHelper $doctrineHelper
+    ) {
     }
 
     public static function getCommandName(): string
