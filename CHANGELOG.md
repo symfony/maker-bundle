@@ -1,5 +1,19 @@
 # Changelog
 
+## [v1.43.0](https://github.com/symfony/maker-bundle/releases/tag/v1.43.0)
+
+*May 17th, 2022*
+
+### Feature
+
+- [#1120](https://github.com/symfony/maker-bundle/pull/1120) - [make:controller] Return a JsonResponse instead of a Response with --no-template - *@l-vo*
+- [#1117](https://github.com/symfony/maker-bundle/pull/1117) - [make:crud] adding repository counts for crud testRemove  - *@dr-matt-smith*
+
+### Bug
+
+- [#1118](https://github.com/symfony/maker-bundle/pull/1118) - Fix errors when enable_authenticator_manager is not set - *@l-vo*
+- [#1042](https://github.com/symfony/maker-bundle/pull/1042) - [CSM] fix: Handle enum as values - *@Geekimo*
+
 ## [v1.42.0](https://github.com/symfony/maker-bundle/releases/tag/v1.42.0)
 
 *May 9th, 2022*
