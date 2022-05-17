@@ -512,6 +512,13 @@ final class ClassSourceManipulator
             throw new \Exception('Invalid value: loop before quoting.');
         }
 
+        if (\function_exists('enum_exists')) {
+            // do we have an enum ?
+            if (\is_object($value) && enum_exists(\get_class($value))) {
+                $value = $value->value;
+            }
+        }
+
         return sprintf('"%s"', $value);
     }
 
