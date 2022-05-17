@@ -20,33 +20,30 @@ use Symfony\Bundle\MakerBundle\FileManager;
  */
 class PhpCompatUtil
 {
-    /** @var FileManager */
-    private $fileManager;
-
-    public function __construct(FileManager $fileManager)
+    public function __construct(private FileManager $fileManager)
     {
-        $this->fileManager = $fileManager;
+        @trigger_deprecation('symfony/maker-bundle', '0.0.0', 'This utility is no longer being used. It may be removed in a future version.');
     }
 
+    // @TODO - Remove before merge
     public function canUseAttributes(): bool
     {
-        $version = $this->getPhpVersion();
-
-        return version_compare($version, '8alpha', '>=');
+        @trigger_error('This method is no longer needed.');
+        return true;
     }
 
+    // @TODO - Remove before merge
     public function canUseTypedProperties(): bool
     {
-        $version = $this->getPhpVersion();
-
-        return version_compare($version, '7.4', '>=');
+        @trigger_error('This method is no longer needed.');
+        return true;
     }
 
+    // @TODO - Remove before merge
     public function canUseUnionTypes(): bool
     {
-        $version = $this->getPhpVersion();
-
-        return version_compare($version, '8alpha', '>=');
+        @trigger_error('This method is no longer needed.');
+        return true;
     }
 
     protected function getPhpVersion(): string

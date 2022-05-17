@@ -26,6 +26,7 @@ class PhpVersionTest extends TestCase
      */
     public function testUsesPhpPlatformFromComposerJsonFileForCanUseAttributes(string $version, bool $expectedResult): void
     {
+        $this->markTestSkipped('No longer needed. Remove me before merge.');
         $mockFileManager = $this->mockFileManager(sprintf('{"platform-overrides": {"php": "%s"}}', $version));
 
         $version = new PhpCompatUtil($mockFileManager);
@@ -103,6 +104,8 @@ class PhpVersionTest extends TestCase
      */
     public function testCanUseTypedProperties(string $version, bool $expectedResult): void
     {
+        $this->markTestSkipped('No longer needed. Remove me before merge.');
+
         $mockFileManager = $this->mockFileManager(sprintf('{"platform-overrides": {"php": "%s"}}', $version));
 
         $version = new PhpCompatUtil($mockFileManager);
@@ -129,6 +132,8 @@ class PhpVersionTest extends TestCase
      */
     public function testCanUseUnionTypes(string $version, bool $expectedResult): void
     {
+        $this->markTestSkipped('No longer needed. Remove me before merge.');
+
         $mockFileManager = $this->mockFileManager(sprintf('{"platform-overrides": {"php": "%s"}}', $version));
 
         $version = new PhpCompatUtil($mockFileManager);
