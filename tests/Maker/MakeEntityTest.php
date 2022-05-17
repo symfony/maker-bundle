@@ -90,7 +90,7 @@ class MakeEntityTest extends MakerTestCase
 
                 $content = file_get_contents($runner->getPath('src/Entity/User.php'));
                 $this->assertStringContainsString('use ApiPlatform\Core\Annotation\ApiResource;', $content);
-                $this->assertStringContainsString($this->useAttributes($runner) ? '#[ApiResource]' : '@ApiResource', $content);
+                $this->assertStringContainsString('#[ApiResource]', $content);
 
                 $this->runEntityTest($runner);
             }),
@@ -587,7 +587,7 @@ class MakeEntityTest extends MakerTestCase
 
                 $content = file_get_contents($runner->getPath('src/Entity/User.php'));
                 $this->assertStringContainsString('use Symfony\UX\Turbo\Attribute\Broadcast;', $content);
-                $this->assertStringContainsString($this->useAttributes($runner) ? '#[Broadcast]' : '@Broadcast', $content);
+                $this->assertStringContainsString('#[Broadcast]', $content);
 
                 $skipMercureTest = $_SERVER['MAKER_SKIP_MERCURE_TEST'] ?? false;
                 if (!$skipMercureTest) {
@@ -681,11 +681,7 @@ class MakeEntityTest extends MakerTestCase
         );
 
         $runner->copy(
-            sprintf(
-                'make-entity/entities/%s/%s',
-                $this->useAttributes($runner) ? 'attributes' : 'annotations',
-                $filename
-            ),
+            sprintf('make-entity/entities/attributes/%s', $filename),
             sprintf('src/Entity/%s.php', $entityClassName)
         );
     }
@@ -693,11 +689,7 @@ class MakeEntityTest extends MakerTestCase
     private function copyEntityDirectory(MakerTestRunner $runner, string $directory): void
     {
         $runner->copy(
-            sprintf(
-                'make-entity/%s/%s',
-                $directory,
-                $this->useAttributes($runner) ? 'attributes' : 'annotations'
-            ),
+            sprintf('make-entity/%s/attributes', $directory),
             ''
         );
     }
