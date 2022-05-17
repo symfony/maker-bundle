@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
-use Doctrine\ORM\Mapping\Driver\AttributeReader;
 use Symfony\Bundle\MakerBundle\Maker\MakeResetPassword;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
