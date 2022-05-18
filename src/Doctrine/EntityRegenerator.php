@@ -199,13 +199,12 @@ final class EntityRegenerator
     private function createClassManipulator(string $classPath): ClassSourceManipulator
     {
         return new ClassSourceManipulator(
-            $this->fileManager->getFileContents($classPath),
-            $this->overwrite,
-            // use annotations
+            sourceCode: $this->fileManager->getFileContents($classPath),
+            overwrite: $this->overwrite,
             // if properties need to be generated then, by definition,
             // some non-annotation config is being used, and so, the
             // properties should not have annotations added to them
-            false
+            useAttributesForDoctrineMapping: false
         );
     }
 

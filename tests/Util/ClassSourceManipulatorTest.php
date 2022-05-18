@@ -27,7 +27,7 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddPropertyTests
      */
-    public function testAddProperty(string $sourceFilename, $propertyName, array $commentLines, $expectedSourceFilename)
+    public function testAddProperty(string $sourceFilename, $propertyName, array $commentLines, $expectedSourceFilename): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_property/'.$expectedSourceFilename);
@@ -35,15 +35,15 @@ class ClassSourceManipulatorTest extends TestCase
         $manipulator = new ClassSourceManipulator($source);
         $method = (new \ReflectionObject($manipulator))->getMethod('addProperty');
         $method->setAccessible(true);
-        $method->invoke($manipulator, $propertyName, $commentLines);
+        $method->invoke($manipulator, name: $propertyName, comments: $commentLines);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function getAddPropertyTests()
+    public function getAddPropertyTests(): \Generator
     {
         yield 'normal_property_add' => [
-            'legacy/User_simple.php',
+            'User_simple.php',
             'fooProp',
             [],
             'User_simple.php',
@@ -67,7 +67,7 @@ class ClassSourceManipulatorTest extends TestCase
         ];
 
         yield 'property_empty_class' => [
-            'legacy/User_empty.php',
+            'User_empty.php',
             'fooProp',
             [],
             'User_empty.php',
@@ -77,7 +77,7 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddGetterTests
      */
-    public function testAddGetter(string $sourceFilename, string $propertyName, string $type, array $commentLines, $expectedSourceFilename)
+    public function testAddGetter(string $sourceFilename, string $propertyName, string $type, array $commentLines, $expectedSourceFilename): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_getter/'.$expectedSourceFilename);
@@ -90,10 +90,10 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function getAddGetterTests()
+    public function getAddGetterTests(): \Generator
     {
         yield 'normal_getter_add' => [
-            'legacy/User_simple.php',
+            'User_simple.php',
             'fooProp',
             'string',
             [],
@@ -101,7 +101,7 @@ class ClassSourceManipulatorTest extends TestCase
         ];
 
         yield 'normal_getter_add_bool' => [
-            'legacy/User_simple.php',
+            'User_simple.php',
             'fooProp',
             'bool',
             [],
@@ -120,7 +120,7 @@ class ClassSourceManipulatorTest extends TestCase
         ];
 
         yield 'getter_empty_class' => [
-            'legacy/User_empty.php',
+            'User_empty.php',
             'fooProp',
             'string',
             [],
@@ -131,7 +131,7 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddSetterTests
      */
-    public function testAddSetter(string $sourceFilename, string $propertyName, string $type, bool $isNullable, array $commentLines, $expectedSourceFilename)
+    public function testAddSetter(string $sourceFilename, string $propertyName, string $type, bool $isNullable, array $commentLines, $expectedSourceFilename): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_setter/'.$expectedSourceFilename);
@@ -144,10 +144,10 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function getAddSetterTests()
+    public function getAddSetterTests(): \Generator
     {
         yield 'normal_setter_add' => [
-            'legacy/User_simple.php',
+            'User_simple.php',
             'fooProp',
             'string',
             false,
@@ -168,7 +168,7 @@ class ClassSourceManipulatorTest extends TestCase
         ];
 
         yield 'setter_empty_class' => [
-            'legacy/User_empty.php',
+            'User_empty.php',
             'fooProp',
             'string',
             false,
@@ -182,11 +182,6 @@ class ClassSourceManipulatorTest extends TestCase
      */
     public function testAddAttributeToClass(string $sourceFilename, string $expectedSourceFilename, string $attributeClass, array $attributeOptions, string $attributePrefix = null): void
     {
-        // @legacy Remove conditional when PHP < 8.0 support is dropped.
-        if ((\PHP_VERSION_ID < 80000)) {
-            $this->markTestSkipped('Requires PHP >= PHP 8.0');
-        }
-
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_class_attribute/'.$expectedSourceFilename);
         $manipulator = new ClassSourceManipulator($source);
@@ -213,38 +208,6 @@ class ClassSourceManipulatorTest extends TestCase
     }
 
     /**
-     * @dataProvider getAnnotationTests
-     */
-    public function testBuildAnnotationLine(string $annotationClass, array $annotationOptions, string $expectedAnnotation)
-    {
-        $manipulator = new ClassSourceManipulator('');
-        $method = (new \ReflectionObject($manipulator))->getMethod('buildAnnotationLine');
-        $method->setAccessible(true);
-        $actualAnnotation = $method->invoke($manipulator, $annotationClass, $annotationOptions);
-
-        $this->assertSame($expectedAnnotation, $actualAnnotation);
-    }
-
-    public function getAnnotationTests()
-    {
-        yield 'empty_annotation' => [
-            '@ORM\Column',
-            [],
-            '@ORM\Column()',
-        ];
-
-        yield 'complex_annotation' => [
-            '@ORM\Column',
-            [
-                'name' => 'firstName',
-                'length' => 10,
-                'nullable' => false,
-            ],
-            '@ORM\Column(name="firstName", length=10, nullable=false)',
-        ];
-    }
-
-    /**
      * @dataProvider getAddEntityFieldTests
      */
     public function testAddEntityField(string $sourceFilename, string $propertyName, array $fieldOptions, $expectedSourceFilename): void
@@ -252,30 +215,17 @@ class ClassSourceManipulatorTest extends TestCase
         $sourcePath = __DIR__.'/fixtures/source';
         $expectedPath = __DIR__.'/fixtures/add_entity_field';
 
-        // Legacy Annotation Tests
         $this->runAddEntityFieldTests(
-            file_get_contents(sprintf('%s/legacy/%s', $sourcePath, $sourceFilename)),
-            $propertyName,
-            $fieldOptions,
-            file_get_contents(sprintf('%s/legacy/%s', $expectedPath, $expectedSourceFilename)),
-            false
-        );
-
-        // Run Attribute Tests
-        if ((\PHP_VERSION_ID >= 80000)) {
-            $this->runAddEntityFieldTests(
                 file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
                 $propertyName,
                 $fieldOptions,
-                file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
-                true
+                file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename))
             );
-        }
     }
 
-    private function runAddEntityFieldTests(string $source, string $propertyName, array $fieldOptions, string $expected, bool $php8): void
+    private function runAddEntityFieldTests(string $source, string $propertyName, array $fieldOptions, string $expected): void
     {
-        $manipulator = new ClassSourceManipulator($source, false, !$php8, true, $php8);
+        $manipulator = new ClassSourceManipulator($source, false, true);
         $manipulator->addEntityField($propertyName, $fieldOptions);
 
         $this->assertSame($expected, $manipulator->getSourceCode());
@@ -345,28 +295,16 @@ class ClassSourceManipulatorTest extends TestCase
         $sourcePath = __DIR__.'/fixtures/source';
         $expectedPath = __DIR__.'/fixtures/add_many_to_one_relation';
 
-        // Legacy Annotation Tests
         $this->runAddManyToOneRelationTests(
-            file_get_contents(sprintf('%s/legacy/%s', $sourcePath, $sourceFilename)),
-            file_get_contents(sprintf('%s/legacy/%s', $expectedPath, $expectedSourceFilename)),
-            $manyToOne,
-            false
-        );
-
-        // Run Attribute Tests
-        if ((\PHP_VERSION_ID >= 80000)) {
-            $this->runAddManyToOneRelationTests(
                 file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
                 file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
-                $manyToOne,
-                true
+                $manyToOne
             );
-        }
     }
 
-    public function runAddManyToOneRelationTests(string $source, string $expected, RelationManyToOne $manyToOne, bool $php8): void
+    public function runAddManyToOneRelationTests(string $source, string $expected, RelationManyToOne $manyToOne): void
     {
-        $manipulator = new ClassSourceManipulator($source, false, !$php8, true, $php8);
+        $manipulator = new ClassSourceManipulator($source, false, true);
         $manipulator->addManyToOneRelation($manyToOne);
 
         $this->assertSame($expected, $manipulator->getSourceCode());
@@ -450,33 +388,21 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddOneToManyRelationTests
      */
-    public function testAddOneToManyRelation(string $sourceFilename, string $expectedSourceFilename, RelationOneToMany $oneToMany)
+    public function testAddOneToManyRelation(string $sourceFilename, string $expectedSourceFilename, RelationOneToMany $oneToMany): void
     {
         $sourcePath = __DIR__.'/fixtures/source';
         $expectedPath = __DIR__.'/fixtures/add_one_to_many_relation';
 
-        // Legacy Annotation Tests
         $this->runAddOneToManyRelationTests(
-            file_get_contents(sprintf('%s/legacy/%s', $sourcePath, $sourceFilename)),
-            file_get_contents(sprintf('%s/legacy/%s', $expectedPath, $expectedSourceFilename)),
-            $oneToMany,
-            false
-        );
-
-        // Run Attribute Tests
-        if ((\PHP_VERSION_ID >= 80000)) {
-            $this->runAddOneToManyRelationTests(
                 file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
                 file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
-                $oneToMany,
-                true
+                $oneToMany
             );
-        }
     }
 
-    private function runAddOneToManyRelationTests(string $source, string $expected, RelationOneToMany $oneToMany, bool $php8): void
+    private function runAddOneToManyRelationTests(string $source, string $expected, RelationOneToMany $oneToMany): void
     {
-        $manipulator = new ClassSourceManipulator($source, false, !$php8, true, $php8);
+        $manipulator = new ClassSourceManipulator($source, false, true);
         $manipulator->addOneToManyRelation($oneToMany);
 
         $this->assertSame($expected, $manipulator->getSourceCode());
@@ -528,28 +454,16 @@ class ClassSourceManipulatorTest extends TestCase
         $sourcePath = __DIR__.'/fixtures/source';
         $expectedPath = __DIR__.'/fixtures/add_many_to_many_relation';
 
-        // Legacy Annotation Tests
         $this->runAddManyToManyRelationTest(
-            file_get_contents(sprintf('%s/legacy/%s', $sourcePath, $sourceFilename)),
-            file_get_contents(sprintf('%s/legacy/%s', $expectedPath, $expectedSourceFilename)),
-            $manyToMany,
-            false
-        );
-
-        // Run Attribute Tests
-        if ((\PHP_VERSION_ID >= 80000)) {
-            $this->runAddManyToManyRelationTest(
                 file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
                 file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
-                $manyToMany,
-                true
+                $manyToMany
             );
-        }
     }
 
-    private function runAddManyToManyRelationTest(string $source, string $expected, RelationManyToMany $manyToMany, bool $php8): void
+    private function runAddManyToManyRelationTest(string $source, string $expected, RelationManyToMany $manyToMany): void
     {
-        $manipulator = new ClassSourceManipulator($source, false, !$php8, true, $php8);
+        $manipulator = new ClassSourceManipulator($source, false, true);
         $manipulator->addManyToManyRelation($manyToMany);
 
         $this->assertSame($expected, $manipulator->getSourceCode());
@@ -599,28 +513,16 @@ class ClassSourceManipulatorTest extends TestCase
         $sourcePath = __DIR__.'/fixtures/source';
         $expectedPath = __DIR__.'/fixtures/add_one_to_one_relation';
 
-        // Legacy Annotation Tests
         $this->runAddOneToOneRelation(
-            file_get_contents(sprintf('%s/legacy/%s', $sourcePath, $sourceFilename)),
-            file_get_contents(sprintf('%s/legacy/%s', $expectedPath, $expectedSourceFilename)),
-            $oneToOne,
-            false
-        );
-
-        // Run Attribute Tests
-        if ((\PHP_VERSION_ID >= 80000)) {
-            $this->runAddOneToOneRelation(
                 file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
                 file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
-                $oneToOne,
-                true
+                $oneToOne
             );
-        }
     }
 
-    private function runAddOneToOneRelation(string $source, string $expected, RelationOneToOne $oneToOne, bool $php8): void
+    private function runAddOneToOneRelation(string $source, string $expected, RelationOneToOne $oneToOne): void
     {
-        $manipulator = new ClassSourceManipulator($source, false, !$php8, true, $php8);
+        $manipulator = new ClassSourceManipulator($source, false, true);
         $manipulator->addOneToOneRelation($oneToOne);
 
         $this->assertSame($expected, $manipulator->getSourceCode());
@@ -722,8 +624,9 @@ class ClassSourceManipulatorTest extends TestCase
         ];
     }
 
-    public function testGenerationWithTabs()
+    public function testGenerationWithTabs(): void
     {
+        $this->markTestIncomplete('We need to refactor the invoked addProperty method to pass an attribute node instead of an annotation array');
         $source = file_get_contents(__DIR__.'/fixtures/source/ProductWithTabs.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/with_tabs/ProductWithTabs.php');
 
@@ -740,9 +643,9 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddInterface()
+    public function testAddInterface(): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/legacy/User_simple.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/implements_interface/User_simple.php');
 
         $manipulator = new ClassSourceManipulator($source);
@@ -751,7 +654,7 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddInterfaceToClassWithOtherInterface()
+    public function testAddInterfaceToClassWithOtherInterface(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_simple_with_interface.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/implements_interface/User_simple_with_interface.php');
@@ -762,9 +665,9 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddMethodBuilder()
+    public function testAddMethodBuilder(): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/legacy/User_empty.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_method/UserEmpty_with_newMethod.php');
 
         $manipulator = new ClassSourceManipulator($source);
@@ -784,7 +687,7 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddMethodWithBody()
+    public function testAddMethodWithBody(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/EmptyController.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_method/Controller_with_action.php');
@@ -808,141 +711,9 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    /**
-     * @dataProvider getTestsForAddAnnotationToClass
-     */
-    public function testAddAnnotationToClass(string $source, string $expectedSource)
+    public function testAddTraitInEmptyClass(): void
     {
-        $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addAnnotationToClass('Bar\\SomeAnnotation', [
-            'message' => 'Foo',
-        ]);
-
-        $this->assertEquals($expectedSource, $manipulator->getSourceCode());
-    }
-
-    public function getTestsForAddAnnotationToClass()
-    {
-        yield 'no_doc_block' => [
-<<<EOF
-    <?php
-
-    namespace Acme;
-
-    class Foo
-    {
-    }
-    EOF
-,
-<<<EOF
-    <?php
-
-    namespace Acme;
-
-    use Bar\SomeAnnotation;
-
-    /**
-     * @SomeAnnotation(message="Foo")
-     */
-    class Foo
-    {
-    }
-    EOF
-];
-
-        yield 'normal_doc_block' => [
-<<<EOF
-    <?php
-
-    namespace Acme;
-
-    /**
-     * I'm a class!
-     */
-    class Foo
-    {
-    }
-    EOF
-,
-<<<EOF
-    <?php
-
-    namespace Acme;
-
-    use Bar\SomeAnnotation;
-
-    /**
-     * I'm a class!
-     * @SomeAnnotation(message="Foo")
-     */
-    class Foo
-    {
-    }
-    EOF
-];
-
-        yield 'simple_inline_doc_block' => [
-<<<EOF
-    <?php
-
-    namespace Acme;
-
-    /** I'm a class! */
-    class Foo
-    {
-    }
-    EOF
-,
-<<<EOF
-    <?php
-
-    namespace Acme;
-
-    use Bar\SomeAnnotation;
-
-    /**
-     * I'm a class!
-     * @SomeAnnotation(message="Foo")
-     */
-    class Foo
-    {
-    }
-    EOF
-        ];
-
-        yield 'weird_inline_doc_block' => [
-<<<EOF
-    <?php
-
-    namespace Acme;
-
-    /** **I'm a class!** ***/
-    class Foo
-    {
-    }
-    EOF
-,
-<<<EOF
-    <?php
-
-    namespace Acme;
-
-    use Bar\SomeAnnotation;
-
-    /**
-     * **I'm a class!**
-     * @SomeAnnotation(message="Foo")
-     ***/
-    class Foo
-    {
-    }
-    EOF
-];
-    }
-
-    public function testAddTraitInEmptyClass()
-    {
-        $source = file_get_contents(__DIR__.'/fixtures/source/legacy/User_empty.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_only_trait.php');
 
         $manipulator = new ClassSourceManipulator($source);
@@ -952,9 +723,9 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddTraitWithProperty()
+    public function testAddTraitWithProperty(): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/legacy/User_simple.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_prop_trait.php');
 
         $manipulator = new ClassSourceManipulator($source);
@@ -964,7 +735,7 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddTraitWithConstant()
+    public function testAddTraitWithConstant(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_const_trait.php');
@@ -976,7 +747,7 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddTraitWithTrait()
+    public function testAddTraitWithTrait(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_trait.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
@@ -988,7 +759,7 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddTraitAlReadyExists()
+    public function testAddTraitAlReadyExists(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
@@ -1000,9 +771,9 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddConstructor()
+    public function testAddConstructor(): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/legacy/User_empty.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserEmpty_with_constructor.php');
 
         $manipulator = new ClassSourceManipulator($source);
@@ -1020,9 +791,9 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddConstructorInClassContainsPropsAndMethods()
+    public function testAddConstructorInClassContainsPropsAndMethods(): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/legacy/User_simple.php');
+        $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserSimple_with_constructor.php');
 
         $manipulator = new ClassSourceManipulator($source);
@@ -1040,7 +811,7 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddConstructorInClassContainsOnlyConstants()
+    public function testAddConstructorInClassContainsOnlyConstants(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/User_with_constructor_constante.php');
@@ -1060,7 +831,7 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddConstructorInClassContainsConstructor()
+    public function testAddConstructorInClassContainsConstructor(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_constructor.php');
 

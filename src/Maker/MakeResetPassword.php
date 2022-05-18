@@ -404,11 +404,9 @@ class MakeResetPassword extends AbstractMaker
         $useAttributesForDoctrineMapping = $this->doctrineHelper->isDoctrineSupportingAttributes() && $this->doctrineHelper->doesClassUsesAttributes($requestClassNameDetails->getFullName());
 
         $manipulator = new ClassSourceManipulator(
-            $this->fileManager->getFileContents($requestEntityPath),
-            false,
-            !$useAttributesForDoctrineMapping,
-            true,
-            $useAttributesForDoctrineMapping
+            sourceCode: $this->fileManager->getFileContents($requestEntityPath),
+            overwrite: false,
+            useAttributesForDoctrineMapping: $useAttributesForDoctrineMapping
         );
 
         $manipulator->addInterface(ResetPasswordRequestInterface::class);
@@ -453,7 +451,7 @@ class MakeResetPassword extends AbstractMaker
         );
 
         $manipulator = new ClassSourceManipulator(
-            $this->fileManager->getFileContents($pathRequestRepository)
+            sourceCode: $this->fileManager->getFileContents($pathRequestRepository)
         );
 
         $manipulator->addInterface(ResetPasswordRequestRepositoryInterface::class);

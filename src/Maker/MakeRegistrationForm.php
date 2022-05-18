@@ -373,7 +373,7 @@ final class MakeRegistrationForm extends AbstractMaker
         if ($this->addUniqueEntityConstraint) {
             $classDetails = new ClassDetails($this->userClass);
             $userManipulator = new ClassSourceManipulator(
-                file_get_contents($classDetails->getPath())
+                sourceCode: file_get_contents($classDetails->getPath())
             );
             $userManipulator->setIo($io);
 
@@ -382,34 +382,24 @@ final class MakeRegistrationForm extends AbstractMaker
                     UniqueEntity::class,
                     ['fields' => [$usernameField], 'message' => sprintf('There is already an account with this %s', $usernameField)]
                 );
-            } else {
-                $userManipulator->addAnnotationToClass(
-                    UniqueEntity::class,
-                    [
-                        'fields' => [$usernameField],
-                        'message' => sprintf('There is already an account with this %s', $usernameField),
-                    ]
-                );
             }
+
             $this->fileManager->dumpFile($classDetails->getPath(), $userManipulator->getSourceCode());
         }
 
         if ($this->willVerifyEmail) {
             $classDetails = new ClassDetails($this->userClass);
             $userManipulator = new ClassSourceManipulator(
-                file_get_contents($classDetails->getPath()),
-                false,
-                false,
-                true,
-                true
+                sourceCode: file_get_contents($classDetails->getPath()),
+                overwrite: false,
+                useAttributesForDoctrineMapping: true
             );
             $userManipulator->setIo($io);
 
             $userManipulator->addProperty(
-                'isVerified',
-                ['@ORM\Column(type="boolean")'],
-                false,
-                [$userManipulator->buildAttributeNode(Column::class, ['type' => 'boolean'], 'ORM')]
+                name: 'isVerified',
+                defaultValue: false,
+                attributes: [$userManipulator->buildAttributeNode(Column::class, ['type' => 'boolean'], 'ORM')]
             );
             $userManipulator->addAccessorMethod('isVerified', 'isVerified', 'bool', false);
             $userManipulator->addSetter('isVerified', 'bool', false);
