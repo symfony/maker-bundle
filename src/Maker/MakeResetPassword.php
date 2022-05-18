@@ -50,7 +50,6 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -214,16 +213,6 @@ class MakeResetPassword extends AbstractMaker
             'Form\\'
         );
 
-        /*
-         * @legacy Conditional can be removed when MakerBundle no longer
-         *         supports Symfony < 5.2
-         */
-        $passwordHasher = UserPasswordEncoderInterface::class;
-
-        if (interface_exists(UserPasswordHasherInterface::class)) {
-            $passwordHasher = UserPasswordHasherInterface::class;
-        }
-
         $useStatements = new UseStatementGenerator([
             AbstractController::class,
             $userClassNameDetails->getFullName(),
@@ -239,7 +228,7 @@ class MakeResetPassword extends AbstractMaker
             ResetPasswordControllerTrait::class,
             ResetPasswordExceptionInterface::class,
             ResetPasswordHelperInterface::class,
-            $passwordHasher,
+            UserPasswordHasherInterface::class,
             EntityManagerInterface::class,
         ]);
 
@@ -269,9 +258,6 @@ class MakeResetPassword extends AbstractMaker
                 'from_email_name' => $this->fromEmailName,
                 'email_getter' => $this->emailGetterMethodName,
                 'email_field' => $this->emailPropertyName,
-                'password_hasher_class_details' => ($passwordClassDetails = $generator->createClassNameDetails($passwordHasher, '\\')),
-                'password_hasher_variable_name' => str_replace('Interface', '', sprintf('$%s', lcfirst($passwordClassDetails->getShortName()))), // @legacy see passwordHasher conditional above
-                'use_password_hasher' => UserPasswordHasherInterface::class === $passwordHasher, // @legacy see passwordHasher conditional above
                 'problem_validate_message_or_constant' => $problemValidateMessageOrConstant,
                 'problem_handle_message_or_constant' => $problemHandleMessageOrConstant,
                 'translator_available' => $isTranslatorAvailable,

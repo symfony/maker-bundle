@@ -58,7 +58,7 @@ class <?= $class_name ?> extends AbstractController
      * Validates and process the reset URL that the user clicked in their email.
      */
     #[Route('/reset/{token}', name: 'app_reset_password')]
-    public function reset(Request $request, <?= $password_hasher_class_details->getShortName() ?> <?= $password_hasher_variable_name ?><?php if ($translator_available): ?>, TranslatorInterface $translator<?php endif ?>, string $token = null): Response
+    public function reset(Request $request, UserPasswordHasherInterface $passwordHasher<?php if ($translator_available): ?>, TranslatorInterface $translator<?php endif ?>, string $token = null): Response
     {
         if ($token) {
             // We store the token in session and remove it from the URL, to avoid the URL being
@@ -94,7 +94,7 @@ class <?= $class_name ?> extends AbstractController
             $this->resetPasswordHelper->removeResetRequest($token);
 
             // Encode(hash) the plain password, and set it.
-            $encodedPassword = <?= $password_hasher_variable_name ?>-><?= $use_password_hasher ? 'hashPassword' : 'encodePassword' ?>(
+            $encodedPassword = $passwordHasher->hashPassword(
                 $user,
                 $form->get('plainPassword')->getData()
             );
