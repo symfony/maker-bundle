@@ -46,25 +46,29 @@ final class ClassSourceManipulator
     private const CONTEXT_CLASS = 'class';
     private const CONTEXT_CLASS_METHOD = 'class_method';
 
-    private $overwrite;
-    private $useAnnotations;
-    private $fluentMutators;
-    private $useAttributesForDoctrineMapping;
-    private $parser;
-    private $lexer;
-    private $printer;
-    /** @var ConsoleStyle|null */
-    private $io;
+    private bool $overwrite;
+    private bool $useAnnotations;
+    private bool $fluentMutators;
+    private bool $useAttributesForDoctrineMapping;
+    private Parser\Php7 $parser;
+    private Lexer\Emulative $lexer;
+    private PrettyPrinter $printer;
+    private ?ConsoleStyle $io = null;
 
-    private $sourceCode;
-    private $oldStmts;
-    private $oldTokens;
-    private $newStmts;
+    private string $sourceCode;
+    private ?array $oldStmts = null;
+    private array $oldTokens = [];
+    private array $newStmts= [];
 
-    private $pendingComments = [];
+    private array $pendingComments = [];
 
-    public function __construct(string $sourceCode, bool $overwrite = false, bool $useAnnotations = true, bool $fluentMutators = true, bool $useAttributesForDoctrineMapping = false)
-    {
+    public function __construct(
+        string $sourceCode,
+        bool $overwrite = false,
+        bool $useAnnotations = true,
+        bool $fluentMutators = true,
+        bool $useAttributesForDoctrineMapping = false
+    ) {
         $this->overwrite = $overwrite;
         $this->useAnnotations = $useAnnotations;
         $this->fluentMutators = $fluentMutators;
