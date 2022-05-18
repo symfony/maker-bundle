@@ -33,17 +33,7 @@ final class SecurityControllerBuilder
     {
         $loginMethodBuilder = $manipulator->createMethodBuilder('login', 'Response', false);
 
-        // @legacy Refactor when annotations are no longer supported
-        if ($this->phpCompatUtil->canUseAttributes()) {
-            $loginMethodBuilder->addAttribute($manipulator->buildAttributeNode(Route::class, ['path' => '/login', 'name' => 'app_login']));
-        } else {
-            $loginMethodBuilder->setDocComment(<<< 'EOT'
-/**
- * @Route("/login", name="app_login")
- */
-EOT
-            );
-        }
+        $loginMethodBuilder->addAttribute($manipulator->buildAttributeNode(Route::class, ['path' => '/login', 'name' => 'app_login']));
 
         $manipulator->addUseStatementIfNecessary(Response::class);
         $manipulator->addUseStatementIfNecessary(Route::class);
@@ -88,17 +78,7 @@ CODE
     {
         $logoutMethodBuilder = $manipulator->createMethodBuilder('logout', 'void', false);
 
-        // @legacy Refactor when annotations are no longer supported
-        if ($this->phpCompatUtil->canUseAttributes()) {
-            $logoutMethodBuilder->addAttribute($manipulator->buildAttributeNode(Route::class, ['path' => '/logout', 'name' => 'app_logout']));
-        } else {
-            $logoutMethodBuilder->setDocComment(<<< 'EOT'
-/**
- * @Route("/logout", name="app_logout")
- */
-EOT
-            );
-        }
+        $logoutMethodBuilder->addAttribute($manipulator->buildAttributeNode(Route::class, ['path' => '/logout', 'name' => 'app_logout']));
 
         $manipulator->addUseStatementIfNecessary(Route::class);
         $manipulator->addMethodBody($logoutMethodBuilder, <<<'CODE'

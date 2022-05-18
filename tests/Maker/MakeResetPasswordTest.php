@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
-use Doctrine\ORM\Mapping\Driver\AttributeReader;
 use Symfony\Bundle\MakerBundle\Maker\MakeResetPassword;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
@@ -173,12 +172,7 @@ class MakeResetPasswordTest extends MakerTestCase
                 // check ResetPasswordRequest
                 $contentResetPasswordRequest = file_get_contents($runner->getPath('src/Entity/ResetPasswordRequest.php'));
 
-                /* @legacy Drop annotation test when annotations are no longer supported. */
-                if ($this->useAttributes($runner)) {
-                    $this->assertStringContainsString('ORM\ManyToOne(targetEntity: UserCustom::class)', $contentResetPasswordRequest);
-                } else {
-                    $this->assertStringContainsString('ORM\ManyToOne(targetEntity=UserCustom::class)', $contentResetPasswordRequest);
-                }
+                $this->assertStringContainsString('ORM\ManyToOne(targetEntity: UserCustom::class)', $contentResetPasswordRequest);
 
                 // check ResetPasswordRequestFormType
                 $contentResetPasswordRequestFormType = file_get_contents($runner->getPath('/src/Form/ResetPasswordRequestFormType.php'));
@@ -215,12 +209,5 @@ class MakeResetPasswordTest extends MakerTestCase
             $identifier, // identifier
             $checkPassword ? 'y' : 'n', // password
         ]);
-    }
-
-    private function useAttributes(MakerTestRunner $runner): bool
-    {
-        return \PHP_VERSION_ID >= 80000
-            && $runner->doesClassExist(AttributeReader::class)
-            && $runner->getSymfonyVersion() >= 50200;
     }
 }

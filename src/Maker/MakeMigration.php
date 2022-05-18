@@ -31,16 +31,10 @@ use Symfony\Component\Console\Input\InputOption;
  */
 final class MakeMigration extends AbstractMaker implements ApplicationAwareMakerInterface
 {
-    private $projectDir;
+    private Application $application;
 
-    /**
-     * @var Application
-     */
-    private $application;
-
-    public function __construct(string $projectDir)
+    public function __construct(private string $projectDir)
     {
-        $this->projectDir = $projectDir;
     }
 
     public static function getCommandName(): string

@@ -32,20 +32,13 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class MakerCommand extends Command
 {
-    private $maker;
-    private $fileManager;
-    private $inputConfig;
-    /** @var ConsoleStyle */
-    private $io;
-    private $checkDependencies = true;
-    private $generator;
+    private InputConfiguration $inputConfig;
+    private ConsoleStyle $io;
+    private bool $checkDependencies = true;
 
-    public function __construct(MakerInterface $maker, FileManager $fileManager, Generator $generator)
+    public function __construct(private MakerInterface $maker, private FileManager $fileManager, private Generator $generator)
     {
-        $this->maker = $maker;
-        $this->fileManager = $fileManager;
         $this->inputConfig = new InputConfiguration();
-        $this->generator = $generator;
 
         parent::__construct();
     }

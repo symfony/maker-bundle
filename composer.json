@@ -13,7 +13,7 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "php": ">=7.2.5",
+        "php": ">=8.0",
         "doctrine/inflector": "^2.0",
         "nikic/php-parser": "^4.11",
         "symfony/config": "^5.4.7|^6.0",

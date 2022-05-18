@@ -45,23 +45,18 @@ use Symfony\UX\Turbo\Attribute\Broadcast;
  */
 final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 {
-    private $fileManager;
-    private $doctrineHelper;
-    private $generator;
-    private $entityClassGenerator;
-    private $phpCompatUtil;
+    private Generator $generator;
+    private EntityClassGenerator $entityClassGenerator;
+    private PhpCompatUtil $phpCompatUtil;
 
     public function __construct(
-        FileManager $fileManager,
-        DoctrineHelper $doctrineHelper,
+        private FileManager $fileManager,
+        private DoctrineHelper $doctrineHelper,
         string $projectDirectory = null,
         Generator $generator = null,
         EntityClassGenerator $entityClassGenerator = null,
         PhpCompatUtil $phpCompatUtil = null
     ) {
-        $this->fileManager = $fileManager;
-        $this->doctrineHelper = $doctrineHelper;
-
         if (null !== $projectDirectory) {
             @trigger_error('The $projectDirectory constructor argument is no longer used since 1.41.0', \E_USER_DEPRECATED);
         }
@@ -877,10 +872,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     /** @legacy Drop when Annotations are no longer supported */
     private function doesEntityUseAttributeMapping(string $className): bool
     {
-        if (!$this->phpCompatUtil->canUseAttributes()) {
-            return false;
-        }
-
         if (!class_exists($className)) {
             $otherClassMetadatas = $this->doctrineHelper->getMetadata(Str::getNamespace($className).'\\', true);
 

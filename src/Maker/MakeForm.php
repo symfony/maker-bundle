@@ -34,13 +34,8 @@ use Symfony\Component\Validator\Validation;
  */
 final class MakeForm extends AbstractMaker
 {
-    private $entityHelper;
-    private $formTypeRenderer;
-
-    public function __construct(DoctrineHelper $entityHelper, FormTypeRenderer $formTypeRenderer)
+    public function __construct(private DoctrineHelper $entityHelper, private FormTypeRenderer $formTypeRenderer)
     {
-        $this->entityHelper = $entityHelper;
-        $this->formTypeRenderer = $formTypeRenderer;
     }
 
     public static function getCommandName(): string

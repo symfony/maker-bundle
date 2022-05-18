@@ -26,11 +26,12 @@ class PhpVersionTest extends TestCase
      */
     public function testUsesPhpPlatformFromComposerJsonFileForCanUseAttributes(string $version, bool $expectedResult): void
     {
+        $this->markTestSkipped('This test needs to be refactored if we keep the util.');
         $mockFileManager = $this->mockFileManager(sprintf('{"platform-overrides": {"php": "%s"}}', $version));
 
         $version = new PhpCompatUtil($mockFileManager);
 
-        $result = $version->canUseAttributes();
+//        $result = $version->canUseAttributes();
 
         /*
          * Symfony 5.2 is required to compare the result. Otherwise it will always
@@ -96,58 +97,6 @@ class PhpVersionTest extends TestCase
         $result = $util->getVersionForTest();
 
         self::assertSame(\PHP_VERSION, $result);
-    }
-
-    /**
-     * @dataProvider phpVersionForTypedPropertiesDataProvider
-     */
-    public function testCanUseTypedProperties(string $version, bool $expectedResult): void
-    {
-        $mockFileManager = $this->mockFileManager(sprintf('{"platform-overrides": {"php": "%s"}}', $version));
-
-        $version = new PhpCompatUtil($mockFileManager);
-
-        $result = $version->canUseTypedProperties();
-
-        self::assertSame($expectedResult, $result);
-    }
-
-    public function phpVersionForTypedPropertiesDataProvider(): \Generator
-    {
-        yield ['8', true];
-        yield ['8.0.1', true];
-        yield ['8RC1', true];
-        yield ['7.4', true];
-        yield ['7.4.6', true];
-        yield ['7', false];
-        yield ['7.0', false];
-        yield ['5.7', false];
-    }
-
-    /**
-     * @dataProvider phpVersionForUnionTypesDataProvider
-     */
-    public function testCanUseUnionTypes(string $version, bool $expectedResult): void
-    {
-        $mockFileManager = $this->mockFileManager(sprintf('{"platform-overrides": {"php": "%s"}}', $version));
-
-        $version = new PhpCompatUtil($mockFileManager);
-
-        $result = $version->canUseUnionTypes();
-
-        self::assertSame($expectedResult, $result);
-    }
-
-    public function phpVersionForUnionTypesDataProvider(): \Generator
-    {
-        yield ['8', true];
-        yield ['8.0.1', true];
-        yield ['8RC1', true];
-        yield ['7.4', false];
-        yield ['7.4.6', false];
-        yield ['7', false];
-        yield ['7.0', false];
-        yield ['5.7', false];
     }
 
     /**

@@ -67,11 +67,6 @@ use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
  */
 final class MakeRegistrationForm extends AbstractMaker
 {
-    private $fileManager;
-    private $formTypeRenderer;
-    private $router;
-    private $doctrineHelper;
-
     private $userClass;
     private $usernameField;
     private $passwordField;
@@ -87,12 +82,12 @@ final class MakeRegistrationForm extends AbstractMaker
     private $addUniqueEntityConstraint;
     private $useNewAuthenticatorSystem = false;
 
-    public function __construct(FileManager $fileManager, FormTypeRenderer $formTypeRenderer, RouterInterface $router, DoctrineHelper $doctrineHelper)
-    {
-        $this->fileManager = $fileManager;
-        $this->formTypeRenderer = $formTypeRenderer;
-        $this->router = $router;
-        $this->doctrineHelper = $doctrineHelper;
+    public function __construct(
+        private FileManager $fileManager,
+        private FormTypeRenderer $formTypeRenderer,
+        private RouterInterface $router,
+        private DoctrineHelper $doctrineHelper
+    ) {
     }
 
     public static function getCommandName(): string

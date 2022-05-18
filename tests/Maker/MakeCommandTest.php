@@ -26,7 +26,6 @@ class MakeCommandTest extends MakerTestCase
     public function getTestDetails(): \Generator
     {
         yield 'it_makes_a_command_no_attributes' => [$this->createMakerTest()
-            ->setRequiredPhpVersion(80000)
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([
                     // command name
@@ -38,7 +37,6 @@ class MakeCommandTest extends MakerTestCase
         ];
 
         yield 'it_makes_a_command_with_attributes' => [$this->createMakerTest()
-            ->setRequiredPhpVersion(80000)
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([
                     // command name

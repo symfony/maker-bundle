@@ -31,11 +31,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 final class MakeSubscriber extends AbstractMaker
 {
-    private $eventRegistry;
-
-    public function __construct(EventRegistry $eventRegistry)
+    public function __construct(private EventRegistry $eventRegistry)
     {
-        $this->eventRegistry = $eventRegistry;
     }
 
     public static function getCommandName(): string
