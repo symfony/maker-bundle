@@ -7,9 +7,9 @@ namespace <?= $namespace; ?>;
 class <?= $class_name; ?><?= "\n" ?>
 {
     public function __construct(
-        private VerifyEmailHelperInterface $helper,
+        private VerifyEmailHelperInterface $verifyEmailHelper,
         private MailerInterface $mailer,
-        private EntityManagerInterface $manager
+        private EntityManagerInterface $entityManager
     ) {
     }
 
