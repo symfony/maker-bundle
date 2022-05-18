@@ -116,7 +116,7 @@ final class MakeController extends AbstractMaker
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
         // @legacy - Remove method when support for Symfony 5.4 is dropped
-        if (null !== $this->phpCompatUtil && 60000 <= Kernel::VERSION_ID && $this->phpCompatUtil->canUseAttributes()) {
+        if (null !== $this->phpCompatUtil && 60000 <= Kernel::VERSION_ID) {
             return;
         }
 

@@ -25,27 +25,6 @@ class PhpCompatUtil
         @trigger_deprecation('symfony/maker-bundle', '0.0.0', 'This utility is no longer being used. It may be removed in a future version.');
     }
 
-    // @TODO - Remove before merge
-    public function canUseAttributes(): bool
-    {
-        @trigger_error('This method is no longer needed.');
-        return true;
-    }
-
-    // @TODO - Remove before merge
-    public function canUseTypedProperties(): bool
-    {
-        @trigger_error('This method is no longer needed.');
-        return true;
-    }
-
-    // @TODO - Remove before merge
-    public function canUseUnionTypes(): bool
-    {
-        @trigger_error('This method is no longer needed.');
-        return true;
-    }
-
     protected function getPhpVersion(): string
     {
         $rootDirectory = $this->fileManager->getRootDirectory();

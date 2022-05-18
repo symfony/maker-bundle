@@ -51,10 +51,6 @@ final class TemplateComponentGenerator
 
     public function getPropertyType(ClassNameDetails $classNameDetails): ?string
     {
-        if (!$this->phpCompatUtil->canUseTypedProperties()) {
-            return null;
-        }
-
         return sprintf('%s ', $classNameDetails->getShortName());
     }
 

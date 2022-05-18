@@ -145,7 +145,7 @@ final class DoctrineHelper
 
     public function isDoctrineSupportingAttributes(): bool
     {
-        return $this->isDoctrineInstalled() && $this->attributeMappingSupport && $this->phpCompatUtil->canUseAttributes();
+        return $this->isDoctrineInstalled() && $this->attributeMappingSupport;
     }
 
     public function getEntitiesForAutocomplete(): array

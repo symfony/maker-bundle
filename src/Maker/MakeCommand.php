@@ -74,11 +74,8 @@ final class MakeCommand extends AbstractMaker
             InputOption::class,
             OutputInterface::class,
             SymfonyStyle::class,
+            AsCommand::class,
         ]);
-
-        if ($this->phpCompatUtil->canUseAttributes()) {
-            $useStatements->addUseStatement(AsCommand::class);
-        }
 
         $generator->generateClass(
             $commandClassNameDetails->getFullName(),

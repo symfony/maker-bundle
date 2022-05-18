@@ -31,7 +31,7 @@ class PhpVersionTest extends TestCase
 
         $version = new PhpCompatUtil($mockFileManager);
 
-        $result = $version->canUseAttributes();
+//        $result = $version->canUseAttributes();
 
         /*
          * Symfony 5.2 is required to compare the result. Otherwise it will always
@@ -110,7 +110,7 @@ class PhpVersionTest extends TestCase
 
         $version = new PhpCompatUtil($mockFileManager);
 
-        $result = $version->canUseTypedProperties();
+//        $result = $version->canUseTypedProperties();
 
         self::assertSame($expectedResult, $result);
     }
@@ -138,7 +138,7 @@ class PhpVersionTest extends TestCase
 
         $version = new PhpCompatUtil($mockFileManager);
 
-        $result = $version->canUseUnionTypes();
+//        $result = $version->canUseUnionTypes();
 
         self::assertSame($expectedResult, $result);
     }

@@ -872,10 +872,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     /** @legacy Drop when Annotations are no longer supported */
     private function doesEntityUseAttributeMapping(string $className): bool
     {
-        if (!$this->phpCompatUtil->canUseAttributes()) {
-            return false;
-        }
-
         if (!class_exists($className)) {
             $otherClassMetadatas = $this->doctrineHelper->getMetadata(Str::getNamespace($className).'\\', true);
 
