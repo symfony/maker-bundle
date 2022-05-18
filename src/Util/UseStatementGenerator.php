@@ -20,8 +20,6 @@ namespace Symfony\Bundle\MakerBundle\Util;
  */
 final class UseStatementGenerator implements \Stringable
 {
-    private $classesToBeImported;
-
     /**
      * For use statements that contain aliases, the $classesToBeImported array
      * may contain an array(s) like [\Some\Class::class => 'ZYX']. The generated
@@ -30,9 +28,8 @@ final class UseStatementGenerator implements \Stringable
      *
      * @param string[]|array<string, string> $classesToBeImported
      */
-    public function __construct(array $classesToBeImported)
+    public function __construct(private array $classesToBeImported)
     {
-        $this->classesToBeImported = $classesToBeImported;
     }
 
     public function __toString(): string
@@ -72,7 +69,7 @@ final class UseStatementGenerator implements \Stringable
     /**
      * @param string|string[]|array<string, string> $className
      */
-    public function addUseStatement($className): void
+    public function addUseStatement(array|string $className): void
     {
         if (\is_array($className)) {
             $this->classesToBeImported = array_merge($this->classesToBeImported, $className);

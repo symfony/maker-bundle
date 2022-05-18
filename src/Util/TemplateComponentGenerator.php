@@ -21,13 +21,6 @@ use ReflectionException;
  */
 final class TemplateComponentGenerator
 {
-    private $phpCompatUtil;
-
-    public function __construct(PhpCompatUtil $phpCompatUtil)
-    {
-        $this->phpCompatUtil = $phpCompatUtil;
-    }
-
     public function generateRouteForControllerMethod(string $routePath, string $routeName, array $methods = [], bool $indent = true, bool $trailingNewLine = true): string
     {
         $attribute = sprintf('%s#[Route(\'%s\', name: \'%s\'', $indent ? '    ' : null, $routePath, $routeName);
