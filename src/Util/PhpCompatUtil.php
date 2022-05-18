@@ -22,7 +22,6 @@ class PhpCompatUtil
 {
     public function __construct(private FileManager $fileManager)
     {
-        @trigger_deprecation('symfony/maker-bundle', '0.0.0', 'This utility is no longer being used. It may be removed in a future version.');
     }
 
     protected function getPhpVersion(): string
