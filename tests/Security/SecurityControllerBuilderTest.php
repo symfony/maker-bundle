@@ -56,7 +56,7 @@ class SecurityControllerBuilderTest extends TestCase
 
     public function testLoginAndLogoutMethod(): void
     {
-        /** @legacy Can be dropped when PHP 7.x support is dropped in MakerBundle */
+        /* @legacy Can be dropped when PHP 7.x support is dropped in MakerBundle */
 //        $builder = $this->getSecurityControllerBuilder(true);
 //        $csm = $this->getClassSourceManipulator();
 //
