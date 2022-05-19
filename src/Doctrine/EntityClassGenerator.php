@@ -30,7 +30,10 @@ use Symfony\UX\Turbo\Attribute\Broadcast;
  */
 final class EntityClassGenerator
 {
-    public function __construct(private Generator $generator, private DoctrineHelper $doctrineHelper)
+    public function __construct(
+        private Generator $generator,
+        private DoctrineHelper $doctrineHelper,
+    )
     {
     }
 
