@@ -18,8 +18,10 @@ use Symfony\Bundle\MakerBundle\Str;
  */
 final class ClassNameValue
 {
-    public function __construct(private string $typeHint, private string $fullClassName)
-    {
+    public function __construct(
+        private string $typeHint,
+        private string $fullClassName
+    ) {
     }
 
     public function getShortName(): string

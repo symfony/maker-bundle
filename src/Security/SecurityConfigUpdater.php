@@ -24,11 +24,10 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 final class SecurityConfigUpdater
 {
     private ?YamlSourceManipulator $manipulator;
-    private ?Logger $ysmLogger;
 
-    public function __construct(private ?Logger $ysmLogger = null)
-    {
-        $this->ysmLogger = $ysmLogger;
+    public function __construct(
+        private ?Logger $ysmLogger = null
+    ) {
     }
 
     /**

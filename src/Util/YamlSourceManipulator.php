@@ -48,8 +48,9 @@ class YamlSourceManipulator
     private $arrayFormatForDepths = [];
     private $arrayTypeForDepths = [];
 
-    public function __construct(private string $contents)
-    {
+    public function __construct(
+        private string $contents
+    ) {
         $this->currentData = Yaml::parse($contents);
 
         if (!\is_array($this->currentData)) {

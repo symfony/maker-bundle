@@ -25,8 +25,7 @@ final class UserClassConfiguration
         private bool $isEntity,
         private string $identityPropertyName,
         private bool $hasPassword,
-    )
-    {
+    ) {
     }
 
     public function isEntity(): bool

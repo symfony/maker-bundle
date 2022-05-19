@@ -33,8 +33,7 @@ final class EntityClassGenerator
     public function __construct(
         private Generator $generator,
         private DoctrineHelper $doctrineHelper,
-    )
-    {
+    ) {
     }
 
     public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false): string
