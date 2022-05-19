@@ -20,7 +20,7 @@ final class ClassNameDetails
     public function __construct(
         private string $fullClassName,
         private string $namespacePrefix,
-        string $suffix = null
+        private ?string $suffix = null
     ) {
         $this->namespacePrefix = trim($namespacePrefix, '\\');
         $this->suffix = $suffix;
