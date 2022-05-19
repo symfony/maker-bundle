@@ -18,21 +18,11 @@ namespace Symfony\Bundle\MakerBundle\Security;
  */
 final class UserClassConfiguration
 {
-    private $isEntity;
+    private bool $useArgon2 = false;
+    private string $userProviderClass;
 
-    private $identityPropertyName;
-
-    private $hasPassword;
-
-    private $useArgon2 = false;
-
-    private $userProviderClass;
-
-    public function __construct(bool $isEntity, string $identityPropertyName, bool $hasPassword)
+    public function __construct(private bool $isEntity, private string $identityPropertyName, private bool $hasPassword)
     {
-        $this->isEntity = $isEntity;
-        $this->identityPropertyName = $identityPropertyName;
-        $this->hasPassword = $hasPassword;
     }
 
     public function isEntity(): bool

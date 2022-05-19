@@ -22,11 +22,8 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
  */
 final class SecurityControllerBuilder
 {
-    private $phpCompatUtil;
-
-    public function __construct(PhpCompatUtil $phpCompatUtil)
+    public function __construct(private PhpCompatUtil $phpCompatUtil)
     {
-        $this->phpCompatUtil = $phpCompatUtil;
     }
 
     public function addLoginMethod(ClassSourceManipulator $manipulator): void
