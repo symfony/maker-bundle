@@ -64,7 +64,19 @@ class MakeResetPasswordTest extends MakerTestCase
 
                 $this->assertSame('App\Repository\ResetPasswordRequestRepository', $resetPasswordConfig['symfonycasts_reset_password']['request_password_repository']);
 
-                $this->runResetPasswordTest($runner, 'it_generates_with_normal_setup.php');
+                $runner->writeFile(
+                    'config/packages/mailer.yaml',
+                    Yaml::dump(['framework' => [
+                        'mailer' => ['dsn' => 'null://null'],
+                    ]])
+                );
+
+                $runner->copy(
+                    'make-reset-password/tests/it_generates_with_normal_setup.php',
+                    'tests/ResetPasswordFunctionalTest.php'
+                );
+
+                $runner->runTests();
             }),
         ];
 
@@ -105,6 +117,7 @@ class MakeResetPasswordTest extends MakerTestCase
 
                 $this->assertStringContainsString('Success', $output);
 
+                // @legacy - conditional can be removed when PHPUnit 9.x is no longer supported.
                 if (method_exists($this, 'assertFileDoesNotExist')) {
                     $this->assertFileDoesNotExist($runner->getPath('config/packages/reset_password.yaml'));
                 } else {
@@ -182,23 +195,6 @@ class MakeResetPasswordTest extends MakerTestCase
                 $this->assertStringContainsString('{{ form_row(requestForm.emailAddress) }}', $contentRequestHtml);
             }),
         ];
-    }
-
-    private function runResetPasswordTest(MakerTestRunner $runner, string $filename): void
-    {
-        $runner->writeFile(
-            'config/packages/mailer.yaml',
-            Yaml::dump(['framework' => [
-                'mailer' => ['dsn' => 'null://null'],
-            ]])
-        );
-
-        $runner->copy(
-            'make-reset-password/tests/'.$filename,
-            'tests/ResetPasswordFunctionalTest.php'
-        );
-
-        $runner->runTests();
     }
 
     private function makeUser(MakerTestRunner $runner, string $identifier = 'email', string $userClass = 'User', bool $checkPassword = true): void
