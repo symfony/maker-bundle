@@ -24,7 +24,7 @@ final class EntityRelation
     private $owningProperty;
     private $inverseProperty;
     private bool $isNullable = false;
-    private bool $isSelfReferencing;
+    private bool $isSelfReferencing = false;
     private bool $orphanRemoval = false;
     private bool $mapInverseRelation = true;
 
