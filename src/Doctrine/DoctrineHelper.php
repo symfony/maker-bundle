@@ -13,7 +13,6 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Mapping\MappingException as ORMMappingException;
 use Doctrine\ORM\Mapping\NamingStrategy;
@@ -25,7 +24,6 @@ use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
-use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
@@ -36,27 +34,12 @@ use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
  */
 final class DoctrineHelper
 {
-    /**
-     * @var string
-     */
-    private $entityNamespace;
-    private $phpCompatUtil;
-    private $registry;
-
-    /**
-     * @var array|null
-     */
-    private $mappingDriversByPrefix;
-
-    private $attributeMappingSupport;
-
-    public function __construct(string $entityNamespace, PhpCompatUtil $phpCompatUtil, ManagerRegistry $registry = null, bool $attributeMappingSupport = false, array $annotatedPrefixes = null)
-    {
+    public function __construct(
+        private string $entityNamespace,
+        private ?ManagerRegistry $registry = null,
+        private ?array $mappingDriversByPrefix = null,
+    ) {
         $this->entityNamespace = trim($entityNamespace, '\\');
-        $this->phpCompatUtil = $phpCompatUtil;
-        $this->registry = $registry;
-        $this->attributeMappingSupport = $attributeMappingSupport;
-        $this->mappingDriversByPrefix = $annotatedPrefixes;
     }
 
     public function getRegistry(): ManagerRegistry
@@ -114,7 +97,7 @@ final class DoctrineHelper
             }
 
             foreach ($metadataDriver->getDrivers() as $namespace => $driver) {
-                if (0 === strpos($className, $namespace)) {
+                if (str_starts_with($className, $namespace)) {
                     return $this->isInstanceOf($driver, $driverClass);
                 }
             }
@@ -125,17 +108,12 @@ final class DoctrineHelper
         $managerName = array_search($em, $this->getRegistry()->getManagers(), true);
 
         foreach ($this->mappingDriversByPrefix[$managerName] as [$prefix, $prefixDriver]) {
-            if (0 === strpos($className, $prefix)) {
+            if (str_starts_with($className, $prefix)) {
                 return $this->isInstanceOf($prefixDriver, $driverClass);
             }
         }
 
         return false;
-    }
-
-    public function isClassAnnotated(string $className): bool
-    {
-        return $this->doesClassUseDriver($className, AnnotationDriver::class);
     }
 
     public function doesClassUsesAttributes(string $className): bool
@@ -145,7 +123,7 @@ final class DoctrineHelper
 
     public function isDoctrineSupportingAttributes(): bool
     {
-        return $this->isDoctrineInstalled() && $this->attributeMappingSupport;
+        return $this->isDoctrineInstalled();
     }
 
     public function getEntitiesForAutocomplete(): array
@@ -168,18 +146,14 @@ final class DoctrineHelper
 
     public function getMetadata(string $classOrNamespace = null, bool $disconnected = false): array|ClassMetadata
     {
-        // Invalidating the cached AnnotationDriver::$classNames to find new Entity classes
+        // Invalidating the cached AttributeDriver::$classNames to find new Entity classes
         foreach ($this->mappingDriversByPrefix ?? [] as $managerName => $prefixes) {
-            foreach ($prefixes as [$prefix, $annotationDriver]) {
-                if (null !== $annotationDriver) {
-                    if ($annotationDriver instanceof AnnotationDriver) {
-                        $classNames = (new \ReflectionClass(AnnotationDriver::class))->getProperty('classNames');
-                    } else {
-                        $classNames = (new \ReflectionClass(AttributeDriver::class))->getProperty('classNames');
-                    }
+            foreach ($prefixes as [$prefix, $attributeDriver]) {
+                if ($attributeDriver instanceof AttributeDriver) {
+                    $classNames = (new \ReflectionClass(AttributeDriver::class))->getProperty('classNames');
 
                     $classNames->setAccessible(true);
-                    $classNames->setValue($annotationDriver, null);
+                    $classNames->setValue($attributeDriver, null);
                 }
             }
         }
@@ -205,14 +179,11 @@ final class DoctrineHelper
                 }
 
                 if (null === $this->mappingDriversByPrefix) {
-                    // Invalidating the cached AnnotationDriver::$classNames to find new Entity classes
+                    // Invalidating the cached AttributeDriver::$classNames to find new Entity classes
                     $metadataDriver = $em->getConfiguration()->getMetadataDriverImpl();
+
                     if ($this->isInstanceOf($metadataDriver, MappingDriverChain::class)) {
                         foreach ($metadataDriver->getDrivers() as $driver) {
-                            if ($this->isInstanceOf($driver, AnnotationDriver::class)) {
-                                $classNames->setValue($driver, null);
-                            }
-
                             if ($this->isInstanceOf($driver, AttributeDriver::class)) {
                                 $classNames->setValue($driver, null);
                             }
@@ -229,7 +200,7 @@ final class DoctrineHelper
                         return $m;
                     }
 
-                    if (0 === strpos($m->getName(), $classOrNamespace)) {
+                    if (str_starts_with($m->getName(), $classOrNamespace)) {
                         $metadata[$m->getName()] = $m;
                     }
                 }

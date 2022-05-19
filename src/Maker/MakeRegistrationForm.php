@@ -399,9 +399,9 @@ final class MakeRegistrationForm extends AbstractMaker
             $userManipulator = new ClassSourceManipulator(
                 file_get_contents($classDetails->getPath()),
                 false,
-                $this->doctrineHelper->isClassAnnotated($this->userClass),
+                false,
                 true,
-                $this->doctrineHelper->doesClassUsesAttributes($this->userClass)
+                true
             );
             $userManipulator->setIo($io);
 

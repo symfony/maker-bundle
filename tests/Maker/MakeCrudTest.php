@@ -18,8 +18,6 @@ use Symfony\Component\Yaml\Yaml;
 
 class MakeCrudTest extends MakerTestCase
 {
-    use TestHelpersTrait;
-
     protected function getMakerClass(): string
     {
         return MakeCrud::class;

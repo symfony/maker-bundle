@@ -63,7 +63,7 @@ class SetDoctrineAnnotatedPrefixesPass implements CompilerPassInterface
         }
 
         if (null !== $annotatedPrefixes) {
-            $container->getDefinition('maker.doctrine_helper')->setArgument(4, $annotatedPrefixes);
+            $container->getDefinition('maker.doctrine_helper')->setArgument(2, $annotatedPrefixes);
         }
     }
 }

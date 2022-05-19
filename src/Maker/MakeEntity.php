@@ -173,10 +173,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             'Entity\\'
         );
 
-        if (!$this->doctrineHelper->isDoctrineSupportingAttributes() && $this->doctrineHelper->doesClassUsesAttributes($entityClassDetails->getFullName())) {
-            throw new RuntimeCommandException('To use Doctrine entity attributes you\'ll need PHP 8, doctrine/orm 2.9, doctrine/doctrine-bundle 2.4 and symfony/framework-bundle 5.2.');
-        }
-
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {
             $broadcast = $input->getOption('broadcast');
@@ -203,11 +199,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $generator->writeChanges();
         }
 
-        if (
-            !$this->doesEntityUseAnnotationMapping($entityClassDetails->getFullName())
-            && !$this->doesEntityUseAttributeMapping($entityClassDetails->getFullName())
-        ) {
-            throw new RuntimeCommandException(sprintf('Only annotation or attribute mapping is supported by make:entity, but the <info>%s</info> class uses a different format. If you would like this command to generate the properties & getter/setter methods, add your mapping configuration, and then re-run this command with the <info>--regenerate</info> flag.', $entityClassDetails->getFullName()));
+        if (!$this->doesEntityUseAttributeMapping($entityClassDetails->getFullName())) {
+            throw new RuntimeCommandException(sprintf('Only attribute mapping is supported by make:entity, but the <info>%s</info> class uses a different format. If you would like this command to generate the properties & getter/setter methods, add your mapping configuration, and then re-run this command with the <info>--regenerate</info> flag.', $entityClassDetails->getFullName()));
         }
 
         if ($classExists) {
@@ -224,7 +217,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         $currentFields = $this->getPropertyNames($entityClassDetails->getFullName());
-        $manipulator = $this->createClassManipulator($entityPath, $io, $overwrite, $entityClassDetails->getFullName());
+        $manipulator = $this->createClassManipulator($entityPath, $io, $overwrite);
 
         $isFirstField = true;
         while (true) {
@@ -252,7 +245,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                     $otherManipulator = $manipulator;
                 } else {
                     $otherManipulatorFilename = $this->getPathOfClass($newField->getInverseClass());
-                    $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite, $entityClassDetails->getFullName());
+                    $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
                 }
                 switch ($newField->getType()) {
                     case EntityRelation::MANY_TO_ONE:
@@ -267,7 +260,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                             // the new field being added to THIS entity is the inverse
                             $newFieldName = $newField->getInverseProperty();
                             $otherManipulatorFilename = $this->getPathOfClass($newField->getOwningClass());
-                            $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite, $entityClassDetails->getFullName());
+                            $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
 
                             // The *other* class will receive the ManyToOne
                             $otherManipulator->addManyToOneRelation($newField->getOwningRelation());
@@ -340,7 +333,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         ORMDependencyBuilder::buildDependencies($dependencies);
     }
 
-    private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField)
+    private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField): EntityRelation|array|null
     {
         $io->writeln('');
 
@@ -478,7 +471,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             ],
         ];
 
-        $printSection = function (array $sectionTypes) use ($io, &$allTypes) {
+        $printSection = static function (array $sectionTypes) use ($io, &$allTypes) {
             foreach ($sectionTypes as $mainType => $subTypes) {
                 unset($allTypes[$mainType]);
                 $line = sprintf('  * <comment>%s</comment>', $mainType);
@@ -530,7 +523,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $question;
     }
 
-    private function askRelationDetails(ConsoleStyle $io, string $generatedEntityClass, string $type, string $newFieldName)
+    private function askRelationDetails(ConsoleStyle $io, string $generatedEntityClass, string $type, string $newFieldName): EntityRelation
     {
         // ask the targetEntity
         $targetEntityClass = null;
@@ -576,7 +569,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             );
         };
 
-        $askIsNullable = function (string $propertyName, string $targetClass) use ($io) {
+        $askIsNullable = static function (string $propertyName, string $targetClass) use ($io) {
             return $io->confirm(sprintf(
                 'Is the <comment>%s</comment>.<comment>%s</comment> property allowed to be null (nullable)?',
                 Str::getShortClassName($targetClass),
@@ -584,7 +577,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             ));
         };
 
-        $askOrphanRemoval = function (string $owningClass, string $inverseClass) use ($io) {
+        $askOrphanRemoval = static function (string $owningClass, string $inverseClass) use ($io) {
             $io->text([
                 'Do you want to activate <comment>orphanRemoval</comment> on your relationship?',
                 sprintf(
@@ -809,12 +802,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $io->askQuestion($question);
     }
 
-    private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite, string $className): ClassSourceManipulator
+    private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite): ClassSourceManipulator
     {
-        $useAttributes = $this->doctrineHelper->doesClassUsesAttributes($className) && $this->doctrineHelper->isDoctrineSupportingAttributes();
-        $useAnnotations = $this->doctrineHelper->isClassAnnotated($className) || !$useAttributes;
-
-        $manipulator = new ClassSourceManipulator($this->fileManager->getFileContents($path), $overwrite, $useAnnotations, true, $useAttributes);
+        $manipulator = new ClassSourceManipulator($this->fileManager->getFileContents($path), $overwrite, false, true, true);
 
         $manipulator->setIo($io);
 
@@ -847,26 +837,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $reflClass = new \ReflectionClass($class);
 
-        return array_map(function (\ReflectionProperty $prop) {
+        return array_map(static function (\ReflectionProperty $prop) {
             return $prop->getName();
         }, $reflClass->getProperties());
-    }
-
-    /** @legacy Drop when Annotations are no longer supported */
-    private function doesEntityUseAnnotationMapping(string $className): bool
-    {
-        if (!class_exists($className)) {
-            $otherClassMetadatas = $this->doctrineHelper->getMetadata(Str::getNamespace($className).'\\', true);
-
-            // if we have no metadata, we should assume this is the first class being mapped
-            if (empty($otherClassMetadatas)) {
-                return false;
-            }
-
-            $className = reset($otherClassMetadatas)->getName();
-        }
-
-        return $this->doctrineHelper->isClassAnnotated($className);
     }
 
     /** @legacy Drop when Annotations are no longer supported */
