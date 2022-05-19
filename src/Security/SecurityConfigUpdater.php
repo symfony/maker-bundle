@@ -26,7 +26,7 @@ final class SecurityConfigUpdater
     private ?YamlSourceManipulator $manipulator;
     private ?Logger $ysmLogger;
 
-    public function __construct(Logger $ysmLogger = null)
+    public function __construct(private ?Logger $ysmLogger = null)
     {
         $this->ysmLogger = $ysmLogger;
     }
