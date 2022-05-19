@@ -166,10 +166,7 @@ final class DoctrineHelper
         return $entities;
     }
 
-    /**
-     * @return array|ClassMetadata
-     */
-    public function getMetadata(string $classOrNamespace = null, bool $disconnected = false)
+    public function getMetadata(string $classOrNamespace = null, bool $disconnected = false): array|ClassMetadata
     {
         // Invalidating the cached AnnotationDriver::$classNames to find new Entity classes
         foreach ($this->mappingDriversByPrefix ?? [] as $managerName => $prefixes) {

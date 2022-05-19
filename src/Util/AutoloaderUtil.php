@@ -20,14 +20,9 @@ use Composer\Autoload\ClassLoader;
  */
 class AutoloaderUtil
 {
-    /**
-     * @var ComposerAutoloaderFinder
-     */
-    private $autoloaderFinder;
-
-    public function __construct(ComposerAutoloaderFinder $autoloaderFinder)
-    {
-        $this->autoloaderFinder = $autoloaderFinder;
+    public function __construct(
+        private ComposerAutoloaderFinder $autoloaderFinder
+    ) {
     }
 
     /**

@@ -16,11 +16,9 @@ namespace Symfony\Bundle\MakerBundle\Util;
  */
 final class ClassDetails
 {
-    private $fullClassName;
-
-    public function __construct(string $fullClassName)
-    {
-        $this->fullClassName = $fullClassName;
+    public function __construct(
+        private string $fullClassName
+    ) {
     }
 
     /**

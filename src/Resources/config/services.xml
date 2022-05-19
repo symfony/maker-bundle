@@ -77,7 +77,6 @@
             </service>
 
             <service id="maker.template_component_generator" class="Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator">
-                <argument type="service" id="maker.php_compat_util" />
             </service>
         </services>
 </container>

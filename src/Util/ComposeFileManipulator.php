@@ -26,8 +26,7 @@ class ComposeFileManipulator
 {
     public const COMPOSE_FILE_VERSION = '3.7';
 
-    /** @var YamlSourceManipulator */
-    private $manipulator;
+    private YamlSourceManipulator $manipulator;
 
     public function __construct(string $contents)
     {

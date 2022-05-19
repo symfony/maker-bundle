@@ -21,14 +21,9 @@ use Doctrine\Persistence\Mapping\ClassMetadata;
  */
 final class EntityDetails
 {
-    private $metadata;
-
-    /**
-     * @param ClassMetadata|LegacyClassMetadata $metadata
-     */
-    public function __construct($metadata)
-    {
-        $this->metadata = $metadata;
+    public function __construct(
+        private ClassMetadata|LegacyClassMetadata $metadata
+    ) {
     }
 
     public function getRepositoryClass(): ?string

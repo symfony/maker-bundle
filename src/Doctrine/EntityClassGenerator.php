@@ -30,13 +30,10 @@ use Symfony\UX\Turbo\Attribute\Broadcast;
  */
 final class EntityClassGenerator
 {
-    private $generator;
-    private $doctrineHelper;
-
-    public function __construct(Generator $generator, DoctrineHelper $doctrineHelper)
-    {
-        $this->generator = $generator;
-        $this->doctrineHelper = $doctrineHelper;
+    public function __construct(
+        private Generator $generator,
+        private DoctrineHelper $doctrineHelper,
+    ) {
     }
 
     public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false): string

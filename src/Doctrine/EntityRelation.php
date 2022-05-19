@@ -21,26 +21,18 @@ final class EntityRelation
     public const MANY_TO_MANY = 'ManyToMany';
     public const ONE_TO_ONE = 'OneToOne';
 
-    private $type;
-
-    private $owningClass;
-
-    private $inverseClass;
-
     private $owningProperty;
-
     private $inverseProperty;
+    private bool $isNullable = false;
+    private bool $isSelfReferencing = false;
+    private bool $orphanRemoval = false;
+    private bool $mapInverseRelation = true;
 
-    private $isNullable = false;
-
-    private $isSelfReferencing = false;
-
-    private $orphanRemoval = false;
-
-    private $mapInverseRelation = true;
-
-    public function __construct(string $type, string $owningClass, string $inverseClass)
-    {
+    public function __construct(
+        private string $type,
+        private string $owningClass,
+        private string $inverseClass
+    ) {
         if (!\in_array($type, self::getValidRelationTypes())) {
             throw new \Exception(sprintf('Invalid relation type "%s"', $type));
         }
@@ -49,9 +41,6 @@ final class EntityRelation
             throw new \Exception('Use ManyToOne instead of OneToMany');
         }
 
-        $this->type = $type;
-        $this->owningClass = $owningClass;
-        $this->inverseClass = $inverseClass;
         $this->isSelfReferencing = $owningClass === $inverseClass;
     }
 
@@ -89,78 +78,60 @@ final class EntityRelation
         ];
     }
 
-    public function getOwningRelation()
+    public function getOwningRelation(): RelationManyToMany|RelationOneToOne|RelationManyToOne
     {
-        switch ($this->getType()) {
-            case self::MANY_TO_ONE:
-                return (new RelationManyToOne())
-                    ->setPropertyName($this->owningProperty)
-                    ->setTargetClassName($this->inverseClass)
-                    ->setTargetPropertyName($this->inverseProperty)
-                    ->setIsNullable($this->isNullable)
-                    ->setIsSelfReferencing($this->isSelfReferencing)
-                    ->setMapInverseRelation($this->mapInverseRelation)
-                ;
-                break;
-            case self::MANY_TO_MANY:
-                return (new RelationManyToMany())
-                    ->setPropertyName($this->owningProperty)
-                    ->setTargetClassName($this->inverseClass)
-                    ->setTargetPropertyName($this->inverseProperty)
-                    ->setIsOwning(true)->setMapInverseRelation($this->mapInverseRelation)
-                    ->setIsSelfReferencing($this->isSelfReferencing)
-                ;
-                break;
-            case self::ONE_TO_ONE:
-                return (new RelationOneToOne())
-                    ->setPropertyName($this->owningProperty)
-                    ->setTargetClassName($this->inverseClass)
-                    ->setTargetPropertyName($this->inverseProperty)
-                    ->setIsNullable($this->isNullable)
-                    ->setIsOwning(true)
-                    ->setIsSelfReferencing($this->isSelfReferencing)
-                    ->setMapInverseRelation($this->mapInverseRelation)
-                ;
-                break;
-            default:
-                throw new \InvalidArgumentException('Invalid type');
-        }
+        return match ($this->getType()) {
+            self::MANY_TO_ONE => (new RelationManyToOne())
+                ->setPropertyName($this->owningProperty)
+                ->setTargetClassName($this->inverseClass)
+                ->setTargetPropertyName($this->inverseProperty)
+                ->setIsNullable($this->isNullable)
+                ->setIsSelfReferencing($this->isSelfReferencing)
+                ->setMapInverseRelation($this->mapInverseRelation),
+            self::MANY_TO_MANY => (new RelationManyToMany())
+                ->setPropertyName($this->owningProperty)
+                ->setTargetClassName($this->inverseClass)
+                ->setTargetPropertyName($this->inverseProperty)
+                ->setIsOwning(true)->setMapInverseRelation(
+                    $this->mapInverseRelation
+                )
+                ->setIsSelfReferencing($this->isSelfReferencing),
+            self::ONE_TO_ONE => (new RelationOneToOne())
+                ->setPropertyName($this->owningProperty)
+                ->setTargetClassName($this->inverseClass)
+                ->setTargetPropertyName($this->inverseProperty)
+                ->setIsNullable($this->isNullable)
+                ->setIsOwning(true)
+                ->setIsSelfReferencing($this->isSelfReferencing)
+                ->setMapInverseRelation($this->mapInverseRelation),
+            default => throw new \InvalidArgumentException('Invalid type'),
+        };
     }
 
-    public function getInverseRelation()
+    public function getInverseRelation(): RelationManyToMany|RelationOneToOne|RelationOneToMany
     {
-        switch ($this->getType()) {
-            case self::MANY_TO_ONE:
-                return (new RelationOneToMany())
-                    ->setPropertyName($this->inverseProperty)
-                    ->setTargetClassName($this->owningClass)
-                    ->setTargetPropertyName($this->owningProperty)
-                    ->setOrphanRemoval($this->orphanRemoval)
-                    ->setIsSelfReferencing($this->isSelfReferencing)
-                ;
-                break;
-            case self::MANY_TO_MANY:
-                return (new RelationManyToMany())
-                    ->setPropertyName($this->inverseProperty)
-                    ->setTargetClassName($this->owningClass)
-                    ->setTargetPropertyName($this->owningProperty)
-                    ->setIsOwning(false)
-                    ->setIsSelfReferencing($this->isSelfReferencing)
-                ;
-                break;
-            case self::ONE_TO_ONE:
-                return (new RelationOneToOne())
-                    ->setPropertyName($this->inverseProperty)
-                    ->setTargetClassName($this->owningClass)
-                    ->setTargetPropertyName($this->owningProperty)
-                    ->setIsNullable($this->isNullable)
-                    ->setIsOwning(false)
-                    ->setIsSelfReferencing($this->isSelfReferencing)
-                ;
-                break;
-            default:
-                throw new \InvalidArgumentException('Invalid type');
-        }
+        return match ($this->getType()) {
+            self::MANY_TO_ONE => (new RelationOneToMany())
+                ->setPropertyName($this->inverseProperty)
+                ->setTargetClassName($this->owningClass)
+                ->setTargetPropertyName($this->owningProperty)
+                ->setOrphanRemoval($this->orphanRemoval)
+                ->setIsSelfReferencing($this->isSelfReferencing),
+            self::MANY_TO_MANY => (new RelationManyToMany())
+                ->setPropertyName($this->inverseProperty)
+                ->setTargetClassName($this->owningClass)
+                ->setTargetPropertyName($this->owningProperty)
+                ->setIsOwning(false)
+                ->setIsSelfReferencing($this->isSelfReferencing),
+            self::ONE_TO_ONE => (new RelationOneToOne())
+                ->setPropertyName($this->inverseProperty)
+                ->setTargetClassName($this->owningClass)
+                ->setTargetPropertyName($this->owningProperty)
+                ->setIsNullable($this->isNullable)
+                ->setIsOwning(false)
+                ->setIsSelfReferencing($this->isSelfReferencing),
+            default => throw new \InvalidArgumentException('Invalid type'),
+        };
     }
 
     public function getType(): string
@@ -178,7 +149,7 @@ final class EntityRelation
         return $this->inverseClass;
     }
 
-    public function getOwningProperty()
+    public function getOwningProperty(): string
     {
         return $this->owningProperty;
     }
@@ -203,7 +174,7 @@ final class EntityRelation
         return $this->mapInverseRelation;
     }
 
-    public function setMapInverseRelation(bool $mapInverseRelation)
+    public function setMapInverseRelation(bool $mapInverseRelation): void
     {
         if ($mapInverseRelation && $this->inverseProperty) {
             throw new \Exception('Cannot set setMapInverseRelation() to true when the inverse relation property is set.');
