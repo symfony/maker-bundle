@@ -25,19 +25,13 @@ use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
  */
 final class EntityRegenerator
 {
-    private $doctrineHelper;
-    private $fileManager;
-    private $generator;
-    private $entityClassGenerator;
-    private $overwrite;
-
-    public function __construct(DoctrineHelper $doctrineHelper, FileManager $fileManager, Generator $generator, EntityClassGenerator $entityClassGenerator, bool $overwrite)
-    {
-        $this->doctrineHelper = $doctrineHelper;
-        $this->fileManager = $fileManager;
-        $this->generator = $generator;
-        $this->entityClassGenerator = $entityClassGenerator;
-        $this->overwrite = $overwrite;
+    public function __construct(
+        private DoctrineHelper $doctrineHelper,
+        private FileManager $fileManager,
+        private Generator $generator,
+        private EntityClassGenerator $entityClassGenerator,
+        private bool $overwrite
+    ) {
     }
 
     public function regenerateEntities(string $classOrNamespace): void
@@ -263,7 +257,7 @@ final class EntityRegenerator
             $targetFields = array_diff($targetFields, $traitProperties);
 
             // exclude inherited properties
-            $targetFields = array_filter($targetFields, function ($field) use ($classReflection) {
+            $targetFields = array_filter($targetFields, static function ($field) use ($classReflection) {
                 return $classReflection->hasProperty($field) &&
                     $classReflection->getProperty($field)->getDeclaringClass()->getName() == $classReflection->getName();
             });
