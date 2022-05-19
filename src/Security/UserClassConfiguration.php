@@ -21,7 +21,11 @@ final class UserClassConfiguration
     private bool $useArgon2 = false;
     private string $userProviderClass;
 
-    public function __construct(private bool $isEntity, private string $identityPropertyName, private bool $hasPassword)
+    public function __construct(
+        private bool $isEntity,
+        private string $identityPropertyName,
+        private bool $hasPassword,
+    )
     {
     }
 
