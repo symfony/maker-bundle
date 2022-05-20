@@ -38,7 +38,7 @@ class FileManager
         AutoloaderUtil $autoloaderUtil,
         MakerFileLinkFormatter $makerFileLinkFormatter,
         string $rootDirectory,
-        string $twigDefaultPath = null
+        string $twigDefaultPath = null,
     ) {
         // move FileManagerTest stuff
         // update EntityRegeneratorTest to mock the autoloader

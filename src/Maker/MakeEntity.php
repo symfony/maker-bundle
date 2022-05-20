@@ -55,7 +55,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         string $projectDirectory = null,
         Generator $generator = null,
         EntityClassGenerator $entityClassGenerator = null,
-        PhpCompatUtil $phpCompatUtil = null
+        PhpCompatUtil $phpCompatUtil = null,
     ) {
         if (null !== $projectDirectory) {
             @trigger_error('The $projectDirectory constructor argument is no longer used since 1.41.0', \E_USER_DEPRECATED);

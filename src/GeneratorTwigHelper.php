@@ -68,19 +68,19 @@ final class GeneratorTwigHelper
     {
         if ($this->fileManager->fileExists($this->fileManager->getPathForTemplate('base.html.twig'))) {
             return <<<TWIG
-{% extends 'base.html.twig' %}
+                {% extends 'base.html.twig' %}
 
-{% block title %}$title{% endblock %}
+                {% block title %}$title{% endblock %}
 
-TWIG;
+                TWIG;
         }
 
         return <<<HTML
-<!DOCTYPE html>
+            <!DOCTYPE html>
 
-<title>$title</title>
+            <title>$title</title>
 
-HTML;
+            HTML;
     }
 
     public function getFileLink($path, $text = null, $line = 0): string

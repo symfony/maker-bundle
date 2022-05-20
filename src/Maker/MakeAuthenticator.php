@@ -70,7 +70,7 @@ final class MakeAuthenticator extends AbstractMaker
         private SecurityConfigUpdater $configUpdater,
         private Generator $generator,
         private DoctrineHelper $doctrineHelper,
-        private SecurityControllerBuilder $securityControllerBuilder
+        private SecurityControllerBuilder $securityControllerBuilder,
     ) {
     }
 

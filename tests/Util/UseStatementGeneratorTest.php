@@ -30,12 +30,12 @@ class UseStatementGeneratorTest extends TestCase
         ]);
 
         $expected = <<< 'EOT'
-use App\Controller\SomeController;
-use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Util\Sorter;
-use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelper;
+            use App\Controller\SomeController;
+            use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
+            use Symfony\Bundle\MakerBundle\Util\Sorter;
+            use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelper;
 
-EOT;
+            EOT;
         self::assertSame($expected, (string) $unsorted);
     }
 
@@ -57,20 +57,20 @@ EOT;
         ]);
 
         $expected = <<< 'EOT'
-use App\Entity\User;
-use App\Form\RegistrationFormType;
-use App\Security\EmailVerifier;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
+            use App\Entity\User;
+            use App\Form\RegistrationFormType;
+            use App\Security\EmailVerifier;
+            use Doctrine\ORM\EntityManagerInterface;
+            use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+            use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+            use Symfony\Component\HttpFoundation\Request;
+            use Symfony\Component\HttpFoundation\Response;
+            use Symfony\Component\Mime\Address;
+            use Symfony\Component\Routing\Annotation\Route;
+            use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+            use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 
-EOT;
+            EOT;
         self::assertSame($expected, (string) $unsorted);
     }
 
@@ -83,11 +83,11 @@ EOT;
         ]);
 
         $expected = <<< 'EOT'
-use ApiPlatform\Core\Annotation\ApiResource;
-use Doctrine\ORM\Mapping as ORM;
-use Symfony\UX\Turbo\Attribute\Broadcast;
+            use ApiPlatform\Core\Annotation\ApiResource;
+            use Doctrine\ORM\Mapping as ORM;
+            use Symfony\UX\Turbo\Attribute\Broadcast;
 
-EOT;
+            EOT;
         self::assertSame($expected, (string) $unsorted);
     }
 }

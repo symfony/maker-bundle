@@ -29,7 +29,7 @@ final class UseStatementGenerator implements \Stringable
      * @param string[]|array<string, string> $classesToBeImported
      */
     public function __construct(
-        private array $classesToBeImported
+        private array $classesToBeImported,
     ) {
     }
 

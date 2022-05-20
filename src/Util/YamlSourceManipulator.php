@@ -49,7 +49,7 @@ class YamlSourceManipulator
     private $arrayTypeForDepths = [];
 
     public function __construct(
-        private string $contents
+        private string $contents,
     ) {
         $this->currentData = Yaml::parse($contents);
 
@@ -966,7 +966,7 @@ class YamlSourceManipulator
         }
 
         $context = [
-            'key' => isset($this->currentPath[$this->depth]) ? $this->currentPath[$this->depth] : 'n/a',
+            'key' => $this->currentPath[$this->depth] ?? 'n/a',
             'depth' => $this->depth,
             'position' => $this->currentPosition,
             'indentation' => $this->indentationForDepths[$this->depth],

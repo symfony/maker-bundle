@@ -23,7 +23,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 final class SecurityControllerBuilder
 {
     public function __construct(
-        private PhpCompatUtil $phpCompatUtil
+        private PhpCompatUtil $phpCompatUtil,
     ) {
     }
 
@@ -42,32 +42,32 @@ final class SecurityControllerBuilder
         );
 
         $manipulator->addMethodBody($loginMethodBuilder, <<<'CODE'
-<?php
-// if ($this->getUser()) {
-//     return $this->redirectToRoute('target_path');
-// }
-CODE
+            <?php
+            // if ($this->getUser()) {
+            //     return $this->redirectToRoute('target_path');
+            // }
+            CODE
         );
         $loginMethodBuilder->addStmt($manipulator->createMethodLevelBlankLine());
         $manipulator->addMethodBody($loginMethodBuilder, <<<'CODE'
-<?php
-// get the login error if there is one
-$error = $authenticationUtils->getLastAuthenticationError();
-// last username entered by the user
-$lastUsername = $authenticationUtils->getLastUsername();
-CODE
+            <?php
+            // get the login error if there is one
+            $error = $authenticationUtils->getLastAuthenticationError();
+            // last username entered by the user
+            $lastUsername = $authenticationUtils->getLastUsername();
+            CODE
         );
         $loginMethodBuilder->addStmt($manipulator->createMethodLevelBlankLine());
         $manipulator->addMethodBody($loginMethodBuilder, <<<'CODE'
-<?php
-return $this->render(
-    'security/login.html.twig',
-    [
-        'last_username' => $lastUsername,
-        'error' => $error,
-    ]
-);
-CODE
+            <?php
+            return $this->render(
+                'security/login.html.twig',
+                [
+                    'last_username' => $lastUsername,
+                    'error' => $error,
+                ]
+            );
+            CODE
         );
         $manipulator->addMethodBuilder($loginMethodBuilder);
     }
@@ -80,9 +80,9 @@ CODE
 
         $manipulator->addUseStatementIfNecessary(Route::class);
         $manipulator->addMethodBody($logoutMethodBuilder, <<<'CODE'
-<?php
-throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
-CODE
+            <?php
+            throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+            CODE
         );
         $manipulator->addMethodBuilder($logoutMethodBuilder);
     }

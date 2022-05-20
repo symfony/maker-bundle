@@ -86,7 +86,7 @@ final class MakeRegistrationForm extends AbstractMaker
         private FileManager $fileManager,
         private FormTypeRenderer $formTypeRenderer,
         private RouterInterface $router,
-        private DoctrineHelper $doctrineHelper
+        private DoctrineHelper $doctrineHelper,
     ) {
     }
 
@@ -537,33 +537,33 @@ final class MakeRegistrationForm extends AbstractMaker
             'agreeTerms' => [
                 'type' => CheckboxType::class,
                 'options_code' => <<<EOF
-                'mapped' => false,
-                'constraints' => [
-                    new IsTrue([
-                        'message' => 'You should agree to our terms.',
-                    ]),
-                ],
-EOF
+                                    'mapped' => false,
+                                    'constraints' => [
+                                        new IsTrue([
+                                            'message' => 'You should agree to our terms.',
+                                        ]),
+                                    ],
+                    EOF
             ],
             'plainPassword' => [
                 'type' => PasswordType::class,
                 'options_code' => <<<EOF
-                // instead of being set onto the object directly,
-                // this is read and encoded in the controller
-                'mapped' => false,
-                'attr' => ['autocomplete' => 'new-password'],
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'Please enter a password',
-                    ]),
-                    new Length([
-                        'min' => 6,
-                        'minMessage' => 'Your password should be at least {{ limit }} characters',
-                        // max length allowed by Symfony for security reasons
-                        'max' => 4096,
-                    ]),
-                ],
-EOF
+                                    // instead of being set onto the object directly,
+                                    // this is read and encoded in the controller
+                                    'mapped' => false,
+                                    'attr' => ['autocomplete' => 'new-password'],
+                                    'constraints' => [
+                                        new NotBlank([
+                                            'message' => 'Please enter a password',
+                                        ]),
+                                        new Length([
+                                            'min' => 6,
+                                            'minMessage' => 'Your password should be at least {{ limit }} characters',
+                                            // max length allowed by Symfony for security reasons
+                                            'max' => 4096,
+                                        ]),
+                                    ],
+                    EOF
             ],
         ];
 

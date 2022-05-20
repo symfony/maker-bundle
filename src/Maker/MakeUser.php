@@ -53,7 +53,7 @@ final class MakeUser extends AbstractMaker
         private UserClassBuilder $userClassBuilder,
         private SecurityConfigUpdater $configUpdater,
         private EntityClassGenerator $entityClassGenerator,
-        private DoctrineHelper $doctrineHelper
+        private DoctrineHelper $doctrineHelper,
     ) {
     }
 

@@ -21,7 +21,7 @@ use Composer\Autoload\ClassLoader;
 class AutoloaderUtil
 {
     public function __construct(
-        private ComposerAutoloaderFinder $autoloaderFinder
+        private ComposerAutoloaderFinder $autoloaderFinder,
     ) {
     }
 

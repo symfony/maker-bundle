@@ -15,7 +15,8 @@ $finder = (new PhpCsFixer\Finder())
 
 return (new PhpCsFixer\Config())
     ->setRules(array(
-        '@PHPUnit75Migration:risky' => true,
+        '@PHP80Migration' => true,
+        '@PHPUnit84Migration:risky' => true,
         '@Symfony' => true,
         '@Symfony:risky' => true,
         'header_comment' => [
@@ -30,6 +31,12 @@ EOF
         ],
         'protected_to_private' => false,
         'semicolon_after_instruction' => false,
+        'trailing_comma_in_multiline' => [
+            'elements' => [
+                'arrays',
+                'parameters'
+            ],
+        ]
     ))
     ->setRiskyAllowed(true)
     ->setFinder($finder)

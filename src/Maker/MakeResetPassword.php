@@ -88,7 +88,7 @@ class MakeResetPassword extends AbstractMaker
     public function __construct(
         private FileManager $fileManager,
         private DoctrineHelper $doctrineHelper,
-        private EntityClassGenerator $entityClassGenerator
+        private EntityClassGenerator $entityClassGenerator,
     ) {
     }
 
@@ -421,10 +421,10 @@ class MakeResetPassword extends AbstractMaker
             (new Param('selector'))->setType('string')->getNode(),
             (new Param('hashedToken'))->setType('string')->getNode(),
         ], <<<'CODE'
-<?php
-$this->user = $user;
-$this->initialize($expiresAt, $selector, $hashedToken);
-CODE
+            <?php
+            $this->user = $user;
+            $this->initialize($expiresAt, $selector, $hashedToken);
+            CODE
         );
 
         $manipulator->addManyToOneRelation((new RelationManyToOne())
@@ -466,9 +466,9 @@ CODE
             (new Param('selector'))->setType('string')->getNode(),
             (new Param('hashedToken'))->setType('string')->getNode(),
         ], <<<'CODE'
-<?php
-return new ResetPasswordRequest($user, $expiresAt, $selector, $hashedToken);
-CODE
+            <?php
+            return new ResetPasswordRequest($user, $expiresAt, $selector, $hashedToken);
+            CODE
         );
 
         $this->fileManager->dumpFile($pathRequestRepository, $manipulator->getSourceCode());
