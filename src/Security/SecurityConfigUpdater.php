@@ -26,7 +26,7 @@ final class SecurityConfigUpdater
     private ?YamlSourceManipulator $manipulator;
 
     public function __construct(
-        private ?Logger $ysmLogger = null
+        private ?Logger $ysmLogger = null,
     ) {
     }
 

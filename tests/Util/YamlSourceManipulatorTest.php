@@ -56,7 +56,7 @@ class YamlSourceManipulatorTest extends TestCase
             ->name('*.test');
 
         foreach ($finder as $file) {
-            list($source, $changeCode, $expected) = explode('===', $file->getContents());
+            [$source, $changeCode, $expected] = explode('===', $file->getContents());
 
             // Multiline string ends with an \n
             $source = substr_replace($source, '', (\strlen($source) - 1));

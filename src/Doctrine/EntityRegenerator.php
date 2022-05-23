@@ -30,7 +30,7 @@ final class EntityRegenerator
         private FileManager $fileManager,
         private Generator $generator,
         private EntityClassGenerator $entityClassGenerator,
-        private bool $overwrite
+        private bool $overwrite,
     ) {
     }
 
@@ -92,7 +92,7 @@ final class EntityRegenerator
             foreach ($classMetadata->fieldMappings as $fieldName => $mapping) {
                 // skip embedded fields
                 if (false !== strpos($fieldName, '.')) {
-                    list($fieldName, $embeddedFiledName) = explode('.', $fieldName);
+                    [$fieldName, $embeddedFiledName] = explode('.', $fieldName);
 
                     $operations[$embeddedClasses[$fieldName]]->addEntityField($embeddedFiledName, $mapping);
 

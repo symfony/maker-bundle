@@ -31,7 +31,7 @@ final class EntityRelation
     public function __construct(
         private string $type,
         private string $owningClass,
-        private string $inverseClass
+        private string $inverseClass,
     ) {
         if (!\in_array($type, self::getValidRelationTypes())) {
             throw new \Exception(sprintf('Invalid relation type "%s"', $type));

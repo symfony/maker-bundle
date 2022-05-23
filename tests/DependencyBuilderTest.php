@@ -98,30 +98,30 @@ class DependencyBuilderTest extends TestCase
             ['bar-package'],
             [],
             <<<EOF
-Missing package: to use the make:something command, run:
+                Missing package: to use the make:something command, run:
 
-composer require bar-package
-EOF
+                composer require bar-package
+                EOF
         ];
 
         yield 'missing_multiple_packages' => [
             ['bar-package', 'other-package'],
             [],
             <<<EOF
-Missing packages: to use the make:something command, run:
+                Missing packages: to use the make:something command, run:
 
-composer require bar-package other-package
-EOF
+                composer require bar-package other-package
+                EOF
         ];
 
         yield 'missing_dev_packages' => [
             [],
             ['bar-package', 'other-package'],
             <<<EOF
-Missing packages: to use the make:something command, run:
+                Missing packages: to use the make:something command, run:
 
-composer require bar-package other-package --dev
-EOF
+                composer require bar-package other-package --dev
+                EOF
         ];
     }
 }

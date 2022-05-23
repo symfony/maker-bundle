@@ -109,12 +109,12 @@ class MakeMessageTest extends MakerTestCase
         $runner->writeFile(
             'config/packages/messenger.yaml',
             <<<EOF
-framework:
-    messenger:
-        transports:
-            async: 'sync://'
-            async_high_priority: 'sync://'
-EOF
+                framework:
+                    messenger:
+                        transports:
+                            async: 'sync://'
+                            async_high_priority: 'sync://'
+                EOF
         );
     }
 }

@@ -20,7 +20,7 @@ final class ClassNameValue
 {
     public function __construct(
         private string $typeHint,
-        private string $fullClassName
+        private string $fullClassName,
     ) {
     }
 
