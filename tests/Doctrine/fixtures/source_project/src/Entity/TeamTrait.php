@@ -6,8 +6,6 @@ use Doctrine\ORM\Mapping as ORM;
 
 trait TeamTrait
 {
-    /**
-     * @ORM\ManyToMany(targetEntity=User::class)
-     */
+    #[ORM\ManyToMany(targetEntity: User::class)]
     private $members;
 }

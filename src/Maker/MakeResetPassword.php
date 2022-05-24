@@ -427,13 +427,15 @@ class MakeResetPassword extends AbstractMaker
             CODE
         );
 
-        $manipulator->addManyToOneRelation((new RelationManyToOne())
-            ->setPropertyName('user')
-            ->setTargetClassName($this->userClass)
-            ->setMapInverseRelation(false)
-            ->setCustomReturnType('object', false)
-            ->avoidSetter()
-        );
+        $manipulator->addManyToOneRelation((new RelationManyToOne(
+            propertyName: 'user',
+            targetClassName: $this->userClass,
+            mapInverseRelation: false,
+            avoidSetter: true,
+            isCustomReturnTypeNullable: false,
+            customReturnType: 'object',
+            isOwning: true,
+        )));
 
         $this->fileManager->dumpFile($requestEntityPath, $manipulator->getSourceCode());
 

@@ -6,27 +6,21 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class Client extends BaseClient
 {
     use TimestampableTrait;
 
     /**
-     * @ORM\Column(type="string")
      * @var string
      */
+    #[ORM\Column(type: 'string')]
     private $apiKey;
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Tag::class)
-     */
+    #[ORM\ManyToMany(targetEntity: Tag::class)]
     private $tags;
 
-    /**
-     * @ORM\Embedded(class=Embed::class)
-     */
+    #[ORM\Embedded(class: Embed::class)]
     private $embed;
 
     public function __construct()

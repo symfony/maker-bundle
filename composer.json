@@ -42,7 +42,9 @@
         "sort-packages": true
     },
     "conflict": {
-        "doctrine/orm": "<2.10"
+        "doctrine/orm": "<2.10",
+        "doctrine/doctrine-bundle": "<2.4",
+        "symfony/doctrine-bridge": "<5.4"
     },
     "autoload": {
         "psr-4": { "Symfony\\Bundle\\MakerBundle\\": "src/" }

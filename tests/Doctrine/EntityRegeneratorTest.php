@@ -31,9 +31,6 @@ use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\RouteCollectionBuilder;
 
-/**
- * @requires PHP 7.1
- */
 class EntityRegeneratorTest extends TestCase
 {
     /**
@@ -101,7 +98,7 @@ class EntityRegeneratorTest extends TestCase
             });
 
         $fileManager = new FileManager($fs, $autoloaderUtil, new MakerFileLinkFormatter(null), $tmpDir);
-        $doctrineHelper = new DoctrineHelper('App\\Entity', new PhpCompatUtil($fileManager), $container->get('doctrine'));
+        $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
         $phpCompatUtil = new PhpCompatUtil($fileManager);
         $generator = new Generator($fileManager, 'App\\', $phpCompatUtil);
         $entityClassGenerator = new EntityClassGenerator($generator, $doctrineHelper);
@@ -179,7 +176,6 @@ class TestEntityRegeneratorKernel extends Kernel
                 'mappings' => [
                     'EntityRegenerator' => [
                         'is_bundle' => false,
-                        'type' => 'annotation',
                         'dir' => '%kernel.project_dir%/src/Entity',
                         'prefix' => 'Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity',
                         'alias' => 'EntityRegeneratorApp',

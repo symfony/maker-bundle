@@ -20,8 +20,6 @@ use Symfony\Component\Yaml\Yaml;
 
 class MakeEntityTest extends MakerTestCase
 {
-    use TestHelpersTrait;
-
     protected function getMakerClass(): string
     {
         return MakeEntity::class;
@@ -31,19 +29,6 @@ class MakeEntityTest extends MakerTestCase
     {
         return $this->createMakerTest()
             ->preRun(function (MakerTestRunner $runner) use ($withDatabase) {
-                $config = $runner->readYaml('config/packages/doctrine.yaml');
-
-                /* @legacy Refactor when annotations are no longer supported. */
-                if (isset($config['doctrine']['orm']['mappings']['App']) && !$this->useAttributes($runner)) {
-                    // Attributes are only supported w/ PHP 8, FrameworkBundle >=5.2,
-                    // ORM >=2.9, & DoctrineBundle >=2.4
-                    $runner->modifyYamlFile('config/packages/doctrine.yaml', function (array $data) {
-                        $data['doctrine']['orm']['mappings']['App']['type'] = 'annotation';
-
-                        return $data;
-                    });
-                }
-
                 if ($withDatabase) {
                     $runner->configureDatabase();
                 }
@@ -504,7 +489,7 @@ class MakeEntityTest extends MakerTestCase
                     '',
                 ], '', true /* allow failure */);
 
-                $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
+                $this->assertStringContainsString('Only attribute mapping is supported', $output);
             }),
         ];
 
@@ -524,7 +509,7 @@ class MakeEntityTest extends MakerTestCase
                     '',
                 ], '', true /* allow failure */);
 
-                $this->assertStringContainsString('Only annotation or attribute mapping is supported', $output);
+                $this->assertStringContainsString('Only attribute mapping is supported', $output);
             }),
         ];
 

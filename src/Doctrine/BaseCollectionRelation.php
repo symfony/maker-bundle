@@ -18,8 +18,6 @@ use Symfony\Bundle\MakerBundle\Str;
  */
 abstract class BaseCollectionRelation extends BaseRelation
 {
-    abstract public function getOrphanRemoval(): bool;
-
     abstract public function getTargetSetterMethodName(): string;
 
     public function getAdderMethodName(): string

@@ -16,22 +16,8 @@ use Symfony\Bundle\MakerBundle\Str;
 /**
  * @internal
  */
-final class RelationOneToOne extends BaseSingleRelation
+final class RelationOneToOne extends BaseRelation
 {
-    private $isOwning;
-
-    public function isOwning(): bool
-    {
-        return $this->isOwning;
-    }
-
-    public function setIsOwning($isOwning): self
-    {
-        $this->isOwning = $isOwning;
-
-        return $this;
-    }
-
     public function getTargetGetterMethodName(): string
     {
         return 'get'.Str::asCamelCase($this->getTargetPropertyName());

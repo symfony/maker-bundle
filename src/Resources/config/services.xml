@@ -37,9 +37,7 @@
 
             <service id="maker.doctrine_helper" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper">
                 <argument /> <!-- entity namespace -->
-                <argument type="service" id="maker.php_compat_util" />
                 <argument type="service" id="doctrine" on-invalid="ignore" />
-                <argument key="$attributeMappingSupport">%maker.compatible_check.doctrine.supports_attributes%</argument>
             </service>
 
             <service id="maker.auto_command.abstract" class="Symfony\Bundle\MakerBundle\Command\MakerCommand" abstract="true">

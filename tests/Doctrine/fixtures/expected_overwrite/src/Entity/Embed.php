@@ -4,14 +4,10 @@ namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Embeddable()
- */
+#[ORM\Embeddable]
 class Embed
 {
-    /**
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Column(type: 'integer')]
     private $val;
 
     public function getVal(): ?int

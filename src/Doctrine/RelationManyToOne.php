@@ -14,10 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 /**
  * @internal
  */
-final class RelationManyToOne extends BaseSingleRelation
+final class RelationManyToOne extends BaseRelation
 {
-    public function isOwning(): bool
-    {
-        return true;
-    }
 }
