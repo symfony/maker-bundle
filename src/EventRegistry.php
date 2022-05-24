@@ -43,7 +43,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 class EventRegistry
 {
     // list of *known* events to always include (if they exist)
-    private static $newEventsMap = [
+    private static array $newEventsMap = [
         'kernel.exception' => ExceptionEvent::class,
         'kernel.request' => RequestEvent::class,
         'kernel.response' => ResponseEvent::class,
@@ -53,7 +53,7 @@ class EventRegistry
         'kernel.terminate' => TerminateEvent::class,
     ];
 
-    private static $eventsMap = [
+    private static array $eventsMap = [
         'console.command' => ConsoleCommandEvent::class,
         'console.terminate' => ConsoleTerminateEvent::class,
         'console.error' => ConsoleErrorEvent::class,
@@ -71,12 +71,9 @@ class EventRegistry
         'security.switch_user' => SwitchUserEvent::class,
     ];
 
-    private $eventDispatcher;
-
-    public function __construct(EventDispatcherInterface $eventDispatcher)
-    {
-        $this->eventDispatcher = $eventDispatcher;
-
+    public function __construct(
+        private EventDispatcherInterface $eventDispatcher,
+    ) {
         // Loop through the new event classes
         foreach (self::$newEventsMap as $eventName => $newEventClass) {
             // Check if the new event classes exist, if so replace the old one with the new.

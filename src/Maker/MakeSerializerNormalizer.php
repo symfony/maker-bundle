@@ -52,7 +52,7 @@ final class MakeSerializerNormalizer extends AbstractMaker
         $normalizerClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
             'Serializer\\Normalizer\\',
-            'Normalizer'
+            \Normalizer::class
         );
 
         $useStatements = new UseStatementGenerator([

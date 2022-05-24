@@ -24,11 +24,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 final class FormTypeRenderer
 {
-    private $generator;
-
-    public function __construct(Generator $generator)
-    {
-        $this->generator = $generator;
+    public function __construct(
+        private Generator $generator,
+    ) {
     }
 
     public function render(ClassNameDetails $formClassDetails, array $formFields, ClassNameDetails $boundClassDetails = null, array $constraintClasses = [], array $extraUseClasses = []): void

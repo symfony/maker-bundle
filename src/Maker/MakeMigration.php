@@ -104,12 +104,12 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
 
             $migrationOutput = $commandOutput->fetch();
 
-            if (false !== strpos($migrationOutput, 'No changes detected')) {
+            if (str_contains($migrationOutput, 'No changes detected')) {
                 $this->noChangesMessage($io);
 
                 return;
             }
-        } catch (\Doctrine\Migrations\Generator\Exception\NoChangesDetected $exception) {
+        } catch (\Doctrine\Migrations\Generator\Exception\NoChangesDetected) {
             $this->noChangesMessage($io);
 
             return;

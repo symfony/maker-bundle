@@ -244,7 +244,6 @@ class MakerTestRunner
         $manipulator = new ClassSourceManipulator(
             sourceCode: $contents,
             overwrite: true,
-            useAttributesForDoctrineMapping: true
         );
         $callback($manipulator);
 

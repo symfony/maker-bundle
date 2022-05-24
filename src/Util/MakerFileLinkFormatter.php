@@ -19,16 +19,9 @@ use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
  */
 final class MakerFileLinkFormatter
 {
-    private $fileLinkFormatter;
-
-    public function __construct(FileLinkFormatter $fileLinkFormatter = null)
-    {
-        // Since nullable types are not available in 7.0; can be removed when php >= 7.1 required
-        if (0 == \func_num_args()) {
-            throw new \LogicException('$fileLinkFormatter argument is required');
-        }
-
-        $this->fileLinkFormatter = $fileLinkFormatter;
+    public function __construct(
+        private ?FileLinkFormatter $fileLinkFormatter = null,
+    ) {
     }
 
     public function makeLinkedPath(string $absolutePath, string $relativePath): string

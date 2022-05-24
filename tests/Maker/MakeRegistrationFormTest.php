@@ -32,7 +32,6 @@ class MakeRegistrationFormTest extends MakerTestCase
                     'make-registration-form/standard_setup',
                     ''
                 );
-                $runner->adjustAuthenticatorForLegacyPassportInterface('src/Security/StubAuthenticator.php');
 
                 if (60000 > $runner->getSymfonyVersion()) {
                     /*

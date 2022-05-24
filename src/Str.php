@@ -21,8 +21,7 @@ use Symfony\Component\DependencyInjection\Container;
  */
 final class Str
 {
-    /** @var Inflector|null */
-    private static $inflector;
+    private static ?Inflector $inflector = null;
 
     /**
      * Looks for suffixes in strings in a case-insensitive way.
@@ -203,6 +202,9 @@ final class Str
         return (bool) preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $name, $matches);
     }
 
+    /**
+     * @return bool
+     */
     public static function areClassesAlphabetical(string $class1, string $class2)
     {
         $arr1 = [$class1, $class2];

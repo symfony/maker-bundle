@@ -369,9 +369,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $defaultType = 'datetime_immutable';
         } elseif ('_id' === $suffix) {
             $defaultType = 'integer';
-        } elseif (0 === strpos($snakeCasedField, 'is_')) {
+        } elseif (str_starts_with($snakeCasedField, 'is_')) {
             $defaultType = 'boolean';
-        } elseif (0 === strpos($snakeCasedField, 'has_')) {
+        } elseif (str_starts_with($snakeCasedField, 'has_')) {
             $defaultType = 'boolean';
         } elseif ('uuid' === $snakeCasedField) {
             $defaultType = 'uuid';
@@ -479,9 +479,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 if (\is_string($subTypes) && $subTypes) {
                     $line .= sprintf(' (%s)', $subTypes);
                 } elseif (\is_array($subTypes) && !empty($subTypes)) {
-                    $line .= sprintf(' (or %s)', implode(', ', array_map(function ($subType) {
-                        return sprintf('<comment>%s</comment>', $subType);
-                    }, $subTypes)));
+                    $line .= sprintf(' (or %s)', implode(', ', array_map(
+                        static fn ($subType) => sprintf('<comment>%s</comment>', $subType), $subTypes))
+                    );
 
                     foreach ($subTypes as $subType) {
                         unset($allTypes[$subType]);
@@ -508,9 +508,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $io->writeln('<info>Other Types</info>');
         // empty the values
-        $allTypes = array_map(function () {
-            return [];
-        }, $allTypes);
+        $allTypes = array_map(static fn () => [], $allTypes);
         $printSection($allTypes);
     }
 
@@ -551,31 +549,27 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $type = $this->askRelationType($io, $generatedEntityClass, $targetEntityClass);
         }
 
-        $askFieldName = function (string $targetClass, string $defaultValue) use ($io) {
-            return $io->ask(
-                sprintf('New field name inside %s', Str::getShortClassName($targetClass)),
-                $defaultValue,
-                function ($name) use ($targetClass) {
-                    // it's still *possible* to create duplicate properties - by
-                    // trying to generate the same property 2 times during the
-                    // same make:entity run. property_exists() only knows about
-                    // properties that *originally* existed on this class.
-                    if (property_exists($targetClass, $name)) {
-                        throw new \InvalidArgumentException(sprintf('The "%s" class already has a "%s" property.', $targetClass, $name));
-                    }
-
-                    return Validator::validateDoctrineFieldName($name, $this->doctrineHelper->getRegistry());
+        $askFieldName = fn (string $targetClass, string $defaultValue) => $io->ask(
+            sprintf('New field name inside %s', Str::getShortClassName($targetClass)),
+            $defaultValue,
+            function ($name) use ($targetClass) {
+                // it's still *possible* to create duplicate properties - by
+                // trying to generate the same property 2 times during the
+                // same make:entity run. property_exists() only knows about
+                // properties that *originally* existed on this class.
+                if (property_exists($targetClass, $name)) {
+                    throw new \InvalidArgumentException(sprintf('The "%s" class already has a "%s" property.', $targetClass, $name));
                 }
-            );
-        };
 
-        $askIsNullable = static function (string $propertyName, string $targetClass) use ($io) {
-            return $io->confirm(sprintf(
-                'Is the <comment>%s</comment>.<comment>%s</comment> property allowed to be null (nullable)?',
-                Str::getShortClassName($targetClass),
-                $propertyName
-            ));
-        };
+                return Validator::validateDoctrineFieldName($name, $this->doctrineHelper->getRegistry());
+            }
+        );
+
+        $askIsNullable = static fn (string $propertyName, string $targetClass) => $io->confirm(sprintf(
+            'Is the <comment>%s</comment>.<comment>%s</comment> property allowed to be null (nullable)?',
+            Str::getShortClassName($targetClass),
+            $propertyName
+        ));
 
         $askOrphanRemoval = static function (string $owningClass, string $inverseClass) use ($io) {
             $io->text([
@@ -807,7 +801,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $manipulator = new ClassSourceManipulator(
             sourceCode: $this->fileManager->getFileContents($path),
             overwrite: $overwrite,
-            useAttributesForDoctrineMapping: true
         );
 
         $manipulator->setIo($io);
@@ -841,9 +834,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $reflClass = new \ReflectionClass($class);
 
-        return array_map(static function (\ReflectionProperty $prop) {
-            return $prop->getName();
-        }, $reflClass->getProperties());
+        return array_map(static fn (\ReflectionProperty $prop) => $prop->getName(), $reflClass->getProperties());
     }
 
     /** @legacy Drop when Annotations are no longer supported */

@@ -70,6 +70,6 @@ final class ClassDetails
             return false;
         }
 
-        return false !== strpos($docComment, $annotation);
+        return str_contains($docComment, $annotation);
     }
 }

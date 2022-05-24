@@ -22,7 +22,6 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
-use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Filesystem\Filesystem;
@@ -99,8 +98,7 @@ class EntityRegeneratorTest extends TestCase
 
         $fileManager = new FileManager($fs, $autoloaderUtil, new MakerFileLinkFormatter(null), $tmpDir);
         $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
-        $phpCompatUtil = new PhpCompatUtil($fileManager);
-        $generator = new Generator($fileManager, 'App\\', $phpCompatUtil);
+        $generator = new Generator($fileManager, 'App\\');
         $entityClassGenerator = new EntityClassGenerator($generator, $doctrineHelper);
         $regenerator = new EntityRegenerator(
             $doctrineHelper,

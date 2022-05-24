@@ -36,13 +36,13 @@ class AutoloaderUtil
 
         // lookup is obviously modeled off of Composer's autoload logic
         foreach ($classLoader->getPrefixesPsr4() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
+            if (str_starts_with($className, $prefix)) {
                 return $paths[0].'/'.str_replace('\\', '/', substr($className, \strlen($prefix))).'.php';
             }
         }
 
         foreach ($classLoader->getPrefixes() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
+            if (str_starts_with($className, $prefix)) {
                 return $paths[0].'/'.str_replace('\\', '/', $className).'.php';
             }
         }
@@ -61,7 +61,7 @@ class AutoloaderUtil
     public function getNamespacePrefixForClass(string $className): string
     {
         foreach ($this->getClassLoader()->getPrefixesPsr4() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
+            if (str_starts_with($className, $prefix)) {
                 return $prefix;
             }
         }
@@ -78,13 +78,13 @@ class AutoloaderUtil
         $classLoader = $this->getClassLoader();
 
         foreach ($classLoader->getPrefixesPsr4() as $prefix => $paths) {
-            if (0 === strpos($namespace, $prefix)) {
+            if (str_starts_with($namespace, $prefix)) {
                 return true;
             }
         }
 
         foreach ($classLoader->getPrefixes() as $prefix => $paths) {
-            if (0 === strpos($namespace, $prefix)) {
+            if (str_starts_with($namespace, $prefix)) {
                 return true;
             }
         }

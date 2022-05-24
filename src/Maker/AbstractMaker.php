@@ -22,10 +22,16 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 abstract class AbstractMaker implements MakerInterface
 {
+    /**
+     * @return void
+     */
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
     {
     }
 
+    /**
+     * @return void
+     */
     protected function writeSuccessMessage(ConsoleStyle $io)
     {
         $io->newLine();
@@ -44,7 +50,7 @@ abstract class AbstractMaker implements MakerInterface
         }
 
         return $dependencyBuilder->getMissingPackagesMessage(
-            $this->getCommandName(),
+            static::getCommandName(),
             $message
         );
     }

@@ -58,7 +58,7 @@ final class MakeCommand extends AbstractMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $commandName = trim($input->getArgument('name'));
-        $commandNameHasAppPrefix = 0 === strpos($commandName, 'app:');
+        $commandNameHasAppPrefix = str_starts_with($commandName, 'app:');
 
         $commandClassNameDetails = $generator->createClassNameDetails(
             $commandNameHasAppPrefix ? substr($commandName, 4) : $commandName,

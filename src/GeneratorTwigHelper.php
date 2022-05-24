@@ -16,16 +16,14 @@ namespace Symfony\Bundle\MakerBundle;
  */
 final class GeneratorTwigHelper
 {
-    private $fileManager;
-
-    public function __construct(FileManager $fileManager)
-    {
-        $this->fileManager = $fileManager;
+    public function __construct(
+        private FileManager $fileManager,
+    ) {
     }
 
     public function getEntityFieldPrintCode($entity, $field): string
     {
-        $twigField = preg_replace_callback('/(?!^)_([a-z0-9])/', function ($s) {
+        $twigField = preg_replace_callback('/(?!^)_([a-z0-9])/', static function ($s) {
             return strtoupper($s[1]);
         }, $field['fieldName']);
         $printCode = $entity.'.'.str_replace('_', '', $twigField);

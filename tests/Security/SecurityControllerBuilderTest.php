@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Tests\Security;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 
 class SecurityControllerBuilderTest extends TestCase
 {
@@ -38,7 +37,7 @@ class SecurityControllerBuilderTest extends TestCase
 
     public function testLoginAndLogoutMethod(): void
     {
-        $builder = $this->getSecurityControllerBuilder();
+        $builder = new SecurityControllerBuilder();
         $csm = $this->getClassSourceManipulator();
 
         $builder->addLoginMethod($csm);
@@ -52,7 +51,7 @@ class SecurityControllerBuilderTest extends TestCase
 
     private function runMethodTest(string $builderMethod, string $expectedFilePath): void
     {
-        $builder = $this->getSecurityControllerBuilder();
+        $builder = new SecurityControllerBuilder();
         $csm = $this->getClassSourceManipulator();
 
         $builder->$builderMethod($csm);
@@ -62,10 +61,5 @@ class SecurityControllerBuilderTest extends TestCase
     private function getClassSourceManipulator(): ClassSourceManipulator
     {
         return new ClassSourceManipulator(file_get_contents(__DIR__.'/fixtures/source/SecurityController.php'));
-    }
-
-    private function getSecurityControllerBuilder(): SecurityControllerBuilder
-    {
-        return new SecurityControllerBuilder($this->createMock(PhpCompatUtil::class));
     }
 }

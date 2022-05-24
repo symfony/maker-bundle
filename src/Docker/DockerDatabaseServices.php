@@ -83,17 +83,11 @@ final class DockerDatabaseServices
 
     public static function getMissingExtensionName(string $name): ?string
     {
-        switch ($name) {
-            case 'mariadb':
-            case 'mysql':
-                $driver = 'mysql';
-                break;
-            case 'postgres':
-                $driver = 'pgsql';
-                break;
-            default:
-                self::throwInvalidDatabase($name);
-        }
+        $driver = match ($name) {
+            'mariadb', 'mysql' => 'mysql',
+            'postgres' => 'pgsql',
+            default => self::throwInvalidDatabase($name),
+        };
 
         if (!\in_array($driver, \PDO::getAvailableDrivers(), true)) {
             return $driver;

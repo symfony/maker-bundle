@@ -34,7 +34,7 @@ final class UserClassBuilder
 
         $this->addPasswordImplementation($manipulator, $userClassConfig);
 
-        $this->addEraseCredentials($manipulator, $userClassConfig);
+        $this->addEraseCredentials($manipulator);
     }
 
     private function addPasswordImplementation(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
@@ -299,7 +299,7 @@ final class UserClassBuilder
         $manipulator->addMethodBuilder($builder);
     }
 
-    private function addEraseCredentials(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
+    private function addEraseCredentials(ClassSourceManipulator $manipulator): void
     {
         // add eraseCredentials: always empty
         $builder = $manipulator->createMethodBuilder(

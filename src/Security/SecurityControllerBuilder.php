@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -22,11 +21,6 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
  */
 final class SecurityControllerBuilder
 {
-    public function __construct(
-        private PhpCompatUtil $phpCompatUtil,
-    ) {
-    }
-
     public function addLoginMethod(ClassSourceManipulator $manipulator): void
     {
         $loginMethodBuilder = $manipulator->createMethodBuilder('login', 'Response', false);

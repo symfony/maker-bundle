@@ -74,7 +74,6 @@ final class MakeUser extends AbstractMaker
             ->addOption('is-entity', null, InputOption::VALUE_NONE, 'Do you want to store user data in the database (via Doctrine)?')
             ->addOption('identity-property-name', null, InputOption::VALUE_REQUIRED, 'Enter a property name that will be the unique "display" name for the user (e.g. <comment>email, username, uuid</comment>)')
             ->addOption('with-password', null, InputOption::VALUE_NONE, 'Will this app be responsible for checking the password? Choose <comment>No</comment> if the password is actually checked by some other system (e.g. a single sign-on server)')
-            ->addOption('use-argon2', null, InputOption::VALUE_NONE, 'Use the Argon2i password encoder? (deprecated)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeUser.txt'));
 
         $inputConfig->setArgumentAsNonInteractive('name');
@@ -120,10 +119,6 @@ final class MakeUser extends AbstractMaker
             $input->getOption('identity-property-name'),
             $input->getOption('with-password')
         );
-        if ($input->getOption('use-argon2')) {
-            @trigger_error('The "--use-argon2" option is deprecated since MakerBundle 1.12.', \E_USER_DEPRECATED);
-            $userClassConfiguration->useArgon2(true);
-        }
 
         $userClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -143,14 +138,17 @@ final class MakeUser extends AbstractMaker
         // need to write changes early so we can modify the contents below
         $generator->writeChanges();
 
-        // @legacy @todo - refactor for better naming conventions BEFORE next release.
-        $useAttributesForDoctrineMapping = $userClassConfiguration->isEntity() && ($this->doctrineHelper->isDoctrineSupportingAttributes()) && $this->doctrineHelper->doesClassUsesAttributes($userClassNameDetails->getFullName());
+        $entityUsesAttributes = ($isEntity = $userClassConfiguration->isEntity()) && $this->doctrineHelper->doesClassUsesAttributes($userClassNameDetails->getFullName());
+
+        if ($isEntity && !$entityUsesAttributes) {
+            throw new \RuntimeException('MakeUser only supports attribute mapping with doctrine entities.');
+        }
 
         // B) Implement UserInterface
         $manipulator = new ClassSourceManipulator(
             sourceCode: $this->fileManager->getFileContents($classPath),
             overwrite: true,
-            useAttributesForDoctrineMapping: $useAttributesForDoctrineMapping
+            useAttributesForDoctrineMapping: $entityUsesAttributes
         );
 
         $manipulator->setIo($io);
@@ -194,7 +192,7 @@ final class MakeUser extends AbstractMaker
                 );
                 $generator->dumpFile($path, $newYaml);
                 $securityYamlUpdated = true;
-            } catch (YamlManipulationFailedException $e) {
+            } catch (YamlManipulationFailedException) {
             }
         }
 
@@ -229,9 +227,7 @@ final class MakeUser extends AbstractMaker
 
         $nextSteps[] = 'Create a way to authenticate! See https://symfony.com/doc/current/security.html';
 
-        $nextSteps = array_map(function ($step) {
-            return sprintf('  - %s', $step);
-        }, $nextSteps);
+        $nextSteps = array_map(static fn ($step) => sprintf('  - %s', $step), $nextSteps);
         $io->text($nextSteps);
     }
 

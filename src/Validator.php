@@ -146,20 +146,17 @@ final class Validator
         return $valueAsBool;
     }
 
-    public static function validatePropertyName(string $name)
+    public static function validatePropertyName(string $name): string
     {
         // check for valid PHP variable name
-        if (null !== $name && !Str::isValidPhpVariableName($name)) {
+        if (!Str::isValidPhpVariableName($name)) {
             throw new \InvalidArgumentException(sprintf('"%s" is not a valid PHP property name.', $name));
         }
 
         return $name;
     }
 
-    /**
-     * @param ManagerRegistry|LegacyManagerRegistry $registry
-     */
-    public static function validateDoctrineFieldName(string $name, $registry)
+    public static function validateDoctrineFieldName(string $name, ManagerRegistry|LegacyManagerRegistry $registry): string
     {
         if (!$registry instanceof ManagerRegistry && !$registry instanceof LegacyManagerRegistry) {
             throw new \InvalidArgumentException(sprintf('Argument 2 to %s::validateDoctrineFieldName must be an instance of %s, %s passed.', __CLASS__, ManagerRegistry::class, \is_object($registry) ? \get_class($registry) : \gettype($registry)));
@@ -184,12 +181,12 @@ final class Validator
         return $email;
     }
 
-    public static function existsOrNull(string $className = null, array $entities = [])
+    public static function existsOrNull(?string $className = null, array $entities = []): ?string
     {
         if (null !== $className) {
             self::validateClassName($className);
 
-            if (0 === strpos($className, '\\')) {
+            if (str_starts_with($className, '\\')) {
                 self::classExists($className);
             } else {
                 self::entityExists($className, $entities);
@@ -220,7 +217,7 @@ final class Validator
             throw new RuntimeCommandException('There are no registered entities; please create an entity before using this command.');
         }
 
-        if (0 === strpos($className, '\\')) {
+        if (str_starts_with($className, '\\')) {
             self::classExists($className, sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
         }
 

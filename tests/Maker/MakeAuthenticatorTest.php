@@ -76,7 +76,6 @@ class MakeAuthenticatorTest extends MakerTestCase
                     'make-auth/BlankAuthenticator.php',
                     'src/Security/BlankAuthenticator.php'
                 );
-                $runner->adjustAuthenticatorForLegacyPassportInterface('src/Security/BlankAuthenticator.php');
 
                 $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
                     $config['security']['firewalls']['main']['custom_authenticator'] = 'App\Security\BlankAuthenticator';
@@ -109,7 +108,6 @@ class MakeAuthenticatorTest extends MakerTestCase
                     'make-auth/BlankAuthenticator.php',
                     'src/Security/BlankAuthenticator.php'
                 );
-                $runner->adjustAuthenticatorForLegacyPassportInterface('src/Security/BlankAuthenticator.php');
 
                 $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
                     $config['security']['firewalls']['second'] = ['lazy' => true, 'custom_authenticator' => 'App\Security\BlankAuthenticator'];

@@ -228,7 +228,7 @@ final class MakeRegistrationForm extends AbstractMaker
         $userDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($userClassNameDetails->getFullName());
 
         $userRepoVars = [
-            'repository_full_class_name' => 'Doctrine\ORM\EntityManagerInterface',
+            'repository_full_class_name' => EntityManagerInterface::class,
             'repository_class_name' => 'EntityManagerInterface',
             'repository_var' => '$manager',
         ];
@@ -392,7 +392,6 @@ final class MakeRegistrationForm extends AbstractMaker
             $userManipulator = new ClassSourceManipulator(
                 sourceCode: file_get_contents($classDetails->getPath()),
                 overwrite: false,
-                useAttributesForDoctrineMapping: true
             );
             $userManipulator->setIo($io);
 
