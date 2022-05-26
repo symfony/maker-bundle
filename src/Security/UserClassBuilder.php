@@ -70,7 +70,9 @@ final class UserClassBuilder
             );
         } else {
             // add normal property
-            $manipulator->addProperty($userClassConfig->getIdentityPropertyName());
+            $manipulator->addProperty(
+                name: $userClassConfig->getIdentityPropertyName()
+            );
 
             $manipulator->addGetter(
                 $userClassConfig->getIdentityPropertyName(),
@@ -126,9 +128,8 @@ final class UserClassBuilder
         } else {
             // add normal property
             $manipulator->addProperty(
-                'roles',
-                [],
-                new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT])
+                name: 'roles',
+                defaultValue: new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT])
             );
 
             $manipulator->addGetter(
@@ -230,7 +231,10 @@ final class UserClassBuilder
             );
         } else {
             // add normal property
-            $manipulator->addProperty('password', [$propertyDocs]);
+            $manipulator->addProperty(
+                name: 'password',
+                comments: [$propertyDocs]
+            );
 
             $manipulator->addGetter(
                 'password',

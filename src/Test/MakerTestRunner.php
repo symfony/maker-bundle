@@ -241,7 +241,11 @@ class MakerTestRunner
     public function manipulateClass(string $filename, \Closure $callback): void
     {
         $contents = file_get_contents($this->getPath($filename));
-        $manipulator = new ClassSourceManipulator($contents, true, false, true, true);
+        $manipulator = new ClassSourceManipulator(
+            sourceCode: $contents,
+            overwrite: true,
+            useAttributesForDoctrineMapping: true
+        );
         $callback($manipulator);
 
         file_put_contents($this->getPath($filename), $manipulator->getSourceCode());

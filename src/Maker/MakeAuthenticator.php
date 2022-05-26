@@ -333,7 +333,10 @@ final class MakeAuthenticator extends AbstractMaker
             throw new RuntimeCommandException(sprintf('Method "login" already exists on class %s', $controllerClassNameDetails->getFullName()));
         }
 
-        $manipulator = new ClassSourceManipulator($controllerSourceCode, true);
+        $manipulator = new ClassSourceManipulator(
+            sourceCode: $controllerSourceCode,
+            overwrite: true
+        );
 
         $this->securityControllerBuilder->addLoginMethod($manipulator);
 
