@@ -33,9 +33,7 @@ class ClassSourceManipulatorTest extends TestCase
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_property/'.$expectedSourceFilename);
 
         $manipulator = new ClassSourceManipulator($source);
-        $method = (new \ReflectionObject($manipulator))->getMethod('addProperty');
-        $method->setAccessible(true);
-        $method->invoke($manipulator, name: $propertyName, comments: $commentLines);
+        $manipulator->addProperty(name: $propertyName, comments: $commentLines);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -83,9 +81,7 @@ class ClassSourceManipulatorTest extends TestCase
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_getter/'.$expectedSourceFilename);
 
         $manipulator = new ClassSourceManipulator($source);
-        $method = (new \ReflectionObject($manipulator))->getMethod('addGetter');
-        $method->setAccessible(true);
-        $method->invoke($manipulator, $propertyName, $type, true, $commentLines);
+        $manipulator->addGetter($propertyName, $type, true, $commentLines);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -137,9 +133,7 @@ class ClassSourceManipulatorTest extends TestCase
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_setter/'.$expectedSourceFilename);
 
         $manipulator = new ClassSourceManipulator($source);
-        $method = (new \ReflectionObject($manipulator))->getMethod('addSetter');
-        $method->setAccessible(true);
-        $method->invoke($manipulator, $propertyName, $type, $isNullable, $commentLines);
+        $manipulator->addSetter($propertyName, $type, $isNullable, $commentLines);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -622,25 +616,6 @@ class ClassSourceManipulatorTest extends TestCase
                 isNullable: true,
             )),
         ];
-    }
-
-    public function testGenerationWithTabs(): void
-    {
-        $this->markTestIncomplete('We need to refactor the invoked addProperty method to pass an attribute node instead of an annotation array');
-        $source = file_get_contents(__DIR__.'/fixtures/source/ProductWithTabs.php');
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/with_tabs/ProductWithTabs.php');
-
-        $manipulator = new ClassSourceManipulator($source);
-
-        $method = (new \ReflectionObject($manipulator))->getMethod('addProperty');
-        $method->setAccessible(true);
-        $method->invoke($manipulator, 'name', ['@ORM\Column(type="string", length=255)']);
-
-        $method = (new \ReflectionObject($manipulator))->getMethod('addGetter');
-        $method->setAccessible(true);
-        $method->invoke($manipulator, 'id', 'int', false);
-
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
     public function testAddInterface(): void
