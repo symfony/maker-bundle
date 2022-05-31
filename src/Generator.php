@@ -23,26 +23,23 @@ use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
  */
 class Generator
 {
-    private $fileManager;
-    private $twigHelper;
-    private $pendingOperations = [];
-    private $namespacePrefix;
-    private $phpCompatUtil;
-    private $templateComponentGenerator;
+    private GeneratorTwigHelper $twigHelper;
+    private array $pendingOperations = [];
+    private ?TemplateComponentGenerator $templateComponentGenerator;
 
-    public function __construct(FileManager $fileManager, string $namespacePrefix, PhpCompatUtil $phpCompatUtil = null, TemplateComponentGenerator $templateComponentGenerator = null)
-    {
-        $this->fileManager = $fileManager;
+    public function __construct(
+        private FileManager $fileManager,
+        private string $namespacePrefix,
+        PhpCompatUtil $phpCompatUtil = null,
+        TemplateComponentGenerator $templateComponentGenerator = null,
+    ) {
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
         $this->namespacePrefix = trim($namespacePrefix, '\\');
 
-        if (null === $phpCompatUtil) {
-            $phpCompatUtil = new PhpCompatUtil($fileManager);
-
-            trigger_deprecation('symfony/maker-bundle', '1.25', 'Initializing Generator without providing an instance of PhpCompatUtil is deprecated.');
+        if (null !== $phpCompatUtil) {
+            trigger_deprecation('symfony/maker-bundle', 'v1.44.0', 'Initializing Generator while providing an instance of PhpCompatUtil is deprecated.');
         }
 
-        $this->phpCompatUtil = $phpCompatUtil;
         $this->templateComponentGenerator = $templateComponentGenerator;
     }
 
@@ -151,7 +148,7 @@ class Generator
 
         // if this is a custom class, we may be completely different than the namespace prefix
         // the best way can do, is find the PSR4 prefix and use that
-        if (0 !== strpos($className, $fullNamespacePrefix)) {
+        if (!str_starts_with($className, $fullNamespacePrefix)) {
             $fullNamespacePrefix = $this->fileManager->getNamespacePrefixForClass($className);
         }
 
@@ -163,7 +160,7 @@ class Generator
         return $this->fileManager->getRootDirectory();
     }
 
-    private function addOperation(string $targetPath, string $templateName, array $variables)
+    private function addOperation(string $targetPath, string $templateName, array $variables): void
     {
         if ($this->fileManager->fileExists($targetPath)) {
             throw new RuntimeCommandException(sprintf('The file "%s" can\'t be generated because it already exists.', $this->fileManager->relativizePath($targetPath)));
@@ -193,6 +190,8 @@ class Generator
 
     /**
      * Actually writes and file changes that are pending.
+     *
+     * @return void
      */
     public function writeChanges()
     {
@@ -231,6 +230,8 @@ class Generator
 
     /**
      * Generate a template file.
+     *
+     * @return void
      */
     public function generateTemplate(string $targetPath, string $templateName, array $variables = [])
     {

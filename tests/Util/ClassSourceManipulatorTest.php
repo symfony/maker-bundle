@@ -225,7 +225,7 @@ class ClassSourceManipulatorTest extends TestCase
 
     private function runAddEntityFieldTests(string $source, string $propertyName, array $fieldOptions, string $expected): void
     {
-        $manipulator = new ClassSourceManipulator($source, false, true);
+        $manipulator = new ClassSourceManipulator($source, false);
         $manipulator->addEntityField($propertyName, $fieldOptions);
 
         $this->assertSame($expected, $manipulator->getSourceCode());
@@ -304,7 +304,7 @@ class ClassSourceManipulatorTest extends TestCase
 
     public function runAddManyToOneRelationTests(string $source, string $expected, RelationManyToOne $manyToOne): void
     {
-        $manipulator = new ClassSourceManipulator($source, false, true);
+        $manipulator = new ClassSourceManipulator($source, false);
         $manipulator->addManyToOneRelation($manyToOne);
 
         $this->assertSame($expected, $manipulator->getSourceCode());
@@ -402,7 +402,7 @@ class ClassSourceManipulatorTest extends TestCase
 
     private function runAddOneToManyRelationTests(string $source, string $expected, RelationOneToMany $oneToMany): void
     {
-        $manipulator = new ClassSourceManipulator($source, false, true);
+        $manipulator = new ClassSourceManipulator($source, false);
         $manipulator->addOneToManyRelation($oneToMany);
 
         $this->assertSame($expected, $manipulator->getSourceCode());
@@ -463,7 +463,7 @@ class ClassSourceManipulatorTest extends TestCase
 
     private function runAddManyToManyRelationTest(string $source, string $expected, RelationManyToMany $manyToMany): void
     {
-        $manipulator = new ClassSourceManipulator($source, false, true);
+        $manipulator = new ClassSourceManipulator($source, false);
         $manipulator->addManyToManyRelation($manyToMany);
 
         $this->assertSame($expected, $manipulator->getSourceCode());
@@ -522,7 +522,7 @@ class ClassSourceManipulatorTest extends TestCase
 
     private function runAddOneToOneRelation(string $source, string $expected, RelationOneToOne $oneToOne): void
     {
-        $manipulator = new ClassSourceManipulator($source, false, true);
+        $manipulator = new ClassSourceManipulator($source, false);
         $manipulator->addOneToOneRelation($oneToOne);
 
         $this->assertSame($expected, $manipulator->getSourceCode());

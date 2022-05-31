@@ -18,7 +18,6 @@ namespace Symfony\Bundle\MakerBundle\Security;
  */
 final class UserClassConfiguration
 {
-    private bool $useArgon2 = false;
     private string $userProviderClass;
 
     public function __construct(
@@ -41,22 +40,6 @@ final class UserClassConfiguration
     public function hasPassword(): bool
     {
         return $this->hasPassword;
-    }
-
-    /**
-     * @deprecated since MakerBundle 1.12
-     */
-    public function useArgon2(bool $shouldUse): void
-    {
-        $this->useArgon2 = $shouldUse;
-    }
-
-    /**
-     * @deprecated since MakerBundle 1.12
-     */
-    public function shouldUseArgon2(): bool
-    {
-        return $this->useArgon2;
     }
 
     public function getUserProviderClass(): string

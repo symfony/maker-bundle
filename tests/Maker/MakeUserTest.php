@@ -32,7 +32,6 @@ class MakeUserTest extends MakerTestCase
                     'make-user/standard_setup',
                     ''
                 );
-                $runner->adjustAuthenticatorForLegacyPassportInterface('src/Security/AutomaticAuthenticator.php');
 
                 $runner->runMaker([
                     // user class name
@@ -53,7 +52,6 @@ class MakeUserTest extends MakerTestCase
                     'make-user/standard_setup',
                     ''
                 );
-                $runner->adjustAuthenticatorForLegacyPassportInterface('src/Security/AutomaticAuthenticator.php');
 
                 $runner->runMaker([
                     // user class name (with non-traditional name)

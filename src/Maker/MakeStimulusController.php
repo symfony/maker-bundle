@@ -176,9 +176,9 @@ final class MakeStimulusController extends AbstractMaker
 
         if ('_id' === $suffix = substr($snakeCasedField, -3)) {
             $defaultType = 'Number';
-        } elseif (0 === strpos($snakeCasedField, 'is_')) {
+        } elseif (str_starts_with($snakeCasedField, 'is_')) {
             $defaultType = 'Boolean';
-        } elseif (0 === strpos($snakeCasedField, 'has_')) {
+        } elseif (str_starts_with($snakeCasedField, 'has_')) {
             $defaultType = 'Boolean';
         }
 

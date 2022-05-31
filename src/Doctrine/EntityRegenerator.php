@@ -38,7 +38,7 @@ final class EntityRegenerator
     {
         try {
             $metadata = $this->doctrineHelper->getMetadata($classOrNamespace);
-        } catch (MappingException|LegacyCommonMappingException|PersistenceMappingException $mappingException) {
+        } catch (MappingException|LegacyCommonMappingException|PersistenceMappingException) {
             $metadata = $this->doctrineHelper->getMetadata($classOrNamespace, true);
         }
 
@@ -72,7 +72,7 @@ final class EntityRegenerator
             $embeddedClasses = [];
 
             foreach ($classMetadata->embeddedClasses as $fieldName => $mapping) {
-                if (false !== strpos($fieldName, '.')) {
+                if (str_contains($fieldName, '.')) {
                     continue;
                 }
 
@@ -91,7 +91,7 @@ final class EntityRegenerator
 
             foreach ($classMetadata->fieldMappings as $fieldName => $mapping) {
                 // skip embedded fields
-                if (false !== strpos($fieldName, '.')) {
+                if (str_contains($fieldName, '.')) {
                     [$fieldName, $embeddedFiledName] = explode('.', $fieldName);
 
                     $operations[$embeddedClasses[$fieldName]]->addEntityField($embeddedFiledName, $mapping);
@@ -238,11 +238,11 @@ final class EntityRegenerator
         /** @var \ReflectionClass $classReflection */
         $classReflection = $classMetadata->reflClass;
 
-        $targetFields = array_merge(
-            array_keys($classMetadata->fieldMappings),
-            array_keys($classMetadata->associationMappings),
-            array_keys($classMetadata->embeddedClasses)
-        );
+        $targetFields = [
+            ...array_keys($classMetadata->fieldMappings),
+            ...array_keys($classMetadata->associationMappings),
+            ...array_keys($classMetadata->embeddedClasses),
+        ];
 
         if ($classReflection) {
             // exclude traits
@@ -257,10 +257,8 @@ final class EntityRegenerator
             $targetFields = array_diff($targetFields, $traitProperties);
 
             // exclude inherited properties
-            $targetFields = array_filter($targetFields, static function ($field) use ($classReflection) {
-                return $classReflection->hasProperty($field) &&
-                    $classReflection->getProperty($field)->getDeclaringClass()->getName() == $classReflection->getName();
-            });
+            $targetFields = array_filter($targetFields, static fn ($field) => $classReflection->hasProperty($field) &&
+                $classReflection->getProperty($field)->getDeclaringClass()->getName() === $classReflection->getName());
         }
 
         return $targetFields;

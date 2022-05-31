@@ -356,7 +356,7 @@ class MakeResetPassword extends AbstractMaker
          * reset_password.yaml exists, and was probably created by flex;
          * Let's replace it with a "clean" file.
          */
-        if (1 >= \count($data[$symfonyCastsKey])) {
+        if (1 >= (is_countable($data[$symfonyCastsKey]) ? \count($data[$symfonyCastsKey]) : 0)) {
             $yaml = [
                 $symfonyCastsKey => [
                     'request_password_repository' => $repositoryClassFullName,
@@ -401,12 +401,10 @@ class MakeResetPassword extends AbstractMaker
 
         $generator->writeChanges();
 
-        $useAttributesForDoctrineMapping = $this->doctrineHelper->isDoctrineSupportingAttributes() && $this->doctrineHelper->doesClassUsesAttributes($requestClassNameDetails->getFullName());
-
         $manipulator = new ClassSourceManipulator(
             sourceCode: $this->fileManager->getFileContents($requestEntityPath),
             overwrite: false,
-            useAttributesForDoctrineMapping: $useAttributesForDoctrineMapping
+            useAttributesForDoctrineMapping: $this->doctrineHelper->doesClassUsesAttributes($requestClassNameDetails->getFullName()),
         );
 
         $manipulator->addInterface(ResetPasswordRequestInterface::class);

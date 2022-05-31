@@ -21,12 +21,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 final class ConsoleStyle extends SymfonyStyle
 {
-    private $output;
-
-    public function __construct(InputInterface $input, OutputInterface $output)
-    {
-        $this->output = $output;
-
+    public function __construct(
+        InputInterface $input,
+        private OutputInterface $output,
+    ) {
         parent::__construct($input, $output);
     }
 

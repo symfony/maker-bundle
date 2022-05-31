@@ -16,7 +16,7 @@ use Symfony\Bundle\MakerBundle\Str;
 /**
  * @internal
  */
-final class ClassNameValue
+final class ClassNameValue implements \Stringable
 {
     public function __construct(
         private string $typeHint,
@@ -38,7 +38,7 @@ final class ClassNameValue
         return 'self' === $this->typeHint;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getShortName();
     }

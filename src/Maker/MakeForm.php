@@ -67,7 +67,7 @@ final class MakeForm extends AbstractMaker
             $entities = $this->entityHelper->getEntitiesForAutocomplete();
 
             $question = new Question($argument->getDescription());
-            $question->setValidator(function ($answer) use ($entities) {return Validator::existsOrNull($answer, $entities); });
+            $question->setValidator(fn ($answer) => Validator::existsOrNull($answer, $entities));
             $question->setAutocompleterValues($entities);
             $question->setMaxAttempts(3);
 

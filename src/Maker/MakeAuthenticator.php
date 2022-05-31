@@ -218,7 +218,7 @@ final class MakeAuthenticator extends AbstractMaker
             );
             $generator->dumpFile($path, $newYaml);
             $securityYamlUpdated = true;
-        } catch (YamlManipulationFailedException $e) {
+        } catch (YamlManipulationFailedException) {
         }
 
         if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {

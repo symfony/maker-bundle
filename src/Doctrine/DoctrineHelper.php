@@ -68,7 +68,7 @@ final class DoctrineHelper
         try {
             /** @var EntityManagerInterface $em */
             $em = $this->getRegistry()->getManagerForClass($className);
-        } catch (\ReflectionException $exception) {
+        } catch (\ReflectionException) {
             // this exception will be thrown by the registry if the class isn't created yet.
             // an example case is the "make:entity" command, which needs to know which driver is used for the class to determine
             // if the class should be generated with attributes or annotations. If this exception is thrown, we will check based on the
@@ -167,7 +167,7 @@ final class DoctrineHelper
             if ($disconnected) {
                 try {
                     $loaded = $cmf->getAllMetadata();
-                } catch (ORMMappingException|PersistenceMappingException $e) {
+                } catch (ORMMappingException|PersistenceMappingException) {
                     $loaded = $this->isInstanceOf($cmf, AbstractClassMetadataFactory::class) ? $cmf->getLoadedMetadata() : [];
                 }
 

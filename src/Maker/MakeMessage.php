@@ -58,13 +58,15 @@ final class MakeMessage extends AbstractMaker
     {
         $command->addArgument('chosen-transport', InputArgument::OPTIONAL);
 
+        $messengerData = [];
+
         try {
             $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents('config/packages/messenger.yaml'));
             $messengerData = $manipulator->getData();
-        } catch (\Exception $e) {
+        } catch (\Exception) {
         }
 
-        if (!isset($messengerData, $messengerData['framework']['messenger']['transports'])) {
+        if (!isset($messengerData['framework']['messenger']['transports'])) {
             return;
         }
 

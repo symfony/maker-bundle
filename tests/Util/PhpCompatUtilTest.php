@@ -11,55 +11,16 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
-use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
  */
-class PhpVersionTest extends TestCase
+class PhpCompatUtilTest extends TestCase
 {
-    /**
-     * @dataProvider phpVersionDataProvider
-     */
-    public function testUsesPhpPlatformFromComposerJsonFileForCanUseAttributes(string $version, bool $expectedResult): void
-    {
-        $this->markTestSkipped('This test needs to be refactored if we keep the util.');
-        $mockFileManager = $this->mockFileManager(sprintf('{"platform-overrides": {"php": "%s"}}', $version));
-
-        $version = new PhpCompatUtil($mockFileManager);
-
-//        $result = $version->canUseAttributes();
-
-        /*
-         * Symfony 5.2 is required to compare the result. Otherwise it will always
-         * return false regardless of the PHP Version. If the test suite is run w/
-         * Symfony < 5.2, we assert false here but still rely on the assertions above.
-         */
-        if (Kernel::VERSION_ID < 50200) {
-            $expectedResult = false;
-        }
-
-        self::assertSame($expectedResult, $result);
-    }
-
-    public function phpVersionDataProvider(): \Generator
-    {
-        yield ['8', true];
-        yield ['8.0', true];
-        yield ['8.0.1', true];
-        yield ['8RC1', true];
-        yield ['8.1alpha1', true];
-        yield ['8.0.0beta2', true];
-        yield ['8beta', true];
-        yield ['7', false];
-        yield ['7.0', false];
-        yield ['7.1.1', false];
-        yield ['7.0.0RC3', false];
-    }
-
     public function testFallBackToPhpVersionWithoutLockFile(): void
     {
         $mockFileManager = $this->createMock(FileManager::class);
@@ -99,10 +60,7 @@ class PhpVersionTest extends TestCase
         self::assertSame(\PHP_VERSION, $result);
     }
 
-    /**
-     * @return \PHPUnit\Framework\MockObject\MockObject|FileManager
-     */
-    private function mockFileManager(string $json)
+    private function mockFileManager(string $json): MockObject|FileManager
     {
         $mockFileManager = $this->createMock(FileManager::class);
         $mockFileManager
