@@ -65,7 +65,7 @@ class Client extends BaseClient
     public function addTag(Tag $tag): self
     {
         if (!$this->tags->contains($tag)) {
-            $this->tags[] = $tag;
+            $this->tags->add($tag);
         }
 
         return $this;

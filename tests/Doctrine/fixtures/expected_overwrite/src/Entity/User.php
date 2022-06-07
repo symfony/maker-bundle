@@ -67,7 +67,7 @@ class User
     public function addAvatar(UserAvatar $avatar): self
     {
         if (!$this->avatars->contains($avatar)) {
-            $this->avatars[] = $avatar;
+            $this->avatars->add($avatar);
             $avatar->setUser($this);
         }
 
@@ -102,7 +102,7 @@ class User
     public function addTag(Tag $tag): self
     {
         if (!$this->tags->contains($tag)) {
-            $this->tags[] = $tag;
+            $this->tags->add($tag);
         }
 
         return $this;
