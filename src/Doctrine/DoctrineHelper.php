@@ -179,7 +179,7 @@ final class DoctrineHelper
     {
         foreach ($this->mappingDriversByPrefix ?? [] as $managerName => $prefixes) {
             foreach ($prefixes as [$prefix, $annotationDriver]) {
-                if ($annotationDriver === null) {
+                if (null === $annotationDriver) {
                     continue;
                 }
                 if (class_exists(AnnotationDriver::class)) {
