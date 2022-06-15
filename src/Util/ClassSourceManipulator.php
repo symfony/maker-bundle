@@ -35,6 +35,8 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @internal
@@ -94,6 +96,8 @@ final class ClassSourceManipulator
         $defaultValue = null;
         if ('array' === $typeHint) {
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
+        } elseif ('\\' === $typeHint[0] && false !== strpos($typeHint, '\\', 1)) {
+            $typeHint = $this->addUseStatementIfNecessary(substr($typeHint, 1));
         }
 
         $this->addProperty(
@@ -1030,6 +1034,8 @@ final class ClassSourceManipulator
             'datetime_immutable', 'datetimetz_immutable', 'date_immutable', 'time_immutable' => '\\'.\DateTimeImmutable::class,
             'dateinterval' => '\\'.\DateInterval::class,
             'object' => 'object',
+            'uuid' => '\\'.Uuid::class,
+            'ulid' => '\\'.Ulid::class,
             default => null,
         };
     }
