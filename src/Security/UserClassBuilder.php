@@ -34,7 +34,7 @@ final class UserClassBuilder
 
         $this->addPasswordImplementation($manipulator, $userClassConfig);
 
-        $this->addEraseCredentials($manipulator);
+        $this->addEraseCredentials($manipulator, $userClassConfig);
     }
 
     private function addPasswordImplementation(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
@@ -299,7 +299,7 @@ final class UserClassBuilder
         $manipulator->addMethodBuilder($builder);
     }
 
-    private function addEraseCredentials(ClassSourceManipulator $manipulator): void
+    private function addEraseCredentials(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
     {
         // add eraseCredentials: always empty
         $builder = $manipulator->createMethodBuilder(
@@ -313,11 +313,21 @@ final class UserClassBuilder
                 'If you store any temporary, sensitive data on the user, clear it here'
             )
         );
-        $builder->addStmt(
-            $manipulator->createMethodLevelCommentNode(
-                '$this->plainPassword = null;'
-            )
-        );
+        if ($userClassConfig->hasPassword()) {
+            // $this->password = ''
+            $builder->addStmt(
+                new Node\Stmt\Expression(new Node\Expr\Assign(
+                    new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), 'password'),
+                    new Node\Scalar\String_('')
+                ))
+            );
+        } else {
+            $builder->addStmt(
+                $manipulator->createMethodLevelCommentNode(
+                    '$this->plainPassword = null;'
+                )
+            );
+        }
 
         $manipulator->addMethodBuilder($builder);
     }
