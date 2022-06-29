@@ -119,10 +119,10 @@ class Generator
      *      // App\Controller\FooController
      *      $gen->createClassNameDetails('foo', 'Controller', 'Controller');
      *
-     *      // App\Controller\Admin\FooController
+     *      // App\Controller\Foo\AdminController
      *      $gen->createClassNameDetails('Foo\\Admin', 'Controller', 'Controller');
      *
-     *      // App\Controller\Security\Voter\CoolController
+     *      // App\Security\Voter\CoolVoter
      *      $gen->createClassNameDetails('Cool', 'Security\Voter', 'Voter');
      *
      *      // Full class names can also be passed. Imagine the user has an autoload
