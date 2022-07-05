@@ -89,6 +89,11 @@ final class ClassSourceManipulator
     public function addEntityField(string $propertyName, array $columnOptions, array $comments = []): void
     {
         $typeHint = $this->getEntityTypeHint($columnOptions['type']);
+
+        if (null !== $typeHint) {
+            $columnOptions['type'] = $this->getTypeConstant($columnOptions['type']);
+        }
+
         $nullable = $columnOptions['nullable'] ?? false;
         $isId = (bool) ($columnOptions['id'] ?? false);
         $attributes[] = $this->buildAttributeNode(Column::class, $columnOptions, 'ORM');
@@ -801,6 +806,17 @@ final class ClassSourceManipulator
                 return new Node\NullableType($option);
             }
 
+            // Use the Doctrine Types constant
+            if ('type' === $option && str_starts_with($value, 'Types::')) {
+                    return new Node\Arg(
+                        new Node\Expr\ConstFetch(new Node\Name($value)),
+                        false,
+                        false,
+                        [],
+                        new Node\Identifier($option)
+                    );
+                }
+
             return new Node\Arg($context->buildNodeExprByValue($value), false, false, [], new Node\Identifier($option));
         }, array_keys($options), array_values($options));
 
@@ -1040,9 +1056,9 @@ final class ClassSourceManipulator
         };
     }
 
-    private function getTypeConstant(string $type): string
+    private function getTypeConstant(string $type): ?string
     {
-        $typesMapping = [
+        return match ($type) {
             'array' => 'Types::ARRAY',
             'ascii_string' => 'Types::ASCII_STRING',
             'bigint' => 'Types::BIGINT',
@@ -1052,10 +1068,8 @@ final class ClassSourceManipulator
             'date' => 'Types::DATE_MUTABLE',
             'date_immutable' => 'Types::DATE_IMMUTABLE',
             'dateinterval' => 'Types::DATEINTERVAL',
-            'datetime' => 'Types::DATETIME_MUTABLE',
-            'datetime_immutable' => 'Types::DATETIME_IMMUTABLE',
-            'datetimetz' => 'Types::DATETIMETZ_MUTABLE',
-            'datetimetz_immutable' => 'Types::DATETIMETZ_IMMUTABLE',
+            'datetime', 'datetimetz' => 'Types::DATETIME_MUTABLE',
+            'datetime_immutable', 'datetimetz_immutable' => 'Types::DATETIME_IMMUTABLE',
             'decimal' => 'Types::DECIMAL',
             'float' => 'Types::FLOAT',
             'guid' => 'Types::GUID',
@@ -1068,9 +1082,10 @@ final class ClassSourceManipulator
             'text' => 'Types::TEXT',
             'time' => 'Types::TIME_MUTABLE',
             'time_immutable' => 'Types::TIME_IMMUTABLE',
-        ];
-
-        return $typesMapping[$type] ?? $type;
+            'ulid' => 'Types::ULID',
+            'uuid' => 'Types::UUID',
+            default => null,
+        };
     }
 
     private function isInSameNamespace(string $class): bool

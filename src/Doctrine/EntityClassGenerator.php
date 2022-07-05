@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -49,6 +50,7 @@ final class EntityClassGenerator
         $useStatements = new UseStatementGenerator([
             $repoClassDetails->getFullName(),
             [Mapping::class => 'ORM'],
+            Types::class,
         ]);
 
         if ($broadcast) {
