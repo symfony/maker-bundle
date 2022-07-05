@@ -139,7 +139,7 @@ jobs:
               run: composer diagnose
 
             - name: "Require symfony/flex"
-              run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
+              run: composer global require --no-progress --no-scripts --no-plugins symfony/flex -vvv
 
             - name: "Composer install"
               uses: "ramsey/composer-install@v1"
