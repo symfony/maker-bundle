@@ -808,14 +808,14 @@ final class ClassSourceManipulator
 
             // Use the Doctrine Types constant
             if ('type' === $option && str_starts_with($value, 'Types::')) {
-                    return new Node\Arg(
+                return new Node\Arg(
                         new Node\Expr\ConstFetch(new Node\Name($value)),
                         false,
                         false,
                         [],
                         new Node\Identifier($option)
                     );
-                }
+            }
 
             return new Node\Arg($context->buildNodeExprByValue($value), false, false, [], new Node\Identifier($option));
         }, array_keys($options), array_values($options));
