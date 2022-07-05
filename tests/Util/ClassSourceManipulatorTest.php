@@ -279,6 +279,24 @@ class ClassSourceManipulatorTest extends TestCase
             ],
             'User_simple_object.php',
         ];
+
+        yield 'entity_add_uuid' => [
+            'User_simple.php',
+            'uuid',
+            [
+                'type' => 'uuid',
+            ],
+            'User_simple_uuid.php',
+        ];
+
+        yield 'entity_add_ulid' => [
+            'User_simple.php',
+            'ulid',
+            [
+                'type' => 'ulid',
+            ],
+            'User_simple_ulid.php',
+        ];
     }
 
     /**
