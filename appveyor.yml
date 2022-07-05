@@ -53,6 +53,7 @@ install:
     - del composer.phar
     - rename composer-stable.phar composer.phar
     - cd C:\projects\maker-bundle
+    - composer global config --no-plugins allow-plugins.symfony/flex false
     - composer global require --no-progress --no-scripts --no-plugins symfony/flex
     - IF %dependencies%==highest appveyor-retry composer update --no-progress --no-suggest --ansi
     - composer install --no-interaction --no-progress --ansi --no-scripts --working-dir=tools/twigcs
