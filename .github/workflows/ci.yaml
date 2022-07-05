@@ -135,7 +135,7 @@ jobs:
             - name: "Add PHPUnit matcher"
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-            - name: "No Plugins"
+            - name: "Allow the Flex Plugin"
               run: composer global config --no-plugins allow-plugins.symfony/flex true
 
             - name: "Require symfony/flex"
