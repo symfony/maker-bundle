@@ -2,6 +2,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\MappedSuperclass]
@@ -11,16 +12,16 @@ class BaseClient
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: Types::INTEGER)]
     private $id;
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: Types::STRING)]
     private $name;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     private $creator;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: Types::INTEGER)]
     private $magic;
 
     public function __construct()

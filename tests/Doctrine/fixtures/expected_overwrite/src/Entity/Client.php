@@ -4,6 +4,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -14,7 +15,7 @@ class Client extends BaseClient
     /**
      * @var string
      */
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: Types::STRING)]
     private $apiKey;
 
     #[ORM\ManyToMany(targetEntity: Tag::class)]

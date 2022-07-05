@@ -2,14 +2,15 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 trait TimestampableTrait
 {
-    #[ORM\Column(type: 'datetime')]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    #[ORM\Column(type: 'datetime')]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private $updatedAt;
 
     /**
