@@ -45,7 +45,7 @@ class MakeCommandRegistrationPass implements CompilerPassInterface
             $tagAttributes = ['command' => $class::getCommandName()];
 
             if (!method_exists($class, 'getCommandDescription')) {
-                // no-op
+            // no-op
             } elseif (class_exists(LazyCommand::class)) {
                 $tagAttributes['description'] = $class::getCommandDescription();
             } else {
