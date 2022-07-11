@@ -2,7 +2,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity;
 
-use Doctrine\DBAL\Types\Types;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -13,12 +13,12 @@ class Client extends BaseClient
     /**
      * @var string
      */
-    #[ORM\Column(type: Types::STRING)]
-    private $apiKey;
+    #[ORM\Column()]
+    private ?string $apiKey = null;
 
     #[ORM\ManyToMany(targetEntity: Tag::class)]
-    private $tags;
+    private Collection $tags;
 
-    #[ORM\Embedded(class: Embed::class)]
-    private $embed;
+    #[ORM\Embedded()]
+    private Embed $embed;
 }

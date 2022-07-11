@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -10,17 +11,17 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-    private $firstName;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $firstName = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private $createdAt;
+    private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\OneToMany(targetEntity: UserAvatar::class, mappedBy: 'user')]
-    private $avatars;
+    private Collection $avatars;
 
     public function getId()
     {

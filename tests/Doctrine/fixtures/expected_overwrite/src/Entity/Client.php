@@ -15,14 +15,14 @@ class Client extends BaseClient
     /**
      * @var string
      */
-    #[ORM\Column(type: Types::STRING)]
-    private $apiKey;
+    #[ORM\Column()]
+    private ?string $apiKey = null;
 
     #[ORM\ManyToMany(targetEntity: Tag::class)]
-    private $tags;
+    private Collection $tags;
 
-    #[ORM\Embedded(class: Embed::class)]
-    private $embed;
+    #[ORM\Embedded()]
+    private Embed $embed;
 
     public function __construct()
     {

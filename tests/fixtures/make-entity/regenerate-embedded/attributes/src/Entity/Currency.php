@@ -11,8 +11,8 @@ class Currency
     /**
      * @var string
      */
-    #[ORM\Column(type: Types::STRING, name: 'currency')]
-    private $currency;
+    #[ORM\Column()]
+    private ?string $currency = null;
 
     public function __construct($currency = null)
     {

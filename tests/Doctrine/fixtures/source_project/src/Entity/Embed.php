@@ -8,6 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Embeddable]
 class Embed
 {
-    #[ORM\Column(type: Types::INTEGER)]
-    private $val;
+    #[ORM\Column()]
+    private ?int $val = null;
 }

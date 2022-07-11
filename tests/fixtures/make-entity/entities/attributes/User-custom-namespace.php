@@ -10,14 +10,14 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-    private $firstName;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $firstName = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private $createdAt;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeInterface $createdAt = null;
 
     public function getId()
     {

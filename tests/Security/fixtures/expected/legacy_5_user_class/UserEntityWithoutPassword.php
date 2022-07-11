@@ -10,14 +10,14 @@ class User implements UserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 180, unique: true)]
-    private $userIdentifier;
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $userIdentifier = null;
 
-    #[ORM\Column(type: 'json')]
-    private $roles = [];
+    #[ORM\Column()]
+    private array $roles = [];
 
     public function getId(): ?int
     {

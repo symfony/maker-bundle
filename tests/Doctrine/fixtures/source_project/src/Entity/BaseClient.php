@@ -12,17 +12,17 @@ class BaseClient
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    #[ORM\Column(type: Types::STRING)]
-    private $name;
+    #[ORM\Column]
+    private ?string $name = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    private $creator;
+    #[ORM\ManyToOne]
+    private ?User $creator = null;
 
-    #[ORM\Column(type: Types::INTEGER)]
-    private $magic;
+    #[ORM\Column()]
+    private int $magic;
 
     public function __construct()
     {

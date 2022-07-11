@@ -10,10 +10,10 @@ class UserAvatar
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'avatars', cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(inversedBy: 'avatars', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private $user;
+    private ?User $user = null;
 }

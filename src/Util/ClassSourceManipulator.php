@@ -162,9 +162,8 @@ final class ClassSourceManipulator
 
         $this->addProperty(
             name: $propertyName,
-            defaultValue: null,
             attributes: $attributes,
-            propertyType: '?'.$typeHint,
+            propertyType: $typeHint,
         );
 
         // logic to avoid re-adding the same ArrayCollection line
