@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Ulid;
 
@@ -11,11 +10,11 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    #[ORM\Column(type: Types::ULID)]
-    private $ulid;
+    #[ORM\Column(type: 'ulid')]
+    private ?Ulid $ulid = null;
 
     public function getId(): ?int
     {

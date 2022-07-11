@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Util;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -30,6 +31,7 @@ use PhpParser\Parser;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\Doctrine\BaseCollectionRelation;
 use Symfony\Bundle\MakerBundle\Doctrine\BaseRelation;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
@@ -46,6 +48,8 @@ final class ClassSourceManipulator
     private const CONTEXT_OUTSIDE_CLASS = 'outside_class';
     private const CONTEXT_CLASS = 'class';
     private const CONTEXT_CLASS_METHOD = 'class_method';
+
+    private const DEFAULT_VALUE_NONE = '__default_value_none';
 
     private Parser\Php7 $parser;
     private Lexer\Emulative $lexer;
@@ -88,11 +92,21 @@ final class ClassSourceManipulator
 
     public function addEntityField(string $propertyName, array $columnOptions, array $comments = []): void
     {
-        $typeHint = $this->getEntityTypeHint($columnOptions['type']);
-
-        if (null !== $typeHint) {
-            $columnOptions['type'] = $this->getTypeConstant($columnOptions['type']);
+        $typeHint = DoctrineHelper::getPropertyTypeForColumn($columnOptions['type']);
+        if ($typeHint && DoctrineHelper::canColumnTypeBeInferredByPropertyType($columnOptions['type'], $typeHint)) {
+            unset($columnOptions['type']);
         }
+
+        if (isset($columnOptions['type'])) {
+            $typeConstant = DoctrineHelper::getTypeConstant($columnOptions['type']);
+            if ($typeConstant) {
+                $this->addUseStatementIfNecessary(Types::class);
+                $columnOptions['type'] = $typeConstant;
+            }
+        }
+
+        // 2) USE property type on property below, nullable
+        // 3) If default value, then NOT nullable
 
         $nullable = $columnOptions['nullable'] ?? false;
         $isId = (bool) ($columnOptions['id'] ?? false);
@@ -101,8 +115,14 @@ final class ClassSourceManipulator
         $defaultValue = null;
         if ('array' === $typeHint) {
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
-        } elseif ('\\' === $typeHint[0] && false !== strpos($typeHint, '\\', 1)) {
+        } elseif ($typeHint && '\\' === $typeHint[0] && false !== strpos($typeHint, '\\', 1)) {
             $typeHint = $this->addUseStatementIfNecessary(substr($typeHint, 1));
+        }
+
+        $propertyType = $typeHint;
+        if ($propertyType && !$defaultValue) {
+            // all property types
+            $propertyType = '?'.$propertyType;
         }
 
         $this->addProperty(
@@ -110,6 +130,7 @@ final class ClassSourceManipulator
             defaultValue: $defaultValue,
             attributes: $attributes,
             comments: $comments,
+            propertyType: $propertyType
         );
 
         $this->addGetter(
@@ -117,7 +138,8 @@ final class ClassSourceManipulator
             $typeHint,
             // getter methods always have nullable return values
             // because even though these are required in the db, they may not be set yet
-            true
+            // unless there is a default value
+            $defaultValue === null
         );
 
         // don't generate setters for id fields
@@ -138,7 +160,12 @@ final class ClassSourceManipulator
             ),
         ];
 
-        $this->addProperty(name: $propertyName, attributes: $attributes);
+        $this->addProperty(
+            name: $propertyName,
+            defaultValue: null,
+            attributes: $attributes,
+            propertyType: '?'.$typeHint,
+        );
 
         // logic to avoid re-adding the same ArrayCollection line
         $addEmbedded = true;
@@ -327,7 +354,7 @@ final class ClassSourceManipulator
     /**
      * @param array<Node\Attribute|Node\AttributeGroup> $attributes
      */
-    public function addProperty(string $name, $defaultValue = null, array $attributes = [], array $comments = []): void
+    public function addProperty(string $name, $defaultValue = self::DEFAULT_VALUE_NONE, array $attributes = [], array $comments = [], string $propertyType = null): void
     {
         if ($this->propertyExists($name)) {
             // we never overwrite properties
@@ -335,6 +362,10 @@ final class ClassSourceManipulator
         }
 
         $newPropertyBuilder = (new Builder\Property($name))->makePrivate();
+
+        if (null !== $propertyType) {
+            $newPropertyBuilder->setType($propertyType);
+        }
 
         if ($this->useAttributesForDoctrineMapping) {
             foreach ($attributes as $attribute) {
@@ -346,7 +377,7 @@ final class ClassSourceManipulator
             $newPropertyBuilder->setDocComment($this->createDocBlock($comments));
         }
 
-        if (null !== $defaultValue) {
+        if ($defaultValue !== self::DEFAULT_VALUE_NONE) {
             $newPropertyBuilder->setDefault($defaultValue);
         }
         $newPropertyNode = $newPropertyBuilder->getNode();
@@ -422,9 +453,7 @@ final class ClassSourceManipulator
             $typeHint = 'self';
         }
 
-        $annotationOptions = [
-            'targetEntity' => new ClassNameValue($typeHint, $relation->getTargetClassName()),
-        ];
+        $annotationOptions = [];
         if ($relation->isOwning()) {
             // sometimes, we don't map the inverse relation
             if ($relation->getMapInverseRelation()) {
@@ -439,18 +468,23 @@ final class ClassSourceManipulator
         }
 
         $attributes = [
-                $this->buildAttributeNode(
-                    $relation instanceof RelationManyToOne ? ManyToOne::class : OneToOne::class,
-                    $annotationOptions,
-                    'ORM'
-                ),
-            ];
+            $this->buildAttributeNode(
+                $relation instanceof RelationManyToOne ? ManyToOne::class : OneToOne::class,
+                $annotationOptions,
+                'ORM'
+            ),
+        ];
 
         if (!$relation->isNullable() && $relation->isOwning()) {
             $attributes[] = $this->buildAttributeNode(JoinColumn::class, ['nullable' => false], 'ORM');
         }
 
-        $this->addProperty(name: $relation->getPropertyName(), attributes: $attributes);
+        $this->addProperty(
+            name: $relation->getPropertyName(),
+            defaultValue: null,
+            attributes: $attributes,
+            propertyType: '?'.$typeHint,
+        );
 
         $this->addGetter(
             $relation->getPropertyName(),
@@ -516,14 +550,18 @@ final class ClassSourceManipulator
         }
 
         $attributes = [
-                $this->buildAttributeNode(
-                    $relation instanceof RelationManyToMany ? ManyToMany::class : OneToMany::class,
-                    $annotationOptions,
-                    'ORM'
-                ),
-            ];
+            $this->buildAttributeNode(
+                $relation instanceof RelationManyToMany ? ManyToMany::class : OneToMany::class,
+                $annotationOptions,
+                'ORM'
+            ),
+        ];
 
-        $this->addProperty(name: $relation->getPropertyName(), attributes: $attributes);
+        $this->addProperty(
+            name: $relation->getPropertyName(),
+            attributes: $attributes,
+            propertyType: $collectionTypeHint,
+        );
 
         // logic to avoid re-adding the same ArrayCollection line
         $addArrayCollection = true;
@@ -1036,56 +1074,6 @@ final class ClassSourceManipulator
             ->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD))
             ->addStmt(new Node\Stmt\Return_(new Node\Expr\Variable('this')));
         $methodBuilder->setReturnType('self');
-    }
-
-    private function getEntityTypeHint(string $doctrineType): ?string
-    {
-        return match ($doctrineType) {
-            'string', 'text', 'guid', 'bigint', 'decimal' => 'string',
-            'array', 'simple_array', 'json', 'json_array' => 'array',
-            'boolean' => 'bool',
-            'integer', 'smallint' => 'int',
-            'float' => 'float',
-            'datetime', 'datetimetz', 'date', 'time' => '\\'.\DateTimeInterface::class,
-            'datetime_immutable', 'datetimetz_immutable', 'date_immutable', 'time_immutable' => '\\'.\DateTimeImmutable::class,
-            'dateinterval' => '\\'.\DateInterval::class,
-            'object' => 'object',
-            'uuid' => '\\'.Uuid::class,
-            'ulid' => '\\'.Ulid::class,
-            default => null,
-        };
-    }
-
-    private function getTypeConstant(string $type): ?string
-    {
-        return match ($type) {
-            'array' => 'Types::ARRAY',
-            'ascii_string' => 'Types::ASCII_STRING',
-            'bigint' => 'Types::BIGINT',
-            'binary' => 'Types::BINARY',
-            'blob' => 'Types::BLOB',
-            'boolean' => 'Types::BOOLEAN',
-            'date' => 'Types::DATE_MUTABLE',
-            'date_immutable' => 'Types::DATE_IMMUTABLE',
-            'dateinterval' => 'Types::DATEINTERVAL',
-            'datetime', 'datetimetz' => 'Types::DATETIME_MUTABLE',
-            'datetime_immutable', 'datetimetz_immutable' => 'Types::DATETIME_IMMUTABLE',
-            'decimal' => 'Types::DECIMAL',
-            'float' => 'Types::FLOAT',
-            'guid' => 'Types::GUID',
-            'integer' => 'Types::INTEGER',
-            'json' => 'Types::JSON',
-            'object' => 'Types::OBJECT',
-            'simple_array' => 'Types::SIMPLE_ARRAY',
-            'smallint' => 'Types::SMALLINT',
-            'string' => 'Types::STRING',
-            'text' => 'Types::TEXT',
-            'time' => 'Types::TIME_MUTABLE',
-            'time_immutable' => 'Types::TIME_IMMUTABLE',
-            'ulid' => 'Types::ULID',
-            'uuid' => 'Types::UUID',
-            default => null,
-        };
     }
 
     private function isInSameNamespace(string $class): bool

@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -10,12 +9,12 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'foods')]
+    #[ORM\ManyToOne(inversedBy: 'foods')]
     #[ORM\JoinColumn(nullable: false)]
-    private $category;
+    private ?Category $category = null;
 
     public function getId(): ?int
     {

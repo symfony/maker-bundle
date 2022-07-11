@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -12,11 +11,11 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserAvatarPhoto::class, orphanRemoval: true)]
-    private $avatarPhotos;
+    private Collection $avatarPhotos;
 
     public function __construct()
     {
