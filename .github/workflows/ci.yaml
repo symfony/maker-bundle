@@ -135,9 +135,6 @@ jobs:
             - name: "Add PHPUnit matcher"
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-            - name: "Require symfony/flex"
-              run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
-
             - name: "Composer install"
               uses: "ramsey/composer-install@v1"
               with:
