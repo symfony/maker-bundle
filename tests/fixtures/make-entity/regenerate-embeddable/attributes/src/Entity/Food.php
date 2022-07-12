@@ -9,12 +9,12 @@ class Food
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(name: 'id', type: 'integer')]
-    private $id;
+    #[ORM\Column(name: 'id')]
+    private ?int $id = null;
 
-    #[ORM\Column(name: 'title', type: 'string', length: 255)]
-    private $title;
+    #[ORM\Column(name: 'title', length: 255)]
+    private ?string $title = null;
 
-    #[ORM\Embedded(class: Recipe::class)]
-    private $recipe;
+    #[ORM\Embedded()]
+    private Recipe $recipe;
 }

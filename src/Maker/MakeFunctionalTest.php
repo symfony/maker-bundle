@@ -65,7 +65,7 @@ class MakeFunctionalTest extends AbstractMaker
         $pantherAvailable = trait_exists(PantherTestCaseTrait::class);
 
         $useStatements = new UseStatementGenerator([
-            ($pantherAvailable ? PantherTestCase::class : WebTestCase::class),
+            $pantherAvailable ? PantherTestCase::class : WebTestCase::class,
         ]);
 
         $generator->generateClass(

@@ -8,8 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 class User
 {
-    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'foods')]
-    private $category;
+    #[ORM\ManyToOne(inversedBy: 'foods')]
+    private ?Category $category = null;
 
     public function getCategory(): ?Category
     {

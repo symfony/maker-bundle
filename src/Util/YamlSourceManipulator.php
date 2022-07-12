@@ -477,7 +477,7 @@ class YamlSourceManipulator
             // this means we need to break onto the next line
 
             // increase(override) the indentation
-            $newYamlValue = "\n".$this->indentMultilineYamlArray($newYamlValue, ($this->indentationForDepths[$this->depth] + $this->getPreferredIndentationSize()));
+            $newYamlValue = "\n".$this->indentMultilineYamlArray($newYamlValue, $this->indentationForDepths[$this->depth] + $this->getPreferredIndentationSize());
         } elseif ($this->isCurrentArrayMultiline() && $this->isCurrentArraySequence()) {
             // we are a multi-line sequence, so drop to next line, indent and add "- " in front
             $newYamlValue = "\n".$this->indentMultilineYamlArray('- '.$newYamlValue);
@@ -626,7 +626,7 @@ class YamlSourceManipulator
         }
 
         // find either a line break or a , that is the end of the previous key
-        while (\in_array(($char = substr($this->contents, $startOfKey - 1, 1)), [',', "\n"])) {
+        while (\in_array($char = substr($this->contents, $startOfKey - 1, 1), [',', "\n"])) {
             --$startOfKey;
         }
 

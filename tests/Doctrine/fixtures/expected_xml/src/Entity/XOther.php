@@ -4,7 +4,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity;
 
 class XOther
 {
-    private $id;
+    private ?int $id = null;
 
     public function getId(): ?int
     {

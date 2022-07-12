@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -9,11 +10,11 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    #[ORM\Column(type: 'decimal', precision: 6, scale: 0)]
-    private $decimal;
+    #[ORM\Column(type: Types::DECIMAL, precision: 6, scale: 0)]
+    private ?string $decimal = null;
 
     public function getId(): ?int
     {

@@ -27,10 +27,10 @@ class MakeMessengerMiddlewareTest extends MakerTestCase
         yield 'it_generates_messenger_middleware' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
-                [
-                    // middleware name
-                    'CustomMiddleware',
-                ]);
+                    [
+                        // middleware name
+                        'CustomMiddleware',
+                    ]);
 
                 $this->assertFileExists($runner->getPath('src/Middleware/CustomMiddleware.php'));
             }),

@@ -9,12 +9,12 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'foods')]
+    #[ORM\ManyToOne(inversedBy: 'foods')]
     #[ORM\JoinColumn(nullable: false)]
-    private $category;
+    private ?Category $category = null;
 
     public function getId(): ?int
     {

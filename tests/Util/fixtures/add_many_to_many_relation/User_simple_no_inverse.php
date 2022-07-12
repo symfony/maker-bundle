@@ -11,11 +11,11 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
     #[ORM\ManyToMany(targetEntity: Recipe::class)]
-    private $recipes;
+    private Collection $recipes;
 
     public function __construct()
     {

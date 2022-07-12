@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Mapping\MappingException as ORMMappingException;
@@ -24,6 +25,8 @@ use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
@@ -228,6 +231,64 @@ final class DoctrineHelper
         }
 
         return (bool) $this->getMetadata($className);
+    }
+
+    /**
+     * Determines if the property-type will make the column type redundant.
+     *
+     * See ClassMetadataInfo::validateAndCompleteTypedFieldMapping()
+     */
+    public static function canColumnTypeBeInferredByPropertyType(string $columnType, string $propertyType): bool
+    {
+        // todo: guessing on enum's could be added
+
+        return match ($propertyType) {
+            '\\'.\DateInterval::class => Types::DATEINTERVAL === $columnType,
+            '\\'.\DateTime::class => Types::DATETIME_MUTABLE === $columnType,
+            '\\'.\DateTimeImmutable::class => Types::DATETIME_IMMUTABLE === $columnType,
+            'array' => Types::JSON === $columnType,
+            'bool' => Types::BOOLEAN === $columnType,
+            'float' => Types::FLOAT === $columnType,
+            'int' => Types::INTEGER === $columnType,
+            'string' => Types::STRING === $columnType,
+            default => false,
+        };
+    }
+
+    public static function getPropertyTypeForColumn(string $columnType): ?string
+    {
+        return match ($columnType) {
+            Types::STRING, Types::TEXT, Types::GUID, Types::BIGINT, Types::DECIMAL => 'string',
+            Types::ARRAY, Types::SIMPLE_ARRAY, Types::JSON => 'array',
+            Types::BOOLEAN => 'bool',
+            Types::INTEGER, Types::SMALLINT => 'int',
+            Types::FLOAT => 'float',
+            Types::DATETIME_MUTABLE, Types::DATETIMETZ_MUTABLE, Types::DATE_MUTABLE, Types::TIME_MUTABLE => '\\'.\DateTimeInterface::class,
+            Types::DATETIME_IMMUTABLE, Types::DATETIMETZ_IMMUTABLE, Types::DATE_IMMUTABLE, Types::TIME_IMMUTABLE => '\\'.\DateTimeImmutable::class,
+            Types::DATEINTERVAL => '\\'.\DateInterval::class,
+            Types::OBJECT => 'object',
+            'uuid' => '\\'.Uuid::class,
+            'ulid' => '\\'.Ulid::class,
+            default => null,
+        };
+    }
+
+    /**
+     * Given the string "column type", this returns the "Types::STRING" constant.
+     *
+     * This is, effectively, a reverse lookup: given the final string, give us
+     * the constant to be used in the generated code.
+     */
+    public static function getTypeConstant(string $columnType): ?string
+    {
+        $reflection = new \ReflectionClass(Types::class);
+        $constants = array_flip($reflection->getConstants());
+
+        if (!isset($constants[$columnType])) {
+            return null;
+        }
+
+        return sprintf('Types::%s', $constants[$columnType]);
     }
 
     private function isInstanceOf($object, string $class): bool

@@ -9,11 +9,11 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: false, options: ['comment' => 'new field'])]
-    private $fooProp;
+    #[ORM\Column(length: 255, nullable: false, options: ['comment' => 'new field'])]
+    private ?string $fooProp = null;
 
     public function getId(): ?int
     {

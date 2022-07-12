@@ -7,9 +7,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Embeddable]
 class Recipe
 {
-    #[ORM\Column(type: 'string', length: 255)]
-    private $ingredients;
+    #[ORM\Column()]
+    private ?string $ingredients = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    private $steps;
+    #[ORM\Column()]
+    private ?string $steps = null;
 }

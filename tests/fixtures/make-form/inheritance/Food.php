@@ -4,25 +4,19 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- * @ORM\InheritanceType("SINGLE_TABLE")
- * @ORM\DiscriminatorColumn(name="food_type", type="string", length=250)
- * @ORM\DiscriminatorMap({"food" = "Food", "sour_food" = "SourFood"})
- */
+#[ORM\Entity]
+#[ORM\InheritanceType('SINGLE_TABLE')]
+#[ORM\DiscriminatorColumn(name: 'food_type', type: 'string', length: 250)]
+#[ORM\DiscriminatorMap(['food' => 'Food', 'sour_food' => 'SourFood'])]
 class Food
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(name="title", type="string", length=255)
-     */
-    private $title;
+    #[ORM\Column]
+    private ?string $title = null;
 
     /**
      * @return mixed

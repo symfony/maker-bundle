@@ -9,9 +9,9 @@ class UserXml
 {
     private $id;
 
-    private $name;
+    private ?string $name = null;
 
-    private $avatars;
+    private Collection $avatars;
 
     public function __construct()
     {

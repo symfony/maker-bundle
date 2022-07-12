@@ -7,17 +7,14 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Embeddable]
 class Money
 {
-    /**
-     * @var Currency
-     */
-    #[ORM\Embedded(class: Currency::class)]
-    private $currency;
+    #[ORM\Embedded()]
+    private Currency $currency;
 
     /**
      * @var int
      */
-    #[ORM\Column(name: 'amount', type: 'integer')]
-    private $amount;
+    #[ORM\Column(name: 'amount')]
+    private ?int $amount;
 
     public function __construct($amount = null, Currency $currency = null)
     {

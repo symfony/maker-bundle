@@ -3,29 +3,22 @@
 namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class SourFood
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(name="title", type="string", length=255)
-     */
-    private $title;
+    #[ORM\Column(name: 'title', length: 255)]
+    private ?string $title = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Property::class, mappedBy="sourFood")
-     */
-    private $properties;
+    #[ORM\OneToMany(targetEntity: Property::class, mappedBy: 'sourFood')]
+    private Collection $properties;
 
     public function __construct()
     {

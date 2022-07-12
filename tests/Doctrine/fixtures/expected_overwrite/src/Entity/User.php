@@ -11,17 +11,17 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
     #[ORM\OneToMany(targetEntity: UserAvatar::class, mappedBy: 'user')]
-    private $avatars;
+    private Collection $avatars;
 
-    #[ORM\OneToOne(targetEntity: UserProfile::class, mappedBy: 'user')]
-    private $userProfile;
+    #[ORM\OneToOne(mappedBy: 'user')]
+    private ?UserProfile $userProfile = null;
 
     #[ORM\ManyToMany(targetEntity: Tag::class)]
-    private $tags;
+    private Collection $tags;
 
     public function __construct()
     {

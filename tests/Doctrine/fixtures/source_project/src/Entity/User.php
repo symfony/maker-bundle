@@ -3,6 +3,7 @@
 namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -10,17 +11,17 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
     #[ORM\OneToMany(targetEntity: UserAvatar::class, mappedBy: 'user')]
-    private $avatars;
+    private Collection $avatars;
 
-    #[ORM\OneToOne(targetEntity: UserProfile::class, mappedBy: 'user')]
-    private $userProfile;
+    #[ORM\OneToOne(mappedBy: 'user')]
+    private ?UserProfile $userProfile = null;
 
     #[ORM\ManyToMany(targetEntity: Tag::class)]
-    private $tags;
+    private Collection $tags;
 
     public function __construct()
     {

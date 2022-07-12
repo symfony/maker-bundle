@@ -10,11 +10,11 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
     #[ORM\Column(type: 'uuid')]
-    private $uuid;
+    private ?Uuid $uuid = null;
 
     public function getId(): ?int
     {

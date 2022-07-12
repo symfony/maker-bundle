@@ -9,12 +9,12 @@ class Invoice
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255, name: 'title')]
-    private $title;
+    #[ORM\Column(length: 255, name: 'title')]
+    private ?string $title = null;
 
-    #[ORM\Embedded(class: Money::class)]
-    private $total;
+    #[ORM\Embedded()]
+    private Money $total;
 }

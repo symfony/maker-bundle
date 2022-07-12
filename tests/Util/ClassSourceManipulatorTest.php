@@ -210,11 +210,11 @@ class ClassSourceManipulatorTest extends TestCase
         $expectedPath = __DIR__.'/fixtures/add_entity_field';
 
         $this->runAddEntityFieldTests(
-                file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
-                $propertyName,
-                $fieldOptions,
-                file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename))
-            );
+            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            $propertyName,
+            $fieldOptions,
+            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename))
+        );
     }
 
     private function runAddEntityFieldTests(string $source, string $propertyName, array $fieldOptions, string $expected): void
@@ -308,10 +308,10 @@ class ClassSourceManipulatorTest extends TestCase
         $expectedPath = __DIR__.'/fixtures/add_many_to_one_relation';
 
         $this->runAddManyToOneRelationTests(
-                file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
-                file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
-                $manyToOne
-            );
+            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            $manyToOne
+        );
     }
 
     public function runAddManyToOneRelationTests(string $source, string $expected, RelationManyToOne $manyToOne): void
@@ -327,73 +327,73 @@ class ClassSourceManipulatorTest extends TestCase
         yield 'many_to_one_not_nullable' => [
             'User_simple.php',
             'User_simple_not_nullable.php',
-            (new RelationManyToOne(
+            new RelationManyToOne(
                 propertyName: 'category',
                 targetClassName: \App\Entity\Category::class,
                 targetPropertyName: 'foods',
                 isOwning: true,
-            )),
+            ),
         ];
 
         yield 'many_to_one_nullable' => [
             'User_simple.php',
             'User_simple_nullable.php',
-            (new RelationManyToOne(
+            new RelationManyToOne(
                 propertyName: 'category',
                 targetClassName: \App\Entity\Category::class,
                 targetPropertyName: 'foods',
                 isOwning: true,
                 isNullable: true,
-            )),
+            ),
         ];
 
         yield 'many_to_one_other_namespace' => [
             'User_simple.php',
             'User_simple_other_namespace.php',
-            (new RelationManyToOne(
+            new RelationManyToOne(
                 propertyName: 'category',
                 targetClassName: \Foo\Entity\Category::class,
                 targetPropertyName: 'foods',
                 isOwning: true,
                 isNullable: true,
-            )),
+            ),
         ];
 
         yield 'many_to_one_empty_other_namespace' => [
             'User_empty.php',
             'User_empty_other_namespace.php',
-            (new RelationManyToOne(
+            new RelationManyToOne(
                 propertyName: 'category',
                 targetClassName: \Foo\Entity\Category::class,
                 targetPropertyName: 'foods',
                 isOwning: true,
                 isNullable: true,
-            )),
+            ),
         ];
 
         yield 'many_to_one_same_and_other_namespaces' => [
             'User_with_relation.php',
             'User_with_relation_same_and_other_namespaces.php',
-            (new RelationManyToOne(
+            new RelationManyToOne(
                 propertyName: 'subCategory',
                 targetClassName: \App\Entity\SubDirectory\Category::class,
                 targetPropertyName: 'foods',
                 isOwning: true,
                 isNullable: true,
-            )),
+            ),
         ];
 
         yield 'many_to_one_no_inverse' => [
             'User_simple.php',
             'User_simple_no_inverse.php',
-            (new RelationManyToOne(
+            new RelationManyToOne(
                 propertyName: 'category',
                 targetClassName: \App\Entity\Category::class,
                 targetPropertyName: 'foods',
                 mapInverseRelation: false,
                 isOwning: true,
                 isNullable: true,
-            )),
+            ),
         ];
     }
 
@@ -406,10 +406,10 @@ class ClassSourceManipulatorTest extends TestCase
         $expectedPath = __DIR__.'/fixtures/add_one_to_many_relation';
 
         $this->runAddOneToManyRelationTests(
-                file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
-                file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
-                $oneToMany
-            );
+            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            $oneToMany
+        );
     }
 
     private function runAddOneToManyRelationTests(string $source, string $expected, RelationOneToMany $oneToMany): void
@@ -425,11 +425,11 @@ class ClassSourceManipulatorTest extends TestCase
         yield 'one_to_many_simple' => [
             'User_simple.php',
             'User_simple.php',
-            (new RelationOneToMany(
+            new RelationOneToMany(
                 propertyName: 'avatarPhotos',
                 targetClassName: \App\Entity\UserAvatarPhoto::class,
                 targetPropertyName: 'user',
-            )),
+            ),
         ];
 
         // interesting also because the source file has its
@@ -437,22 +437,22 @@ class ClassSourceManipulatorTest extends TestCase
         yield 'one_to_many_simple_no_duplicate_use' => [
             'User_with_use_statements.php',
             'User_with_use_statements.php',
-            (new RelationOneToMany(
+            new RelationOneToMany(
                 propertyName: 'avatarPhotos',
                 targetClassName: \App\Entity\UserAvatarPhoto::class,
                 targetPropertyName: 'user',
-            )),
+            ),
         ];
 
         yield 'one_to_many_orphan_removal' => [
             'User_simple.php',
             'User_simple_orphan_removal.php',
-            (new RelationOneToMany(
+            new RelationOneToMany(
                 propertyName: 'avatarPhotos',
                 targetClassName: \App\Entity\UserAvatarPhoto::class,
                 targetPropertyName: 'user',
                 orphanRemoval: true,
-            )),
+            ),
         ];
 
         // todo test existing constructor
@@ -467,10 +467,10 @@ class ClassSourceManipulatorTest extends TestCase
         $expectedPath = __DIR__.'/fixtures/add_many_to_many_relation';
 
         $this->runAddManyToManyRelationTest(
-                file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
-                file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
-                $manyToMany
-            );
+            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            $manyToMany
+        );
     }
 
     private function runAddManyToManyRelationTest(string $source, string $expected, RelationManyToMany $manyToMany): void
@@ -486,34 +486,34 @@ class ClassSourceManipulatorTest extends TestCase
         yield 'many_to_many_owning' => [
             'User_simple.php',
             'User_simple_owning.php',
-            (new RelationManyToMany(
+            new RelationManyToMany(
                 propertyName: 'recipes',
                 targetClassName: \App\Entity\Recipe::class,
                 targetPropertyName: 'foods',
                 isOwning: true,
-            )),
+            ),
         ];
 
         yield 'many_to_many_inverse' => [
             'User_simple.php',
             'User_simple_inverse.php',
-            (new RelationManyToMany(
+            new RelationManyToMany(
                 propertyName: 'recipes',
                 targetClassName: \App\Entity\Recipe::class,
                 targetPropertyName: 'foods',
-            )),
+            ),
         ];
 
         yield 'many_to_many_owning_inverse' => [
             'User_simple.php',
             'User_simple_no_inverse.php',
-            (new RelationManyToMany(
+            new RelationManyToMany(
                 propertyName: 'recipes',
                 targetClassName: \App\Entity\Recipe::class,
                 targetPropertyName: 'foods',
                 mapInverseRelation: false,
                 isOwning: true,
-            )),
+            ),
         ];
     }
 
@@ -526,10 +526,10 @@ class ClassSourceManipulatorTest extends TestCase
         $expectedPath = __DIR__.'/fixtures/add_one_to_one_relation';
 
         $this->runAddOneToOneRelation(
-                file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
-                file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
-                $oneToOne
-            );
+            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            $oneToOne
+        );
     }
 
     private function runAddOneToOneRelation(string $source, string $expected, RelationOneToOne $oneToOne): void
@@ -545,94 +545,94 @@ class ClassSourceManipulatorTest extends TestCase
         yield 'one_to_one_owning' => [
             'User_simple.php',
             'User_simple_owning.php',
-            (new RelationOneToOne(
+            new RelationOneToOne(
                 propertyName: 'userProfile',
                 targetClassName: \App\Entity\UserProfile::class,
                 targetPropertyName: 'user',
                 isOwning: true,
                 isNullable: true,
-            )),
+            ),
         ];
 
         // a relationship to yourself - return type is self
         yield 'one_to_one_owning_self' => [
             'User_simple.php',
             'User_simple_self.php',
-            (new RelationOneToOne(
+            new RelationOneToOne(
                 propertyName: 'embeddedUser',
                 targetClassName: \App\Entity\User::class,
                 targetPropertyName: 'user',
                 isOwning: true,
                 isNullable: true,
-            )),
+            ),
         ];
 
         yield 'one_to_one_inverse' => [
             'UserProfile_simple.php',
             'UserProfile_simple_inverse.php',
-            (new RelationOneToOne(
+            new RelationOneToOne(
                 propertyName: 'user',
                 targetClassName: \App\Entity\User::class,
                 targetPropertyName: 'userProfile',
                 isNullable: true,
-            )),
+            ),
         ];
 
         yield 'one_to_one_inverse_not_nullable' => [
             'UserProfile_simple.php',
             'UserProfile_simple_inverse_not_nullable.php',
-            (new RelationOneToOne(
+            new RelationOneToOne(
                 propertyName: 'user',
                 targetClassName: \App\Entity\User::class,
                 targetPropertyName: 'userProfile',
-            )),
+            ),
         ];
 
         yield 'one_to_one_no_inverse' => [
             'User_simple.php',
             'User_simple_no_inverse.php',
-            (new RelationOneToOne(
+            new RelationOneToOne(
                 propertyName: 'userProfile',
                 targetClassName: \App\Entity\UserProfile::class,
                 mapInverseRelation: false,
                 isOwning: true,
                 isNullable: true,
-            )),
+            ),
         ];
 
         yield 'one_to_one_no_inverse_not_nullable' => [
             'User_simple.php',
             'User_simple_no_inverse_not_nullable.php',
-            (new RelationOneToOne(
+            new RelationOneToOne(
                 propertyName: 'userProfile',
                 targetClassName: \App\Entity\UserProfile::class,
                 mapInverseRelation: false,
                 isOwning: true,
-            )),
+            ),
         ];
 
         yield 'avoid_duplicate_use_statement' => [
             'User_with_use_statements.php',
             'User_with_use_statements_avoid_duplicate_use.php',
-            (new RelationOneToOne(
+            new RelationOneToOne(
                 propertyName: 'userProfile',
                 targetClassName: \App\OtherEntity\UserProfile::class,
                 targetPropertyName: 'user',
                 isOwning: true,
                 isNullable: true,
-            )),
+            ),
         ];
 
         yield 'avoid_duplicate_use_statement_with_alias' => [
             'User_with_use_statements.php',
             'User_with_use_statements_avoid_duplicate_use_alias.php',
-            (new RelationOneToOne(
+            new RelationOneToOne(
                 propertyName: 'category',
                 targetClassName: \App\OtherEntity\Category::class,
                 targetPropertyName: 'user',
                 isOwning: true,
                 isNullable: true,
-            )),
+            ),
         ];
     }
 
@@ -675,7 +675,7 @@ class ClassSourceManipulatorTest extends TestCase
                 <?php
                 $this->someParam = $someParam;
                 CODE
-);
+        );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -692,10 +692,10 @@ class ClassSourceManipulatorTest extends TestCase
             (new Param('param'))->setTypeHint('string')
         );
         $manipulator->addMethodBody($methodBuilder,
-<<<'CODE'
-    <?php
-    return new JsonResponse(['param' => $param]);
-    CODE
+            <<<'CODE'
+                <?php
+                return new JsonResponse(['param' => $param]);
+                CODE
         );
         $manipulator->addMethodBuilder($methodBuilder);
         $manipulator->addUseStatementIfNecessary('Symfony\\Component\\HttpFoundation\\JsonResponse');

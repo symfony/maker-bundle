@@ -9,11 +9,11 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column()]
+    private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'user', targetEntity: self::class, cascade: ['persist', 'remove'])]
-    private $embeddedUser;
+    private ?self $embeddedUser = null;
 
     public function getId(): ?int
     {
