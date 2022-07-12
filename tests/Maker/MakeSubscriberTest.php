@@ -54,7 +54,7 @@ class MakeSubscriberTest extends MakerTestCase
                 );
 
                 self::assertStringContainsString(
-                    'foo.unknown_event => \'onFooUnknownEvent\',',
+                    '\'foo.unknown_event\' => \'onFooUnknownEvent\',',
                     file_get_contents($runner->getPath('src/EventSubscriber/FooBarSubscriber.php'))
                 );
             }),
