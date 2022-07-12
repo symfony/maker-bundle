@@ -46,7 +46,6 @@ final class ClassSourceManipulator
     private const CONTEXT_OUTSIDE_CLASS = 'outside_class';
     private const CONTEXT_CLASS = 'class';
     private const CONTEXT_CLASS_METHOD = 'class_method';
-
     private const DEFAULT_VALUE_NONE = '__default_value_none';
 
     private Parser\Php7 $parser;

@@ -288,7 +288,7 @@ final class DoctrineHelper
             return null;
         }
 
-        return 'Types::'.$constants[$columnType];
+        return sprintf('Types::%s', $constants[$columnType]);
     }
 
     private function isInstanceOf($object, string $class): bool
