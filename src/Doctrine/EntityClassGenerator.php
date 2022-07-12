@@ -47,7 +47,7 @@ final class EntityClassGenerator
 
         $useStatements = new UseStatementGenerator([
             $repoClassDetails->getFullName(),
-            [Mapping::class => 'ORM'],
+            ['Doctrine\\ORM\\Mapping' => 'ORM'],
         ]);
 
         if ($broadcast) {
