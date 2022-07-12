@@ -37,8 +37,6 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Component\Uid\Ulid;
-use Symfony\Component\Uid\Uuid;
 
 /**
  * @internal
@@ -139,7 +137,7 @@ final class ClassSourceManipulator
             // getter methods always have nullable return values
             // because even though these are required in the db, they may not be set yet
             // unless there is a default value
-            $defaultValue === null
+            null === $defaultValue
         );
 
         // don't generate setters for id fields
@@ -376,7 +374,7 @@ final class ClassSourceManipulator
             $newPropertyBuilder->setDocComment($this->createDocBlock($comments));
         }
 
-        if ($defaultValue !== self::DEFAULT_VALUE_NONE) {
+        if (self::DEFAULT_VALUE_NONE !== $defaultValue) {
             $newPropertyBuilder->setDefault($defaultValue);
         }
         $newPropertyNode = $newPropertyBuilder->getNode();
@@ -462,7 +460,7 @@ final class ClassSourceManipulator
             $annotationOptions['mappedBy'] = $relation->getTargetPropertyName();
         }
 
-        if ($typeHint === 'self') {
+        if ('self' === $typeHint) {
             // Doctrine does not currently resolve "self" correctly for targetEntity guessing
             $annotationOptions['targetEntity'] = new ClassNameValue($typeHint, $relation->getTargetClassName());
         }

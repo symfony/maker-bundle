@@ -25,8 +25,8 @@ use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
-use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
@@ -243,14 +243,14 @@ final class DoctrineHelper
         // todo: guessing on enum's could be added
 
         return match ($propertyType) {
-            '\\' . \DateInterval::class => $columnType === Types::DATEINTERVAL,
-            '\\' . \DateTime::class => $columnType === Types::DATETIME_MUTABLE,
-            '\\' . \DateTimeImmutable::class => $columnType === Types::DATETIME_IMMUTABLE,
-            'array' => $columnType === Types::JSON,
-            'bool' => $columnType === Types::BOOLEAN,
-            'float' => $columnType === Types::FLOAT,
-            'int' => $columnType === Types::INTEGER,
-            'string' => $columnType === Types::STRING,
+            '\\'.\DateInterval::class => Types::DATEINTERVAL === $columnType,
+            '\\'.\DateTime::class => Types::DATETIME_MUTABLE === $columnType,
+            '\\'.\DateTimeImmutable::class => Types::DATETIME_IMMUTABLE === $columnType,
+            'array' => Types::JSON === $columnType,
+            'bool' => Types::BOOLEAN === $columnType,
+            'float' => Types::FLOAT === $columnType,
+            'int' => Types::INTEGER === $columnType,
+            'string' => Types::STRING === $columnType,
             default => false,
         };
     }
@@ -263,12 +263,12 @@ final class DoctrineHelper
             Types::BOOLEAN => 'bool',
             Types::INTEGER, Types::SMALLINT => 'int',
             Types::FLOAT => 'float',
-            Types::DATETIME_MUTABLE, Types::DATETIMETZ_MUTABLE, Types::DATE_MUTABLE, Types::TIME_MUTABLE => '\\' . \DateTimeInterface::class,
-            Types::DATETIME_IMMUTABLE, Types::DATETIMETZ_IMMUTABLE, Types::DATE_IMMUTABLE, Types::TIME_IMMUTABLE => '\\' . \DateTimeImmutable::class,
-            Types::DATEINTERVAL => '\\' . \DateInterval::class,
+            Types::DATETIME_MUTABLE, Types::DATETIMETZ_MUTABLE, Types::DATE_MUTABLE, Types::TIME_MUTABLE => '\\'.\DateTimeInterface::class,
+            Types::DATETIME_IMMUTABLE, Types::DATETIMETZ_IMMUTABLE, Types::DATE_IMMUTABLE, Types::TIME_IMMUTABLE => '\\'.\DateTimeImmutable::class,
+            Types::DATEINTERVAL => '\\'.\DateInterval::class,
             Types::OBJECT => 'object',
-            'uuid' => '\\' . Uuid::class,
-            'ulid' => '\\' . Ulid::class,
+            'uuid' => '\\'.Uuid::class,
+            'ulid' => '\\'.Ulid::class,
             default => null,
         };
     }
