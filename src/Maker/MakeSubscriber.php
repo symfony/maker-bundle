@@ -88,8 +88,12 @@ final class MakeSubscriber extends AbstractMaker
             EventSubscriberInterface::class,
         ]);
 
-        if ($this->isNeedImportConstantsClass($event)) {
+        // Determine if we use a KernelEvents::CONSTANT or custom even name
+        if (null !== ($eventConstant = $this->getEventConstant($event))) {
             $useStatements->addUseStatement(KernelEvents::class);
+            $eventName = $eventConstant;
+        } else {
+            $eventName = class_exists($event) ? sprintf('%s::class', $eventClassName) : sprintf('\'%s\'', $event);
         }
 
         if (null !== $eventFullClassName) {
@@ -101,7 +105,7 @@ final class MakeSubscriber extends AbstractMaker
             'event/Subscriber.tpl.php',
             [
                 'use_statements' => $useStatements,
-                'event' => class_exists($event) ? sprintf('%s::class', $eventClassName) : $this->getEventConstant($event),
+                'event' => $eventName,
                 'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
                 'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
             ]
@@ -121,30 +125,15 @@ final class MakeSubscriber extends AbstractMaker
     {
     }
 
-    private function getEventConstant(string $event): string
+    private function getEventConstant(string $event): ?string
     {
         $constants = $this->getKernelEventsConstants();
 
-        foreach ($constants as $name => $value) {
-            if ($value === $event) {
-                return 'KernelEvents::'.$name;
-            }
+        if (false !== ($name = array_search($event, $constants, true))) {
+            return sprintf('KernelEvents::%s', $name);
         }
 
-        return sprintf('\'%s\'', $event);
-    }
-
-    private function isNeedImportConstantsClass(string $event): bool
-    {
-        $constants = $this->getKernelEventsConstants();
-
-        foreach ($constants as $name => $value) {
-            if ($value === $event) {
-                return true;
-            }
-        }
-
-        return false;
+        return null;
     }
 
     private function getKernelEventsConstants(): array
