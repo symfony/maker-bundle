@@ -12,7 +12,7 @@ class User
     #[ORM\Column()]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'user', targetEntity: User::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'user', targetEntity: self::class, cascade: ['persist', 'remove'])]
     private ?self $embeddedUser = null;
 
     public function getId(): ?int

@@ -16,7 +16,7 @@ class User implements UserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $userIdentifier = null;
 
-    #[ORM\Column()]
+    #[ORM\Column]
     private array $roles = [];
 
     public function getId(): ?int

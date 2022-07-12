@@ -2,7 +2,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\MappedSuperclass]
@@ -46,7 +45,7 @@ class BaseClient
         return $this;
     }
 
-    public function getMagic(): int
+    public function getMagic(): ?int
     {
         return $this->magic;
     }

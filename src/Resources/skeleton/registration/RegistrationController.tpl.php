@@ -25,7 +25,7 @@ class <?= $class_name; ?> extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // encode the plain password
             $user->set<?= ucfirst($password_field) ?>(
-            <?= $password_hasher_variable_name ?>-><?= $use_password_hasher ? 'hashPassword' : 'encodePassword' ?>(
+                <?= $password_hasher_variable_name ?>-><?= $use_password_hasher ? 'hashPassword' : 'encodePassword' ?>(
                     $user,
                     $form->get('plainPassword')->getData()
                 )

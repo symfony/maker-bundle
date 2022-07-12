@@ -461,6 +461,7 @@ final class ClassSourceManipulator
         } else {
             $annotationOptions['mappedBy'] = $relation->getTargetPropertyName();
         }
+
         if ($typeHint === 'self') {
             // Doctrine does not currently resolve "self" correctly for targetEntity guessing
             $annotationOptions['targetEntity'] = new ClassNameValue($typeHint, $relation->getTargetClassName());

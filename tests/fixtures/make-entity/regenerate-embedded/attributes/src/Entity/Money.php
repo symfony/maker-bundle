@@ -7,9 +7,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Embeddable]
 class Money
 {
-    /**
-     * @var Currency
-     */
     #[ORM\Embedded()]
     private Currency $currency;
 

@@ -17,13 +17,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $user_identifier = null;
 
-    #[ORM\Column()]
+    #[ORM\Column]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
-    #[ORM\Column()]
+    #[ORM\Column]
     private ?string $password = null;
 
     public function getId(): ?int
