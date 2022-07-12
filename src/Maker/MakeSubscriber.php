@@ -121,10 +121,7 @@ final class MakeSubscriber extends AbstractMaker
     {
     }
 
-    /**
-     * @param $event
-     */
-    private function getEventConstant($event): string
+    private function getEventConstant(string $event): string
     {
         $constants = $this->getKernelEventsConstants();
 
@@ -137,10 +134,7 @@ final class MakeSubscriber extends AbstractMaker
         return sprintf('\'%s\'', $event);
     }
 
-    /**
-     * @param $event
-     */
-    private function isNeedImportConstantsClass($event): bool
+    private function isNeedImportConstantsClass(string $event): bool
     {
         $constants = $this->getKernelEventsConstants();
 
@@ -155,8 +149,6 @@ final class MakeSubscriber extends AbstractMaker
 
     private function getKernelEventsConstants(): array
     {
-        $class = new \ReflectionClass(KernelEvents::class);
-
-        return $class->getConstants();
+        return (new \ReflectionClass(KernelEvents::class))->getConstants();
     }
 }

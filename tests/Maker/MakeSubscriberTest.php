@@ -22,7 +22,7 @@ class MakeSubscriberTest extends MakerTestCase
         return MakeSubscriber::class;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_makes_subscriber_for_known_event' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
