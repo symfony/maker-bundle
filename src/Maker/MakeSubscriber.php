@@ -23,8 +23,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
-use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -101,7 +101,7 @@ final class MakeSubscriber extends AbstractMaker
             'event/Subscriber.tpl.php',
             [
                 'use_statements' => $useStatements,
-                'event' =>  class_exists($event) ? sprintf('%s::class', $eventClassName) : $this->getEventConstant($event),
+                'event' => class_exists($event) ? sprintf('%s::class', $eventClassName) : $this->getEventConstant($event),
                 'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
                 'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
             ]
