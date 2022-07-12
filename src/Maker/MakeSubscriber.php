@@ -88,6 +88,10 @@ final class MakeSubscriber extends AbstractMaker
             EventSubscriberInterface::class,
         ]);
 
+        if ($this->isNeedImportConstantsClass($event)) {
+            $useStatements->addUseStatement(KernelEvents::class);
+        }
+
         if (null !== $eventFullClassName) {
             $useStatements->addUseStatement($eventFullClassName);
         }
@@ -99,8 +103,6 @@ final class MakeSubscriber extends AbstractMaker
                 'use_statements' => $useStatements,
                 'event' =>  class_exists($event) ? sprintf('%s::class', $eventClassName) : $this->getEventConstant($event),
                 'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
-                'import_constant_class' => $this->isNeedImportConstantsClass($event),
-                'event_full_class_name' => $eventFullClassName,
                 'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
             ]
         );
