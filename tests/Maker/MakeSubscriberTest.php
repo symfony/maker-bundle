@@ -34,6 +34,11 @@ class MakeSubscriberTest extends MakerTestCase
                         'kernel.request',
                     ]
                 );
+
+                self::assertStringContainsString(
+                    'KernelEvents::REQUEST => \'onKernelRequest\'',
+                    file_get_contents($runner->getPath('src/EventSubscriber/FooBarSubscriber.php'))
+                );
             }),
         ];
 
@@ -46,6 +51,11 @@ class MakeSubscriberTest extends MakerTestCase
                         // event name
                         'foo.unknown_event',
                     ]
+                );
+
+                self::assertStringContainsString(
+                    'foo.unknown_event => \'onFooUnknownEvent\',',
+                    file_get_contents($runner->getPath('src/EventSubscriber/FooBarSubscriber.php'))
                 );
             }),
         ];
