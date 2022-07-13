@@ -1,0 +1,10 @@
+---------------------------------------------------------------------------
+
+by jrushlow at 2022-07-12T17:42:35Z
+
+>Also, in the interactive list that we show the users (when asking for which event they want), do we show the string name kernel.controller or the class name - ControllerEvent? We should probably show the class name.
+
+This is what we have -
+![image](https://user-images.githubusercontent.com/40327885/178557886-9de01058-d1b8-4a99-ae48-4f33d7e76197.png)
+
+Seems like the best of both worlds
