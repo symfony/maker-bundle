@@ -42,6 +42,24 @@ class MakeSubscriberTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_makes_subscriber_for_custom_event_class' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // subscriber name
+                        'FooBar',
+                        // event name
+                        \Symfony\Bundle\MakerBundle\Generator::class,
+                    ]
+                );
+
+                self::assertStringContainsString(
+                    'Generator::class => \'onGenerator\'',
+                    file_get_contents($runner->getPath('src/EventSubscriber/FooBarSubscriber.php'))
+                );
+            }),
+        ];
+
         yield 'it_makes_subscriber_for_unknown_event_class' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
