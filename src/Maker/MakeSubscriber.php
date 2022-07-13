@@ -24,6 +24,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -87,6 +88,14 @@ final class MakeSubscriber extends AbstractMaker
             EventSubscriberInterface::class,
         ]);
 
+        // Determine if we use a KernelEvents::CONSTANT or custom even name
+        if (null !== ($eventConstant = $this->getEventConstant($event))) {
+            $useStatements->addUseStatement(KernelEvents::class);
+            $eventName = $eventConstant;
+        } else {
+            $eventName = class_exists($event) ? sprintf('%s::class', $eventClassName) : sprintf('\'%s\'', $event);
+        }
+
         if (null !== $eventFullClassName) {
             $useStatements->addUseStatement($eventFullClassName);
         }
@@ -96,7 +105,7 @@ final class MakeSubscriber extends AbstractMaker
             'event/Subscriber.tpl.php',
             [
                 'use_statements' => $useStatements,
-                'event' => class_exists($event) ? sprintf('%s::class', $eventClassName) : sprintf('\'%s\'', $event),
+                'event' => $eventName,
                 'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
                 'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
             ]
@@ -114,5 +123,16 @@ final class MakeSubscriber extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
+    }
+
+    private function getEventConstant(string $event): ?string
+    {
+        $constants = (new \ReflectionClass(KernelEvents::class))->getConstants();
+
+        if (false !== ($name = array_search($event, $constants, true))) {
+            return sprintf('KernelEvents::%s', $name);
+        }
+
+        return null;
     }
 }

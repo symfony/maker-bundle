@@ -22,7 +22,7 @@ class MakeSubscriberTest extends MakerTestCase
         return MakeSubscriber::class;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_makes_subscriber_for_known_event' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
@@ -33,6 +33,29 @@ class MakeSubscriberTest extends MakerTestCase
                         // event name
                         'kernel.request',
                     ]
+                );
+
+                self::assertStringContainsString(
+                    'KernelEvents::REQUEST => \'onKernelRequest\'',
+                    file_get_contents($runner->getPath('src/EventSubscriber/FooBarSubscriber.php'))
+                );
+            }),
+        ];
+
+        yield 'it_makes_subscriber_for_custom_event_class' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // subscriber name
+                        'FooBar',
+                        // event name
+                        \Symfony\Bundle\MakerBundle\Generator::class,
+                    ]
+                );
+
+                self::assertStringContainsString(
+                    'Generator::class => \'onGenerator\'',
+                    file_get_contents($runner->getPath('src/EventSubscriber/FooBarSubscriber.php'))
                 );
             }),
         ];
@@ -46,6 +69,11 @@ class MakeSubscriberTest extends MakerTestCase
                         // event name
                         'foo.unknown_event',
                     ]
+                );
+
+                self::assertStringContainsString(
+                    '\'foo.unknown_event\' => \'onFooUnknownEvent\',',
+                    file_get_contents($runner->getPath('src/EventSubscriber/FooBarSubscriber.php'))
                 );
             }),
         ];
