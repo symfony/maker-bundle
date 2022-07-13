@@ -1,5 +1,20 @@
 # Changelog
 
+## [v1.44.0](https://github.com/symfony/maker-bundle/releases/tag/v1.44.0)
+
+*July 13th, 2022*
+
+### Feature
+
+- [#1147](https://github.com/symfony/maker-bundle/pull/1147) - [make:entity] Property types, Types:: constant & type guessing - *@weaverryan*
+- [#1139](https://github.com/symfony/maker-bundle/pull/1139) - [make:entity] Improve uid support - *@HypeMC*
+- [#1129](https://github.com/symfony/maker-bundle/pull/1129) - [tests] bring test suite up to PHP8 standards - *@jrushlow*
+- [#1128](https://github.com/symfony/maker-bundle/pull/1128) - improve PHP 8 support w/ rector, removes legacy code, deprecates unused methods - *@jrushlow*
+- [#1126](https://github.com/symfony/maker-bundle/pull/1126) - drop annotation support with entities - *@jrushlow*
+- [#1125](https://github.com/symfony/maker-bundle/pull/1125) - [csm] strict typing && legacy code removal - *@jrushlow*
+- [#1122](https://github.com/symfony/maker-bundle/pull/1122) - drop PHP 7.x support - *@jrushlow*
+- [#940](https://github.com/symfony/maker-bundle/pull/940) - [make:subscriber] Improve MakeSubscriber to use KernelEvents constant instead hardcoded event - *@bdaler*
+
 ## [v1.43.0](https://github.com/symfony/maker-bundle/releases/tag/v1.43.0)
 
 *May 17th, 2022*
