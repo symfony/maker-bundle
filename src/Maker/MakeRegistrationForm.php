@@ -160,13 +160,13 @@ final class MakeRegistrationForm extends AbstractMaker
             $this->emailGetter = $interactiveSecurityHelper->guessEmailGetter($io, $this->userClass, 'email');
 
             $this->fromEmailAddress = $io->ask(
-                'What email address will be used to send registration confirmations? e.g. mailer@your-domain.com',
+                'What email address will be used to send registration confirmations? (e.g. <fg=yellow>mailer@your-domain.com</>)',
                 null,
                 [Validator::class, 'validateEmailAddress']
             );
 
             $this->fromEmailName = $io->ask(
-                'What "name" should be associated with that email address? e.g. "Acme Mail Bot"',
+                'What "name" should be associated with that email address? (e.g. <fg=yellow>Acme Mail Bot</>)',
                 null,
                 [Validator::class, 'notBlank']
             );
@@ -343,7 +343,7 @@ final class MakeRegistrationForm extends AbstractMaker
                     'email_verifier_class_details' => $verifyEmailServiceClassNameDetails,
                     'verify_email_anonymously' => $this->verifyEmailAnonymously,
                     'from_email' => $this->fromEmailAddress,
-                    'from_email_name' => $this->fromEmailName,
+                    'from_email_name' => addslashes($this->fromEmailName),
                     'email_getter' => $this->emailGetter,
                     'authenticator_class_name' => $this->autoLoginAuthenticator ? Str::getShortClassName($this->autoLoginAuthenticator) : null,
                     'authenticator_full_class_name' => $this->autoLoginAuthenticator,
