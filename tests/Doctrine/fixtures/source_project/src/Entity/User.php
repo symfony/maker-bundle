@@ -11,7 +11,7 @@ class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column()]
+    #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\OneToMany(targetEntity: UserAvatar::class, mappedBy: 'user')]
