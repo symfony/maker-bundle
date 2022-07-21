@@ -615,11 +615,10 @@ final class ClassSourceManipulator
 
         // append the item
         $ifNotContainsStmt->stmts[] = new Node\Stmt\Expression(
-            new Node\Expr\Assign(
-                new Node\Expr\ArrayDimFetch(
-                    new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $relation->getPropertyName())
-                ),
-                new Node\Expr\Variable($argName)
+            new Node\Expr\MethodCall(
+                new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $relation->getPropertyName()),
+                'add',
+                [new Node\Expr\Variable($argName)]
             ));
 
         // set the owning side of the relationship

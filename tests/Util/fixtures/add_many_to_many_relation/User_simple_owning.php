@@ -38,7 +38,7 @@ class User
     public function addRecipe(Recipe $recipe): self
     {
         if (!$this->recipes->contains($recipe)) {
-            $this->recipes[] = $recipe;
+            $this->recipes->add($recipe);
         }
 
         return $this;

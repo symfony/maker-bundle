@@ -47,7 +47,7 @@ class UserXml
     public function addAvatar(UserAvatar $avatar): self
     {
         if (!$this->avatars->contains($avatar)) {
-            $this->avatars[] = $avatar;
+            $this->avatars->add($avatar);
             $avatar->setUser($this);
         }
 

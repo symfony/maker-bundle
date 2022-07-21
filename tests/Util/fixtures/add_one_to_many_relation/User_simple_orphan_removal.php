@@ -38,7 +38,7 @@ class User
     public function addAvatarPhoto(UserAvatarPhoto $avatarPhoto): self
     {
         if (!$this->avatarPhotos->contains($avatarPhoto)) {
-            $this->avatarPhotos[] = $avatarPhoto;
+            $this->avatarPhotos->add($avatarPhoto);
             $avatarPhoto->setUser($this);
         }
 
