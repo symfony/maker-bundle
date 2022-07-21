@@ -14,7 +14,7 @@ class Client extends BaseClient
     /**
      * @var string
      */
-    #[ORM\Column()]
+    #[ORM\Column]
     private ?string $apiKey = null;
 
     #[ORM\ManyToMany(targetEntity: Tag::class)]

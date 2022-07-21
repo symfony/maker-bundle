@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Embeddable]
 class Embed
 {
-    #[ORM\Column()]
+    #[ORM\Column]
     private ?int $val = null;
 
     public function getVal(): ?int

@@ -9,7 +9,7 @@ class UserAvatar
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column()]
+    #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'avatars', cascade: ['persist', 'remove'])]

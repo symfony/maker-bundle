@@ -17,7 +17,7 @@ class <?= $class_name."\n" ?>
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column()]
+    #[ORM\Column]
     private ?int $id = null;
 
     public function getId(): ?int
