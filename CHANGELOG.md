@@ -1,5 +1,17 @@
 # Changelog
 
+## [v1.45.0](https://github.com/symfony/maker-bundle/releases/tag/v1.45.0)
+
+*July 26th, 2022*
+
+### Feature
+
+- [#1136](https://github.com/symfony/maker-bundle/pull/1136) - use method add() instead of [] in collection adder-method - *@HKandulla*
+### Bug
+
+- [#1154](https://github.com/symfony/maker-bundle/pull/1154) - [make:entity] remove empty parenthesis on `id` - *@jrushlow*
+- [#1153](https://github.com/symfony/maker-bundle/pull/1153) - [make:registration-form] Fix escape text-strings - *@mdoutreluingne*
+
 ## [v1.44.0](https://github.com/symfony/maker-bundle/releases/tag/v1.44.0)
 
 *July 13th, 2022*
