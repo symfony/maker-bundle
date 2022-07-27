@@ -9,7 +9,7 @@ on:
 #        -   cron: '0 0 * * *'
 
 env:
-    PHPUNIT_FLAGS: "-v"
+    PHPUNIT_FLAGS: "-vvv"
 #    SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
     MAKER_DISABLE_FILE_LINKS: 1
     MAKER_SKIP_MERCURE_TEST: 1
@@ -136,4 +136,4 @@ jobs:
 #              run: "Get-ChildItem Env: | Format-Table -Wrap -AutoSize"
 #
             - name: "Run tests"
-              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
+              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }} --filter auth_empty_one_firewall
