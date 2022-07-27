@@ -98,6 +98,7 @@ jobs:
                   coverage: "none"
                   php-version: ${{ matrix.php-version }}
                   tools: composer:v2
+                  extensions: pdo pdo-mysql pdo-sqlite
 
             - name: "Add PHPUnit matcher"
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
