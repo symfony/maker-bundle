@@ -232,14 +232,14 @@ final class MakerTestEnvironment
 
         dump($this->cachePath, ['dir_exists' => is_dir($this->cachePath), 'readable' => is_readable($this->cachePath), 'writeable' => is_writable($this->cachePath)], scandir($this->cachePath));
 
-        $flexDir = sprintf('%s\flex_project%s', $this->cachePath, $targetVersion);
+        $flexDir = sprintf('%s\flex_project%s', $this->cachePath, rtrim($targetVersion, '*'));
 
         $this->fs->mkdir($flexDir);
 
         dump(['dir_exists' => is_dir($flexDir), 'readable' => is_readable($flexDir), 'writeable' => is_writable($flexDir)], ['cache_path' => scandir($this->cachePath)], ['flex_dir' => scandir($flexDir)]);
 
         MakerTestProcess::create(
-            sprintf('composer create-project symfony/skeleton%s %s\flex_project%s --prefer-dist -vvv', $versionString, $this->cachePath, $targetVersion),
+            sprintf('composer create-project symfony/skeleton%s %s --prefer-dist -vvv', $versionString, $flexDir),
             $this->cachePath
         )->run();
 
