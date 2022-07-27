@@ -32,7 +32,6 @@ environment:
 install:
     - choco install sqlite --params "/NoTools"
     - ps: Set-Service wuauserv -StartupType Manual
-    - cinst: sqlite3
     - IF EXIST C:\tools\php (SET PHP=1) # Checks for the PHP install being cached
     - IF %PHP%==0 cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version %php_ver_target%
     - cd C:\tools\php
