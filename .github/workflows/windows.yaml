@@ -123,5 +123,11 @@ jobs:
             - name: "PHPUnit version"
               run: vendor/bin/simple-phpunit --version
 
-            - name: "Run tests"
-              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
+            - name: "PHP Info"
+              run: php -i
+
+            - name: "List Windows Env"
+              run: SET
+#
+#            - name: "Run tests"
+#              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
