@@ -1,4 +1,4 @@
-name: "CI"
+name: "Windows Builds"
 
 on:
     pull_request:
@@ -13,53 +13,10 @@ env:
     SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
 
 jobs:
-    coding-standards:
-        name: "Coding Standards (${{ matrix.php-version }})"
-
-        runs-on: "windows-latest"
-
-        strategy:
-            fail-fast: false
-            matrix:
-                php-version:
-                    - '8.0'
-
-        steps:
-            -
-                name: "Checkout code"
-                uses: "actions/checkout@v2"
-
-            -
-                name: "Install PHP"
-                uses: "shivammathur/setup-php@v2"
-                with:
-                    coverage: "none"
-                    php-version: "${{ matrix.php-version }}"
-
-            -
-                name: "Validate composer.json"
-                run: "composer validate --strict --no-check-lock"
-
-            -
-                name: "Composer install"
-                uses: "ramsey/composer-install@v1"
-                with:
-                    composer-options: "--no-scripts"
-
-            -
-                name: "Composer install php-cs-fixer"
-                uses: "ramsey/composer-install@v1"
-                with:
-                    composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
-
-            -
-                name: "Run friendsofphp/php-cs-fixer"
-                run: "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --dry-run --diff"
-
     test:
         name: "PHP ${{ matrix.php-version }} + @${{ matrix.symfony-version }} ${{ matrix.dependency-versions }} deps"
 
-        runs-on: ubuntu-18.04
+        runs-on: windows-latest
 
         services:
             mysql:
