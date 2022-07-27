@@ -70,9 +70,9 @@ jobs:
             - name: "Checkout code"
               uses: actions/checkout@v2.3.3
 
-            - name: "Start MySQL"
-              run: |
-                  sudo /etc/init.d/mysql start
+#            - name: "Start MySQL"
+#              run: |
+#                  sudo /etc/init.d/mysql start
 
             - name: "Verify MySQL connection from host"
               run: |
