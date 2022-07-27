@@ -78,6 +78,10 @@ jobs:
               run: |
                   choco install mysql
 
+            - name: "Set Root Password"
+              run: |
+                  mysqladmin --user=root password "root"
+
             - name: "Verify MySQL connection from host"
               run: |
                   mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "SHOW DATABASES;"
