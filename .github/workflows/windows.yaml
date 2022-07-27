@@ -77,7 +77,8 @@ jobs:
             - name: "Setup MySQL"
               uses: ankane/setup-mysql@v1
               with:
-                  mysql-version: 5.4
+                  mysql-version: 5.6
+                  database: test_maker
 
             - name: "Verify MySQL connection from host"
               run: |
