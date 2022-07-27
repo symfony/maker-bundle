@@ -61,6 +61,6 @@ install:
     - vendor/bin/simple-phpunit install
     - php -i
 
-#test_script:
-#    - cd C:\projects\maker-bundle
-#    - vendor/bin/simple-phpunit
+test_script:
+    - cd C:\projects\maker-bundle
+    - vendor/bin/simple-phpunit
