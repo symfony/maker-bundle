@@ -98,7 +98,7 @@ jobs:
                   coverage: "none"
                   php-version: ${{ matrix.php-version }}
                   tools: composer:v2
-                  extensions: pdo pdo-mysql pdo-sqlite
+                  extensions: pdo pdo_mysql pdo_sqlite
 
             - name: "Add PHPUnit matcher"
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
@@ -127,8 +127,8 @@ jobs:
             - name: "PHP Info"
               run: php -i
 
-            - name: "List Windows Env"
-              run: "Get-ChildItem Env: | Format-Table -Wrap -AutoSize"
+#            - name: "List Windows Env"
+#              run: "Get-ChildItem Env: | Format-Table -Wrap -AutoSize"
 #
-#            - name: "Run tests"
-#              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
+            - name: "Run tests"
+              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
