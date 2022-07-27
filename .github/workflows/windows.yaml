@@ -17,27 +17,27 @@ jobs:
         name: "PHP ${{ matrix.php-version }} + @${{ matrix.symfony-version }} ${{ matrix.dependency-versions }} deps"
 
         runs-on: windows-latest
-
-        services:
-            mysql:
-                image: mysql:5.7 # Update server_version in phpunit.xml.dist if this changes.
-                env:
-                    MYSQL_ROOT_PASSWORD: root
-                    MYSQL_DATABASE: test_maker
-                ports:
-                    - 3306
-                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-            mercure:
-                image: dunglas/mercure
-                env:
-                    SERVER_NAME: :1337
-                    MERCURE_PUBLISHER_JWT_KEY: '!ChangeMe!'
-                    MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeMe!'
-                    MERCURE_EXTRA_DIRECTIVES: |
-                        anonymous
-                        cors_origins *
-                ports:
-                    - 1337:1337
+#
+#        services:
+#            mysql:
+#                image: mysql:5.7 # Update server_version in phpunit.xml.dist if this changes.
+#                env:
+#                    MYSQL_ROOT_PASSWORD: root
+#                    MYSQL_DATABASE: test_maker
+#                ports:
+#                    - 3306
+#                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+#            mercure:
+#                image: dunglas/mercure
+#                env:
+#                    SERVER_NAME: :1337
+#                    MERCURE_PUBLISHER_JWT_KEY: '!ChangeMe!'
+#                    MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeMe!'
+#                    MERCURE_EXTRA_DIRECTIVES: |
+#                        anonymous
+#                        cors_origins *
+#                ports:
+#                    - 1337:1337
 
         env:
             SYMFONY_VERSION: ${{ matrix.symfony-version }}
