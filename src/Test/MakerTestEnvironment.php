@@ -230,7 +230,7 @@ final class MakerTestEnvironment
         $targetVersion = $this->getTargetSkeletonVersion();
         $versionString = $targetVersion ? sprintf(':%s', $targetVersion) : '';
 
-        dd($this->cachePath);
+        dump($this->cachePath, ['dir_exists' => is_dir($this->cachePath)]);
 
         MakerTestProcess::create(
             sprintf('composer create-project symfony/skeleton%s flex_project%s --prefer-dist --no-progress', $versionString, $targetVersion),

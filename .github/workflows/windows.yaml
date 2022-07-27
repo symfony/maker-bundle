@@ -69,6 +69,7 @@ jobs:
 #                      dependency-versions: 'highest'
 
         steps:
+              # This is needed in Windows, otherwise assertions comparing fixtures and generated code will fail.
             - name: "Use INPUT for autocrlf in Git Config"
               run: git config --global core.autocrlf input
 
@@ -81,7 +82,7 @@ jobs:
 
             - name: "Setup MySQL"
               run: |
-                  choco install mysql --version=5.7.18
+                  choco install mysql
 
             - name: "Set MySQL Root Password"
               run: |
