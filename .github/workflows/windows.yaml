@@ -11,6 +11,8 @@ on:
 env:
     PHPUNIT_FLAGS: "-v"
     SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
+    MAKER_DISABLE_FILE_LINKS: 1
+    MAKER_SKIP_MERCURE_TEST: 1
 
 jobs:
     test:
@@ -70,15 +72,15 @@ jobs:
             - name: "Checkout code"
               uses: actions/checkout@v2.3.3
 
-#            - name: "Start MySQL"
-#              run: |
-#                  sudo /etc/init.d/mysql start
+            - name: "Setup SQLite For Entity Regen Tests"
+              run: |
+                  choco install sqlite --params "/NoTools"
 
             - name: "Setup MySQL"
               run: |
                   choco install mysql
 
-            - name: "Set Root Password"
+            - name: "Set MySQL Root Password"
               run: |
                   mysqladmin --user=root password "root"
 
