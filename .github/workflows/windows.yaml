@@ -78,7 +78,7 @@ jobs:
 
             - name: "Setup MySQL"
               run: |
-                  choco install mysql --version=5.7
+                  choco install mysql --version=5.7.18
 
             - name: "Set MySQL Root Password"
               run: |
