@@ -74,6 +74,11 @@ jobs:
 #              run: |
 #                  sudo /etc/init.d/mysql start
 
+            - name: "Setup MySQL"
+              uses: ankane/setup-mysql@v1
+              with:
+                  mysql-version: 5.4
+
             - name: "Verify MySQL connection from host"
               run: |
                   mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "SHOW DATABASES;"
