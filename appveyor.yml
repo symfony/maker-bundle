@@ -60,7 +60,8 @@ install:
     - composer install --no-interaction --no-progress --ansi --no-scripts --working-dir=tools/php-cs-fixer
     - vendor/bin/simple-phpunit install
     - php -i
+    - git config --global --list --show-origin
 
-test_script:
-    - cd C:\projects\maker-bundle
-    - vendor/bin/simple-phpunit
+#test_script:
+#    - cd C:\projects\maker-bundle
+#    - vendor/bin/simple-phpunit
