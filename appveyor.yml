@@ -59,6 +59,7 @@ install:
     - composer install --no-interaction --no-progress --ansi --no-scripts --working-dir=tools/twigcs
     - composer install --no-interaction --no-progress --ansi --no-scripts --working-dir=tools/php-cs-fixer
     - vendor/bin/simple-phpunit install
+    - php -i
 
 test_script:
     - cd C:\projects\maker-bundle
