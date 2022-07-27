@@ -75,10 +75,8 @@ jobs:
 #                  sudo /etc/init.d/mysql start
 
             - name: "Setup MySQL"
-              uses: ankane/setup-mysql@v1
-              with:
-                  mysql-version: 5.6
-                  database: test_maker
+              run: |
+                  choco install mysql
 
             - name: "Verify MySQL connection from host"
               run: |
