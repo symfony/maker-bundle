@@ -30,6 +30,7 @@ environment:
         php_ver_target: 8.0.19
 
 install:
+    - choco install sqlite --params "/NoTools"
     - ps: Set-Service wuauserv -StartupType Manual
     - IF EXIST C:\tools\php (SET PHP=1) # Checks for the PHP install being cached
     - IF %PHP%==0 cinst --params '""/InstallDir:C:\tools\php""' --ignore-checksums -y php --version %php_ver_target%
@@ -48,6 +49,7 @@ install:
     - IF %PHP%==0 echo extension=php_mysqli.dll >> php.ini
     - IF %PHP%==0 echo extension=php_curl.dll >> php.ini
     - IF %PHP%==0 echo extension=php_pdo_mysql.dll >> php.ini
+    - echo extension=php_pdo_sqlite.dll >> php.ini
     - IF %PHP%==0 echo @php %%~dp0composer.phar %%* > composer.bat
     - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer-stable.phar
     - del composer.phar
