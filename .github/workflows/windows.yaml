@@ -2,11 +2,11 @@ name: "Windows Builds"
 
 on:
     pull_request:
-    push:
-        branches:
-            - 'main'
-    schedule:
-        -   cron: '0 0 * * *'
+#    push:
+#        branches:
+#            - 'main'
+#    schedule:
+#        -   cron: '0 0 * * *'
 
 env:
     PHPUNIT_FLAGS: "-v"
@@ -50,21 +50,21 @@ jobs:
                     - '8.1'
                 symfony-version:
                     - '5.4.*'
-                    - '5.4.x-dev'
-                    - '6.0.x-dev'
-                    - '6.1.x-dev'
-                    - '6.2.x-dev'
+#                    - '5.4.x-dev'
+#                    - '6.0.x-dev'
+#                    - '6.1.x-dev'
+#                    - '6.2.x-dev'
                 dependency-versions: ['highest']
                 allow-dev-deps-in-apps: ['0']
-                include:
-                    # testing lowest PHP version with LTS
-                    - php-version: '8.0.0'
-                      symfony-version: '5.4.*'
-                      dependency-versions: 'lowest'
-                    # testing lowest php version with highest 5.x stable
-                    - php-version: '8.0.0'
-                      symfony-version: '5.4.*'
-                      dependency-versions: 'highest'
+#                include:
+#                    # testing lowest PHP version with LTS
+#                    - php-version: '8.0.0'
+#                      symfony-version: '5.4.*'
+#                      dependency-versions: 'lowest'
+#                    # testing lowest php version with highest 5.x stable
+#                    - php-version: '8.0.0'
+#                      symfony-version: '5.4.*'
+#                      dependency-versions: 'highest'
 
         steps:
             - name: "Checkout code"
