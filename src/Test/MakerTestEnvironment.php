@@ -232,7 +232,7 @@ final class MakerTestEnvironment
 
         dump($this->cachePath, ['dir_exists' => is_dir($this->cachePath), 'readable' => is_readable($this->cachePath), 'writeable' => is_writable($this->cachePath)], scandir($this->cachePath));
 
-        $flexDir = sprintf('%s\flex_project%s', $this->cachePath, rtrim($targetVersion, '*'));
+        $flexDir = sprintf('%s\flex_project%s', $this->cachePath, '54');
 
         $this->fs->mkdir($flexDir);
 
