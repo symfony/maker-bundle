@@ -131,5 +131,5 @@ jobs:
 #            - name: "List Windows Env"
 #              run: "Get-ChildItem Env: | Format-Table -Wrap -AutoSize"
 #
-#            - name: "Run tests"
-#              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
+            - name: "Run tests"
+              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
