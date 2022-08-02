@@ -183,7 +183,18 @@ final class DoctrineHelper
         // Invalidating the cached AnnotationDriver::$classNames to find new Entity classes
         foreach ($this->mappingDriversByPrefix ?? [] as $managerName => $prefixes) {
             foreach ($prefixes as [$prefix, $annotationDriver]) {
-                if (null !== $annotationDriver) {
+                if (null === $annotationDriver) {
+                    continue;
+                }
+                if (class_exists(AnnotationDriver::class)) {
+                    $classNames = (new \ReflectionClass(AnnotationDriver::class))->getProperty('classNames');
+                }
+                if ($annotationDriver instanceof AttributeDriver) {
+                    $classNames = (new \ReflectionClass(AttributeDriver::class))->getProperty('classNames');
+                }
+
+                if (isset($classNames)) {
+                    $classNames->setAccessible(true);
                     $classNames->setValue($annotationDriver, null);
                 }
             }
