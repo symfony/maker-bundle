@@ -21,7 +21,7 @@ class XOtherRepository extends ServiceEntityRepository
         parent::__construct($registry, XOther::class);
     }
 
-    public function add(XOther $entity, bool $flush = false): void
+    public function save(XOther $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
