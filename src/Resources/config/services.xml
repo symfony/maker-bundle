@@ -16,7 +16,7 @@
             </service>
 
             <service id="maker.autoloader_finder" class="Symfony\Bundle\MakerBundle\Util\ComposerAutoloaderFinder" >
-                <argument /> <!-- root namespace -->
+                <argument type="service" id="maker.namespaces_helper" />
             </service>
 
             <service id="maker.autoloader_util" class="Symfony\Bundle\MakerBundle\Util\AutoloaderUtil">
