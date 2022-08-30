@@ -36,7 +36,7 @@ class Configuration implements ConfigurationInterface
 
             ->children()
                 ->scalarNode('root_namespace')
-                    ->setDeprecated('The child node "%node%" at path "%path%" is deprecated. Please use namespaces.root instead.')
+                    ->setDeprecated('symfony/maker-bundle', '2.0', 'The "root_namespace" option is deprecated, use "namespaces.root" instead.')
                     ->defaultNull()
                 ->end()
 
