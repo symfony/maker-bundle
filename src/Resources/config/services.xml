@@ -36,8 +36,25 @@
             </service>
 
             <service id="maker.doctrine_helper" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper">
-                <argument /> <!-- entity namespace -->
+                <argument type="service" id="maker.namespaces_helper" />
                 <argument type="service" id="doctrine" on-invalid="ignore" />
+            </service>
+
+            <service id="maker.namespaces_helper" class="Symfony\Bundle\MakerBundle\Util\NamespacesHelper">
+                <argument /> <!-- root namespace -->
+                <argument /> <!-- command namespace -->
+                <argument /> <!-- controller namespace -->
+                <argument /> <!-- entity namespace -->
+                <argument /> <!-- fixtures namespace -->
+                <argument /> <!-- form namespace -->
+                <argument /> <!-- functional_test namespace -->
+                <argument /> <!-- repository namespace -->
+                <argument /> <!-- security namespace -->
+                <argument /> <!-- serializer namespace -->
+                <argument /> <!-- subscriber namespace -->
+                <argument /> <!-- twig namespace -->
+                <argument /> <!-- unit_test namespace -->
+                <argument /> <!-- validator namespace -->
             </service>
 
             <service id="maker.auto_command.abstract" class="Symfony\Bundle\MakerBundle\Command\MakerCommand" abstract="true">
@@ -48,7 +65,7 @@
 
             <service id="maker.generator" class="Symfony\Bundle\MakerBundle\Generator">
                 <argument type="service" id="maker.file_manager" />
-                <argument /> <!-- root namespace -->
+                <argument type="service" id="maker.namespaces_helper" />
                 <argument>null</argument> <!-- PhpCompatUtil -->
                 <argument type="service" id="maker.template_component_generator" />
             </service>

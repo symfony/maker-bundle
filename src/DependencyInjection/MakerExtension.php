@@ -26,6 +26,24 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
  */
 class MakerExtension extends Extension
 {
+    /** @var string[] */
+    private static $namespaces = [
+        'root_namespace',
+        'command_namespace',
+        'controller_namespace',
+        'entity_namespace',
+        'fixtures_namespace',
+        'form_namespace',
+        'functional_test_namespace',
+        'repository_namespace',
+        'security_namespace',
+        'serializer_namespace',
+        'subscriber_namespace',
+        'twig_namespace',
+        'unit_test_namespace',
+        'validator_namespace'
+    ];
+
     /**
      * @deprecated remove this block when removing make:unit-test and make:functional-test
      */
@@ -54,7 +72,10 @@ class MakerExtension extends Extension
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
 
-        $rootNamespace = trim($config['root_namespace'], '\\');
+        $namespacesHelperDefinition = $container->getDefinition('maker.namespaces_helper');
+        foreach (static::$namespaces as $index => $namespace) {
+            $namespacesHelperDefinition->replaceArgument($index, \trim($config[$namespace], '\\'));
+        }
 
         $autoloaderFinderDefinition = $container->getDefinition('maker.autoloader_finder');
         $autoloaderFinderDefinition->replaceArgument(0, $rootNamespace);

@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 
@@ -26,15 +27,16 @@ class Generator
     private GeneratorTwigHelper $twigHelper;
     private array $pendingOperations = [];
     private ?TemplateComponentGenerator $templateComponentGenerator;
+    private NamespacesHelper $namespacesHelper;
 
     public function __construct(
         private FileManager $fileManager,
-        private string $namespacePrefix,
+        NamespacesHelper $namespacesHelper,
         PhpCompatUtil $phpCompatUtil = null,
         TemplateComponentGenerator $templateComponentGenerator = null,
     ) {
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
-        $this->namespacePrefix = trim($namespacePrefix, '\\');
+        $this->namespacesHelper = $namespacesHelper;
 
         if (null !== $phpCompatUtil) {
             trigger_deprecation('symfony/maker-bundle', 'v1.44.0', 'Initializing Generator while providing an instance of PhpCompatUtil is deprecated.');
@@ -136,7 +138,7 @@ class Generator
      */
     public function createClassNameDetails(string $name, string $namespacePrefix, string $suffix = '', string $validationErrorMessage = ''): ClassNameDetails
     {
-        $fullNamespacePrefix = $this->namespacePrefix.'\\'.$namespacePrefix;
+        $fullNamespacePrefix = $this->namespacesHelper->getRootNamespace().'\\'.$namespacePrefix;
         if ('\\' === $name[0]) {
             // class is already "absolute" - leave it alone (but strip opening \)
             $className = substr($name, 1);
@@ -211,9 +213,14 @@ class Generator
         $this->pendingOperations = [];
     }
 
+    public function getNamespacesHelper(): NamespacesHelper
+    {
+        return $this->namespacesHelper;
+    }
+
     public function getRootNamespace(): string
     {
-        return $this->namespacePrefix;
+        return $this->namespacesHelper->getRootNamespace();
     }
 
     public function generateController(string $controllerClassName, string $controllerTemplatePath, array $parameters = []): string

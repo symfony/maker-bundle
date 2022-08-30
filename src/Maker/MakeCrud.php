@@ -102,9 +102,11 @@ final class MakeCrud extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        $namespacesHelper = $generator->getNamespacesHelper();
+
         $entityClassDetails = $generator->createClassNameDetails(
             Validator::entityExists($input->getArgument('entity-class'), $this->doctrineHelper->getEntitiesForAutocomplete()),
-            'Entity\\'
+            $namespacesHelper->getEntityNamespace()
         );
 
         $entityDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($entityClassDetails->getFullName());
@@ -115,7 +117,7 @@ final class MakeCrud extends AbstractMaker
         if (null !== $entityDoctrineDetails->getRepositoryClass()) {
             $repositoryClassDetails = $generator->createClassNameDetails(
                 '\\'.$entityDoctrineDetails->getRepositoryClass(),
-                'Repository\\',
+                $namespacesHelper->getRepositoryNamespace(),
                 'Repository'
             );
 
@@ -130,7 +132,7 @@ final class MakeCrud extends AbstractMaker
 
         $controllerClassDetails = $generator->createClassNameDetails(
             $this->controllerClassName,
-            'Controller\\',
+            $namespacesHelper->getControllerNamespace(),
             'Controller'
         );
 
@@ -138,7 +140,7 @@ final class MakeCrud extends AbstractMaker
         do {
             $formClassDetails = $generator->createClassNameDetails(
                 $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'Type',
-                'Form\\',
+                $namespacesHelper->getFormNamespace(),
                 'Type'
             );
             ++$iter;
