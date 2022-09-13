@@ -835,7 +835,7 @@ class YamlSourceManipulator
             return $endKeyPosition;
         }
 
-        if (is_scalar($value) || null === $value) {
+        if (\is_scalar($value) || null === $value) {
             $offset = null === $offset ? $this->currentPosition : $offset;
 
             if (\is_bool($value)) {
