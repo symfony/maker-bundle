@@ -1,5 +1,17 @@
 # Changelog
 
+## [v1.39.1](https://github.com/symfony/maker-bundle/releases/tag/v1.39.1)
+
+*September 13th, 2022*
+
+### Bug
+
+- [#1181](https://github.com/symfony/maker-bundle/pull/1181) - [4.4] handle legacy Doctrine Persistence 
+  AnnotationDriver - *@jrushlow*
+
+- [#1163](https://github.com/symfony/maker-bundle/pull/1163) - fix attribute support in symfony 4.4 applications - 
+  *@spyridonas*
+
 ## [v1.39.0](https://github.com/symfony/maker-bundle/releases/tag/v1.39.0)
 
 *April 21st, 2022*
