@@ -42,13 +42,13 @@ jobs:
 
             -
                 name: "Composer install"
-                uses: "ramsey/composer-install@v1"
+                uses: "ramsey/composer-install@v2"
                 with:
                     composer-options: "--no-scripts"
 
             -
                 name: "Composer install php-cs-fixer"
-                uses: "ramsey/composer-install@v1"
+                uses: "ramsey/composer-install@v2"
                 with:
                     composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
 
@@ -145,19 +145,20 @@ jobs:
               run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
 
             - name: "Composer install"
-              uses: "ramsey/composer-install@v1"
+              uses: "ramsey/composer-install@v2"
               with:
                   dependency-versions: "${{ matrix.dependency-versions }}"
+                  composer-options: "-vvv"
 
             - name: "Composer install php-cs-fixer"
-              uses: "ramsey/composer-install@v1"
+              uses: "ramsey/composer-install@v2"
               with:
-                  composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
+                  composer-options: "--no-scripts --working-dir=tools/php-cs-fixer -vvv"
 
             - name: "Composer install twigcs"
-              uses: "ramsey/composer-install@v1"
+              uses: "ramsey/composer-install@v2"
               with:
-                  composer-options: "--no-scripts --working-dir=tools/twigcs"
+                  composer-options: "--no-scripts --working-dir=tools/twigcs -vvv"
 
             - name: "Install PHPUnit"
               run: vendor/bin/simple-phpunit install
