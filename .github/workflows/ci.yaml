@@ -144,6 +144,9 @@ jobs:
             - name: "Require symfony/flex"
               run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
 
+            - name: "Composer Validate"
+              run: composer validate -vvv
+
             - name: "Composer install"
               uses: "ramsey/composer-install@v2"
               with:
