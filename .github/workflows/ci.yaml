@@ -42,13 +42,13 @@ jobs:
 
             -
                 name: "Composer install"
-                uses: "ramsey/composer-install@v1"
+                uses: "ramsey/composer-install@v2"
                 with:
                     composer-options: "--no-scripts"
 
             -
                 name: "Composer install php-cs-fixer"
-                uses: "ramsey/composer-install@v1"
+                uses: "ramsey/composer-install@v2"
                 with:
                     composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
 
@@ -90,12 +90,9 @@ jobs:
             fail-fast: false
             matrix:
                 php-version:
-                    - '8.0'
+                    - '7.4'
                 symfony-version:
                     - '4.4.*'
-                    - '5.3.*'
-                    - '5.4.x-dev'
-                    - '6.0.x-dev'
                 dependency-versions: ['highest']
                 allow-dev-deps-in-apps: ['0']
                 include:
@@ -106,11 +103,11 @@ jobs:
                       dependency-versions: 'highest'
                     # testing lowest php version with highest 5.x stable
                     - php-version: '7.2.5'
-                      symfony-version: '5.3.*'
+                      symfony-version: '4.4.*'
                       dependency-versions: 'lowest'
                     # testing bleeding edge PHP with highest 5.x stable
-                    - php-version: '8.1'
-                      symfony-version: '5.3.*'
+                    - php-version: '7.4'
+                      symfony-version: '4.4.*'
                       dependency-versions: 'highest'
                       # temporarily needed until some packages support php 8.1
                       allow-dev-deps-in-apps: '1'
@@ -141,23 +138,30 @@ jobs:
             - name: "Add PHPUnit matcher"
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
+            - name: "Allow flex globally"
+              run: composer global config --no-plugins allow-plugins.symfony/flex true
+
             - name: "Require symfony/flex"
               run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
 
+            - name: "Composer Validate"
+              run: composer validate -vvv
+
             - name: "Composer install"
-              uses: "ramsey/composer-install@v1"
+              uses: "ramsey/composer-install@v2"
               with:
                   dependency-versions: "${{ matrix.dependency-versions }}"
+                  composer-options: "-vvv"
 
             - name: "Composer install php-cs-fixer"
-              uses: "ramsey/composer-install@v1"
+              uses: "ramsey/composer-install@v2"
               with:
-                  composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
+                  composer-options: "--no-scripts --working-dir=tools/php-cs-fixer -vvv"
 
             - name: "Composer install twigcs"
-              uses: "ramsey/composer-install@v1"
+              uses: "ramsey/composer-install@v2"
               with:
-                  composer-options: "--no-scripts --working-dir=tools/twigcs"
+                  composer-options: "--no-scripts --working-dir=tools/twigcs -vvv"
 
             - name: "Install PHPUnit"
               run: vendor/bin/simple-phpunit install

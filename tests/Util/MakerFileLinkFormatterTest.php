@@ -50,8 +50,8 @@ final class MakerFileLinkFormatterTest extends TestCase
 
         $sut = new MakerFileLinkFormatter($fileLinkFormatter);
         $this->assertEquals(
-           $expectedOutput,
-           $sut->makeLinkedPath('/my/absolute/path', './my/relative/path')
-       );
+            $expectedOutput,
+            $sut->makeLinkedPath('/my/absolute/path', './my/relative/path')
+        );
     }
 }
