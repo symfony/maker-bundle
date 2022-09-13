@@ -175,7 +175,7 @@ class ClassSourceManipulatorTest extends TestCase
     public function testAddAttributeToClass(string $sourceFilename, string $expectedSourceFilename, string $attributeClass, array $attributeOptions, string $attributePrefix = null): void
     {
         // @legacy Remove conditional when PHP < 8.0 support is dropped.
-        if ((\PHP_VERSION_ID < 80000)) {
+        if (\PHP_VERSION_ID < 80000) {
             $this->markTestSkipped('Requires PHP >= PHP 8.0');
         }
 
@@ -254,7 +254,7 @@ class ClassSourceManipulatorTest extends TestCase
         );
 
         // Run Attribute Tests
-        if ((\PHP_VERSION_ID >= 80000)) {
+        if (\PHP_VERSION_ID >= 80000) {
             $this->runAddEntityFieldTests(
                 file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
                 $propertyName,
@@ -337,7 +337,7 @@ class ClassSourceManipulatorTest extends TestCase
         );
 
         // Run Attribute Tests
-        if ((\PHP_VERSION_ID >= 80000)) {
+        if (\PHP_VERSION_ID >= 80000) {
             $this->runAddManyToOneRelationTests(
                 file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
                 file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
@@ -436,7 +436,7 @@ class ClassSourceManipulatorTest extends TestCase
         );
 
         // Run Attribute Tests
-        if ((\PHP_VERSION_ID >= 80000)) {
+        if (\PHP_VERSION_ID >= 80000) {
             $this->runAddOneToManyRelationTests(
                 file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
                 file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
@@ -508,7 +508,7 @@ class ClassSourceManipulatorTest extends TestCase
         );
 
         // Run Attribute Tests
-        if ((\PHP_VERSION_ID >= 80000)) {
+        if (\PHP_VERSION_ID >= 80000) {
             $this->runAddManyToManyRelationTest(
                 file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
                 file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
@@ -577,7 +577,7 @@ class ClassSourceManipulatorTest extends TestCase
         );
 
         // Run Attribute Tests
-        if ((\PHP_VERSION_ID >= 80000)) {
+        if (\PHP_VERSION_ID >= 80000) {
             $this->runAddOneToOneRelation(
                 file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
                 file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
@@ -744,7 +744,7 @@ class ClassSourceManipulatorTest extends TestCase
 <?php
 $this->someParam = $someParam;
 CODE
-);
+        );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
@@ -761,7 +761,7 @@ CODE
             (new Param('param'))->setTypeHint('string')
         );
         $manipulator->addMethodBody($methodBuilder,
-<<<'CODE'
+            <<<'CODE'
 <?php
 return new JsonResponse(['param' => $param]);
 CODE

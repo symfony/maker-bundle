@@ -164,7 +164,7 @@ final class MakeUser extends AbstractMaker
         // need to write changes early so we can modify the contents below
         $generator->writeChanges();
 
-        $useAttributesForDoctrineMapping = $userClassConfiguration->isEntity() && ($this->doctrineHelper->isDoctrineSupportingAttributes()) && $this->doctrineHelper->doesClassUsesAttributes($userClassNameDetails->getFullName());
+        $useAttributesForDoctrineMapping = $userClassConfiguration->isEntity() && $this->doctrineHelper->isDoctrineSupportingAttributes() && $this->doctrineHelper->doesClassUsesAttributes($userClassNameDetails->getFullName());
 
         // B) Implement UserInterface
         $manipulator = new ClassSourceManipulator(

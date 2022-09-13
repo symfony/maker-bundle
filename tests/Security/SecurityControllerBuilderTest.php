@@ -29,7 +29,7 @@ class SecurityControllerBuilderTest extends TestCase
             sprintf('%s/legacy_add_login_method/%s', $this->expectedBasePath, 'SecurityController_login.php')
         );
 
-        if ((\PHP_VERSION_ID >= 80000)) {
+        if (\PHP_VERSION_ID >= 80000) {
             $this->runMethodTest(
                 'addLoginMethod',
                 false,
@@ -47,7 +47,7 @@ class SecurityControllerBuilderTest extends TestCase
             sprintf('%s/legacy_add_logout_method/%s', $this->expectedBasePath, 'SecurityController_logout.php')
         );
 
-        if ((\PHP_VERSION_ID >= 80000)) {
+        if (\PHP_VERSION_ID >= 80000) {
             $this->runMethodTest(
                 'addLogoutMethod',
                 false,
@@ -70,7 +70,7 @@ class SecurityControllerBuilderTest extends TestCase
             $csm->getSourceCode()
         );
 
-        if ((\PHP_VERSION_ID >= 80000)) {
+        if (\PHP_VERSION_ID >= 80000) {
             $builder = $this->getSecurityControllerBuilder(false);
             $csm = $this->getClassSourceManipulator();
 
