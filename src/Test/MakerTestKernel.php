@@ -57,6 +57,7 @@ class MakerTestKernel extends Kernel implements CompilerPassInterface
             'router' => [
                 'utf8' => true,
             ],
+            'http_method_override' => false,
         ]);
     }
 
