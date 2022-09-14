@@ -1,7 +1,0 @@
-app_homepage:
-    path: /
-    controller: App\Controller\TestingController::homepage
-
-app_login:
-    path: /login
-    controller: ~

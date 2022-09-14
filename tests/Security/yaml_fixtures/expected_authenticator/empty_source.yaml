@@ -1,6 +1,0 @@
-security:
-    firewalls:
-        main:
-            anonymous: true
-            guard:
-                authenticators: [App\Security\AppCustomAuthenticator]
