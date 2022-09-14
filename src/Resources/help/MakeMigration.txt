@@ -1,3 +1,0 @@
-The <info>%command.name%</info> command generates a new migration:
-
-<info>php %command.full_name%</info>
