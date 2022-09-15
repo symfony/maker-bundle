@@ -1026,7 +1026,7 @@ final class ClassSourceManipulator
     private function addMethod(Node\Stmt\ClassMethod $methodNode): void
     {
         $classNode = $this->getClassNode();
-        $methodName = $methodNode->name;
+        $methodName = (string) $methodNode->name;
         $existingIndex = null;
         if ($this->methodExists($methodName)) {
             if (!$this->overwrite) {
