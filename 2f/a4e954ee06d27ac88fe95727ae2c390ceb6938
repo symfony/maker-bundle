@@ -1,0 +1,23 @@
+---------------------------------------------------------------------------
+
+by kbond at 2021-11-25T14:04:17Z
+
+_(I'll add tests once we finalize the maker and stubs)_
+
+---------------------------------------------------------------------------
+
+by jrushlow at 2022-02-22T18:23:56Z
+
+@kbond - is this ready to move forward? a rebase and tests would be awesome when you get some free time
+
+---------------------------------------------------------------------------
+
+by kbond at 2022-09-12T18:50:46Z
+
+Sorry for the delay. Updated this PR to work with the latest version of twig/live components. If we are good with the templates/maker, I'll add tests.
+
+---------------------------------------------------------------------------
+
+by kbond at 2022-09-14T14:06:06Z
+
+Ok, this is ready. Assuming https://github.com/symfony/ux/pull/460 is merged, we can add support for this in the maker.
