@@ -79,7 +79,7 @@ final class MakerTestDetails
      * Skip a test from running between a range of PHP Versions.
      *
      * @param int $lowerLimit Versions below this value will be allowed
-     * @param int $upperLimit Version above this value will be allowed
+     * @param int $upperLimit Versions above this value will be allowed
      *
      * @internal
      */
