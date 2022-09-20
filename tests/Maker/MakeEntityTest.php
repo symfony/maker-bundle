@@ -559,13 +559,6 @@ class MakeEntityTest extends MakerTestCase
                     'http://127.0.0.1:1337/.well-known/mercure'
                 );
 
-                // JWT Secrets needs to be at least 256 bits in length
-                $runner->replaceInFile(
-                    '.env',
-                    'MERCURE_JWT_SECRET="!ChangeMe!"',
-                    'MERCURE_JWT_SECRET="!ChangeMe!!ChangeMe!!ChangeMe!!ChangeMe!"'
-                );
-
                 $runner->runMaker([
                     // entity class name
                     'User',
