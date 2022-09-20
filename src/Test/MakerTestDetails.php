@@ -22,6 +22,8 @@ final class MakerTestDetails
     private string $rootNamespace = 'App';
     private int $requiredPhpVersion = 80000;
     private array $requiredPackageVersions = [];
+    private int $blockedPhpVersionUpper = 0;
+    private int $blockedPhpVersionLower = 0;
 
     public function __construct(
         private MakerInterface $maker,
@@ -73,6 +75,22 @@ final class MakerTestDetails
         return $this;
     }
 
+    /**
+     * Skip a test from running between a range of PHP Versions.
+     *
+     * @param int $lowerLimit Versions below this value will be allowed
+     * @param int $upperLimit Versions above this value will be allowed
+     *
+     * @internal
+     */
+    public function setSkippedPhpVersions(int $lowerLimit, int $upperLimit): self
+    {
+        $this->blockedPhpVersionUpper = $upperLimit;
+        $this->blockedPhpVersionLower = $lowerLimit;
+
+        return $this;
+    }
+
     public function addRequiredPackageVersion(string $packageName, string $versionConstraint): self
     {
         $this->requiredPackageVersions[] = ['name' => $packageName, 'version_constraint' => $versionConstraint];
@@ -118,7 +136,22 @@ final class MakerTestDetails
 
     public function isSupportedByCurrentPhpVersion(): bool
     {
-        return \PHP_VERSION_ID >= $this->requiredPhpVersion;
+        $hasPhpVersionConstraint = $this->blockedPhpVersionLower > 0 && $this->blockedPhpVersionUpper > 0;
+        $isSupported = false;
+
+        if (!$hasPhpVersionConstraint) {
+            $isSupported = true;
+        }
+
+        if (\PHP_VERSION_ID > $this->blockedPhpVersionUpper) {
+            $isSupported = true;
+        }
+
+        if (\PHP_VERSION_ID < $this->blockedPhpVersionLower) {
+            $isSupported = true;
+        }
+
+        return $isSupported && \PHP_VERSION_ID >= $this->requiredPhpVersion;
     }
 
     public function getRequiredPackageVersions(): array
