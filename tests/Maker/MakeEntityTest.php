@@ -74,7 +74,7 @@ class MakeEntityTest extends MakerTestCase
                 $this->assertFileExists($runner->getPath('src/Entity/User.php'));
 
                 $content = file_get_contents($runner->getPath('src/Entity/User.php'));
-                $this->assertStringContainsString('use ApiPlatform\Core\Annotation\ApiResource;', $content);
+                $this->assertStringContainsString('use ApiPlatform\Metadata\ApiResource;', $content);
                 $this->assertStringContainsString('#[ApiResource]', $content);
 
                 $this->runEntityTest($runner);
