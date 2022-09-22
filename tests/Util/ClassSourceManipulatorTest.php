@@ -127,7 +127,7 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddSetterTests
      */
-    public function testAddSetter(string $sourceFilename, string $propertyName, string $type, bool $isNullable, array $commentLines, $expectedSourceFilename): void
+    public function testAddSetter(string $sourceFilename, string $propertyName, ?string $type, bool $isNullable, array $commentLines, $expectedSourceFilename): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_setter/'.$expectedSourceFilename);
@@ -168,6 +168,15 @@ class ClassSourceManipulatorTest extends TestCase
             false,
             [],
             'User_empty.php',
+        ];
+
+        yield 'setter_null_type' => [
+            'User_simple.php',
+            'fooProp',
+            null,
+            false,
+            [],
+            'User_simple_null_type.php',
         ];
     }
 

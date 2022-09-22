@@ -266,7 +266,7 @@ final class ClassSourceManipulator
         $this->addCustomGetter($propertyName, $methodName, $returnType, $isReturnTypeNullable, $commentLines);
     }
 
-    public function addSetter(string $propertyName, string $type, bool $isNullable, array $commentLines = []): void
+    public function addSetter(string $propertyName, ?string $type, bool $isNullable, array $commentLines = []): void
     {
         $builder = $this->createSetterNodeBuilder($propertyName, $type, $isNullable, $commentLines);
         $builder->addStmt(
