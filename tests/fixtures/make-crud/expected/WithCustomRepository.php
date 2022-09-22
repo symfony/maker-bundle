@@ -29,7 +29,7 @@ class SweetFoodController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $sweetFoodRepository->add($sweetFood, true);
+            $sweetFoodRepository->save($sweetFood, true);
 
             return $this->redirectToRoute('app_sweet_food_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -55,7 +55,7 @@ class SweetFoodController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $sweetFoodRepository->add($sweetFood, true);
+            $sweetFoodRepository->save($sweetFood, true);
 
             return $this->redirectToRoute('app_sweet_food_index', [], Response::HTTP_SEE_OTHER);
         }
