@@ -176,7 +176,7 @@ class ClassSourceManipulatorTest extends TestCase
             null,
             false,
             [],
-            'User_simple.php',
+            'User_simple_null_type.php',
         ];
     }
 
