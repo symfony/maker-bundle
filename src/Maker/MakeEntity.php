@@ -318,14 +318,14 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null): void
     {
         if (null !== $input && $input->getOption('api-resource')) {
-            if (class_exists(LegacyApiResource::class)) {
+            if (class_exists(ApiResource::class)) {
                 $dependencies->addClassDependency(
-                    LegacyApiResource::class,
+                    ApiResource::class,
                     'api'
                 );
             } else {
                 $dependencies->addClassDependency(
-                    ApiResource::class,
+                    LegacyApiResource::class,
                     'api'
                 );
             }
