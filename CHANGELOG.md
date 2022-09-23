@@ -1,5 +1,19 @@
 # Changelog
 
+## [v1.40.0](https://github.com/symfony/maker-bundle/releases/tag/v1.40.0)
+
+*September 23rd, 2022*
+
+### Feature
+
+- [#1204](https://github.com/symfony/maker-bundle/pull/1204) - [make:crud] use save instead of add repository methods - *@jrushlow*
+- [#1202](https://github.com/symfony/maker-bundle/pull/1202) - [reset-password] use higher level "options" in ChangePasswordFormType.tpl.php - *@seb-jean*
+- [#1019](https://github.com/symfony/maker-bundle/pull/1019) - Add `make:twig-component` maker - *@kbond*
+### Bug
+
+- [#1199](https://github.com/symfony/maker-bundle/pull/1199) - [make:entity] fix compatibility with api-platform 3.0 - *@yobrx*
+- [#1176](https://github.com/symfony/maker-bundle/pull/1176) - [make:entity] Fix error while making blob in entity - *@mdoutreluingne*
+
 ## [v1.45.0](https://github.com/symfony/maker-bundle/releases/tag/v1.45.0)
 
 *July 26th, 2022*
