@@ -1,6 +1,6 @@
 # Changelog
 
-## [v1.40.0](https://github.com/symfony/maker-bundle/releases/tag/v1.40.0)
+## [v1.46.0](https://github.com/symfony/maker-bundle/releases/tag/v1.46.0)
 
 *September 23rd, 2022*
 
