@@ -51,7 +51,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
 
         $user->setPassword($newHashedPassword);
 
-        $this->add($user, true);
+        $this->save($user, true);
     }
 
 <?php endif ?>
