@@ -36,8 +36,7 @@ class <?= $class_name ?> extends AbstractController
 <?php } ?>
     {
         $<?= $entity_var_singular ?> = new <?= $entity_class_name ?>();
-        $form = $this->createForm(<?= $form_class_name ?>::class, $<?= $entity_var_singular ?>);
-        $form->handleRequest($request);
+        $form = $this->createForm(<?= $form_class_name ?>::class, $<?= $entity_var_singular ?>)->handleRequest($request);
 
 <?php if (isset($repository_full_class_name) && $generator->repositoryHasSaveAndRemoveMethods($repository_full_class_name)) { ?>
         if ($form->isSubmitted() && $form->isValid()) {
