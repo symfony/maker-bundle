@@ -25,8 +25,7 @@ class SweetFoodController extends AbstractController
     public function new(Request $request, SweetFoodRepository $sweetFoodRepository): Response
     {
         $sweetFood = new SweetFood();
-        $form = $this->createForm(SweetFoodType::class, $sweetFood);
-        $form->handleRequest($request);
+        $form = $this->createForm(SweetFoodType::class, $sweetFood)->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $sweetFoodRepository->save($sweetFood, true);
