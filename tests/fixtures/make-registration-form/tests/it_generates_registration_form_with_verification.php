@@ -19,8 +19,7 @@ class RegistrationFormTest extends WebTestCase
 
         $client->submit($form);
 
-        $messages = $this->getMailerMessages();
-        self::assertCount(1, $messages);
+        self::assertEmailCount(1);
 
         /** @var EntityManager $em */
         $em = self::$kernel->getContainer()
@@ -32,9 +31,12 @@ class RegistrationFormTest extends WebTestCase
 
         self::assertFalse(($query->getSingleResult())->isVerified());
 
-        $context = $messages[0]->getContext();
+        $messageBody = self::getMailerMessage()->getHtmlBody();
 
-        $client->request('GET', $context['signedUrl']);
+        // Group "1" contains just the signed url from the email
+        preg_match('/(http.*)(")/', $messageBody, $signedUrl);
+
+        $client->request('GET', $signedUrl[1]);
 
         self::assertTrue(($query->getSingleResult())->isVerified());
     }

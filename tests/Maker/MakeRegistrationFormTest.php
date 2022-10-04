@@ -135,7 +135,7 @@ class MakeRegistrationFormTest extends MakerTestCase
                     'jr@rushlow.dev', // from email address
                     'SymfonyCasts', // From Name
                     'n', // no authenticate after
-                    0, // route number to redirect to
+                    'app_anonymous', // route number to redirect to
                 ]);
 
                 $this->assertStringContainsString('Success', $output);
@@ -174,7 +174,7 @@ class MakeRegistrationFormTest extends MakerTestCase
                     'victor@symfonycasts.com', // from email address
                     'SymfonyCasts', // From Name
                     'n', // no authenticate after
-                    0, // route number to redirect to
+                    'app_anonymous', // route number to redirect to
                 ]);
 
                 $this->assertStringContainsString('Success', $output);
