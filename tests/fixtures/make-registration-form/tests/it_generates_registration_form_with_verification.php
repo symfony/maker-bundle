@@ -33,13 +33,10 @@ class RegistrationFormTest extends WebTestCase
 
         $messageBody = self::getMailerMessage()->getHtmlBody();
 
+        // Group "1" contains just the signed url from the email
         preg_match('/(http.*)(")/', $messageBody, $signedUrl);
 
-        $parsed = parse_url($signedUrl[1]);
-
-        $decodedQueryString = str_replace('amp;', '', $parsed['query']);
-
-        $client->request('GET', sprintf('%s://%s%s?%s', $parsed['scheme'], $parsed['host'], $parsed['path'], $decodedQueryString));
+        $client->request('GET', $signedUrl[1]);
 
         self::assertTrue(($query->getSingleResult())->isVerified());
     }
