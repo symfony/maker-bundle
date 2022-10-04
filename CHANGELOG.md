@@ -1,5 +1,20 @@
 # Changelog
 
+## [v1.47.0](https://github.com/symfony/maker-bundle/releases/tag/v1.47.0)
+
+*October 4th, 2022*
+
+### Feature
+
+- [#1211](https://github.com/symfony/maker-bundle/pull/1211) - [make:twig-extension] Change folder for Twig Extension - *@seb-jean*
+
+### Bug
+
+- [#1217](https://github.com/symfony/maker-bundle/pull/1217) - [make:registration-form] render the raw signedUrl in the email template - 
+  *@jrushlow*
+- [#1210](https://github.com/symfony/maker-bundle/pull/1210) - [make:serializer] use empty string in str_replace - *@jrushlow*
+- [#1209](https://github.com/symfony/maker-bundle/pull/1209) - [make:crud] use save instead of add in `upgradePassword` - *@seb-jean*
+
 ## [v1.46.0](https://github.com/symfony/maker-bundle/releases/tag/v1.46.0)
 
 *September 23rd, 2022*
