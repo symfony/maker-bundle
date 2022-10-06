@@ -17,6 +17,9 @@ class SourFood
     #[ORM\Column(name: 'title', length: 255)]
     private ?string $title = null;
 
+    /**
+     * @var Collection<int, Property>
+     */
     #[ORM\OneToMany(targetEntity: Property::class, mappedBy: 'sourFood')]
     private Collection $properties;
 

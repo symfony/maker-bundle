@@ -17,6 +17,9 @@ class User
     #[ORM\Column()]
     private ?int $id = null;
 
+    /**
+     * @var Collection<int, UserAvatarPhoto>
+     */
     #[ORM\OneToMany(targetEntity: UserAvatarPhoto::class, mappedBy: 'user')]
     private Collection $avatarPhotos;
 

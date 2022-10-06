@@ -14,6 +14,9 @@ class User
     #[ORM\Column()]
     private ?int $id = null;
 
+    /**
+     * @var Collection<int, Recipe>
+     */
     #[ORM\ManyToMany(targetEntity: Recipe::class)]
     private Collection $recipes;
 

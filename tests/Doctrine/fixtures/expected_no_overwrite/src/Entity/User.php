@@ -14,12 +14,18 @@ class User
     #[ORM\Column]
     private ?int $id = null;
 
+    /**
+     * @var Collection<int, UserAvatar>
+     */
     #[ORM\OneToMany(targetEntity: UserAvatar::class, mappedBy: 'user')]
     private Collection $avatars;
 
     #[ORM\OneToOne(mappedBy: 'user')]
     private ?UserProfile $userProfile = null;
 
+    /**
+     * @var Collection<int, Tag>
+     */
     #[ORM\ManyToMany(targetEntity: Tag::class)]
     private Collection $tags;
 

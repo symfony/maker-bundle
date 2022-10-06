@@ -11,6 +11,9 @@ class UserXml
 
     private ?string $name = null;
 
+    /**
+     * @var Collection<int, UserAvatar>
+     */
     private Collection $avatars;
 
     public function __construct()
