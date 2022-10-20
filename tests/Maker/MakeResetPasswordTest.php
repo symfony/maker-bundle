@@ -27,6 +27,7 @@ class MakeResetPasswordTest extends MakerTestCase
     public function getTestDetails(): \Generator
     {
         yield 'it_generates_with_normal_setup' => [$this->createMakerTest()
+            ->setSkippedPhpVersions(80100, 80109)
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner);
 
@@ -81,6 +82,7 @@ class MakeResetPasswordTest extends MakerTestCase
         ];
 
         yield 'it_generates_with_translator_installed' => [$this->createMakerTest()
+            ->setSkippedPhpVersions(80100, 80109)
             ->addExtraDependencies('symfony/translation')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner);
@@ -97,6 +99,7 @@ class MakeResetPasswordTest extends MakerTestCase
         ];
 
         yield 'it_generates_with_custom_config' => [$this->createMakerTest()
+            ->setSkippedPhpVersions(80100, 80109)
             ->run(function (MakerTestRunner $runner) {
                 $runner->deleteFile('config/packages/reset_password.yaml');
                 $runner->writeFile(
@@ -131,6 +134,7 @@ class MakeResetPasswordTest extends MakerTestCase
         ];
 
         yield 'it_amends_configuration' => [$this->createMakerTest()
+            ->setSkippedPhpVersions(80100, 80109)
             ->run(function (MakerTestRunner $runner) {
                 $runner->modifyYamlFile('config/packages/reset_password.yaml', function (array $config) {
                     $config['symfonycasts_reset_password']['lifetime'] = 9999;
@@ -157,6 +161,7 @@ class MakeResetPasswordTest extends MakerTestCase
         ];
 
         yield 'it_generates_with_custom_user' => [$this->createMakerTest()
+            ->setSkippedPhpVersions(80100, 80109)
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'emailAddress', 'UserCustom', false);
 

@@ -1,5 +1,34 @@
 # Changelog
 
+## [v1.47.0](https://github.com/symfony/maker-bundle/releases/tag/v1.47.0)
+
+*October 4th, 2022*
+
+### Feature
+
+- [#1211](https://github.com/symfony/maker-bundle/pull/1211) - [make:twig-extension] Change folder for Twig Extension - *@seb-jean*
+
+### Bug
+
+- [#1217](https://github.com/symfony/maker-bundle/pull/1217) - [make:registration-form] render the raw signedUrl in the email template - 
+  *@jrushlow*
+- [#1210](https://github.com/symfony/maker-bundle/pull/1210) - [make:serializer] use empty string in str_replace - *@jrushlow*
+- [#1209](https://github.com/symfony/maker-bundle/pull/1209) - [make:crud] use save instead of add in `upgradePassword` - *@seb-jean*
+
+## [v1.46.0](https://github.com/symfony/maker-bundle/releases/tag/v1.46.0)
+
+*September 23rd, 2022*
+
+### Feature
+
+- [#1204](https://github.com/symfony/maker-bundle/pull/1204) - [make:crud] use save instead of add repository methods - *@jrushlow*
+- [#1202](https://github.com/symfony/maker-bundle/pull/1202) - [reset-password] use higher level "options" in ChangePasswordFormType.tpl.php - *@seb-jean*
+- [#1019](https://github.com/symfony/maker-bundle/pull/1019) - Add `make:twig-component` maker - *@kbond*
+### Bug
+
+- [#1199](https://github.com/symfony/maker-bundle/pull/1199) - [make:entity] fix compatibility with api-platform 3.0 - *@yobrx*
+- [#1176](https://github.com/symfony/maker-bundle/pull/1176) - [make:entity] Fix error while making blob in entity - *@mdoutreluingne*
+
 ## [v1.45.0](https://github.com/symfony/maker-bundle/releases/tag/v1.45.0)
 
 *July 26th, 2022*

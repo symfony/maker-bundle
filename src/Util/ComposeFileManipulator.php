@@ -20,6 +20,7 @@ use Symfony\Component\Yaml\Dumper;
  * @author Jesse Rushlow <jr@rushlow.dev>
  *
  * @internal
+ *
  * @final
  */
 class ComposeFileManipulator

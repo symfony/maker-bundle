@@ -11,7 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
-use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiResource as LegacyApiResource;
+use ApiPlatform\Metadata\ApiResource;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -320,10 +321,17 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null): void
     {
         if (null !== $input && $input->getOption('api-resource')) {
-            $dependencies->addClassDependency(
-                ApiResource::class,
-                'api'
-            );
+            if (class_exists(ApiResource::class)) {
+                $dependencies->addClassDependency(
+                    ApiResource::class,
+                    'api'
+                );
+            } else {
+                $dependencies->addClassDependency(
+                    LegacyApiResource::class,
+                    'api'
+                );
+            }
         }
 
         if (null !== $input && $input->getOption('broadcast')) {

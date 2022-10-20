@@ -50,10 +50,10 @@ final class TemplateComponentGenerator
     /**
      * @throws ReflectionException
      */
-    public function repositoryHasAddRemoveMethods(string $repositoryFullClassName): bool
+    public function repositoryHasSaveAndRemoveMethods(string $repositoryFullClassName): bool
     {
         $reflectedComponents = new ReflectionClass($repositoryFullClassName);
 
-        return $reflectedComponents->hasMethod('add') && $reflectedComponents->hasMethod('remove');
+        return $reflectedComponents->hasMethod('save') && $reflectedComponents->hasMethod('remove');
     }
 }

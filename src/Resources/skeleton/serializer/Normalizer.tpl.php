@@ -21,7 +21,7 @@ class <?= $class_name ?> implements NormalizerInterface, CacheableSupportsMethod
 
     public function supportsNormalization($data, string $format = null, array $context = []): bool
     {
-        return $data instanceof \App\Entity\<?= str_replace('Normalizer', null, $class_name) ?>;
+        return $data instanceof \App\Entity\<?= str_replace('Normalizer', '', $class_name) ?>;
     }
 
     public function hasCacheableSupportsMethod(): bool

@@ -15,7 +15,7 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
     protected function setUp(): void
     {
         $this->client = static::createClient();
-        $this->manager = (static::getContainer()->get('doctrine'))->getManager();
+        $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->repository = $this->manager->getRepository(<?= $entity_class_name; ?>::class);
 
         foreach ($this->repository->findAll() as $object) {

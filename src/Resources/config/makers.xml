@@ -21,6 +21,10 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_twig_component" class="Symfony\Bundle\MakerBundle\Maker\MakeTwigComponent">
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_controller" class="Symfony\Bundle\MakerBundle\Maker\MakeController">
                 <argument type="service" id="maker.php_compat_util" />
                 <tag name="maker.command" />

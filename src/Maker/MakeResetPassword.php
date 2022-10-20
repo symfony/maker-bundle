@@ -73,6 +73,7 @@ use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
  * @author Antoine Michelet <jean.marcel.michelet@gmail.com>
  *
  * @internal
+ *
  * @final
  */
 class MakeResetPassword extends AbstractMaker
