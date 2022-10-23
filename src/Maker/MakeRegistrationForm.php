@@ -85,8 +85,8 @@ final class MakeRegistrationForm extends AbstractMaker
     public function __construct(
         private FileManager $fileManager,
         private FormTypeRenderer $formTypeRenderer,
-        private RouterInterface $router,
         private DoctrineHelper $doctrineHelper,
+        private ?RouterInterface $router = null,
     ) {
     }
 
@@ -110,6 +110,10 @@ final class MakeRegistrationForm extends AbstractMaker
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
+
+        if (null === $this->router) {
+            throw new RuntimeCommandException('Router have been explicitely disabled in your configuration. This command needs to use the router.');
+        }
 
         if (!$this->fileManager->fileExists($path = 'config/packages/security.yaml')) {
             throw new RuntimeCommandException('The file "config/packages/security.yaml" does not exist. This command needs that file to accurately build your registration form.');
