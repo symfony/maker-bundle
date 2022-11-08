@@ -122,6 +122,20 @@ class MakeCrudTest extends MakerTestCase
                     Yaml::dump(['maker' => ['root_namespace' => 'Custom']])
                 );
 
+                // @legacy Conditional can be removed when Symfony 5.4 support is dropped
+                if (60000 <= $runner->getSymfonyVersion()) {
+                    // Symfony 6.2 sets the path and namespace for router resources
+                    $runner->modifyYamlFile('config/routes.yaml', function (array $config) {
+                        if (!isset($config['controllers']['resource']['namespace'])) {
+                            return $config;
+                        }
+
+                        $config['controllers']['resource']['namespace'] = 'Custom\Controller';
+
+                        return $config;
+                    });
+                }
+
                 $runner->copy(
                     'make-crud/SweetFood-custom-namespace.php',
                     'src/Entity/SweetFood.php'
