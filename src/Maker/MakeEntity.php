@@ -502,10 +502,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $io->writeln('');
         };
 
-        $io->writeln('<info>Main types</info>');
+        $io->writeln('<info>Main Types</info>');
         $printSection($typesTable['main']);
 
-        $io->writeln('<info>Relationships / Associations</info>');
+        $io->writeln('<info>Relationships/Associations</info>');
         $printSection($typesTable['relation']);
 
         $io->writeln('<info>Array/Object Types</info>');
