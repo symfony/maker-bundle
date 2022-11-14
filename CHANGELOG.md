@@ -1,5 +1,18 @@
 # Changelog
 
+## [v1.48.0](https://github.com/symfony/maker-bundle/releases/tag/v1.48.0)
+
+*November 14th, 2022*
+
+### Feature
+
+- [#1221](https://github.com/symfony/maker-bundle/pull/1221) - [make:voter] Set type for subject in Voter template - *@N-M*
+### Bug
+
+- [#1232](https://github.com/symfony/maker-bundle/pull/1232) - [make:entity] Minor: Consistent output formatting - *@ThomasLandauer*
+- [#1227](https://github.com/symfony/maker-bundle/pull/1227) - [make:registration] Make router optional in MakeRegistrationForm constructor - *@odolbeau*
+- [#1226](https://github.com/symfony/maker-bundle/pull/1226) - [make:controller] replace repository method add by save - *@bechir*
+
 ## [v1.47.0](https://github.com/symfony/maker-bundle/releases/tag/v1.47.0)
 
 *October 4th, 2022*
