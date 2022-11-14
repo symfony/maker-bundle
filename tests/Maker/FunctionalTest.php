@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
 use Symfony\Bundle\MakerBundle\Test\MakerTestKernel;
@@ -38,7 +37,7 @@ class FunctionalTest extends TestCase
 
         $application = new Application($kernel);
         foreach ($finder as $file) {
-            $maker = new ReflectionClass(sprintf('Symfony\Bundle\MakerBundle\Maker\%s', $file->getBasename('.php')));
+            $maker = new \ReflectionClass(sprintf('Symfony\Bundle\MakerBundle\Maker\%s', $file->getBasename('.php')));
 
             if ($maker->isAbstract()) {
                 continue;
