@@ -9,6 +9,8 @@
 <?php endif; ?>
     <h1>Register</h1>
 
+    {{ form_errors(registrationForm) }}
+
     {{ form_start(registrationForm) }}
         {{ form_row(registrationForm.<?= $username_field ?>) }}
         {{ form_row(registrationForm.plainPassword, {
