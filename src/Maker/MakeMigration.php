@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\CliTools;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -121,8 +122,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
 
         $io->text([
             sprintf('Next: Review the new migration <info>%s</info>', $migrationName),
-            'Then: Run the migration with <info>php bin/console doctrine:migrations:migrate</info>',
-            'or if you\'re using the Symfony CLI: <info>symfony console doctrine:migrations:migrate</info>',
+            sprintf('Then: Run the migration with <info>%s doctrine:migrations:migrate</info>', CliTools::getCommandPrefix()),
             'See <fg=yellow>https://symfony.com/doc/current/bundles/DoctrineMigrationsBundle/index.html</>',
         ]);
     }
