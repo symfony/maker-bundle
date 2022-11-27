@@ -35,7 +35,7 @@ class CliToolsTest extends TestCase
 
     public function cliEnvProvider(): \Generator
     {
-        yield 'Using Symfony CLI' => ['SYMFONY_CLI_VERSION', 'SYMFONY_CLI_BINARY_NAME', 'symfony console '];
-        yield 'Without Symfony CLI' => ['ARBITRARY_VERSION', 'ARBITRARY_BIN_NAME', 'php bin/console '];
+        yield 'Using Symfony CLI' => ['SYMFONY_CLI_VERSION', 'SYMFONY_CLI_BINARY_NAME', 'symfony console'];
+        yield 'Without Symfony CLI' => ['ARBITRARY_VERSION', 'ARBITRARY_BIN_NAME', 'php bin/console'];
     }
 }

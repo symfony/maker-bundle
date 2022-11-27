@@ -32,12 +32,12 @@ final class CliTools
      */
     public static function getCommandPrefix(): string
     {
-        $prompt = 'php bin/console ';
+        $prompt = 'php bin/console';
 
         $env = getenv(self::ENV_VERSION);
 
         if ($env) {
-            $prompt = 'symfony console ';
+            $prompt = 'symfony console';
         }
 
         return $prompt;
