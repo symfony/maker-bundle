@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Util;
 
 /**
@@ -7,18 +16,17 @@ namespace Symfony\Bundle\MakerBundle\Util;
  *
  * @internal
  *
- *
  * @TODO Better class name
  */
 final class CliTools
 {
     // EnvVars exposed by Symfony's CLI
-    const ENV_VERSION = 'SYMFONY_CLI_VERSION';
-    const ENV_BIN_NAME = 'SYMFONY_CLI_BINARY_NAME';
+    public const ENV_VERSION = 'SYMFONY_CLI_VERSION';
+    public const ENV_BIN_NAME = 'SYMFONY_CLI_BINARY_NAME';
 
     /**
      * Get the correct prefix for maker commands based on the cli tool
-     * being used to call make:*
+     * being used to call make:*.
      *
      * @TODO Better Description
      */
@@ -28,7 +36,7 @@ final class CliTools
 
         $env = getenv(self::ENV_VERSION);
 
-        if (!$env) {
+        if ($env) {
             $prompt = 'symfony console ';
         }
 
