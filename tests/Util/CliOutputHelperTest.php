@@ -19,23 +19,19 @@ use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
  */
 class CliOutputHelperTest extends TestCase
 {
-    /**
-     * @dataProvider cliEnvProvider
-     */
-    public function testCorrectPrefixReturnedBasedOnInputMethod(string $cliVersion, string $cliBinary, string $expectedPrefix): void
+    protected function tearDown(): void
     {
-        putenv(sprintf('%s=SYMFONY', $cliBinary));
-        putenv(sprintf('%s=1.0.0', $cliVersion));
-
-        self::assertSame($expectedPrefix, CliOutputHelper::getCommandPrefix());
-
-        putenv($cliVersion);
-        putenv($cliBinary);
+        putenv('SYMFONY_CLI_BINARY_NAME');
+        putenv('SYMFONY_CLI_VERSION');
     }
 
-    public function cliEnvProvider(): \Generator
+    public function testCorrectPrefixReturnedBasedOnInputMethod(): void
     {
-        yield 'Using Symfony CLI' => ['SYMFONY_CLI_VERSION', 'SYMFONY_CLI_BINARY_NAME', 'symfony console'];
-        yield 'Without Symfony CLI' => ['ARBITRARY_VERSION', 'ARBITRARY_BIN_NAME', 'php bin/console'];
+        self::assertSame('php bin/console', CliOutputHelper::getCommandPrefix());
+
+        putenv('SYMFONY_CLI_BINARY_NAME=symfony');
+        putenv('SYMFONY_CLI_VERSION=0.0.0');
+
+        self::assertSame('symfony console', CliOutputHelper::getCommandPrefix());
     }
 }

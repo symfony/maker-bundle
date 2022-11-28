@@ -15,7 +15,6 @@ use Symfony\Bundle\MakerBundle\Maker\MakeResetPassword;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
 use Symfony\Component\Yaml\Yaml;
 
 class MakeResetPasswordTest extends MakerTestCase
@@ -79,34 +78,6 @@ class MakeResetPasswordTest extends MakerTestCase
                 );
 
                 $runner->runTests();
-            }),
-        ];
-
-        yield 'it_detects_symfony_cli_usage' => [$this->createMakerTest()
-            ->run(function (MakerTestRunner $runner) {
-                $this->makeUser($runner);
-
-                $output = $runner->runMaker(
-                    inputs: ['App\Entity\User', 'app_home', 'victor@symfonycasts.com', 'SymfonyCasts'],
-                    envVars: [CliOutputHelper::ENV_VERSION => '1.0.0', CliOutputHelper::ENV_BIN_NAME => 'symfony']
-                );
-
-                $this->assertStringContainsString('Success', $output);
-                $this->assertStringContainsString('symfony console make:migration', $output);
-            }),
-        ];
-
-        yield 'it_detects_symfony_cli_is_not_used' => [$this->createMakerTest()
-            ->run(function (MakerTestRunner $runner) {
-                $this->makeUser($runner);
-
-                $output = $runner->runMaker(
-                    inputs: ['App\Entity\User', 'app_home', 'victor@symfonycasts.com', 'SymfonyCasts'],
-                    envVars: []
-                );
-
-                $this->assertStringContainsString('Success', $output);
-                $this->assertStringContainsString('php bin/console make:migration', $output);
             }),
         ];
 
