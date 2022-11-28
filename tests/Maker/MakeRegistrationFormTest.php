@@ -15,7 +15,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeRegistrationForm;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
-use Symfony\Bundle\MakerBundle\Util\CliTools;
+use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
 use Symfony\Component\Yaml\Yaml;
 
 class MakeRegistrationFormTest extends MakerTestCase
@@ -176,7 +176,7 @@ class MakeRegistrationFormTest extends MakerTestCase
                         'n', // no authenticate after
                         'app_anonymous', // route number to redirect to
                     ],
-                    envVars: [CliTools::ENV_VERSION => '0.0.0']
+                    envVars: [CliOutputHelper::ENV_VERSION => '1.0.0', CliOutputHelper::ENV_BIN_NAME => 'symfony']
                 );
 
                 $this->assertStringContainsString('symfony console make:migration', $output);

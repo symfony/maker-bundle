@@ -12,12 +12,12 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Bundle\MakerBundle\Util\CliTools;
+use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
  */
-class CliToolsTest extends TestCase
+class CliOutputHelperTest extends TestCase
 {
     /**
      * @dataProvider cliEnvProvider
@@ -27,7 +27,7 @@ class CliToolsTest extends TestCase
         putenv(sprintf('%s=SYMFONY', $cliBinary));
         putenv(sprintf('%s=1.0.0', $cliVersion));
 
-        self::assertSame($expectedPrefix, CliTools::getCommandPrefix());
+        self::assertSame($expectedPrefix, CliOutputHelper::getCommandPrefix());
 
         putenv($cliVersion);
         putenv($cliBinary);

@@ -15,7 +15,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
-use Symfony\Bundle\MakerBundle\Util\CliTools;
+use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
@@ -64,7 +64,7 @@ class MakeEntityTest extends MakerTestCase
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker(
                     inputs: ['User', ''], // Simple user entity with no fields
-                    envVars: [CliTools::ENV_VERSION => '1.0.0'] // If the ENV is present, Maker should presume Symfony CLI called the command
+                    envVars: [CliOutputHelper::ENV_VERSION => '1.0.0', CliOutputHelper::ENV_BIN_NAME => 'symfony']
                 );
 
                 $this->runEntityTest($runner);
