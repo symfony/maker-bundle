@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
+use Symfony\Bundle\MakerBundle\Security\Object\AuthenticatorType;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class InteractiveSecurityHelperTest extends TestCase
@@ -203,6 +204,63 @@ class InteractiveSecurityHelperTest extends TestCase
             false,
             FixtureClass4::class,
             ['myEmail'],
+        ];
+    }
+
+    /** @dataProvider authenticatorClassProvider */
+    public function testGuessAuthenticatorClasses(array $firewallData, array $expectedResults): void
+    {
+        $helper = new InteractiveSecurityHelper();
+        $result = $helper->getAuthenticatorClasses($firewallData);
+
+        self::assertEquals($expectedResults, $result);
+    }
+
+    public function authenticatorClassProvider(): \Generator
+    {
+        yield 'Only Custom Authenticator' => [
+            [
+                'lazy' => true,
+                'custom_authenticator' => 'App\Security\CustomAuthenticator',
+                'provider' => 'a_user_provider',
+            ],
+            [new AuthenticatorType('App\Security\CustomAuthenticator')],
+        ];
+
+        yield 'Only Form Login' => [
+            [
+                'form_login' => ['login_path' => 'some_path'],
+                'provider' => 'a_user_provider',
+            ],
+            [new AuthenticatorType(AuthenticatorType::FORM_LOGIN)],
+        ];
+
+        yield 'Form & Json Login' => [
+            [
+                'form_login' => ['login_path' => 'some_path'],
+                'json_login' => ['login_path' => 'some_path'],
+                'provider' => 'a_user_provider',
+            ],
+            [new AuthenticatorType(AuthenticatorType::FORM_LOGIN), new AuthenticatorType(AuthenticatorType::JSON_LOGIN)],
+        ];
+
+        yield 'Native & Custom' => [
+            [
+                'form_login' => ['login_path' => 'some_path'],
+                'json_login' => ['login_path' => 'some_path'],
+                'custom_authenticator' => 'App\Security\CustomAuthenticator',
+                'provider' => 'a_user_provider',
+            ],
+            [
+                new AuthenticatorType(AuthenticatorType::FORM_LOGIN),
+                new AuthenticatorType(AuthenticatorType::JSON_LOGIN),
+                new AuthenticatorType('App\Security\CustomAuthenticator'),
+            ],
+        ];
+
+        yield 'No Authenticators' => [
+            ['provider' => 'a_user_provider'],
+            [],
         ];
     }
 

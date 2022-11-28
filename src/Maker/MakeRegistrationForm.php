@@ -26,6 +26,7 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
+use Symfony\Bundle\MakerBundle\Security\Object\AuthenticatorType;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
@@ -34,6 +35,7 @@ use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -75,10 +77,11 @@ final class MakeRegistrationForm extends AbstractMaker
     private $emailGetter;
     private $fromEmailAddress;
     private $fromEmailName;
-    private $autoLoginAuthenticator;
+    private ?AuthenticatorType $autoLoginAuthenticator = null;
     private $firewallName;
     private $redirectRouteName;
     private $addUniqueEntityConstraint;
+    private bool $canSecurityBundleLogin = false;
 
     public function __construct(
         private FileManager $fileManager,
@@ -110,7 +113,7 @@ final class MakeRegistrationForm extends AbstractMaker
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
 
         if (null === $this->router) {
-            throw new RuntimeCommandException('Router have been explicitely disabled in your configuration. This command needs to use the router.');
+            throw new RuntimeCommandException('Router have been explicitly disabled in your configuration. This command needs to use the router.');
         }
 
         if (!$this->fileManager->fileExists($path = 'config/packages/security.yaml')) {
@@ -184,6 +187,8 @@ final class MakeRegistrationForm extends AbstractMaker
 
     private function interactAuthenticatorQuestions(ConsoleStyle $io, InteractiveSecurityHelper $interactiveSecurityHelper, array $securityData): void
     {
+        $this->canSecurityBundleLogin = class_exists(Security::class);
+
         $firewallsData = $securityData['security']['firewalls'] ?? [];
         $firewallName = $interactiveSecurityHelper->guessFirewallName(
             $io,
@@ -199,17 +204,36 @@ final class MakeRegistrationForm extends AbstractMaker
 
         $this->firewallName = $firewallName;
 
-        // get list of guard authenticators
-        $authenticatorClasses = $interactiveSecurityHelper->getAuthenticatorClasses($firewallsData[$firewallName]);
-        if (empty($authenticatorClasses)) {
-            $io->note('No Guard authenticators found - so your user won\'t be automatically authenticated after registering.');
-        } else {
-            $this->autoLoginAuthenticator =
-                1 === \count($authenticatorClasses) ? $authenticatorClasses[0] : $io->choice(
-                    'Which authenticator\'s onAuthenticationSuccess() should be used after logging in?',
-                    $authenticatorClasses
-                );
+        // get list of authenticators
+        $authenticators = $interactiveSecurityHelper->getAuthenticatorClasses($firewallsData[$firewallName]);
+
+        $canLoginAfterRegistration = $this->canSecurityBundleLogin;
+
+        if (!$this->canSecurityBundleLogin) {
+            foreach ($authenticators as $authenticator) {
+                if (!$authenticator->isNative()) {
+                    $canLoginAfterRegistration = true;
+                }
+            }
         }
+
+        if (!$canLoginAfterRegistration) {
+            $io->note('Skipping login after registration. This version of MakerBundle only supports logging in after registration when using custom authenticators or using Symfony 6.2 or higher');
+
+            return;
+        }
+
+        if (empty($authenticators)) {
+            $io->note('No authenticators found - so your user won\'t be automatically authenticated after registering.');
+
+            return;
+        }
+
+        $this->autoLoginAuthenticator =
+            1 === \count($authenticators) ? $authenticators[0] : $io->choice(
+                'Which authenticator\'s should be used to login the user?',
+                $authenticators
+            );
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
@@ -314,7 +338,7 @@ final class MakeRegistrationForm extends AbstractMaker
 
         if ($this->autoLoginAuthenticator) {
             $useStatements->addUseStatement([
-                $this->autoLoginAuthenticator,
+                $this->autoLoginAuthenticator->getType(),
                 UserAuthenticatorInterface::class,
             ]);
         }
@@ -339,8 +363,8 @@ final class MakeRegistrationForm extends AbstractMaker
                     'from_email' => $this->fromEmailAddress,
                     'from_email_name' => addslashes($this->fromEmailName),
                     'email_getter' => $this->emailGetter,
-                    'authenticator_class_name' => $this->autoLoginAuthenticator ? Str::getShortClassName($this->autoLoginAuthenticator) : null,
-                    'authenticator_full_class_name' => $this->autoLoginAuthenticator,
+                    'authenticator_class_name' => $this->autoLoginAuthenticator ? Str::getShortClassName($this->autoLoginAuthenticator->getType()) : null,
+                    'authenticator_full_class_name' => $this->autoLoginAuthenticator ? $this->autoLoginAuthenticator->getType() : '',
                     'firewall_name' => $this->firewallName,
                     'redirect_route_name' => $this->redirectRouteName,
                     'password_hasher_class_details' => $generator->createClassNameDetails(UserPasswordHasherInterface::class, '\\'),

@@ -16,7 +16,7 @@ class <?= $class_name; ?> extends AbstractController
 
 <?php endif; ?>
 <?= $generator->generateRouteForControllerMethod($route_path, $route_name) ?>
-    public function register(Request $request, <?= $password_hasher_class_details->getShortName() ?> $userPasswordHasher<?= $authenticator_full_class_name ? sprintf(', UserAuthenticatorInterface $userAuthenticator, %s $authenticator', $authenticator_class_name) : '' ?>, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, <?= $password_hasher_class_details->getShortName() ?> <?= $password_hasher_variable_name ?><?= $authenticator_full_class_name ? sprintf(', UserAuthenticatorInterface $userAuthenticator, %s $authenticator', $authenticator_class_name) : '' ?>, EntityManagerInterface $entityManager): Response
     {
         $user = new <?= $user_class_name ?>();
         $form = $this->createForm(<?= $form_class_name ?>::class, $user);

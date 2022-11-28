@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Security;
 
+use Symfony\Bundle\MakerBundle\Security\Object\AuthenticatorType;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -140,22 +141,36 @@ final class InteractiveSecurityHelper
         );
     }
 
+    /**
+     * @return AuthenticatorType[]
+     */
     public function getAuthenticatorClasses(array $firewallData): array
     {
-        if (isset($firewallData['guard'])) {
-            return array_filter($firewallData['guard']['authenticators'] ?? [], static fn ($authenticator) => class_exists($authenticator));
+        $authenticators = [];
+
+        foreach ($firewallData as $potentialAuthenticator => $configData) {
+            $authenticator = \in_array(strtolower($potentialAuthenticator), AuthenticatorType::getNativeTypes(), true);
+
+            if (false !== $authenticator) {
+                $authenticators[] = new AuthenticatorType($potentialAuthenticator);
+            }
         }
 
         if (isset($firewallData['custom_authenticator'])) {
-            $authenticators = $firewallData['custom_authenticator'];
-            if (\is_string($authenticators)) {
-                $authenticators = [$authenticators];
+            if (\is_string($firewallData['custom_authenticator'])) {
+                $authenticators[] = new AuthenticatorType($firewallData['custom_authenticator']);
+
+                return $authenticators;
             }
 
-            return array_filter($authenticators, static fn ($authenticator) => class_exists($authenticator));
+            foreach ($firewallData['custom_authenticator'] as $potentialAuthenticator) {
+                if (class_exists($potentialAuthenticator)) {
+                    $authenticators[] = new AuthenticatorType($potentialAuthenticator);
+                }
+            }
         }
 
-        return [];
+        return $authenticators;
     }
 
     public function guessPasswordSetter(SymfonyStyle $io, string $userClass): string
