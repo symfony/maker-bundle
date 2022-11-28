@@ -15,6 +15,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeRegistrationForm;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
+use Symfony\Bundle\MakerBundle\Util\CliTools;
 use Symfony\Component\Yaml\Yaml;
 
 class MakeRegistrationFormTest extends MakerTestCase
@@ -150,6 +151,64 @@ class MakeRegistrationFormTest extends MakerTestCase
                 }
 
                 $this->runRegistrationTest($runner, 'it_generates_registration_form_with_verification.php');
+            }),
+        ];
+
+        yield 'it_detects_symfony_cli_usage' => [$this->createRegistrationFormTest()
+            ->addExtraDependencies('symfonycasts/verify-email-bundle', 'mailer')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->writeFile(
+                    'config/packages/mailer.yaml',
+                    Yaml::dump(['framework' => [
+                        'mailer' => ['dsn' => 'null://null'],
+                    ]])
+                );
+
+                $this->makeUser($runner);
+
+                $output = $runner->runMaker(
+                    inputs: [
+                        'n', // add UniqueEntity
+                        'y', // verify user
+                        'y', // require authentication to verify user email
+                        'jr@rushlow.dev', // from email address
+                        'SymfonyCasts', // From Name
+                        'n', // no authenticate after
+                        'app_anonymous', // route number to redirect to
+                    ],
+                    envVars: [CliTools::ENV_VERSION => '0.0.0']
+                );
+
+                $this->assertStringContainsString('symfony console make:migration', $output);
+            }),
+        ];
+
+        yield 'it_detects_symfony_cli_is_not_used' => [$this->createRegistrationFormTest()
+            ->addExtraDependencies('symfonycasts/verify-email-bundle', 'mailer')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->writeFile(
+                    'config/packages/mailer.yaml',
+                    Yaml::dump(['framework' => [
+                        'mailer' => ['dsn' => 'null://null'],
+                    ]])
+                );
+
+                $this->makeUser($runner);
+
+                $output = $runner->runMaker(
+                    inputs: [
+                        'n', // add UniqueEntity
+                        'y', // verify user
+                        'y', // require authentication to verify user email
+                        'jr@rushlow.dev', // from email address
+                        'SymfonyCasts', // From Name
+                        'n', // no authenticate after
+                        'app_anonymous', // route number to redirect to
+                    ],
+                    envVars: []
+                );
+
+                $this->assertStringContainsString('php bin/console make:migration', $output);
             }),
         ];
 

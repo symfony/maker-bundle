@@ -15,6 +15,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
+use Symfony\Bundle\MakerBundle\Util\CliTools;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
@@ -56,6 +57,32 @@ class MakeEntityTest extends MakerTestCase
                 ]);
 
                 $this->runEntityTest($runner);
+            }),
+        ];
+
+        yield 'it_detects_symfony_cli_usage' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker(
+                    inputs: ['User', ''], // Simple user entity with no fields
+                    envVars: [CliTools::ENV_VERSION => '1.0.0'] // If the ENV is present, Maker should presume Symfony CLI called the command
+                );
+
+                $this->runEntityTest($runner);
+
+                self::assertStringContainsString('symfony console make:migration', $output);
+            }),
+        ];
+
+        yield 'it_detects_symfony_cli_is_not_used' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker(
+                    inputs: ['User', ''], // Simple user entity with no fields
+                    envVars: []
+                );
+
+                $this->runEntityTest($runner);
+
+                self::assertStringContainsString('php bin/console make:migration', $output);
             }),
         ];
 

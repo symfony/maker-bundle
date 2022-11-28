@@ -170,15 +170,16 @@ final class MakerTestEnvironment
         return MakerTestProcess::create($command, $this->path)->run();
     }
 
-    public function runMaker(array $inputs, string $argumentsString = '', bool $allowedToFail = false): MakerTestProcess
+    public function runMaker(array $inputs, string $argumentsString = '', bool $allowedToFail = false, array $envVars = []): MakerTestProcess
     {
         // Let's remove cache
         $this->fs->remove($this->path.'/var/cache');
 
         $testProcess = $this->createInteractiveCommandProcess(
-            $this->testDetails->getMaker()::getCommandName(),
-            $inputs,
-            $argumentsString
+            commandName: $this->testDetails->getMaker()::getCommandName(),
+            userInputs: $inputs,
+            argumentsString: $argumentsString,
+            envVars: $envVars,
         );
 
         $this->runnedMakerProcess = $testProcess->run($allowedToFail);
@@ -329,16 +330,16 @@ final class MakerTestEnvironment
         file_put_contents($path, str_replace($find, $replace, $contents));
     }
 
-    public function createInteractiveCommandProcess(string $commandName, array $userInputs, string $argumentsString = ''): MakerTestProcess
+    public function createInteractiveCommandProcess(string $commandName, array $userInputs, string $argumentsString = '', array $envVars = []): MakerTestProcess
     {
+        $envVars = array_merge(['SHELL_INTERACTIVE' => '1'], $envVars);
+
         // We don't need ansi coloring in tests!
         $process = MakerTestProcess::create(
-            sprintf('php bin/console %s %s --no-ansi', $commandName, $argumentsString),
-            $this->path,
-            [
-                'SHELL_INTERACTIVE' => '1',
-            ],
-            10
+            commandLine: sprintf('php bin/console %s %s --no-ansi', $commandName, $argumentsString),
+            cwd: $this->path,
+            envVars: $envVars,
+            timeout: 10
         );
 
         if ($userInputs) {
