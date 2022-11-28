@@ -36,10 +36,13 @@ final class CliOutputHelper
     {
         $prompt = 'php bin/console';
 
-        $envs = [getenv(self::ENV_VERSION), getenv(self::ENV_BIN_NAME)];
+        $envs = [
+            'version' => getenv(self::ENV_VERSION),
+            'name' => getenv(self::ENV_BIN_NAME),
+        ];
 
-        if (false !== $envs[0] || false !== $envs[1]) {
-            $prompt = 'symfony console';
+        if (false !== $envs['version'] || false !== $envs['name']) {
+            $prompt = sprintf('%s console', $envs['name']);
         }
 
         return $prompt;
