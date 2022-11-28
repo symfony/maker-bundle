@@ -25,7 +25,7 @@ class User
         return $this->embeddedUser;
     }
 
-    public function setEmbeddedUser(?self $embeddedUser): self
+    public function setEmbeddedUser(?self $embeddedUser): static
     {
         $this->embeddedUser = $embeddedUser;
 

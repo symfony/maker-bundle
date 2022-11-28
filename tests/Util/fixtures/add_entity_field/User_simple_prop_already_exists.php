@@ -31,7 +31,7 @@ class User
         return $this->firstName;
     }
 
-    public function setFirstName(string $firstName): self
+    public function setFirstName(string $firstName): static
     {
         $this->firstName = $firstName;
 

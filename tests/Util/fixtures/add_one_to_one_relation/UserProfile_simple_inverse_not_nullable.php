@@ -26,7 +26,7 @@ class UserProfile
         return $this->user;
     }
 
-    public function setUser(User $user): self
+    public function setUser(User $user): static
     {
         // set the owning side of the relation if necessary
         if ($user->getUserProfile() !== $this) {

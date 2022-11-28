@@ -26,7 +26,7 @@ class User
         return $this->ulid;
     }
 
-    public function setUlid(Ulid $ulid): self
+    public function setUlid(Ulid $ulid): static
     {
         $this->ulid = $ulid;
 

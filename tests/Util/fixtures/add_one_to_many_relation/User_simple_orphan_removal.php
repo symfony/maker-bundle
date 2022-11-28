@@ -35,7 +35,7 @@ class User
         return $this->avatarPhotos;
     }
 
-    public function addAvatarPhoto(UserAvatarPhoto $avatarPhoto): self
+    public function addAvatarPhoto(UserAvatarPhoto $avatarPhoto): static
     {
         if (!$this->avatarPhotos->contains($avatarPhoto)) {
             $this->avatarPhotos->add($avatarPhoto);
@@ -45,7 +45,7 @@ class User
         return $this;
     }
 
-    public function removeAvatarPhoto(UserAvatarPhoto $avatarPhoto): self
+    public function removeAvatarPhoto(UserAvatarPhoto $avatarPhoto): static
     {
         if ($this->avatarPhotos->removeElement($avatarPhoto)) {
             // set the owning side to null (unless already changed)

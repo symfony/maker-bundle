@@ -19,7 +19,7 @@ class User
         return $this->category;
     }
 
-    public function setCategory(?Category $category): self
+    public function setCategory(?Category $category): static
     {
         $this->category = $category;
 
@@ -31,7 +31,7 @@ class User
         return $this->subCategory;
     }
 
-    public function setSubCategory(?\App\Entity\SubDirectory\Category $subCategory): self
+    public function setSubCategory(?\App\Entity\SubDirectory\Category $subCategory): static
     {
         $this->subCategory = $subCategory;
 

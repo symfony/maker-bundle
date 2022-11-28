@@ -16,7 +16,7 @@ class Embed
         return $this->val;
     }
 
-    public function setVal(int $val): self
+    public function setVal(int $val): static
     {
         $this->val = $val;
 

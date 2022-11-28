@@ -20,7 +20,7 @@ class User implements UserInterface
         return (string) $this->userIdentifier;
     }
 
-    public function setUserIdentifier(string $userIdentifier): self
+    public function setUserIdentifier(string $userIdentifier): static
     {
         $this->userIdentifier = $userIdentifier;
 
@@ -47,7 +47,7 @@ class User implements UserInterface
         return array_unique($roles);
     }
 
-    public function setRoles(array $roles): self
+    public function setRoles(array $roles): static
     {
         $this->roles = $roles;
 
