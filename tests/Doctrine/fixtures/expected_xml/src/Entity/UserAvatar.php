@@ -18,7 +18,7 @@ class UserAvatar
         return $this->user;
     }
 
-    public function setUser(?UserXml $user): self
+    public function setUser(?UserXml $user): static
     {
         $this->user = $user;
 

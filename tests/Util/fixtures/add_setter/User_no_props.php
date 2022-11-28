@@ -18,7 +18,7 @@ class User
      * @param string $fooProp
      * @internal
      */
-    public function setFooProp(?string $fooProp): self
+    public function setFooProp(?string $fooProp): static
     {
         $this->fooProp = $fooProp;
 

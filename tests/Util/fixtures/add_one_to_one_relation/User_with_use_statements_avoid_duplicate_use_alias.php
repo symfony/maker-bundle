@@ -29,7 +29,7 @@ class User
         return $this->category;
     }
 
-    public function setCategory(?\App\OtherEntity\Category $category): self
+    public function setCategory(?\App\OtherEntity\Category $category): static
     {
         $this->category = $category;
 

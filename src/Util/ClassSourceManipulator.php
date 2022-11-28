@@ -1073,7 +1073,7 @@ final class ClassSourceManipulator
         $methodBuilder
             ->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD))
             ->addStmt(new Node\Stmt\Return_(new Node\Expr\Variable('this')));
-        $methodBuilder->setReturnType('self');
+        $methodBuilder->setReturnType('static');
     }
 
     private function isInSameNamespace(string $class): bool

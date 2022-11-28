@@ -29,7 +29,7 @@ class User
         return $this->userProfile;
     }
 
-    public function setUserProfile(?\App\OtherEntity\UserProfile $userProfile): self
+    public function setUserProfile(?\App\OtherEntity\UserProfile $userProfile): static
     {
         $this->userProfile = $userProfile;
 

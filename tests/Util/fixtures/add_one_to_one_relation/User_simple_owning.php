@@ -25,7 +25,7 @@ class User
         return $this->userProfile;
     }
 
-    public function setUserProfile(?UserProfile $userProfile): self
+    public function setUserProfile(?UserProfile $userProfile): static
     {
         $this->userProfile = $userProfile;
 
