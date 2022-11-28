@@ -36,13 +36,10 @@ final class CliOutputHelper
     {
         $prompt = 'php bin/console';
 
-        $envs = [
-            'version' => getenv(self::ENV_VERSION),
-            'name' => getenv(self::ENV_BIN_NAME),
-        ];
+        $binaryNameEnvVar = getenv(self::ENV_BIN_NAME);
 
-        if (false !== $envs['version'] || false !== $envs['name']) {
-            $prompt = sprintf('%s console', $envs['name']);
+        if (false !== $binaryNameEnvVar && false !== getenv(self::ENV_VERSION)) {
+            $prompt = sprintf('%s console', $binaryNameEnvVar);
         }
 
         return $prompt;
