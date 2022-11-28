@@ -31,6 +31,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -434,7 +435,7 @@ final class MakeRegistrationForm extends AbstractMaker
             $closing[] = '   * Customize the last <fg=yellow>redirectToRoute()</> after a successful email verification.';
             $closing[] = '   * Make sure you\'re rendering <fg=yellow>success</> flash messages or change the <fg=yellow>$this->addFlash()</> line.';
             $closing[] = sprintf('%d) Review and customize the form, controller, and templates as needed.', $index++);
-            $closing[] = sprintf('%d) Run <fg=yellow>"php bin/console make:migration"</> to generate a migration for the newly added <fg=yellow>%s::isVerified</> property.', $index++, $userClass);
+            $closing[] = sprintf('%d) Run <fg=yellow>"%s make:migration"</> to generate a migration for the newly added <fg=yellow>%s::isVerified</> property.', $index++, CliOutputHelper::getCommandPrefix(), $userClass);
         }
 
         $io->text($closing);

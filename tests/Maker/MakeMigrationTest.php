@@ -15,6 +15,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeMigration;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
+use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
 use Symfony\Component\Finder\Finder;
 
 class MakeMigrationTest extends MakerTestCase
@@ -62,6 +63,28 @@ class MakeMigrationTest extends MakerTestCase
                 $iterator = $finder->getIterator();
                 $iterator->rewind();
                 $this->assertStringContainsString(sprintf('"%s/%s"', $migrationsDirectoryPath, $iterator->current()->getFilename()), $output);
+            }),
+        ];
+
+        yield 'it_detects_symfony_cli_usage' => [$this->createMakeMigrationTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker(
+                    inputs: [],
+                    envVars: [CliOutputHelper::ENV_VERSION => '0.0.0', CliOutputHelper::ENV_BIN_NAME => 'symfony']
+                );
+
+                $this->assertStringContainsString('symfony console doctrine:migrations:migrate', $output);
+            }),
+        ];
+
+        yield 'it_detects_symfony_cli_is_not_used' => [$this->createMakeMigrationTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker(
+                    inputs: [],
+                    envVars: []
+                );
+
+                $this->assertStringContainsString('php bin/console doctrine:migrations:migrate', $output);
             }),
         ];
 

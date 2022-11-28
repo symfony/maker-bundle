@@ -30,6 +30,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -384,7 +385,7 @@ class MakeResetPassword extends AbstractMaker
     private function successMessage(InputInterface $input, ConsoleStyle $io, string $requestClassName): void
     {
         $closing[] = 'Next:';
-        $closing[] = sprintf('  1) Run <fg=yellow>"php bin/console make:migration"</> to generate a migration for the new <fg=yellow>"%s"</> entity.', $requestClassName);
+        $closing[] = sprintf('  1) Run <fg=yellow>"%s make:migration"</> to generate a migration for the new <fg=yellow>"%s"</> entity.', CliOutputHelper::getCommandPrefix(), $requestClassName);
         $closing[] = '  2) Review forms in <fg=yellow>"src/Form"</> to customize validation and labels.';
         $closing[] = '  3) Review and customize the templates in <fg=yellow>`templates/reset_password`</>.';
         $closing[] = '  4) Make sure your <fg=yellow>MAILER_DSN</> env var has the correct settings.';

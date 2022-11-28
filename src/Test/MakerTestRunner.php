@@ -31,9 +31,9 @@ class MakerTestRunner
         $this->filesystem = new Filesystem();
     }
 
-    public function runMaker(array $inputs, string $argumentsString = '', bool $allowedToFail = false): string
+    public function runMaker(array $inputs, string $argumentsString = '', bool $allowedToFail = false, array $envVars = []): string
     {
-        $this->executedMakerProcess = $this->environment->runMaker($inputs, $argumentsString, $allowedToFail);
+        $this->executedMakerProcess = $this->environment->runMaker($inputs, $argumentsString, $allowedToFail, $envVars);
 
         return $this->executedMakerProcess->getOutput();
     }

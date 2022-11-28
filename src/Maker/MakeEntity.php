@@ -29,6 +29,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -310,7 +311,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $this->writeSuccessMessage($io);
         $io->text([
-            'Next: When you\'re ready, create a migration with <info>php bin/console make:migration</info>',
+            sprintf('Next: When you\'re ready, create a migration with <info>%s make:migration</info>', CliOutputHelper::getCommandPrefix()),
             '',
         ]);
     }
