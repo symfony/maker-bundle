@@ -25,7 +25,7 @@ class CliOutputHelperTest extends TestCase
         putenv('SYMFONY_CLI_VERSION');
     }
 
-    public function testCorrectPrefixReturnedBasedOnInputMethod(): void
+    public function testCorrectCommandPrefixReturnedWhenUsingSymfonyBinary(): void
     {
         self::assertSame('php bin/console', CliOutputHelper::getCommandPrefix());
 
