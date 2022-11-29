@@ -174,7 +174,7 @@ final class MakeFormLogin extends AbstractMaker
         $this->writeSuccessMessage($io);
 
         $io->text([
-            sprintf('Next: Review and adapt the login template: <info>%s/login.html.twig</info> to suite your needs.', $templatePath),
+            sprintf('Next: Review and adapt the login template: <info>%s/login.html.twig</info> to suit your needs.', $templatePath),
         ]);
     }
 }
