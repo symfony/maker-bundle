@@ -40,7 +40,7 @@ class MakeFormLoginTest extends MakerTestCase
                 $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
 
                 $this->assertFileEquals($fixturePath.'/SecurityController.php', $runner->getPath('src/Controller/SecurityController.php'));
-                $this->assertFileEquals($fixturePath.'/login.html.twig', $runner->getPath('templates/login/login.html.twig'));
+                $this->assertFileEquals($fixturePath.'/login.html.twig', $runner->getPath('templates/security/login.html.twig'));
 
                 $securityConfig = $runner->readYaml('config/packages/security.yaml');
 
@@ -63,7 +63,7 @@ class MakeFormLoginTest extends MakerTestCase
                 $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
 
                 $this->assertFileEquals($fixturePath.'/SecurityControllerWithoutLogout.php', $runner->getPath('src/Controller/SecurityController.php'));
-                $this->assertFileEquals($fixturePath.'/login_no_logout.html.twig', $runner->getPath('templates/login/login.html.twig'));
+                $this->assertFileEquals($fixturePath.'/login_no_logout.html.twig', $runner->getPath('templates/security/login.html.twig'));
 
                 $securityConfig = $runner->readYaml('config/packages/security.yaml');
 

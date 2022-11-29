@@ -146,8 +146,10 @@ class MakeFormLogin extends AbstractMaker
             $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
         }
 
+        $templatePath = strtolower($controllerNameDetails->getRelativeNameWithoutSuffix());
+
         $generator->generateTemplate(
-            'login/login.html.twig',
+            sprintf('%s/login.html.twig', $templatePath),
             'security/formLogin/login_form.tpl.php',
             [
                 'logout_setup' => $this->willLogout,
