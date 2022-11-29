@@ -30,7 +30,7 @@ final class SecurityConfigUpdater
     ) {
     }
 
-    public function updateForFormLogin(string $yamlSource, string $loginPath, string $checkPath): string
+    public function updateForFormLogin(string $yamlSource, string $firewallToUpdate, string $loginPath, string $checkPath): string
     {
         $this->manipulator = new YamlSourceManipulator($yamlSource);
 
@@ -42,8 +42,8 @@ final class SecurityConfigUpdater
 
         $newData = $this->manipulator->getData();
 
-        $newData['security']['firewalls']['main']['form_login']['login_path'] = $loginPath;
-        $newData['security']['firewalls']['main']['form_login']['check_path'] = $checkPath;
+        $newData['security']['firewalls'][$firewallToUpdate]['form_login']['login_path'] = $loginPath;
+        $newData['security']['firewalls'][$firewallToUpdate]['form_login']['check_path'] = $checkPath;
 
         $this->manipulator->setData($newData);
 
@@ -133,6 +133,31 @@ final class SecurityConfigUpdater
         }
 
         $newData['security']['firewalls'][$firewallName] = $firewall;
+
+        $this->manipulator->setData($newData);
+
+        return $this->manipulator->getContents();
+    }
+
+    public function updateForLogout(string $yamlSource, string $firewallName): string
+    {
+        $this->manipulator = new YamlSourceManipulator($yamlSource);
+
+        if (null !== $this->ysmLogger) {
+            $this->manipulator->setLogger($this->ysmLogger);
+        }
+
+        $this->normalizeSecurityYamlFile();
+
+        $newData = $this->manipulator->getData();
+
+        $newData['security']['firewalls'][$firewallName]['logout'] = ['path' => 'app_logout'];
+        $newData['security']['firewalls'][$firewallName]['logout'][] = $this->manipulator->createCommentLine(
+            ' where to redirect after logout'
+        );
+        $newData['security']['firewalls'][$firewallName]['logout'][] = $this->manipulator->createCommentLine(
+            ' target: app_any_route'
+        );
 
         $this->manipulator->setData($newData);
 

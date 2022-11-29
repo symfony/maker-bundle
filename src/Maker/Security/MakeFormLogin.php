@@ -22,7 +22,9 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
+use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -43,7 +45,6 @@ class MakeFormLogin extends AbstractMaker
 {
     private const SECURITY_CONFIG_PATH = 'config/packages/security.yaml';
     private YamlSourceManipulator $ysm;
-    private array $securityData = [];
     private string $firewallToUpdate;
     private string $userNameField;
     private bool $willLogout;
@@ -51,6 +52,7 @@ class MakeFormLogin extends AbstractMaker
     public function __construct(
         private FileManager $fileManager,
         private SecurityConfigUpdater $securityConfigUpdater,
+        private SecurityControllerBuilder $securityControllerBuilder,
     ) {
     }
 
@@ -95,16 +97,16 @@ class MakeFormLogin extends AbstractMaker
         }
 
         $this->ysm = new YamlSourceManipulator($this->fileManager->getFileContents(self::SECURITY_CONFIG_PATH));
-        $this->securityData = $this->ysm->getData();
+        $securityData = $this->ysm->getData();
 
-        if (!isset($this->securityData['security']['providers']) || !$this->securityData['security']['providers']) {
+        if (!isset($securityData['security']['providers']) || !$securityData['security']['providers']) {
             throw new RuntimeCommandException('To generate a form login authentication, you must configure at least one entry under "providers" in "security.yaml".');
         }
 
         $securityHelper = new InteractiveSecurityHelper();
-        $this->firewallToUpdate = $securityHelper->guessFirewallName($io, $this->securityData);
-        $userClass = $securityHelper->guessUserClass($io, $this->securityData['security']['providers']);
-        $this->userNameField = $securityHelper->guessUserNameField($io, $userClass, $this->securityData['security']['providers']);
+        $this->firewallToUpdate = $securityHelper->guessFirewallName($io, $securityData);
+        $userClass = $securityHelper->guessUserClass($io, $securityData['security']['providers']);
+        $this->userNameField = $securityHelper->guessUserNameField($io, $userClass, $securityData['security']['providers']);
         $this->willLogout = $io->confirm('Do you want to generate a \'/logout\' URL?');
     }
 
@@ -119,11 +121,19 @@ class MakeFormLogin extends AbstractMaker
 
         $controllerNameDetails = $generator->createClassNameDetails('LoginController', 'Controller\\', 'Controller');
 
-        $generator->generateController(
+        $controllerPath = $generator->generateController(
             $controllerNameDetails->getFullName(),
             'security/formLogin/LoginController.tpl.php',
             ['use_statements' => $useStatements]
         );
+
+        if ($this->willLogout) {
+            $manipulator = new ClassSourceManipulator($generator->getFileContentsForPendingOperation($controllerPath));
+
+            $this->securityControllerBuilder->addLogoutMethod($manipulator);
+
+            $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
+        }
 
         $generator->generateTemplate(
             'login/login.html.twig',
@@ -136,7 +146,11 @@ class MakeFormLogin extends AbstractMaker
             ]
         );
 
-        $securityData = $this->securityConfigUpdater->updateForFormLogin($this->ysm->getContents(), 'app_login', 'app_login');
+        $securityData = $this->securityConfigUpdater->updateForFormLogin($this->ysm->getContents(), $this->firewallToUpdate, 'app_login', 'app_login');
+
+        if ($this->willLogout) {
+            $securityData = $this->securityConfigUpdater->updateForLogout($securityData, $this->firewallToUpdate);
+        }
         $generator->dumpFile(self::SECURITY_CONFIG_PATH, $securityData);
 
         $generator->writeChanges();
