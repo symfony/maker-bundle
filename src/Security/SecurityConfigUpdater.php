@@ -44,6 +44,7 @@ final class SecurityConfigUpdater
 
         $newData['security']['firewalls'][$firewallToUpdate]['form_login']['login_path'] = $loginPath;
         $newData['security']['firewalls'][$firewallToUpdate]['form_login']['check_path'] = $checkPath;
+        $newData['security']['firewalls'][$firewallToUpdate]['form_login']['enable_csrf'] = true;
 
         $this->manipulator->setData($newData);
 

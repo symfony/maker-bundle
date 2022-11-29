@@ -46,6 +46,7 @@ class MakeFormLoginTest extends MakerTestCase
 
                 $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['login_path']);
                 $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['check_path']);
+                $this->assertTrue($securityConfig['security']['firewalls']['main']['form_login']['enable_csrf']);
                 $this->assertSame('app_logout', $securityConfig['security']['firewalls']['main']['logout']['path']);
             }),
         ];
