@@ -56,13 +56,7 @@ final class SecurityConfigUpdater
      */
     public function updateForUserClass(string $yamlSource, UserClassConfiguration $userConfig, string $userClass): string
     {
-        $this->manipulator = new YamlSourceManipulator($yamlSource);
-
-        if (null !== $this->ysmLogger) {
-            $this->manipulator->setLogger($this->ysmLogger);
-        }
-
-        $this->normalizeSecurityYamlFile();
+        $this->createYamlSourceManipulator($yamlSource);
 
         $this->updateProviders($userConfig, $userClass);
 
@@ -78,13 +72,7 @@ final class SecurityConfigUpdater
 
     public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup): string
     {
-        $this->manipulator = new YamlSourceManipulator($yamlSource);
-
-        if (null !== $this->ysmLogger) {
-            $this->manipulator->setLogger($this->ysmLogger);
-        }
-
-        $this->normalizeSecurityYamlFile();
+        $this->createYamlSourceManipulator($yamlSource);
 
         $newData = $this->manipulator->getData();
 
@@ -142,13 +130,7 @@ final class SecurityConfigUpdater
 
     public function updateForLogout(string $yamlSource, string $firewallName): string
     {
-        $this->manipulator = new YamlSourceManipulator($yamlSource);
-
-        if (null !== $this->ysmLogger) {
-            $this->manipulator->setLogger($this->ysmLogger);
-        }
-
-        $this->normalizeSecurityYamlFile();
+        $this->createYamlSourceManipulator($yamlSource);
 
         $newData = $this->manipulator->getData();
 
@@ -163,6 +145,17 @@ final class SecurityConfigUpdater
         $this->manipulator->setData($newData);
 
         return $this->manipulator->getContents();
+    }
+
+    private function createYamlSourceManipulator(string $yamlSource): void
+    {
+        $this->manipulator = new YamlSourceManipulator($yamlSource);
+
+        if (null !== $this->ysmLogger) {
+            $this->manipulator->setLogger($this->ysmLogger);
+        }
+
+        $this->normalizeSecurityYamlFile();
     }
 
     private function normalizeSecurityYamlFile(): void
