@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker\Security;
 use Symfony\Bundle\MakerBundle\Maker\Security\MakeFormLogin;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
@@ -48,6 +49,8 @@ class MakeFormLoginTest extends MakerTestCase
                 $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['check_path']);
                 $this->assertTrue($securityConfig['security']['firewalls']['main']['form_login']['enable_csrf']);
                 $this->assertSame('app_logout', $securityConfig['security']['firewalls']['main']['logout']['path']);
+
+                $this->runLoginTest($runner);
             }),
         ];
 
@@ -96,6 +99,28 @@ class MakeFormLoginTest extends MakerTestCase
                 $this->assertSame('app_logout', $securityConfig['security']['firewalls']['main']['logout']['path']);
             }),
         ];
+    }
+
+    private function runLoginTest(MakerTestRunner $runner): void
+    {
+        $fixturePath = 'security/make-form-login/';
+
+        $runner->renderTemplateFile($fixturePath.'/LoginTest.php', 'tests/LoginTest.php', []);
+
+        // plaintext password: needed for entities, simplifies overall
+        $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
+            if (isset($config['when@test']['security']['password_hashers'])) {
+                $config['when@test']['security']['password_hashers'] = [PasswordAuthenticatedUserInterface::class => 'plaintext'];
+
+                return $config;
+            }
+
+            return $config;
+        });
+
+        $runner->configureDatabase();
+
+        $runner->runTests();
     }
 
     private function makeUser(MakerTestRunner $runner, string $identifier = 'email'): void

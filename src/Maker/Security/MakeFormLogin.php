@@ -129,6 +129,7 @@ class MakeFormLogin extends AbstractMaker
         ]);
 
         $controllerNameDetails = $generator->createClassNameDetails($this->controllerName, 'Controller\\', 'Controller');
+        $templatePath = strtolower($controllerNameDetails->getRelativeNameWithoutSuffix());
 
         $controllerPath = $generator->generateController(
             $controllerNameDetails->getFullName(),
@@ -136,6 +137,7 @@ class MakeFormLogin extends AbstractMaker
             [
                 'use_statements' => $useStatements,
                 'controller_name' => $controllerNameDetails->getShortName(),
+                'template_path' => $templatePath,
             ]
         );
 
@@ -147,14 +149,11 @@ class MakeFormLogin extends AbstractMaker
             $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
         }
 
-        $templatePath = strtolower($controllerNameDetails->getRelativeNameWithoutSuffix());
-
         $generator->generateTemplate(
             sprintf('%s/login.html.twig', $templatePath),
             'security/formLogin/login_form.tpl.php',
             [
                 'logout_setup' => $this->willLogout,
-                'username_field' => $this->userNameField,
                 'username_label' => Str::asHumanWords($this->userNameField),
                 'username_is_email' => false !== stripos($this->userNameField, 'email'),
             ]
@@ -165,6 +164,7 @@ class MakeFormLogin extends AbstractMaker
         if ($this->willLogout) {
             $securityData = $this->securityConfigUpdater->updateForLogout($securityData, $this->firewallToUpdate);
         }
+
         $generator->dumpFile(self::SECURITY_CONFIG_PATH, $securityData);
 
         $generator->writeChanges();
