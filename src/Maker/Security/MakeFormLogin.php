@@ -21,11 +21,14 @@ use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
+use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * WIP - Security System.
@@ -58,7 +61,18 @@ class MakeFormLogin extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
-        // TODO: Implement configureDependencies() method.
+        $dependencies->addClassDependency(
+            SecurityBundle::class,
+            'security'
+        );
+
+        $dependencies->addClassDependency(TwigBundle::class, 'twig');
+
+        // needed to update the YAML files
+        $dependencies->addClassDependency(
+            Yaml::class,
+            'yaml'
+        );
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
