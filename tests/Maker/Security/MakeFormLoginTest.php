@@ -29,13 +29,15 @@ class MakeFormLoginTest extends MakerTestCase
     {
         yield 'generates_basic_form_login' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner);
+
                 $output = $runner->runMaker([]);
 
 //                $this->assertStringContainsString('Success', $output);
-                // @TODO: Use fixtures to ensure actual files generated match expected files
+                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
 
-                $this->assertFileExists($runner->getPath('src/Controller/LoginController.php'));
-                $this->assertFileExists($runner->getPath('templates/login/login.html.twig'));
+                $this->assertFileEquals($fixturePath.'/LoginController.php', $runner->getPath('src/Controller/LoginController.php'));
+                $this->assertFileEquals($fixturePath.'/login.html.twig', $runner->getPath('templates/login/login.html.twig'));
 
                 $securityConfig = $runner->readYaml('config/packages/security.yaml');
 
@@ -43,5 +45,15 @@ class MakeFormLoginTest extends MakerTestCase
                 $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['check_path']);
             }),
         ];
+    }
+
+    private function makeUser(MakerTestRunner $runner, string $identifier = 'email'): void
+    {
+        $runner->runConsole('make:user', [
+            'User', // Class Name
+            'y', // Create as Entity
+            $identifier, // Property used to identify the user,
+            'y', // Uses a password
+        ]);
     }
 }
