@@ -37,13 +37,13 @@ class FunctionalTest extends TestCase
 
         $application = new Application($kernel);
         foreach ($finder as $file) {
-            $namespace = 'Symfony\Bundle\MakerBundle\Maker';
+            $classNameFromPath = str_replace(
+                ['/', '.php'], // We need to flip and "/" to "\" and remove ".php"
+                ['\\', ''],
+                sprintf('Symfony\Bundle\MakerBundle\Maker\%s', $file->getRelativePathname())
+            );
 
-            if (str_ends_with($file->getRelativePath(), 'Security')) {
-                $namespace = 'Symfony\Bundle\MakerBundle\Maker\Security';
-            }
-
-            $maker = new \ReflectionClass(sprintf('%s\%s', $namespace, $file->getBasename('.php')));
+            $maker = new \ReflectionClass($classNameFromPath);
 
             if ($maker->isAbstract()) {
                 continue;
