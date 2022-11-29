@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Maker\Security;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,7 +28,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 /**
- * WIP - Security System
+ * WIP - Security System.
+ *
  * @author Jesse Rushlow <jr@rushlow.dev>
  */
 class MakeFormLogin extends AbstractMaker
@@ -80,7 +90,7 @@ class MakeFormLogin extends AbstractMaker
                 'logout_setup' => false,
                 'username_field' => 'email',
                 'username_label' => 'email',
-                'username_is_email' => true
+                'username_is_email' => true,
             ]
         );
 
