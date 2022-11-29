@@ -111,17 +111,13 @@ final class SecurityConfigUpdater
             $firewall['entry_point'] = $authenticatorClass;
         }
 
-        if (!isset($firewall['logout']) && $logoutSetup) {
-            $firewall['logout'] = ['path' => 'app_logout'];
-            $firewall['logout'][] = $this->manipulator->createCommentLine(
-                ' where to redirect after logout'
-            );
-            $firewall['logout'][] = $this->manipulator->createCommentLine(
-                ' target: app_any_route'
-            );
-        }
-
         $newData['security']['firewalls'][$firewallName] = $firewall;
+
+        if (!isset($firewall['logout']) && $logoutSetup) {
+            $this->configureLogout($newData, $firewallName);
+
+            return $this->manipulator->getContents();
+        }
 
         $this->manipulator->setData($newData);
 
@@ -132,19 +128,25 @@ final class SecurityConfigUpdater
     {
         $this->createYamlSourceManipulator($yamlSource);
 
-        $newData = $this->manipulator->getData();
+        $this->configureLogout($this->manipulator->getData(), $firewallName);
 
-        $newData['security']['firewalls'][$firewallName]['logout'] = ['path' => 'app_logout'];
-        $newData['security']['firewalls'][$firewallName]['logout'][] = $this->manipulator->createCommentLine(
+        return $this->manipulator->getContents();
+    }
+
+    /**
+     * @legacy This can be removed once we deprecate/remove `make:auth`
+     */
+    private function configureLogout(array $securityData, string $firewallName): void
+    {
+        $securityData['security']['firewalls'][$firewallName]['logout'] = ['path' => 'app_logout'];
+        $securityData['security']['firewalls'][$firewallName]['logout'][] = $this->manipulator->createCommentLine(
             ' where to redirect after logout'
         );
-        $newData['security']['firewalls'][$firewallName]['logout'][] = $this->manipulator->createCommentLine(
+        $securityData['security']['firewalls'][$firewallName]['logout'][] = $this->manipulator->createCommentLine(
             ' target: app_any_route'
         );
 
-        $this->manipulator->setData($newData);
-
-        return $this->manipulator->getContents();
+        $this->manipulator->setData($securityData);
     }
 
     private function createYamlSourceManipulator(string $yamlSource): void
