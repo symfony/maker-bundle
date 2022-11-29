@@ -74,7 +74,7 @@ final class MakeFormLogin extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Configure SecurityBundle\'s Form Login Authenticator';
+        return 'Generate the code needed for the form_login authenticator';
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void
