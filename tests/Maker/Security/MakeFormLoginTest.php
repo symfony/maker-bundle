@@ -27,11 +27,58 @@ class MakeFormLoginTest extends MakerTestCase
 
     public function getTestDetails(): \Generator
     {
-        yield 'generates_basic_form_login_with_logout' => [$this->createMakerTest()
+        yield 'generates_form_login_using_defaults' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner);
 
                 $output = $runner->runMaker([
+                    'SecurityController', // Controller Name
+                    'y', // Generate Logout
+                ]);
+
+//                $this->assertStringContainsString('Success', $output);
+                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
+
+                $this->assertFileEquals($fixturePath.'/SecurityController.php', $runner->getPath('src/Controller/SecurityController.php'));
+                $this->assertFileEquals($fixturePath.'/login.html.twig', $runner->getPath('templates/login/login.html.twig'));
+
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+
+                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['login_path']);
+                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['check_path']);
+                $this->assertSame('app_logout', $securityConfig['security']['firewalls']['main']['logout']['path']);
+            }),
+        ];
+
+        yield 'generates_form_login_without_logout' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner);
+
+                $output = $runner->runMaker([
+                    'SecurityController', // Controller Name
+                    'n', // Generate Logout
+                ]);
+
+//                $this->assertStringContainsString('Success', $output);
+                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
+
+                $this->assertFileEquals($fixturePath.'/SecurityControllerWithoutLogout.php', $runner->getPath('src/Controller/SecurityController.php'));
+                $this->assertFileEquals($fixturePath.'/login_no_logout.html.twig', $runner->getPath('templates/login/login.html.twig'));
+
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+
+                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['login_path']);
+                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['check_path']);
+                $this->assertFalse(isset($securityConfig['security']['firewalls']['main']['logout']['path']));
+            }),
+        ];
+
+        yield 'generates_form_login_with_custom_controller_name' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner);
+
+                $output = $runner->runMaker([
+                    'LoginController', // Controller Name
                     'y', // Generate Logout
                 ]);
 
@@ -46,28 +93,6 @@ class MakeFormLoginTest extends MakerTestCase
                 $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['login_path']);
                 $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['check_path']);
                 $this->assertSame('app_logout', $securityConfig['security']['firewalls']['main']['logout']['path']);
-            }),
-        ];
-
-        yield 'generates_basic_form_login_without_logout' => [$this->createMakerTest()
-            ->run(function (MakerTestRunner $runner) {
-                $this->makeUser($runner);
-
-                $output = $runner->runMaker([
-                    'n', // Generate Logout
-                ]);
-
-//                $this->assertStringContainsString('Success', $output);
-                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
-
-                $this->assertFileEquals($fixturePath.'/LoginControllerWithoutLogout.php', $runner->getPath('src/Controller/LoginController.php'));
-                $this->assertFileEquals($fixturePath.'/login_no_logout.html.twig', $runner->getPath('templates/login/login.html.twig'));
-
-                $securityConfig = $runner->readYaml('config/packages/security.yaml');
-
-                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['login_path']);
-                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['check_path']);
-                $this->assertFalse(isset($securityConfig['security']['firewalls']['main']['logout']['path']));
             }),
         ];
     }

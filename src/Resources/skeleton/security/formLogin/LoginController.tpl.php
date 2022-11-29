@@ -4,7 +4,7 @@ namespace <?= $namespace; ?>;
 
 <?= $use_statements; ?>
 
-class LoginController extends AbstractController
+class <?= $controller_name ?> extends AbstractController
 {
     #[Route(path: '/login', name: 'app_login')]
     public function index(AuthenticationUtils $authenticationUtils): Response

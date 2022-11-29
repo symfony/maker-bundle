@@ -27,6 +27,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -45,6 +46,7 @@ class MakeFormLogin extends AbstractMaker
 {
     private const SECURITY_CONFIG_PATH = 'config/packages/security.yaml';
     private YamlSourceManipulator $ysm;
+    private string $controllerName;
     private string $firewallToUpdate;
     private string $userNameField;
     private bool $willLogout;
@@ -103,6 +105,12 @@ class MakeFormLogin extends AbstractMaker
             throw new RuntimeCommandException('To generate a form login authentication, you must configure at least one entry under "providers" in "security.yaml".');
         }
 
+        $this->controllerName = $io->ask(
+            'Choose a name for the controller class (e.g. <fg=yellow>SecurityController</>)',
+            'SecurityController',
+            [Validator::class, 'validateClassName']
+        );
+
         $securityHelper = new InteractiveSecurityHelper();
         $this->firewallToUpdate = $securityHelper->guessFirewallName($io, $securityData);
         $userClass = $securityHelper->guessUserClass($io, $securityData['security']['providers']);
@@ -119,12 +127,15 @@ class MakeFormLogin extends AbstractMaker
             AuthenticationUtils::class,
         ]);
 
-        $controllerNameDetails = $generator->createClassNameDetails('LoginController', 'Controller\\', 'Controller');
+        $controllerNameDetails = $generator->createClassNameDetails($this->controllerName, 'Controller\\', 'Controller');
 
         $controllerPath = $generator->generateController(
             $controllerNameDetails->getFullName(),
             'security/formLogin/LoginController.tpl.php',
-            ['use_statements' => $useStatements]
+            [
+                'use_statements' => $useStatements,
+                'controller_name' => $controllerNameDetails->getShortName(),
+            ]
         );
 
         if ($this->willLogout) {
