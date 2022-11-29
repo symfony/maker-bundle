@@ -43,8 +43,10 @@ use Symfony\Component\Yaml\Yaml;
  * @see https://symfony.com/doc/current/security.html#form-login
  *
  * @author Jesse Rushlow <jr@rushlow.dev>
+ *
+ * @internal
  */
-class MakeFormLogin extends AbstractMaker
+final class MakeFormLogin extends AbstractMaker
 {
     private const SECURITY_CONFIG_PATH = 'config/packages/security.yaml';
     private YamlSourceManipulator $ysm;
