@@ -36,7 +36,7 @@ class MakeFormLoginTest extends MakerTestCase
                     'y', // Generate Logout
                 ]);
 
-//                $this->assertStringContainsString('Success', $output);
+                $this->assertStringContainsString('Success', $output);
                 $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
 
                 $this->assertFileEquals($fixturePath.'/SecurityController.php', $runner->getPath('src/Controller/SecurityController.php'));
@@ -59,7 +59,7 @@ class MakeFormLoginTest extends MakerTestCase
                     'n', // Generate Logout
                 ]);
 
-//                $this->assertStringContainsString('Success', $output);
+                $this->assertStringContainsString('Success', $output);
                 $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
 
                 $this->assertFileEquals($fixturePath.'/SecurityControllerWithoutLogout.php', $runner->getPath('src/Controller/SecurityController.php'));
@@ -82,7 +82,7 @@ class MakeFormLoginTest extends MakerTestCase
                     'y', // Generate Logout
                 ]);
 
-//                $this->assertStringContainsString('Success', $output);
+                $this->assertStringContainsString('Success', $output);
                 $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
 
                 $this->assertFileEquals($fixturePath.'/LoginController.php', $runner->getPath('src/Controller/LoginController.php'));

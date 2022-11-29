@@ -168,5 +168,11 @@ class MakeFormLogin extends AbstractMaker
         $generator->dumpFile(self::SECURITY_CONFIG_PATH, $securityData);
 
         $generator->writeChanges();
+
+        $this->writeSuccessMessage($io);
+
+        $io->text([
+            sprintf('Next: Review and adapt the login template: <info>%s/login.html.twig</info> to suite your needs.', $templatePath),
+        ]);
     }
 }
