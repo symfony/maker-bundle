@@ -30,6 +30,26 @@ final class SecurityConfigUpdater
     ) {
     }
 
+    public function updateForFormLogin(string $yamlSource, string $loginPath, string $checkPath): string
+    {
+        $this->manipulator = new YamlSourceManipulator($yamlSource);
+
+        if (null !== $this->ysmLogger) {
+            $this->manipulator->setLogger($this->ysmLogger);
+        }
+
+        $this->normalizeSecurityYamlFile();
+
+        $newData = $this->manipulator->getData();
+
+        $newData['security']['firewalls']['main']['form_login']['login_path'] = $loginPath;
+        $newData['security']['firewalls']['main']['form_login']['check_path'] = $checkPath;
+
+        $this->manipulator->setData($newData);
+
+        return $this->manipulator->getContents();
+    }
+
     /**
      * Updates security.yaml contents based on a new User class.
      */

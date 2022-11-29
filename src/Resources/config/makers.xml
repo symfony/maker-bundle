@@ -142,6 +142,7 @@
 
             <service id="maker.maker.make_security_form_login" class="Symfony\Bundle\MakerBundle\Maker\Security\MakeFormLogin">
                 <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.security_config_updater" />
                 <tag name="maker.command" />
             </service>
         </services>

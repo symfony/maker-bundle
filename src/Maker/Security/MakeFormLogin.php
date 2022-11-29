@@ -26,7 +26,7 @@ class MakeFormLogin extends AbstractMaker
 {
     public function __construct(
         private FileManager $fileManager,
-//        private SecurityConfigUpdater $securityConfigUpdater,
+        private SecurityConfigUpdater $securityConfigUpdater,
     ) {
     }
 
@@ -58,9 +58,6 @@ class MakeFormLogin extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-//        $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents('config/packages/security.yaml'));
-//        $securityData = $manipulator->getData();
-
         $useStatements = new UseStatementGenerator([
             AbstractController::class,
             Response::class,
@@ -86,6 +83,10 @@ class MakeFormLogin extends AbstractMaker
                 'username_is_email' => true
             ]
         );
+
+        $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents('config/packages/security.yaml'));
+        $securityData = $this->securityConfigUpdater->updateForFormLogin($manipulator->getContents(), 'app_login', 'app_login');
+        $generator->dumpFile('config/packages/security.yaml', $securityData);
 
         $generator->writeChanges();
     }
