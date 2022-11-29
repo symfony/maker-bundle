@@ -1,0 +1,10 @@
+The <info>%command.name%</info> command generates a controller and twig template
+to allow users to login using SecurityBundle's Form Login Authenticator.
+
+The controller name, and logout ability can be customized by answering the
+questions asked when running <info>%command.name%</info>.
+
+In all cases, this will update your <info>security.yaml</info> to work with
+the built-in authenticators provided by SecurityBundle.
+
+<info>php %command.full_name%</info>

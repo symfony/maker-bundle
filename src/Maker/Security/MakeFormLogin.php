@@ -38,7 +38,9 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * WIP - Security System.
+ * Generate Form Login Security using SecurityBundle's Authenticator.
+ *
+ * @see https://symfony.com/doc/current/security.html#form-login
  *
  * @author Jesse Rushlow <jr@rushlow.dev>
  */
@@ -65,13 +67,12 @@ class MakeFormLogin extends AbstractMaker
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
-        // TODO: Implement configureCommand() method.
+        $command->setHelp(file_get_contents(\dirname(__DIR__, 2).'/Resources/help/security/MakeFormLogin.txt'));
     }
 
     public static function getCommandDescription(): string
     {
-        // TODO: Ya this needs to be better
-        return 'Something better needs to go here';
+        return 'Configure SecurityBundle\'s Form Login Authenticator';
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void
