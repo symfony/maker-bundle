@@ -32,23 +32,22 @@ final class SecurityConfigUpdater
 
     public function updateForFormLogin(string $yamlSource, string $firewallToUpdate, string $loginPath, string $checkPath): string
     {
-        $this->manipulator = new YamlSourceManipulator($yamlSource);
-
-        if (null !== $this->ysmLogger) {
-            $this->manipulator->setLogger($this->ysmLogger);
-        }
-
-        $this->normalizeSecurityYamlFile();
-
-        $newData = $this->manipulator->getData();
+        $newData = $this->createYamlSourceManipulator($yamlSource);
 
         $newData['security']['firewalls'][$firewallToUpdate]['form_login']['login_path'] = $loginPath;
         $newData['security']['firewalls'][$firewallToUpdate]['form_login']['check_path'] = $checkPath;
         $newData['security']['firewalls'][$firewallToUpdate]['form_login']['enable_csrf'] = true;
 
-        $this->manipulator->setData($newData);
+        return $this->getYamlContentsFromData($newData);
+    }
 
-        return $this->manipulator->getContents();
+    public function updateForJsonLogin(string $yamlSource, string $firewallToUpdate, string $checkPath): string
+    {
+        $data = $this->createYamlSourceManipulator($yamlSource);
+
+        $data['security']['firewalls'][$firewallToUpdate]['json_login']['check_path'] = $checkPath;
+
+        return $this->getYamlContentsFromData($data);
     }
 
     /**
@@ -149,7 +148,7 @@ final class SecurityConfigUpdater
         $this->manipulator->setData($securityData);
     }
 
-    private function createYamlSourceManipulator(string $yamlSource): void
+    private function createYamlSourceManipulator(string $yamlSource): array
     {
         $this->manipulator = new YamlSourceManipulator($yamlSource);
 
@@ -158,6 +157,15 @@ final class SecurityConfigUpdater
         }
 
         $this->normalizeSecurityYamlFile();
+
+        return $this->manipulator->getData();
+    }
+
+    private function getYamlContentsFromData(array $yamlData): string
+    {
+        $this->manipulator->setData($yamlData);
+
+        return $this->manipulator->getContents();
     }
 
     private function normalizeSecurityYamlFile(): void

@@ -22,15 +22,9 @@ class SecurityConfigUpdaterTest extends TestCase
     /**
      * Set to true to enable low level debug logging during tests for
      * the YamlSourceManipulator.
-     *
-     * @var bool
      */
-    private $enableYsmLogging = false;
-
-    /**
-     * @var Logger|null
-     */
-    private $ysmLogger = null;
+    private bool $enableYsmLogging = false;
+    private ?Logger $ysmLogger = null;
 
     /**
      * @dataProvider getUserClassTests
@@ -45,9 +39,9 @@ class SecurityConfigUpdaterTest extends TestCase
         }
 
         $updater = new SecurityConfigUpdater($this->ysmLogger);
-        $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
+        $source = $this->getYamlSource($startingSourceFilename);
         $actualSource = $updater->updateForUserClass($source, $userConfig, $userClass);
-        $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_user_class/5.3/'.$expectedSourceFilename);
+        $expectedSource = $this->getExpectedYaml('expected_user_class/5.3', $expectedSourceFilename);
 
         $expectedSource = str_replace('{BCRYPT_OR_AUTO}', 'auto', $expectedSource);
 
@@ -115,9 +109,9 @@ class SecurityConfigUpdaterTest extends TestCase
         $this->createLogger();
 
         $updater = new SecurityConfigUpdater($this->ysmLogger);
-        $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
+        $source = $this->getYamlSource($startingSourceFilename);
         $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator', $logoutSetup);
-        $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_authenticator/'.$expectedSourceFilename);
+        $expectedSource = $this->getExpectedYaml('expected_authenticator', $expectedSourceFilename);
 
         $this->assertSame($expectedSource, $actualSource);
     }
@@ -173,6 +167,51 @@ class SecurityConfigUpdaterTest extends TestCase
         ];
     }
 
+    public function testUpdateForFormLogin(): void
+    {
+        $this->createLogger();
+
+        $updater = new SecurityConfigUpdater($this->ysmLogger);
+        $source = $this->getYamlSource('empty_security.yaml');
+
+        $actualSource = $updater->updateForFormLogin($source, 'main', 'a_login_path', 'a_check_path');
+
+        $this->assertSame(
+            $this->getExpectedYaml('expected_form_login', 'form_login.yaml'),
+            $actualSource
+        );
+    }
+
+    public function testUpdateForJsonLogin(): void
+    {
+        $this->createLogger();
+
+        $updater = new SecurityConfigUpdater($this->ysmLogger);
+        $source = $this->getYamlSource('empty_security.yaml');
+
+        $actualSource = $updater->updateForJsonLogin($source, 'main', 'a_check_path');
+
+        $this->assertSame(
+            $this->getExpectedYaml('expected_json_login', 'json_login.yaml'),
+            $actualSource
+        );
+    }
+
+    public function testUpdateForLogout(): void
+    {
+        $this->createLogger();
+
+        $updater = new SecurityConfigUpdater($this->ysmLogger);
+        $source = $this->getYamlSource('simple_security_with_firewalls.yaml');
+
+        $actualSource = $updater->updateForLogout($source, 'main');
+
+        $this->assertSame(
+            $this->getExpectedYaml('expected_logout', 'logout.yaml'),
+            $actualSource
+        );
+    }
+
     private function createLogger(): void
     {
         if (!$this->enableYsmLogging) {
@@ -193,5 +232,15 @@ class SecurityConfigUpdaterTest extends TestCase
 
             return $message."\n\n";
         });
+    }
+
+    private function getYamlSource(string $yamlFileName): string
+    {
+        return file_get_contents(sprintf('%s/yaml_fixtures/source/%s', __DIR__, $yamlFileName));
+    }
+
+    private function getExpectedYaml(string $subDirectory, string $yamlFileName): string
+    {
+        return file_get_contents(sprintf('%s/yaml_fixtures/%s/%s', __DIR__, $subDirectory, $yamlFileName));
     }
 }
