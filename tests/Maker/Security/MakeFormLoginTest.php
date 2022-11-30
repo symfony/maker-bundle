@@ -12,14 +12,13 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Maker\Security;
 
 use Symfony\Bundle\MakerBundle\Maker\Security\MakeFormLogin;
-use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
  */
-class MakeFormLoginTest extends MakerTestCase
+final class MakeFormLoginTest extends AbstractSecurityMakerTestCase
 {
     protected function getMakerClass(): string
     {
@@ -126,15 +125,5 @@ class MakeFormLoginTest extends MakerTestCase
         $runner->configureDatabase();
 
         $runner->runTests();
-    }
-
-    private function makeUser(MakerTestRunner $runner, string $identifier = 'email'): void
-    {
-        $runner->runConsole('make:user', [
-            'User', // Class Name
-            'y', // Create as Entity
-            $identifier, // Property used to identify the user,
-            'y', // Uses a password
-        ]);
     }
 }
