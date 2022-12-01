@@ -11,23 +11,15 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker\Security;
 
-use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
-use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
-use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
-use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
-use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
-use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
-use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -35,7 +27,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * Generate Form Login Security using SecurityBundle's Authenticator.
@@ -46,22 +37,8 @@ use Symfony\Component\Yaml\Yaml;
  *
  * @internal
  */
-final class MakeFormLogin extends AbstractMaker
+final class MakeFormLogin extends AbstractSecurityMaker
 {
-    private const SECURITY_CONFIG_PATH = 'config/packages/security.yaml';
-    private YamlSourceManipulator $ysm;
-    private string $controllerName;
-    private string $firewallToUpdate;
-    private string $userNameField;
-    private bool $willLogout;
-
-    public function __construct(
-        private FileManager $fileManager,
-        private SecurityConfigUpdater $securityConfigUpdater,
-        private SecurityControllerBuilder $securityControllerBuilder,
-    ) {
-    }
-
     public static function getCommandName(): string
     {
         return 'make:security:form-login';
@@ -79,46 +56,20 @@ final class MakeFormLogin extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
-        $dependencies->addClassDependency(
-            SecurityBundle::class,
-            'security'
-        );
-
         $dependencies->addClassDependency(TwigBundle::class, 'twig');
 
-        // needed to update the YAML files
-        $dependencies->addClassDependency(
-            Yaml::class,
-            'yaml'
-        );
-
-        $dependencies->addClassDependency(DoctrineBundle::class, 'orm');
+        parent::configureDependencies($dependencies);
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        if (!$this->fileManager->fileExists(self::SECURITY_CONFIG_PATH)) {
-            throw new RuntimeCommandException(sprintf('The file "%s" does not exist. PHP & XML configuration formats are currently not supported.', self::SECURITY_CONFIG_PATH));
-        }
+        parent::interact($input, $io, $command);
 
-        $this->ysm = new YamlSourceManipulator($this->fileManager->getFileContents(self::SECURITY_CONFIG_PATH));
         $securityData = $this->ysm->getData();
 
         if (!isset($securityData['security']['providers']) || !$securityData['security']['providers']) {
             throw new RuntimeCommandException('To generate a form login authentication, you must configure at least one entry under "providers" in "security.yaml".');
         }
-
-        $this->controllerName = $io->ask(
-            'Choose a name for the controller class (e.g. <fg=yellow>SecurityController</>)',
-            'SecurityController',
-            [Validator::class, 'validateClassName']
-        );
-
-        $securityHelper = new InteractiveSecurityHelper();
-        $this->firewallToUpdate = $securityHelper->guessFirewallName($io, $securityData);
-        $userClass = $securityHelper->guessUserClass($io, $securityData['security']['providers']);
-        $this->userNameField = $securityHelper->guessUserNameField($io, $userClass, $securityData['security']['providers']);
-        $this->willLogout = $io->confirm('Do you want to generate a \'/logout\' URL?');
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
@@ -130,7 +81,7 @@ final class MakeFormLogin extends AbstractMaker
             AuthenticationUtils::class,
         ]);
 
-        $controllerNameDetails = $generator->createClassNameDetails($this->controllerName, 'Controller\\', 'Controller');
+        $controllerNameDetails = $generator->createClassNameDetails($this->securityControllerName, 'Controller\\', 'Controller');
         $templatePath = strtolower($controllerNameDetails->getRelativeNameWithoutSuffix());
 
         $controllerPath = $generator->generateController(
