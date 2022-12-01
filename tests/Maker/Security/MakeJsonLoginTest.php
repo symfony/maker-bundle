@@ -73,7 +73,7 @@ final class MakeJsonLoginTest extends AbstractSecurityMakerTestCase
                 $this->makeUser($runner);
 
                 $output = $runner->runMaker([
-                    'SecurityController', // Controller Name
+                    'LoginController', // Controller Name
                     'y', // Generate Logout
                 ]);
 
@@ -92,6 +92,8 @@ final class MakeJsonLoginTest extends AbstractSecurityMakerTestCase
         yield 'generates_json_login_using_existing_form_login_controller' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner);
+
+                $runner->copy('security/make-json-login/setup/', '');
 
                 $output = $runner->runMaker([
                     'SecurityController', // Controller Name

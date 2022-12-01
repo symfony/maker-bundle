@@ -12,26 +12,25 @@
 namespace Symfony\Bundle\MakerBundle\Maker\Security;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -43,12 +42,13 @@ use Symfony\Component\Yaml\Yaml;
  *
  * @internal
  */
-final class MakeJsonLogin extends AbstractMaker
+final class MakeJsonLogin extends AbstractSecurityMaker
 {
     private const SECURITY_CONFIG_PATH = 'config/packages/security.yaml';
     private YamlSourceManipulator $ysm;
     private string $controllerName;
     private string $firewallToUpdate;
+    private string $userClass;
     private string $userNameField;
     private bool $willLogout;
 
@@ -76,10 +76,9 @@ final class MakeJsonLogin extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
-//        $dependencies->addClassDependency(
-//            SecurityBundle::class,
-//            'security'
-//        );
+        $dependencies->addClassDependency(SecurityBundle::class, 'security');
+
+        $dependencies->addClassDependency(Process::class, 'process');
 //
 //        $dependencies->addClassDependency(TwigBundle::class, 'twig');
 //
@@ -89,7 +88,7 @@ final class MakeJsonLogin extends AbstractMaker
 //            'yaml'
 //        );
 //
-//        $dependencies->addClassDependency(DoctrineBundle::class, 'orm');
+        $dependencies->addClassDependency(DoctrineBundle::class, 'orm');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
@@ -111,42 +110,73 @@ final class MakeJsonLogin extends AbstractMaker
             [Validator::class, 'validateClassName']
         );
 
-//        $securityHelper = new InteractiveSecurityHelper();
-//        $this->firewallToUpdate = $securityHelper->guessFirewallName($io, $securityData);
-//        $userClass = $securityHelper->guessUserClass($io, $securityData['security']['providers']);
-//        $this->userNameField = $securityHelper->guessUserNameField($io, $userClass, $securityData['security']['providers']);
+        $securityHelper = new InteractiveSecurityHelper();
+        $this->firewallToUpdate = $securityHelper->guessFirewallName($io, $securityData);
+        $this->userClass = $securityHelper->guessUserClass($io, $securityData['security']['providers']);
+        $this->userNameField = $securityHelper->guessUserNameField($io, $this->userClass, $securityData['security']['providers']);
         $this->willLogout = $io->confirm('Do you want to generate a \'/logout\' URL?');
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-//        $useStatements = new UseStatementGenerator([
-//            AbstractController::class,
-//            Response::class,
-//            Route::class,
-//            AuthenticationUtils::class,
-//        ]);
-//
-//        $controllerNameDetails = $generator->createClassNameDetails($this->controllerName, 'Controller\\', 'Controller');
-//        $templatePath = strtolower($controllerNameDetails->getRelativeNameWithoutSuffix());
-//
-//        $controllerPath = $generator->generateController(
-//            $controllerNameDetails->getFullName(),
-//            'security/formLogin/LoginController.tpl.php',
-//            [
-//                'use_statements' => $useStatements,
-//                'controller_name' => $controllerNameDetails->getShortName(),
-//                'template_path' => $templatePath,
-//            ]
-//        );
-//
-//        if ($this->willLogout) {
-//            $manipulator = new ClassSourceManipulator($generator->getFileContentsForPendingOperation($controllerPath));
-//
-//            $this->securityControllerBuilder->addLogoutMethod($manipulator);
-//
-//            $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
+        $userClassDetails = new ClassNameDetails($this->userClass, '');
+
+        $useStatements = new UseStatementGenerator([
+            $userClassDetails->getFullName(),
+            \Symfony\Bundle\FrameworkBundle\Controller\AbstractController::class,
+            \Symfony\Component\HttpFoundation\JsonResponse::class,
+            \Symfony\Component\HttpFoundation\Response::class,
+            \Symfony\Component\Routing\Annotation\Route::class,
+            \Symfony\Component\Security\Http\Attribute\CurrentUser::class,
+        ]);
+
+        $controllerNameDetails = $generator->createClassNameDetails($this->controllerName, 'Controller\\', 'Controller');
+
+        $controllerPath = $this->fileManager->getRelativePathForFutureClass($controllerNameDetails->getFullName());
+
+        $controllerExists = $this->fileManager->fileExists($controllerPath);
+
+        if ($controllerExists) {
+            $manipulator = new ClassSourceManipulator(file_get_contents($controllerPath));
+        } else {
+            $generator->generateController($controllerNameDetails->getFullName(), 'security/jsonLogin/EmptyController.tpl.php', [
+                'use_statements' => $useStatements,
+                'controller_name' => $controllerNameDetails->getShortName(),
+            ]);
+
+            $generator->writeChanges();
+
+            $manipulator = new ClassSourceManipulator(file_get_contents($controllerPath));
+        }
+
+//        if ($controllerExists) {
+//            $manipulator = new ClassSourceManipulator(file_get_contents($controllerPath));
+
+            $this->securityControllerBuilder->addJsonLoginMethod($manipulator, $userClassDetails);
+
+            $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
+            $generator->writeChanges();
+
+            $this->runFixer($controllerPath);
+//        } else {
+//            $controllerPath = $generator->generateController(
+//                $controllerNameDetails->getFullName(),
+//                'security/jsonLogin/LoginController.tpl.php',
+//                [
+//                    'use_statements' => $useStatements,
+//                    'controller_name' => $controllerNameDetails->getShortName(),
+//                    'user_class' => $userClassDetails->getShortName(),
+//                ]
+//            );
 //        }
+
+        if ($this->willLogout) {
+//            $manipulator = new ClassSourceManipulator($generator->getFileContentsForPendingOperation($controllerPath));
+
+            $this->securityControllerBuilder->addLogoutMethod($manipulator);
+
+            $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
+        }
 //
 //        $generator->generateTemplate(
 //            sprintf('%s/login.html.twig', $templatePath),
