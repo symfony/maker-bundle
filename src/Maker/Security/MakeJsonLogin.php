@@ -152,12 +152,12 @@ final class MakeJsonLogin extends AbstractSecurityMaker
 //        if ($controllerExists) {
 //            $manipulator = new ClassSourceManipulator(file_get_contents($controllerPath));
 
-            $this->securityControllerBuilder->addJsonLoginMethod($manipulator, $userClassDetails);
+        $this->securityControllerBuilder->addJsonLoginMethod($manipulator, $userClassDetails);
 
-            $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
-            $generator->writeChanges();
+        $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
+        $generator->writeChanges();
 
-            $this->runFixer($controllerPath);
+        $this->runFixer($controllerPath);
 //        } else {
 //            $controllerPath = $generator->generateController(
 //                $controllerNameDetails->getFullName(),
