@@ -26,6 +26,7 @@ class Generator
     private GeneratorTwigHelper $twigHelper;
     private array $pendingOperations = [];
     private ?TemplateComponentGenerator $templateComponentGenerator;
+    private array $generatedPhpFiles = [];
 
     public function __construct(
         private FileManager $fileManager,
@@ -68,6 +69,8 @@ class Generator
         ]);
 
         $this->addOperation($targetPath, $templateName, $variables);
+
+        $this->generatedPhpFiles[] = $targetPath;
 
         return $targetPath;
     }
@@ -240,6 +243,11 @@ class Generator
             $templateName,
             $variables
         );
+    }
+
+    public function getGeneratedPhpFiles(): array
+    {
+        return $this->generatedPhpFiles;
     }
 
     /**
