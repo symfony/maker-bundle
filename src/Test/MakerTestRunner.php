@@ -224,11 +224,10 @@ class MakerTestRunner
      */
     public function addToAutoloader(string $namespace, string $path)
     {
-        $this->replaceInFile(
-            'composer.json',
-            '"App\\\Tests\\\": "tests/",',
-            sprintf('"App\\\Tests\\\": "tests/",'."\n".'            "%s": "%s",', $namespace, $path)
-        );
+        $composerJson = json_decode(file_get_contents($this->getPath('composer.json')), true);
+        $composerJson['autoload-dev']['psr-4'][$namespace] = $path;
+
+        $this->filesystem->dumpFile($this->getPath('composer.json'), json_encode($composerJson));
 
         $this->environment->runCommand('composer dump-autoload');
     }
