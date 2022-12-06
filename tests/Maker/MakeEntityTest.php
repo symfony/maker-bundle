@@ -637,7 +637,7 @@ class MakeEntityTest extends MakerTestCase
         );
 
         $runner->addToAutoloader(
-            'Some\Vendor\\',
+            'Some\\Vendor\\',
             'vendor/some-vendor/src'
         );
     }

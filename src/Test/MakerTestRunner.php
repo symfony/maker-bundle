@@ -224,10 +224,18 @@ class MakerTestRunner
      */
     public function addToAutoloader(string $namespace, string $path)
     {
-        $composerJson = json_decode(file_get_contents($this->getPath('composer.json')), true);
+        $composerJson = json_decode(
+            json: file_get_contents($this->getPath('composer.json')),
+            associative: true,
+            flags: \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_SLASHES
+        );
+
         $composerJson['autoload-dev']['psr-4'][$namespace] = $path;
 
-        $this->filesystem->dumpFile($this->getPath('composer.json'), json_encode($composerJson));
+        $this->filesystem->dumpFile(
+            $this->getPath('composer.json'),
+            json_encode($composerJson, \JSON_UNESCAPED_SLASHES | \JSON_PRETTY_PRINT | \JSON_THROW_ON_ERROR)
+        );
 
         $this->environment->runCommand('composer dump-autoload');
     }
