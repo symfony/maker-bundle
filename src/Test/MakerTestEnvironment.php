@@ -127,7 +127,10 @@ final class MakerTestEnvironment
 
     public function prepareDirectory(): void
     {
-        $this->buildMakerRepo();
+        // Copy MakerBundle to a "repo" directory for tests
+        if (!file_exists($makerRepoPath = sprintf('%s/maker-repo', $this->cachePath))) {
+            MakerTestProcess::create(sprintf('git clone %s %s', $this->rootPath, $makerRepoPath), $this->cachePath)->run();
+        }
 
         if (!$this->fs->exists($this->flexPath)) {
             $this->buildFlexSkeleton();
@@ -135,7 +138,7 @@ final class MakerTestEnvironment
 
         if (!$this->fs->exists($this->path)) {
             try {
-                // lets do some magic here git is faster than copy
+                // let's do some magic here git is faster than copy
                 MakerTestProcess::create(
                     '\\' === \DIRECTORY_SEPARATOR ? 'git clone %FLEX_PATH% %APP_PATH%' : 'git clone "$FLEX_PATH" "$APP_PATH"',
                     \dirname($this->flexPath),
@@ -148,7 +151,7 @@ final class MakerTestEnvironment
 
                 // In Window's we have to require MakerBundle in each project - git clone doesn't symlink well
                 if ($this->isWindows) {
-                    $this->requireMakerBundle($this->path);
+                    $this->composerRequireMakerBundle($this->path);
                 }
 
                 // install any missing dependencies
@@ -252,9 +255,9 @@ final class MakerTestEnvironment
 
         $this->addMakerBundleRepoToComposer(sprintf('%s/%s/composer.json', $this->cachePath, $flexProjectDir));
 
-        // In Linux, git plays well with symlinks. We can add maker to the flex skeleton.
+        // In Linux, git plays well with symlinks - we can add maker to the flex skeleton.
         if (!$this->isWindows) {
-            $this->requireMakerBundle(sprintf('%s/%s', $this->cachePath, $flexProjectDir));
+            $this->composerRequireMakerBundle(sprintf('%s/%s', $this->cachePath, $flexProjectDir));
         }
 
         if ($_SERVER['MAKER_ALLOW_DEV_DEPS_IN_APP'] ?? false) {
@@ -410,17 +413,7 @@ echo json_encode($missingDependencies);
         return $_SERVER['SYMFONY_VERSION'] ?? '';
     }
 
-    private function buildMakerRepo(): void
-    {
-        // Copy MakerBundle to a "repo" directory for tests
-        $makerRepoPath = sprintf('%s/maker-repo', $this->cachePath);
-
-        if (!file_exists($makerRepoPath)) {
-            MakerTestProcess::create(sprintf('git clone %s %s', $this->rootPath, $makerRepoPath), $this->cachePath)->run();
-        }
-    }
-
-    private function requireMakerBundle(string $projectDirectory): void
+    private function composerRequireMakerBundle(string $projectDirectory): void
     {
         MakerTestProcess::create('composer require --dev symfony/maker-bundle', $projectDirectory)
             ->run()
@@ -428,13 +421,16 @@ echo json_encode($missingDependencies);
 
         $makerRepoSrcPath = sprintf('%s/maker-repo/src', $this->cachePath);
 
-        // DX - So we can test changes without having to commit them locally
+        // DX - So we can test local changes without having to commit them.
         if (!is_link($makerRepoSrcPath)) {
             $this->fs->remove($makerRepoSrcPath);
             $this->fs->symlink(sprintf('%s/src', $this->rootPath), $makerRepoSrcPath);
         }
     }
 
+    /**
+     * Adds Symfony/MakerBundle as a "path" repository to composer.json.
+     */
     private function addMakerBundleRepoToComposer(string $composerJsonPath): void
     {
         $composerJson = json_decode(
