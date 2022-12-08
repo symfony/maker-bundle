@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony MakerBundle package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use PHPUnit\Framework\TestCase;
@@ -32,8 +41,8 @@ class TemplateLinterTest extends TestCase
 
     public function pathProvider(): \Generator
     {
-        yield 'Binary Path Wrong' => ['/bad/path', dirname(__DIR__, 2).'/src/Resources/config/php-cs-fixer.config.php'];
-        yield 'Config Path Wrong' => [dirname(__DIR__, 2).'/src/Bin/php-cs-fixer-v3.13.0.phar', '/bad/path'];
+        yield 'Binary Path Wrong' => ['/bad/path', \dirname(__DIR__, 2).'/src/Resources/config/php-cs-fixer.config.php'];
+        yield 'Config Path Wrong' => [\dirname(__DIR__, 2).'/src/Bin/php-cs-fixer-v3.13.0.phar', '/bad/path'];
         yield 'Both Paths Wrong' => ['/bad/path', '/bad/path'];
     }
 
@@ -41,7 +50,7 @@ class TemplateLinterTest extends TestCase
     {
         $file = new Filesystem();
         $sourcePath = __DIR__.'/fixtures/source/';
-        $tmpLocation = dirname(__DIR__).'/tmp/cache/linter-test/';
+        $tmpLocation = \dirname(__DIR__).'/tmp/cache/linter-test/';
 
         $file->copy($sourcePath.$sourceFileName, $tmpLocation.$sourceFileName);
 
