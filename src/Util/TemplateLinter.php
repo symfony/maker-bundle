@@ -15,6 +15,8 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Component\Process\Process;
 
 /**
+ * Linters used by make:* commands to cleanup the generated files.
+ *
  * @author Jesse Rushlow <jr@rushlow.dev>
  *
  * @internal

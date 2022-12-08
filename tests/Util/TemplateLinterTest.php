@@ -15,9 +15,13 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Util\TemplateLinter;
 
 /**
+ * Linter tests are written in `tests/Maker/TemplateLinterTest`.
+ *
  * @author Jesse Rushlow <jr@rushlow.dev>
+ *
+ * @internal
  */
-class TemplateLinterTest extends TestCase
+final class TemplateLinterTest extends TestCase
 {
     public function testExceptionBinaryPathDoesntExist(): void
     {
