@@ -94,7 +94,6 @@ final class MakeJsonLogin extends AbstractSecurityMaker
         $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
 
         $generator->writeChanges();
-        $this->runFixer($controllerPath);
 
         $this->writeSuccessMessage($io);
 

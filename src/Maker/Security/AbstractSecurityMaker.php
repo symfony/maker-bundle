@@ -51,15 +51,6 @@ abstract class AbstractSecurityMaker extends AbstractMaker
     ) {
     }
 
-    protected function runFixer(string $templateFilePath): void
-    {
-        $fixerPath = \dirname(__DIR__, 2).'/bin/php-cs-fixer-v3.13.0.phar';
-        $configPath = \dirname(__DIR__, 2).'/Resources/test/.php_cs.test';
-
-        $process = Process::fromShellCommandline(sprintf('php %s --config=%s --using-cache=no fix %s', $fixerPath, $configPath, $templateFilePath));
-        $process->run();
-    }
-
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(SecurityBundle::class, 'security');
