@@ -59,7 +59,7 @@ final class TemplateLinter
             return;
         }
 
-        $this->phpCsFixerBinaryPath = \dirname(__DIR__).'/Bin/php-cs-fixer-v3.13.0.phar';
+        $this->phpCsFixerBinaryPath = \dirname(__DIR__).'/Resources/bin/php-cs-fixer-v3.13.0.phar';
     }
 
     private function setConfig(): void
