@@ -43,6 +43,24 @@ optional arguments and options. Check them out with the ``--help`` option:
 
     $ php bin/console make:controller --help
 
+
+Linting Generated Code
+______________________
+
+MakerBundle uses php-cs-fixer to enforce coding standards when generating ``.php``
+files. If you have ``friendsofphp/php-cs-fixer`` added to your project, we'll
+use the ``bin/php-cs-fixer`` binary and ``.php-cs-fixer.dist.php`` configuration
+file automatically.
+
+Otherwise, we use a ``php-cs-fixer`` version that is packaged with this bundle.
+
+You can explicitly set a custom path to a php-cs-fixer binary and/or configuration
+file by their respective environment variables:
+
+- ``MAKER_PHP_CS_FIXER_BINARY_PATH`` e.g. /path/to/project/php-cs-fixer.php
+- ``MAKER_PHP_CS_FIXER_CONFIG_PATH`` e.g. /path/to/project/php-cs-fixer.config.php
+
+
 Configuration
 -------------
 
