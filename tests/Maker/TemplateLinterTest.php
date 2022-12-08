@@ -52,5 +52,28 @@ class TemplateLinterTest extends MakerTestCase
                 self::assertStringContainsString('Linted by custom php-cs-config', $generatedTemplate);
             }),
         ];
+
+        yield 'lints_templates_with_flex_generated_config_file' => [$this->createMakerTest()
+            ->addExtraDependencies('friendsofphp/php-cs-fixer')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->replaceInFile(
+                    '.php-cs-fixer.dist.php',
+                    '\'@Symfony\' => true,',
+                    <<< 'EOT'
+                        '@Symfony' => true,
+                        'header_comment' => [
+                            'header' => 'Linted with stock php-cs-config',
+                        ],
+                        EOT
+                );
+
+                // Voter class name
+                $runner->runMaker(['FooBar']);
+
+                $generatedTemplate = file_get_contents($runner->getPath('src/Security/Voter/FooBarVoter.php'));
+
+                self::assertStringContainsString('Linted with stock php-cs-config', $generatedTemplate);
+            }),
+        ];
     }
 }
