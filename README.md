@@ -28,16 +28,19 @@ B) The generated code itself may change between minor releases. This
 
 ## Linting Generated Templates
 
-MakerBundle uses php-cs-fixer to enforce coding standards when generating .php
-templates. We check for an existing config file in your project root dir, check
-for one in `tools/php-cs-fixer`, then fallback to our config file(INSERT LINK TO 
-CONFIG FILE). 
+### PHP-CS-FIXER
 
+MakerBundle uses php-cs-fixer to enforce coding standards when generating `.php`
+files. If you have `friendsofphp/php-cs-fixer` added to your project, we'll
+use the `bin/php-cs-fixer` binary and `.php-cs-fixer.dist.php` configuration file
+automatically.
 
-### Envs:
+Otherwise, we use the `src/Bin/php-cs-fixer-v3.13.0.phar` and
+`src/Resources/config/php-cs-fixer.config.php` that are included with MakerBundle.
 
-- Setting `MAKER_PHP_CS_FIXER_ENABLED=false|true` (Default: `true`) will enable/
-   disable php-cs-fixer. But generated php files may be ugly if this is set to `false`
+You can explicitly set a custom path to the `php-cs-fixer` binary and/or a 
+php-cs-fixer config file by explicitly setting their respective environment
+variables:
 
-- Setting `MAKER_PHP_CS_FIXER_CONFIG=/some/path/to/php-cs-fixer.conf` will
-  force php-cs-fixer to use that config.
+- `MAKER_PHP_CS_FIXER_BINARY_PATH` e.g. /path/to/project/php-cs-fixer.php
+- `MAKER_PHP_CS_FIXER_CONFIG_PATH` e.g. /path/to/project/php-cs-fixer.config.php
