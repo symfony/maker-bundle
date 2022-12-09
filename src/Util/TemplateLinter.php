@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Util;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
@@ -52,6 +53,7 @@ final class TemplateLinter
 
         foreach ($templateFilePath as $filePath) {
             $process = Process::fromShellCommandline(sprintf('php %s --config=%s --using-cache=no fix %s', $this->phpCsFixerBinaryPath, $this->phpCsFixerConfigPath, $filePath));
+
             $process->run();
         }
     }
@@ -64,15 +66,10 @@ final class TemplateLinter
             return;
         }
 
-        $defaultBinaryPath = 'bin/php-cs-fixer';
-
-        if (file_exists($defaultBinaryPath)) {
-            $this->phpCsFixerBinaryPath = $defaultBinaryPath;
-
-            return;
-        }
-
-        $this->phpCsFixerBinaryPath = \dirname(__DIR__).'/Resources/bin/php-cs-fixer-v3.13.0.phar';
+        $this->phpCsFixerBinaryPath = (new ExecutableFinder())->find(
+            'php-cs-fixer',
+            \dirname(__DIR__).'/Resources/bin/php-cs-fixer-v3.13.0.phar'
+        );
     }
 
     private function setConfig(): void
