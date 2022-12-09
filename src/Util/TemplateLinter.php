@@ -31,6 +31,19 @@ final class TemplateLinter
         $this->setBinary();
     }
 
+    public function lintFiles(array $templateFilePaths): void
+    {
+        $phpFiles = [];
+
+        foreach ($templateFilePaths as $filePath) {
+            if (str_ends_with($filePath, '.php')) {
+                $phpFiles[] = $filePath;
+            }
+        }
+
+        $this->lintPhpTemplate($phpFiles);
+    }
+
     public function lintPhpTemplate(string|array $templateFilePath): void
     {
         if (\is_string($templateFilePath)) {

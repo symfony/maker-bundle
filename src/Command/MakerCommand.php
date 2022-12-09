@@ -102,7 +102,7 @@ final class MakerCommand extends Command
             throw new \LogicException('Make sure to call the writeChanges() method on the generator.');
         }
 
-        $this->linter->lintPhpTemplate($this->generator->getGeneratedPhpFiles());
+        $this->linter->lintFiles($this->generator->getGeneratedFiles());
 
         return 0;
     }
