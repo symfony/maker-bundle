@@ -24,6 +24,9 @@ use Symfony\Component\Process\Process;
  */
 final class TemplateLinter
 {
+    private bool $usingBundledPhpCsFixer = true;
+    private bool $usingBundledPhpCsFixerConfig = true;
+
     public function __construct(
         private ?string $phpCsFixerBinaryPath = null,
         private ?string $phpCsFixerConfigPath = null,
@@ -58,24 +61,68 @@ final class TemplateLinter
         }
     }
 
+    public function getLinterUserMessage(): array
+    {
+        $message = [];
+        $message[0] = 'Linting Generated Files With:'.\PHP_EOL;
+        $message[1] = $this->usingBundledPhpCsFixer ?
+            'Bundled PHP-CS-Fixer & ' :
+            sprintf('System PHP-CS-Fixer (<info>%s</info>) & ', $this->phpCsFixerBinaryPath)
+
+        ;
+
+        $message[1] .= $this->usingBundledPhpCsFixerConfig ?
+            'Bundled PHP-CS-Fixer Configuration'.\PHP_EOL :
+            sprintf('System PHP-CS-Fixer Configuration (<info>%s</info>)', $this->phpCsFixerConfigPath).\PHP_EOL
+        ;
+
+        $message[] = \PHP_EOL;
+
+        return $message;
+    }
+
     private function setBinary(): void
     {
         if (null !== $this->phpCsFixerBinaryPath) {
             $this->checkPathExists($this->phpCsFixerBinaryPath, false);
 
+            $this->usingBundledPhpCsFixer = false;
+
             return;
         }
 
-        $this->phpCsFixerBinaryPath = (new ExecutableFinder())->find(
-            'php-cs-fixer',
-            \dirname(__DIR__).'/Resources/bin/php-cs-fixer-v3.13.0.phar'
+        $finder = new ExecutableFinder();
+        $finder->addSuffix('.phar');
+
+        ($process = Process::fromShellCommandline('composer config bin-dir && composer global config bin-dir --absolute'))
+            ->run();
+
+        $composerBinPaths = explode(\PHP_EOL, $process->getOutput());
+
+        $this->phpCsFixerBinaryPath = $finder->find(
+            name: 'php-cs-fixer',
+            extraDirs: [
+                ...$composerBinPaths,
+                'tools/php-cs-fixer/vendor/bin',
+                'tools/php-cs-fixer/bin',
+            ]
         );
+
+        if (null !== $this->phpCsFixerBinaryPath) {
+            $this->usingBundledPhpCsFixer = false;
+
+            return;
+        }
+
+        $this->phpCsFixerBinaryPath = \dirname(__DIR__).'/Resources/bin/php-cs-fixer-v3.13.0.phar';
     }
 
     private function setConfig(): void
     {
         if (null !== $this->phpCsFixerConfigPath) {
             $this->checkPathExists($this->phpCsFixerConfigPath, true);
+
+            $this->usingBundledPhpCsFixerConfig = false;
 
             return;
         }
@@ -84,6 +131,8 @@ final class TemplateLinter
 
         if (file_exists($defaultConfigPath)) {
             $this->phpCsFixerConfigPath = $defaultConfigPath;
+
+            $this->usingBundledPhpCsFixerConfig = false;
 
             return;
         }

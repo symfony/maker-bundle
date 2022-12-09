@@ -95,6 +95,8 @@ final class MakerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $output->write($this->linter->getLinterUserMessage());
+
         $this->maker->generate($input, $this->io, $this->generator);
 
         // sanity check for custom makers

@@ -47,11 +47,14 @@ final class TemplateLinterTest extends MakerTestCase
                 );
 
                 // Voter class name
-                $runner->runMaker(['FooBar']);
+                $output = $runner->runMaker(['FooBar']);
 
                 $generatedTemplate = file_get_contents($runner->getPath('src/Security/Voter/FooBarVoter.php'));
 
                 self::assertStringContainsString('Linted by custom php-cs-config', $generatedTemplate);
+
+                $expectedOutput = 'System PHP-CS-Fixer (bin/php-cs-fixer) & System PHP-CS-Fixer Configuration (php-cs-fixer.test.php)';
+                self::assertStringContainsString($expectedOutput, $output);
             }),
         ];
 
@@ -70,11 +73,50 @@ final class TemplateLinterTest extends MakerTestCase
                 );
 
                 // Voter class name
-                $runner->runMaker(['FooBar']);
+                $output = $runner->runMaker(['FooBar']);
 
                 $generatedTemplate = file_get_contents($runner->getPath('src/Security/Voter/FooBarVoter.php'));
 
                 self::assertStringContainsString('Linted with stock php-cs-config', $generatedTemplate);
+
+                $expectedOutput = 'System PHP-CS-Fixer (bin/php-cs-fixer) & System PHP-CS-Fixer Configuration (.php-cs-fixer.dist.php)';
+                self::assertStringContainsString($expectedOutput, $output);
+            }),
+        ];
+
+        yield 'lints_templates_with_bundled_php_cs_fixer' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                // Voter class name
+                $output = $runner->runMaker(['FooBar']);
+
+                $expectedOutput = 'Bundled PHP-CS-Fixer & Bundled PHP-CS-Fixer Configuration';
+                self::assertStringContainsString($expectedOutput, $output);
+            }),
+        ];
+
+        yield 'lints_templates_with_php_cs_fixer_in_tools_dir' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->writeFile('tools/php-cs-fixer/.gitignore', ''); // create the dir
+                $runner->runProcess('composer require --working-dir=tools/php-cs-fixer friendsofphp/php-cs-fixer');
+
+                // Voter class name
+                $output = $runner->runMaker(['FooBar']);
+
+                $expectedOutput = 'System PHP-CS-Fixer (tools/php-cs-fixer/bin/php-cs-fixer) & Bundled PHP-CS-Fixer Configuration';
+                self::assertStringContainsString($expectedOutput, $output);
+            }),
+        ];
+
+        yield 'lints_templates_with_composer_global_php_cs_fixer' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runProcess('composer global require friendsofphp/php-cs-fixer');
+
+                // Voter class name
+                $output = $runner->runMaker(['FooBar']);
+
+                // We don't know the prefix to the global "composer" dir. e.g. /your/system/composer/....
+                $expectedOutput = 'composer/bin/php-cs-fixer) & Bundled PHP-CS-Fixer Configuration';
+                self::assertStringContainsString($expectedOutput, $output);
             }),
         ];
     }
