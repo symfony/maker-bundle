@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Util;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
-use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
@@ -31,8 +30,8 @@ final class TemplateLinter
         private ?string $phpCsFixerBinaryPath = null,
         private ?string $phpCsFixerConfigPath = null,
     ) {
-        $this->setConfig();
         $this->setBinary();
+        $this->setConfig();
     }
 
     public function lintFiles(array $templateFilePaths): void
@@ -86,29 +85,6 @@ final class TemplateLinter
         if (null !== $this->phpCsFixerBinaryPath) {
             $this->checkPathExists($this->phpCsFixerBinaryPath, false);
 
-            $this->usingBundledPhpCsFixer = false;
-
-            return;
-        }
-
-        $finder = new ExecutableFinder();
-        $finder->addSuffix('.phar');
-
-        ($process = Process::fromShellCommandline('composer config bin-dir && composer global config bin-dir --absolute'))
-            ->run();
-
-        $composerBinPaths = explode(\PHP_EOL, $process->getOutput());
-
-        $this->phpCsFixerBinaryPath = $finder->find(
-            name: 'php-cs-fixer',
-            extraDirs: [
-                ...$composerBinPaths,
-                'tools/php-cs-fixer/vendor/bin',
-                'tools/php-cs-fixer/bin',
-            ]
-        );
-
-        if (null !== $this->phpCsFixerBinaryPath) {
             $this->usingBundledPhpCsFixer = false;
 
             return;
