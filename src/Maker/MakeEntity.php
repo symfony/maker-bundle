@@ -36,6 +36,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\UX\Turbo\Attribute\Broadcast;
@@ -103,6 +104,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             ->addOption('broadcast', 'b', InputOption::VALUE_NONE, 'Add the ability to broadcast entity updates using Symfony UX Turbo?')
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
+            ->addOption('em', null, InputOption::VALUE_REQUIRED, 'The entity manager name')
+            ->addOption('mapping', null, InputOption::VALUE_REQUIRED, 'Define the mapping to generate entity for')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
         ;
 
@@ -111,7 +114,28 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        if ($input->getArgument('name')) {
+        if (!$this->doctrineHelper->hasMultipleManagers()) {
+            $input->setOption('em', $this->doctrineHelper->getRegistry()->getDefaultManagerName());
+        } else {
+            $entityManagerName = $io->askQuestion(new ChoiceQuestion(
+                'Several entity managers detected, for which one the entity should be generated?',
+                array_keys($this->doctrineHelper->getRegistry()->getManagerNames())),
+                $this->doctrineHelper->getRegistry()->getDefaultManagerName()
+            );
+            $input->setOption('em', $entityManagerName);
+        }
+
+        if (!$this->doctrineHelper->hasMultipleMappings($input->getOption('em'))) {
+            $input->setOption('mapping', array_keys($this->doctrineHelper->getEntityNamespaces($input->getOption('em')))[0]);
+        } else {
+            $mappingName = $io->askQuestion(new ChoiceQuestion(
+                'Several mappings for entity manager detected, for which on the entity should be generated',
+                array_keys($this->doctrineHelper->getEntityNamespaces($input->getOption('em')))
+            ));
+            $input->setOption('mapping', $mappingName);
+        }
+
+        if ($input->getArgument('name') && $input->getOption('em') && $input->getOption('mapping')) {
             return;
         }
 
@@ -170,20 +194,41 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             return;
         }
 
+        $namespace = $this->doctrineHelper->getNamespaceByMapping($input->getOption('em'), $input->getOption('mapping'));
+
         $entityClassDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Entity\\'
+            sprintf('%s\\', $generator->removeRootNamespace($namespace))
         );
 
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {
+            if ($this->doctrineHelper->hasMultipleMappings()) {
+                $explodedNamespacePrefix = explode('\\', $entityClassDetails->getNamespacePrefix());
+                $relativeNamespaceRoot = implode('\\', \array_slice($explodedNamespacePrefix, 0, \count($explodedNamespacePrefix) - 1));
+
+                $repositoryPrefixes = array_values(array_unique([
+                    sprintf('%s\\Repository', $relativeNamespaceRoot),
+                    sprintf('%s\\Repository', $generator->getRootNamespace()),
+                ]));
+
+                if (\count($repositoryPrefixes) > 1) {
+                    $repositoryNamespacePrefix = $io->askQuestion(new ChoiceQuestion('Which prefix should be used for the repository?', $repositoryPrefixes, 0));
+                } else {
+                    $repositoryNamespacePrefix = $repositoryPrefixes[0];
+                }
+            } else {
+                $repositoryNamespacePrefix = sprintf('%s\\Repository', $generator->getRootNamespace());
+            }
+
             $broadcast = $input->getOption('broadcast');
             $entityPath = $this->entityClassGenerator->generateEntityClass(
                 $entityClassDetails,
                 $input->getOption('api-resource'),
                 false,
                 true,
-                $broadcast
+                $broadcast,
+                $generator->removeRootNamespace($repositoryNamespacePrefix)
             );
 
             if ($broadcast) {

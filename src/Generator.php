@@ -251,4 +251,15 @@ class Generator
 
         return new ClassNameDetails(AbstractController::class, '\\');
     }
+
+    public function removeRootNamespace(string $target): string
+    {
+        $rootNamespace = sprintf('%s\\', $this->getRootNamespace());
+
+        if (!str_starts_with($target, $rootNamespace)) {
+            return $target;
+        }
+
+        return substr($target, \strlen($rootNamespace));
+    }
 }
