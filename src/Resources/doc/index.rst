@@ -48,11 +48,8 @@ Linting Generated Code
 ______________________
 
 MakerBundle uses php-cs-fixer to enforce coding standards when generating ``.php``
-files. If you have ``friendsofphp/php-cs-fixer`` added to your project, we'll
-use the ``bin/php-cs-fixer`` binary and ``.php-cs-fixer.dist.php`` configuration
-file automatically.
-
-Otherwise, we use a ``php-cs-fixer`` version that is packaged with this bundle.
+files. When running a ``make`` command, MakerBundle will use a ``php-cs-fixer``
+version and configuration that is packaged with this bundle.
 
 You can explicitly set a custom path to a php-cs-fixer binary and/or configuration
 file by their respective environment variables:
