@@ -111,9 +111,9 @@ class MakeMigrationTest extends MakerTestCase
                     'y',
                 ]);
 
-                $this->assertStringContainsString('You have 1 available migrations to execute', $output);
+                $this->assertStringContainsString('[WARNING] You have 1 available migrations to execute', $output);
+                $this->assertStringContainsString('Are you sure you wish to continue?', $output);
                 $this->assertStringContainsString('Success', $output);
-                $this->assertCount(14, explode("\n", $output), 'Asserting that very specific output is shown - some should be hidden');
             }),
         ];
 
