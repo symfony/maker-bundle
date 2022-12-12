@@ -75,7 +75,7 @@ final class TemplateLinter
             sprintf('System PHP-CS-Fixer Configuration (<info>%s</info>)', $this->phpCsFixerConfigPath).\PHP_EOL
         ;
 
-        $message[] = \PHP_EOL;
+        $message[2] = \PHP_EOL;
 
         return $message;
     }
