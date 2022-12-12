@@ -133,6 +133,7 @@
 
             <service id="maker.maker.make_migration" class="Symfony\Bundle\MakerBundle\Maker\MakeMigration">
                 <argument>%kernel.project_dir%</argument>
+                <argument type="service" id="maker.file_link_formatter" />
                 <tag name="maker.command" />
             </service>
 
