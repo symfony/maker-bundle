@@ -96,7 +96,7 @@ final class MakerCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if ($output->isVerbose()) {
-            $output->write($this->linter->getLinterUserMessage());
+            $this->linter->writeLinterMessage($output);
         }
 
         $this->maker->generate($input, $this->io, $this->generator);

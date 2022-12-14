@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Util;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
 /**
@@ -60,24 +61,22 @@ final class TemplateLinter
         }
     }
 
-    public function getLinterUserMessage(): array
+    public function writeLinterMessage(OutputInterface $output): void
     {
-        $message = [];
-        $message[0] = 'Linting Generated Files With:'.\PHP_EOL;
-        $message[1] = $this->usingBundledPhpCsFixer ?
+        $output->writeln('Linting Generated Files With:');
+
+        $fixerMessage = $this->usingBundledPhpCsFixer ?
             'Bundled PHP-CS-Fixer & ' :
             sprintf('System PHP-CS-Fixer (<info>%s</info>) & ', $this->phpCsFixerBinaryPath)
 
         ;
 
-        $message[1] .= $this->usingBundledPhpCsFixerConfig ?
-            'Bundled PHP-CS-Fixer Configuration'.\PHP_EOL :
-            sprintf('System PHP-CS-Fixer Configuration (<info>%s</info>)', $this->phpCsFixerConfigPath).\PHP_EOL
+        $fixerMessage .= $this->usingBundledPhpCsFixerConfig ?
+            'Bundled PHP-CS-Fixer Configuration' :
+            sprintf('System PHP-CS-Fixer Configuration (<info>%s</info>)', $this->phpCsFixerConfigPath)
         ;
 
-        $message[2] = \PHP_EOL;
-
-        return $message;
+        $output->writeln([$fixerMessage, '']); // Empty string so we have an empty line
     }
 
     private function setBinary(): void
