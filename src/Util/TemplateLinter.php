@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Util;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
@@ -55,7 +56,7 @@ final class TemplateLinter
         }
 
         foreach ($templateFilePath as $filePath) {
-            $process = Process::fromShellCommandline(sprintf('php %s --config=%s --using-cache=no fix %s', $this->phpCsFixerBinaryPath, $this->phpCsFixerConfigPath, $filePath));
+            $process = Process::fromShellCommandline(sprintf('%s --config=%s --using-cache=no fix %s', $this->phpCsFixerBinaryPath, $this->phpCsFixerConfigPath, $filePath));
 
             $process->run();
         }
@@ -81,30 +82,37 @@ final class TemplateLinter
 
     private function setBinary(): void
     {
-        if (null !== $this->phpCsFixerBinaryPath) {
-            $this->checkPathExists($this->phpCsFixerBinaryPath, false);
+        // Use Bundled PHP-CS-Fixer
+        if (null === $this->phpCsFixerBinaryPath) {
+            $this->phpCsFixerBinaryPath = sprintf('php %s', \dirname(__DIR__).'/Resources/bin/php-cs-fixer-v3.13.0.phar');
+
+            return;
+        }
+
+        // Path to PHP-CS-Fixer provided
+        if (is_file($this->phpCsFixerBinaryPath)) {
+            $this->usingBundledPhpCsFixer = false;
+
+            return;
+        }
+
+        // PHP-CS-Fixer in the system path?
+        if (null !== $path = (new ExecutableFinder())->find($this->phpCsFixerBinaryPath)) {
+            $this->phpCsFixerBinaryPath = $path;
 
             $this->usingBundledPhpCsFixer = false;
 
             return;
         }
 
-        $this->phpCsFixerBinaryPath = \dirname(__DIR__).'/Resources/bin/php-cs-fixer-v3.13.0.phar';
+        // PHP-CS-Fixer provided is not a file and is not in the system path.
+        throw new RuntimeCommandException(sprintf('The MAKER_PHP_CS_FIXER_BINARY_PATH provided: %s does not exist.', $this->phpCsFixerBinaryPath));
     }
 
     private function setConfig(): void
     {
-        if (null !== $this->phpCsFixerConfigPath) {
-            $this->checkPathExists($this->phpCsFixerConfigPath, true);
-
-            $this->usingBundledPhpCsFixerConfig = false;
-
-            return;
-        }
-
-        $defaultConfigPath = '.php-cs-fixer.dist.php';
-
-        if (file_exists($defaultConfigPath)) {
+        // No config provided, but there is a dist config file in the project dir
+        if (null === $this->phpCsFixerConfigPath && file_exists($defaultConfigPath = '.php-cs-fixer.dist.php')) {
             $this->phpCsFixerConfigPath = $defaultConfigPath;
 
             $this->usingBundledPhpCsFixerConfig = false;
@@ -112,15 +120,18 @@ final class TemplateLinter
             return;
         }
 
-        $this->phpCsFixerConfigPath = \dirname(__DIR__).'/Resources/config/php-cs-fixer.config.php';
-    }
+        // No config provided and no project dist config - use our config
+        if (null === $this->phpCsFixerConfigPath) {
+            $this->phpCsFixerConfigPath = \dirname(__DIR__).'/Resources/config/php-cs-fixer.config.php';
 
-    private function checkPathExists(string $path, bool $isConfigPath): void
-    {
-        if (file_exists($path)) {
             return;
         }
 
-        throw new RuntimeCommandException(sprintf('The %s provided: %s does not exist.', $isConfigPath ? 'MAKER_PHP_CS_FIXER_CONFIG_PATH' : 'MAKER_PHP_CS_FIXER_BINARY_PATH', $path));
+        // The config path provided doesn't exist...
+        if (!file_exists($this->phpCsFixerConfigPath)) {
+            throw new RuntimeCommandException(sprintf('The MAKER_PHP_CS_FIXER_CONFIG_PATH provided: %s does not exist.', $this->phpCsFixerConfigPath));
+        }
+
+        $this->usingBundledPhpCsFixerConfig = false;
     }
 }
