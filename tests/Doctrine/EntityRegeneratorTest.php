@@ -158,6 +158,7 @@ class TestEntityRegeneratorKernel extends Kernel
             'router' => [
                 'utf8' => true,
             ],
+            'http_method_override' => false,
             'annotations' => [
                 'enabled' => true,
             ],
@@ -212,6 +213,7 @@ class TestXmlEntityRegeneratorKernel extends Kernel
             'router' => [
                 'utf8' => true,
             ],
+            'http_method_override' => false,
         ]);
 
         $dbal = [
