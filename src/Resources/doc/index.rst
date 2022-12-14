@@ -54,8 +54,14 @@ version and configuration that is packaged with this bundle.
 You can explicitly set a custom path to a php-cs-fixer binary and/or configuration
 file by their respective environment variables:
 
-- ``MAKER_PHP_CS_FIXER_BINARY_PATH`` e.g. /path/to/project/php-cs-fixer.php
-- ``MAKER_PHP_CS_FIXER_CONFIG_PATH`` e.g. /path/to/project/php-cs-fixer.config.php
+- ``MAKER_PHP_CS_FIXER_BINARY_PATH`` e.g. /path/to/binary/php-cs-fixer.php
+- ``MAKER_PHP_CS_FIXER_CONFIG_PATH`` e.g. .php-cs-fixer.config.php
+
+
+.. tip::
+
+    Is PHP-CS-Fixer installed globally? To avoid needing to set these in every
+    project, you can instead set these on your operating system.
 
 
 Configuration
