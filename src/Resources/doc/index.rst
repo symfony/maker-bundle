@@ -54,7 +54,7 @@ version and configuration that is packaged with this bundle.
 You can explicitly set a custom path to a php-cs-fixer binary and/or configuration
 file by their respective environment variables:
 
-- ``MAKER_PHP_CS_FIXER_BINARY_PATH`` e.g. tools/vendor/bin/php-cs-fixer.php
+- ``MAKER_PHP_CS_FIXER_BINARY_PATH`` e.g. tools/vendor/bin/php-cs-fixer
 - ``MAKER_PHP_CS_FIXER_CONFIG_PATH`` e.g. .php-cs-fixer.config.php
 
 
