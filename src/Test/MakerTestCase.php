@@ -77,16 +77,6 @@ abstract class MakerTestCase extends TestCase
         foreach ($files as $file) {
             $this->assertTrue($testEnv->fileExists($file), sprintf('The file "%s" does not exist after generation', $file));
 
-            if (str_ends_with($file, '.php')) {
-                $csProcess = $testEnv->runPhpCSFixer($file);
-
-                $this->assertTrue($csProcess->isSuccessful(), sprintf(
-                    "File '%s' has a php-cs problem: %s\n",
-                    $file,
-                    $csProcess->getErrorOutput()."\n".$csProcess->getOutput()
-                ));
-            }
-
             if (str_ends_with($file, '.twig')) {
                 $csProcess = $testEnv->runTwigCSLint($file);
 
