@@ -25,8 +25,11 @@ use PhpParser\Builder;
 use PhpParser\BuilderHelpers;
 use PhpParser\Lexer;
 use PhpParser\Node;
+use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Scalar\String_;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
+use PhpParser\NodeVisitorAbstract;
 use PhpParser\Parser;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\Doctrine\BaseCollectionRelation;
@@ -312,9 +315,9 @@ final class ClassSourceManipulator
         $this->addMethod($methodBuilder->getNode());
     }
 
-    public function addMethodBody(Builder\Method $methodBuilder, string $methodBody): void
+    public function addMethodBody(Builder\Method $methodBuilder, string $methodBody, array $templateVars = []): void
     {
-        $nodes = $this->parser->parse($methodBody);
+        $nodes = $this->parseTemplateVariables($this->parser->parse($methodBody), $templateVars);
         $methodBuilder->addStmts($nodes);
     }
 
@@ -1358,5 +1361,34 @@ final class ClassSourceManipulator
         }
 
         return array_merge($sorted, $options);
+    }
+
+    /**
+     * @param Node[]                $nodes
+     * @param array<string, string> $templateVars
+     */
+    private function parseTemplateVariables(array $nodes, array $templateVars = []): array
+    {
+        if (empty($templateVars)) {
+            return $nodes;
+        }
+
+        $traverser = new NodeTraverser();
+        $traverser->addVisitor(new class($templateVars) extends NodeVisitorAbstract {
+            public function __construct(private array $vars)
+            {
+            }
+
+            public function enterNode(Node $node)
+            {
+                if ($node instanceof Variable && str_starts_with($node->name, 'tpl_')) {
+                    $name = str_replace('tpl_', '', $node->name);
+
+                    return new String_($this->vars[$name]);
+                }
+            }
+        });
+
+        return $traverser->traverse($nodes);
     }
 }

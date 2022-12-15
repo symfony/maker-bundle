@@ -68,7 +68,7 @@ final class MakeJsonLogin extends AbstractSecurityMaker
         if (!$controllerExists) {
             $generator->generateController(
                 $controllerNameDetails->getFullName(),
-                'security/jsonLogin/EmptyController.tpl.php',
+                'EmptyController.tpl.php',
                 [
                     'use_statements' => $useStatements,
                     'controller_name' => $controllerNameDetails->getShortName(),
@@ -97,8 +97,10 @@ final class MakeJsonLogin extends AbstractSecurityMaker
 
         $this->writeSuccessMessage($io);
 
-//        $io->text([
-//            sprintf('Next: Review and adapt the login template: <info>%s/login.html.twig</info> to suit your needs.', $templatePath),
-//        ]);
+        $io->text([
+            'Next: Make a <info>POST</info> request to <info>/api/login</info> with a <info>username</info> and <info>password</info> to login.',
+            'Then: The security system intercepts the requests and authenticates the user.',
+            sprintf('And Finally: The <info>%s::apiLogin</info> method creates and returns a JsonResponse.', $controllerNameDetails->getShortName()),
+        ]);
     }
 }

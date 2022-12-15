@@ -84,22 +84,33 @@ final class MakeFormLogin extends AbstractSecurityMaker
         $controllerNameDetails = $generator->createClassNameDetails($this->securityControllerName, 'Controller\\', 'Controller');
         $templatePath = strtolower($controllerNameDetails->getRelativeNameWithoutSuffix());
 
-        $controllerPath = $generator->generateController(
-            $controllerNameDetails->getFullName(),
-            'security/formLogin/LoginController.tpl.php',
-            [
-                'use_statements' => $useStatements,
-                'controller_name' => $controllerNameDetails->getShortName(),
-                'template_path' => $templatePath,
-            ]
-        );
+        $controllerPath = $this->fileManager->getRelativePathForFutureClass($controllerNameDetails->getFullName());
+
+        $controllerExists = $this->fileManager->fileExists($controllerPath);
+
+        if (!$controllerExists) {
+            $generator->generateController(
+                $controllerNameDetails->getFullName(),
+                'EmptyController.tpl.php',
+                [
+                    'use_statements' => $useStatements,
+                    'controller_name' => $controllerNameDetails->getShortName(),
+                ]
+            );
+        }
+
+        $controllerSource = $controllerExists ? file_get_contents($controllerPath) : $generator->getFileContentsForPendingOperation($controllerPath);
+
+        $manipulator = new ClassSourceManipulator($controllerSource);
+
+        $this->securityControllerBuilder->addFormLoginMethod($manipulator, $templatePath);
+
+        $securityData = $this->securityConfigUpdater->updateForFormLogin($this->ysm->getContents(), $this->firewallToUpdate, 'app_login', 'app_login');
 
         if ($this->willLogout) {
-            $manipulator = new ClassSourceManipulator($generator->getFileContentsForPendingOperation($controllerPath));
-
             $this->securityControllerBuilder->addLogoutMethod($manipulator);
 
-            $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
+            $securityData = $this->securityConfigUpdater->updateForLogout($securityData, $this->firewallToUpdate);
         }
 
         $generator->generateTemplate(
@@ -112,13 +123,8 @@ final class MakeFormLogin extends AbstractSecurityMaker
             ]
         );
 
-        $securityData = $this->securityConfigUpdater->updateForFormLogin($this->ysm->getContents(), $this->firewallToUpdate, 'app_login', 'app_login');
-
-        if ($this->willLogout) {
-            $securityData = $this->securityConfigUpdater->updateForLogout($securityData, $this->firewallToUpdate);
-        }
-
         $generator->dumpFile(self::SECURITY_CONFIG_PATH, $securityData);
+        $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
 
         $generator->writeChanges();
 

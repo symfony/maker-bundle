@@ -12,9 +12,16 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use PhpParser\Builder\Param;
+use PhpParser\Lexer\Emulative;
 use PhpParser\Node\Attribute;
+use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Name;
 use PhpParser\Node\NullableType;
+use PhpParser\Node\Scalar\String_;
+use PhpParser\NodeTraverser;
+use PhpParser\NodeVisitorAbstract;
+use PhpParser\Parser\Php7;
+use PhpParser\PrettyPrinter\Standard;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -86,6 +93,60 @@ final class SecurityControllerBuilder
             CODE
         );
         $manipulator->addMethodBuilder($logoutMethodBuilder);
+    }
+
+    public function addFormLoginMethod(ClassSourceManipulator $manipulator, string $loginTemplatePath): void
+    {
+        $methodBuilder = $manipulator->createMethodBuilder('login', Response::class, false);
+        $methodBuilder->addAttribute($manipulator->buildAttributeNode(Route::class, ['path' => '/login', 'name' => 'app_login']));
+
+        $this->addUseStatements($manipulator, [Route::class]);
+
+        $methodBuilder->addParam((new Param('authenticationUtils'))->setType('AuthenticationUtils'));
+
+        $contents = file_get_contents(\dirname(__DIR__).'/Resources/skeleton/security/formLogin/_LoginMethodBody.tpl.php');
+
+//        $lexer = new Emulative([
+//            'usedAttributes' => [
+//                'comments',
+//                'startLine', 'endLine',
+//                'startTokenPos', 'endTokenPos',
+//            ],
+//        ]);
+
+//        $parser = new Php7($lexer);
+//
+//        $result = $parser->parse($contents);
+//
+//        $traverser = new NodeTraverser();
+//        $traverser->addVisitor(new class extends NodeVisitorAbstract {
+//            public function enterNode(\PhpParser\Node $node) {
+//                if ($node instanceof Variable && str_starts_with($node->name, 'tpl_')) {
+//                    return new String_('ha-ha');
+//                }
+//            }
+//        });
+//
+//        $x = $traverser->traverse($result);
+//        $printer = new Standard();
+//        $x = $printer->prettyPrintFile($x);
+
+        // //        dd($x);
+//        foreach ($result as $key => $node) {
+        // //            array_map(function ($x) {}, $)
+//            array_walk_recursive($result, function ($value, $key) {
+//                if ($value instanceof Variable) {
+//                    dump($value);
+//                }
+//            });
+        // //            dump($key, $node);
+//        }
+//
+//        dd();
+//        dd($contents, $result);
+
+        $manipulator->addMethodBody($methodBuilder, $contents, ['template_path' => $loginTemplatePath]);
+        $manipulator->addMethodBuilder($methodBuilder);
     }
 
     public function addJsonLoginMethod(ClassSourceManipulator $manipulator, ClassNameDetails $userClass): void
