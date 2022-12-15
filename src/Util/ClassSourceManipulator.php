@@ -315,6 +315,13 @@ final class ClassSourceManipulator
         $this->addMethod($methodBuilder->getNode());
     }
 
+    /**
+     * @param string $methodBody   Can be the contents of a *.tpl.php file or a simple string
+     * @param array  $templateVars When the $methodBody contains template var's the need to be parsed,
+     *                             e.g. $tpl_user_class_name
+     *                             Pass in an array like ['user_class_name' => 'User']
+     *                             omitting the tpl_ prefix.
+     */
     public function addMethodBody(Builder\Method $methodBuilder, string $methodBody, array $templateVars = []): void
     {
         $nodes = $this->parseTemplateVariables($this->parser->parse($methodBody), $templateVars);
@@ -1364,6 +1371,19 @@ final class ClassSourceManipulator
     }
 
     /**
+     * Replaces variables that start with "tpl_" within a node tree with the
+     * corresponding values found in $templateVars.
+     *
+     * E.g. Parse a php-file.tpl.php like:
+     * $this->render($tpl_base_path.'/my-route')
+     *
+     * & Provide $templateVars with:
+     * ['base_path' => 'cool-controller']
+     *
+     * will result in:
+     *
+     * $this->render('cool-controller/my-route')
+     *
      * @param Node[]                $nodes
      * @param array<string, string> $templateVars
      */
