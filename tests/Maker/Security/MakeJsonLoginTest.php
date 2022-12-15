@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker\Security;
 
 use Symfony\Bundle\MakerBundle\Maker\Security\MakeJsonLogin;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
@@ -43,7 +44,9 @@ final class MakeJsonLoginTest extends AbstractSecurityMakerTestCase
 
                 $securityConfig = $runner->readYaml('config/packages/security.yaml');
 
-                $this->assertSame('api_login', $securityConfig['security']['firewalls']['main']['json_login']['check_path']);
+                $this->assertSame('app_api_login', $securityConfig['security']['firewalls']['main']['json_login']['check_path']);
+
+                $this->runLoginTest($runner);
             }),
         ];
 
@@ -64,7 +67,7 @@ final class MakeJsonLoginTest extends AbstractSecurityMakerTestCase
 
                 $securityConfig = $runner->readYaml('config/packages/security.yaml');
 
-                $this->assertSame('api_login', $securityConfig['security']['firewalls']['main']['json_login']['check_path']);
+                $this->assertSame('app_api_login', $securityConfig['security']['firewalls']['main']['json_login']['check_path']);
             }),
         ];
 
@@ -85,7 +88,7 @@ final class MakeJsonLoginTest extends AbstractSecurityMakerTestCase
 
                 $securityConfig = $runner->readYaml('config/packages/security.yaml');
 
-                $this->assertSame('api_login', $securityConfig['security']['firewalls']['main']['json_login']['check_path']);
+                $this->assertSame('app_api_login', $securityConfig['security']['firewalls']['main']['json_login']['check_path']);
             }),
         ];
 
@@ -108,8 +111,30 @@ final class MakeJsonLoginTest extends AbstractSecurityMakerTestCase
 
                 $securityConfig = $runner->readYaml('config/packages/security.yaml');
 
-                $this->assertSame('api_login', $securityConfig['security']['firewalls']['main']['json_login']['check_path']);
+                $this->assertSame('app_api_login', $securityConfig['security']['firewalls']['main']['json_login']['check_path']);
             }),
         ];
+    }
+
+    private function runLoginTest(MakerTestRunner $runner): void
+    {
+        $fixturePath = 'security/make-json-login/';
+
+        $runner->renderTemplateFile($fixturePath.'/LoginTest.php', 'tests/LoginTest.php', []);
+
+        // plaintext password: needed for entities, simplifies overall
+        $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
+            if (isset($config['when@test']['security']['password_hashers'])) {
+                $config['when@test']['security']['password_hashers'] = [PasswordAuthenticatedUserInterface::class => 'plaintext'];
+
+                return $config;
+            }
+
+            return $config;
+        });
+
+        $runner->configureDatabase();
+
+        $runner->runTests();
     }
 }

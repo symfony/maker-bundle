@@ -82,7 +82,7 @@ final class MakeJsonLogin extends AbstractSecurityMaker
 
         $this->securityControllerBuilder->addJsonLoginMethod($manipulator, $userClassDetails);
 
-        $securityData = $this->securityConfigUpdater->updateForJsonLogin($this->ysm->getContents(), $this->firewallToUpdate, 'api_login');
+        $securityData = $this->securityConfigUpdater->updateForJsonLogin($this->ysm->getContents(), $this->firewallToUpdate, 'app_api_login');
 
         if ($this->willLogout) {
             $this->securityControllerBuilder->addLogoutMethod($manipulator);
