@@ -27,6 +27,7 @@ final class TemplateLinter
 {
     private bool $usingBundledPhpCsFixer = true;
     private bool $usingBundledPhpCsFixerConfig = true;
+    private bool $needsPhpCmdPrefix = true;
 
     public function __construct(
         private ?string $phpCsFixerBinaryPath = null,
@@ -56,7 +57,9 @@ final class TemplateLinter
         }
 
         foreach ($templateFilePath as $filePath) {
-            $process = Process::fromShellCommandline(sprintf('%s --config=%s --using-cache=no fix %s', $this->phpCsFixerBinaryPath, $this->phpCsFixerConfigPath, $filePath));
+            $cmdPrefix = $this->needsPhpCmdPrefix ? 'php ' : '';
+
+            $process = Process::fromShellCommandline(sprintf('%s%s --config=%s --using-cache=no fix %s', $cmdPrefix, $this->phpCsFixerBinaryPath, $this->phpCsFixerConfigPath, $filePath));
 
             $process->run();
         }
@@ -84,7 +87,7 @@ final class TemplateLinter
     {
         // Use Bundled PHP-CS-Fixer
         if (null === $this->phpCsFixerBinaryPath) {
-            $this->phpCsFixerBinaryPath = sprintf('php %s', \dirname(__DIR__).'/Resources/bin/php-cs-fixer-v3.13.0.phar');
+            $this->phpCsFixerBinaryPath = \dirname(__DIR__).'/Resources/bin/php-cs-fixer-v3.13.0.phar';
 
             return;
         }
@@ -100,6 +103,7 @@ final class TemplateLinter
         if (null !== $path = (new ExecutableFinder())->find($this->phpCsFixerBinaryPath)) {
             $this->phpCsFixerBinaryPath = $path;
 
+            $this->needsPhpCmdPrefix = false;
             $this->usingBundledPhpCsFixer = false;
 
             return;
