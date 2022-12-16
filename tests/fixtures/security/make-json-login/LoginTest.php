@@ -13,7 +13,7 @@ class LoginTest extends WebTestCase
     public function testJsonLogin(): void
     {
         $client = static::createClient();
-        $client->xmlHttpRequest('POST', '/api/login');
+        $client->jsonRequest('POST', '/api/login');
 
         self::assertResponseStatusCodeSame(401);
 
