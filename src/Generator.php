@@ -13,9 +13,12 @@ namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\Object\ClassData;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -211,6 +214,27 @@ class Generator
                 'generator' => $this->templateComponentGenerator,
             ]
         );
+    }
+
+    /**
+     * @internal
+     */
+    final public function generateEmptyController(ClassData $classData): ClassData
+    {
+        $path = $this->generateClass(
+            className: $classData->classNameDetails->getFullName(),
+            templateName: 'EmptyController.tpl.php',
+            variables: [
+                'use_statements' => new UseStatementGenerator([
+                    AbstractController::class,
+                ]),
+                'controller_name' => $classData->classNameDetails->getShortName(),
+            ]
+        );
+
+        $classData->manipulator = new ClassSourceManipulator($this->getFileContentsForPendingOperation($path));
+
+        return $classData;
     }
 
     /**

@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle\Security;
 
+use PhpParser\Builder\Param;
+use Symfony\Bundle\MakerBundle\Object\ClassData;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -79,5 +81,26 @@ final class SecurityControllerBuilder
             CODE
         );
         $manipulator->addMethodBuilder($logoutMethodBuilder);
+    }
+
+    public function addFormLoginMethod(ClassData $classData, string $loginTemplatePath): ClassData
+    {
+        $methodBuilder = $classData->manipulator->createMethodBuilder('login', Response::class, false);
+        $methodBuilder->addAttribute($classData->manipulator->buildAttributeNode(Route::class, ['path' => '/login', 'name' => 'app_login']));
+
+        $classData->manipulator->addUseStatementsToClass([
+            Response::class,
+            Route::class,
+            AuthenticationUtils::class,
+        ]);
+
+        $methodBuilder->addParam((new Param('authenticationUtils'))->setType('AuthenticationUtils'));
+
+        $contents = file_get_contents(\dirname(__DIR__).'/Resources/skeleton/security/formLogin/_loginMethodBody.tpl.php');
+
+        $classData->manipulator->addMethodBody($methodBuilder, $contents, ['template_path' => $loginTemplatePath]);
+        $classData->manipulator->addMethodBuilder($methodBuilder);
+
+        return $classData;
     }
 }

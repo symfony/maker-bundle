@@ -25,8 +25,11 @@ use PhpParser\Builder;
 use PhpParser\BuilderHelpers;
 use PhpParser\Lexer;
 use PhpParser\Node;
+use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Scalar\String_;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
+use PhpParser\NodeVisitorAbstract;
 use PhpParser\Parser;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\Doctrine\BaseCollectionRelation;
@@ -312,9 +315,16 @@ final class ClassSourceManipulator
         $this->addMethod($methodBuilder->getNode());
     }
 
-    public function addMethodBody(Builder\Method $methodBuilder, string $methodBody): void
+    /**
+     * @param string $methodBody   Can be the contents of a *.tpl.php file or a simple string
+     * @param array  $templateVars When the $methodBody contains template var's the need to be parsed,
+     *                             e.g. $tpl_user_class_name
+     *                             Pass in an array like ['user_class_name' => 'User']
+     *                             omitting the tpl_ prefix.
+     */
+    public function addMethodBody(Builder\Method $methodBuilder, string $methodBody, array $templateVars = []): void
     {
-        $nodes = $this->parser->parse($methodBody);
+        $nodes = $this->parseTemplateVariables($this->parser->parse($methodBody), $templateVars);
         $methodBuilder->addStmts($nodes);
     }
 
@@ -747,6 +757,13 @@ final class ClassSourceManipulator
         }
 
         return null;
+    }
+
+    public function addUseStatementsToClass(array $classNames): void
+    {
+        foreach ($classNames as $name) {
+            $this->addUseStatementIfNecessary($name);
+        }
     }
 
     /**
@@ -1358,5 +1375,47 @@ final class ClassSourceManipulator
         }
 
         return array_merge($sorted, $options);
+    }
+
+    /**
+     * Replaces variables that start with "tpl_" within a node tree with the
+     * corresponding values found in $templateVars.
+     *
+     * E.g. Parse a php-file.tpl.php like:
+     * $this->render($tpl_base_path.'/my-route')
+     *
+     * & Provide $templateVars with:
+     * ['base_path' => 'cool-controller']
+     *
+     * will result in:
+     *
+     * $this->render('cool-controller/my-route')
+     *
+     * @param Node[]                $nodes
+     * @param array<string, string> $templateVars
+     */
+    private function parseTemplateVariables(array $nodes, array $templateVars = []): array
+    {
+        if (empty($templateVars)) {
+            return $nodes;
+        }
+
+        $traverser = new NodeTraverser();
+        $traverser->addVisitor(new class($templateVars) extends NodeVisitorAbstract {
+            public function __construct(private array $vars)
+            {
+            }
+
+            public function enterNode(Node $node)
+            {
+                if ($node instanceof Variable && str_starts_with($node->name, 'tpl_')) {
+                    $name = str_replace('tpl_', '', $node->name);
+
+                    return new String_($this->vars[$name]);
+                }
+            }
+        });
+
+        return $traverser->traverse($nodes);
     }
 }

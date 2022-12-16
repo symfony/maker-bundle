@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Maker\Security;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
@@ -20,21 +19,18 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
+use Symfony\Bundle\MakerBundle\Object\ClassData;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -123,32 +119,21 @@ final class MakeFormLogin extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-        $useStatements = new UseStatementGenerator([
-            AbstractController::class,
-            Response::class,
-            Route::class,
-            AuthenticationUtils::class,
-        ]);
+        $classData = $this->getClassData($generator->createClassNameDetails($this->controllerName, 'Controller\\', 'Controller'));
 
-        $controllerNameDetails = $generator->createClassNameDetails($this->controllerName, 'Controller\\', 'Controller');
-        $templatePath = strtolower($controllerNameDetails->getRelativeNameWithoutSuffix());
+        if (!$classData->classExists) {
+            $classData = $generator->generateEmptyController($classData);
+        }
 
-        $controllerPath = $generator->generateController(
-            $controllerNameDetails->getFullName(),
-            'security/formLogin/LoginController.tpl.php',
-            [
-                'use_statements' => $useStatements,
-                'controller_name' => $controllerNameDetails->getShortName(),
-                'template_path' => $templatePath,
-            ]
-        );
+        $templatePath = strtolower($classData->classNameDetails->getRelativeNameWithoutSuffix());
+
+        $this->securityControllerBuilder->addFormLoginMethod($classData, $templatePath);
+        $securityData = $this->securityConfigUpdater->updateForFormLogin($this->ysm->getContents(), $this->firewallToUpdate, 'app_login', 'app_login');
 
         if ($this->willLogout) {
-            $manipulator = new ClassSourceManipulator($generator->getFileContentsForPendingOperation($controllerPath));
+            $this->securityControllerBuilder->addLogoutMethod($classData->manipulator);
 
-            $this->securityControllerBuilder->addLogoutMethod($manipulator);
-
-            $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
+            $securityData = $this->securityConfigUpdater->updateForLogout($securityData, $this->firewallToUpdate);
         }
 
         $generator->generateTemplate(
@@ -161,13 +146,8 @@ final class MakeFormLogin extends AbstractMaker
             ]
         );
 
-        $securityData = $this->securityConfigUpdater->updateForFormLogin($this->ysm->getContents(), $this->firewallToUpdate, 'app_login', 'app_login');
-
-        if ($this->willLogout) {
-            $securityData = $this->securityConfigUpdater->updateForLogout($securityData, $this->firewallToUpdate);
-        }
-
         $generator->dumpFile(self::SECURITY_CONFIG_PATH, $securityData);
+        $generator->dumpFile($classData->classPath, $classData->manipulator->getSourceCode());
 
         $generator->writeChanges();
 
@@ -176,5 +156,17 @@ final class MakeFormLogin extends AbstractMaker
         $io->text([
             sprintf('Next: Review and adapt the login template: <info>%s/login.html.twig</info> to suit your needs.', $templatePath),
         ]);
+    }
+
+    private function getClassData(ClassNameDetails $className): ClassData
+    {
+        $controllerPath = $this->fileManager->getRelativePathForFutureClass($className->getFullName());
+        $controllerExists = $this->fileManager->fileExists($controllerPath);
+
+        return new ClassData(
+            $className,
+            $controllerPath,
+            $controllerExists,
+        );
     }
 }
