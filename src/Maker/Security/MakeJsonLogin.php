@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker\Security;
 
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
@@ -19,6 +20,10 @@ use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 /**
  * Generate Form Login Security using SecurityBundle's Authenticator.
@@ -52,11 +57,11 @@ final class MakeJsonLogin extends AbstractSecurityMaker
 
         $useStatements = new UseStatementGenerator([
             $userClassDetails->getFullName(),
-            \Symfony\Bundle\FrameworkBundle\Controller\AbstractController::class,
-            \Symfony\Component\HttpFoundation\JsonResponse::class,
-            \Symfony\Component\HttpFoundation\Response::class,
-            \Symfony\Component\Routing\Annotation\Route::class,
-            \Symfony\Component\Security\Http\Attribute\CurrentUser::class,
+            AbstractController::class,
+            JsonResponse::class,
+            Response::class,
+            Route::class,
+            CurrentUser::class,
         ]);
 
         $controllerNameDetails = $generator->createClassNameDetails($this->securityControllerName, 'Controller\\', 'Controller');
