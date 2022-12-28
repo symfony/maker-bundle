@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
-use Doctrine\Common\Annotations\Annotation;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpParser\Builder\Param;
 use Symfony\Bridge\Twig\AppVariable;
