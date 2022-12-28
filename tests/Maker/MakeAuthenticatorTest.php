@@ -282,6 +282,11 @@ class MakeAuthenticatorTest extends MakerTestCase
             ]
         );
 
+        // @legacy - In 5.4 tests, we need to tell Symfony to look for route attributes in `src/Controller`
+        if ('60000' > $runner->getSymfonyVersion()) {
+            $runner->copy('make-auth/annotations.yaml', 'config/routes/annotations.yaml');
+        }
+
         // plaintext password: needed for entities, simplifies overall
         $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
             if (isset($config['when@test']['security']['password_hashers'])) {
