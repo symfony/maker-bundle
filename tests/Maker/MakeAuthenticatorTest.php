@@ -164,7 +164,7 @@ class MakeAuthenticatorTest extends MakerTestCase
         ];
 
         yield 'auth_login_form_no_entity_custom_username_field' => [$this->createMakerTest()
-            ->addExtraDependencies('doctrine/annotations', 'twig', 'symfony/form')
+            ->addExtraDependencies('twig', 'symfony/form')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'userEmail', false);
 
@@ -193,7 +193,7 @@ class MakeAuthenticatorTest extends MakerTestCase
         ];
 
         yield 'auth_login_form_user_not_entity_with_hasher' => [$this->createMakerTest()
-            ->addExtraDependencies('doctrine/annotations', 'twig', 'symfony/form')
+            ->addExtraDependencies('twig', 'symfony/form')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'email', false);
 
@@ -281,6 +281,11 @@ class MakeAuthenticatorTest extends MakerTestCase
                 'useLegacyContainerProperty' => $runner->getSymfonyVersion() <= 50200,
             ]
         );
+
+        // @legacy - In 5.4 tests, we need to tell Symfony to look for route attributes in `src/Controller`
+        if ('60000' > $runner->getSymfonyVersion()) {
+            $runner->copy('make-auth/annotations.yaml', 'config/routes/annotations.yaml');
+        }
 
         // plaintext password: needed for entities, simplifies overall
         $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
