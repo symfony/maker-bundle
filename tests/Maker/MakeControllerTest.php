@@ -29,11 +29,11 @@ class MakeControllerTest extends MakerTestCase
         return $this
             ->createMakerTest()
             ->preRun(function (MakerTestRunner $runner) {
-                if ($runner->getSymfonyVersion() < 60000) {
-                    // Because MakeController::configureDependencies() is executed in the main thread,
-                    // we need to manually add in `doctrine/annotations` for Symfony 5.4 tests.
-                    $runner->runProcess('composer require doctrine/annotations');
-                }
+//                if ($runner->getSymfonyVersion() < 60000) {
+//                    // Because MakeController::configureDependencies() is executed in the main thread,
+//                    // we need to manually add in `doctrine/annotations` for Symfony 5.4 tests.
+//                    $runner->runProcess('composer require doctrine/annotations');
+//                }
             });
     }
 

@@ -159,9 +159,9 @@ class TestEntityRegeneratorKernel extends Kernel
                 'utf8' => true,
             ],
             'http_method_override' => false,
-            'annotations' => [
-                'enabled' => true,
-            ],
+//            'annotations' => [
+//                'enabled' => true,
+//            ],
         ]);
 
         $dbal = [
