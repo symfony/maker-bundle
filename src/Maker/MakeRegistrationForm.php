@@ -143,11 +143,11 @@ final class MakeRegistrationForm extends AbstractMaker
 
         // see if it makes sense to add the UniqueEntity constraint
         $userClassDetails = new ClassDetails($this->userClass);
-        $addAttribute = false;
-        if (!$userClassDetails->isClassUnique()) {
-            $addAttribute = $io->confirm(sprintf('Do you want to add a <comment>#[UniqueEntity]</comment> validation attribute on your <comment>%s</comment> class to make sure duplicate accounts aren\'t created?', Str::getShortClassName($this->userClass)));
+        $addAnnotation = false;
+        if (!$userClassDetails->doesDocBlockContainAnnotation('@UniqueEntity')) {
+            $addAnnotation = $io->confirm(sprintf('Do you want to add a <comment>@UniqueEntity</comment> validation annotation on your <comment>%s</comment> class to make sure duplicate accounts aren\'t created?', Str::getShortClassName($this->userClass)));
         }
-        $this->addUniqueEntityConstraint = $addAttribute;
+        $this->addUniqueEntityConstraint = $addAnnotation;
 
         $this->willVerifyEmail = $io->confirm('Do you want to send an email to verify the user\'s email address after registration?', true);
 
@@ -488,10 +488,10 @@ final class MakeRegistrationForm extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
-//        $dependencies->addClassDependency(
-//            Annotation::class,
-//            'doctrine/annotations'
-//        );
+        $dependencies->addClassDependency(
+            Annotation::class,
+            'doctrine/annotations'
+        );
 
         $dependencies->addClassDependency(
             AbstractType::class,

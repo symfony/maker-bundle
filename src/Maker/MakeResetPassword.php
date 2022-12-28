@@ -122,7 +122,7 @@ class MakeResetPassword extends AbstractMaker
 
         ORMDependencyBuilder::buildDependencies($dependencies);
 
-//        $dependencies->addClassDependency(Annotation::class, 'annotations');
+        $dependencies->addClassDependency(Annotation::class, 'annotations');
 
         // reset-password-bundle 1.6 includes the ability to generate a fake token.
         // we need to check that version 1.6 is installed
