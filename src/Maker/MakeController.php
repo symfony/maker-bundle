@@ -120,10 +120,10 @@ final class MakeController extends AbstractMaker
             return;
         }
 
-        $dependencies->addClassDependency(
-            Annotation::class,
-            'doctrine/annotations'
-        );
+//        $dependencies->addClassDependency(
+//            Annotation::class,
+//            'doctrine/annotations'
+//        );
     }
 
     private function isTwigInstalled(): bool

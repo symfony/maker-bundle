@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * @internal
  */
@@ -61,6 +63,7 @@ final class ClassDetails
      * An imperfect, but simple way to check for the presence of an annotation.
      *
      * @param string $annotation The annotation - e.g. @UniqueEntity
+     * @deprecated We dont support anntations anymore..
      */
     public function doesDocBlockContainAnnotation(string $annotation): bool
     {
@@ -71,5 +74,12 @@ final class ClassDetails
         }
 
         return str_contains($docComment, $annotation);
+    }
+
+    public function isClassUnique(): bool
+    {
+        $reflected = new \ReflectionClass($this->fullClassName);
+
+        return !empty($reflected->getAttributes(UniqueEntity::class));
     }
 }
