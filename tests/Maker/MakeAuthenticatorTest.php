@@ -164,7 +164,7 @@ class MakeAuthenticatorTest extends MakerTestCase
         ];
 
         yield 'auth_login_form_no_entity_custom_username_field' => [$this->createMakerTest()
-            ->addExtraDependencies('doctrine/annotations', 'twig', 'symfony/form')
+            ->addExtraDependencies('twig', 'symfony/form')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'userEmail', false);
 
@@ -193,7 +193,7 @@ class MakeAuthenticatorTest extends MakerTestCase
         ];
 
         yield 'auth_login_form_user_not_entity_with_hasher' => [$this->createMakerTest()
-            ->addExtraDependencies('doctrine/annotations', 'twig', 'symfony/form')
+            ->addExtraDependencies('twig', 'symfony/form')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'email', false);
 
