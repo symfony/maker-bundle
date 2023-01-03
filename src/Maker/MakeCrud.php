@@ -17,6 +17,7 @@ use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Bridge\Doctrine\ArgumentResolver\EntityValueResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -317,9 +318,11 @@ final class MakeCrud extends AbstractMaker
             'security-csrf'
         );
 
+        // @legacy - Remove dependency when support for Symfony <6.2 is dropped
         $dependencies->addClassDependency(
             ParamConverter::class,
-            'annotations'
+            'annotations',
+            !class_exists(EntityValueResolver::class) // sensio/framework-extra-bundle dependency is not required when using symfony 6.2+
         );
     }
 }
