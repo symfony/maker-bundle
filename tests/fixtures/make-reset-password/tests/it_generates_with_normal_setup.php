@@ -6,7 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class ResetPasswordFunctionalTest extends WebTestCase
 {
-    public function testResetRequestRoute()
+    public function testResetRequestRoute(): void
     {
         $client = static::createClient();
         $client->request('GET', '/reset-password');
@@ -14,7 +14,7 @@ class ResetPasswordFunctionalTest extends WebTestCase
         self::assertSame(200, $client->getResponse()->getStatusCode());
     }
 
-    public function testResetRequestRouteDeniesInvalidToken()
+    public function testResetRequestRouteDeniesInvalidToken(): void
     {
         $client = static::createClient();
         $client->request('GET', '/reset-password/reset/badToken1234');
@@ -22,7 +22,7 @@ class ResetPasswordFunctionalTest extends WebTestCase
         self::assertSame(302, $client->getResponse()->getStatusCode());
     }
 
-    public function testCheckEmailPageIsAlwaysAccessible()
+    public function testCheckEmailPageIsAlwaysAccessible(): void
     {
         $client = static::createClient();
         $client->request('GET', '/reset-password/check-email');

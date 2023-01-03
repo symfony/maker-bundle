@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
-use Doctrine\Common\Annotations\Annotation;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpParser\Builder\Param;
 use Symfony\Bridge\Twig\AppVariable;
@@ -121,8 +120,6 @@ class MakeResetPassword extends AbstractMaker
         $dependencies->addClassDependency(AppVariable::class, 'twig');
 
         ORMDependencyBuilder::buildDependencies($dependencies);
-
-        $dependencies->addClassDependency(Annotation::class, 'annotations');
 
         // reset-password-bundle 1.6 includes the ability to generate a fake token.
         // we need to check that version 1.6 is installed
