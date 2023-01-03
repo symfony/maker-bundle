@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
-use Doctrine\Common\Annotations\Annotation;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -27,7 +26,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -115,15 +113,6 @@ final class MakeController extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
-        // @legacy - Remove method when support for Symfony 5.4 is dropped
-        if (null !== $this->phpCompatUtil && 60000 <= Kernel::VERSION_ID) {
-            return;
-        }
-
-        $dependencies->addClassDependency(
-            Annotation::class,
-            'doctrine/annotations'
-        );
     }
 
     private function isTwigInstalled(): bool

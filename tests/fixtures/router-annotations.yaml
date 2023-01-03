@@ -1,0 +1,10 @@
+# @legacy - Can be removed when Symfony 5.4 is no longer supported
+# This is needed for controller attributes as we do not install / require
+# doctrine/annotations...
+controllers:
+    resource: ../../src/Controller/
+    type: annotation
+
+kernel:
+    resource: ../../src/Kernel.php
+    type: annotation
