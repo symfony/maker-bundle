@@ -77,6 +77,11 @@ class MakeResetPasswordTest extends MakerTestCase
                     'tests/ResetPasswordFunctionalTest.php'
                 );
 
+                if (60000 > $runner->getSymfonyVersion()) {
+                    // @legacy - In 5.4 tests, we need to tell Symfony to look for the route attributes in `src/Controller`
+                    $runner->copy('router-annotations.yaml', 'config/routes/annotations.yaml');
+                }
+
                 $runner->runTests();
             }),
         ];
