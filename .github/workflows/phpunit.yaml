@@ -1,4 +1,4 @@
-name: "CI"
+name: PHPUnit
 
 on:
     pull_request:
@@ -14,7 +14,7 @@ env:
 
 jobs:
     test:
-        name: "PHP ${{ matrix.php-version }} + @${{ matrix.symfony-version }} ${{ matrix.dependency-versions }} deps"
+        name: "${{ matrix.php-version }} + @${{ matrix.symfony-version }} ${{ matrix.dependency-versions }} deps"
 
         runs-on: ubuntu-latest
 
