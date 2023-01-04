@@ -55,6 +55,7 @@ jobs:
                     - '6.0.x-dev'
                     - '6.1.x-dev'
                     - '6.2.x-dev'
+                    - '6.3.x-dev'
                 dependency-versions: ['highest']
                 allow-dev-deps-in-apps: ['0']
                 include:
