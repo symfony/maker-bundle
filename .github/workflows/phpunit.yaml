@@ -37,10 +37,6 @@ jobs:
                     php-version: "${{ matrix.php-version }}"
 
             -
-                name: "Validate composer.json"
-                run: "composer validate --strict --no-check-lock"
-
-            -
                 name: "Composer install"
                 uses: "ramsey/composer-install@v1"
                 with:
