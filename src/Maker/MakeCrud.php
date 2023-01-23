@@ -70,7 +70,8 @@ final class MakeCrud extends AbstractMaker
     {
         $command
             ->addArgument('entity-class', InputArgument::OPTIONAL, sprintf('The class name of the entity to create CRUD (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCrud.txt'));
+            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCrud.txt'))
+        ;
 
         $inputConfig->setArgumentAsNonInteractive('entity-class');
     }
