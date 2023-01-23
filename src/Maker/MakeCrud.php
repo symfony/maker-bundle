@@ -167,20 +167,20 @@ final class MakeCrud extends AbstractMaker
             $controllerClassDetails->getFullName(),
             'crud/controller/Controller.tpl.php',
             array_merge([
-                'use_statements' => $useStatements,
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'form_class_name' => $formClassDetails->getShortName(),
-                'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
-                'route_name' => $routeName,
-                'templates_path' => $templatesPath,
-                'entity_var_plural' => $entityVarPlural,
-                'entity_twig_var_plural' => $entityTwigVarPlural,
-                'entity_var_singular' => $entityVarSingular,
-                'entity_twig_var_singular' => $entityTwigVarSingular,
-                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
-                // @legacy - Remove when support for Symfony <6 is dropped - hack to determine version
-                'use_render_form' => method_exists(AbstractController::class, 'getDoctrine'),
-            ],
+                    'use_statements' => $useStatements,
+                    'entity_class_name' => $entityClassDetails->getShortName(),
+                    'form_class_name' => $formClassDetails->getShortName(),
+                    'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
+                    'route_name' => $routeName,
+                    'templates_path' => $templatesPath,
+                    'entity_var_plural' => $entityVarPlural,
+                    'entity_twig_var_plural' => $entityTwigVarPlural,
+                    'entity_var_singular' => $entityVarSingular,
+                    'entity_twig_var_singular' => $entityTwigVarSingular,
+                    'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
+                    // @legacy - Remove when support for Symfony <6 is dropped - hack to determine version
+                    'use_render_form' => method_exists(AbstractController::class, 'getDoctrine'),
+                ],
                 $repositoryVars
             )
         );
