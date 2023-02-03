@@ -55,7 +55,7 @@ class <?= $class_name ?> extends AbstractController
 <?php } ?>
 
 <?php if ($use_render_form) { ?>
-        return $this->renderForm('<?= $templates_path ?>/new.html.twig', [
+        return $this->render('<?= $templates_path ?>/new.html.twig', [
             '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
             'form' => $form,
         ]);
@@ -100,7 +100,7 @@ class <?= $class_name ?> extends AbstractController
 <?php } ?>
 
 <?php if ($use_render_form) { ?>
-        return $this->renderForm('<?= $templates_path ?>/edit.html.twig', [
+        return $this->render('<?= $templates_path ?>/edit.html.twig', [
             '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
             'form' => $form,
         ]);
