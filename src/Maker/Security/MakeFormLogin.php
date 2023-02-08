@@ -85,7 +85,7 @@ final class MakeFormLogin extends AbstractMaker
             DependencyPackages::SECURITY_BUNDLE
         );
 
-        $dependencies->addClassDependency(TwigBundle::class, 'twig/twig');
+        $dependencies->addClassDependency(TwigBundle::class, DependencyPackages::TWIG);
 
         // needed to update the YAML files
         $dependencies->addClassDependency(
@@ -93,7 +93,7 @@ final class MakeFormLogin extends AbstractMaker
             DependencyPackages::YAML
         );
 
-        $dependencies->addClassDependency(DoctrineBundle::class, 'orm');
+        $dependencies->addClassDependency(DoctrineBundle::class, DependencyPackages::ORM_PACK);
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
