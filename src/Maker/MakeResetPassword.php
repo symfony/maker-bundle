@@ -30,6 +30,7 @@ use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -112,12 +113,12 @@ class MakeResetPassword extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
-        $dependencies->addClassDependency(SymfonyCastsResetPasswordBundle::class, 'symfonycasts/reset-password-bundle');
-        $dependencies->addClassDependency(MailerInterface::class, 'symfony/mailer');
-        $dependencies->addClassDependency(Form::class, 'symfony/form');
-        $dependencies->addClassDependency(Validation::class, 'symfony/validator');
-        $dependencies->addClassDependency(SecurityBundle::class, 'security-bundle');
-        $dependencies->addClassDependency(AppVariable::class, 'twig');
+        $dependencies->addClassDependency(SymfonyCastsResetPasswordBundle::class, DependencyPackages::RESET_PASSWORD_BUNDLE);
+        $dependencies->addClassDependency(MailerInterface::class, DependencyPackages::MAILER);
+        $dependencies->addClassDependency(Form::class, DependencyPackages::FORM);
+        $dependencies->addClassDependency(Validation::class, DependencyPackages::VALIDATOR);
+        $dependencies->addClassDependency(SecurityBundle::class, DependencyPackages::SECURITY_BUNDLE);
+        $dependencies->addClassDependency(AppVariable::class, DependencyPackages::TWIG);
 
         ORMDependencyBuilder::buildDependencies($dependencies);
 

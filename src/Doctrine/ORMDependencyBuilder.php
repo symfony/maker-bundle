@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\ORM\Mapping\Column;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 
 /**
  * @internal
@@ -35,7 +36,7 @@ final class ORMDependencyBuilder
         foreach ($classes as $class) {
             $dependencies->addClassDependency(
                 $class,
-                'orm'
+                DependencyPackages::ORM_PACK
             );
         }
     }

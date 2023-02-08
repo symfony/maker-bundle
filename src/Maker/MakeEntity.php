@@ -30,6 +30,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -322,12 +323,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             if (class_exists(ApiResource::class)) {
                 $dependencies->addClassDependency(
                     ApiResource::class,
-                    'api'
+                    DependencyPackages::API_PLATFORM_CORE
                 );
             } else {
                 $dependencies->addClassDependency(
                     LegacyApiResource::class,
-                    'api'
+                    DependencyPackages::API_PLATFORM_CORE
                 );
             }
         }
@@ -335,7 +336,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         if (null !== $input && $input->getOption('broadcast')) {
             $dependencies->addClassDependency(
                 Broadcast::class,
-                'ux-turbo-mercure'
+                DependencyPackages::UX_TURBO_MERCURE
             );
         }
 

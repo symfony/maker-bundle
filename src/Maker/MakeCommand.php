@@ -16,6 +16,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -100,7 +101,7 @@ final class MakeCommand extends AbstractMaker
     {
         $dependencies->addClassDependency(
             Command::class,
-            'console'
+            DependencyPackages::CONSOLE
         );
     }
 }

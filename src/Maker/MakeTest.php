@@ -21,6 +21,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\BrowserKit\History;
 use Symfony\Component\Console\Command\Command;
@@ -173,13 +174,13 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
             case 'WebTestCase':
                 $dependencies->addClassDependency(
                     History::class,
-                    'browser-kit',
+                    DependencyPackages::BROWSER_KIT,
                     true,
                     true
                 );
                 $dependencies->addClassDependency(
                     CssSelectorConverter::class,
-                    'css-selector',
+                    DependencyPackages::CSS_SELECTOR,
                     true,
                     true
                 );
@@ -189,7 +190,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
             case 'ApiTestCase':
                 $dependencies->addClassDependency(
                     !class_exists(ApiTestCase::class) ? LegacyApiTestCase::class : ApiTestCase::class,
-                    'api',
+                    DependencyPackages::API_PLATFORM_CORE,
                     true,
                     false
                 );
@@ -199,7 +200,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
             case 'PantherTestCase':
                 $dependencies->addClassDependency(
                     PantherTestCaseTrait::class,
-                    'panther',
+                    DependencyPackages::PANTHER,
                     true,
                     true
                 );

@@ -16,6 +16,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Console\Command\Command;
@@ -150,7 +151,7 @@ final class MakeMessage extends AbstractMaker
     {
         $dependencies->addClassDependency(
             MessageBusInterface::class,
-            'messenger'
+            DependencyPackages::MESSENGER
         );
     }
 }

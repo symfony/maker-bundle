@@ -28,6 +28,7 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -290,38 +291,38 @@ final class MakeCrud extends AbstractMaker
     {
         $dependencies->addClassDependency(
             Route::class,
-            'router'
+            DependencyPackages::ROUTING
         );
 
         $dependencies->addClassDependency(
             AbstractType::class,
-            'form'
+            DependencyPackages::FORM
         );
 
         $dependencies->addClassDependency(
             Validation::class,
-            'validator'
+            DependencyPackages::VALIDATOR
         );
 
         $dependencies->addClassDependency(
             TwigBundle::class,
-            'twig-bundle'
+            DependencyPackages::TWIG_BUNDLE
         );
 
         $dependencies->addClassDependency(
             DoctrineBundle::class,
-            'orm'
+            DependencyPackages::ORM_PACK
         );
 
         $dependencies->addClassDependency(
             CsrfTokenManager::class,
-            'security-csrf'
+            DependencyPackages::SECURITY_CSRF
         );
 
         // @legacy - Remove dependency when support for Symfony <6.2 is dropped
         $dependencies->addClassDependency(
             ParamConverter::class,
-            'annotations',
+            DependencyPackages::FRAMEWORK_EXTRA_BUNDLE,
             !class_exists(EntityValueResolver::class) // sensio/framework-extra-bundle dependency is not required when using symfony 6.2+
         );
     }

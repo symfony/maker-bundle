@@ -31,6 +31,7 @@ use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -489,27 +490,27 @@ final class MakeRegistrationForm extends AbstractMaker
     {
         $dependencies->addClassDependency(
             AbstractType::class,
-            'form'
+            DependencyPackages::FORM
         );
 
         $dependencies->addClassDependency(
             Validation::class,
-            'validator'
+            DependencyPackages::VALIDATOR
         );
 
         $dependencies->addClassDependency(
             TwigBundle::class,
-            'twig-bundle'
+            DependencyPackages::TWIG_BUNDLE
         );
 
         $dependencies->addClassDependency(
             DoctrineBundle::class,
-            'orm'
+            DependencyPackages::DOCTRINE_ORM
         );
 
         $dependencies->addClassDependency(
             SecurityBundle::class,
-            'security'
+            DependencyPackages::SECURITY_BUNDLE
         );
     }
 

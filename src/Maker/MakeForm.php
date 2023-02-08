@@ -20,6 +20,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -125,19 +126,19 @@ final class MakeForm extends AbstractMaker
         $dependencies->addClassDependency(
             AbstractType::class,
             // technically only form is needed, but the user will *probably* also want validation
-            'form'
+            DependencyPackages::FORM
         );
 
         $dependencies->addClassDependency(
             Validation::class,
-            'validator',
+            DependencyPackages::VALIDATOR,
             // add as an optional dependency: the user *probably* wants validation
             false
         );
 
         $dependencies->addClassDependency(
             DoctrineBundle::class,
-            'orm',
+            DependencyPackages::DOCTRINE_ORM,
             false
         );
     }

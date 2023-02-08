@@ -16,6 +16,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -229,7 +230,7 @@ final class MakeStimulusController extends AbstractMaker
     {
         $dependencies->addClassDependency(
             WebpackEncoreBundle::class,
-            'webpack-encore-bundle'
+            DependencyPackages::WEBPACK_ENCORE_BUNDLE
         );
     }
 }

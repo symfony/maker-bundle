@@ -24,6 +24,7 @@ use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
@@ -406,13 +407,13 @@ final class MakeAuthenticator extends AbstractMaker
     {
         $dependencies->addClassDependency(
             SecurityBundle::class,
-            'security'
+            DependencyPackages::SECURITY_BUNDLE
         );
 
         // needed to update the YAML files
         $dependencies->addClassDependency(
             Yaml::class,
-            'yaml'
+            DependencyPackages::YAML
         );
     }
 }

@@ -25,6 +25,7 @@ use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\UserClassBuilder;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -236,13 +237,13 @@ final class MakeUser extends AbstractMaker
         // checking for SecurityBundle guarantees security.yaml is present
         $dependencies->addClassDependency(
             SecurityBundle::class,
-            'security'
+            DependencyPackages::SECURITY_BUNDLE
         );
 
         // needed to update the YAML files
         $dependencies->addClassDependency(
             Yaml::class,
-            'yaml'
+            DependencyPackages::YAML
         );
 
         if (null !== $input && $input->getOption('is-entity')) {

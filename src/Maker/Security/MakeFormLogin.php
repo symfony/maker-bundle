@@ -25,6 +25,7 @@ use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -81,15 +82,15 @@ final class MakeFormLogin extends AbstractMaker
     {
         $dependencies->addClassDependency(
             SecurityBundle::class,
-            'security'
+            DependencyPackages::SECURITY_BUNDLE
         );
 
-        $dependencies->addClassDependency(TwigBundle::class, 'twig');
+        $dependencies->addClassDependency(TwigBundle::class, 'twig/twig');
 
         // needed to update the YAML files
         $dependencies->addClassDependency(
             Yaml::class,
-            'yaml'
+            DependencyPackages::YAML
         );
 
         $dependencies->addClassDependency(DoctrineBundle::class, 'orm');

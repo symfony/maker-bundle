@@ -18,6 +18,7 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ComposeFileManipulator;
+use Symfony\Bundle\MakerBundle\Util\DependencyPackages;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -153,7 +154,7 @@ final class MakeDockerDatabase extends AbstractMaker
     {
         $dependencies->addClassDependency(
             Yaml::class,
-            'yaml'
+            DependencyPackages::YAML
         );
     }
 
