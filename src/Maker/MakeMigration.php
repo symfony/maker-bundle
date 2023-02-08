@@ -147,7 +147,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
     {
         $dependencies->addClassDependency(
             DoctrineMigrationsBundle::class,
-            'migrations'
+            'doctrine/doctrine-migrations-bundle'
         );
     }
 
