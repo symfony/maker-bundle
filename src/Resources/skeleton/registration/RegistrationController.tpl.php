@@ -78,7 +78,7 @@ class <?= $class_name; ?> extends AbstractController
 <?php if (!$verify_email_anonymously): ?>
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 <?php else: ?>
-        $id = $request->get('id');
+        $id = $request->query->get('id');
 
         if (null === $id) {
             return $this->redirectToRoute('app_register');
