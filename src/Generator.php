@@ -154,8 +154,10 @@ class Generator
 
         // if this is a custom class, we may be completely different than the namespace prefix
         // the best way can do, is find the PSR4 prefix and use that
-        if (!str_starts_with($className, $fullNamespacePrefix)) {
-            $fullNamespacePrefix = $this->fileManager->getNamespacePrefixForClass($className);
+        if (!str_starts_with($name, $this->namespacePrefix)) {
+            $namespace = $this->fileManager->getNamespacePrefixForClass($name);
+            $fullNamespacePrefix = $namespace.$namespacePrefix;
+            $className = rtrim($fullNamespacePrefix, '\\').'\\'.Str::asClassName(str_replace($namespace, '', $name), $suffix);
         }
 
         return new ClassNameDetails($className, $fullNamespacePrefix, $suffix);
