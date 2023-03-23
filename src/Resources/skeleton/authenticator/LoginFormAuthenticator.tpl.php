@@ -23,9 +23,10 @@ class <?= $class_name; ?> extends AbstractLoginFormAuthenticator
         return new Passport(
             new UserBadge($<?= $username_field_var ?>),
             new PasswordCredentials($request->request->get('password', '')),
-            [
+            array_filter([
                 new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
-            ]
+                (bool) $request->request->get('_remember_me') ? new RememberMeBadge() : null,
+            ])
         );
     }
 
