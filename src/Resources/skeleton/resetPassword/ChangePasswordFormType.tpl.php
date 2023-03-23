@@ -29,7 +29,9 @@ class <?= $class_name ?> extends AbstractType
                             'max' => 64,
                             'maxMessage' => 'Your password cannot be longer than {{ limit }} characters',
                         ]),
-                        new NotCompromisedPassword(),
+                        new NotCompromisedPassword([
+                            'skipOnError' => true,
+                        ]),
                     ],
                     'label' => 'New password',
                 ],
