@@ -53,6 +53,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotCompromisedPassword;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -292,6 +293,7 @@ class MakeResetPassword extends AbstractMaker
             OptionsResolver::class,
             Length::class,
             NotBlank::class,
+            NotCompromisedPassword::class,
         ]);
 
         $generator->generateClass(

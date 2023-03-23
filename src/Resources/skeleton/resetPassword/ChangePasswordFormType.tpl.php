@@ -22,11 +22,14 @@ class <?= $class_name ?> extends AbstractType
                             'message' => 'Please enter a password',
                         ]),
                         new Length([
-                            'min' => 6,
+                            // min and max lengths recommended as per the OWASP Cheat Sheet and the hashing function limitations
+                            // see https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html#implement-proper-password-strength-controls
+                            'min' => 8,
                             'minMessage' => 'Your password should be at least {{ limit }} characters',
-                            // max length allowed by Symfony for security reasons
-                            'max' => 4096,
+                            'max' => 64,
+                            'maxMessage' => 'Your password cannot be longer than {{ limit }} characters',
                         ]),
+                        new NotCompromisedPassword(),
                     ],
                     'label' => 'New password',
                 ],
