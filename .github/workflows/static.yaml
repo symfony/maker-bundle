@@ -1,0 +1,39 @@
+name: Static
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+    release:
+    schedule:
+        -   cron: '0 0 * * *'
+
+jobs:
+    composer-validate:
+        name: Validate composer.json
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v3
+
+            -   name: Validate
+                run: composer validate --strict --no-check-lock
+
+    php-cs-fixer:
+        name: PHP-CS-Fixer
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v3
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: '8.1'
+                    tools: php-cs-fixer
+
+            -   name: Style Check
+                run: php-cs-fixer fix --dry-run --diff
