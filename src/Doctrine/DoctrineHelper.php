@@ -35,7 +35,7 @@ use Symfony\Component\Uid\Uuid;
  *
  * @internal
  */
-final class DoctrineHelper
+class DoctrineHelper
 {
     public function __construct(
         private string $entityNamespace,
