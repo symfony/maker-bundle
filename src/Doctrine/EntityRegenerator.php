@@ -257,8 +257,8 @@ final class EntityRegenerator
             $targetFields = array_diff($targetFields, $traitProperties);
 
             // exclude inherited properties
-            $targetFields = array_filter($targetFields, static fn ($field) => $classReflection->hasProperty($field) &&
-                $classReflection->getProperty($field)->getDeclaringClass()->getName() === $classReflection->getName());
+            $targetFields = array_filter($targetFields, static fn ($field) => $classReflection->hasProperty($field)
+                && $classReflection->getProperty($field)->getDeclaringClass()->getName() === $classReflection->getName());
         }
 
         return $targetFields;

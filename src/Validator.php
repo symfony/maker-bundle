@@ -159,7 +159,7 @@ final class Validator
     public static function validateDoctrineFieldName(string $name, ManagerRegistry|LegacyManagerRegistry $registry): string
     {
         if (!$registry instanceof ManagerRegistry && !$registry instanceof LegacyManagerRegistry) {
-            throw new \InvalidArgumentException(sprintf('Argument 2 to %s::validateDoctrineFieldName must be an instance of %s, %s passed.', __CLASS__, ManagerRegistry::class, \is_object($registry) ? \get_class($registry) : \gettype($registry)));
+            throw new \InvalidArgumentException(sprintf('Argument 2 to %s::validateDoctrineFieldName must be an instance of %s, %s passed.', __CLASS__, ManagerRegistry::class, \is_object($registry) ? $registry::class : \gettype($registry)));
         }
 
         // check reserved words
@@ -181,7 +181,7 @@ final class Validator
         return $email;
     }
 
-    public static function existsOrNull(?string $className = null, array $entities = []): ?string
+    public static function existsOrNull(string $className = null, array $entities = []): ?string
     {
         if (null !== $className) {
             self::validateClassName($className);
