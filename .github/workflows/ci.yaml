@@ -16,7 +16,7 @@ jobs:
     coding-standards:
         name: "Coding Standards (${{ matrix.php-version }})"
 
-        runs-on: "ubuntu-18.04"
+        runs-on: ubuntu-latest
 
         strategy:
             fail-fast: false
@@ -59,7 +59,7 @@ jobs:
     test:
         name: "PHP ${{ matrix.php-version }} + @${{ matrix.symfony-version }} ${{ matrix.dependency-versions }} deps"
 
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-latest
 
         services:
             mysql:
