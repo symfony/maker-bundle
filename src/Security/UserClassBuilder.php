@@ -304,7 +304,7 @@ final class UserClassBuilder
         // add eraseCredentials: always empty
         $builder = $manipulator->createMethodBuilder(
             'eraseCredentials',
-            null,
+            'void',
             false,
             ['@see UserInterface']
         );
