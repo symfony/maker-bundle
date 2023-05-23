@@ -59,7 +59,7 @@ final class TemplateLinter
         foreach ($templateFilePath as $filePath) {
             $cmdPrefix = $this->needsPhpCmdPrefix ? 'php ' : '';
 
-            $process = Process::fromShellCommandline(sprintf('%s%s --config=%s --using-cache=no fix %s', $cmdPrefix, $this->phpCsFixerBinaryPath, $this->phpCsFixerConfigPath, $filePath));
+            $process = Process::fromShellCommandline(sprintf('PHP_CS_FIXER_IGNORE_ENV=1 %s%s --config=%s --using-cache=no fix %s', $cmdPrefix, $this->phpCsFixerBinaryPath, $this->phpCsFixerConfigPath, $filePath));
 
             $process->run();
         }
