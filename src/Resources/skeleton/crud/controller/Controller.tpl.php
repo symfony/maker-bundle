@@ -62,7 +62,7 @@ class <?= $class_name ?> extends AbstractController
 <?php } else { ?>
         return $this->render('<?= $templates_path ?>/new.html.twig', [
             '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
 <?php } ?>
     }
@@ -107,7 +107,7 @@ class <?= $class_name ?> extends AbstractController
 <?php } else { ?>
         return $this->render('<?= $templates_path ?>/edit.html.twig', [
             '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
 <?php } ?>
     }
