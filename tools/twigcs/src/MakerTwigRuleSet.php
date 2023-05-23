@@ -31,9 +31,6 @@ final class MakerTwigRuleSet implements RulesetInterface
         $this->twigMajorVersion = $twigMajorVersion;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRules(): array
     {
         $configurator = new RulesetConfigurator();
