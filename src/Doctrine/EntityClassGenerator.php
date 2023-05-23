@@ -35,7 +35,7 @@ final class EntityClassGenerator
     ) {
     }
 
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false): string
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false, bool $useLegacyRepoMethods = false): string
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -77,14 +77,15 @@ final class EntityClassGenerator
                 $repoClassDetails->getFullName(),
                 $entityClassDetails->getFullName(),
                 $withPasswordUpgrade,
-                true
+                true,
+                $useLegacyRepoMethods
             );
         }
 
         return $entityPath;
     }
 
-    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade, bool $includeExampleComments = true): void
+    public function generateRepositoryClass(string $repositoryClass, string $entityClass, bool $withPasswordUpgrade, bool $includeExampleComments = true, bool $useLegacyMethods = false): void
     {
         $shortEntityClass = Str::getShortClassName($entityClass);
         $entityAlias = strtolower($shortEntityClass[0]);
@@ -121,6 +122,7 @@ final class EntityClassGenerator
                 'with_password_upgrade' => $withPasswordUpgrade,
                 'password_upgrade_user_interface' => $interfaceClassNameDetails,
                 'include_example_comments' => $includeExampleComments,
+                'use_legacy_methods' => $useLegacyMethods,
             ]
         );
     }

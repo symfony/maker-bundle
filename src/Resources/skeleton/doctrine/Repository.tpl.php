@@ -19,6 +19,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
         parent::__construct($registry, <?= $entity_class_name; ?>::class);
     }
 
+<?php if ($use_legacy_methods): ?>
     public function save(<?= $entity_class_name ?> $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -36,6 +37,34 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
             $this->getEntityManager()->flush();
         }
     }
+<?php else: ?>
+    public function persist(<?= $entity_class_name ?> $entity): void
+    {
+        $this->_em->persist($entity);
+    }
+
+    public function persistAndFlush(<?= $entity_class_name ?> $entity): void
+    {
+        $this->persist($entity);
+        $this->flush();
+    }
+
+    public function flush(): void
+    {
+        $this->_em->flush();
+    }
+
+    public function remove(<?= $entity_class_name ?> $entity): void
+    {
+        $this->_em->remove($entity);
+    }
+
+    public function removeAndFlush(<?= $entity_class_name ?> $entity): void
+    {
+        $this->remove($entity);
+        $this->flush();
+    }
+<?php endif; ?>
 <?php if ($include_example_comments): // When adding a new method without existing default comments, the blank line is automatically added.?>
 
 <?php endif; ?>
