@@ -102,6 +102,18 @@ final class ClassSourceManipulator
             }
         }
 
+        // Check if we are dealing with a custom type
+        if (
+            empty($typeConstant)
+            && isset($columnOptions['type'])
+            && class_exists('\Doctrine\DBAL\Types\Type')
+        ) {
+            $typeRegistry = \Doctrine\DBAL\Types\Type::getTypeRegistry();
+            $type = $typeRegistry->get($columnOptions['type']);
+
+            $typeHint = $type::class;
+        }
+
         // 2) USE property type on property below, nullable
         // 3) If default value, then NOT nullable
 
@@ -112,8 +124,15 @@ final class ClassSourceManipulator
         $defaultValue = null;
         if ('array' === $typeHint) {
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
-        } elseif ($typeHint && '\\' === $typeHint[0] && false !== strpos($typeHint, '\\', 1)) {
-            $typeHint = $this->addUseStatementIfNecessary(substr($typeHint, 1));
+        } elseif ($typeHint) {
+            $backslashPosition = strpos($typeHint, '\\');
+            if ($backslashPosition === 1) {
+                // Remove preceeding backslash
+                $typeHint = $this->addUseStatementIfNecessary(substr($typeHint, 1));
+            } elseif ($backslashPosition !== false) {
+                // Containts backslash, add use statement
+                $typeHint = $this->addUseStatementIfNecessary($typeHint);
+            }
         }
 
         $propertyType = $typeHint;
