@@ -464,6 +464,10 @@ final class ClassSourceManipulator
             $annotationOptions['targetEntity'] = new ClassNameValue($typeHint, $relation->getTargetClassName());
         }
 
+        if ($cascade = $relation->getCascade()) {
+            $annotationOptions['cascade'] = $cascade;
+        }
+
         if ($relation instanceof RelationOneToOne) {
             $annotationOptions['cascade'] = ['persist', 'remove'];
         }
@@ -548,6 +552,10 @@ final class ClassSourceManipulator
 
         if ($relation->getOrphanRemoval()) {
             $annotationOptions['orphanRemoval'] = true;
+        }
+
+        if ($cascade = $relation->getCascade()) {
+            $annotationOptions['cascade'] = $cascade;
         }
 
         $attributes = [
