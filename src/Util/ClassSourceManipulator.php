@@ -107,7 +107,8 @@ final class ClassSourceManipulator
 
         $nullable = $columnOptions['nullable'] ?? false;
         $isId = (bool) ($columnOptions['id'] ?? false);
-        $attributes[] = $this->buildAttributeNode(Column::class, $columnOptions, 'ORM');
+        $attributes[Column::class] = $this->buildAttributeNode(Column::class, $columnOptions, 'ORM');
+        $attributes = array_values(array_merge($attributes, $relation->getAdditionnalAttributes()));
 
         $defaultValue = null;
         if ('array' === $typeHint) {
@@ -150,12 +151,13 @@ final class ClassSourceManipulator
         $typeHint = $this->addUseStatementIfNecessary($className);
 
         $attributes = [
-            $this->buildAttributeNode(
+            Embedded::class => $this->buildAttributeNode(
                 Embedded::class,
                 ['class' => new ClassNameValue($className, $typeHint)],
                 'ORM'
             ),
         ];
+        $attributes = array_values(array_merge($attributes, $relation->getAdditionnalAttributes()));
 
         $this->addProperty(
             name: $propertyName,
@@ -468,17 +470,20 @@ final class ClassSourceManipulator
             $annotationOptions['cascade'] = ['persist', 'remove'];
         }
 
+        $attributeClass = $relation instanceof RelationManyToOne ? ManyToOne::class : OneToOne::class;
         $attributes = [
             $this->buildAttributeNode(
-                $relation instanceof RelationManyToOne ? ManyToOne::class : OneToOne::class,
+                $attributeClass,
                 $annotationOptions,
                 'ORM'
             ),
         ];
 
         if (!$relation->isNullable() && $relation->isOwning()) {
-            $attributes[] = $this->buildAttributeNode(JoinColumn::class, ['nullable' => false], 'ORM');
+            $attributes[JoinColumn::class] = $this->buildAttributeNode(JoinColumn::class, ['nullable' => false], 'ORM');
         }
+
+        $attributes = array_values(array_merge($attributes, $relation->getAdditionnalAttributes()));
 
         $this->addProperty(
             name: $relation->getPropertyName(),
@@ -550,13 +555,17 @@ final class ClassSourceManipulator
             $annotationOptions['orphanRemoval'] = true;
         }
 
+        $attributeClass = $relation instanceof RelationManyToMany ? ManyToMany::class : OneToMany::class;
+
         $attributes = [
-            $this->buildAttributeNode(
-                $relation instanceof RelationManyToMany ? ManyToMany::class : OneToMany::class,
+            $attributeClass => $this->buildAttributeNode(
+                $attributeClass,
                 $annotationOptions,
                 'ORM'
             ),
         ];
+
+        $attributes = array_values(array_merge($attributes, $relation->getAdditionnalAttributes()));
 
         $this->addProperty(
             name: $relation->getPropertyName(),
