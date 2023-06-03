@@ -790,7 +790,7 @@ final class ClassSourceManipulator
                 }
 
                 $lastUseStmtIndex = $index;
-            } elseif ($stmt instanceof Node\Stmt\Class_) {
+            } elseif ($stmt instanceof Node\Stmt\Class_ || $stmt instanceof Node\Stmt\Trait_) {
                 if (null !== $targetIndex) {
                     // we already found where to place the use statement
 
@@ -910,10 +910,10 @@ final class ClassSourceManipulator
         $this->newStmts = $traverser->traverse($this->oldStmts);
     }
 
-    private function getClassNode(): Node\Stmt\Class_
+    private function getClassNode(): Node\Stmt\Class_|Node\Stmt\Trait_
     {
         $node = $this->findFirstNode(function ($node) {
-            return $node instanceof Node\Stmt\Class_;
+            return $node instanceof Node\Stmt\Class_ || $node instanceof Node\Stmt\Trait_;
         });
 
         if (!$node) {
