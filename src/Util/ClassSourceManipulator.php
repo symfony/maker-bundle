@@ -16,7 +16,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
+use Doctrine\ORM\Mapping\InverseJoinColumn;
 use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\JoinTable;
 use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -468,17 +470,45 @@ final class ClassSourceManipulator
             $annotationOptions['cascade'] = ['persist', 'remove'];
         }
 
+        $attributeClass = $relation instanceof RelationManyToOne ? ManyToOne::class : OneToOne::class;
+
+        $additionnalAttributes = $relation->getAdditionnalAttributes();
+
+        if (array_key_exists($attributeClass, $additionnalAttributes)) {
+            throw new \LogicException('Impossible to set '.$attributeClass.' as additionnal attribute');
+        }
+
+        if (array_key_exists(JoinTable::class, $additionnalAttributes)) {
+            throw new \LogicException(JoinTable::class.' annotation have no sense with '.$attributeClass);
+        }
+
         $attributes = [
-            $this->buildAttributeNode(
-                $relation instanceof RelationManyToOne ? ManyToOne::class : OneToOne::class,
+            $attributeClass => $this->buildAttributeNode(
+                $attributeClass,
                 $annotationOptions,
                 'ORM'
             ),
         ];
 
         if (!$relation->isNullable() && $relation->isOwning()) {
-            $attributes[] = $this->buildAttributeNode(JoinColumn::class, ['nullable' => false], 'ORM');
+            $options = ['nullable' => false];
+
+            if (!empty($additionnalAttributes[JoinColumn::class])) {
+                $options = array_merge($options, $additionnalAttributes[JoinColumn::class]);
+            }
+
+            $additionnalAttributes[JoinColumn::class] = $options;
         }
+
+        foreach ($additionnalAttributes as $class => $options) {
+            $attributes[$class] = $this->buildAttributeNode(
+                $class,
+                $options,
+                'ORM'
+            );
+        }
+
+        $attributes = array_values($attributes);
 
         $this->addProperty(
             name: $relation->getPropertyName(),
@@ -550,13 +580,39 @@ final class ClassSourceManipulator
             $annotationOptions['orphanRemoval'] = true;
         }
 
+        $attributeClass = $relation instanceof RelationManyToMany ? ManyToMany::class : OneToMany::class;
+
+        $additionnalAttributes = $relation->getAdditionnalAttributes();
+
+        if (array_key_exists($attributeClass, $additionnalAttributes)) {
+            throw new \LogicException('Impossible to set '.$attributeClass.' as additionnal attribute');
+        }
+
+        if (array_key_exists(JoinTable::class, $additionnalAttributes) && $attributeClass === OneToMany::class) {
+            throw new \LogicException(JoinTable::class.' annotation have no sense with '.OneToMany::class);
+        }
+
+        if (array_key_exists(InverseJoinColumn::class, $additionnalAttributes) && $attributeClass === OneToMany::class) {
+            throw new \LogicException(InverseJoinColumn::class.' annotation have no sense with '.OneToMany::class);
+        }
+
         $attributes = [
-            $this->buildAttributeNode(
-                $relation instanceof RelationManyToMany ? ManyToMany::class : OneToMany::class,
+            $attributeClass => $this->buildAttributeNode(
+                $attributeClass,
                 $annotationOptions,
                 'ORM'
-            ),
+            )
         ];
+
+        foreach ($additionnalAttributes as $class => $options) {
+            $attributes[$class] = $this->buildAttributeNode(
+                $class,
+                $options,
+                'ORM'
+            );
+        }
+
+        $attributes = array_values($attributes);
 
         $this->addProperty(
             name: $relation->getPropertyName(),
