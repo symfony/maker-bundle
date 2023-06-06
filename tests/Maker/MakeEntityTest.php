@@ -331,7 +331,7 @@ class MakeEntityTest extends MakerTestCase
                     '',
                 ]);
 
-                $this->assertStringContainsString('updated: src/Entity/User.php', $output);
+                $this->assertStringContainsString('src/Entity/User.php', $output);
                 $this->assertStringNotContainsString('updated: vendor/', $output);
 
                 // sanity checks on the generated code

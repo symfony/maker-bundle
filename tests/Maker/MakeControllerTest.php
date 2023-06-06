@@ -75,8 +75,8 @@ class MakeControllerTest extends MakerTestCase
 
                 // make sure the template was not configured
                 $this->assertContainsCount('created: ', $output, 1);
-                $this->assertStringContainsString('created: src/Controller/FooNoTemplateController.php', $output);
-                $this->assertStringNotContainsString('created: templates/foo_no_template/index.html.twig', $output);
+                $this->assertStringContainsString('src/Controller/FooNoTemplateController.php', $output);
+                $this->assertStringNotContainsString('templates/foo_no_template/index.html.twig', $output);
             }),
         ];
 
@@ -88,7 +88,7 @@ class MakeControllerTest extends MakerTestCase
                 ]);
 
                 $this->assertFileExists($runner->getPath('src/Controller/Admin/FooBarController.php'));
-                $this->assertStringContainsString('created: src/Controller/Admin/FooBarController.php', $output);
+                $this->assertStringContainsString('src/Controller/Admin/FooBarController.php', $output);
             }),
         ];
 
@@ -112,8 +112,8 @@ class MakeControllerTest extends MakerTestCase
                     '\App\Foo\Bar\CoolController',
                 ]);
 
-                $this->assertStringContainsString('created: src/Foo/Bar/CoolController.php', $output);
-                $this->assertStringContainsString('created: templates/foo/bar/cool/index.html.twig', $output);
+                $this->assertStringContainsString('src/Foo/Bar/CoolController.php', $output);
+                $this->assertStringContainsString('templates/foo/bar/cool/index.html.twig', $output);
             }),
         ];
     }

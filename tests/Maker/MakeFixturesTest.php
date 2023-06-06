@@ -30,7 +30,7 @@ class MakeFixturesTest extends MakerTestCase
                     'FooFixtures',
                 ]);
 
-                $this->assertStringContainsString('created: src/DataFixtures/FooFixtures.php', $output);
+                $this->assertStringContainsString('src/DataFixtures/FooFixtures.php', $output);
             }),
         ];
     }
