@@ -2,10 +2,11 @@
 
 ## [v1.49.0](https://github.com/symfony/maker-bundle/releases/tag/v1.49.0)
 
-*May 23rd, 2023*
+*June 7th, 2023*
 
 ### Feature
 
+- [#1321](https://github.com/symfony/maker-bundle/pull/1321) - Changing make:stimulus-controller to require StimulusBundle - *@weaverryan*
 - [#1309](https://github.com/symfony/maker-bundle/pull/1309) - Apply `get_class_to_class_keyword` PHP-CS-Fixer rule - *@seb-jean*
 - [#1276](https://github.com/symfony/maker-bundle/pull/1276) - [make:migration] Change message when required package for migration doesn't exist. - *@bdaler*
 - [#1261](https://github.com/symfony/maker-bundle/pull/1261) - [make:registration-form] use UniqueEntity attribute instead of annotation - *@jrushlow*
