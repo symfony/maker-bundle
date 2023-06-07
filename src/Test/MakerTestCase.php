@@ -54,6 +54,10 @@ abstract class MakerTestCase extends TestCase
             $this->markTestSkipped();
         }
 
+        if ($testDetails->skipOnWindows() && '\\' === \DIRECTORY_SEPARATOR) {
+            $this->markTestSkipped('This test is not supported on Windows');
+        }
+
         $testEnv = MakerTestEnvironment::create($testDetails);
 
         // prepare environment to test
