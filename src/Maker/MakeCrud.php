@@ -181,7 +181,7 @@ final class MakeCrud extends AbstractMaker
                     'entity_twig_var_singular' => $entityTwigVarSingular,
                     'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
                     // @legacy - Remove when support for Symfony <6 is dropped
-                    'use_render_form' => Kernel::VERSION_ID < 62000,
+                    'use_render_form' => Kernel::VERSION_ID < 60200,
                 ],
                 $repositoryVars
             )
