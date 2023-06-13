@@ -23,19 +23,21 @@ class XOtherRepository extends ServiceEntityRepository
 
     public function save(XOther $entity, bool $flush = false): void
     {
-        $this->getEntityManager()->persist($entity);
+        $entityManager = $this->getEntityManager();
+        $entityManager->persist($entity);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $entityManager->flush();
         }
     }
 
     public function remove(XOther $entity, bool $flush = false): void
     {
-        $this->getEntityManager()->remove($entity);
+        $entityManager = $this->getEntityManager();
+        $entityManager->remove($entity);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $entityManager->flush();
         }
     }
 

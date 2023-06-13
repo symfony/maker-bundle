@@ -23,19 +23,21 @@ class UserRepository extends ServiceEntityRepository
 
     public function save(UserXml $entity, bool $flush = false): void
     {
-        $this->getEntityManager()->persist($entity);
+        $entityManager = $this->getEntityManager();
+        $entityManager->persist($entity);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $entityManager->flush();
         }
     }
 
     public function remove(UserXml $entity, bool $flush = false): void
     {
-        $this->getEntityManager()->remove($entity);
+        $entityManager = $this->getEntityManager();
+        $entityManager->remove($entity);
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $entityManager->flush();
         }
     }
 
