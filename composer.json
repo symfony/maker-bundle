@@ -4,7 +4,7 @@
     "name": "symfony/maker-bundle",
     "type": "symfony-bundle",
     "license": "MIT",
-    "keywords": ["generator", "code generator", "scaffolding", "scaffold"],
+    "keywords": ["generator", "code generator", "scaffolding", "scaffold", "dev"],
     "authors": [
         {
             "name": "Symfony Community",
