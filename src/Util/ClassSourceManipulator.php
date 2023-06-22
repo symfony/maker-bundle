@@ -164,7 +164,7 @@ final class ClassSourceManipulator
         );
 
         // logic to avoid re-adding the same ArrayCollection line
-        $addEmbedded = true;
+        $addEmbedded = false === $this->getClassNode() instanceof Node\Stmt\Trait_;
         if ($this->getConstructorNode()) {
             // We print the constructor to a string, then
             // look for "$this->propertyName = "
@@ -565,7 +565,7 @@ final class ClassSourceManipulator
         );
 
         // logic to avoid re-adding the same ArrayCollection line
-        $addArrayCollection = true;
+        $addArrayCollection = false === $this->getClassNode() instanceof Node\Stmt\Trait_;
         if ($this->getConstructorNode()) {
             // We print the constructor to a string, then
             // look for "$this->propertyName = "
