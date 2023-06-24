@@ -18,26 +18,6 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
     {
         parent::__construct($registry, <?= $entity_class_name; ?>::class);
     }
-
-    public function save(<?= $entity_class_name ?> $entity, bool $flush = false): void
-    {
-        $entityManager = $this->getEntityManager();
-        $entityManager->persist($entity);
-
-        if ($flush) {
-            $entityManager->flush();
-        }
-    }
-
-    public function remove(<?= $entity_class_name ?> $entity, bool $flush = false): void
-    {
-        $entityManager = $this->getEntityManager();
-        $entityManager->remove($entity);
-
-        if ($flush) {
-            $entityManager->flush();
-        }
-    }
 <?php if ($include_example_comments): // When adding a new method without existing default comments, the blank line is automatically added.?>
 
 <?php endif; ?>
@@ -52,8 +32,8 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
         }
 
         $user->setPassword($newHashedPassword);
-
-        $this->save($user, true);
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
     }
 
 <?php endif ?>
