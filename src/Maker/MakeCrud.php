@@ -163,6 +163,7 @@ final class MakeCrud extends AbstractMaker
             Request::class,
             Response::class,
             Route::class,
+            EntityManagerInterface::class,
         ]);
 
         $generator->generateController(
