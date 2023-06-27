@@ -23,6 +23,7 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Uid\Uuid;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 /**
@@ -57,6 +58,10 @@ final class EntityClassGenerator
 
         if ($apiResource) {
             $useStatements->addUseStatement(ApiResource::class);
+        }
+
+        if ($useUUIDIdentifier) {
+            $useStatements->addUseStatement(Uuid::class);
         }
 
         $entityPath = $this->generator->generateClass(
