@@ -117,7 +117,7 @@ final class MakeUser extends AbstractMaker
     {
         if ($input->getOption('uuid_id')) {
             if (!class_exists('Symfony\Component\Uid\Uuid')) {
-                throw new \Exception('The symfony/uid package is not installed');
+                $io->warning('The symfony/uid package is not installed');
             }
         }
 
