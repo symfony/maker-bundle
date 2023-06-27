@@ -15,6 +15,18 @@ namespace <?= $namespace ?>;
 <?php endif ?>
 class <?= $class_name."\n" ?>
 {
+<?php if ($uuid_id_enabled): ?>
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private ?Uuid $id = null;
+
+    public function getId(): ?Uuid
+    {
+        return $this->id;
+    }
+<?php else: ?>
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -24,4 +36,5 @@ class <?= $class_name."\n" ?>
     {
         return $this->id;
     }
+<?php endif ?>
 }

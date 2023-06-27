@@ -74,6 +74,7 @@ final class MakeUser extends AbstractMaker
             ->addOption('is-entity', null, InputOption::VALUE_NONE, 'Do you want to store user data in the database (via Doctrine)?')
             ->addOption('identity-property-name', null, InputOption::VALUE_REQUIRED, 'Enter a property name that will be the unique "display" name for the user (e.g. <comment>email, username, uuid</comment>)')
             ->addOption('with-password', null, InputOption::VALUE_NONE, 'Will this app be responsible for checking the password? Choose <comment>No</comment> if the password is actually checked by some other system (e.g. a single sign-on server)')
+            ->addOption('uuid_id', 'u', InputOption::VALUE_NONE, 'Use UUIDs as id fields')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeUser.txt'));
 
         $inputConfig->setArgumentAsNonInteractive('name');
@@ -114,6 +115,12 @@ final class MakeUser extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        if ($input->getOption('uuid_id')) {
+            if(!class_exists('Symfony\Component\Uid\Uuid')) {
+                throw new \Exception('The symfony/uid package is not installed');
+            }
+        }
+
         $userClassConfiguration = new UserClassConfiguration(
             $input->getOption('is-entity'),
             $input->getOption('identity-property-name'),
@@ -130,7 +137,9 @@ final class MakeUser extends AbstractMaker
             $classPath = $this->entityClassGenerator->generateEntityClass(
                 $userClassNameDetails,
                 false, // api resource
-                $userClassConfiguration->hasPassword() // security user
+                $userClassConfiguration->hasPassword(), // security user
+                true,
+                $input->getOption('uuid_id')
             );
         } else {
             $classPath = $generator->generateClass($userClassNameDetails->getFullName(), 'Class.tpl.php');

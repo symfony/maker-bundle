@@ -36,6 +36,7 @@ use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -108,6 +109,7 @@ class MakeResetPassword extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
+            ->addOption('uuid_id', 'u', InputOption::VALUE_NONE, 'Use UUIDs as id fields')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeResetPassword.txt'))
         ;
     }
@@ -184,6 +186,12 @@ class MakeResetPassword extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        if ($input->getOption('uuid_id')) {
+            if(!class_exists('Symfony\Component\Uid\Uuid')) {
+                throw new \Exception('The symfony/uid package is not installed');
+            }
+        }
+
         $userClassNameDetails = $generator->createClassNameDetails(
             '\\'.$this->userClass,
             'Entity\\'
@@ -265,7 +273,7 @@ class MakeResetPassword extends AbstractMaker
             ]
         );
 
-        $this->generateRequestEntity($generator, $requestClassNameDetails, $repositoryClassNameDetails);
+        $this->generateRequestEntity($generator, $requestClassNameDetails, $repositoryClassNameDetails, $input->getOption('uuid_id'));
 
         $this->setBundleConfig($io, $generator, $repositoryClassNameDetails->getFullName());
 
@@ -398,9 +406,9 @@ class MakeResetPassword extends AbstractMaker
         $io->newLine();
     }
 
-    private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails): void
+    private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails, $useUUIDIdentifier = false): void
     {
-        $requestEntityPath = $this->entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, false);
+        $requestEntityPath = $this->entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, false, $useUUIDIdentifier);
 
         $generator->writeChanges();
 

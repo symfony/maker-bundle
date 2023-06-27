@@ -94,6 +94,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             ->addOption('broadcast', 'b', InputOption::VALUE_NONE, 'Add the ability to broadcast entity updates using Symfony UX Turbo?')
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
+            ->addOption('uuid_id', 'u', InputOption::VALUE_NONE, 'Use UUIDs as id fields')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
         ;
 
@@ -165,6 +166,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        if ($input->getOption('uuid_id')) {
+            if(!class_exists('Symfony\Component\Uid\Uuid')) {
+                throw new \Exception('The symfony/uid package is not installed');
+            }
+        }
+
         $overwrite = $input->getOption('overwrite');
 
         // the regenerate option has entirely custom behavior
@@ -188,6 +195,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 $input->getOption('api-resource'),
                 false,
                 true,
+                $input->getOption('uuid_id'),
                 $broadcast
             );
 
