@@ -139,6 +139,27 @@ class MakeEntityTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_creates_a_new_class_with_uuid' => [$this->createMakeEntityTest()
+            ->addExtraDependencies('uid')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // add not additional fields
+                    '',
+                ], '--uuid_id');
+
+                $this->assertFileExists($runner->getPath('src/Entity/User.php'));
+
+                $content = file_get_contents($runner->getPath('src/Entity/User.php'));
+                $this->assertStringContainsString('use Symfony\Component\Uid\Uuid;', $content);
+                $this->assertStringContainsString('[ORM\CustomIdGenerator(class: \'doctrine.uuid_generator\')]', $content);
+
+                $this->runEntityTest($runner);
+            }),
+
+        ];
+
         yield 'it_creates_a_new_class_with_fields' => [$this->createMakeEntityTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([

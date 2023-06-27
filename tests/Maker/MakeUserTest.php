@@ -45,6 +45,27 @@ class MakeUserTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_generates_entity_with_password_and_uuid' => [$this->createMakerTest()
+            ->addExtraDependencies('doctrine')
+            ->addExtraDependencies('uid')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-user/standard_setup',
+                    ''
+                );
+
+                $runner->runMaker([
+                    // user class name
+                    'User',
+                    'y', // entity
+                    'email', // identity property
+                    'y', // with password
+                ], '--uuid_id');
+
+                $this->runUserTest($runner, 'it_generates_entity_with_password_and_uuid.php');
+            }),
+        ];
+
         yield 'it_generates_non_entity_no_password' => [$this->createMakerTest()
             ->addExtraDependencies('doctrine')
             ->run(function (MakerTestRunner $runner) {
