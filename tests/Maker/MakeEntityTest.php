@@ -140,7 +140,7 @@ class MakeEntityTest extends MakerTestCase
         ];
 
         yield 'it_creates_a_new_class_with_uuid' => [$this->createMakeEntityTest()
-            ->addExtraDependencies('uid')
+            ->addExtraDependencies('symfony/uid')
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([
                     // entity class name
@@ -157,7 +157,6 @@ class MakeEntityTest extends MakerTestCase
 
                 $this->runEntityTest($runner);
             }),
-
         ];
 
         yield 'it_creates_a_new_class_with_fields' => [$this->createMakeEntityTest()

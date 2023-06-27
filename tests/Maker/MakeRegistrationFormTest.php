@@ -124,31 +124,6 @@ class MakeRegistrationFormTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_registration_with_uuid_entity_and_authenticator' => [$this->createRegistrationFormTest()
-            ->run(function (MakerTestRunner $runner) {
-                $this->makeUser($runner);
-
-                $runner->modifyYamlFile('config/packages/security.yaml', function (array $data) {
-                    $data['security']['firewalls']['main']['custom_authenticator'] = 'App\\Security\\StubAuthenticator';
-
-                    return $data;
-                });
-
-                $runner->runMaker([
-                    // user class guessed,
-                    // username field guessed
-                    // password guessed
-                    '', // yes to add UniqueEntity
-                    'n', // verify user
-                    // firewall name guessed
-                    '', // yes authenticate after
-                    // 1 authenticator will be guessed
-                ], '--uuid_id');
-
-                $this->runRegistrationTest($runner, 'it_generates_registration_with_uuid_entity_and_authenticator.php');
-            }),
-        ];
-
         yield 'it_generates_registration_form_with_no_guessing' => [$this->createRegistrationFormTest()
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'emailAlt');

@@ -13,7 +13,6 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;

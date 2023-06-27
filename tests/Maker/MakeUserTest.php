@@ -47,7 +47,7 @@ class MakeUserTest extends MakerTestCase
 
         yield 'it_generates_entity_with_password_and_uuid' => [$this->createMakerTest()
             ->addExtraDependencies('doctrine')
-            ->addExtraDependencies('uid')
+            ->addExtraDependencies('symfony/uid')
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
                     'make-user/standard_setup',
