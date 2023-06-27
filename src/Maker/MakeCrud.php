@@ -163,8 +163,11 @@ final class MakeCrud extends AbstractMaker
             Request::class,
             Response::class,
             Route::class,
-            EntityManagerInterface::class,
         ]);
+
+        if (EntityManagerInterface::class !== $repositoryClassName) {
+            $useStatements->addUseStatement(EntityManagerInterface::class);
+        }
 
         $generator->generateController(
             $controllerClassDetails->getFullName(),
@@ -257,6 +260,10 @@ final class MakeCrud extends AbstractMaker
 
             if ($usesEntityManager) {
                 $useStatements->addUseStatement(EntityRepository::class);
+            }
+
+            if (EntityManagerInterface::class !== $repositoryClassName) {
+                $useStatements->addUseStatement(EntityManagerInterface::class);
             }
 
             $generator->generateFile(
