@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Tests;
+
+use App\Document\User;
+use Doctrine\ODM\MongoDB\DocumentManager;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+
+class GeneratedDocumentTest extends KernelTestCase
+{
+    public function testGeneratedDocument()
+    {
+        self::bootKernel();
+        /** @var DocumentManager $dm */
+        $dm = self::$kernel->getContainer()
+            ->get('doctrine_mongodb')
+            ->getManager();
+
+        $dm->createQueryBuilder(User::class)
+            ->remove()
+            ->getQuery()
+            ->execute();
+
+        $user = new User();
+        {% for field, value in data %}
+        $user->set{{ field|title }}('{{ value }}');
+        {% endfor %}
+        $dm->persist($user);
+        $dm->flush();
+
+        $actualUser = $dm->getRepository(User::class)
+            ->findAll();
+
+        $this->assertcount(1, $actualUser);
+    }
+}

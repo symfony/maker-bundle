@@ -193,6 +193,27 @@ class MakerTestRunner
         }
     }
 
+    public function configureMongoDatabase(bool $createSchema = true): void
+    {
+        $this->replaceInFile(
+            '.env',
+            'mongodb://localhost:27017',
+            getenv('TEST_MONGODB_URL')
+        );
+
+        $this->replaceInFile(
+            '.env',
+            'MONGODB_DB=symfony',
+            'MONGODB_DB=' . getenv('TEST_MONGODB_DB')
+        );
+
+        $this->runConsole('doctrine:mongodb:schema:drop', [], '--env=test');
+
+        if ($createSchema) {
+            $this->runConsole('doctrine:mongodb:schema:create', [], '--env=test');
+        }
+    }
+
     public function updateSchema(): void
     {
         $this->runConsole('doctrine:schema:update', [], '--env=test --force');

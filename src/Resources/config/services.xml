@@ -40,6 +40,11 @@
                 <argument type="service" id="doctrine" on-invalid="ignore" />
             </service>
 
+            <service id="maker.doctrine_odm_helper" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineODMHelper">
+                <argument /> <!-- document namespace -->
+                <argument type="service" id="doctrine_mongodb" on-invalid="ignore" />
+            </service>
+
             <service id="maker.template_linter" class="Symfony\Bundle\MakerBundle\Util\TemplateLinter">
                 <argument>%env(default::string:MAKER_PHP_CS_FIXER_BINARY_PATH)%</argument>
                 <argument>%env(default::string:MAKER_PHP_CS_FIXER_CONFIG_PATH)%</argument>
@@ -62,6 +67,11 @@
             <service id="maker.entity_class_generator" class="Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator">
                 <argument type="service" id="maker.generator" />
                 <argument type="service" id="maker.doctrine_helper" />
+            </service>
+
+            <service id="maker.document_class_generator" class="Symfony\Bundle\MakerBundle\Doctrine\DocumentClassGenerator">
+                <argument type="service" id="maker.generator" />
+                <argument type="service" id="maker.doctrine_odm_helper" />
             </service>
 
             <service id="maker.user_class_builder" class="Symfony\Bundle\MakerBundle\Security\UserClassBuilder" />

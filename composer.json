@@ -29,6 +29,7 @@
     "require-dev": {
         "composer/semver": "^3.0",
         "doctrine/doctrine-bundle": "^2.4",
+        "doctrine/mongodb-odm-bundle": "^4.4",
         "doctrine/orm": "^2.10.0",
         "symfony/http-client": "^5.4.7|^6.0",
         "symfony/phpunit-bridge": "^5.4.17|^6.0",

@@ -62,6 +62,9 @@ class MakerExtension extends Extension
         $doctrineHelperDefinition = $container->getDefinition('maker.doctrine_helper');
         $doctrineHelperDefinition->replaceArgument(0, $rootNamespace.'\\Entity');
 
+        $doctrineODMHelperDefinition = $container->getDefinition('maker.doctrine_odm_helper');
+        $doctrineODMHelperDefinition->replaceArgument(0, $rootNamespace.'\\Document');
+
         $container->registerForAutoconfiguration(MakerInterface::class)
             ->addTag(MakeCommandRegistrationPass::MAKER_TAG);
     }

@@ -12,6 +12,8 @@
     <php>
         <ini name="error_reporting" value="-1" />
         <env name="TEST_DATABASE_DSN" value="mysql://root:root@127.0.0.1:3306/test_maker?serverVersion=5.7" />
+        <env name="TEST_MONGODB_URL" value="mongodb://test:password@127.0.0.1:27017" />
+        <env name="TEST_MONGODB_DB" value="test_maker" />
         <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0"/>
     </php>
 

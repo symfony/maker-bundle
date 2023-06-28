@@ -163,8 +163,10 @@ final class Validator
         }
 
         // check reserved words
-        if ($registry->getConnection()->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name)) {
-            throw new \InvalidArgumentException(sprintf('Name "%s" is a reserved word.', $name));
+        if ($registry->getConnection() instanceof \Doctrine\DBAL\Connection) {
+            if ($registry->getConnection()->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name)) {
+                throw new \InvalidArgumentException(sprintf('Name "%s" is a reserved word.', $name));
+            }
         }
 
         self::validatePropertyName($name);

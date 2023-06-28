@@ -250,6 +250,7 @@ final class MakerTestEnvironment
         if ($_SERVER['MAKER_ALLOW_DEV_DEPS_IN_APP'] ?? false) {
             MakerTestProcess::create('composer config minimum-stability dev', $this->flexPath)->run();
             MakerTestProcess::create('composer config prefer-stable true', $this->flexPath)->run();
+
         }
 
         // fetch a few packages needed for testing
@@ -280,6 +281,8 @@ final class MakerTestEnvironment
         // end of temp code
 
         file_put_contents($this->flexPath.'/.gitignore', "var/cache/\n");
+
+        MakerTestProcess::create('composer config extra.symfony.allow-contrib true', $this->flexPath)->run();
 
         // Force adding vendor/ dir to Git repo in case users exclude it in global .gitignore
         MakerTestProcess::create('git init && git config user.name "symfony" && git config user.email "test@symfony.com" && git add . && git add vendor/ -f && git commit -a -m "first commit"',

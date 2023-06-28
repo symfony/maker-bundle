@@ -1,0 +1,12 @@
+<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+                    http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
+
+    <document name="Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Document\UserXml"
+              repository-class="Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\DocumentRepository\UserRepository">
+        <id field-name="id" />
+        <field field-name="name" name="name" type="string" />
+        <reference-many field="avatars" field-name="avatars" target-document="UserAvatar" mapped-by="user" />
+    </document>
+</doctrine-mongo-mapping>

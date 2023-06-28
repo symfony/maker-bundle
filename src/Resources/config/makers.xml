@@ -51,6 +51,16 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_document" class="Symfony\Bundle\MakerBundle\Maker\MakeDocument">
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.doctrine_odm_helper" />
+                <argument>null</argument>
+                <argument type="service" id="maker.generator" />
+                <argument type="service" id="maker.document_class_generator" />
+                <argument type="service" id="maker.php_compat_util" />
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_fixtures" class="Symfony\Bundle\MakerBundle\Maker\MakeFixtures">
                 <tag name="maker.command" />
             </service>

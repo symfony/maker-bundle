@@ -14,6 +14,9 @@ namespace Symfony\Bundle\MakerBundle\Util;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\ODM\MongoDB\Mapping\Annotations\EmbedOne;
+use Doctrine\ODM\MongoDB\Mapping\Annotations\Field;
+use Doctrine\ODM\MongoDB\Types\Type;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -29,9 +32,16 @@ use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
 use PhpParser\Parser;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\Doctrine\BaseCollectionReference;
 use Symfony\Bundle\MakerBundle\Doctrine\BaseCollectionRelation;
+use Symfony\Bundle\MakerBundle\Doctrine\BaseReference;
 use Symfony\Bundle\MakerBundle\Doctrine\BaseRelation;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineODMHelper;
+use Symfony\Bundle\MakerBundle\Doctrine\ReferenceMany;
+use Symfony\Bundle\MakerBundle\Doctrine\ReferenceManyToMany;
+use Symfony\Bundle\MakerBundle\Doctrine\ReferenceOne;
+use Symfony\Bundle\MakerBundle\Doctrine\ReferenceOneToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
@@ -145,6 +155,64 @@ final class ClassSourceManipulator
         }
     }
 
+    public function addDocumentField(string $propertyName, array $columnOptions, array $comments = []): void
+    {
+        $typeHint = DoctrineODMHelper::getPropertyTypeForColumn($columnOptions['type']);
+        if ($typeHint && DoctrineODMHelper::canColumnTypeBeInferredByPropertyType($columnOptions['type'], $typeHint)) {
+            unset($columnOptions['type']);
+        }
+
+        if (isset($columnOptions['type'])) {
+            $typeConstant = DoctrineODMHelper::getTypeConstant($columnOptions['type']);
+            if ($typeConstant) {
+                $this->addUseStatementIfNecessary(Type::class);
+                $columnOptions['type'] = $typeConstant;
+            }
+        }
+
+        // 2) USE property type on property below, nullable
+        // 3) If default value, then NOT nullable
+
+        $nullable = $columnOptions['nullable'] ?? false;
+        $isId = (bool) ($columnOptions['id'] ?? false);
+        $attributes[] = $this->buildAttributeNode(Field::class, $columnOptions, 'ODM');
+
+        $defaultValue = null;
+        if ('array' === $typeHint) {
+            $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
+        } elseif ($typeHint && '\\' === $typeHint[0] && false !== strpos($typeHint, '\\', 1)) {
+            $typeHint = $this->addUseStatementIfNecessary(substr($typeHint, 1));
+        }
+
+        $propertyType = $typeHint;
+        if ($propertyType && !$defaultValue) {
+            // all property types
+            $propertyType = '?'.$propertyType;
+        }
+
+        $this->addProperty(
+            name: $propertyName,
+            defaultValue: $defaultValue,
+            attributes: $attributes,
+            comments: $comments,
+            propertyType: $propertyType
+        );
+
+        $this->addGetter(
+            $propertyName,
+            $typeHint,
+            // getter methods always have nullable return values
+            // because even though these are required in the db, they may not be set yet
+            // unless there is a default value
+            null === $defaultValue
+        );
+
+        // don't generate setters for id fields
+        if (!$isId) {
+            $this->addSetter($propertyName, $typeHint, $nullable);
+        }
+    }
+
     public function addEmbeddedEntity(string $propertyName, string $className): void
     {
         $typeHint = $this->addUseStatementIfNecessary($className);
@@ -188,7 +256,55 @@ final class ClassSourceManipulator
         $this->addSetter($propertyName, $typeHint, false);
     }
 
+    public function addEmbeddedDocument(string $propertyName, string $className): void
+    {
+        $typeHint = $this->addUseStatementIfNecessary($className);
+
+        $attributes = [
+            $this->buildAttributeNode(
+                EmbedOne::class,
+                ['class' => new ClassNameValue($className, $typeHint)],
+                'ODM'
+            ),
+        ];
+
+        $this->addProperty(
+            name: $propertyName,
+            attributes: $attributes,
+            propertyType: $typeHint,
+        );
+
+        // logic to avoid re-adding the same ArrayCollection line
+        $addEmbedded = true;
+        if ($this->getConstructorNode()) {
+            // We print the constructor to a string, then
+            // look for "$this->propertyName = "
+
+            $constructorString = $this->printer->prettyPrint([$this->getConstructorNode()]);
+            if (str_contains($constructorString, sprintf('$this->%s = ', $propertyName))) {
+                $addEmbedded = false;
+            }
+        }
+
+        if ($addEmbedded) {
+            $this->addStatementToConstructor(
+                new Node\Stmt\Expression(new Node\Expr\Assign(
+                    new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $propertyName),
+                    new Node\Expr\New_(new Node\Name($typeHint))
+                ))
+            );
+        }
+
+        $this->addGetter($propertyName, $typeHint, false);
+        $this->addSetter($propertyName, $typeHint, false);
+    }
+
     public function addManyToOneRelation(RelationManyToOne $manyToOne): void
+    {
+        $this->addSingularRelation($manyToOne);
+    }
+
+    public function addManyToOneReference(ReferenceOne $manyToOne): void
     {
         $this->addSingularRelation($manyToOne);
     }
@@ -198,12 +314,27 @@ final class ClassSourceManipulator
         $this->addSingularRelation($oneToOne);
     }
 
+    public function addOneToOneReference(ReferenceOneToOne $oneToOne): void
+    {
+        $this->addSingularRelation($oneToOne);
+    }
+
     public function addOneToManyRelation(RelationOneToMany $oneToMany): void
     {
         $this->addCollectionRelation($oneToMany);
     }
 
+    public function addOneToManyReference(ReferenceMany $oneToMany): void
+    {
+        $this->addCollectionRelation($oneToMany);
+    }
+
     public function addManyToManyRelation(RelationManyToMany $manyToMany): void
+    {
+        $this->addCollectionRelation($manyToMany);
+    }
+
+    public function addManyToManyReference(ReferenceManyToMany $manyToMany): void
     {
         $this->addCollectionRelation($manyToMany);
     }
@@ -442,10 +573,11 @@ final class ClassSourceManipulator
         return $setterNodeBuilder;
     }
 
-    private function addSingularRelation(BaseRelation $relation): void
+    private function addSingularRelation(BaseRelation|BaseReference $relation): void
     {
-        $typeHint = $this->addUseStatementIfNecessary($relation->getTargetClassName());
-        if ($relation->getTargetClassName() === $this->getThisFullClassName()) {
+        $target = $relation instanceof BaseRelation ? $relation->getTargetClassName() : $relation->getTargetDocument();
+        $typeHint = $this->addUseStatementIfNecessary($target);
+        if ($target === $this->getThisFullClassName()) {
             $typeHint = 'self';
         }
 
@@ -459,25 +591,41 @@ final class ClassSourceManipulator
             $annotationOptions['mappedBy'] = $relation->getTargetPropertyName();
         }
 
-        if ('self' === $typeHint) {
-            // Doctrine does not currently resolve "self" correctly for targetEntity guessing
-            $annotationOptions['targetEntity'] = new ClassNameValue($typeHint, $relation->getTargetClassName());
-        }
+        if ($relation instanceof BaseRelation) {
+            if ('self' === $typeHint) {
+                // Doctrine does not currently resolve "self" correctly for targetEntity guessing
+                $annotationOptions['targetEntity'] = new ClassNameValue($typeHint, $relation->getTargetClassName());
+            }
 
-        if ($relation instanceof RelationOneToOne) {
-            $annotationOptions['cascade'] = ['persist', 'remove'];
-        }
+            if ($relation instanceof RelationOneToOne) {
+                $annotationOptions['cascade'] = ['persist', 'remove'];
+            }
 
-        $attributes = [
-            $this->buildAttributeNode(
-                $relation instanceof RelationManyToOne ? ManyToOne::class : OneToOne::class,
-                $annotationOptions,
-                'ORM'
-            ),
-        ];
+            $attributes = [
+                $this->buildAttributeNode(
+                    $relation instanceof RelationManyToOne ? ManyToOne::class : OneToOne::class,
+                    $annotationOptions,
+                    'ORM'
+                ),
+            ];
 
-        if (!$relation->isNullable() && $relation->isOwning()) {
-            $attributes[] = $this->buildAttributeNode(JoinColumn::class, ['nullable' => false], 'ORM');
+            if (!$relation->isNullable() && $relation->isOwning()) {
+                $attributes[] = $this->buildAttributeNode(JoinColumn::class, ['nullable' => false], 'ORM');
+            }
+        } else {
+            $annotationOptions['targetDocument'] = new ClassNameValue($typeHint, $target);
+
+            if ($relation instanceof ReferenceOneToOne) {
+                $annotationOptions['cascade'] = ['persist', 'remove'];
+            }
+
+            $attributes = [
+                $this->buildAttributeNode(
+                    \Doctrine\ODM\MongoDB\Mapping\Annotations\ReferenceOne::class,
+                    $annotationOptions,
+                    'ODM'
+                ),
+            ];
         }
 
         $this->addProperty(
@@ -513,7 +661,7 @@ final class ClassSourceManipulator
         // set the *owning* side of the relation
         // OneToOne is the only "singular" relation type that
         // may be the inverse side
-        if ($relation instanceof RelationOneToOne && !$relation->isOwning()) {
+        if (($relation instanceof RelationOneToOne || $relation instanceof ReferenceOneToOne) && !$relation->isOwning()) {
             $this->addNodesToSetOtherSideOfOneToOne($relation, $setterNodeBuilder);
         }
 
@@ -527,16 +675,24 @@ final class ClassSourceManipulator
         $this->addMethod($setterNodeBuilder->getNode());
     }
 
-    private function addCollectionRelation(BaseCollectionRelation $relation): void
+    private function addCollectionRelation(BaseCollectionRelation|BaseCollectionReference $relation): void
     {
-        $typeHint = $relation->isSelfReferencing() ? 'self' : $this->addUseStatementIfNecessary($relation->getTargetClassName());
+        $target = $relation instanceof BaseRelation ? $relation->getTargetClassName() : $relation->getTargetDocument();
+        $typeHint = $relation->isSelfReferencing() ? 'self' : $this->addUseStatementIfNecessary($target);
 
         $arrayCollectionTypeHint = $this->addUseStatementIfNecessary(ArrayCollection::class);
         $collectionTypeHint = $this->addUseStatementIfNecessary(Collection::class);
 
-        $annotationOptions = [
-            'targetEntity' => new ClassNameValue($typeHint, $relation->getTargetClassName()),
-        ];
+        if ($relation instanceof BaseRelation) {
+            $annotationOptions = [
+                'targetEntity' => new ClassNameValue($typeHint, $target),
+            ];
+        } else {
+            $annotationOptions = [
+                'targetDocument' => new ClassNameValue($typeHint, $target),
+            ];
+        }
+
         if ($relation->isOwning()) {
             // sometimes, we don't map the inverse relation
             if ($relation->getMapInverseRelation()) {
@@ -550,13 +706,23 @@ final class ClassSourceManipulator
             $annotationOptions['orphanRemoval'] = true;
         }
 
-        $attributes = [
-            $this->buildAttributeNode(
-                $relation instanceof RelationManyToMany ? ManyToMany::class : OneToMany::class,
-                $annotationOptions,
-                'ORM'
-            ),
-        ];
+        if ($relation instanceof BaseRelation) {
+            $attributes = [
+                $this->buildAttributeNode(
+                    $relation instanceof RelationManyToMany ? ManyToMany::class : OneToMany::class,
+                    $annotationOptions,
+                    'ORM'
+                ),
+            ];
+        } else {
+            $attributes = [
+                $this->buildAttributeNode(
+                    \Doctrine\ODM\MongoDB\Mapping\Annotations\ReferenceMany::class,
+                    $annotationOptions,
+                    'ODM'
+                ),
+            ];
+        }
 
         $this->addProperty(
             name: $relation->getPropertyName(),
@@ -659,7 +825,7 @@ final class ClassSourceManipulator
             // if ($this->avatars->removeElement($avatar))
             $ifRemoveElementStmt = new Node\Stmt\If_($removeElementCall);
             $removerNodeBuilder->addStmt($ifRemoveElementStmt);
-            if ($relation instanceof RelationOneToMany) {
+            if ($relation instanceof RelationOneToMany || $relation instanceof ReferenceMany) {
                 // OneToMany: $student->setCourse(null);
                 /*
                  * // set the owning side to null (unless already changed)
@@ -692,7 +858,7 @@ final class ClassSourceManipulator
                 ];
 
                 $ifRemoveElementStmt->stmts[] = $ifNode;
-            } elseif ($relation instanceof RelationManyToMany) {
+            } elseif ($relation instanceof RelationManyToMany || $relation instanceof ReferenceManyToMany) {
                 // $student->removeCourse($this);
                 $ifRemoveElementStmt->stmts[] = new Node\Stmt\Expression(
                     new Node\Expr\MethodCall(
@@ -844,8 +1010,8 @@ final class ClassSourceManipulator
                 return new Node\NullableType($option);
             }
 
-            // Use the Doctrine Types constant
-            if ('type' === $option && str_starts_with($value, 'Types::')) {
+            // Use the Doctrine Types (or Doctrine ODM Type) constant
+            if ('type' === $option && (str_starts_with($value, 'Types::') || str_starts_with($value, 'Type::'))) {
                 return new Node\Arg(
                     new Node\Expr\ConstFetch(new Node\Name($value)),
                     false,
@@ -1146,7 +1312,7 @@ final class ClassSourceManipulator
         return new Node\Expr\ConstFetch(new Node\Name('null'));
     }
 
-    private function addNodesToSetOtherSideOfOneToOne(RelationOneToOne $relation, Builder\Method $setterNodeBuilder): void
+    private function addNodesToSetOtherSideOfOneToOne(RelationOneToOne|ReferenceOneToOne $relation, Builder\Method $setterNodeBuilder): void
     {
         if (!$relation->isNullable()) {
             $setterNodeBuilder->addStmt($this->createSingleLineCommentNode(
