@@ -143,7 +143,7 @@ class TestDocumentRegeneratorKernel extends Kernel
     {
         return [
             new FrameworkBundle(),
-            new DoctrineMongoDBBundle()
+            new DoctrineMongoDBBundle(),
         ];
     }
 
@@ -166,7 +166,7 @@ class TestDocumentRegeneratorKernel extends Kernel
                 'default' => [
                     'server' => 'mongodb://localhost:27017',
                     'options' => [],
-                    ]
+                    ],
             ],
             'document_managers' => [
                 'default' => [
@@ -178,7 +178,7 @@ class TestDocumentRegeneratorKernel extends Kernel
                             'alias' => 'DocumentRegeneratorApp',
                         ],
                     ],
-                ]
+                ],
             ],
         ]);
     }
@@ -197,7 +197,7 @@ class TestXmlDocumentRegeneratorKernel extends Kernel
     {
         return [
             new FrameworkBundle(),
-            new DoctrineMongoDBBundle()
+            new DoctrineMongoDBBundle(),
         ];
     }
 
@@ -215,7 +215,6 @@ class TestXmlDocumentRegeneratorKernel extends Kernel
             'http_method_override' => false,
         ]);
 
-
         $c->prependExtensionConfig('doctrine_mongodb', [
             'auto_generate_proxy_classes' => true,
             'auto_generate_hydrator_classes' => true,
@@ -224,7 +223,7 @@ class TestXmlDocumentRegeneratorKernel extends Kernel
                 'default' => [
                     'server' => 'mongodb://localhost:27017',
                     'options' => [],
-                ]
+                ],
             ],
             'document_managers' => [
                 'default' => [

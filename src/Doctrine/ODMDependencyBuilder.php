@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
-
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\ODM\MongoDB\Mapping\Annotations\Field;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;

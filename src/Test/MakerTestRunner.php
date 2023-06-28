@@ -204,7 +204,7 @@ class MakerTestRunner
         $this->replaceInFile(
             '.env',
             'MONGODB_DB=symfony',
-            'MONGODB_DB=' . getenv('TEST_MONGODB_DB')
+            'MONGODB_DB='.getenv('TEST_MONGODB_DB')
         );
 
         $this->runConsole('doctrine:mongodb:schema:drop', [], '--env=test');

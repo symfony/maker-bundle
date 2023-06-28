@@ -21,6 +21,7 @@ use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 
 /**
  * @internal
+ *
  * @author Chigakov Konstantin <constantable@gmail.com>
  */
 final class DocumentClassGenerator
@@ -77,7 +78,6 @@ final class DocumentClassGenerator
     {
         $shortDocumentClass = Str::getShortClassName($documentClass);
         $documentAlias = strtolower($shortDocumentClass[0]);
-
 
         $useStatements = new UseStatementGenerator([
             $documentClass,

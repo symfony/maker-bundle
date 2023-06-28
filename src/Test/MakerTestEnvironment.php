@@ -250,7 +250,6 @@ final class MakerTestEnvironment
         if ($_SERVER['MAKER_ALLOW_DEV_DEPS_IN_APP'] ?? false) {
             MakerTestProcess::create('composer config minimum-stability dev', $this->flexPath)->run();
             MakerTestProcess::create('composer config prefer-stable true', $this->flexPath)->run();
-
         }
 
         // fetch a few packages needed for testing

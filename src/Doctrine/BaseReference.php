@@ -17,17 +17,17 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 abstract class BaseReference
 {
     public function __construct(
-        private string  $propertyName,
-        private string  $targetDocument,
+        private string $propertyName,
+        private string $targetDocument,
         private ?string $targetPropertyName = null,
-        private bool    $isSelfReferencing = false,
-        private bool    $mapInverseRelation = true,
-        private bool    $avoidSetter = false,
-        private bool    $isCustomReturnTypeNullable = false,
+        private bool $isSelfReferencing = false,
+        private bool $mapInverseRelation = true,
+        private bool $avoidSetter = false,
+        private bool $isCustomReturnTypeNullable = false,
         private ?string $customReturnType = null,
-        private bool    $isOwning = false,
-        private bool    $orphanRemoval = false,
-        private bool    $isNullable = false,
+        private bool $isOwning = false,
+        private bool $orphanRemoval = false,
+        private bool $isNullable = false,
     ) {
     }
 

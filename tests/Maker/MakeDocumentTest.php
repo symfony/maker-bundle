@@ -9,13 +9,11 @@
  * file that was distributed with this source code.
  */
 
-
 use Symfony\Bundle\MakerBundle\Maker\MakeDocument;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Yaml\Yaml;
 
 class MakeDocumentTest extends MakerTestCase
 {
@@ -34,7 +32,7 @@ class MakeDocumentTest extends MakerTestCase
             });
     }
 
-    public function getTestDetails(): \Generator
+    public function getTestDetails(): Generator
     {
         yield 'it_creates_a_new_class_basic' => [$this->createMakeDocumentTest()
             ->run(function (MakerTestRunner $runner) {
@@ -430,8 +428,6 @@ class MakeDocumentTest extends MakerTestCase
                 $this->runCustomTest($runner, 'it_creates_class_that_matches_existing_namespace.php');
             }),
         ];
-
-
     }
 
     private function runDocumentTest(MakerTestRunner $runner, array $data = []): void

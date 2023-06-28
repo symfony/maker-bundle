@@ -13,15 +13,11 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\DBAL\Connection;
-
-
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadataFactory;
 use Doctrine\ODM\MongoDB\Mapping\Driver\AttributeDriver;
 use Doctrine\ODM\MongoDB\Mapping\MappingException as ODMMappingException;
 use Doctrine\ODM\MongoDB\Types\Type;
-
-
 use Doctrine\Persistence\Mapping\AbstractClassMetadataFactory;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
@@ -41,9 +37,9 @@ use Symfony\Component\Uid\Uuid;
 final class DoctrineODMHelper
 {
     public function __construct(
-        private string           $documentNamespace,
+        private string $documentNamespace,
         private ?ManagerRegistry $registry = null,
-        private ?array           $mappingDriversByPrefix = null,
+        private ?array $mappingDriversByPrefix = null,
     ) {
         $this->documentNamespace = trim($documentNamespace, '\\');
     }
@@ -177,7 +173,7 @@ final class DoctrineODMHelper
                     $loaded = $this->isInstanceOf($cmf, AbstractClassMetadataFactory::class) ? $cmf->getLoadedMetadata() : [];
                 }
 
-                $cmf = new ClassMetadataFactory();// DisconnectedClassMetadataFactory();
+                $cmf = new ClassMetadataFactory(); // DisconnectedClassMetadataFactory();
                 $cmf->setDocumentManager($dm);
                 $cmf->setConfiguration($dm->getConfiguration());
 
