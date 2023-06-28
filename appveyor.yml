@@ -14,6 +14,7 @@ cache:
 
 services:
   - mysql
+  - mongodb
 
 init:
     - SET PATH=C:\Program Files\OpenSSL;C:\tools\php;%PATH%
@@ -25,6 +26,7 @@ init:
 
 environment:
     TEST_DATABASE_DSN: mysql://root:Password12!@127.0.0.1:3306/test_maker
+    TEST_MONGODB_URL: mongodb://127.0.0.1:27017
     matrix:
       - dependencies: highest
         php_ver_target: 8.0.19
@@ -50,6 +52,9 @@ install:
     - IF %PHP%==0 echo extension=php_curl.dll >> php.ini
     - IF %PHP%==0 echo extension=php_pdo_mysql.dll >> php.ini
     - echo extension=php_pdo_sqlite.dll >> php.ini
+    - echo extension=php_mongodb >> php.ini
+    - appveyor-retry appveyor DownloadFile https://windows.php.net/downloads/pecl/releases/mongodb/1.13.0/php_mongodb-1.13.0-8.0-ts-vs16-x64.zip
+    - 7z e -oext php_mongodb-1.13.0-8.0-ts-vs16-x64.zip
     - IF %PHP%==0 echo @php %%~dp0composer.phar %%* > composer.bat
     - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer-stable.phar
     - del composer.phar
