@@ -52,9 +52,9 @@ install:
     - IF %PHP%==0 echo extension=php_curl.dll >> php.ini
     - IF %PHP%==0 echo extension=php_pdo_mysql.dll >> php.ini
     - IF %PHP%==0 echo extension=php_pdo_sqlite.dll >> php.ini
-    - echo extension=php_mongodb.dll >> php.ini
-    - appveyor-retry appveyor DownloadFile https://github.com/mongodb/mongo-php-driver/releases/download/1.15.0/php_mongodb-1.15.0-8.0-ts-x64.zip
-    - 7z e -y -oext php_mongodb-1.15.0-8.0-ts-x64.zip
+    - IF %PHP%==0 echo extension=php_mongodb.dll >> php.ini
+    - appveyor-retry appveyor DownloadFile https://github.com/mongodb/mongo-php-driver/releases/download/1.15.0/php_mongodb-1.15.0-8.0-nts-x64.zip
+    - 7z e -y -oext php_mongodb-1.15.0-8.0-nts-x64.zip
     - IF %PHP%==0 echo @php %%~dp0composer.phar %%* > composer.bat
     - appveyor-retry appveyor DownloadFile https://getcomposer.org/composer-stable.phar
     - del composer.phar
