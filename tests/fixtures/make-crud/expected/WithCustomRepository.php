@@ -36,7 +36,7 @@ class SweetFoodController extends AbstractController
             return $this->redirectToRoute('app_sweet_food_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('sweet_food/new.html.twig', [
+        return $this->render('sweet_food/new.html.twig', [
             'sweet_food' => $sweetFood,
             'form' => $form,
         ]);
@@ -62,7 +62,7 @@ class SweetFoodController extends AbstractController
             return $this->redirectToRoute('app_sweet_food_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('sweet_food/edit.html.twig', [
+        return $this->render('sweet_food/edit.html.twig', [
             'sweet_food' => $sweetFood,
             'form' => $form,
         ]);
