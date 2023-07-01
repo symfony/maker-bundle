@@ -15,6 +15,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeCrud;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\HttpKernel\Kernel;
 
 class MakeCrudTest extends MakerTestCase
 {
@@ -177,7 +178,7 @@ class MakeCrudTest extends MakerTestCase
                 $this->runCrudTest($runner, 'it_generates_basic_crud.php');
 
                 self::assertFileEquals(
-                    sprintf('%s/fixtures/%s', \dirname(__DIR__), 'make-crud/expected/WithCustomRepository.php'),
+                    sprintf('%s/fixtures/make-crud/expected/WithCustomRepository%s.php', \dirname(__DIR__), Kernel::VERSION_ID < 60200 ? 'Legacy' : ''),
                     $runner->getPath('src/Controller/SweetFoodController.php')
                 );
             }),
