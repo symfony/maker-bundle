@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 use Symfony\Bundle\MakerBundle\Maker\MakeCrud;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Yaml\Yaml;
 
 class MakeCrudTest extends MakerTestCase
