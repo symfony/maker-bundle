@@ -17,7 +17,7 @@ class SweetFoodController extends AbstractController
     #[Route('/', name: 'app_sweet_food_index', methods: ['GET'])]
     public function index(SweetFoodRepository $sweetFoodRepository): Response
     {
-        return $this->renderForm('sweet_food/index.html.twig', [
+        return $this->render('sweet_food/index.html.twig', [
             'sweet_foods' => $sweetFoodRepository->findAll(),
         ]);
     }
@@ -45,7 +45,7 @@ class SweetFoodController extends AbstractController
     #[Route('/{id}', name: 'app_sweet_food_show', methods: ['GET'])]
     public function show(SweetFood $sweetFood): Response
     {
-        return $this->renderForm('sweet_food/show.html.twig', [
+        return $this->render('sweet_food/show.html.twig', [
             'sweet_food' => $sweetFood,
         ]);
     }
