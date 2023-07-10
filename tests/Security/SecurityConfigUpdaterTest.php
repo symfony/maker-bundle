@@ -104,14 +104,14 @@ class SecurityConfigUpdaterTest extends TestCase
     /**
      * @dataProvider getAuthenticatorTests
      */
-    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename, bool $logoutSetup): void
+    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): void
     {
         $this->createLogger();
 
         $updater = new SecurityConfigUpdater($this->ysmLogger);
-        $source = $this->getYamlSource($startingSourceFilename);
-        $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator', $logoutSetup);
-        $expectedSource = $this->getExpectedYaml('expected_authenticator', $expectedSourceFilename);
+        $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
+        $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator', $logoutSetup, $supportRememberMe, $alwaysRememberMe);
+        $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_authenticator/'.$expectedSourceFilename);
 
         $this->assertSame($expectedSource, $actualSource);
     }
@@ -124,6 +124,8 @@ class SecurityConfigUpdaterTest extends TestCase
             'empty_source.yaml',
             'empty_security.yaml',
             false,
+            false,
+            false,
         ];
 
         yield 'simple_security' => [
@@ -131,6 +133,8 @@ class SecurityConfigUpdaterTest extends TestCase
             null,
             'simple_security_source.yaml',
             'simple_security.yaml',
+            false,
+            false,
             false,
         ];
 
@@ -140,6 +144,8 @@ class SecurityConfigUpdaterTest extends TestCase
             'simple_security_with_firewalls.yaml',
             'simple_security_with_firewalls.yaml',
             false,
+            false,
+            false,
         ];
 
         yield 'simple_security_with_firewalls_and_authenticator' => [
@@ -147,6 +153,8 @@ class SecurityConfigUpdaterTest extends TestCase
             'App\\Security\\AppCustomAuthenticator',
             'simple_security_with_firewalls_and_authenticator.yaml',
             'simple_security_with_firewalls_and_authenticator.yaml',
+            false,
+            false,
             false,
         ];
 
@@ -156,6 +164,8 @@ class SecurityConfigUpdaterTest extends TestCase
             'simple_security_with_firewalls_and_logout.yaml',
             'simple_security_with_firewalls_and_logout.yaml',
             true,
+            false,
+            false,
         ];
 
         yield 'security_52_with_multiple_authenticators' => [
@@ -164,6 +174,28 @@ class SecurityConfigUpdaterTest extends TestCase
             'multiple_authenticators.yaml',
             'multiple_authenticators.yaml',
             false,
+            false,
+            false,
+        ];
+
+        yield 'simple_security_with_firewalls_and_remember_me_checkbox' => [
+            'main',
+            null,
+            'simple_security_with_firewalls_and_remember_me_checkbox.yaml',
+            'simple_security.yaml',
+            false,
+            true,
+            false,
+        ];
+
+        yield 'simple_security_with_firewalls_and_always_remember_me' => [
+            'main',
+            null,
+            'simple_security_with_firewalls_and_always_remember_me.yaml',
+            'simple_security.yaml',
+            false,
+            true,
+            true,
         ];
     }
 

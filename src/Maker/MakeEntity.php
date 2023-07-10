@@ -486,9 +486,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 $line = sprintf('  * <comment>%s</comment>', $mainType);
 
                 if (\is_string($subTypes) && $subTypes) {
-                    $line .= sprintf(' (%s)', $subTypes);
+                    $line .= sprintf(' or %s', $subTypes);
                 } elseif (\is_array($subTypes) && !empty($subTypes)) {
-                    $line .= sprintf(' (or %s)', implode(', ', array_map(
+                    $line .= sprintf(' or %s', implode(' or ', array_map(
                         static fn ($subType) => sprintf('<comment>%s</comment>', $subType), $subTypes))
                     );
 

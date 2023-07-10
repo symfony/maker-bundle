@@ -43,14 +43,4 @@ final class TemplateComponentGenerator
     {
         return sprintf('%s ', $classNameDetails->getShortName());
     }
-
-    /**
-     * @throws \ReflectionException
-     */
-    public function repositoryHasSaveAndRemoveMethods(string $repositoryFullClassName): bool
-    {
-        $reflectedComponents = new \ReflectionClass($repositoryFullClassName);
-
-        return $reflectedComponents->hasMethod('save') && $reflectedComponents->hasMethod('remove');
-    }
 }

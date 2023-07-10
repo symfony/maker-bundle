@@ -1,5 +1,20 @@
 # Changelog
 
+## [v1.50.0](https://github.com/symfony/maker-bundle/releases/tag/v1.50.0)
+
+### Feature
+
+- [#1328](https://github.com/symfony/maker-bundle/pull/1328) - Deleting save and remove methods from repositories - *@mdoutreluingne*
+- [#986](https://github.com/symfony/maker-bundle/pull/986) - Add RememberMeBadge - *@bechir*
+- [#1332](https://github.com/symfony/maker-bundle/pull/1332) - Add conditional @implements tag to Doctrine repository template - *@gremo*
+- [#1325](https://github.com/symfony/maker-bundle/pull/1325) - Fix English typo in reset password template - *@pbek*
+
+### Bug
+
+- [#1322](https://github.com/symfony/maker-bundle/pull/1322) - [make:crud] fix typo in Kernel::VERSION usage - *@nacorp*
+- [#1324](https://github.com/symfony/maker-bundle/pull/1324) - Fix(Doctrine Repository template)/Avoid potential double call in save method - *@Mano-Lis*
+- [#1293](https://github.com/symfony/maker-bundle/pull/1293) - [make:entity] don't set array field default value for nullable column - *@Rootie*
+
 ## [v1.49.0](https://github.com/symfony/maker-bundle/releases/tag/v1.49.0)
 
 *June 7th, 2023*

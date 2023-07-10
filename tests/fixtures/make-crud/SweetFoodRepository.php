@@ -20,22 +20,4 @@ class SweetFoodRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, SweetFood::class);
     }
-
-    public function save(SweetFood $entity, bool $flush = false): void
-    {
-        ($em = $this->getEntityManager())->persist($entity);
-
-        if ($flush) {
-            $em->flush();
-        }
-    }
-
-    public function remove(SweetFood $entity, bool $flush = false): void
-    {
-        ($em = $this->getEntityManager())->remove($entity);
-
-        if ($flush) {
-            $em->flush();
-        }
-    }
 }

@@ -49,6 +49,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
@@ -65,6 +66,9 @@ final class MakeAuthenticator extends AbstractMaker
 {
     private const AUTH_TYPE_EMPTY_AUTHENTICATOR = 'empty-authenticator';
     private const AUTH_TYPE_FORM_LOGIN = 'form-login';
+
+    private const REMEMBER_ME_TYPE_ALWAYS = 'always';
+    private const REMEMBER_ME_TYPE_CHECKBOX = 'checkbox';
 
     public function __construct(
         private FileManager $fileManager,
@@ -184,6 +188,34 @@ final class MakeAuthenticator extends AbstractMaker
                     true
                 )
             );
+
+            $command->addArgument('support-remember-me', InputArgument::REQUIRED);
+            $input->setArgument(
+                'support-remember-me',
+                $io->confirm(
+                    'Do you want to support remember me?',
+                    true
+                )
+            );
+
+            if ($input->getArgument('support-remember-me')) {
+                $supportRememberMeValues = [
+                    'Activate when the user checks a box' => self::REMEMBER_ME_TYPE_CHECKBOX,
+                    'Always activate remember me' => self::REMEMBER_ME_TYPE_ALWAYS,
+                ];
+                $command->addArgument('always-remember-me', InputArgument::REQUIRED);
+
+                $supportRememberMeType = $io->choice(
+                    'How should remember me be activated?',
+                    array_keys($supportRememberMeValues),
+                    key($supportRememberMeValues)
+                );
+
+                $input->setArgument(
+                    'always-remember-me',
+                    $supportRememberMeValues[$supportRememberMeType]
+                );
+            }
         }
     }
 
@@ -192,12 +224,16 @@ final class MakeAuthenticator extends AbstractMaker
         $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents('config/packages/security.yaml'));
         $securityData = $manipulator->getData();
 
+        $supportRememberMe = $input->hasArgument('support-remember-me') ? $input->getArgument('support-remember-me') : false;
+        $alwaysRememberMe = $input->hasArgument('always-remember-me') ? $input->getArgument('always-remember-me') : false;
+
         $this->generateAuthenticatorClass(
             $securityData,
             $input->getArgument('authenticator-type'),
             $input->getArgument('authenticator-class'),
             $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
-            $input->hasArgument('username-field') ? $input->getArgument('username-field') : null
+            $input->hasArgument('username-field') ? $input->getArgument('username-field') : null,
+            $supportRememberMe,
         );
 
         // update security.yaml with guard config
@@ -215,7 +251,9 @@ final class MakeAuthenticator extends AbstractMaker
                 $input->getOption('firewall-name'),
                 $entryPoint,
                 $input->getArgument('authenticator-class'),
-                $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false
+                $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false,
+                $supportRememberMe,
+                $alwaysRememberMe
             );
             $generator->dumpFile($path, $newYaml);
             $securityYamlUpdated = true;
@@ -226,7 +264,9 @@ final class MakeAuthenticator extends AbstractMaker
             $this->generateFormLoginFiles(
                 $input->getArgument('controller-class'),
                 $input->getArgument('username-field'),
-                $input->getArgument('logout-setup')
+                $input->getArgument('logout-setup'),
+                $supportRememberMe,
+                $alwaysRememberMe,
             );
         }
 
@@ -241,12 +281,14 @@ final class MakeAuthenticator extends AbstractMaker
                 $input->getArgument('authenticator-class'),
                 $securityData,
                 $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
-                $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false
+                $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false,
+                $supportRememberMe,
+                $alwaysRememberMe
             )
         );
     }
 
-    private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, $userClass, $userNameField): void
+    private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, $userClass, $userNameField, bool $supportRememberMe): void
     {
         $useStatements = new UseStatementGenerator([
             Request::class,
@@ -288,6 +330,10 @@ final class MakeAuthenticator extends AbstractMaker
             $useStatements->addUseStatement(LegacySecurity::class);
         }
 
+        if ($supportRememberMe) {
+            $useStatements->addUseStatement(RememberMeBadge::class);
+        }
+
         $userClassNameDetails = $this->generator->createClassNameDetails(
             '\\'.$userClass,
             'Entity\\'
@@ -305,11 +351,12 @@ final class MakeAuthenticator extends AbstractMaker
                 'username_field_var' => Str::asLowerCamelCase($userNameField),
                 'user_needs_encoder' => $this->userClassHasEncoder($securityData, $userClass),
                 'user_is_entity' => $this->doctrineHelper->isClassAMappedEntity($userClass),
+                'remember_me_badge' => $supportRememberMe,
             ]
         );
     }
 
-    private function generateFormLoginFiles(string $controllerClass, string $userNameField, bool $logoutSetup): void
+    private function generateFormLoginFiles(string $controllerClass, string $userNameField, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): void
     {
         $controllerClassNameDetails = $this->generator->createClassNameDetails(
             $controllerClass,
@@ -362,11 +409,13 @@ final class MakeAuthenticator extends AbstractMaker
                 'username_is_email' => false !== stripos($userNameField, 'email'),
                 'username_label' => ucfirst(Str::asHumanWords($userNameField)),
                 'logout_setup' => $logoutSetup,
+                'support_remember_me' => $supportRememberMe,
+                'always_remember_me' => $alwaysRememberMe,
             ]
         );
     }
 
-    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, array $securityData, $userClass, bool $logoutSetup): array
+    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, array $securityData, $userClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): array
     {
         $nextTexts = ['Next:'];
         $nextTexts[] = '- Customize your new authenticator.';
@@ -377,7 +426,9 @@ final class MakeAuthenticator extends AbstractMaker
                 'main',
                 null,
                 $authenticatorClass,
-                $logoutSetup
+                $logoutSetup,
+                $supportRememberMe,
+                $alwaysRememberMe
             );
             $nextTexts[] = "- Your <info>security.yaml</info> could not be updated automatically. You'll need to add the following config manually:\n\n".$yamlExample;
         }

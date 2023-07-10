@@ -175,9 +175,8 @@ class MakeCrudTest extends MakerTestCase
                 $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
 
                 $this->runCrudTest($runner, 'it_generates_basic_crud.php');
-
                 self::assertFileEquals(
-                    sprintf('%s/fixtures/%s', \dirname(__DIR__), 'make-crud/expected/WithCustomRepository.php'),
+                    sprintf('%s/fixtures/make-crud/expected/WithCustomRepository%s.php', \dirname(__DIR__), $runner->getSymfonyVersion() < 60200 ? 'Legacy' : ''),
                     $runner->getPath('src/Controller/SweetFoodController.php')
                 );
             }),
