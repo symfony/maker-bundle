@@ -206,7 +206,7 @@ final class MakeAuthenticator extends AbstractMaker
                 $command->addArgument('always-remember-me', InputArgument::REQUIRED);
 
                 $supportRememberMeType = $io->choice(
-                    'When activate the remember me?',
+                    'How should remember me be activated?',
                     array_keys($supportRememberMeValues),
                     key($supportRememberMeValues)
                 );
