@@ -21,26 +21,6 @@ class XOtherRepository extends ServiceEntityRepository
         parent::__construct($registry, XOther::class);
     }
 
-    public function save(XOther $entity, bool $flush = false): void
-    {
-        $entityManager = $this->getEntityManager();
-        $entityManager->persist($entity);
-
-        if ($flush) {
-            $entityManager->flush();
-        }
-    }
-
-    public function remove(XOther $entity, bool $flush = false): void
-    {
-        $entityManager = $this->getEntityManager();
-        $entityManager->remove($entity);
-
-        if ($flush) {
-            $entityManager->flush();
-        }
-    }
-
 //    /**
 //     * @return XOther[] Returns an array of XOther objects
 //     */

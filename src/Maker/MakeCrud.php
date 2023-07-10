@@ -165,6 +165,10 @@ final class MakeCrud extends AbstractMaker
             Route::class,
         ]);
 
+        if (EntityManagerInterface::class !== $repositoryClassName) {
+            $useStatements->addUseStatement(EntityManagerInterface::class);
+        }
+
         $generator->generateController(
             $controllerClassDetails->getFullName(),
             'crud/controller/Controller.tpl.php',
@@ -256,6 +260,10 @@ final class MakeCrud extends AbstractMaker
 
             if ($usesEntityManager) {
                 $useStatements->addUseStatement(EntityRepository::class);
+            }
+
+            if (EntityManagerInterface::class !== $repositoryClassName) {
+                $useStatements->addUseStatement(EntityManagerInterface::class);
             }
 
             $generator->generateFile(
