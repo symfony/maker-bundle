@@ -1,0 +1,78 @@
+---------------------------------------------------------------------------
+
+by mdoutreluingne at 2023-06-25T17:40:05Z
+
+It seems that the red tests are linked to my PR. However, I want to correct the tests but I am unable them.
+
+Locally I still have this error `Compile Error: Cannot use Doctrine\ORM\EntityManagerInterface as EntityManagerInterface because the name is already in use`  that I am unable correct them .
+
+Can you please help me?
+
+---------------------------------------------------------------------------
+
+by mdoutreluingne at 2023-06-27T20:01:38Z
+
+It looks like the other failed test came from `it_generates_basic_crud.php`, I'll try to fix that tomorrow
+
+---------------------------------------------------------------------------
+
+by mdoutreluingne at 2023-06-29T19:23:53Z
+
+Finally, the remaining failed test came from `it_generates_crud_using_custom_repository` on the assert `assertFileEquals` because the files `WithCustomRepository.php` and `SweetFoodController.php` were not identical due to the renderForm methods in `WithCustomRepository.php` for the route names `app_sweet_food_new` and `app_sweet_food_edit`.
+
+When I ran the tests locally, I didn't get this error again. It's strange because after committing and pushing on the repository, the `it_generates_crud_using_custom_repository` test still fails, whereas locally I don't get any more errors concerning this test.
+
+I noticed that this test also failed on the PRs(#1330, #1325).
+
+Would you have any suggestions for correcting this test?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2023-06-29T20:06:10Z
+
+The tests can be sensitive. That's partly by design, but they can be a pain... especially when it comes to different Symfony versions. Here's what I'm thinking:
+
+A) Duplicate `WithCustomRepository.php` to create a new `WithCustomRepositoryLegacy.php` that includes the `renderForm()` version.
+
+B) In MakeCrudTest, dynamically choose `WithCustomRepository.php` vs `WithCustomRepositoryLegacy.php` in the `assertFileEquals()` by checking `Kernel::VERSION_ID < 60200`. Something like:
+
+```diff
+- sprintf('%s/fixtures/%s', \dirname(__DIR__), 'make-crud/expected/WithCustomRepository.php'),
++ sprintf('%s/fixtures/make-crud/expected/WithCustomRepository%s.php', \dirname(__DIR__), Kernel::VERSION_ID < 60200 ? 'Legacy' : ''),
+```
+
+Let me know if that helps :)
+
+---------------------------------------------------------------------------
+
+by mdoutreluingne at 2023-07-01T17:13:57Z
+
+Unfortunately, the tests failed globally (1 test failed when installing symfony/console), I don't know why it compares `render()` and `renderForm()` when `WithCustomRepository.php` is chosen dynamically.
+
+**One thing to note:** the last 2 tests failed on the `index` and `show` route names, while the other 2 failed on the `new` and `edit` route names.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2023-07-05T16:49:44Z
+
+My code suggestion for checking the Symfony version was slightly wrong - I just pushed the fix for it. Let's see what the tests think now :)
+
+---------------------------------------------------------------------------
+
+by mdoutreluingne at 2023-07-05T17:30:43Z
+
+The tests were successful ! :)
+
+@weaverryan Thanks for your help
+
+I didn't understand why you replaced `renderForm()` by `render()` for the route name `index` and `show` in `WithCustomRepositoryLegacy.php`, which should normally be the version with `renderForm()`
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2023-07-05T18:50:18Z
+
+> I didn't understand why you replaced renderForm() by render() for the route name index and show in WithCustomRepositoryLegacy.php, which should normally be the version with renderForm()
+
+Even back when `renderForm()` existed and was the correct solution, there was no reason to call `renderForm()` if you weren't passing a form into the template. So `index` and `show` have always generated as `render()`.
+
+Anyway, tests green now! Woo!
