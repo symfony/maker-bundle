@@ -1,0 +1,31 @@
+---------------------------------------------------------------------------
+
+by bechir at 2022-10-04T05:51:04Z
+
+Hi @weaverryan !
+
+Thank you for your feedbacks.
+
+Sorry for the late. I just saw that I had a PR in progress.
+
+I updated the code as you suggested me above.
+
+Updated existing tests add added new tests: one for checkbox and an other for `always_remember_me` (It seems to work)
+
+---------------------------------------------------------------------------
+
+by sadikoff at 2023-06-19T16:04:19Z
+
+Hey @bechir
+
+Sorry for so late ping a lot of time has passed, but will you be able to update your PR and do some last pending fixes?
+
+Cheers!
+
+---------------------------------------------------------------------------
+
+by bechir at 2023-06-23T12:04:32Z
+
+Hi @sadikoff
+I rebased my work and tests passed.
+Can you check it please?
