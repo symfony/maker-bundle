@@ -110,7 +110,7 @@ final class ClassSourceManipulator
         $attributes[] = $this->buildAttributeNode(Column::class, $columnOptions, 'ORM');
 
         $defaultValue = null;
-        if ('array' === $typeHint) {
+        if ('array' === $typeHint && !$nullable) {
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
         } elseif ($typeHint && '\\' === $typeHint[0] && false !== strpos($typeHint, '\\', 1)) {
             $typeHint = $this->addUseStatementIfNecessary(substr($typeHint, 1));
