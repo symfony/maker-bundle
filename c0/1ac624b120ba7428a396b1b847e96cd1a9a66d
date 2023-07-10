@@ -1,0 +1,33 @@
+---------------------------------------------------------------------------
+
+by sadikoff at 2023-06-19T16:53:02Z
+
+Hi @Rootie,
+
+Can you please update the description and PR so it can be reviewed?
+
+Cheers!
+
+---------------------------------------------------------------------------
+
+by Rootie at 2023-06-27T13:21:40Z
+
+Hi @sadikoff,
+
+i updated the description.
+
+I also wanted to note that if keeping the default value for array fields is wanted, then it is also possible to just modify the addGetter call in Util\ClassSourceManipulator::addEntityField
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2023-06-27T20:26:10Z
+
+This makes sense to me. Could you rebase so we can check the tests?
+
+---------------------------------------------------------------------------
+
+by Rootie at 2023-06-28T07:01:17Z
+
+Hi @weaverryan,
+
+i updated my branch
