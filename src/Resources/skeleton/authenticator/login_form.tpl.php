@@ -25,15 +25,13 @@
     <input type="hidden" name="_csrf_token"
            value="{{ csrf_token('authenticate') }}"
     >
-<?php if($support_remember_me): ?>
-<?php if(!$always_remember_me): ?>
+<?php if($support_remember_me && !$always_remember_me): ?>
 
     <div class="checkbox mb-3">
         <label>
             <input type="checkbox" name="_remember_me"> Remember me
         </label>
     </div>
-<?php endif; ?>
 <?php endif; ?>
 
     <button class="btn btn-lg btn-primary" type="submit">
