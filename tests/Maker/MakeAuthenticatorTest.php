@@ -151,6 +151,8 @@ class MakeAuthenticatorTest extends MakerTestCase
                     // field name
                     'userEmail',
                     'no',
+                    // remember me support => no
+                    'no',
                 ]);
 
                 $this->runLoginTest($runner, 'userEmail');
@@ -180,6 +182,8 @@ class MakeAuthenticatorTest extends MakerTestCase
                     // username field => userEmail
                     0,
                     'no',
+                    // remember me support => no
+                    'no',
                 ]);
 
                 $runner->runTests();
@@ -207,6 +211,8 @@ class MakeAuthenticatorTest extends MakerTestCase
                     // user class
                     'App\Security\User',
                     'no',
+                    // remember me support => no
+                    'no',
                 ]);
             }),
         ];
@@ -229,6 +235,8 @@ class MakeAuthenticatorTest extends MakerTestCase
                     // controller name
                     'SecurityController',
                     'no',
+                    // remember me support => no
+                    'no',
                 ]);
 
                 $this->runLoginTest($runner, 'email');
@@ -249,6 +257,8 @@ class MakeAuthenticatorTest extends MakerTestCase
                     'SecurityController',
                     // logout support
                     'yes',
+                    // remember me support => no
+                    'no',
                 ]);
 
                 $this->runLoginTest($runner, 'userEmail', true, 'App\\Entity\\User', true);
@@ -264,6 +274,68 @@ class MakeAuthenticatorTest extends MakerTestCase
                     'app_logout',
                     $securityConfig['security']['firewalls']['main']['logout']['path']
                 );
+            }),
+        ];
+
+        yield 'auth_login_form_remember_me_via_checkbox' => [$this->createMakerTest()
+            ->addExtraDependencies('doctrine', 'twig', 'symfony/form')
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner, 'userEmail');
+
+                $output = $runner->runMaker([
+                    // authenticator type => login-form
+                    1,
+                    // class name
+                    'AppCustomAuthenticator',
+                    // controller name
+                    'SecurityController',
+                    // logout support
+                    'yes',
+                    // remember me support => yes
+                    'yes',
+                    // remember me type => checkbox
+                    0,
+                ]);
+
+                $this->runLoginTest($runner, 'userEmail');
+
+                $this->assertStringContainsString('Success', $output);
+                $seucrityConfig = $runner->readYaml('config/packages/security.yaml');
+                $firewallMain = $seucrityConfig['security']['firewalls']['main'];
+
+                $this->assertEquals('%kernel.secret%', $firewallMain['remember_me']['secret']);
+                $this->assertEquals('604800', $firewallMain['remember_me']['lifetime']);
+            }),
+        ];
+
+        yield 'auth_login_form_always_remember_me' => [$this->createMakerTest()
+            ->addExtraDependencies('doctrine', 'twig', 'symfony/form')
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner, 'userEmail');
+
+                $output = $runner->runMaker([
+                    // authenticator type => login-form
+                    1,
+                    // class name
+                    'AppCustomAuthenticator',
+                    // controller name
+                    'SecurityController',
+                    // logout support
+                    'yes',
+                    // remember me support => yes
+                    'yes',
+                    // remember me type => always
+                    1,
+                ]);
+
+                $this->runLoginTest($runner, 'userEmail');
+
+                $this->assertStringContainsString('Success', $output);
+                $seucrityConfig = $runner->readYaml('config/packages/security.yaml');
+                $firewallMain = $seucrityConfig['security']['firewalls']['main'];
+
+                $this->assertEquals('%kernel.secret%', $firewallMain['remember_me']['secret']);
+                $this->assertTrue($firewallMain['remember_me']['always_remember_me']);
             }),
         ];
     }

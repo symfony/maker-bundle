@@ -69,7 +69,7 @@ final class SecurityConfigUpdater
         return $contents;
     }
 
-    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup): string
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): string
     {
         $this->createYamlSourceManipulator($yamlSource);
 
@@ -108,6 +108,41 @@ final class SecurityConfigUpdater
                 ' the entry_point start() method determines what happens when an anonymous user accesses a protected page'
             );
             $firewall['entry_point'] = $authenticatorClass;
+        }
+
+        if (!isset($firewall['logout']) && $logoutSetup) {
+            $firewall['logout'] = ['path' => 'app_logout'];
+            $firewall['logout'][] = $this->manipulator->createCommentLine(
+                ' where to redirect after logout'
+            );
+            $firewall['logout'][] = $this->manipulator->createCommentLine(
+                ' target: app_any_route'
+            );
+        }
+
+        if ($supportRememberMe) {
+            if (!isset($firewall['remember_me'])) {
+                $firewall['remember_me_empty_line'] = $this->manipulator->createEmptyLine();
+                $firewall['remember_me'] = [
+                    'secret' => '%kernel.secret%',
+                    'lifetime' => 604800,
+                    'path' => '/',
+                ];
+                if (!$alwaysRememberMe) {
+                    $firewall['remember_me'][] = $this->manipulator->createCommentLine(' by default, the feature is enabled by checking a checkbox in the');
+                    $firewall['remember_me'][] = $this->manipulator->createCommentLine(' login form, uncomment the following line to always enable it.');
+                }
+            } else {
+                $firewall['remember_me']['secret'] ??= '%kernel.secret%';
+                $firewall['remember_me']['lifetime'] ??= 604800;
+                $firewall['remember_me']['path'] ??= '/';
+            }
+
+            if ($alwaysRememberMe) {
+                $firewall['remember_me']['always_remember_me'] = true;
+            } else {
+                $firewall['remember_me'][] = $this->manipulator->createCommentLine('always_remember_me: true');
+            }
         }
 
         $newData['security']['firewalls'][$firewallName] = $firewall;

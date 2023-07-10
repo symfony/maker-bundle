@@ -24,7 +24,8 @@ class <?= $class_name; ?> extends AbstractLoginFormAuthenticator
             new UserBadge($<?= $username_field_var ?>),
             new PasswordCredentials($request->request->get('password', '')),
             [
-                new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
+                new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),<?= $remember_me_badge ? "
+                new RememberMeBadge(),\n" : "" ?>
             ]
         );
     }
