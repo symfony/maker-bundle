@@ -22,22 +22,4 @@ class UserRepository extends DocumentRepository
         $classMetaData = $dm->getClassMetadata(UserXml::class);
         parent::__construct($dm, $uow, $classMetaData);
     }
-
-    public function save(UserXml $document, bool $flush = false): void
-    {
-        $this->dm->persist($document);
-
-        if ($flush) {
-            $this->dm->flush();
-        }
-    }
-
-    public function remove(UserXml $document, bool $flush = false): void
-    {
-        $this->dm->remove($document);
-
-        if ($flush) {
-            $this->dm->flush();
-        }
-    }
 }

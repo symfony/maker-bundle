@@ -20,24 +20,6 @@ class <?= $class_name; ?> extends DocumentRepository
         $classMetaData = $dm->getClassMetadata(<?= $document_class_name; ?>::class);
         parent::__construct($dm, $uow, $classMetaData);
     }
-
-    public function save(<?= $document_class_name ?> $document, bool $flush = false): void
-    {
-        $this->dm->persist($document);
-
-        if ($flush) {
-            $this->dm->flush();
-        }
-    }
-
-    public function remove(<?= $document_class_name ?> $document, bool $flush = false): void
-    {
-        $this->dm->remove($document);
-
-        if ($flush) {
-            $this->dm->flush();
-        }
-    }
 <?php if ($include_example_comments): // When adding a new method without existing default comments, the blank line is automatically added.?>
 
 <?php endif; ?>

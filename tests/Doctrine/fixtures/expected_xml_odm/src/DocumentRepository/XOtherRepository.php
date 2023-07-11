@@ -22,22 +22,4 @@ class XOtherRepository extends DocumentRepository
         $classMetaData = $dm->getClassMetadata(XOther::class);
         parent::__construct($dm, $uow, $classMetaData);
     }
-
-    public function save(XOther $document, bool $flush = false): void
-    {
-        $this->dm->persist($document);
-
-        if ($flush) {
-            $this->dm->flush();
-        }
-    }
-
-    public function remove(XOther $document, bool $flush = false): void
-    {
-        $this->dm->remove($document);
-
-        if ($flush) {
-            $this->dm->flush();
-        }
-    }
 }
