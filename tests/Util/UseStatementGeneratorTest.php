@@ -90,4 +90,20 @@ class UseStatementGeneratorTest extends TestCase
             EOT;
         self::assertSame($expected, (string) $unsorted);
     }
+
+    public function testUseStatementsWithDuplicates(): void
+    {
+        $unsorted = new UseStatementGenerator([
+            \Symfony\UX\Turbo\Attribute\Broadcast::class,
+            \ApiPlatform\Core\Annotation\ApiResource::class,
+            \ApiPlatform\Core\Annotation\ApiResource::class,
+        ]);
+
+        $expected = <<< 'EOT'
+            use ApiPlatform\Core\Annotation\ApiResource;
+            use Symfony\UX\Turbo\Attribute\Broadcast;
+
+            EOT;
+        self::assertSame($expected, (string) $unsorted);
+    }
 }
