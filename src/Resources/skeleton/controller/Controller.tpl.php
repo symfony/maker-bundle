@@ -7,7 +7,7 @@ namespace <?= $namespace; ?>;
 class <?= $class_name; ?> extends AbstractController
 {
 <?= $generator->generateRouteForControllerMethod($route_path, $route_name); ?>
-    public function index(): <?php if ($with_template) { ?>Response<?php } else { ?>JsonResponse<?php } ?>
+    public function <?= $method_name ?>(): <?php if ($with_template) { ?>Response<?php } else { ?>JsonResponse<?php } ?>
 
     {
 <?php if ($with_template) { ?>
