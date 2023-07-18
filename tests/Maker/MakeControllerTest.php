@@ -143,6 +143,31 @@ class MakeControllerTest extends MakerTestCase
                 $this->assertStringContainsString('templates/admin/foo_invokable.html.twig', $output);
             }),
         ];
+
+        yield 'it_generates_a_controller_standalone' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([
+                    // controller class name
+                    'FooStandalone',
+                ], '--standalone');
+
+                $this->assertStringContainsString('src/Controller/FooStandaloneController.php', $output);
+                $this->runControllerTest($runner, 'it_generates_a_standalone_controller.php');
+            }),
+        ];
+
+        yield 'it_generates_a_controller_standalone_with_twig' => [$this->createMakerTest()
+            ->addExtraDependencies('twig')
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([
+                    // controller class name
+                    'FooStandaloneTwig',
+                ], '--standalone');
+
+                $this->assertStringContainsString('src/Controller/FooStandaloneTwigController.php', $output);
+                $this->runControllerTest($runner, 'it_generates_a_standalone_controller_with_twig.php');
+            }),
+        ];
     }
 
     private function runControllerTest(MakerTestRunner $runner, string $filename): void

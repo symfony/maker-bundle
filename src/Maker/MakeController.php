@@ -26,7 +26,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Annotation\Route;
+use Twig\Environment;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -61,6 +63,7 @@ final class MakeController extends AbstractMaker
             ->addArgument('controller-class', InputArgument::OPTIONAL, sprintf('Choose a name for your controller class (e.g. <fg=yellow>%sController</>)', Str::asClassName(Str::getRandomTerm())))
             ->addOption('no-template', null, InputOption::VALUE_NONE, 'Use this option to disable template generation')
             ->addOption('invokable', 'i', InputOption::VALUE_NONE, 'Use this option to create an invokable controller')
+            ->addOption('standalone', 's', InputOption::VALUE_NONE, 'Use this option to create a controller without base class')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeController.txt'))
         ;
     }
@@ -75,12 +78,14 @@ final class MakeController extends AbstractMaker
 
         $withTemplate = $this->isTwigInstalled() && !$input->getOption('no-template');
         $isInvokable = (bool) $input->getOption('invokable');
+        $isStandalone = (bool) $input->getOption('standalone');
 
-        $useStatements = new UseStatementGenerator([
-            AbstractController::class,
+        $useStatements = new UseStatementGenerator(array_filter([
+            $isStandalone ? AsController::class : AbstractController::class,
+            ($isStandalone && $withTemplate) ? Environment::class : null,
             $withTemplate ? Response::class : JsonResponse::class,
             Route::class,
-        ]);
+        ]));
 
         $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix())
             .($isInvokable ? '.html.twig' : '/index.html.twig');
@@ -90,6 +95,7 @@ final class MakeController extends AbstractMaker
             'controller/Controller.tpl.php',
             [
                 'use_statements' => $useStatements,
+                'is_standalone' => $isStandalone,
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'method_name' => $isInvokable ? '__invoke' : 'index',
