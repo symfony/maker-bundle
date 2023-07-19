@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by adrienlucas at 2023-07-18T14:59:17Z
+
+> Waiting for the tests - but it looks nice to me!
+
+Fixed CS. Not sure why one of the test is failing.
+Thanks for your very quick feedback!
+
+---------------------------------------------------------------------------
+
+by adrienlucas at 2023-07-18T17:47:53Z
+
+Second commit : the name of the template should not be `{controller_name}/index.html.twig` but rather `{controller_name}.html.twig`.
+For example: `App\Controller\Blog\CreateBlogPostController` => `templates/blog/create_blog_post.html.twig`.
+
+Edit : that is only for invokable controllers of course.
