@@ -153,7 +153,7 @@ final class MakeAuthenticator extends AbstractMaker
 
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
         $command->addOption('firewall-name', null, InputOption::VALUE_OPTIONAL);
-        $input->setOption('firewall-name', $firewallName = $interactiveSecurityHelper->guessFirewallName($io, $securityData));
+        $input->setOption('firewall-name', $interactiveSecurityHelper->guessFirewallName($io, $securityData));
 
         $command->addOption('entry-point', null, InputOption::VALUE_OPTIONAL);
 
@@ -279,7 +279,6 @@ final class MakeAuthenticator extends AbstractMaker
                 $securityYamlUpdated,
                 $input->getArgument('authenticator-type'),
                 $input->getArgument('authenticator-class'),
-                $securityData,
                 $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
                 $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false,
                 $supportRememberMe,
@@ -415,7 +414,7 @@ final class MakeAuthenticator extends AbstractMaker
         );
     }
 
-    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, array $securityData, $userClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): array
+    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, $userClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): array
     {
         $nextTexts = ['Next:'];
         $nextTexts[] = '- Customize your new authenticator.';
@@ -449,7 +448,7 @@ final class MakeAuthenticator extends AbstractMaker
     private function userClassHasEncoder(array $securityData, string $userClass): bool
     {
         $userNeedsEncoder = false;
-        $hashersData = $securityData['security']['encoders'] ?? $securityData['security']['encoders'] ?? [];
+        $hashersData = $securityData['security']['encoders'] ?? [];
 
         foreach ($hashersData as $userClassWithEncoder => $encoder) {
             if ($userClass === $userClassWithEncoder || is_subclass_of($userClass, $userClassWithEncoder) || class_implements($userClass, $userClassWithEncoder)) {

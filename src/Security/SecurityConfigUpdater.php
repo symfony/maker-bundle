@@ -60,7 +60,7 @@ final class SecurityConfigUpdater
         $this->updateProviders($userConfig, $userClass);
 
         if ($userConfig->hasPassword()) {
-            $this->updatePasswordHashers($userConfig, $userClass);
+            $this->updatePasswordHashers($userClass);
         }
 
         $contents = $this->manipulator->getContents();
@@ -243,7 +243,7 @@ final class SecurityConfigUpdater
         $this->manipulator->setData($newData);
     }
 
-    private function updatePasswordHashers(UserClassConfiguration $userConfig, string $userClass): void
+    private function updatePasswordHashers(string $userClass): void
     {
         $newData = $this->manipulator->getData();
 

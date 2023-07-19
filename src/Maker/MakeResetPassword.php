@@ -326,7 +326,7 @@ class MakeResetPassword extends AbstractMaker
         $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
-        $this->successMessage($input, $io, $requestClassNameDetails->getFullName());
+        $this->successMessage($io, $requestClassNameDetails->getFullName());
     }
 
     private function setBundleConfig(ConsoleStyle $io, Generator $generator, string $repositoryClassFullName): void
@@ -379,7 +379,7 @@ class MakeResetPassword extends AbstractMaker
         $generator->dumpFile($path, $manipulator->getContents());
     }
 
-    private function successMessage(InputInterface $input, ConsoleStyle $io, string $requestClassName): void
+    private function successMessage(ConsoleStyle $io, string $requestClassName): void
     {
         $closing[] = 'Next:';
         $closing[] = sprintf('  1) Run <fg=yellow>"%s make:migration"</> to generate a migration for the new <fg=yellow>"%s"</> entity.', CliOutputHelper::getCommandPrefix(), $requestClassName);
