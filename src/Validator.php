@@ -158,10 +158,6 @@ final class Validator
 
     public static function validateDoctrineFieldName(string $name, ManagerRegistry|LegacyManagerRegistry $registry): string
     {
-        if (!$registry instanceof ManagerRegistry && !$registry instanceof LegacyManagerRegistry) {
-            throw new \InvalidArgumentException(sprintf('Argument 2 to %s::validateDoctrineFieldName must be an instance of %s, %s passed.', __CLASS__, ManagerRegistry::class, \is_object($registry) ? $registry::class : \gettype($registry)));
-        }
-
         // check reserved words
         if ($registry->getConnection()->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name)) {
             throw new \InvalidArgumentException(sprintf('Name "%s" is a reserved word.', $name));

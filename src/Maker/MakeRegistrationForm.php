@@ -178,11 +178,9 @@ final class MakeRegistrationForm extends AbstractMaker
 
         if ($io->confirm('Do you want to automatically authenticate the user after registration?')) {
             $this->interactAuthenticatorQuestions(
-                $input,
                 $io,
                 $interactiveSecurityHelper,
-                $securityData,
-                $command
+                $securityData
             );
         }
 
@@ -192,7 +190,7 @@ final class MakeRegistrationForm extends AbstractMaker
         }
     }
 
-    private function interactAuthenticatorQuestions(InputInterface $input, ConsoleStyle $io, InteractiveSecurityHelper $interactiveSecurityHelper, array $securityData, Command $command): void
+    private function interactAuthenticatorQuestions(ConsoleStyle $io, InteractiveSecurityHelper $interactiveSecurityHelper, array $securityData): void
     {
         $firewallsData = $securityData['security']['firewalls'] ?? [];
         $firewallName = $interactiveSecurityHelper->guessFirewallName(

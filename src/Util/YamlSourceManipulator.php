@@ -226,7 +226,7 @@ class YamlSourceManipulator
         // Edge case: if the last item on a multi-line array has a comment,
         // we want to move to the end of the line, beyond that comment
         if (\count($currentData) < \count($newData) && $this->isCurrentArrayMultiline()) {
-            $this->advanceBeyondMultilineArrayLastItem($currentData, $newData);
+            $this->advanceBeyondMultilineArrayLastItem();
         }
 
         if (0 === $this->indentationForDepths[$this->depth] && $this->depth > 1) {
@@ -534,7 +534,7 @@ class YamlSourceManipulator
         $this->advanceCurrentPosition($this->getEndOfPreviousKeyPosition($key));
     }
 
-    private function advanceBeyondMultilineArrayLastItem(array $currentData, array $newData)
+    private function advanceBeyondMultilineArrayLastItem()
     {
         $this->log('Trying to advance beyond the last item in a multiline array');
         $this->advanceBeyondWhitespace();

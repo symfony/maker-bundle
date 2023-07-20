@@ -175,7 +175,7 @@ final class MakeStimulusController extends AbstractMaker
         // convert to snake case for simplicity
         $snakeCasedField = Str::asSnakeCase($valueName);
 
-        if ('_id' === $suffix = substr($snakeCasedField, -3)) {
+        if ('_id' === substr($snakeCasedField, -3)) {
             $defaultType = 'Number';
         } elseif (str_starts_with($snakeCasedField, 'is_')) {
             $defaultType = 'Boolean';
