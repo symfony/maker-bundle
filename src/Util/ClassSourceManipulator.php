@@ -1556,6 +1556,7 @@ final class ClassSourceManipulator
                 }
             }
         }
+
         return false;
     }
 
