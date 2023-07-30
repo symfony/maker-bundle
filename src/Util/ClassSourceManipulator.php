@@ -14,6 +14,8 @@ namespace Symfony\Bundle\MakerBundle\Util;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\ODM\MongoDB\Mapping\Annotations\EmbeddedDocument;
+use Doctrine\ODM\MongoDB\Mapping\Annotations\EmbedMany;
 use Doctrine\ODM\MongoDB\Mapping\Annotations\EmbedOne;
 use Doctrine\ODM\MongoDB\Mapping\Annotations\Field;
 use Doctrine\ODM\MongoDB\Types\Type;
@@ -256,14 +258,15 @@ final class ClassSourceManipulator
         $this->addSetter($propertyName, $typeHint, false);
     }
 
-    public function addEmbeddedDocument(string $propertyName, string $className): void
+    public function addEmbedOne(\Symfony\Bundle\MakerBundle\Doctrine\EmbedOne $embedding): void
     {
-        $typeHint = $this->addUseStatementIfNecessary($className);
+        $propertyName = $embedding->getPropertyName();
+        $typeHint = $this->addUseStatementIfNecessary($embedding->getTargetClassName());
 
         $attributes = [
             $this->buildAttributeNode(
                 EmbedOne::class,
-                ['class' => new ClassNameValue($className, $typeHint)],
+                ['targetDocument' => new ClassNameValue($typeHint, $embedding->getTargetClassName())],
                 'ODM'
             ),
         ];
@@ -297,6 +300,105 @@ final class ClassSourceManipulator
 
         $this->addGetter($propertyName, $typeHint, false);
         $this->addSetter($propertyName, $typeHint, false);
+    }
+
+    public function addEmbedMany(\Symfony\Bundle\MakerBundle\Doctrine\EmbedMany $embedding): void
+    {
+        $className = $embedding->getTargetClassName();
+        $propertyName = $embedding->getPropertyName();
+        $typeHint = $this->addUseStatementIfNecessary($className);
+        $arrayCollectionTypeHint = $this->addUseStatementIfNecessary(ArrayCollection::class);
+        $collectionTypeHint = $this->addUseStatementIfNecessary(Collection::class);
+        $attributes = [
+            $this->buildAttributeNode(
+                EmbedMany::class,
+                ['targetDocument' => new ClassNameValue($typeHint, $className)],
+                'ODM'
+            ),
+        ];
+
+        $this->addProperty(
+            name: $propertyName,
+            attributes: $attributes,
+            propertyType: $collectionTypeHint,
+        );
+
+        // logic to avoid re-adding the same ArrayCollection line
+        $addArrayCollection = true;
+        if ($this->getConstructorNode()) {
+            // We print the constructor to a string, then
+            // look for "$this->propertyName = "
+
+            $constructorString = $this->printer->prettyPrint([$this->getConstructorNode()]);
+            if (str_contains($constructorString, sprintf('$this->%s = ', $propertyName))) {
+                $addArrayCollection = false;
+            }
+        }
+
+        if ($addArrayCollection) {
+            $this->addStatementToConstructor(
+                new Node\Stmt\Expression(new Node\Expr\Assign(
+                    new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $propertyName),
+                    new Node\Expr\New_(new Node\Name($arrayCollectionTypeHint))
+                ))
+            );
+        }
+
+        $this->addGetter(
+            $propertyName,
+            $collectionTypeHint,
+            false,
+            // add @return that advertises this as a collection of specific objects
+            [sprintf('@return %s<int, %s>', $collectionTypeHint, $typeHint)]
+        );
+
+        $argName = Str::pluralCamelCaseToSingular($propertyName);
+
+        // adder method
+        $adderNodeBuilder = (new Builder\Method($embedding->getAdderMethodName()))->makePublic();
+
+        $paramBuilder = new Builder\Param($argName);
+        $paramBuilder->setType($typeHint);
+        $adderNodeBuilder->addParam($paramBuilder->getNode());
+
+        $containsMethodCallNode = new Node\Expr\MethodCall(
+            new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $propertyName),
+            'contains',
+            [new Node\Expr\Variable($argName)]
+        );
+        $ifNotContainsStmt = new Node\Stmt\If_(
+            new Node\Expr\BooleanNot($containsMethodCallNode)
+        );
+        $adderNodeBuilder->addStmt($ifNotContainsStmt);
+
+        // append the item
+        $ifNotContainsStmt->stmts[] = new Node\Stmt\Expression(
+            new Node\Expr\MethodCall(
+                new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $propertyName),
+                'add',
+                [new Node\Expr\Variable($argName)]
+            ));
+
+        $this->makeMethodFluent($adderNodeBuilder);
+        $this->addMethod($adderNodeBuilder->getNode());
+
+        // Remover method
+        $removerNodeBuilder = (new Builder\Method($embedding->getRemoverMethodName()))->makePublic();
+
+        $paramBuilder = new Builder\Param($argName);
+        $paramBuilder->setType($typeHint);
+        $removerNodeBuilder->addParam($paramBuilder->getNode());
+
+        $removeElementCall = new Node\Expr\MethodCall(
+            new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $propertyName),
+            'removeElement',
+            [new Node\Expr\Variable($argName)]
+        );
+
+        $removerNodeBuilder->addStmt(BuilderHelpers::normalizeStmt($removeElementCall));
+
+        $this->makeMethodFluent($removerNodeBuilder);
+        $this->addMethod($removerNodeBuilder->getNode());
     }
 
     public function addManyToOneRelation(RelationManyToOne $manyToOne): void
@@ -918,7 +1020,7 @@ final class ClassSourceManipulator
     /**
      * @return string The alias to use when referencing this class
      */
-    public function addUseStatementIfNecessary(string $class): string
+    public function addUseStatementIfNecessary(string $class, string $as = null): string
     {
         $shortClassName = Str::getShortClassName($class);
         if ($this->isInSameNamespace($class)) {
@@ -980,7 +1082,13 @@ final class ClassSourceManipulator
             throw new \Exception('Could not find a class!');
         }
 
-        $newUseNode = (new Builder\Use_($class, Node\Stmt\Use_::TYPE_NORMAL))->getNode();
+        $newUse = new Builder\Use_($class, Node\Stmt\Use_::TYPE_NORMAL);
+
+        if ($as) {
+            $newUse->as($as);
+        }
+
+        $newUseNode = $newUse->getNode();
         array_splice(
             $namespaceNode->stmts,
             $targetIndex,
@@ -1433,6 +1541,40 @@ final class ClassSourceManipulator
         }
 
         return false;
+    }
+
+    public function isEmbeddedDocument(): bool
+    {
+        $classNode = $this->getClassNode();
+
+        foreach ($classNode->attrGroups as $attributeGroup) {
+            if ($attributeGroup instanceof Node\AttributeGroup) {
+                foreach ($attributeGroup->attrs as $attribute) {
+                    if ($attribute instanceof Node\Attribute && str_contains($attribute->name->toString(), 'EmbeddedDocument')) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public function transformToEmbeddedDocument(): void
+    {
+        $classNode = $this->getClassNode();
+        $this->addUseStatementIfNecessary('Doctrine\\ODM\\MongoDB\\Mapping\\Annotations', 'ODM');
+
+        foreach ($classNode->attrGroups as $i => $attributeGroup) {
+            if ($attributeGroup instanceof Node\AttributeGroup) {
+                foreach ($attributeGroup->attrs as $k => $attribute) {
+                    if ($attribute instanceof Node\Attribute && str_contains($attribute->name->toString(), 'Document')) {
+                        $attributeGroup->attrs[$k] = $this->buildAttributeNode(EmbeddedDocument::class, [], 'ODM');
+                    }
+                }
+            }
+        }
+
+        $this->updateSourceCodeFromNewStmts();
     }
 
     private function writeNote(string $note): void

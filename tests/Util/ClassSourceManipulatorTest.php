@@ -15,6 +15,8 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use PhpParser\Builder\Param;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\MakerBundle\Doctrine\EmbedMany;
+use Symfony\Bundle\MakerBundle\Doctrine\EmbedOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
@@ -851,5 +853,77 @@ class ClassSourceManipulatorTest extends TestCase
             $this->someMethod($someStringParam);
             CODE
         );
+    }
+
+    /**
+     * @dataProvider getAddEmbedOneTests
+     */
+    public function testAddEmbedOne(string $sourceFilename, string $expectedSourceFilename, EmbedOne $embedOne): void
+    {
+        $sourcePath = __DIR__.'/fixtures/source';
+        $expectedPath = __DIR__.'/fixtures/add_embed_one';
+
+        $this->runAddEmbedOneTests(
+            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            $embedOne
+        );
+    }
+
+    private function runAddEmbedOneTests(string $source, string $expected, EmbedOne $embedOne): void
+    {
+        $manipulator = new ClassSourceManipulator($source, false);
+        $manipulator->addEmbedOne($embedOne);
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function getAddEmbedOneTests(): \Generator
+    {
+        yield 'embed_one_simple' => [
+            'Document_User_simple.php',
+            'Document_User_simple.php',
+            new EmbedOne(
+                propertyName: 'avatarPhoto',
+                targetClassName: \App\Document\UserAvatarPhoto::class,
+                isNullable: true,
+            ),
+        ];
+    }
+
+    /**
+     * @dataProvider getAddEmbedManyTests
+     */
+    public function testAddEmbedMany(string $sourceFilename, string $expectedSourceFilename, EmbedMany $embedMany): void
+    {
+        $sourcePath = __DIR__.'/fixtures/source';
+        $expectedPath = __DIR__.'/fixtures/add_embed_many';
+
+        $this->runAddEmbedManyTests(
+            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            $embedMany
+        );
+    }
+
+    private function runAddEmbedManyTests(string $source, string $expected, EmbedMany $embedMany): void
+    {
+        $manipulator = new ClassSourceManipulator($source, false);
+        $manipulator->addEmbedMany($embedMany);
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function getAddEmbedManyTests(): \Generator
+    {
+        yield 'embed_many_simple' => [
+            'Document_User_simple.php',
+            'Document_User_simple.php',
+            new EmbedMany(
+                propertyName: 'avatarPhotos',
+                targetClassName: \App\Document\UserAvatarPhoto::class,
+                isNullable: true,
+            ),
+        ];
     }
 }

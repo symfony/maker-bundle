@@ -428,6 +428,102 @@ class MakeDocumentTest extends MakerTestCase
                 $this->runCustomTest($runner, 'it_creates_class_that_matches_existing_namespace.php');
             }),
         ];
+
+        yield 'it_adds_embed_one_embedded' => [$this->createMakeDocumentTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyDocument($runner, 'UserAvatarPhoto-embedded.php');
+
+                $runner->runMaker([
+                    // document class name
+                    'User',
+                    // field name
+                    'photo',
+                    // add a EmbedOne field
+                    'EmbedOne',
+                    // the target document
+                    'UserAvatarPhoto',
+                    // nullable
+                    'n',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runCustomTest($runner, 'it_adds_embed_one_embedded.php');
+            }),
+        ];
+
+        yield 'it_adds_embed_one_non_embedded' => [$this->createMakeDocumentTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyDocument($runner, 'UserAvatarPhoto-non-embedded.php');
+
+                $runner->runMaker([
+                    // document class name
+                    'User',
+                    // field name
+                    'photo',
+                    // add a EmbedOne field
+                    'EmbedOne',
+                    // the target document
+                    'UserAvatarPhoto',
+                    // nullable
+                    'n',
+                    // transform into EmbeddedDocument?
+                    'y',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runCustomTest($runner, 'it_adds_embed_one_embedded.php');
+            }),
+        ];
+
+        yield 'it_adds_embed_many_embedded' => [$this->createMakeDocumentTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyDocument($runner, 'UserAvatarPhoto-embedded.php');
+
+                $runner->runMaker([
+                    // document class name
+                    'User',
+                    // field name
+                    'photos',
+                    // add a EmbedMany field
+                    'EmbedMany',
+                    // the target document
+                    'UserAvatarPhoto',
+                    // nullable
+                    'n',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runCustomTest($runner, 'it_adds_embed_many_embedded.php');
+            }),
+        ];
+
+        yield 'it_adds_embed_many_non_embedded' => [$this->createMakeDocumentTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyDocument($runner, 'UserAvatarPhoto-non-embedded.php');
+
+                $runner->runMaker([
+                    // document class name
+                    'User',
+                    // field name
+                    'photos',
+                    // add a EmbedMany field
+                    'EmbedMany',
+                    // the target document
+                    'UserAvatarPhoto',
+                    // nullable
+                    'n',
+                    // transform into EmbeddedDocument?
+                    'y',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runCustomTest($runner, 'it_adds_embed_many_embedded.php');
+            }),
+        ];
     }
 
     private function runDocumentTest(MakerTestRunner $runner, array $data = []): void

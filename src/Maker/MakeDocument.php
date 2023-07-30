@@ -18,6 +18,7 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineODMHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\DocumentClassGenerator;
+use Symfony\Bundle\MakerBundle\Doctrine\DocumentEmbedding;
 use Symfony\Bundle\MakerBundle\Doctrine\DocumentRegenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\DocumentRelation;
 use Symfony\Bundle\MakerBundle\Doctrine\ODMDependencyBuilder;
@@ -101,6 +102,7 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
             ->addOption('api-resource', 'a', InputOption::VALUE_NONE, 'Mark this class as an API Platform resource (expose a CRUD API for it)')
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
+            ->addOption('embedded', null, InputOption::VALUE_NONE, 'Mark this document as embedded')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeDocument.txt'))
         ;
 
@@ -148,6 +150,8 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
     {
         $overwrite = $input->getOption('overwrite');
 
+        $embedded = $input->getOption('embedded');
+
         // the regenerate option has entirely custom behavior
         if ($input->getOption('regenerate')) {
             $this->regenerateDocuments($input->getArgument('name'), $overwrite, $generator);
@@ -166,7 +170,7 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
             $documentPath = $this->documentClassGenerator->generateDocumentClass(
                 $documentClassDetails,
                 $input->getOption('api-resource'),
-                true
+                $embedded
             );
 
             $generator->writeChanges();
@@ -176,21 +180,29 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
             throw new RuntimeCommandException(sprintf('Only attribute mapping is supported by make:document, but the <info>%s</info> class uses a different format. If you would like this command to generate the properties & getter/setter methods, add your mapping configuration, and then re-run this command with the <info>--regenerate</info> flag.', $documentClassDetails->getFullName()));
         }
 
+        $currentFields = $this->getPropertyNames($documentClassDetails->getFullName());
+
         if ($classExists) {
             $documentPath = $this->getPathOfClass($documentClassDetails->getFullName());
-            $io->text([
-                'Your document already exists! So let\'s add some new fields!',
-            ]);
+            $manipulator = $this->createClassManipulator($documentPath, $io, $overwrite);
+            if ($embedded && !$manipulator->isEmbeddedDocument()) {
+                if ($io->confirm('Your document already exists, but it is not an EmbeddedDocument. Do you want the Document should be transformed into EmbeddedDocument?', false)) {
+                    $manipulator->transformToEmbeddedDocument();
+                    $this->fileManager->dumpFile($documentPath, $manipulator->getSourceCode());
+                }
+            } else {
+                $io->text([
+                    'Your document already exists! So let\'s add some new fields!',
+                ]);
+            }
         } else {
+            $manipulator = $this->createClassManipulator($documentPath, $io, $overwrite);
             $io->text([
                 '',
                 'Document generated! Now let\'s add some fields!',
                 'You can always add more fields later manually or by re-running this command.',
             ]);
         }
-
-        $currentFields = $this->getPropertyNames($documentClassDetails->getFullName());
-        $manipulator = $this->createClassManipulator($documentPath, $io, $overwrite);
 
         $isFirstField = true;
         while (true) {
@@ -267,6 +279,25 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
                     $fileManagerOperations[$otherManipulatorFilename] = $otherManipulator;
                 }
                 $currentFields[] = $newFieldName;
+            } elseif ($newField instanceof DocumentEmbedding) {
+                $otherManipulatorFilename = $this->getPathOfClass($newField->getTargetClass());
+                $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
+                if (!$otherManipulator->isEmbeddedDocument()) {
+                    if ($io->confirm(sprintf(
+                        'Class <comment>%s</comment> is not marked as EmbeddedDocument. Do you want it to be transformed into EmbeddedDocument?',
+                        Str::getShortClassName($newField->getTargetClass())), false)) {
+                        $otherManipulator->transformToEmbeddedDocument();
+                        $fileManagerOperations[$otherManipulatorFilename] = $otherManipulator;
+                    }
+                }
+                switch ($newField->getType()) {
+                    case DocumentEmbedding::EMBED_ONE:
+                        $manipulator->addEmbedOne($newField->getDocumentEmbedding());
+                        break;
+                    case DocumentEmbedding::EMBED_MANY:
+                        $manipulator->addEmbedMany($newField->getDocumentEmbedding());
+                        break;
+                }
             } else {
                 throw new \Exception('Invalid value');
             }
@@ -302,7 +333,7 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
         ODMDependencyBuilder::buildDependencies($dependencies);
     }
 
-    private function askForNextField(ConsoleStyle $io, array $fields, string $documentClass, bool $isFirstField): DocumentRelation|array|null
+    private function askForNextField(ConsoleStyle $io, array $fields, string $documentClass, bool $isFirstField): DocumentRelation|DocumentEmbedding|array|null
     {
         $io->writeln('');
 
@@ -352,6 +383,7 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
         $allValidTypes = array_merge(
             array_keys($types),
             DocumentRelation::getValidRelationTypes(),
+            DocumentEmbedding::getValidEmbeddingTypes(),
             ['relation']
         );
         while (null === $type) {
@@ -375,6 +407,10 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
 
         if ('relation' === $type || \in_array($type, DocumentRelation::getValidRelationTypes())) {
             return $this->askRelationDetails($io, $documentClass, $type, $fieldName);
+        }
+
+        if (\in_array($type, DocumentEmbedding::getValidEmbeddingTypes())) {
+            return $this->askEmbeddingDetails($io, $documentClass, $type, $fieldName);
         }
 
         // this is a normal field
@@ -408,6 +444,10 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
                 'relation' => 'a '.$wizard.' will help you build the relation',
                 DocumentRelation::REFERENCE_ONE => [],
                 DocumentRelation::REFERENCE_MANY => [],
+            ],
+            'embedding' => [
+                DocumentEmbedding::EMBED_ONE => [],
+                DocumentEmbedding::EMBED_MANY => [],
             ],
             'array_object' => [
                 'hash' => [],
@@ -448,6 +488,9 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
 
         $io->writeln('<info>Relationships/Associations</info>');
         $printSection($typesTable['relation']);
+
+        $io->writeln('<info>Embed documents</info>');
+        $printSection($typesTable['embedding']);
 
         $io->writeln('<info>Array/Object Types</info>');
         $printSection($typesTable['array_object']);
@@ -697,6 +740,72 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
         return $relation;
     }
 
+    private function askEmbeddingDetails(ConsoleStyle $io, string $generatedDocumentClass, string $type, string $newFieldName): DocumentEmbedding
+    {
+        // ask the targetDocument
+        $targetDocumentClass = null;
+        while (null === $targetDocumentClass) {
+            $question = $this->createDocumentClassQuestion('What class should this document embed?');
+
+            $answeredDocumentClass = $io->askQuestion($question);
+
+            // find the correct class name - but give priority over looking
+            // in the Document namespace versus just checking the full class
+            // name to avoid issues with classes like "Directory" that exist
+            // in PHP's core.
+            if (class_exists($this->getDocumentNamespace().'\\'.$answeredDocumentClass)) {
+                $targetDocumentClass = $this->getDocumentNamespace().'\\'.$answeredDocumentClass;
+            } elseif (class_exists($answeredDocumentClass)) {
+                $targetDocumentClass = $answeredDocumentClass;
+            } else {
+                $io->error(sprintf('Unknown class "%s"', $answeredDocumentClass));
+                continue;
+            }
+        }
+
+        $askIsNullable = static fn (string $propertyName, string $targetClass) => $io->confirm(sprintf(
+            'Is the <comment>%s</comment>.<comment>%s</comment> property allowed to be null (nullable)?',
+            Str::getShortClassName($targetClass),
+            $propertyName
+        ));
+
+        switch ($type) {
+            case DocumentEmbedding::EMBED_ONE:
+                $embed = new DocumentEmbedding(
+                    DocumentEmbedding::EMBED_ONE,
+                    $generatedDocumentClass,
+                    $targetDocumentClass
+                );
+                $embed->setOwningProperty($newFieldName);
+
+                $embed->setIsNullable($askIsNullable(
+                    $embed->getOwningProperty(),
+                    $embed->getOwningClass()
+                ));
+                break;
+
+            case DocumentEmbedding::EMBED_MANY:
+                $embed = new DocumentEmbedding(
+                    DocumentEmbedding::EMBED_MANY,
+                    $generatedDocumentClass,
+                    $targetDocumentClass
+                );
+                $embed->setOwningProperty($newFieldName);
+
+                $embed->setIsNullable($askIsNullable(
+                    $embed->getOwningProperty(),
+                    $embed->getOwningClass()
+                ));
+
+                break;
+
+            default:
+                throw new \InvalidArgumentException('Invalid type: '.$type);
+        }
+
+        return $embed;
+    }
+
     private function askRelationType(ConsoleStyle $io, string $documentClass, string $targetDocumentClass)
     {
         $io->writeln('What type of relationship is this?');
@@ -800,7 +909,7 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
             $className = reset($otherClassMetadatas)->getName();
         }
 
-        return $this->doctrineHelper->doesClassUsesAttributes($className);
+        return $this->doctrineHelper->doesClassUseAttributes($className);
     }
 
     private function getDocumentNamespace(): string

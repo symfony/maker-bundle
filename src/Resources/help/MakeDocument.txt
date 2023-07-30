@@ -17,3 +17,7 @@ for the properties of existing documents:
 You can also *overwrite* any existing methods:
 
 <info>php %command.full_name% --regenerate --overwrite</info>
+
+You can create an EmbeddedDocument class:
+
+<info>php %command.full_name% --embedded</info>

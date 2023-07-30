@@ -32,20 +32,23 @@ final class DocumentClassGenerator
     ) {
     }
 
-    public function generateDocumentClass(ClassNameDetails $documentClassDetails, bool $apiResource, bool $generateRepositoryClass = true): string
+    public function generateDocumentClass(ClassNameDetails $documentClassDetails, bool $apiResource, bool $generateEmbeddedDocument = false): string
     {
+        $collectionName = $this->doctrineHelper->getPotentialCollectionName($documentClassDetails->getFullName());
+
         $repoClassDetails = $this->generator->createClassNameDetails(
             $documentClassDetails->getRelativeName(),
             'Repository\\',
             'Repository'
         );
 
-        $collectionName = $this->doctrineHelper->getPotentialCollectionName($documentClassDetails->getFullName());
-
         $useStatements = new UseStatementGenerator([
-            $repoClassDetails->getFullName(),
             ['Doctrine\\ODM\\MongoDB\\Mapping\\Annotations' => 'ODM'],
         ]);
+
+        if (!$generateEmbeddedDocument) {
+            $useStatements->addUseStatement($repoClassDetails->getFullName());
+        }
 
         if ($apiResource) {
             // @legacy Drop annotation class when annotations are no longer supported.
@@ -54,16 +57,17 @@ final class DocumentClassGenerator
 
         $documentPath = $this->generator->generateClass(
             $documentClassDetails->getFullName(),
-            'doctrine/Document.tpl.php',
+            $generateEmbeddedDocument ? 'doctrine/EmbeddedDocument.tpl.php' : 'doctrine/Document.tpl.php',
             [
                 'use_statements' => $useStatements,
                 'repository_class_name' => $repoClassDetails->getShortName(),
                 'api_resource' => $apiResource,
                 'collection_name' => $collectionName,
+                'embedded' => $generateEmbeddedDocument,
             ]
         );
 
-        if ($generateRepositoryClass) {
+        if (!$generateEmbeddedDocument) {
             $this->generateRepositoryClass(
                 $repoClassDetails->getFullName(),
                 $documentClassDetails->getFullName(),

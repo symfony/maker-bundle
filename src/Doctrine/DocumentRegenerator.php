@@ -69,36 +69,20 @@ final class DocumentRegenerator
             $manipulator = $this->createClassManipulator($classPath);
             $operations[$classPath] = $manipulator;
 
-            $embeddedClasses = [];
-
             foreach ($classMetadata->getEmbeddedFieldsMappings() as $fieldName => $mapping) {
-                if (str_contains($fieldName, '.')) {
-                    continue;
-                }
-
                 $className = $mapping['targetDocument'];
-
-                $embeddedClasses[$fieldName] = $this->getPathOfClass($className);
-
-                $operations[$embeddedClasses[$fieldName]] = $this->createClassManipulator($embeddedClasses[$fieldName]);
 
                 if (!\in_array($fieldName, $mappedFields)) {
                     continue;
                 }
-
-                $manipulator->addEmbeddedDocument($fieldName, $className);
+                if ($classMetadata->isSingleValuedEmbed($fieldName)) {
+                    $manipulator->addEmbedOne(new EmbedOne($fieldName, $className));
+                } else {
+                    $manipulator->addEmbedMany(new EmbedMany($fieldName, $className));
+                }
             }
 
             foreach ($classMetadata->fieldMappings as $fieldName => $mapping) {
-                // skip embedded fields
-                if (str_contains($fieldName, '.')) {
-                    [$fieldName, $embeddedFiledName] = explode('.', $fieldName);
-
-                    $operations[$embeddedClasses[$fieldName]]->addDocumentField($embeddedFiledName, $mapping);
-
-                    continue;
-                }
-
                 if (!\in_array($fieldName, $mappedFields)) {
                     continue;
                 }

@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
-use Doctrine\DBAL\Connection;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadataFactory;
 use Doctrine\ODM\MongoDB\Mapping\Driver\AttributeDriver;
@@ -24,8 +23,6 @@ use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
-use Symfony\Component\Uid\Ulid;
-use Symfony\Component\Uid\Uuid;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
@@ -83,7 +80,7 @@ final class DoctrineODMHelper
             }
             $classNamespace = implode('\\', $classNameComponents);
 
-            return $this->isInstanceOf($this->getMappingDriverForNamespace($classNamespace), $driverClass);
+            return $this->getMappingDriverForNamespace($classNamespace) instanceof $driverClass;
         }
 
         if (null === $dm) {
@@ -91,41 +88,25 @@ final class DoctrineODMHelper
         }
 
         if (null === $this->mappingDriversByPrefix) {
-            // doctrine-bundle <= 2.2
             $metadataDriver = $dm->getConfiguration()->getMetadataDriverImpl();
 
-            if (!$this->isInstanceOf($metadataDriver, MappingDriverChain::class)) {
-                return $this->isInstanceOf($metadataDriver, $driverClass);
-            }
-
-            foreach ($metadataDriver->getDrivers() as $namespace => $driver) {
-                if (str_starts_with($className, $namespace)) {
-                    return $this->isInstanceOf($driver, $driverClass);
-                }
-            }
-
-            return $this->isInstanceOf($metadataDriver->getDefaultDriver(), $driverClass);
+            return $metadataDriver instanceof $driverClass;
         }
 
         $managerName = array_search($dm, $this->getRegistry()->getManagers(), true);
 
         foreach ($this->mappingDriversByPrefix[$managerName] as [$prefix, $prefixDriver]) {
             if (str_starts_with($className, $prefix)) {
-                return $this->isInstanceOf($prefixDriver, $driverClass);
+                return $prefixDriver instanceof $driverClass;
             }
         }
 
         return false;
     }
 
-    public function doesClassUsesAttributes(string $className): bool
+    public function doesClassUseAttributes(string $className): bool
     {
         return $this->doesClassUseDriver($className, AttributeDriver::class);
-    }
-
-    public function isDoctrineSupportingAttributes(): bool
-    {
-        return $this->isDoctrineInstalled();
     }
 
     public function getDocumentsForAutocomplete(): array
@@ -170,10 +151,10 @@ final class DoctrineODMHelper
                 try {
                     $loaded = $cmf->getAllMetadata();
                 } catch (ODMMappingException|PersistenceMappingException) {
-                    $loaded = $this->isInstanceOf($cmf, AbstractClassMetadataFactory::class) ? $cmf->getLoadedMetadata() : [];
+                    $loaded = ($cmf instanceof AbstractClassMetadataFactory) ? $cmf->getLoadedMetadata() : [];
                 }
 
-                $cmf = new ClassMetadataFactory(); // DisconnectedClassMetadataFactory();
+                $cmf = new ClassMetadataFactory();
                 $cmf->setDocumentManager($dm);
                 $cmf->setConfiguration($dm->getConfiguration());
 
@@ -185,9 +166,9 @@ final class DoctrineODMHelper
                     // Invalidating the cached AttributeDriver::$classNames to find new Entity classes
                     $metadataDriver = $dm->getConfiguration()->getMetadataDriverImpl();
 
-                    if ($this->isInstanceOf($metadataDriver, MappingDriverChain::class)) {
+                    if ($metadataDriver instanceof MappingDriverChain) {
                         foreach ($metadataDriver->getDrivers() as $driver) {
-                            if ($this->isInstanceOf($driver, AttributeDriver::class)) {
+                            if ($driver instanceof AttributeDriver) {
                                 $classNames->setValue($driver, null);
                             }
                         }
@@ -211,17 +192,6 @@ final class DoctrineODMHelper
         }
 
         return $metadata;
-    }
-
-    public function createDoctrineDetails(string $documentClassName): ?DocumentDetails
-    {
-        $metadata = $this->getMetadata($documentClassName);
-
-        if ($this->isInstanceOf($metadata, ClassMetadata::class)) {
-            return new DocumentDetails($metadata);
-        }
-
-        return null;
     }
 
     public function isClassAMappedDocument(string $className): bool
@@ -262,8 +232,6 @@ final class DoctrineODMHelper
             Type::FLOAT => 'float',
             Type::DATE => '\\'.\DateTimeInterface::class,
             Type::DATE_IMMUTABLE => '\\'.\DateTimeImmutable::class,
-            'uuid' => '\\'.Uuid::class,
-            'ulid' => '\\'.Ulid::class,
             default => null,
         };
     }
@@ -286,21 +254,12 @@ final class DoctrineODMHelper
         return sprintf('Type::%s', $constants[$columnType]);
     }
 
-    private function isInstanceOf($object, string $class): bool
-    {
-        if (!\is_object($object)) {
-            return false;
-        }
-
-        return $object instanceof $class;
-    }
-
     public function getPotentialCollectionName(string $className): string
     {
         $documentManager = $this->getRegistry()->getManager();
 
         if (!$documentManager instanceof DocumentManager) {
-            throw new \RuntimeException('ObjectManager is not an DocumentManager.');
+            throw new \RuntimeException('ObjectManager is not a DocumentManager.');
         }
 
         return $this->classToCollectionName($className);
@@ -313,14 +272,6 @@ final class DoctrineODMHelper
         }
 
         return $className;
-    }
-
-    public function isKeyword(string $name): bool
-    {
-        /** @var Connection $connection */
-        $connection = $this->getRegistry()->getConnection();
-
-        return $connection->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name);
     }
 
     /**
