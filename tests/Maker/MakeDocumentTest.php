@@ -456,7 +456,7 @@ class MakeDocumentTest extends MakerTestCase
             ->run(function (MakerTestRunner $runner) {
                 $this->copyDocument($runner, 'UserAvatarPhoto-non-embedded.php');
 
-                $runner->runMaker([
+                $output = $runner->runMaker([
                     // document class name
                     'User',
                     // field name
@@ -465,15 +465,10 @@ class MakeDocumentTest extends MakerTestCase
                     'EmbedOne',
                     // the target document
                     'UserAvatarPhoto',
-                    // nullable
-                    'n',
-                    // transform into EmbeddedDocument?
-                    'y',
                     // finish adding fields
                     '',
-                ]);
-
-                $this->runCustomTest($runner, 'it_adds_embed_one_embedded.php');
+                ], '', true);
+                $this->assertStringContainsString('is not an EmbeddedDocument', $output);
             }),
         ];
 
@@ -504,7 +499,7 @@ class MakeDocumentTest extends MakerTestCase
             ->run(function (MakerTestRunner $runner) {
                 $this->copyDocument($runner, 'UserAvatarPhoto-non-embedded.php');
 
-                $runner->runMaker([
+                $output = $runner->runMaker([
                     // document class name
                     'User',
                     // field name
@@ -513,15 +508,10 @@ class MakeDocumentTest extends MakerTestCase
                     'EmbedMany',
                     // the target document
                     'UserAvatarPhoto',
-                    // nullable
-                    'n',
-                    // transform into EmbeddedDocument?
-                    'y',
                     // finish adding fields
                     '',
-                ]);
-
-                $this->runCustomTest($runner, 'it_adds_embed_many_embedded.php');
+                ], '', true);
+                $this->assertStringContainsString('is not an EmbeddedDocument', $output);
             }),
         ];
     }

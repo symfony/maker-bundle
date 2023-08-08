@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Util;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
-use Doctrine\ODM\MongoDB\Mapping\Annotations\EmbeddedDocument;
 use Doctrine\ODM\MongoDB\Mapping\Annotations\EmbedMany;
 use Doctrine\ODM\MongoDB\Mapping\Annotations\EmbedOne;
 use Doctrine\ODM\MongoDB\Mapping\Annotations\Field;
@@ -1558,24 +1557,6 @@ final class ClassSourceManipulator
         }
 
         return false;
-    }
-
-    public function transformToEmbeddedDocument(): void
-    {
-        $classNode = $this->getClassNode();
-        $this->addUseStatementIfNecessary('Doctrine\\ODM\\MongoDB\\Mapping\\Annotations', 'ODM');
-
-        foreach ($classNode->attrGroups as $i => $attributeGroup) {
-            if ($attributeGroup instanceof Node\AttributeGroup) {
-                foreach ($attributeGroup->attrs as $k => $attribute) {
-                    if ($attribute instanceof Node\Attribute && str_contains($attribute->name->toString(), 'Document')) {
-                        $attributeGroup->attrs[$k] = $this->buildAttributeNode(EmbeddedDocument::class, [], 'ODM');
-                    }
-                }
-            }
-        }
-
-        $this->updateSourceCodeFromNewStmts();
     }
 
     private function writeNote(string $note): void

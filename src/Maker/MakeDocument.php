@@ -185,16 +185,9 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
         if ($classExists) {
             $documentPath = $this->getPathOfClass($documentClassDetails->getFullName());
             $manipulator = $this->createClassManipulator($documentPath, $io, $overwrite);
-            if ($embedded && !$manipulator->isEmbeddedDocument()) {
-                if ($io->confirm('Your document already exists, but it is not an EmbeddedDocument. Do you want the Document should be transformed into EmbeddedDocument?', false)) {
-                    $manipulator->transformToEmbeddedDocument();
-                    $this->fileManager->dumpFile($documentPath, $manipulator->getSourceCode());
-                }
-            } else {
-                $io->text([
-                    'Your document already exists! So let\'s add some new fields!',
-                ]);
-            }
+            $io->text([
+                'Your document already exists! So let\'s add some new fields!',
+            ]);
         } else {
             $manipulator = $this->createClassManipulator($documentPath, $io, $overwrite);
             $io->text([
@@ -280,16 +273,6 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
                 }
                 $currentFields[] = $newFieldName;
             } elseif ($newField instanceof DocumentEmbedding) {
-                $otherManipulatorFilename = $this->getPathOfClass($newField->getTargetClass());
-                $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
-                if (!$otherManipulator->isEmbeddedDocument()) {
-                    if ($io->confirm(sprintf(
-                        'Class <comment>%s</comment> is not marked as EmbeddedDocument. Do you want it to be transformed into EmbeddedDocument?',
-                        Str::getShortClassName($newField->getTargetClass())), false)) {
-                        $otherManipulator->transformToEmbeddedDocument();
-                        $fileManagerOperations[$otherManipulatorFilename] = $otherManipulator;
-                    }
-                }
                 switch ($newField->getType()) {
                     case DocumentEmbedding::EMBED_ONE:
                         $manipulator->addEmbedOne($newField->getDocumentEmbedding());
@@ -760,6 +743,16 @@ final class MakeDocument extends AbstractMaker implements InputAwareMakerInterfa
             } else {
                 $io->error(sprintf('Unknown class "%s"', $answeredDocumentClass));
                 continue;
+            }
+            if (class_exists($targetDocumentClass)) {
+                $manipulator = $this->createClassManipulator($this->getPathOfClass($targetDocumentClass), $io, false);
+                if (!$manipulator->isEmbeddedDocument()) {
+                    $io->error([sprintf(
+                        'Class "%s" is not an EmbeddedDocument.',
+                        Str::getShortClassName($targetDocumentClass)), 'Please pick a correct EmbeddedDocument class or run make:document --embedded to create a new one.']);
+                    $targetDocumentClass = null;
+                    continue;
+                }
             }
         }
 
