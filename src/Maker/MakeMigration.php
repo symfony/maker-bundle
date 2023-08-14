@@ -70,6 +70,9 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
                 ->addOption('shard', null, InputOption::VALUE_REQUIRED, 'The shard connection name')
             ;
         }
+
+        $command
+            ->addOption('formatted', null, InputOption::VALUE_NONE, 'Format the generated SQL');
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -87,6 +90,10 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
             $options[] = '--shard='.$input->getOption('shard');
         }
         // end 2.x support
+
+        if ($input->hasOption('formatted') && null !== $input->getOption('formatted')) {
+            $options[] = '--formatted';
+        }
 
         $generateMigrationCommand = $this->application->find('doctrine:migrations:diff');
         $generateMigrationCommandInput = new ArgvInput($options);
