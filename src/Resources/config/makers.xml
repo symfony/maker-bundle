@@ -65,6 +65,11 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_listener" class="Symfony\Bundle\MakerBundle\Maker\MakeListener">
+                <tag name="maker.command" />
+                <argument type="service" id="maker.event_registry" />
+            </service>
+
             <service id="maker.maker.make_message" class="Symfony\Bundle\MakerBundle\Maker\MakeMessage">
                 <argument type="service" id="maker.file_manager" />
                 <tag name="maker.command" />
