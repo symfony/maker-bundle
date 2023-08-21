@@ -91,7 +91,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         }
         // end 2.x support
 
-        if ($input->hasOption('formatted') && null !== $input->getOption('formatted')) {
+        if ($input->getOption('formatted')) {
             $options[] = '--formatted';
         }
 
