@@ -15,9 +15,9 @@
         {% endif %}
 
         <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-        <label for="username">Email</label>
+        <label for="username" class="form-label">Email</label>
         <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" required autofocus>
-        <label for="password">Password</label>
+        <label for="password" class="form-label">Password</label>
         <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
 
         <input type="hidden" name="_csrf_token"
