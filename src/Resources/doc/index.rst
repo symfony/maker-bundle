@@ -80,6 +80,31 @@ the root namespace that is used to "guess" what classes you want to generate:
         # (e.g. Acme\Entity\Article, Acme\Command\MyCommand, etc)
         root_namespace: 'Acme'
 
+You *can* also configure the root namespace that use `.env` and overwrite as below:
+
+.. code-block:: yaml
+
+    # config/packages/dev/maker.yaml
+    maker:
+        root_namespace: '%env(resolve:MAKER_ROOT_NAMESPACE)%'
+
+.. code-block:: yaml
+
+    # config/services.yaml
+    parameters:
+        env(MAKER_ROOT_NAMESPACE): 'App'
+
+.. code-block:: env
+
+    # .env
+    ###> symfony/maker-bundle ###
+    MAKER_ROOT_NAMESPACE=App
+    ###< symfony/maker-bundle ###
+
+.. code-block:: terminal
+
+    $ MAKER_ROOT_NAMESPACE=Symfony\\Bundle\\MakerBundle php bin/console make:command app:do-something
+
 Creating your Own Makers
 ------------------------
 
