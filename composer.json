@@ -32,7 +32,6 @@
         "doctrine/orm": "^2.10.0",
         "symfony/http-client": "^6.3|^7.0",
         "symfony/phpunit-bridge": "^6.3|^7.0",
-        "symfony/polyfill-php80": "^1.16.0",
         "symfony/security-core": "^6.3|^7.0",
         "symfony/yaml": "^6.3|^7.0",
         "twig/twig": "^2.0|^3.0"
