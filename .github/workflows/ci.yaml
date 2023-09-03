@@ -27,7 +27,7 @@ jobs:
         steps:
             -
                 name: "Checkout code"
-                uses: "actions/checkout@v2"
+                uses: "actions/checkout@v3"
 
             -
                 name: "Install PHP"
@@ -42,13 +42,13 @@ jobs:
 
             -
                 name: "Composer install"
-                uses: "ramsey/composer-install@v1"
+                uses: "ramsey/composer-install@v2"
                 with:
                     composer-options: "--no-scripts"
 
             -
                 name: "Composer install php-cs-fixer"
-                uses: "ramsey/composer-install@v1"
+                uses: "ramsey/composer-install@v2"
                 with:
                     composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
 
@@ -112,7 +112,7 @@ jobs:
 
         steps:
             - name: "Checkout code"
-              uses: actions/checkout@v2.3.3
+              uses: actions/checkout@v3
 
             - name: "Start MySQL"
               run: |
@@ -137,17 +137,17 @@ jobs:
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
             - name: "Composer install"
-              uses: "ramsey/composer-install@v1"
+              uses: "ramsey/composer-install@v2"
               with:
                   dependency-versions: "${{ matrix.dependency-versions }}"
 
             - name: "Composer install php-cs-fixer"
-              uses: "ramsey/composer-install@v1"
+              uses: "ramsey/composer-install@v2"
               with:
                   composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
 
             - name: "Composer install twigcs"
-              uses: "ramsey/composer-install@v1"
+              uses: "ramsey/composer-install@v2"
               with:
                   composer-options: "--no-scripts --working-dir=tools/twigcs"
 
