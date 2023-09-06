@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use ApiPlatform\Core\Annotation\ApiResource as LegacyApiResource;
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -375,17 +376,17 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $snakeCasedField = Str::asSnakeCase($fieldName);
 
         if ('_at' === $suffix = substr($snakeCasedField, -3)) {
-            $defaultType = 'datetime_immutable';
+            $defaultType = Types::DATE_IMMUTABLE;
         } elseif ('_id' === $suffix) {
-            $defaultType = 'integer';
+            $defaultType = Types::INTEGER;
         } elseif (str_starts_with($snakeCasedField, 'is_')) {
-            $defaultType = 'boolean';
+            $defaultType = Types::BOOLEAN;
         } elseif (str_starts_with($snakeCasedField, 'has_')) {
-            $defaultType = 'boolean';
+            $defaultType = Types::BOOLEAN;
         } elseif ('uuid' === $snakeCasedField) {
-            $defaultType = Type::hasType('uuid') ? 'uuid' : 'guid';
+            $defaultType = Type::hasType('uuid') ? 'uuid' : Types::GUID;
         } elseif ('guid' === $snakeCasedField) {
-            $defaultType = 'guid';
+            $defaultType = Types::GUID;
         }
 
         $type = null;
