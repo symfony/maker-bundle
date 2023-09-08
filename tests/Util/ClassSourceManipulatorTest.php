@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use PhpParser\Builder\Param;
@@ -240,7 +241,7 @@ class ClassSourceManipulatorTest extends TestCase
             'User_simple.php',
             'fooProp',
             [
-                'type' => 'string',
+                'type' => Types::STRING,
                 'length' => 255,
                 'nullable' => false,
                 'options' => ['comment' => 'new field'],
@@ -252,7 +253,7 @@ class ClassSourceManipulatorTest extends TestCase
             'User_simple.php',
             'createdAt',
             [
-                'type' => 'datetime',
+                'type' => Types::DATETIME_MUTABLE,
                 'nullable' => true,
             ],
             'User_simple_datetime.php',
@@ -262,7 +263,7 @@ class ClassSourceManipulatorTest extends TestCase
             'User_some_props.php',
             'firstName',
             [
-                'type' => 'string',
+                'type' => Types::STRING,
                 'length' => 255,
                 'nullable' => false,
             ],
@@ -273,7 +274,7 @@ class ClassSourceManipulatorTest extends TestCase
             'User_simple.php',
             'decimal',
             [
-                'type' => 'decimal',
+                'type' => Types::DECIMAL,
                 'precision' => 6,
                 'scale' => 0,
             ],
@@ -284,7 +285,7 @@ class ClassSourceManipulatorTest extends TestCase
             'User_simple.php',
             'someObject',
             [
-                'type' => 'object',
+                'type' => Types::OBJECT,
             ],
             'User_simple_object.php',
         ];
