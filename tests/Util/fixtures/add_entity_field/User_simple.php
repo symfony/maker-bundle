@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -12,7 +13,7 @@ class User
     #[ORM\Column()]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, nullable: false, options: ['comment' => 'new field'])]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: false, options: ['comment' => 'new field'])]
     private ?string $fooProp = null;
 
     public function getId(): ?int
