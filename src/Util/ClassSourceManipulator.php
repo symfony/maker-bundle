@@ -90,10 +90,6 @@ final class ClassSourceManipulator
     public function addEntityField(string $propertyName, array $columnOptions, array $comments = []): void
     {
         $typeHint = DoctrineHelper::getPropertyTypeForColumn($columnOptions['type']);
-        if ($typeHint && DoctrineHelper::canColumnTypeBeInferredByPropertyType($columnOptions['type'], $typeHint)) {
-            unset($columnOptions['type']);
-        }
-
         if (isset($columnOptions['type'])) {
             $typeConstant = DoctrineHelper::getTypeConstant($columnOptions['type']);
             if ($typeConstant) {

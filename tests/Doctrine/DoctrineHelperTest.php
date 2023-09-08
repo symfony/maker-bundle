@@ -31,18 +31,4 @@ class DoctrineHelperTest extends TestCase
         yield 'string' => ['string', 'Types::STRING'];
         yield 'datetimetz_immutable' => ['datetimetz_immutable', 'Types::DATETIMETZ_IMMUTABLE'];
     }
-
-    /**
-     * @dataProvider getCanColumnTypeBeInferredTests
-     */
-    public function testCanColumnTypeBeInferredByPropertyType(string $columnType, string $propertyType, bool $expected)
-    {
-        $this->assertSame($expected, DoctrineHelper::canColumnTypeBeInferredByPropertyType($columnType, $propertyType));
-    }
-
-    public function getCanColumnTypeBeInferredTests(): \Generator
-    {
-        yield 'non_matching' => [Types::TEXT, 'string', false];
-        yield 'yes_matching' => [Types::STRING, 'string', true];
-    }
 }

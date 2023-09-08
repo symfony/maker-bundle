@@ -233,28 +233,6 @@ final class DoctrineHelper
         return (bool) $this->getMetadata($className);
     }
 
-    /**
-     * Determines if the property-type will make the column type redundant.
-     *
-     * See ClassMetadataInfo::validateAndCompleteTypedFieldMapping()
-     */
-    public static function canColumnTypeBeInferredByPropertyType(string $columnType, string $propertyType): bool
-    {
-        // todo: guessing on enum's could be added
-
-        return match ($propertyType) {
-            '\\'.\DateInterval::class => Types::DATEINTERVAL === $columnType,
-            '\\'.\DateTime::class => Types::DATETIME_MUTABLE === $columnType,
-            '\\'.\DateTimeImmutable::class => Types::DATETIME_IMMUTABLE === $columnType,
-            'array' => Types::JSON === $columnType,
-            'bool' => Types::BOOLEAN === $columnType,
-            'float' => Types::FLOAT === $columnType,
-            'int' => Types::INTEGER === $columnType,
-            'string' => Types::STRING === $columnType,
-            default => false,
-        };
-    }
-
     public static function getPropertyTypeForColumn(string $columnType): ?string
     {
         return match ($columnType) {
