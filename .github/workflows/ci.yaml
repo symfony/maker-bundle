@@ -95,9 +95,9 @@ jobs:
                     - '5.4.*'
                     - '5.4.x-dev'
                     - '6.0.x-dev'
-                    - '6.1.x-dev'
-                    - '6.2.x-dev'
                     - '6.3.x-dev'
+                    - '6.4.x-dev'
+                    - '7.0.x-dev'
                 dependency-versions: ['highest']
                 allow-dev-deps-in-apps: ['0']
                 include:
