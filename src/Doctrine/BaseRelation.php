@@ -28,6 +28,7 @@ abstract class BaseRelation
         private bool $isOwning = false,
         private bool $orphanRemoval = false,
         private bool $isNullable = false,
+        private array $cascade = []
     ) {
     }
 
@@ -84,5 +85,10 @@ abstract class BaseRelation
     public function isNullable(): bool
     {
         return $this->isNullable;
+    }
+
+    public function getCascade(): array
+    {
+        return $this->cascade;
     }
 }

@@ -404,6 +404,20 @@ class ClassSourceManipulatorTest extends TestCase
                 isNullable: true,
             ),
         ];
+
+        yield 'many_to_one_cascade_persist' => [
+            'User_simple.php',
+            'User_simple_cascade_persist.php',
+            new RelationManyToOne(
+                propertyName: 'category',
+                targetClassName: \App\Entity\Category::class,
+                targetPropertyName: 'foods',
+                mapInverseRelation: false,
+                isOwning: true,
+                isNullable: true,
+                cascade: ['persist'],
+            ),
+        ];
     }
 
     /**
@@ -461,6 +475,17 @@ class ClassSourceManipulatorTest extends TestCase
                 targetClassName: \App\Entity\UserAvatarPhoto::class,
                 targetPropertyName: 'user',
                 orphanRemoval: true,
+            ),
+        ];
+
+        yield 'one_to_many_cascade_persist' => [
+            'User_simple.php',
+            'User_simple_cascade_persist.php',
+            new RelationOneToMany(
+                propertyName: 'avatarPhotos',
+                targetClassName: \App\Entity\UserAvatarPhoto::class,
+                targetPropertyName: 'user',
+                cascade: ['persist'],
             ),
         ];
 
@@ -522,6 +547,19 @@ class ClassSourceManipulatorTest extends TestCase
                 targetPropertyName: 'foods',
                 mapInverseRelation: false,
                 isOwning: true,
+            ),
+        ];
+
+        yield 'many_to_many_cascade_persist' => [
+            'User_simple.php',
+            'User_simple_cascade_persist.php',
+            new RelationManyToMany(
+                propertyName: 'recipes',
+                targetClassName: \App\Entity\Recipe::class,
+                targetPropertyName: 'foods',
+                mapInverseRelation: false,
+                isOwning: true,
+                cascade: ['persist'],
             ),
         ];
     }
@@ -641,6 +679,19 @@ class ClassSourceManipulatorTest extends TestCase
                 targetPropertyName: 'user',
                 isOwning: true,
                 isNullable: true,
+            ),
+        ];
+
+        yield 'one_to_one_cascade_persist_only' => [
+            'User_simple.php',
+            'User_simple_owning.php', // Same because ['persist', 'remove'] is forced
+            new RelationOneToOne(
+                propertyName: 'userProfile',
+                targetClassName: \App\Entity\UserProfile::class,
+                targetPropertyName: 'user',
+                isOwning: true,
+                isNullable: true,
+                cascade: ['persist'],
             ),
         ];
     }
