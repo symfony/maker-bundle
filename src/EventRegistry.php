@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
-use Symfony\Component\EventDispatcher\Event as LegacyEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -35,7 +34,6 @@ use Symfony\Component\Security\Core\Event\AuthenticationFailureEvent;
 use Symfony\Component\Security\Core\Event\AuthenticationSuccessEvent;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
-use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * @internal
@@ -148,11 +146,7 @@ class EventRegistry
             }
 
             if (null !== $type = $args[0]->getType()) {
-                $type = $type instanceof \ReflectionNamedType ? $type->getName() : $type->__toString();
-
-                if (LegacyEvent::class === $type && class_exists(Event::class)) {
-                    return Event::class;
-                }
+                $type = $type instanceof \ReflectionNamedType ? $type->getName() : null;
 
                 // ignore an "object" type-hint
                 if ('object' === $type) {

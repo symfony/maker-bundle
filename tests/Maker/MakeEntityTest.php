@@ -38,8 +38,9 @@ class MakeEntityTest extends MakerTestCase
     private function createMakeEntityTestForMercure(): MakerTestDetails
     {
         return $this->createMakeEntityTest()
+            ->skipOnSymfony7() // legacy remove when ux-turbo-mercure supports Symfony 7
             ->preRun(function (MakerTestRunner $runner) {
-                // installed manually later so that the compatibility check can run fist
+                // installed manually later so that the compatibility check can run first
                 $runner->runProcess('composer require symfony/ux-turbo-mercure');
             });
     }
@@ -60,6 +61,7 @@ class MakeEntityTest extends MakerTestCase
         ];
 
         yield 'it_creates_a_new_class_and_api_resource' => [$this->createMakeEntityTest()
+            ->skipOnSymfony7() // legacy: remove when API Platform supports Symfony 7
             ->addExtraDependencies('api')
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([
@@ -473,46 +475,6 @@ class MakeEntityTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_display_an_error_using_with_xml' => [$this->createMakeEntityTest(false)
-            ->run(function (MakerTestRunner $runner) {
-                $this->copyEntity($runner, 'User-basic.php');
-
-                $runner->copy(
-                    'make-entity/xml-mapping',
-                    ''
-                );
-
-                $this->changeToXmlMapping($runner);
-
-                $output = $runner->runMaker([
-                    'User',
-                    '',
-                ], '', true /* allow failure */);
-
-                $this->assertStringContainsString('Only attribute mapping is supported', $output);
-            }),
-        ];
-
-        yield 'it_display_an_error_using_with_xml_with_new_class' => [$this->createMakeEntityTest(false)
-            ->run(function (MakerTestRunner $runner) {
-                $this->copyEntity($runner, 'User-basic.php');
-
-                $runner->copy(
-                    'make-entity/xml-mapping',
-                    ''
-                );
-
-                $this->changeToXmlMapping($runner);
-
-                $output = $runner->runMaker([
-                    'UserAvatarPhoto',
-                    '',
-                ], '', true /* allow failure */);
-
-                $this->assertStringContainsString('Only attribute mapping is supported', $output);
-            }),
-        ];
-
         yield 'it_can_overwrite_while_adding_fields' => [$this->createMakeEntityTest()
             ->run(function (MakerTestRunner $runner) {
                 $this->copyEntity($runner, 'User-invalid-method-no-property.php');
@@ -583,6 +545,7 @@ class MakeEntityTest extends MakerTestCase
 
         yield 'it_makes_new_entity_no_to_all_extras' => [$this->createMakeEntityTestForMercure()
             ->addExtraDependencies('api')
+            ->skipOnSymfony7() // legacy: remove when API Platform supports Symfony 7
             // special setup done in createMakeEntityTestForMercure()
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([

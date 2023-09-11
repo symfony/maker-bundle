@@ -152,11 +152,6 @@ class MakeControllerTest extends MakerTestCase
             'tests/GeneratedControllerTest.php'
         );
 
-        // @legacy - In 5.4 tests, we need to tell Symfony to look for route attributes in `src/Controller`
-        if ('60000' > $runner->getSymfonyVersion()) {
-            $runner->copy('router-annotations.yaml', 'config/routes/annotations.yaml');
-        }
-
         $runner->runTests();
     }
 }

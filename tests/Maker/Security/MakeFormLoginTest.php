@@ -103,11 +103,6 @@ class MakeFormLoginTest extends MakerTestCase
 
     private function runLoginTest(MakerTestRunner $runner): void
     {
-        if (60000 > $runner->getSymfonyVersion()) {
-            // @legacy - In 5.4 tests, we need to tell Symfony to look for the route attributes in `src/Controller`
-            $runner->copy('router-annotations.yaml', 'config/routes/annotations.yaml');
-        }
-
         $fixturePath = 'security/make-form-login/';
 
         $runner->renderTemplateFile($fixturePath.'/LoginTest.php', 'tests/LoginTest.php', []);
