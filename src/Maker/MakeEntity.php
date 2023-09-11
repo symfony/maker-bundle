@@ -549,7 +549,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 $targetEntityClass = $answeredEntityClass;
             } else {
                 $io->error(sprintf('Unknown class "%s"', $answeredEntityClass));
-                continue;
             }
         }
 
