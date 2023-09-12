@@ -171,14 +171,6 @@ class MakerTestRunner
             return $config;
         });
 
-        // @legacy DoctrineBundle 2.4 recipe uses when@test instead of a test/doctrine.yaml config
-        if ($this->filesystem->exists('config/packages/test/doctrine.yaml')) {
-            $this->removeFromFile(
-                'config/packages/test/doctrine.yaml',
-                "dbname_suffix: '_test%env(default::TEST_TOKEN)%'"
-            );
-        }
-
         // this looks silly, but it's the only way to drop the database *for sure*,
         // as doctrine:database:drop will error if there is no database
         // also, skip for SQLITE, as it does not support --if-not-exists

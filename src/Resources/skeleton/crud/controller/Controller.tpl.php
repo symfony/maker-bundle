@@ -42,17 +42,10 @@ class <?= $class_name ?> extends AbstractController
             return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
         }
 
-<?php if ($use_render_form) { ?>
-        return $this->renderForm('<?= $templates_path ?>/new.html.twig', [
-            '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
-            'form' => $form,
-        ]);
-<?php } else { ?>
         return $this->render('<?= $templates_path ?>/new.html.twig', [
             '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
             'form' => $form,
         ]);
-<?php } ?>
     }
 
 <?= $generator->generateRouteForControllerMethod(sprintf('/{%s}', $entity_identifier), sprintf('%s_show', $route_name), ['GET']) ?>
@@ -75,17 +68,10 @@ class <?= $class_name ?> extends AbstractController
             return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
         }
 
-<?php if ($use_render_form) { ?>
-        return $this->renderForm('<?= $templates_path ?>/edit.html.twig', [
-            '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
-            'form' => $form,
-        ]);
-<?php } else { ?>
         return $this->render('<?= $templates_path ?>/edit.html.twig', [
             '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
             'form' => $form,
         ]);
-<?php } ?>
     }
 
 <?= $generator->generateRouteForControllerMethod(sprintf('/{%s}', $entity_identifier), sprintf('%s_delete', $route_name), ['POST']) ?>

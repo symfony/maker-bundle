@@ -34,7 +34,7 @@ class UserProvider implements UserProviderInterface
     {
     }
 
-    public function supportsClass(string $class): UserInterface
+    public function supportsClass(string $class): bool
     {
     }
 }

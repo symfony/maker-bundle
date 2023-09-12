@@ -31,7 +31,7 @@ class MakeMigrationTest extends MakerTestCase
             // doctrine-migrations-bundle only requires doctrine-bundle, which
             // only requires doctrine/dbal. But we're testing with the ORM,
             // so let's install it
-            ->addExtraDependencies('doctrine/orm:@stable')
+            ->addExtraDependencies('doctrine/orm')
             ->preRun(function (MakerTestRunner $runner) {
                 $runner->copy(
                     'make-migration/SpicyFood.php',

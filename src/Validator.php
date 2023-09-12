@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
-use Doctrine\Common\Persistence\ManagerRegistry as LegacyManagerRegistry;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -156,12 +155,8 @@ final class Validator
         return $name;
     }
 
-    public static function validateDoctrineFieldName(string $name, ManagerRegistry|LegacyManagerRegistry $registry): string
+    public static function validateDoctrineFieldName(string $name, ManagerRegistry $registry): string
     {
-        if (!$registry instanceof ManagerRegistry && !$registry instanceof LegacyManagerRegistry) {
-            throw new \InvalidArgumentException(sprintf('Argument 2 to %s::validateDoctrineFieldName must be an instance of %s, %s passed.', __CLASS__, ManagerRegistry::class, \is_object($registry) ? $registry::class : \gettype($registry)));
-        }
-
         // check reserved words
         if ($registry->getConnection() instanceof \Doctrine\DBAL\Connection) {
             if ($registry->getConnection()->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name)) {

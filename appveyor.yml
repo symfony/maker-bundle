@@ -29,7 +29,7 @@ environment:
     TEST_MONGODB_URL: mongodb://127.0.0.1:27017
     matrix:
       - dependencies: highest
-        php_ver_target: 8.0.19
+        php_ver_target: 8.1.23
 
 install:
     - choco install sqlite --params "/NoTools"

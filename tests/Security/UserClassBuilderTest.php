@@ -15,7 +15,6 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\UserClassBuilder;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserClassBuilderTest extends TestCase
 {
@@ -29,8 +28,7 @@ class UserClassBuilderTest extends TestCase
         $classBuilder = new UserClassBuilder();
         $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig);
 
-        $isSymfony5 = method_exists(UserInterface::class, 'getSalt');
-        $expectedPath = $this->getExpectedPath($expectedFilename, $isSymfony5 ? 'legacy_5_user_class' : null);
+        $expectedPath = $this->getExpectedPath($expectedFilename, null);
         $expectedSource = file_get_contents($expectedPath);
 
         self::assertSame($expectedSource, $manipulator->getSourceCode());
@@ -84,11 +82,11 @@ class UserClassBuilderTest extends TestCase
         );
     }
 
-    private function getExpectedPath(string $expectedFilename, string $subDirectory = null): string
+    private function getExpectedPath(string $expectedFilename): string
     {
         $basePath = __DIR__.'/fixtures/expected';
 
-        $expectedPath = null === $subDirectory ? sprintf('%s/%s', $basePath, $expectedFilename) : sprintf('%s/%s/%s', $basePath, $subDirectory, $expectedFilename);
+        $expectedPath = sprintf('%s/%s', $basePath, $expectedFilename);
 
         if (!file_exists($expectedPath)) {
             throw new \Exception(sprintf('Expected file missing: "%s"', $expectedPath));

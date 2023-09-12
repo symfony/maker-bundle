@@ -54,11 +54,11 @@ abstract class MakerTestCase extends TestCase
             $this->markTestSkipped();
         }
 
-        if ($testDetails->skipOnWindows() && '\\' === \DIRECTORY_SEPARATOR) {
-            $this->markTestSkipped('This test is not supported on Windows');
-        }
-
         $testEnv = MakerTestEnvironment::create($testDetails);
+
+        if ('7.0.x-dev' === $testEnv->getTargetSkeletonVersion() && $testDetails->getSkipOnSymfony7()) {
+            $this->markTestSkipped('This test is skipped on Symfony 7');
+        }
 
         // prepare environment to test
         $testEnv->prepareDirectory();

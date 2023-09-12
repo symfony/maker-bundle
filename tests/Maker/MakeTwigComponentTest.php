@@ -21,6 +21,7 @@ class MakeTwigComponentTest extends MakerTestCase
     {
         yield 'it_generates_twig_component' => [$this->createMakerTest()
             ->addExtraDependencies('symfony/ux-twig-component', 'symfony/twig-bundle')
+            ->skipOnSymfony7() // legacy: remove when ux-twig-component supports Symfony 7
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker(['Alert']);
 
@@ -39,6 +40,7 @@ class MakeTwigComponentTest extends MakerTestCase
 
         yield 'it_generates_pascal_case_twig_component' => [$this->createMakerTest()
             ->addExtraDependencies('symfony/ux-twig-component', 'symfony/twig-bundle')
+            ->skipOnSymfony7() // legacy: remove when ux-twig-component supports Symfony 7
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker(['FormInput']);
 
@@ -57,6 +59,7 @@ class MakeTwigComponentTest extends MakerTestCase
 
         yield 'it_generates_live_component' => [$this->createMakerTest()
             ->addExtraDependencies('symfony/ux-live-component', 'symfony/twig-bundle')
+            ->skipOnSymfony7() // legacy: remove when ux-twig-component supports Symfony 7
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker(['Alert']);
 
@@ -75,6 +78,7 @@ class MakeTwigComponentTest extends MakerTestCase
 
         yield 'it_generates_pascal_case_live_component' => [$this->createMakerTest()
             ->addExtraDependencies('symfony/ux-live-component', 'symfony/twig-bundle')
+            ->skipOnSymfony7() // legacy: remove when ux-twig-component supports Symfony 7
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker(['FormInput']);
 

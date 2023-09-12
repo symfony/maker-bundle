@@ -55,8 +55,7 @@ final class EntityClassGenerator
         }
 
         if ($apiResource) {
-            // @legacy Drop annotation class when annotations are no longer supported.
-            $useStatements->addUseStatement(class_exists(ApiResource::class) ? ApiResource::class : \ApiPlatform\Core\Annotation\ApiResource::class);
+            $useStatements->addUseStatement(ApiResource::class);
         }
 
         $entityPath = $this->generator->generateClass(

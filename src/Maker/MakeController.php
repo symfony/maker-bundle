@@ -60,6 +60,7 @@ final class MakeController extends AbstractMaker
         $command
             ->addArgument('controller-class', InputArgument::OPTIONAL, sprintf('Choose a name for your controller class (e.g. <fg=yellow>%sController</>)', Str::asClassName(Str::getRandomTerm())))
             ->addOption('no-template', null, InputOption::VALUE_NONE, 'Use this option to disable template generation')
+            ->addOption('invokable', 'i', InputOption::VALUE_NONE, 'Use this option to create an invokable controller')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeController.txt'))
         ;
     }
@@ -73,6 +74,7 @@ final class MakeController extends AbstractMaker
         );
 
         $withTemplate = $this->isTwigInstalled() && !$input->getOption('no-template');
+        $isInvokable = (bool) $input->getOption('invokable');
 
         $useStatements = new UseStatementGenerator([
             AbstractController::class,
@@ -80,7 +82,9 @@ final class MakeController extends AbstractMaker
             Route::class,
         ]);
 
-        $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()).'/index.html.twig';
+        $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix())
+            .($isInvokable ? '.html.twig' : '/index.html.twig');
+
         $controllerPath = $generator->generateController(
             $controllerClassNameDetails->getFullName(),
             'controller/Controller.tpl.php',
@@ -88,6 +92,7 @@ final class MakeController extends AbstractMaker
                 'use_statements' => $useStatements,
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
+                'method_name' => $isInvokable ? '__invoke' : 'index',
                 'with_template' => $withTemplate,
                 'template_name' => $templateName,
             ]

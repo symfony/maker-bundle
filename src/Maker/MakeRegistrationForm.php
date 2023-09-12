@@ -49,7 +49,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Guard\AuthenticatorInterface as GuardAuthenticatorInterface;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Validation;
@@ -80,7 +79,6 @@ final class MakeRegistrationForm extends AbstractMaker
     private $firewallName;
     private $redirectRouteName;
     private $addUniqueEntityConstraint;
-    private $useNewAuthenticatorSystem = false;
 
     public function __construct(
         private FileManager $fileManager,
@@ -122,12 +120,6 @@ final class MakeRegistrationForm extends AbstractMaker
         $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents($path));
         $securityData = $manipulator->getData();
         $providersData = $securityData['security']['providers'] ?? [];
-
-        // Determine if we should use new security features introduced in Symfony 5.2
-        // @legacy - Can be removed when Symfony 5.4 support is dropped
-        if (!interface_exists(GuardAuthenticatorInterface::class) || ($securityData['security']['enable_authenticator_manager'] ?? false)) {
-            $this->useNewAuthenticatorSystem = true;
-        }
 
         $this->userClass = $interactiveSecurityHelper->guessUserClass(
             $io,
@@ -178,11 +170,9 @@ final class MakeRegistrationForm extends AbstractMaker
 
         if ($io->confirm('Do you want to automatically authenticate the user after registration?')) {
             $this->interactAuthenticatorQuestions(
-                $input,
                 $io,
                 $interactiveSecurityHelper,
-                $securityData,
-                $command
+                $securityData
             );
         }
 
@@ -192,7 +182,7 @@ final class MakeRegistrationForm extends AbstractMaker
         }
     }
 
-    private function interactAuthenticatorQuestions(InputInterface $input, ConsoleStyle $io, InteractiveSecurityHelper $interactiveSecurityHelper, array $securityData, Command $command): void
+    private function interactAuthenticatorQuestions(ConsoleStyle $io, InteractiveSecurityHelper $interactiveSecurityHelper, array $securityData): void
     {
         $firewallsData = $securityData['security']['firewalls'] ?? [];
         $firewallName = $interactiveSecurityHelper->guessFirewallName(
@@ -351,12 +341,9 @@ final class MakeRegistrationForm extends AbstractMaker
                     'email_getter' => $this->emailGetter,
                     'authenticator_class_name' => $this->autoLoginAuthenticator ? Str::getShortClassName($this->autoLoginAuthenticator) : null,
                     'authenticator_full_class_name' => $this->autoLoginAuthenticator,
-                    'use_new_authenticator_system' => $this->useNewAuthenticatorSystem,
                     'firewall_name' => $this->firewallName,
                     'redirect_route_name' => $this->redirectRouteName,
-                    'password_hasher_class_details' => ($passwordClassDetails = $generator->createClassNameDetails(UserPasswordHasherInterface::class, '\\')),
-                    'password_hasher_variable_name' => str_replace('Interface', '', sprintf('$%s', lcfirst($passwordClassDetails->getShortName()))), // @legacy see passwordHasher conditional above
-                    'use_password_hasher' => true,
+                    'password_hasher_class_details' => $generator->createClassNameDetails(UserPasswordHasherInterface::class, '\\'),
                     'translator_available' => $isTranslatorAvailable,
                 ],
                 $userRepoVars
