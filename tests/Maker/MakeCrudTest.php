@@ -122,19 +122,16 @@ class MakeCrudTest extends MakerTestCase
                     Yaml::dump(['maker' => ['root_namespace' => 'Custom']])
                 );
 
-                // @legacy Conditional can be removed when Symfony 5.4 support is dropped
-                if (60000 <= $runner->getSymfonyVersion()) {
-                    // Symfony 6.2 sets the path and namespace for router resources
-                    $runner->modifyYamlFile('config/routes.yaml', function (array $config) {
-                        if (!isset($config['controllers']['resource']['namespace'])) {
-                            return $config;
-                        }
-
-                        $config['controllers']['resource']['namespace'] = 'Custom\Controller';
-
+                // Symfony 6.2 sets the path and namespace for router resources
+                $runner->modifyYamlFile('config/routes.yaml', function (array $config) {
+                    if (!isset($config['controllers']['resource']['namespace'])) {
                         return $config;
-                    });
-                }
+                    }
+
+                    $config['controllers']['resource']['namespace'] = 'Custom\Controller';
+
+                    return $config;
+                });
 
                 $runner->copy(
                     'make-crud/SweetFood-custom-namespace.php',
@@ -176,7 +173,7 @@ class MakeCrudTest extends MakerTestCase
 
                 $this->runCrudTest($runner, 'it_generates_basic_crud.php');
                 self::assertFileEquals(
-                    sprintf('%s/fixtures/make-crud/expected/WithCustomRepository%s.php', \dirname(__DIR__), $runner->getSymfonyVersion() < 60200 ? 'Legacy' : ''),
+                    sprintf('%s/fixtures/make-crud/expected/WithCustomRepository.php', \dirname(__DIR__)),
                     $runner->getPath('src/Controller/SweetFoodController.php')
                 );
             }),

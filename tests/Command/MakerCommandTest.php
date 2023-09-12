@@ -59,11 +59,6 @@ class MakerCommandTest extends TestCase
         $tester = new CommandTester($command);
         $tester->execute([]);
 
-        if (method_exists(self::class, 'assertStringContainsString')) {
-            self::assertStringContainsString('using a namespace other than "Unknown"', $tester->getDisplay());
-        } else {
-            // legacy for older phpunit versions (e.g. older php version on CI)
-            self::assertContains('using a namespace other than "Unknown"', $tester->getDisplay());
-        }
+        self::assertStringContainsString('using a namespace other than "Unknown"', $tester->getDisplay());
     }
 }

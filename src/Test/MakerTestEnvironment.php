@@ -157,8 +157,18 @@ final class MakerTestEnvironment
                 // install any missing dependencies
                 $dependencies = $this->determineMissingDependencies();
                 if ($dependencies) {
-                    MakerTestProcess::create(sprintf('composer require %s', implode(' ', $dependencies)), $this->path)
-                        ->run();
+                    // -v actually silences the "very" verbose output in case of an error
+                    $composerProcess = MakerTestProcess::create(sprintf('composer require %s -v', implode(' ', $dependencies)), $this->path);
+
+                    // @legacy Temporary code until doctrine/dbal 3.7 is out (which supports symfony/console 7.0
+                    $composerProcess->run(true);
+                    if (!$composerProcess->isSuccessful()) {
+                        if (str_contains($composerProcess->getErrorOutput(), 'Declaration of Doctrine\DBAL\Tools\Console\Command\RunSqlCommand::execute')) {
+                            $this->patchDoctrineDbalForSymfony7();
+                        } else {
+                            throw new \Exception(sprintf('Error running command: composer require %s -v. Output: "%s". Error: "%s"', implode(' ', $dependencies), $composerProcess->getOutput(), $composerProcess->getErrorOutput()));
+                        }
+                    }
                 }
 
                 $this->changeRootNamespaceIfNeeded();
@@ -175,6 +185,7 @@ final class MakerTestEnvironment
             }
         } else {
             MakerTestProcess::create('git reset --hard && git clean -fd', $this->path)->run();
+            $this->fs->remove($this->path.'/var/cache');
         }
     }
 
@@ -395,7 +406,7 @@ echo json_encode($missingDependencies);
         return array_merge($data, $this->testDetails->getExtraDependencies());
     }
 
-    private function getTargetSkeletonVersion(): ?string
+    public function getTargetSkeletonVersion(): ?string
     {
         return $_SERVER['SYMFONY_VERSION'] ?? '';
     }
@@ -437,5 +448,23 @@ echo json_encode($missingDependencies);
         ];
 
         file_put_contents($composerJsonPath, json_encode($composerJson, \JSON_THROW_ON_ERROR | \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES));
+    }
+
+    private function patchDoctrineDbalForSymfony7(): void
+    {
+        $commandPath = $this->path.'/vendor/doctrine/dbal/src/Tools/Console/Command/RunSqlCommand.php';
+        $contents = file_get_contents($commandPath);
+
+        $needle = 'protected function execute(InputInterface $input, OutputInterface $output)';
+        if (str_contains($contents, $needle.': int')) {
+            return;
+        }
+
+        $contents = str_replace(
+            $needle,
+            $needle.': int',
+            $contents
+        );
+        file_put_contents($commandPath, $contents);
     }
 }

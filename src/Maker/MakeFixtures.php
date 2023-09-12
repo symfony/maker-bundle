@@ -12,13 +12,13 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Common\Persistence\ObjectManager as LegacyObjectManager;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -54,11 +54,16 @@ final class MakeFixtures extends AbstractMaker
             'DataFixtures\\'
         );
 
+        $useStatements = new UseStatementGenerator([
+            Fixture::class => null,
+            ObjectManager::class => null,
+        ]);
+
         $generator->generateClass(
             $fixturesClassNameDetails->getFullName(),
             'doctrine/Fixtures.tpl.php',
             [
-                'object_manager_class' => interface_exists(ObjectManager::class) ? ObjectManager::class : LegacyObjectManager::class,
+                'use_statements' => $useStatements,
             ]
         );
 

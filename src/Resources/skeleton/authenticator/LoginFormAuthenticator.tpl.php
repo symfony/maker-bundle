@@ -18,7 +18,7 @@ class <?= $class_name; ?> extends AbstractLoginFormAuthenticator
     {
         $<?= $username_field_var ?> = $request->request->get('<?= $username_field ?>', '');
 
-        $request->getSession()->set(Security::LAST_USERNAME, $<?= $username_field_var ?>);
+        $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $<?= $username_field_var ?>);
 
         return new Passport(
             new UserBadge($<?= $username_field_var ?>),

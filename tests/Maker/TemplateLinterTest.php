@@ -33,9 +33,7 @@ final class TemplateLinterTest extends MakerTestCase
     public function getTestDetails(): \Generator
     {
         yield 'lints_templates_with_custom_php_cs_fixer_and_config' => [$this->createMakerTest()
-            ->addExtraDependencies('friendsofphp/php-cs-fixer')
-            // these tests are troublesome on Windows
-            ->skipOnWindows()
+            ->addExtraDependencies('php-cs-fixer/shim')
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy('template-linter/php-cs-fixer.test.php', 'php-cs-fixer.test.php');
 
@@ -61,9 +59,7 @@ final class TemplateLinterTest extends MakerTestCase
         ];
 
         yield 'lints_templates_with_flex_generated_config_file' => [$this->createMakerTest()
-            ->addExtraDependencies('friendsofphp/php-cs-fixer')
-            // these tests are troublesome on Windows
-            ->skipOnWindows()
+            ->addExtraDependencies('php-cs-fixer/shim')
             ->run(function (MakerTestRunner $runner) {
                 $runner->replaceInFile(
                     '.php-cs-fixer.dist.php',

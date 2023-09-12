@@ -16,7 +16,7 @@ class <?= $class_name; ?> extends AbstractController
 
 <?php endif; ?>
 <?= $generator->generateRouteForControllerMethod($route_path, $route_name) ?>
-    public function register(Request $request, <?= $password_hasher_class_details->getShortName() ?> <?= $password_hasher_variable_name ?><?= $authenticator_full_class_name ? sprintf(', %s %s, %s $authenticator', ($use_new_authenticator_system ? 'UserAuthenticatorInterface' : 'GuardAuthenticatorHandler'), ($use_new_authenticator_system ? '$userAuthenticator' : '$guardHandler'), $authenticator_class_name) : '' ?>, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, <?= $password_hasher_class_details->getShortName() ?> $userPasswordHasher<?= $authenticator_full_class_name ? sprintf(', UserAuthenticatorInterface $userAuthenticator, %s $authenticator', $authenticator_class_name) : '' ?>, EntityManagerInterface $entityManager): Response
     {
         $user = new <?= $user_class_name ?>();
         $form = $this->createForm(<?= $form_class_name ?>::class, $user);
@@ -25,7 +25,7 @@ class <?= $class_name; ?> extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // encode the plain password
             $user->set<?= ucfirst($password_field) ?>(
-                <?= $password_hasher_variable_name ?>-><?= $use_password_hasher ? 'hashPassword' : 'encodePassword' ?>(
+                $userPasswordHasher->hashPassword(
                     $user,
                     $form->get('plainPassword')->getData()
                 )
@@ -47,20 +47,11 @@ class <?= $class_name; ?> extends AbstractController
             // do anything else you need here, like send an email
 
 <?php if ($authenticator_full_class_name): ?>
-<?php if ($use_new_authenticator_system): ?>
             return $userAuthenticator->authenticateUser(
                 $user,
                 $authenticator,
                 $request
             );
-<?php else: ?>
-            return $guardHandler->authenticateUserAndHandleSuccess(
-                $user,
-                $request,
-                $authenticator,
-                '<?= $firewall_name; ?>' // firewall name in security.yaml
-            );
-<?php endif; ?>
 <?php else: ?>
             return $this->redirectToRoute('<?= $redirect_route_name ?>');
 <?php endif; ?>

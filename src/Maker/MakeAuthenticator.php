@@ -28,7 +28,6 @@ use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -43,8 +42,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\Security as LegacySecurity;
-use Symfony\Component\Security\Guard\AuthenticatorInterface as GuardAuthenticatorInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
@@ -53,6 +50,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use Symfony\Component\Yaml\Yaml;
 
@@ -102,11 +100,6 @@ final class MakeAuthenticator extends AbstractMaker
         }
         $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents($path));
         $securityData = $manipulator->getData();
-
-        // @legacy - Can be removed when Symfony 5.4 support is dropped
-        if (interface_exists(GuardAuthenticatorInterface::class) && !($securityData['security']['enable_authenticator_manager'] ?? false)) {
-            throw new RuntimeCommandException('MakerBundle only supports the new authenticator based security system. See https://symfony.com/doc/current/security.html');
-        }
 
         // authenticator type
         $authenticatorTypeValues = [
@@ -320,14 +313,8 @@ final class MakeAuthenticator extends AbstractMaker
             UserBadge::class,
             PasswordCredentials::class,
             TargetPathTrait::class,
+            SecurityRequestAttributes::class,
         ]);
-
-        // @legacy - Can be removed when Symfony 5.4 support is dropped
-        if (class_exists(Security::class)) {
-            $useStatements->addUseStatement(Security::class);
-        } else {
-            $useStatements->addUseStatement(LegacySecurity::class);
-        }
 
         if ($supportRememberMe) {
             $useStatements->addUseStatement(RememberMeBadge::class);
