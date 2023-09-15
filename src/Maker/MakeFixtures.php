@@ -55,8 +55,8 @@ final class MakeFixtures extends AbstractMaker
         );
 
         $useStatements = new UseStatementGenerator([
-            Fixture::class => null,
-            ObjectManager::class => null,
+            Fixture::class,
+            ObjectManager::class,
         ]);
 
         $generator->generateClass(
