@@ -193,8 +193,8 @@ final class MakeAuthenticator extends AbstractMaker
 
             if ($input->getArgument('support-remember-me')) {
                 $supportRememberMeValues = [
-                    'Activate when the user checks a box' => false,
-                    'Always activate remember me' => true,
+                    'Activate when the user checks a box' => FALSE,
+                    'Always activate remember me' => TRUE,
                 ];
                 $command->addArgument('always-remember-me', InputArgument::REQUIRED);
 
