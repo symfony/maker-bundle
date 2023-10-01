@@ -24,7 +24,7 @@ class MakeDocumentTest extends MakerTestCase
 
     private function createMakeDocumentTest(bool $withDatabase = true): MakerTestDetails
     {
-        return $this->createMakerTest()
+        return $this->createMakerTest()->skipOnSymfony7()
             ->preRun(function (MakerTestRunner $runner) use ($withDatabase) {
                 if ($withDatabase) {
                     $runner->configureMongoDatabase();
