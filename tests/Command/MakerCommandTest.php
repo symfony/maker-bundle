@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
+use Symfony\Bundle\MakerBundle\Util\TemplateLinter;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class MakerCommandTest extends TestCase
@@ -42,7 +43,8 @@ class MakerCommandTest extends TestCase
 
         $namespacesHelper = new NamespacesHelper(['root_namespace' => 'App']);
 
-        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, $namespacesHelper));
+        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, $namespacesHelper), new TemplateLinter());
+
         // needed because it's normally set by the Application
         $command->setName('make:foo');
         $tester = new CommandTester($command);
@@ -57,17 +59,13 @@ class MakerCommandTest extends TestCase
 
         $namespacesHelper = new NamespacesHelper(['root' => 'Unknown']);
 
-        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, $namespacesHelper));
+        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, $namespacesHelper), new TemplateLinter());
+
         // needed because it's normally set by the Application
         $command->setName('make:foo');
         $tester = new CommandTester($command);
         $tester->execute([]);
 
-        if (method_exists(self::class, 'assertStringContainsString')) {
-            self::assertStringContainsString('using a namespace other than "Unknown"', $tester->getDisplay());
-        } else {
-            // legacy for older phpunit versions (e.g. older php version on CI)
-            self::assertContains('using a namespace other than "Unknown"', $tester->getDisplay());
-        }
+        self::assertStringContainsString('using a namespace other than "Unknown"', $tester->getDisplay());
     }
 }

@@ -17,7 +17,7 @@ class User
         return $this->id;
     }
 
-    public function setFooProp($fooProp): self
+    public function setFooProp($fooProp): static
     {
         $this->fooProp = $fooProp;
 

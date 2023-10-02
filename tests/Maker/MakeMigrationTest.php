@@ -15,6 +15,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeMigration;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
+use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
 use Symfony\Component\Finder\Finder;
 
 class MakeMigrationTest extends MakerTestCase
@@ -30,7 +31,7 @@ class MakeMigrationTest extends MakerTestCase
             // doctrine-migrations-bundle only requires doctrine-bundle, which
             // only requires doctrine/dbal. But we're testing with the ORM,
             // so let's install it
-            ->addExtraDependencies('doctrine/orm:@stable')
+            ->addExtraDependencies('doctrine/orm')
             ->preRun(function (MakerTestRunner $runner) {
                 $runner->copy(
                     'make-migration/SpicyFood.php',
@@ -61,7 +62,29 @@ class MakeMigrationTest extends MakerTestCase
                 // see that the exact filename is in the output
                 $iterator = $finder->getIterator();
                 $iterator->rewind();
-                $this->assertStringContainsString(sprintf('"%s/%s"', $migrationsDirectoryPath, $iterator->current()->getFilename()), $output);
+                $this->assertStringContainsString(sprintf('%s/%s', $migrationsDirectoryPath, $iterator->current()->getFilename()), $output);
+            }),
+        ];
+
+        yield 'it_detects_symfony_cli_usage' => [$this->createMakeMigrationTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker(
+                    inputs: [],
+                    envVars: [CliOutputHelper::ENV_VERSION => '0.0.0', CliOutputHelper::ENV_BIN_NAME => 'symfony']
+                );
+
+                $this->assertStringContainsString('symfony console doctrine:migrations:migrate', $output);
+            }),
+        ];
+
+        yield 'it_detects_symfony_cli_is_not_used' => [$this->createMakeMigrationTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker(
+                    inputs: [],
+                    envVars: []
+                );
+
+                $this->assertStringContainsString('php bin/console doctrine:migrations:migrate', $output);
             }),
         ];
 
@@ -88,9 +111,9 @@ class MakeMigrationTest extends MakerTestCase
                     'y',
                 ]);
 
-                $this->assertStringContainsString('You have 1 available migrations to execute', $output);
+                $this->assertStringContainsString('[WARNING] You have 1 available migrations to execute', $output);
+                $this->assertStringContainsString('Are you sure you wish to continue?', $output);
                 $this->assertStringContainsString('Success', $output);
-                $this->assertCount(14, explode("\n", $output), 'Asserting that very specific output is shown - some should be hidden');
             }),
         ];
 

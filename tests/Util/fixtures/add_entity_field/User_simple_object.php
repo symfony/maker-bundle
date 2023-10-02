@@ -26,7 +26,7 @@ class User
         return $this->someObject;
     }
 
-    public function setSomeObject(object $someObject): self
+    public function setSomeObject(object $someObject): static
     {
         $this->someObject = $someObject;
 

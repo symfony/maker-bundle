@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
-use Doctrine\Common\Annotations\Annotation;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Column;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -31,6 +30,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -49,7 +49,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Guard\AuthenticatorInterface as GuardAuthenticatorInterface;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Validation;
@@ -80,13 +79,12 @@ final class MakeRegistrationForm extends AbstractMaker
     private $firewallName;
     private $redirectRouteName;
     private $addUniqueEntityConstraint;
-    private $useNewAuthenticatorSystem = false;
 
     public function __construct(
         private FileManager $fileManager,
         private FormTypeRenderer $formTypeRenderer,
-        private RouterInterface $router,
         private DoctrineHelper $doctrineHelper,
+        private ?RouterInterface $router = null,
     ) {
     }
 
@@ -111,19 +109,17 @@ final class MakeRegistrationForm extends AbstractMaker
     {
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
 
+        if (null === $this->router) {
+            throw new RuntimeCommandException('Router have been explicitely disabled in your configuration. This command needs to use the router.');
+        }
+
         if (!$this->fileManager->fileExists($path = 'config/packages/security.yaml')) {
-            throw new RuntimeCommandException('The file "config/packages/security.yaml" does not exist. This command needs that file to accurately build your registration form.');
+            throw new RuntimeCommandException('The file "config/packages/security.yaml" does not exist. PHP & XML configuration formats are currently not supported.');
         }
 
         $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents($path));
         $securityData = $manipulator->getData();
         $providersData = $securityData['security']['providers'] ?? [];
-
-        // Determine if we should use new security features introduced in Symfony 5.2
-        // @legacy - Can be removed when Symfony 5.4 support is dropped
-        if (!interface_exists(GuardAuthenticatorInterface::class) || ($securityData['security']['enable_authenticator_manager'] ?? false)) {
-            $this->useNewAuthenticatorSystem = true;
-        }
 
         $this->userClass = $interactiveSecurityHelper->guessUserClass(
             $io,
@@ -138,11 +134,11 @@ final class MakeRegistrationForm extends AbstractMaker
 
         // see if it makes sense to add the UniqueEntity constraint
         $userClassDetails = new ClassDetails($this->userClass);
-        $addAnnotation = false;
-        if (!$userClassDetails->doesDocBlockContainAnnotation('@UniqueEntity')) {
-            $addAnnotation = $io->confirm(sprintf('Do you want to add a <comment>@UniqueEntity</comment> validation annotation on your <comment>%s</comment> class to make sure duplicate accounts aren\'t created?', Str::getShortClassName($this->userClass)));
+        $this->addUniqueEntityConstraint = false;
+
+        if (!$userClassDetails->hasAttribute(UniqueEntity::class)) {
+            $this->addUniqueEntityConstraint = $io->confirm(sprintf('Do you want to add a <comment>#[UniqueEntity]</comment> validation attribute to your <comment>%s</comment> class to make sure duplicate accounts aren\'t created?', Str::getShortClassName($this->userClass)));
         }
-        $this->addUniqueEntityConstraint = $addAnnotation;
 
         $this->willVerifyEmail = $io->confirm('Do you want to send an email to verify the user\'s email address after registration?', true);
 
@@ -174,11 +170,9 @@ final class MakeRegistrationForm extends AbstractMaker
 
         if ($io->confirm('Do you want to automatically authenticate the user after registration?')) {
             $this->interactAuthenticatorQuestions(
-                $input,
                 $io,
                 $interactiveSecurityHelper,
-                $securityData,
-                $command
+                $securityData
             );
         }
 
@@ -188,7 +182,7 @@ final class MakeRegistrationForm extends AbstractMaker
         }
     }
 
-    private function interactAuthenticatorQuestions(InputInterface $input, ConsoleStyle $io, InteractiveSecurityHelper $interactiveSecurityHelper, array $securityData, Command $command): void
+    private function interactAuthenticatorQuestions(ConsoleStyle $io, InteractiveSecurityHelper $interactiveSecurityHelper, array $securityData): void
     {
         $firewallsData = $securityData['security']['firewalls'] ?? [];
         $firewallName = $interactiveSecurityHelper->guessFirewallName(
@@ -347,12 +341,9 @@ final class MakeRegistrationForm extends AbstractMaker
                     'email_getter' => $this->emailGetter,
                     'authenticator_class_name' => $this->autoLoginAuthenticator ? Str::getShortClassName($this->autoLoginAuthenticator) : null,
                     'authenticator_full_class_name' => $this->autoLoginAuthenticator,
-                    'use_new_authenticator_system' => $this->useNewAuthenticatorSystem,
                     'firewall_name' => $this->firewallName,
                     'redirect_route_name' => $this->redirectRouteName,
-                    'password_hasher_class_details' => ($passwordClassDetails = $generator->createClassNameDetails(UserPasswordHasherInterface::class, '\\')),
-                    'password_hasher_variable_name' => str_replace('Interface', '', sprintf('$%s', lcfirst($passwordClassDetails->getShortName()))), // @legacy see passwordHasher conditional above
-                    'use_password_hasher' => true,
+                    'password_hasher_class_details' => $generator->createClassNameDetails(UserPasswordHasherInterface::class, '\\'),
                     'translator_available' => $isTranslatorAvailable,
                 ],
                 $userRepoVars
@@ -430,7 +421,7 @@ final class MakeRegistrationForm extends AbstractMaker
             $closing[] = '   * Customize the last <fg=yellow>redirectToRoute()</> after a successful email verification.';
             $closing[] = '   * Make sure you\'re rendering <fg=yellow>success</> flash messages or change the <fg=yellow>$this->addFlash()</> line.';
             $closing[] = sprintf('%d) Review and customize the form, controller, and templates as needed.', $index++);
-            $closing[] = sprintf('%d) Run <fg=yellow>"php bin/console make:migration"</> to generate a migration for the newly added <fg=yellow>%s::isVerified</> property.', $index++, $userClass);
+            $closing[] = sprintf('%d) Run <fg=yellow>"%s make:migration"</> to generate a migration for the newly added <fg=yellow>%s::isVerified</> property.', $index++, CliOutputHelper::getCommandPrefix(), $userClass);
         }
 
         $io->text($closing);
@@ -483,11 +474,6 @@ final class MakeRegistrationForm extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
-        $dependencies->addClassDependency(
-            Annotation::class,
-            'doctrine/annotations'
-        );
-
         $dependencies->addClassDependency(
             AbstractType::class,
             'form'

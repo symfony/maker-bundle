@@ -28,6 +28,7 @@ class Generator
     private array $pendingOperations = [];
     private ?TemplateComponentGenerator $templateComponentGenerator;
     private NamespacesHelper $namespacesHelper;
+    private array $generatedFiles = [];
 
     public function __construct(
         private FileManager $fileManager,
@@ -76,6 +77,8 @@ class Generator
 
     /**
      * Generate a normal file from a template.
+     *
+     * @return void
      */
     public function generateFile(string $targetPath, string $templateName, array $variables = [])
     {
@@ -86,6 +89,9 @@ class Generator
         $this->addOperation($targetPath, $templateName, $variables);
     }
 
+    /**
+     * @return void
+     */
     public function dumpFile(string $targetPath, string $contents)
     {
         $this->pendingOperations[$targetPath] = [
@@ -162,29 +168,6 @@ class Generator
         return $this->fileManager->getRootDirectory();
     }
 
-    private function addOperation(string $targetPath, string $templateName, array $variables): void
-    {
-        if ($this->fileManager->fileExists($targetPath)) {
-            throw new RuntimeCommandException(sprintf('The file "%s" can\'t be generated because it already exists.', $this->fileManager->relativizePath($targetPath)));
-        }
-
-        $variables['relative_path'] = $this->fileManager->relativizePath($targetPath);
-
-        $templatePath = $templateName;
-        if (!file_exists($templatePath)) {
-            $templatePath = __DIR__.'/Resources/skeleton/'.$templateName;
-
-            if (!file_exists($templatePath)) {
-                throw new \Exception(sprintf('Cannot find template "%s"', $templateName));
-            }
-        }
-
-        $this->pendingOperations[$targetPath] = [
-            'template' => $templatePath,
-            'variables' => $variables,
-        ];
-    }
-
     public function hasPendingOperations(): bool
     {
         return !empty($this->pendingOperations);
@@ -198,6 +181,8 @@ class Generator
     public function writeChanges()
     {
         foreach ($this->pendingOperations as $targetPath => $templateData) {
+            $this->generatedFiles[] = $targetPath;
+
             if (isset($templateData['contents'])) {
                 $this->fileManager->dumpFile($targetPath, $templateData['contents']);
 
@@ -206,7 +191,7 @@ class Generator
 
             $this->fileManager->dumpFile(
                 $targetPath,
-                $this->getFileContentsForPendingOperation($targetPath, $templateData)
+                $this->getFileContentsForPendingOperation($targetPath)
             );
         }
 
@@ -250,6 +235,14 @@ class Generator
     }
 
     /**
+     * Get the full path of each file created by the Generator.
+     */
+    public function getGeneratedFiles(): array
+    {
+        return $this->generatedFiles;
+    }
+
+    /**
      * @deprecated MakerBundle only supports AbstractController::class. This method will be removed in the future.
      */
     public static function getControllerBaseClass(): ClassNameDetails
@@ -257,5 +250,28 @@ class Generator
         trigger_deprecation('symfony/maker-bundle', 'v1.41.0', 'MakerBundle only supports AbstractController. This method will be removed in the future.');
 
         return new ClassNameDetails(AbstractController::class, '\\');
+    }
+
+    private function addOperation(string $targetPath, string $templateName, array $variables): void
+    {
+        if ($this->fileManager->fileExists($targetPath)) {
+            throw new RuntimeCommandException(sprintf('The file "%s" can\'t be generated because it already exists.', $this->fileManager->relativizePath($targetPath)));
+        }
+
+        $variables['relative_path'] = $this->fileManager->relativizePath($targetPath);
+
+        $templatePath = $templateName;
+        if (!file_exists($templatePath)) {
+            $templatePath = __DIR__.'/Resources/skeleton/'.$templateName;
+
+            if (!file_exists($templatePath)) {
+                throw new \Exception(sprintf('Cannot find template "%s"', $templateName));
+            }
+        }
+
+        $this->pendingOperations[$targetPath] = [
+            'template' => $templatePath,
+            'variables' => $variables,
+        ];
     }
 }

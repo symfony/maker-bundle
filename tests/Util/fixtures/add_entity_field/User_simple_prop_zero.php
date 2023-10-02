@@ -26,7 +26,7 @@ class User
         return $this->decimal;
     }
 
-    public function setDecimal(string $decimal): self
+    public function setDecimal(string $decimal): static
     {
         $this->decimal = $decimal;
 

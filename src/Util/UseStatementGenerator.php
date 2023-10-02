@@ -45,7 +45,11 @@ final class UseStatementGenerator implements \Stringable
                 $class = $aliasClass;
             }
 
-            $transformed[$key] = str_replace('\\', ' ', $class);
+            $transformedClass = str_replace('\\', ' ', $class);
+            // Let's not add the class again if it already exists.
+            if (!\in_array($transformedClass, $transformed, true)) {
+                $transformed[$key] = $transformedClass;
+            }
         }
 
         asort($transformed);

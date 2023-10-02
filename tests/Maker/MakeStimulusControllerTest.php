@@ -25,6 +25,7 @@ class MakeStimulusControllerTest extends MakerTestCase
     public function getTestDetails(): \Generator
     {
         yield 'it_generates_stimulus_controller_with_targets' => [$this->createMakerTest()
+            ->skipOnSymfony7() // legacy: remove StimulusBundle supports Symfony 7
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
                     [
@@ -52,6 +53,7 @@ class MakeStimulusControllerTest extends MakerTestCase
         ];
 
         yield 'it_generates_stimulus_controller_without_targets' => [$this->createMakerTest()
+            ->skipOnSymfony7() // legacy: remove StimulusBundle supports Symfony 7
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
                     [
@@ -75,6 +77,7 @@ class MakeStimulusControllerTest extends MakerTestCase
         ];
 
         yield 'it_generates_typescript_stimulus_controller' => [$this->createMakerTest()
+            ->skipOnSymfony7() // legacy: remove StimulusBundle supports Symfony 7
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
                     [

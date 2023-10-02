@@ -1,5 +1,58 @@
 # Changelog
 
+## [v1.50.0](https://github.com/symfony/maker-bundle/releases/tag/v1.50.0)
+
+### Feature
+
+- [#1328](https://github.com/symfony/maker-bundle/pull/1328) - Deleting save and remove methods from repositories - *@mdoutreluingne*
+- [#986](https://github.com/symfony/maker-bundle/pull/986) - Add RememberMeBadge - *@bechir*
+- [#1332](https://github.com/symfony/maker-bundle/pull/1332) - Add conditional @implements tag to Doctrine repository template - *@gremo*
+- [#1325](https://github.com/symfony/maker-bundle/pull/1325) - Fix English typo in reset password template - *@pbek*
+
+### Bug
+
+- [#1322](https://github.com/symfony/maker-bundle/pull/1322) - [make:crud] fix typo in Kernel::VERSION usage - *@nacorp*
+- [#1324](https://github.com/symfony/maker-bundle/pull/1324) - Fix(Doctrine Repository template)/Avoid potential double call in save method - *@Mano-Lis*
+- [#1293](https://github.com/symfony/maker-bundle/pull/1293) - [make:entity] don't set array field default value for nullable column - *@Rootie*
+
+## [v1.49.0](https://github.com/symfony/maker-bundle/releases/tag/v1.49.0)
+
+*June 7th, 2023*
+
+### Feature
+
+- [#1321](https://github.com/symfony/maker-bundle/pull/1321) - Changing make:stimulus-controller to require StimulusBundle - *@weaverryan*
+- [#1309](https://github.com/symfony/maker-bundle/pull/1309) - Apply `get_class_to_class_keyword` PHP-CS-Fixer rule - *@seb-jean*
+- [#1276](https://github.com/symfony/maker-bundle/pull/1276) - [make:migration] Change message when required package for migration doesn't exist. - *@bdaler*
+- [#1261](https://github.com/symfony/maker-bundle/pull/1261) - [make:registration-form] use UniqueEntity attribute instead of annotation - *@jrushlow*
+- [#1253](https://github.com/symfony/maker-bundle/pull/1253) - [make:migration] Add link to new migration files - *@nicolas-grekas*
+- [#1251](https://github.com/symfony/maker-bundle/pull/1251) - [make:*] use php-cs-fixer to style/lint all generated php templates - *@jrushlow*
+- [#1244](https://github.com/symfony/maker-bundle/pull/1244) - [make:security:form-login] new maker to use built in FormLogin - *@jrushlow*
+- [#1242](https://github.com/symfony/maker-bundle/pull/1242) - [make:*] use static return type instead of self for setters - *@jrushlow*
+- [#1239](https://github.com/symfony/maker-bundle/pull/1239) - Improve error messages to show PHP & XML configurations are not supported - *@ThomasLandauer*
+- [#1238](https://github.com/symfony/maker-bundle/pull/1238) - [make:*] improve output messages for Symfony CLI users - *@jrushlow*
+- [#1237](https://github.com/symfony/maker-bundle/pull/1237) - [make:registration-form] Print registration form errors - *@comxd*
+### Bug
+
+- [#1307](https://github.com/symfony/maker-bundle/pull/1307) - [make:twig-component] handle upstream changes to how live components are rendered - *@jrushlow*
+- [#1270](https://github.com/symfony/maker-bundle/pull/1270) - [make:authenticator] Core\Security or SecurityBundle\Security - Avoid deprecations in 6.2 - *@nacorp*
+- [#1265](https://github.com/symfony/maker-bundle/pull/1265) - [make:crud] Make sensio/framework-extra-bundle an optional dependency - *@acrobat*
+- [#1264](https://github.com/symfony/maker-bundle/pull/1264) - [make:controller] doctrine/annotations is not needed - *@jrushlow*
+- [#1262](https://github.com/symfony/maker-bundle/pull/1262) - [make:reset-password] doctrine/annotations are not needed - *@jrushlow*
+
+## [v1.48.0](https://github.com/symfony/maker-bundle/releases/tag/v1.48.0)
+
+*November 14th, 2022*
+
+### Feature
+
+- [#1221](https://github.com/symfony/maker-bundle/pull/1221) - [make:voter] Set type for subject in Voter template - *@N-M*
+### Bug
+
+- [#1232](https://github.com/symfony/maker-bundle/pull/1232) - [make:entity] Minor: Consistent output formatting - *@ThomasLandauer*
+- [#1227](https://github.com/symfony/maker-bundle/pull/1227) - [make:registration] Make router optional in MakeRegistrationForm constructor - *@odolbeau*
+- [#1226](https://github.com/symfony/maker-bundle/pull/1226) - [make:controller] replace repository method add by save - *@bechir*
+
 ## [v1.47.0](https://github.com/symfony/maker-bundle/releases/tag/v1.47.0)
 
 *October 4th, 2022*

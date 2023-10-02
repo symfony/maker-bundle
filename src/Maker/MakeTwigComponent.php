@@ -64,17 +64,15 @@ final class MakeTwigComponent extends AbstractMaker
         $factory = $generator->createClassNameDetails(
             $name,
             'Twig\\Components',
-            'Component'
         );
 
-        $shortName = Str::asSnakeCase(Str::removeSuffix($factory->getShortName(), 'Component'));
+        $shortName = Str::getShortClassName($factory->getShortName());
 
         $generator->generateClass(
             $factory->getFullName(),
             sprintf('%s/../Resources/skeleton/twig/%s', __DIR__, $live ? 'LiveComponent.tpl.php' : 'Component.tpl.php'),
             [
                 'live' => $live,
-                'short_name' => $shortName,
             ]
         );
         $generator->generateTemplate(

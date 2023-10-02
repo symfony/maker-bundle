@@ -1,0 +1,6 @@
+security:
+    enable_authenticator_manager: true
+    firewalls:
+        main:
+            json_login:
+                check_path: a_check_path

@@ -30,23 +30,37 @@ final class SecurityConfigUpdater
     ) {
     }
 
+    public function updateForFormLogin(string $yamlSource, string $firewallToUpdate, string $loginPath, string $checkPath): string
+    {
+        $newData = $this->createYamlSourceManipulator($yamlSource);
+
+        $newData['security']['firewalls'][$firewallToUpdate]['form_login']['login_path'] = $loginPath;
+        $newData['security']['firewalls'][$firewallToUpdate]['form_login']['check_path'] = $checkPath;
+        $newData['security']['firewalls'][$firewallToUpdate]['form_login']['enable_csrf'] = true;
+
+        return $this->getYamlContentsFromData($newData);
+    }
+
+    public function updateForJsonLogin(string $yamlSource, string $firewallToUpdate, string $checkPath): string
+    {
+        $data = $this->createYamlSourceManipulator($yamlSource);
+
+        $data['security']['firewalls'][$firewallToUpdate]['json_login']['check_path'] = $checkPath;
+
+        return $this->getYamlContentsFromData($data);
+    }
+
     /**
      * Updates security.yaml contents based on a new User class.
      */
     public function updateForUserClass(string $yamlSource, UserClassConfiguration $userConfig, string $userClass): string
     {
-        $this->manipulator = new YamlSourceManipulator($yamlSource);
-
-        if (null !== $this->ysmLogger) {
-            $this->manipulator->setLogger($this->ysmLogger);
-        }
-
-        $this->normalizeSecurityYamlFile();
+        $this->createYamlSourceManipulator($yamlSource);
 
         $this->updateProviders($userConfig, $userClass);
 
         if ($userConfig->hasPassword()) {
-            $this->updatePasswordHashers($userConfig, $userClass);
+            $this->updatePasswordHashers($userClass);
         }
 
         $contents = $this->manipulator->getContents();
@@ -55,15 +69,9 @@ final class SecurityConfigUpdater
         return $contents;
     }
 
-    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup): string
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): string
     {
-        $this->manipulator = new YamlSourceManipulator($yamlSource);
-
-        if (null !== $this->ysmLogger) {
-            $this->manipulator->setLogger($this->ysmLogger);
-        }
-
-        $this->normalizeSecurityYamlFile();
+        $this->createYamlSourceManipulator($yamlSource);
 
         $newData = $this->manipulator->getData();
 
@@ -112,9 +120,85 @@ final class SecurityConfigUpdater
             );
         }
 
+        if ($supportRememberMe) {
+            if (!isset($firewall['remember_me'])) {
+                $firewall['remember_me_empty_line'] = $this->manipulator->createEmptyLine();
+                $firewall['remember_me'] = [
+                    'secret' => '%kernel.secret%',
+                    'lifetime' => 604800,
+                    'path' => '/',
+                ];
+                if (!$alwaysRememberMe) {
+                    $firewall['remember_me'][] = $this->manipulator->createCommentLine(' by default, the feature is enabled by checking a checkbox in the');
+                    $firewall['remember_me'][] = $this->manipulator->createCommentLine(' login form, uncomment the following line to always enable it.');
+                }
+            } else {
+                $firewall['remember_me']['secret'] ??= '%kernel.secret%';
+                $firewall['remember_me']['lifetime'] ??= 604800;
+                $firewall['remember_me']['path'] ??= '/';
+            }
+
+            if ($alwaysRememberMe) {
+                $firewall['remember_me']['always_remember_me'] = true;
+            } else {
+                $firewall['remember_me'][] = $this->manipulator->createCommentLine('always_remember_me: true');
+            }
+        }
+
         $newData['security']['firewalls'][$firewallName] = $firewall;
 
+        if (!isset($firewall['logout']) && $logoutSetup) {
+            $this->configureLogout($newData, $firewallName);
+
+            return $this->manipulator->getContents();
+        }
+
         $this->manipulator->setData($newData);
+
+        return $this->manipulator->getContents();
+    }
+
+    public function updateForLogout(string $yamlSource, string $firewallName): string
+    {
+        $this->createYamlSourceManipulator($yamlSource);
+
+        $this->configureLogout($this->manipulator->getData(), $firewallName);
+
+        return $this->manipulator->getContents();
+    }
+
+    /**
+     * @legacy This can be removed once we deprecate/remove `make:auth`
+     */
+    private function configureLogout(array $securityData, string $firewallName): void
+    {
+        $securityData['security']['firewalls'][$firewallName]['logout'] = ['path' => 'app_logout'];
+        $securityData['security']['firewalls'][$firewallName]['logout'][] = $this->manipulator->createCommentLine(
+            ' where to redirect after logout'
+        );
+        $securityData['security']['firewalls'][$firewallName]['logout'][] = $this->manipulator->createCommentLine(
+            ' target: app_any_route'
+        );
+
+        $this->manipulator->setData($securityData);
+    }
+
+    private function createYamlSourceManipulator(string $yamlSource): array
+    {
+        $this->manipulator = new YamlSourceManipulator($yamlSource);
+
+        if (null !== $this->ysmLogger) {
+            $this->manipulator->setLogger($this->ysmLogger);
+        }
+
+        $this->normalizeSecurityYamlFile();
+
+        return $this->manipulator->getData();
+    }
+
+    private function getYamlContentsFromData(array $yamlData): string
+    {
+        $this->manipulator->setData($yamlData);
 
         return $this->manipulator->getContents();
     }
@@ -159,7 +243,7 @@ final class SecurityConfigUpdater
         $this->manipulator->setData($newData);
     }
 
-    private function updatePasswordHashers(UserClassConfiguration $userConfig, string $userClass): void
+    private function updatePasswordHashers(string $userClass): void
     {
         $newData = $this->manipulator->getData();
 

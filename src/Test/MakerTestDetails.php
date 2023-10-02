@@ -24,6 +24,7 @@ final class MakerTestDetails
     private array $requiredPackageVersions = [];
     private int $blockedPhpVersionUpper = 0;
     private int $blockedPhpVersionLower = 0;
+    private bool $skipOnSymfony7 = false;
 
     public function __construct(
         private MakerInterface $maker,
@@ -174,5 +175,17 @@ final class MakerTestDetails
     public function getPreRunCallbacks(): array
     {
         return $this->preRunCallbacks;
+    }
+
+    public function skipOnSymfony7(): self
+    {
+        $this->skipOnSymfony7 = true;
+
+        return $this;
+    }
+
+    public function getSkipOnSymfony7(): bool
+    {
+        return $this->skipOnSymfony7;
     }
 }

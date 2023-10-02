@@ -56,6 +56,10 @@ abstract class MakerTestCase extends TestCase
 
         $testEnv = MakerTestEnvironment::create($testDetails);
 
+        if ('7.0.x-dev' === $testEnv->getTargetSkeletonVersion() && $testDetails->getSkipOnSymfony7()) {
+            $this->markTestSkipped('This test is skipped on Symfony 7');
+        }
+
         // prepare environment to test
         $testEnv->prepareDirectory();
 
@@ -76,16 +80,6 @@ abstract class MakerTestCase extends TestCase
 
         foreach ($files as $file) {
             $this->assertTrue($testEnv->fileExists($file), sprintf('The file "%s" does not exist after generation', $file));
-
-            if (str_ends_with($file, '.php')) {
-                $csProcess = $testEnv->runPhpCSFixer($file);
-
-                $this->assertTrue($csProcess->isSuccessful(), sprintf(
-                    "File '%s' has a php-cs problem: %s\n",
-                    $file,
-                    $csProcess->getErrorOutput()."\n".$csProcess->getOutput()
-                ));
-            }
 
             if (str_ends_with($file, '.twig')) {
                 $csProcess = $testEnv->runTwigCSLint($file);

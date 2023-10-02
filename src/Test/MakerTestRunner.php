@@ -31,9 +31,9 @@ class MakerTestRunner
         $this->filesystem = new Filesystem();
     }
 
-    public function runMaker(array $inputs, string $argumentsString = '', bool $allowedToFail = false): string
+    public function runMaker(array $inputs, string $argumentsString = '', bool $allowedToFail = false, array $envVars = []): string
     {
-        $this->executedMakerProcess = $this->environment->runMaker($inputs, $argumentsString, $allowedToFail);
+        $this->executedMakerProcess = $this->environment->runMaker($inputs, $argumentsString, $allowedToFail, $envVars);
 
         return $this->executedMakerProcess->getOutput();
     }
@@ -157,7 +157,7 @@ class MakerTestRunner
     {
         $this->replaceInFile(
             '.env',
-            'postgresql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=14&charset=utf8',
+            'postgresql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=15&charset=utf8',
             getenv('TEST_DATABASE_DSN')
         );
 
@@ -170,14 +170,6 @@ class MakerTestRunner
 
             return $config;
         });
-
-        // @legacy DoctrineBundle 2.4 recipe uses when@test instead of a test/doctrine.yaml config
-        if ($this->filesystem->exists('config/packages/test/doctrine.yaml')) {
-            $this->removeFromFile(
-                'config/packages/test/doctrine.yaml',
-                "dbname_suffix: '_test%env(default::TEST_TOKEN)%'"
-            );
-        }
 
         // this looks silly, but it's the only way to drop the database *for sure*,
         // as doctrine:database:drop will error if there is no database
@@ -224,10 +216,17 @@ class MakerTestRunner
      */
     public function addToAutoloader(string $namespace, string $path)
     {
-        $this->replaceInFile(
-            'composer.json',
-            '"App\\\Tests\\\": "tests/",',
-            sprintf('"App\\\Tests\\\": "tests/",'."\n".'            "%s": "%s",', $namespace, $path)
+        $composerJson = json_decode(
+            json: file_get_contents($this->getPath('composer.json')),
+            associative: true,
+            flags: \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_SLASHES
+        );
+
+        $composerJson['autoload-dev']['psr-4'][$namespace] = $path;
+
+        $this->filesystem->dumpFile(
+            $this->getPath('composer.json'),
+            json_encode($composerJson, \JSON_UNESCAPED_SLASHES | \JSON_PRETTY_PRINT | \JSON_THROW_ON_ERROR)
         );
 
         $this->environment->runCommand('composer dump-autoload');

@@ -19,6 +19,8 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
+use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -33,8 +35,10 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
 {
     private Application $application;
 
-    public function __construct(private string $projectDir)
-    {
+    public function __construct(
+        private string $projectDir,
+        private ?MakerFileLinkFormatter $makerFileLinkFormatter = null,
+    ) {
     }
 
     public static function getCommandName(): string
@@ -115,13 +119,15 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
             return;
         }
 
+        $absolutePath = $this->getGeneratedMigrationFilename($migrationOutput);
+        $relativePath = str_replace($this->projectDir.'/', '', $absolutePath);
+
+        $io->comment('<fg=blue>created</>: '.($this->makerFileLinkFormatter?->makeLinkedPath($absolutePath, $relativePath) ?? $relativePath));
+
         $this->writeSuccessMessage($io);
 
-        $migrationName = $this->getGeneratedMigrationFilename($migrationOutput);
-
         $io->text([
-            sprintf('Next: Review the new migration <info>%s</info>', $migrationName),
-            'Then: Run the migration with <info>php bin/console doctrine:migrations:migrate</info>',
+            sprintf('Review the new migration then run it with <info>%s doctrine:migrations:migrate</info>', CliOutputHelper::getCommandPrefix()),
             'See <fg=yellow>https://symfony.com/doc/current/bundles/DoctrineMigrationsBundle/index.html</>',
         ]);
     }
@@ -141,18 +147,18 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
     {
         $dependencies->addClassDependency(
             DoctrineMigrationsBundle::class,
-            'migrations'
+            'doctrine/doctrine-migrations-bundle'
         );
     }
 
     private function getGeneratedMigrationFilename(string $migrationOutput): string
     {
-        preg_match('#"(.*?)"#', $migrationOutput, $matches);
+        preg_match('#"<info>(.*?)</info>"#', $migrationOutput, $matches);
 
-        if (!isset($matches[0])) {
+        if (!isset($matches[1])) {
             throw new \Exception('Your migration generated successfully, but an error occurred printing the summary of what occurred.');
         }
 
-        return str_replace($this->projectDir.'/', '', $matches[0]);
+        return $matches[1];
     }
 }

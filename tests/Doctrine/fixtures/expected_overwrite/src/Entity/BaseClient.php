@@ -38,7 +38,7 @@ class BaseClient
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(string $name): static
     {
         $this->name = $name;
 
@@ -50,7 +50,7 @@ class BaseClient
         return $this->magic;
     }
 
-    public function setMagic(int $magic): self
+    public function setMagic(int $magic): static
     {
         $this->magic = $magic;
 
@@ -62,7 +62,7 @@ class BaseClient
         return $this->creator;
     }
 
-    public function setCreator(?User $creator): self
+    public function setCreator(?User $creator): static
     {
         $this->creator = $creator;
 

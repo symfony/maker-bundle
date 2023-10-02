@@ -21,24 +21,6 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, UserXml::class);
     }
 
-    public function save(UserXml $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(UserXml $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
 //    /**
 //     * @return UserXml[] Returns an array of UserXml objects
 //     */

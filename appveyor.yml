@@ -27,7 +27,7 @@ environment:
     TEST_DATABASE_DSN: mysql://root:Password12!@127.0.0.1:3306/test_maker
     matrix:
       - dependencies: highest
-        php_ver_target: 8.0.19
+        php_ver_target: 8.1.23
 
 install:
     - choco install sqlite --params "/NoTools"

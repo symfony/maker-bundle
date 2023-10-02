@@ -28,10 +28,13 @@ final class MakerTestEnvironment
     private string $flexPath;
     private string $path;
     private MakerTestProcess $runnedMakerProcess;
+    private bool $isWindows;
 
     private function __construct(
         private MakerTestDetails $testDetails,
     ) {
+        $this->isWindows = str_contains(strtolower(\PHP_OS), 'win');
+
         $this->fs = new Filesystem();
         $this->rootPath = realpath(__DIR__.'/../../');
         $cachePath = $this->rootPath.'/tests/tmp/cache';
@@ -124,13 +127,18 @@ final class MakerTestEnvironment
 
     public function prepareDirectory(): void
     {
+        // Copy MakerBundle to a "repo" directory for tests
+        if (!file_exists($makerRepoPath = sprintf('%s/maker-repo', $this->cachePath))) {
+            MakerTestProcess::create(sprintf('git clone %s %s', $this->rootPath, $makerRepoPath), $this->cachePath)->run();
+        }
+
         if (!$this->fs->exists($this->flexPath)) {
             $this->buildFlexSkeleton();
         }
 
         if (!$this->fs->exists($this->path)) {
             try {
-                // lets do some magic here git is faster than copy
+                // let's do some magic here git is faster than copy
                 MakerTestProcess::create(
                     '\\' === \DIRECTORY_SEPARATOR ? 'git clone %FLEX_PATH% %APP_PATH%' : 'git clone "$FLEX_PATH" "$APP_PATH"',
                     \dirname($this->flexPath),
@@ -141,11 +149,26 @@ final class MakerTestEnvironment
                 )
                     ->run();
 
+                // In Window's we have to require MakerBundle in each project - git clone doesn't symlink well
+                if ($this->isWindows) {
+                    $this->composerRequireMakerBundle($this->path);
+                }
+
                 // install any missing dependencies
                 $dependencies = $this->determineMissingDependencies();
                 if ($dependencies) {
-                    MakerTestProcess::create(sprintf('composer require %s', implode(' ', $dependencies)), $this->path)
-                        ->run();
+                    // -v actually silences the "very" verbose output in case of an error
+                    $composerProcess = MakerTestProcess::create(sprintf('composer require %s -v', implode(' ', $dependencies)), $this->path);
+
+                    // @legacy Temporary code until doctrine/dbal 3.7 is out (which supports symfony/console 7.0
+                    $composerProcess->run(true);
+                    if (!$composerProcess->isSuccessful()) {
+                        if (str_contains($composerProcess->getErrorOutput(), 'Declaration of Doctrine\DBAL\Tools\Console\Command\RunSqlCommand::execute')) {
+                            $this->patchDoctrineDbalForSymfony7();
+                        } else {
+                            throw new \Exception(sprintf('Error running command: composer require %s -v. Output: "%s". Error: "%s"', implode(' ', $dependencies), $composerProcess->getOutput(), $composerProcess->getErrorOutput()));
+                        }
+                    }
                 }
 
                 $this->changeRootNamespaceIfNeeded();
@@ -162,6 +185,7 @@ final class MakerTestEnvironment
             }
         } else {
             MakerTestProcess::create('git reset --hard && git clean -fd', $this->path)->run();
+            $this->fs->remove($this->path.'/var/cache');
         }
     }
 
@@ -170,15 +194,16 @@ final class MakerTestEnvironment
         return MakerTestProcess::create($command, $this->path)->run();
     }
 
-    public function runMaker(array $inputs, string $argumentsString = '', bool $allowedToFail = false): MakerTestProcess
+    public function runMaker(array $inputs, string $argumentsString = '', bool $allowedToFail = false, array $envVars = []): MakerTestProcess
     {
         // Let's remove cache
         $this->fs->remove($this->path.'/var/cache');
 
         $testProcess = $this->createInteractiveCommandProcess(
-            $this->testDetails->getMaker()::getCommandName(),
-            $inputs,
-            $argumentsString
+            commandName: $this->testDetails->getMaker()::getCommandName(),
+            userInputs: $inputs,
+            argumentsString: $argumentsString,
+            envVars: $envVars,
         );
 
         $this->runnedMakerProcess = $testProcess->run($allowedToFail);
@@ -202,19 +227,6 @@ final class MakerTestEnvironment
         return $this->fs->exists($this->path.'/'.$file);
     }
 
-    public function runPhpCSFixer(string $file): MakerTestProcess
-    {
-        if (!file_exists(__DIR__.'/../../tools/php-cs-fixer/vendor/bin/php-cs-fixer')) {
-            throw new \Exception('php-cs-fixer not found: run: "composer install --working-dir=tools/php-cs-fixer".');
-        }
-
-        return MakerTestProcess::create(
-            sprintf('php tools/php-cs-fixer/vendor/bin/php-cs-fixer --config=%s fix --dry-run --diff %s', __DIR__.'/../Resources/test/.php_cs.test', $this->path.'/'.$file),
-            $this->rootPath,
-            ['PHP_CS_FIXER_IGNORE_ENV' => '1']
-        )->run(true);
-    }
-
     public function runTwigCSLint(string $file): MakerTestProcess
     {
         if (!file_exists(__DIR__.'/../../tools/twigcs/vendor/bin/twigcs')) {
@@ -230,33 +242,21 @@ final class MakerTestEnvironment
         $targetVersion = $this->getTargetSkeletonVersion();
         $versionString = $targetVersion ? sprintf(':%s', $targetVersion) : '';
 
+        $flexProjectDir = sprintf('flex_project%s', $targetVersion);
+
         MakerTestProcess::create(
-            sprintf('composer create-project symfony/skeleton%s flex_project%s --prefer-dist --no-progress', $versionString, $targetVersion),
+            sprintf('composer create-project symfony/skeleton%s %s --prefer-dist --no-progress', $versionString, $flexProjectDir),
             $this->cachePath
         )->run();
 
         $rootPath = str_replace('\\', '\\\\', realpath(__DIR__.'/../..'));
 
-        // processes any changes needed to the Flex project
-        $replacements = [
-            [
-                'filename' => 'config/bundles.php',
-                'find' => "Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],",
-                'replace' => "Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],\n    Symfony\Bundle\MakerBundle\MakerBundle::class => ['dev' => true],",
-            ],
-            [
-                // ugly way to autoload Maker & any other vendor libs needed in the command
-                'filename' => 'composer.json',
-                'find' => '"App\\\Tests\\\": "tests/"',
-                'replace' => sprintf(
-                    '"App\\\Tests\\\": "tests/",'."\n".'            "Symfony\\\Bundle\\\MakerBundle\\\": "%s/src/",'."\n".'            "PhpParser\\\": "%s/vendor/nikic/php-parser/lib/PhpParser/"',
-                    // escape \ for Windows
-                    $rootPath,
-                    $rootPath
-                ),
-            ],
-        ];
-        $this->processReplacements($replacements, $this->flexPath);
+        $this->addMakerBundleRepoToComposer(sprintf('%s/%s/composer.json', $this->cachePath, $flexProjectDir));
+
+        // In Linux, git plays well with symlinks - we can add maker to the flex skeleton.
+        if (!$this->isWindows) {
+            $this->composerRequireMakerBundle(sprintf('%s/%s', $this->cachePath, $flexProjectDir));
+        }
 
         if ($_SERVER['MAKER_ALLOW_DEV_DEPS_IN_APP'] ?? false) {
             MakerTestProcess::create('composer config minimum-stability dev', $this->flexPath)->run();
@@ -329,16 +329,16 @@ final class MakerTestEnvironment
         file_put_contents($path, str_replace($find, $replace, $contents));
     }
 
-    public function createInteractiveCommandProcess(string $commandName, array $userInputs, string $argumentsString = ''): MakerTestProcess
+    public function createInteractiveCommandProcess(string $commandName, array $userInputs, string $argumentsString = '', array $envVars = []): MakerTestProcess
     {
+        $envVars = array_merge(['SHELL_INTERACTIVE' => '1'], $envVars);
+
         // We don't need ansi coloring in tests!
         $process = MakerTestProcess::create(
-            sprintf('php bin/console %s %s --no-ansi', $commandName, $argumentsString),
-            $this->path,
-            [
-                'SHELL_INTERACTIVE' => '1',
-            ],
-            10
+            commandLine: sprintf('php bin/console %s %s --no-ansi', $commandName, $argumentsString),
+            cwd: $this->path,
+            envVars: $envVars,
+            timeout: 10
         );
 
         if ($userInputs) {
@@ -406,8 +406,65 @@ echo json_encode($missingDependencies);
         return array_merge($data, $this->testDetails->getExtraDependencies());
     }
 
-    private function getTargetSkeletonVersion(): ?string
+    public function getTargetSkeletonVersion(): ?string
     {
         return $_SERVER['SYMFONY_VERSION'] ?? '';
+    }
+
+    private function composerRequireMakerBundle(string $projectDirectory): void
+    {
+        MakerTestProcess::create('composer require --dev symfony/maker-bundle', $projectDirectory)
+            ->run()
+        ;
+
+        $makerRepoSrcPath = sprintf('%s/maker-repo/src', $this->cachePath);
+
+        // DX - So we can test local changes without having to commit them.
+        if (!is_link($makerRepoSrcPath)) {
+            $this->fs->remove($makerRepoSrcPath);
+            $this->fs->symlink(sprintf('%s/src', $this->rootPath), $makerRepoSrcPath);
+        }
+    }
+
+    /**
+     * Adds Symfony/MakerBundle as a "path" repository to composer.json.
+     */
+    private function addMakerBundleRepoToComposer(string $composerJsonPath): void
+    {
+        $composerJson = json_decode(
+            file_get_contents($composerJsonPath), true, 512, \JSON_THROW_ON_ERROR);
+
+        // Require-dev is empty and composer complains about this being an array when we encode it again.
+        unset($composerJson['require-dev']);
+
+        $composerJson['repositories']['symfony/maker-bundle'] = [
+            'type' => 'path',
+            'url' => sprintf('%s%smaker-repo', $this->cachePath, \DIRECTORY_SEPARATOR),
+            'options' => [
+                'versions' => [
+                    'symfony/maker-bundle' => '9999.99', // Arbitrary version to avoid stability conflicts
+                ],
+            ],
+        ];
+
+        file_put_contents($composerJsonPath, json_encode($composerJson, \JSON_THROW_ON_ERROR | \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES));
+    }
+
+    private function patchDoctrineDbalForSymfony7(): void
+    {
+        $commandPath = $this->path.'/vendor/doctrine/dbal/src/Tools/Console/Command/RunSqlCommand.php';
+        $contents = file_get_contents($commandPath);
+
+        $needle = 'protected function execute(InputInterface $input, OutputInterface $output)';
+        if (str_contains($contents, $needle.': int')) {
+            return;
+        }
+
+        $contents = str_replace(
+            $needle,
+            $needle.': int',
+            $contents
+        );
+        file_put_contents($commandPath, $contents);
     }
 }

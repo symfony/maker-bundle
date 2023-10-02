@@ -77,8 +77,8 @@
             <service id="maker.maker.make_registration_form" class="Symfony\Bundle\MakerBundle\Maker\MakeRegistrationForm">
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.renderer.form_type_renderer" />
-                <argument type="service" id="router" />
                 <argument type="service" id="maker.doctrine_helper" />
+                <argument type="service" id="router" on-invalid="ignore" />
                 <tag name="maker.command" />
             </service>
 
@@ -133,10 +133,18 @@
 
             <service id="maker.maker.make_migration" class="Symfony\Bundle\MakerBundle\Maker\MakeMigration">
                 <argument>%kernel.project_dir%</argument>
+                <argument type="service" id="maker.file_link_formatter" />
                 <tag name="maker.command" />
             </service>
 
             <service id="maker.maker.make_stimulus_controller" class="Symfony\Bundle\MakerBundle\Maker\MakeStimulusController">
+                <tag name="maker.command" />
+            </service>
+
+            <service id="maker.maker.make_form_login" class="Symfony\Bundle\MakerBundle\Maker\Security\MakeFormLogin">
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.security_config_updater" />
+                <argument type="service" id="maker.security_controller_builder" />
                 <tag name="maker.command" />
             </service>
         </services>

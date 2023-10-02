@@ -35,7 +35,7 @@ class User
         return $this->recipes;
     }
 
-    public function addRecipe(Recipe $recipe): self
+    public function addRecipe(Recipe $recipe): static
     {
         if (!$this->recipes->contains($recipe)) {
             $this->recipes->add($recipe);
@@ -45,7 +45,7 @@ class User
         return $this;
     }
 
-    public function removeRecipe(Recipe $recipe): self
+    public function removeRecipe(Recipe $recipe): static
     {
         if ($this->recipes->removeElement($recipe)) {
             $recipe->removeFood($this);

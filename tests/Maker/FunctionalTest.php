@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
 use Symfony\Bundle\MakerBundle\Test\MakerTestKernel;
@@ -38,7 +37,13 @@ class FunctionalTest extends TestCase
 
         $application = new Application($kernel);
         foreach ($finder as $file) {
-            $maker = new ReflectionClass(sprintf('Symfony\Bundle\MakerBundle\Maker\%s', $file->getBasename('.php')));
+            $classNameFromPath = str_replace(
+                ['/', '.php'], // We need to flip and "/" to "\" and remove ".php"
+                ['\\', ''],
+                sprintf('Symfony\Bundle\MakerBundle\Maker\%s', $file->getRelativePathname())
+            );
+
+            $maker = new \ReflectionClass($classNameFromPath);
 
             if ($maker->isAbstract()) {
                 continue;

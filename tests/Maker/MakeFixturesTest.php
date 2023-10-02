@@ -25,12 +25,14 @@ class MakeFixturesTest extends MakerTestCase
     public function getTestDetails()
     {
         yield 'it_generates_fixtures' => [$this->createMakerTest()
+            // legacy: remove when DoctrineFixturesBundle 4.0 is installed
+            ->skipOnSymfony7()
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([
                     'FooFixtures',
                 ]);
 
-                $this->assertStringContainsString('created: src/DataFixtures/FooFixtures.php', $output);
+                $this->assertStringContainsString('src/DataFixtures/FooFixtures.php', $output);
             }),
         ];
     }

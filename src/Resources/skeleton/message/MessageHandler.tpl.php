@@ -4,7 +4,8 @@ namespace <?= $namespace; ?>;
 
 <?= $use_statements; ?>
 
-final class <?= $class_name ?> implements MessageHandlerInterface
+#[AsMessageHandler]
+final class <?= $class_name ?>
 {
     public function __invoke(<?= $message_class_name ?> $message)
     {

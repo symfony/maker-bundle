@@ -29,7 +29,7 @@ class UserXml
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(string $name): static
     {
         $this->name = $name;
 
@@ -44,7 +44,7 @@ class UserXml
         return $this->avatars;
     }
 
-    public function addAvatar(UserAvatar $avatar): self
+    public function addAvatar(UserAvatar $avatar): static
     {
         if (!$this->avatars->contains($avatar)) {
             $this->avatars->add($avatar);
@@ -54,7 +54,7 @@ class UserXml
         return $this;
     }
 
-    public function removeAvatar(UserAvatar $avatar): self
+    public function removeAvatar(UserAvatar $avatar): static
     {
         if ($this->avatars->removeElement($avatar)) {
             // set the owning side to null (unless already changed)

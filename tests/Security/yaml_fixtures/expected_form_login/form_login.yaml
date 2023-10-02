@@ -1,0 +1,8 @@
+security:
+    enable_authenticator_manager: true
+    firewalls:
+        main:
+            form_login:
+                login_path: a_login_path
+                check_path: a_check_path
+                enable_csrf: true

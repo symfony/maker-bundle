@@ -43,7 +43,7 @@ final class DatabaseServicesTest extends TestCase
         $result = DockerDatabaseServices::getDatabaseSkeleton($databaseName, 'latest');
 
         self::assertArrayHasKey('image', $result);
-        $this->assertStringContainsIgnoringCase($databaseName, $result['image']);
+        self::assertStringContainsStringIgnoringCase($databaseName, $result['image']);
     }
 
     /**
@@ -64,15 +64,5 @@ final class DatabaseServicesTest extends TestCase
         $result = DockerDatabaseServices::getSuggestedServiceVersion($databaseName);
 
         ('postgres' === strtolower($databaseName)) ? self::assertSame('alpine', $result) : self::assertSame('latest', $result);
-    }
-
-    private function assertStringContainsIgnoringCase(string $needle, string $haystack): void
-    {
-        if (method_exists(self::class, 'assertStringContainsString')) {
-            self::assertStringContainsStringIgnoringCase($needle, $haystack);
-        } else {
-            // legacy for older phpunit versions (e.g. older php version on CI)
-            self::assertContains(strtolower($needle), strtolower($haystack));
-        }
     }
 }
