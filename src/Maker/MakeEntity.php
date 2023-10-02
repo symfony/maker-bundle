@@ -27,8 +27,8 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -135,9 +135,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $entityNamespace = $this->doctrineHelper->getEntityNamespace();
 
         if (
-            !$input->getOption('api-resource') &&
-            class_exists(ApiResource::class) &&
-            !class_exists($this->generator->createClassNameDetails($entityClassName, $entityNamespace)->getFullName())
+            !$input->getOption('api-resource')
+            && class_exists(ApiResource::class)
+            && !class_exists($this->generator->createClassNameDetails($entityClassName, $entityNamespace)->getFullName())
         ) {
             $description = $command->getDefinition()->getOption('api-resource')->getDescription();
             $question = new ConfirmationQuestion($description, false);
