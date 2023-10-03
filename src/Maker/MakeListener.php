@@ -70,7 +70,7 @@ final class MakeListener extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $subscriberClassNameDetails = $generator->createClassNameDetails(
+        $ListenerClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
             'EventListener\\',
             'Listener'
@@ -97,7 +97,7 @@ final class MakeListener extends AbstractMaker
         }
 
         $generator->generateClass(
-            $subscriberClassNameDetails->getFullName(),
+            $ListenerClassNameDetails->getFullName(),
             'event/Listener.tpl.php',
             [
                 'use_statements' => $useStatements,
