@@ -63,6 +63,12 @@
 
             <service id="maker.maker.make_functional_test" class="Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest">
                 <tag name="maker.command" />
+                <deprecated package="symfony/maker-bundle" version="1.29">The "%service_id%" service is deprecated, use "maker.maker.make_test" instead.</deprecated>
+            </service>
+
+            <service id="maker.maker.make_listener" class="Symfony\Bundle\MakerBundle\Maker\MakeListener">
+                <tag name="maker.command" />
+                <argument type="service" id="maker.event_registry" />
             </service>
 
             <service id="maker.maker.make_message" class="Symfony\Bundle\MakerBundle\Maker\MakeMessage">
@@ -100,6 +106,7 @@
             <service id="maker.maker.make_subscriber" class="Symfony\Bundle\MakerBundle\Maker\MakeSubscriber">
                 <tag name="maker.command" />
                 <argument type="service" id="maker.event_registry" />
+                <deprecated package="symfony/maker-bundle" version="1.51">The "%service_id%" service is deprecated, use "maker.maker.make_listener" instead.</deprecated>
             </service>
 
             <service id="maker.maker.make_twig_extension" class="Symfony\Bundle\MakerBundle\Maker\MakeTwigExtension">
@@ -112,6 +119,7 @@
 
             <service id="maker.maker.make_unit_test" class="Symfony\Bundle\MakerBundle\Maker\MakeUnitTest">
                 <tag name="maker.command" />
+                <deprecated package="symfony/maker-bundle" version="1.29">The "%service_id%" service is deprecated, use "maker.maker.make_test" instead.</deprecated>
             </service>
 
             <service id="maker.maker.make_validator" class="Symfony\Bundle\MakerBundle\Maker\MakeValidator">
