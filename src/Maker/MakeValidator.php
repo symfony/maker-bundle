@@ -34,7 +34,7 @@ final class MakeValidator extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new validator and constraint class';
+        return 'Create a new validator and constraint class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConf)

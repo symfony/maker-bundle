@@ -52,7 +52,7 @@ final class MakeController extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new controller class';
+        return 'Create a new controller class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

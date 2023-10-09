@@ -43,7 +43,7 @@ class MakeFunctionalTest extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new functional test class';
+        return 'Create a new functional test class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

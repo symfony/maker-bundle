@@ -90,7 +90,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public static function getCommandDescription(): string
     {
-        return 'Creates or updates a Doctrine entity class, and optionally an API Platform resource';
+        return 'Create or update a Doctrine entity class, and optionally an API Platform resource';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

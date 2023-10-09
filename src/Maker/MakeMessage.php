@@ -43,7 +43,7 @@ final class MakeMessage extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new message and handler';
+        return 'Create a new message and handler';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

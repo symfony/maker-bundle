@@ -38,7 +38,7 @@ final class MakeUnitTest extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new unit test class';
+        return 'Create a new unit test class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
