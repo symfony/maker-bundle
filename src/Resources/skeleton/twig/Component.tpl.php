@@ -4,7 +4,7 @@ namespace <?= $namespace; ?>;
 
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
-#[AsTwigComponent()]
+#[AsTwigComponent]
 final class <?= $class_name."\n" ?>
 {
 }

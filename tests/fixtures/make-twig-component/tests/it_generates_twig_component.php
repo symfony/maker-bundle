@@ -8,7 +8,7 @@ class GeneratedTwigComponentTest extends KernelTestCase
 {
     public function testController()
     {
-        $output = self::getContainer()->get('twig')->createTemplate("{{ component('{name}') }}")->render();
+        $output = self::getContainer()->get('twig')->createTemplate("<twig:{name} />")->render();
 
         $this->assertSame("<div>\n    <!-- component html -->\n</div>\n", $output);
     }
