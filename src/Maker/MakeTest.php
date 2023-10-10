@@ -65,7 +65,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new test class';
+        return 'Create a new test class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

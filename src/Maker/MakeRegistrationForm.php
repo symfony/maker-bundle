@@ -95,7 +95,7 @@ final class MakeRegistrationForm extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new registration form system';
+        return 'Create a new registration form system';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConf): void

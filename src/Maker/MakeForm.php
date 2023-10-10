@@ -45,7 +45,7 @@ final class MakeForm extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new form class';
+        return 'Create a new form class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

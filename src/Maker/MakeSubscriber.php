@@ -43,7 +43,7 @@ final class MakeSubscriber extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new event subscriber class';
+        return 'Create a new event subscriber class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

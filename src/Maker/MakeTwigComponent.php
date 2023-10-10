@@ -35,7 +35,7 @@ final class MakeTwigComponent extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a twig (or live) component';
+        return 'Create a twig (or live) component';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

@@ -38,7 +38,7 @@ final class MakeMessengerMiddleware extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new messenger middleware';
+        return 'Create a new messenger middleware';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

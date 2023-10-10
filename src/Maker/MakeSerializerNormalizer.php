@@ -36,7 +36,7 @@ final class MakeSerializerNormalizer extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new serializer normalizer class';
+        return 'Create a new serializer normalizer class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

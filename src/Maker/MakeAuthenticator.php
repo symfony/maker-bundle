@@ -84,7 +84,7 @@ final class MakeAuthenticator extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a Guard authenticator of different flavors';
+        return 'Create a Guard authenticator of different flavors';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

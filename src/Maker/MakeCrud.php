@@ -61,7 +61,7 @@ final class MakeCrud extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates CRUD for Doctrine entity class';
+        return 'Create CRUD for Doctrine entity class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
