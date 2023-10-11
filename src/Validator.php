@@ -216,7 +216,7 @@ final class Validator
             self::classExists($className, sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
         }
 
-        if (!\in_array($className, $entities)) {
+        if (!\in_array($className, $entities) && !\in_array(ltrim($className, '\\'), $entities)) {
             throw new RuntimeCommandException(sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
         }
 
