@@ -94,4 +94,26 @@ class ValidatorTest extends TestCase
         $this->expectExceptionMessage(sprintf('"%sController" is not a UTF-8-encoded string.', \chr(0xA6)));
         Validator::validateClassName(mb_convert_encoding('ŚController', 'ISO-8859-2', 'UTF-8'));
     }
+
+    public function testRegisteredEntitiesExists()
+    {
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage('There are no registered entities; please create an entity before using this command.');
+        Validator::entityExists('App\Entity\Class', []);
+    }
+
+    public function testEntityExists()
+    {
+        $className = self::class;
+        $this->assertSame($className, Validator::entityExists($className, [$className]));
+        $this->assertSame('\\'.$className, Validator::entityExists('\\'.$className, [$className]));
+    }
+
+    public function testEntityDoesNotExist()
+    {
+        $className = '\\'.self::class;
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage(sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
+        Validator::entityExists($className, ['Full\Entity\DummyEntity']);
+    }
 }
