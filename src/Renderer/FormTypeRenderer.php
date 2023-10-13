@@ -39,6 +39,14 @@ final class FormTypeRenderer
             if (isset($fieldTypeOptions['type'])) {
                 $fieldTypeUseStatements[] = $fieldTypeOptions['type'];
                 $fieldTypeOptions['type'] = Str::getShortClassName($fieldTypeOptions['type']);
+                if (\array_key_exists('extra_use_classes', $fieldTypeOptions) && \count($fieldTypeOptions['extra_use_classes']) > 0) {
+                    $extraUseClasses = array_merge($extraUseClasses, $fieldTypeOptions['extra_use_classes'] ?? []);
+                    $fieldTypeOptions['options_code'] = str_replace(
+                        $fieldTypeOptions['extra_use_classes'],
+                        array_map(fn ($class) => Str::getShortClassName($class), $fieldTypeOptions['extra_use_classes']),
+                        $fieldTypeOptions['options_code']
+                    );
+                }
             }
 
             $fields[$name] = $fieldTypeOptions;

@@ -1,5 +1,11 @@
 # Changelog
 
+## [v1.52.0](https://github.com/symfony/maker-bundle/releases/tag/v1.52.0)
+
+### Feature
+
+- [#1372](https://github.com/symfony/maker-bundle/issue/1372) - Support Entity relations in form generation - *@maelanleborgne*
+
 ## [v1.50.0](https://github.com/symfony/maker-bundle/releases/tag/v1.50.0)
 
 ### Feature

@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-class SourFood
+class Book
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
@@ -17,37 +17,38 @@ class SourFood
     #[ORM\Column(name: 'title', length: 255)]
     private ?string $title = null;
 
-    #[ORM\OneToMany(targetEntity: Property::class, mappedBy: 'sourFood')]
-    private Collection $properties;
+    #[ORM\ManyToMany(targetEntity: Library::class, mappedBy: 'books')]
+    private Collection $libraries;
 
     public function __construct()
     {
-        $this->properties = new ArrayCollection();
+        $this->libraries = new ArrayCollection();
     }
 
-    /**
-     * @return mixed
-     */
     public function getId()
     {
         return $this->id;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getTitle()
+    public function getTitle(): string
     {
         return $this->title;
     }
 
-    /**
-     * @param mixed $title
-     */
-    public function setTitle($title): static
+    public function setTitle(string $title): static
     {
         $this->title = $title;
 
+        return $this;
+    }
+
+    public function getLibraries(): Collection
+    {
+        return $this->libraries;
+    }
+    public function setLibraries(Collection $libraries): static
+    {
+        $this->libraries = $libraries;
         return $this;
     }
 }
