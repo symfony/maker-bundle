@@ -26,7 +26,11 @@ use Symfony\Component\Console\Question\Question;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
+trigger_deprecation('symfony/maker-bundle', '1.51', 'The "%s" class is deprecated, use "%s" instead.', MakeSubscriber::class, MakeListener::class);
+
 /**
+ * @deprecated since MakerBundle 1.51, use Symfony\Bundle\MakerBundle\Maker\MakeListener instead.
+ *
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
