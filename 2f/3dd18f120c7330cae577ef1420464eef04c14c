@@ -1,0 +1,94 @@
+---------------------------------------------------------------------------
+
+by StevenRenaux at 2023-10-11T12:24:45Z
+
+@weaverryan  Command renamed `make:listener`  with listener as default type.
+
+To resume:
+If Listener or Subscriber was not found in the suffix
+
+```
+$ php bin/console make:listener foo
+
+ What event class to generate(enter ? to see all types) [Listener]:
+ >
+```
+
+If Listener or Subscriber was  found in the suffix we display the originals events to choose, as the legacy command did.
+
+```
+$ php bin/console make:listener FooListener
+
+ Suggested Events:
+ * Generator::class ()
+ * Symfony\Component\Mailer\Event\MessageEvent (Symfony\Component\Mailer\Event\MessageEvent)
+ * Symfony\UX\TwigComponent\Event\PostRenderEvent (Symfony\UX\TwigComponent\Event\PostRenderEvent)
+ * Symfony\UX\TwigComponent\Event\PreCreateForRenderEvent (Symfony\UX\TwigComponent\Event\PreCreateForRenderEvent)
+/* ...*/
+
+  What event do you want to listen to?:
+ >
+```
+
+And if no name was filled, a question is displayed:
+
+```
+$ php bin/console make:listener
+
+ Choose a class name for your event listener or subscriber (e.g. ExceptionListener or ExceptionSubscriber):
+ >
+
+```
+I didn't really understand your comment, if I was right to notify a deprecation about `make:subscriber`:
+> Hmm, ok fair enough. We are free to change what these commands due between minor releases. So let's give them the better experience.
+
+```
+$ php bin/console make:subscriber FooSubscriber
+
+ [WARNING] The "make:subscriber" command is deprecated, use "make:listener" instead.
+
+ Suggested Events:
+ * Generator::class ()
+ * Symfony\Component\Mailer\Event\MessageEvent (Symfony\Component\Mailer\Event\MessageEvent)
+ * Symfony\UX\TwigComponent\Event\PostRenderEvent (Symfony\UX\TwigComponent\Event\PostRenderEvent)
+ * Symfony\UX\TwigComponent\Event\PreCreateForRenderEvent (Symfony\UX\TwigComponent\Event
+/*...*/
+
+  What event do you want to listen to?:
+ >
+```
+
+If it good for you, maybe we would need to create a new Issue for the next major version to clean all of this deprecation as:
+
+- [MakerExtension](https://github.com/StevenRenaux/maker-bundle/blob/f04136d0b5dfbf2d2cba95e30a1981c887fbf122/src/DependencyInjection/MakerExtension.php#L36)
+- [MakerExtension](https://github.com/StevenRenaux/maker-bundle/blob/f04136d0b5dfbf2d2cba95e30a1981c887fbf122/src/DependencyInjection/MakerExtension.php#L58)
+- [MakeListener](https://github.com/StevenRenaux/maker-bundle/blob/f04136d0b5dfbf2d2cba95e30a1981c887fbf122/src/Maker/MakeListener.php#L52)
+- [MakeListener](https://github.com/StevenRenaux/maker-bundle/blob/f04136d0b5dfbf2d2cba95e30a1981c887fbf122/src/Maker/MakeListener.php#L76)
+- [MakeListener](https://github.com/StevenRenaux/maker-bundle/blob/f04136d0b5dfbf2d2cba95e30a1981c887fbf122/src/Maker/MakeListener.php#L244)
+- [MakeCommandRegistrationPass](https://github.com/StevenRenaux/maker-bundle/blob/f04136d0b5dfbf2d2cba95e30a1981c887fbf122/src/DependencyInjection/CompilerPass/MakeCommandRegistrationPass.php#L69)
+- And MakeSubscriber.php and MakeSubscriberTest.php
+
+PS: not related to this PR but we also have deprecated code about `make:functinal-test`  and `make:unit-test `.
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2023-10-11T14:26:10Z
+
+> I didn't really understand your comment, if I was right to notify a deprecation about make:subscriber:
+
+It looks correct what you did 👍
+
+> If it good for you, maybe we would need to create a new Issue for the next major version to clean all of this deprecation as:
+
+Yes - though no issue needed, this will naturally happen. I don't know when we might release a new major version, but the main thing we will do when that happens is hunt down all of the deprecated code paths and remove them. Assuming we've done a good job marking this with `@deprecated` or `trigger_deprecation()`, they should be easy to find.
+
+---------------------------------------------------------------------------
+
+by StevenRenaux at 2023-10-12T12:50:54Z
+
+Need help @weaverryan , I don't understand why it failed in the appveyor. It only failed when Listener are generated. But in local or during the other tests in the CI it work.
+Example on local, on the left side the file generated and in the right the one compare with. I don't understant why we loose an indention during appveyor test.
+
+![image](https://github.com/symfony/maker-bundle/assets/59167761/153da7e2-0ed6-4cdd-9008-4b3947b2767c)
+
+By the way I updated the deprecated messages and finally removed it from MakerExtension.php and added it in the maker.xml
