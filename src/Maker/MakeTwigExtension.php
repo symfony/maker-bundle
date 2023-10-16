@@ -54,7 +54,7 @@ final class MakeTwigExtension extends AbstractMaker
 
         $extensionClassNameDetails = $generator->createClassNameDetails(
             $name,
-            'Twig\\Extension\\',
+            $generator->getNamespacesHelper()->getTwigNamespace(),
             'Extension'
         );
 

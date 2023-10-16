@@ -22,8 +22,40 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
+            ->beforeNormalization()
+                ->ifTrue(function ($v) { return isset($v['root_namespace']) && !isset($v['namespaces']['root']); })
+                ->then(function ($v) {
+                    $v['namespaces']['root'] = $v['root_namespace'];
+
+                    return $v;
+                })
+            ->end()
+
             ->children()
-                ->scalarNode('root_namespace')->defaultValue('App')->end()
+                ->scalarNode('root_namespace')
+                    ->setDeprecated('symfony/maker-bundle', '2.0', 'The "root_namespace" option is deprecated, use "namespaces.root" instead.')
+                    ->defaultNull()
+                ->end()
+
+                ->arrayNode('namespaces')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('root')->defaultNull()->end()
+                        ->scalarNode('command')->defaultValue('Command\\')->end()
+                        ->scalarNode('controller')->defaultValue('Controller\\')->end()
+                        ->scalarNode('entity')->defaultValue('Entity\\')->end()
+                        ->scalarNode('fixtures')->defaultValue('DataFixtures\\')->end()
+                        ->scalarNode('form')->defaultValue('Form\\')->end()
+                        ->scalarNode('functional_test')->defaultValue('Tests\\')->end()
+                        ->scalarNode('repository')->defaultValue('Repository\\')->end()
+                        ->scalarNode('security')->defaultValue('Security\\')->end()
+                        ->scalarNode('serializer')->defaultValue('Serializer\\')->end()
+                        ->scalarNode('subscriber')->defaultValue('EventSubscriber\\')->end()
+                        ->scalarNode('twig')->defaultValue('Twig\\')->end()
+                        ->scalarNode('unit_test')->defaultValue('Tests\\')->end()
+                        ->scalarNode('validator')->defaultValue('Validator\\')->end()
+                    ->end()
+                ->end()
             ->end()
         ;
 
