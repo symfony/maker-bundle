@@ -29,6 +29,7 @@ use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\FeatureSupportTrait;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -155,7 +156,7 @@ final class MakeFormLogin extends AbstractMaker
             ]
         );
 
-        if ($this->willLogout) {
+        if ($this->willLogout && !$this->supportsLogoutRouteLoader()) {
             $manipulator = new ClassSourceManipulator($generator->getFileContentsForPendingOperation($controllerPath));
 
             $this->securityControllerBuilder->addLogoutMethod($manipulator);
@@ -170,6 +171,7 @@ final class MakeFormLogin extends AbstractMaker
                 'logout_setup' => $this->willLogout,
                 'username_label' => Str::asHumanWords($this->userNameField),
                 'username_is_email' => false !== stripos($this->userNameField, 'email'),
+                'logout_path' => $this->supportsLogoutRouteLoader() ? '_logout_'.$this->firewallToUpdate : 'app_logout',
             ]
         );
 

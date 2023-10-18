@@ -24,6 +24,7 @@ use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\FeatureSupportTrait;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlManipulationFailedException;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
@@ -64,6 +65,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 final class MakeAuthenticator extends AbstractMaker
 {
+    use FeatureSupportTrait;
     private const AUTH_TYPE_EMPTY_AUTHENTICATOR = 'empty-authenticator';
     private const AUTH_TYPE_FORM_LOGIN = 'form-login';
 
@@ -259,6 +261,20 @@ final class MakeAuthenticator extends AbstractMaker
         } catch (YamlManipulationFailedException) {
         }
 
+        if ($this->supportsLogoutRouteLoader()) {
+            $yamlData = [];
+            if (\file_exists($path = 'config/routes/security.yaml')) {
+                $yamlData = Yaml::parse($this->fileManager->getFileContents($path)) ?? [];
+            }
+            if (!(\array_key_exists('_symfony_logout', $yamlData) && 'security.route_loader.logout' !== $yamlData['_symfony_logout']['ressource'] ?? null)) {
+                $yamlData['_symfony_logout'] = [
+                    'resource' => 'security.route_loader.logout',
+                    'type' => 'service'
+                ];
+            }
+            $generator->dumpFile($path, Yaml::dump($yamlData));
+        }
+
         if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {
             $this->generateFormLoginFiles(
                 $input->getArgument('controller-class'),
@@ -266,6 +282,7 @@ final class MakeAuthenticator extends AbstractMaker
                 $input->getArgument('logout-setup'),
                 $supportRememberMe,
                 $alwaysRememberMe,
+                $input->getOption('firewall-name')
             );
         }
 
@@ -349,7 +366,7 @@ final class MakeAuthenticator extends AbstractMaker
         );
     }
 
-    private function generateFormLoginFiles(string $controllerClass, string $userNameField, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): void
+    private function generateFormLoginFiles(string $controllerClass, string $userNameField, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe, string $firewallName = 'main'): void
     {
         $controllerClassNameDetails = $this->generator->createClassNameDetails(
             $controllerClass,
@@ -387,7 +404,7 @@ final class MakeAuthenticator extends AbstractMaker
 
         $this->securityControllerBuilder->addLoginMethod($manipulator);
 
-        if ($logoutSetup) {
+        if ($logoutSetup && !$this->supportsLogoutRouteLoader()) {
             $this->securityControllerBuilder->addLogoutMethod($manipulator);
         }
 
@@ -402,6 +419,7 @@ final class MakeAuthenticator extends AbstractMaker
                 'username_is_email' => false !== stripos($userNameField, 'email'),
                 'username_label' => ucfirst(Str::asHumanWords($userNameField)),
                 'logout_setup' => $logoutSetup,
+                'logout_path' => $this->supportsLogoutRouteLoader() ? '_logout_'.$firewallName : 'app_logout',
                 'support_remember_me' => $supportRememberMe,
                 'always_remember_me' => $alwaysRememberMe,
             ]

@@ -104,11 +104,14 @@ class SecurityConfigUpdaterTest extends TestCase
     /**
      * @dataProvider getAuthenticatorTests
      */
-    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): void
+    public function testUpdateForAuthenticator(string $firewallName, $entryPoint, string $expectedSourceFilename, string $startingSourceFilename, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe, bool $useLogoutRouteLoader = false): void
     {
         $this->createLogger();
 
         $updater = new SecurityConfigUpdater($this->ysmLogger);
+        if($useLogoutRouteLoader) {
+            $updater->forceSupportLogoutRouteLoader();
+        }
         $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
         $actualSource = $updater->updateForAuthenticator($source, $firewallName, $entryPoint, 'App\\Security\\AppCustomAuthenticator', $logoutSetup, $supportRememberMe, $alwaysRememberMe);
         $expectedSource = file_get_contents(__DIR__.'/yaml_fixtures/expected_authenticator/'.$expectedSourceFilename);
@@ -196,6 +199,17 @@ class SecurityConfigUpdaterTest extends TestCase
             false,
             true,
             true,
+        ];
+
+        yield 'simple_security_with_firewalls_and_logout_via_loader' => [
+            'main',
+            'App\\Security\\AppCustomAuthenticator',
+            'simple_security_with_firewalls_and_logout_via_loader.yaml',
+            'simple_security_with_firewalls_and_logout.yaml',
+            true,
+            false,
+            false,
+            true
         ];
     }
 
