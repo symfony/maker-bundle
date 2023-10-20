@@ -109,7 +109,7 @@ class SecurityConfigUpdaterTest extends TestCase
         $this->createLogger();
 
         $updater = new SecurityConfigUpdater($this->ysmLogger);
-        if($useLogoutRouteLoader) {
+        if ($useLogoutRouteLoader) {
             $updater->forceSupportLogoutRouteLoader();
         }
         $source = file_get_contents(__DIR__.'/yaml_fixtures/source/'.$startingSourceFilename);
@@ -209,7 +209,7 @@ class SecurityConfigUpdaterTest extends TestCase
             true,
             false,
             false,
-            true
+            true,
         ];
     }
 
