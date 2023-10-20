@@ -263,13 +263,13 @@ final class MakeAuthenticator extends AbstractMaker
 
         if ($this->supportsLogoutRouteLoader()) {
             $yamlData = [];
-            if (\file_exists($path = 'config/routes/security.yaml')) {
+            if (file_exists($path = 'config/routes/security.yaml')) {
                 $yamlData = Yaml::parse($this->fileManager->getFileContents($path)) ?? [];
             }
             if (!(\array_key_exists('_symfony_logout', $yamlData) && 'security.route_loader.logout' !== $yamlData['_symfony_logout']['ressource'] ?? null)) {
                 $yamlData['_symfony_logout'] = [
                     'resource' => 'security.route_loader.logout',
-                    'type' => 'service'
+                    'type' => 'service',
                 ];
             }
             $generator->dumpFile($path, Yaml::dump($yamlData));

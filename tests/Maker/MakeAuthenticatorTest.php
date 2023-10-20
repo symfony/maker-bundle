@@ -285,12 +285,13 @@ class MakeAuthenticatorTest extends MakerTestCase
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'userEmail');
                 // We pretend that the LogoutRouteLoader is registered
-                $runner->addToAutoloader('Symfony\\Bundle\\SecurityBundle\\Routing\\', \dirname(__DIR__) . '/fixtures/security-bundle/routing/');
+                $runner->addToAutoloader('Symfony\\Bundle\\SecurityBundle\\Routing\\', \dirname(__DIR__).'/fixtures/security-bundle/routing/');
                 $runner->modifyYamlFile('config/services.yaml', function (array $config) {
                     $config['services']['security.route_loader.logout'] = [
                         'class' => 'Symfony\Bundle\SecurityBundle\\Routing\\LogoutRouteLoader',
                         'tags' => ['routing.route_loader'],
                     ];
+
                     return $config;
                 });
                 $output = $runner->runMaker([
@@ -311,7 +312,7 @@ class MakeAuthenticatorTest extends MakerTestCase
                 $this->assertStringContainsString('Success', $output);
 
                 $this->assertFileExists($runner->getPath('src/Controller/SecurityController.php'));
-                $this->assertFileEquals(\dirname(__DIR__) . '/fixtures/make-auth/SecurityController-no-logout.php', $runner->getPath('src/Controller/SecurityController.php'));
+                $this->assertFileEquals(\dirname(__DIR__).'/fixtures/make-auth/SecurityController-no-logout.php', $runner->getPath('src/Controller/SecurityController.php'));
                 $this->assertFileExists($runner->getPath('templates/security/login.html.twig'));
                 $this->assertFileExists($runner->getPath('src/Security/AppCustomAuthenticator.php'));
 
