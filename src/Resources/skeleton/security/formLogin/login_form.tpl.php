@@ -11,7 +11,7 @@
 <?php if ($logout_setup): ?>
         {% if app.user %}
             <div class="mb-3">
-                You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('<?= $logout_path; ?>') }}">Logout</a>
+                You are logged in as {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Logout</a>
             </div>
         {% endif %}
 

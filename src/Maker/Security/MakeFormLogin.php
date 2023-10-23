@@ -171,7 +171,6 @@ final class MakeFormLogin extends AbstractMaker
                 'logout_setup' => $this->willLogout,
                 'username_label' => Str::asHumanWords($this->userNameField),
                 'username_is_email' => false !== stripos($this->userNameField, 'email'),
-                'logout_path' => $this->supportsLogoutRouteLoader() ? '_logout_'.$this->firewallToUpdate : 'app_logout',
             ]
         );
 
