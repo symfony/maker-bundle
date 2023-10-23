@@ -13,7 +13,8 @@ namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
-use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
+use Symfony\Component\ErrorHandler\ErrorRenderer\FileLinkFormatter;
+use Symfony\Component\HttpKernel\Debug\FileLinkFormatter as LegacyFileLinkFormatter;
 
 final class MakerFileLinkFormatterTest extends TestCase
 {
@@ -39,7 +40,12 @@ final class MakerFileLinkFormatterTest extends TestCase
 
         $fileLinkFormatter = null;
         if ($withFileLinkFormatter) {
-            $fileLinkFormatter = $this->createMock(FileLinkFormatter::class);
+            if (class_exists(FileLinkFormatter::class)) {
+                $fileLinkFormatter = $this->createMock(FileLinkFormatter::class);
+            } else {
+                $fileLinkFormatter = $this->createMock(LegacyFileLinkFormatter::class);
+            }
+
             $return = $linkFormatterReturnsLink ? $this->returnCallback(function ($path, $line) {
                 return sprintf('subl://open?url=file://%s&line=%d', $path, $line);
             }) : $this->returnValue(false);

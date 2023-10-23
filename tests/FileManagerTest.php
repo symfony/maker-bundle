@@ -16,8 +16,9 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\ErrorHandler\ErrorRenderer\FileLinkFormatter;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
+use Symfony\Component\HttpKernel\Debug\FileLinkFormatter as LegacyFileLinkFormatter;
 
 class FileManagerTest extends TestCase
 {
@@ -193,7 +194,12 @@ class FileManagerTest extends TestCase
             $this->markTestSkipped();
         }
 
-        $fileLinkFormatter = $this->createMock(FileLinkFormatter::class);
+        if (class_exists(FileLinkFormatter::class)) {
+            $fileLinkFormatter = $this->createMock(FileLinkFormatter::class);
+        } else {
+            $fileLinkFormatter = $this->createMock(LegacyFileLinkFormatter::class);
+        }
+
         $fileLinkFormatter
             ->method('format')
             ->willReturnCallback(function ($path, $line) {
