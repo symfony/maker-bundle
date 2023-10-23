@@ -276,7 +276,6 @@ final class MakeAuthenticator extends AbstractMaker
                 $input->getArgument('logout-setup'),
                 $supportRememberMe,
                 $alwaysRememberMe,
-                $input->getOption('firewall-name')
             );
         }
 
@@ -359,7 +358,7 @@ final class MakeAuthenticator extends AbstractMaker
         );
     }
 
-    private function generateFormLoginFiles(string $controllerClass, string $userNameField, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe, string $firewallName = 'main'): void
+    private function generateFormLoginFiles(string $controllerClass, string $userNameField, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): void
     {
         $controllerClassNameDetails = $this->generator->createClassNameDetails(
             $controllerClass,
@@ -412,7 +411,6 @@ final class MakeAuthenticator extends AbstractMaker
                 'username_is_email' => false !== stripos($userNameField, 'email'),
                 'username_label' => ucfirst(Str::asHumanWords($userNameField)),
                 'logout_setup' => $logoutSetup,
-                'logout_path' => $this->supportsLogoutRouteLoader() ? '_logout_'.$firewallName : 'app_logout',
                 'support_remember_me' => $supportRememberMe,
                 'always_remember_me' => $alwaysRememberMe,
             ]
