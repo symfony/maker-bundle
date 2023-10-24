@@ -261,20 +261,6 @@ final class MakeAuthenticator extends AbstractMaker
         } catch (YamlManipulationFailedException) {
         }
 
-        if ($this->supportsLogoutRouteLoader()) {
-            $yamlData = [];
-            if (file_exists($path = 'config/routes/security.yaml')) {
-                $yamlData = Yaml::parse($this->fileManager->getFileContents($path)) ?? [];
-            }
-            if (!(\array_key_exists('_symfony_logout', $yamlData) && 'security.route_loader.logout' !== $yamlData['_symfony_logout']['ressource'] ?? null)) {
-                $yamlData['_symfony_logout'] = [
-                    'resource' => 'security.route_loader.logout',
-                    'type' => 'service',
-                ];
-            }
-            $generator->dumpFile($path, Yaml::dump($yamlData));
-        }
-
         if (self::AUTH_TYPE_FORM_LOGIN === $input->getArgument('authenticator-type')) {
             $this->generateFormLoginFiles(
                 $input->getArgument('controller-class'),
@@ -297,7 +283,8 @@ final class MakeAuthenticator extends AbstractMaker
                 $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
                 $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false,
                 $supportRememberMe,
-                $alwaysRememberMe
+                $alwaysRememberMe,
+                $this->supportsLogoutRouteLoader() && !file_exists('config/routes/security.yaml'),
             )
         );
     }
@@ -425,7 +412,7 @@ final class MakeAuthenticator extends AbstractMaker
     }
 
     /** @return string[] */
-    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, ?string $userClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): array
+    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, ?string $userClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe, bool $defaultSecurityRoute): array
     {
         $nextTexts = ['Next:'];
         $nextTexts[] = '- Customize your new authenticator.';
@@ -452,6 +439,9 @@ final class MakeAuthenticator extends AbstractMaker
 
             $nextTexts[] = '- Review & adapt the login template: <info>'.$this->fileManager->getPathForTemplate('security/login.html.twig').'</info>.';
         }
+
+        // If the security.logout_route_loader is not loaded from the default flex recipe
+        $nextTexts[] = '- Be sure to add the "logout" route to <info>config/routes/security.yaml</info> or upgrade the <info>symfony/security-bundle</info> recipe.';
 
         return $nextTexts;
     }
