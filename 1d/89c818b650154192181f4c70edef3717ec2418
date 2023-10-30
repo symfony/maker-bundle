@@ -1,0 +1,21 @@
+---------------------------------------------------------------------------
+
+by tacman at 2023-10-29T23:29:07Z
+
+I'd love to use this bundle when testing Symfony 7, but all the make: commands are broken.  Can this be at least pushed to the dev branch?
+
+---------------------------------------------------------------------------
+
+by jeremyFreeAgent at 2023-10-30T08:23:03Z
+
+Currently I sed this fix :
+
+```
+sed  -e "s/HttpKernel\\\Debug/ErrorHandler\\\ErrorRenderer/" vendor/symfony/maker-bundle/src/Util/MakerFileLinkFormatter.php
+```
+
+---------------------------------------------------------------------------
+
+by tacman at 2023-10-30T09:55:12Z
+
+Thanks!  I think that should be sed -i (not -e).
