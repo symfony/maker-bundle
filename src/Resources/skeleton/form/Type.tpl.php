@@ -16,7 +16,7 @@ class <?= $class_name ?> extends AbstractType
             ->add('<?= $form_field ?>', <?= $typeOptions['type'] ?>::class)
 <?php else: ?>
             ->add('<?= $form_field ?>', <?= $typeOptions['type'] ? ($typeOptions['type'].'::class') : 'null' ?>, [
-<?= $typeOptions['options_code']."\n" ?>
+                <?= $typeOptions['options_code']."\n" ?>
             ])
 <?php endif; ?>
 <?php endforeach; ?>
