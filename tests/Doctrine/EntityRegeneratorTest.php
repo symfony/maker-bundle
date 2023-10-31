@@ -175,6 +175,7 @@ class TestEntityRegeneratorKernel extends Kernel
                         'dir' => '%kernel.project_dir%/src/Entity',
                         'prefix' => 'Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity',
                         'alias' => 'EntityRegeneratorApp',
+                        'type' => 'attribute',
                     ],
                 ],
             ],
