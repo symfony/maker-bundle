@@ -15,11 +15,13 @@ class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
     protected function setUp(): void
     {
         $this->client = static::createClient();
-        $this->repository = static::getContainer()->get('doctrine')->getRepository(<?= $entity_class_name; ?>::class);
+        $this->manager = static::getContainer()->get('doctrine')->getManager();
+        $this->repository = $this->manager->getRepository(<?= $entity_class_name; ?>::class);
 
         foreach ($this->repository->findAll() as $object) {
             $this->manager->remove($object);
         }
+        $this->manager->flush();
     }
 
     public function testIndex(): void
