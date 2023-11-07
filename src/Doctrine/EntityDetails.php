@@ -13,8 +13,6 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\MakerBundle\Tests\Doctrine\DoctrineHelperTest;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
@@ -65,12 +63,11 @@ final class EntityDetails
 
         foreach ($this->metadata->fieldMappings as $fieldName => $fieldMapping) {
             $propType = DoctrineHelper::getPropertyTypeForColumn($fieldMapping['type']);
-            if (($propType === '\\' . \DateTimeImmutable::class) ||
-                ($propType === '\\' . \DateTimeInterface::class))
-            {
+            if (($propType === '\\'.\DateTimeImmutable::class)
+                || ($propType === '\\'.\DateTimeInterface::class)) {
                 $fieldsWithTypes[$fieldName] = [
                     'type' => null,
-                    'options_code' => "'widget' => 'single_text'"
+                    'options_code' => "'widget' => 'single_text'",
                 ];
             }
         }
