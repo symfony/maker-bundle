@@ -35,7 +35,7 @@ final class MakeSerializerEncoder extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new serializer encoder class';
+        return 'Create a new serializer encoder class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

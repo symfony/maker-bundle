@@ -59,7 +59,7 @@ final class MakeDockerDatabase extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Adds a database container to your docker-compose.yaml file';
+        return 'Add a database container to your docker-compose.yaml file';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

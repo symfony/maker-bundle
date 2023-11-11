@@ -340,7 +340,7 @@ class YamlSourceManipulator
             // no previous blank line is needed, but we DO need to add a blank
             // line after, because the remainder of the content expects the
             // current position the start at the beginning of a new line
-            $newYamlValue = $newYamlValue."\n";
+            $newYamlValue .= "\n";
         } else {
             if ($this->isCurrentArrayMultiline()) {
                 // because we're inside a multi-line array, put this item
@@ -351,7 +351,7 @@ class YamlSourceManipulator
                 if ($firstItemInArray) {
                     // avoid the starting "," if first item in array
                     // but, DO add an ending ","
-                    $newYamlValue = $newYamlValue.', ';
+                    $newYamlValue .= ', ';
                 } else {
                     $newYamlValue = ', '.$newYamlValue;
                 }
@@ -363,7 +363,7 @@ class YamlSourceManipulator
             .substr($this->contents, $this->currentPosition + $extraOffset);
         // manually bump the position: we didn't really move forward
         // any in the existing string, we just added our own new content
-        $this->currentPosition = $this->currentPosition + \strlen($newYamlValue);
+        $this->currentPosition += \strlen($newYamlValue);
 
         if (0 === $this->depth) {
             $newData = $this->currentData;
@@ -438,7 +438,7 @@ class YamlSourceManipulator
         // instead of passing the new +2 position below, we do it here
         // manually. This is because this it's not a real position move,
         // we manually (above) added some new chars that didn't exist before
-        $this->currentPosition = $this->currentPosition + $newPositionBump;
+        $this->currentPosition += $newPositionBump;
 
         $this->updateContents(
             $newContents,
@@ -1171,7 +1171,7 @@ class YamlSourceManipulator
 
     private function manuallyIncrementIndentation()
     {
-        $this->indentationForDepths[$this->depth] = $this->indentationForDepths[$this->depth] + $this->getPreferredIndentationSize();
+        $this->indentationForDepths[$this->depth] += $this->getPreferredIndentationSize();
     }
 
     private function isEOF(int $position = null)

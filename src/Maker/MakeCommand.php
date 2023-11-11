@@ -44,7 +44,7 @@ final class MakeCommand extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new console command class';
+        return 'Create a new console command class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void

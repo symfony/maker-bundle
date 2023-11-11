@@ -44,8 +44,10 @@ class SourFood
     /**
      * @param mixed $title
      */
-    public function setTitle($title)
+    public function setTitle($title): static
     {
         $this->title = $title;
+
+        return $this;
     }
 }

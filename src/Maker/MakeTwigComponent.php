@@ -35,14 +35,14 @@ final class MakeTwigComponent extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a twig (or live) component';
+        return 'Create a twig (or live) component';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->setDescription(self::getCommandDescription())
-            ->addArgument('name', InputArgument::OPTIONAL, 'The name of your twig component (ie <fg=yellow>NotificationComponent</>)')
+            ->addArgument('name', InputArgument::OPTIONAL, 'The name of your twig component (ie <fg=yellow>Notification</>)')
             ->addOption('live', null, InputOption::VALUE_NONE, 'Whether to create a live twig component (requires <fg=yellow>symfony/ux-live-component</>)')
         ;
     }
@@ -84,7 +84,7 @@ final class MakeTwigComponent extends AbstractMaker
 
         $this->writeSuccessMessage($io);
         $io->newLine();
-        $io->writeln(" To render the component, use {{ component('{$shortName}') }}.");
+        $io->writeln(" To render the component, use <fg=yellow><twig:{$shortName} /></>.");
         $io->newLine();
     }
 

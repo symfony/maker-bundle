@@ -27,7 +27,7 @@ class MakeTwigComponentTest extends MakerTestCase
 
                 $this->assertStringContainsString('src/Twig/Components/Alert.php', $output);
                 $this->assertStringContainsString('templates/components/Alert.html.twig', $output);
-                $this->assertStringContainsString("To render the component, use {{ component('Alert') }}.", $output);
+                $this->assertStringContainsString('To render the component, use <twig:Alert />.', $output);
 
                 $runner->copy(
                     'make-twig-component/tests/it_generates_twig_component.php',
@@ -46,7 +46,7 @@ class MakeTwigComponentTest extends MakerTestCase
 
                 $this->assertStringContainsString('src/Twig/Components/FormInput.php', $output);
                 $this->assertStringContainsString('templates/components/FormInput.html.twig', $output);
-                $this->assertStringContainsString("To render the component, use {{ component('FormInput') }}.", $output);
+                $this->assertStringContainsString('To render the component, use <twig:FormInput />.', $output);
 
                 $runner->copy(
                     'make-twig-component/tests/it_generates_twig_component.php',
@@ -65,7 +65,7 @@ class MakeTwigComponentTest extends MakerTestCase
 
                 $this->assertStringContainsString('src/Twig/Components/Alert.php', $output);
                 $this->assertStringContainsString('templates/components/Alert.html.twig', $output);
-                $this->assertStringContainsString("To render the component, use {{ component('Alert') }}.", $output);
+                $this->assertStringContainsString('To render the component, use <twig:Alert />.', $output);
 
                 $runner->copy(
                     'make-twig-component/tests/it_generates_live_component.php',
@@ -84,7 +84,7 @@ class MakeTwigComponentTest extends MakerTestCase
 
                 $this->assertStringContainsString('src/Twig/Components/FormInput.php', $output);
                 $this->assertStringContainsString('templates/components/FormInput.html.twig', $output);
-                $this->assertStringContainsString("To render the component, use {{ component('FormInput') }}.", $output);
+                $this->assertStringContainsString('To render the component, use <twig:FormInput />.', $output);
 
                 $runner->copy(
                     'make-twig-component/tests/it_generates_live_component.php',

@@ -61,7 +61,7 @@ final class MakeCrud extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates CRUD for Doctrine entity class';
+        return 'Create CRUD for Doctrine entity class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
@@ -251,11 +251,9 @@ final class MakeCrud extends AbstractMaker
                 $repositoryClassName,
             ]);
 
-            $usesEntityManager = EntityManagerInterface::class === $repositoryClassName;
 
-            if ($usesEntityManager) {
-                $useStatements->addUseStatement(EntityRepository::class);
-            }
+            $useStatements->addUseStatement(EntityRepository::class);
+
 
             if (EntityManagerInterface::class !== $repositoryClassName) {
                 $useStatements->addUseStatement(EntityManagerInterface::class);
@@ -263,7 +261,7 @@ final class MakeCrud extends AbstractMaker
 
             $generator->generateFile(
                 'tests/Controller/'.$testClassDetails->getShortName().'.php',
-                $usesEntityManager ? 'crud/test/Test.EntityManager.tpl.php' : 'crud/test/Test.tpl.php',
+                'crud/test/Test.EntityManager.tpl.php',
                 [
                     'use_statements' => $useStatements,
                     'entity_full_class_name' => $entityClassDetails->getFullName(),
@@ -274,7 +272,7 @@ final class MakeCrud extends AbstractMaker
                     'class_name' => Str::getShortClassName($testClassDetails->getFullName()),
                     'namespace' => Str::getNamespace($testClassDetails->getFullName()),
                     'form_fields' => $entityDoctrineDetails->getFormFields(),
-                    'repository_class_name' => $usesEntityManager ? EntityManagerInterface::class : $repositoryVars['repository_class_name'],
+                    'repository_class_name' => EntityManagerInterface::class,
                     'form_field_prefix' => strtolower(Str::asSnakeCase($entityTwigVarSingular)),
                 ]
             );

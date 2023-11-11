@@ -34,16 +34,16 @@ final class Validator
             'clone', 'const', 'continue', 'declare', 'default', 'die', 'do',
             'echo', 'else', 'elseif', 'empty', 'enddeclare', 'endfor',
             'endforeach', 'endif', 'endswitch', 'endwhile', 'eval',
-            'exit', 'extends', 'final', 'finally', 'for', 'foreach', 'function',
+            'exit', 'extends', 'final', 'finally', 'fn', 'for', 'foreach', 'function',
             'global', 'goto', 'if', 'implements', 'include',
             'include_once', 'instanceof', 'insteadof', 'interface', 'isset',
-            'list', 'namespace', 'new', 'or', 'print', 'private',
-            'protected', 'public', 'require', 'require_once', 'return',
+            'list', 'match', 'namespace', 'new', 'or', 'print', 'private',
+            'protected', 'public', 'readonly', 'require', 'require_once', 'return',
             'static', 'switch', 'throw', 'trait', 'try', 'unset',
             'use', 'var', 'while', 'xor', 'yield',
             'int', 'float', 'bool', 'string', 'true', 'false', 'null', 'void',
             'iterable', 'object', '__file__', '__line__', '__dir__', '__function__', '__class__',
-            '__method__', '__namespace__', '__trait__', 'self', 'parent',
+            '__method__', '__namespace__', '__trait__', 'self', 'parent', 'collection',
         ];
 
         foreach ($pieces as $piece) {
@@ -218,7 +218,7 @@ final class Validator
             self::classExists($className, sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
         }
 
-        if (!\in_array($className, $entities)) {
+        if (!\in_array($className, $entities) && !\in_array(ltrim($className, '\\'), $entities)) {
             throw new RuntimeCommandException(sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
         }
 

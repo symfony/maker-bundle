@@ -48,7 +48,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Creates a new migration based on database changes';
+        return 'Create a new migration based on database changes';
     }
 
     public function setApplication(Application $application)

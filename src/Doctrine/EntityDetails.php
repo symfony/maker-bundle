@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\Persistence\Mapping\ClassMetadata;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
@@ -55,15 +56,23 @@ final class EntityDetails
             }
         }
 
-        foreach ($this->metadata->associationMappings as $fieldName => $relation) {
-            if (\Doctrine\ORM\Mapping\ClassMetadata::ONE_TO_MANY !== $relation['type']) {
-                $fields[] = $fieldName;
-            }
-        }
-
         $fieldsWithTypes = [];
         foreach ($fields as $field) {
             $fieldsWithTypes[$field] = null;
+        }
+
+        foreach ($this->metadata->associationMappings as $fieldName => $relation) {
+            if (\Doctrine\ORM\Mapping\ClassMetadata::ONE_TO_MANY === $relation['type']) {
+                continue;
+            }
+            $fieldsWithTypes[$fieldName] = [
+                'type' => EntityType::class,
+                'options_code' => sprintf('\'class\' => %s::class,', $relation['targetEntity']).PHP_EOL.'\'choice_label\' => \'id\',',
+                'extra_use_classes' => [$relation['targetEntity']],
+            ];
+            if (\Doctrine\ORM\Mapping\ClassMetadata::MANY_TO_MANY === $relation['type']) {
+                $fieldsWithTypes[$fieldName]['options_code'] .= "\n'multiple' => true,";
+            }
         }
 
         return $fieldsWithTypes;

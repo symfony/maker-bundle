@@ -18,4 +18,16 @@ class Property
     #[ORM\ManyToOne(inversedBy: 'properties')]
     #[ORM\JoinColumn(name: 'sour_food_id', referencedColumnName: 'id')]
     private ?SourFood $sourFood = null;
+
+    public function setSourFood(?SourFood $sourFood): static
+    {
+        $this->sourFood = $sourFood;
+
+        return $this;
+    }
+
+    public function getSourFood(): ?SourFood
+    {
+        return $this->sourFood;
+    }
 }

@@ -97,6 +97,90 @@ class MakeFormTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_generates_form_with_many_to_one_relation' => [$this->createMakerTest()
+            ->addExtraDependencies('orm')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-form/relation_one_to_many/Book.php',
+                    'src/Entity/Book.php'
+                );
+                $runner->copy(
+                    'make-form/relation_one_to_many/Author.php',
+                    'src/Entity/Author.php'
+                );
+
+                $runner->runMaker([
+                    // Entity name
+                    'BookType',
+                    'Book',
+                ]);
+
+                $this->runFormTest($runner, 'it_generates_form_with_many_to_one_relation.php');
+            }),
+        ];
+        yield 'it_generates_form_with_one_to_many_relation' => [$this->createMakerTest()
+            ->addExtraDependencies('orm')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-form/relation_one_to_many/Book.php',
+                    'src/Entity/Book.php'
+                );
+                $runner->copy(
+                    'make-form/relation_one_to_many/Author.php',
+                    'src/Entity/Author.php'
+                );
+
+                $runner->runMaker([
+                    // Entity name
+                    'AuthorType',
+                    'Author',
+                ]);
+
+                $this->runFormTest($runner, 'it_generates_form_with_one_to_many_relation.php');
+            }),
+        ];
+        yield 'it_generates_form_with_many_to_many_relation' => [$this->createMakerTest()
+            ->addExtraDependencies('orm')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-form/relation_many_to_many/Book.php',
+                    'src/Entity/Book.php'
+                );
+                $runner->copy(
+                    'make-form/relation_many_to_many/Library.php',
+                    'src/Entity/Library.php'
+                );
+
+                $runner->runMaker([
+                    // Entity name
+                    'BookType',
+                    'Book',
+                ]);
+
+                $this->runFormTest($runner, 'it_generates_form_with_many_to_many_relation.php');
+            }),
+        ];
+        yield 'it_generates_form_with_one_to_one_relation' => [$this->createMakerTest()
+            ->addExtraDependencies('orm')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-form/relation_one_to_one/Librarian.php',
+                    'src/Entity/Librarian.php'
+                );
+                $runner->copy(
+                    'make-form/relation_one_to_one/Library.php',
+                    'src/Entity/Library.php'
+                );
+
+                $runner->runMaker([
+                    // Entity name
+                    'LibraryType',
+                    'Library',
+                ]);
+
+                $this->runFormTest($runner, 'it_generates_form_with_one_to_one_relation.php');
+            }),
+        ];
         yield 'it_generates_form_with_embeddable_entity' => [$this->createMakerTest()
             ->addExtraDependencies('orm')
             ->run(function (MakerTestRunner $runner) {
