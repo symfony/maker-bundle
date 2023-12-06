@@ -2,7 +2,7 @@
 
 namespace <?= $namespace; ?>;
 
-<?= $use_statements; ?>;
+<?= $use_statements; ?>
 
 class <?= $class_name ?> extends Fixture
 {
