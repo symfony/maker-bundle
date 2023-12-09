@@ -283,7 +283,7 @@ final class MakerTestEnvironment
             // do not explicitly set the PHPUnit version
             [
                 'filename' => 'phpunit.xml.dist',
-                'find' => '<server name="SYMFONY_PHPUNIT_VERSION" value="9.5" />',
+                'find' => '<server name="SYMFONY_PHPUNIT_VERSION" value="9.6" />',
                 'replace' => '',
             ],
         ];

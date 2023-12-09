@@ -251,9 +251,7 @@ final class MakeCrud extends AbstractMaker
                 $repositoryClassName,
             ]);
 
-
             $useStatements->addUseStatement(EntityRepository::class);
-
 
             if (EntityManagerInterface::class !== $repositoryClassName) {
                 $useStatements->addUseStatement(EntityManagerInterface::class);
