@@ -122,11 +122,11 @@ class ComposeFileManipulator
         $data = $this->manipulator->getData();
 
         if (empty($data['version'])) {
-            throw new RuntimeCommandException('docker-compose.yaml file version is not set.');
+            throw new RuntimeCommandException('compose.yaml file version is not set.');
         }
 
         if (2.0 > (float) $data['version']) {
-            throw new RuntimeCommandException(sprintf('docker-compose.yaml version %s is not supported. Please update your docker-compose.yaml file to the latest version.', $data['version']));
+            throw new RuntimeCommandException(sprintf('compose.yaml version %s is not supported. Please update your compose.yaml file to the latest version.', $data['version']));
         }
     }
 }
