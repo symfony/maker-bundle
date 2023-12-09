@@ -35,7 +35,7 @@ final class MakeDockerDatabaseTest extends MakerTestCase
                     '', // use the default "latest" service version
                 ]);
 
-                $this->assertFileExists($runner->getPath('docker-compose.yaml'));
+                $this->assertFileExists($runner->getPath('compose.yaml'));
 
                 $manipulator = $this->getComposeManipulator($runner);
                 $data = $manipulator->getComposeData();
@@ -103,7 +103,7 @@ final class MakeDockerDatabaseTest extends MakerTestCase
 
     private function getComposeManipulator(MakerTestRunner $runner): ComposeFileManipulator
     {
-        $composeFile = $runner->getPath('docker-compose.yaml');
+        $composeFile = $runner->getPath('compose.yaml');
 
         return new ComposeFileManipulator(file_get_contents($composeFile));
     }

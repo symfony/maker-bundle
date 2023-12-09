@@ -146,7 +146,7 @@ class ComposeFileManipulatorTest extends TestCase
         new ComposeFileManipulator('version: \'2\'');
 
         $this->expectException(RuntimeCommandException::class);
-        $this->expectExceptionMessage('docker-compose.yaml version 1.9 is not supported. Please update your docker-compose.yaml file to the latest version.');
+        $this->expectExceptionMessage('compose.yaml version 1.9 is not supported. Please update your compose.yaml file to the latest version.');
 
         new ComposeFileManipulator('version: \'1.9\'');
     }
@@ -158,7 +158,7 @@ class ComposeFileManipulatorTest extends TestCase
                 []
             EOT;
         $this->expectException(RuntimeCommandException::class);
-        $this->expectExceptionMessage('docker-compose.yaml file version is not set.');
+        $this->expectExceptionMessage('compose.yaml file version is not set.');
 
         new ComposeFileManipulator($composeFile);
     }

@@ -39,12 +39,12 @@ final class MakeDockerDatabase extends AbstractMaker
     private ?string $databaseChoice = null;
 
     /**
-     * @var string Service identifier to be set in docker-compose.yaml
+     * @var string Service identifier to be set in compose.yaml
      */
     private string $serviceName = 'database';
 
     /**
-     * @var string Version set in docker-compose.yaml for the service. e.g. latest
+     * @var string Version set in compose.yaml for the service. e.g. latest
      */
     private string $serviceVersion = 'latest';
 
@@ -59,7 +59,7 @@ final class MakeDockerDatabase extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Add a database container to your docker-compose.yaml file';
+        return 'Add a database container to your compose.yaml file';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
@@ -134,7 +134,7 @@ final class MakeDockerDatabase extends AbstractMaker
         $closing[] = '    Run <fg=yellow>symfony var:export --multiline</> to see the environment variables the binary is exposing.';
         $closing[] = '    These will override any values you have in your .env files.';
         $closing[] = '';
-        $closing[] = ' C) Run <fg=yellow>docker-compose stop</> will stop all the containers in docker-compose.yaml.';
+        $closing[] = ' C) Run <fg=yellow>docker-compose stop</> will stop all the containers in compose.yaml.';
         $closing[] = '    <fg=yellow>docker-compose down</> will stop and destroy the containers.';
         $closing[] = '';
         $closing[] = sprintf(
@@ -174,19 +174,19 @@ final class MakeDockerDatabase extends AbstractMaker
      */
     private function getComposeFileContents(ConsoleStyle $io): string
     {
-        $this->composeFilePath = sprintf('%s/docker-compose.yaml', $this->fileManager->getRootDirectory());
+        $this->composeFilePath = sprintf('%s/compose.yaml', $this->fileManager->getRootDirectory());
 
         $composeFileExists = false;
-        $statusMessage = 'Existing docker-compose.yaml not found: a new one will be generated!';
+        $statusMessage = 'Existing compose.yaml not found: a new one will be generated!';
         $contents = '';
 
         foreach (['.yml', '.yaml'] as $extension) {
-            $composeFilePath = sprintf('%s/docker-compose%s', $this->fileManager->getRootDirectory(), $extension);
+            $composeFilePath = sprintf('%s/compose%s', $this->fileManager->getRootDirectory(), $extension);
 
             if (!$composeFileExists && $this->fileManager->fileExists($composeFilePath)) {
                 $composeFileExists = true;
 
-                $statusMessage = sprintf('We found your existing docker-compose%s: Let\'s update it!', $extension);
+                $statusMessage = sprintf('We found your existing compose%s: Let\'s update it!', $extension);
 
                 $this->composeFilePath = $composeFilePath;
                 $contents = $this->fileManager->getFileContents($composeFilePath);
