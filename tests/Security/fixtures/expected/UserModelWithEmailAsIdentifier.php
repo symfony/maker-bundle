@@ -9,6 +9,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     private $email;
 
+    /**
+     * @var list<string> The user roles
+     */
     private $roles = [];
 
     /**
@@ -40,6 +43,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @see UserInterface
+     * @return list<string>
      */
     public function getRoles(): array
     {
@@ -50,6 +54,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return array_unique($roles);
     }
 
+    /**
+     * @param list<string> $roles
+     */
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;

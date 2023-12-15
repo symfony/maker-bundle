@@ -105,28 +105,32 @@ final class UserClassBuilder
             // add normal property
             $manipulator->addProperty(
                 name: 'roles',
-                defaultValue: new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT])
+                defaultValue: new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]),
+                comments: [
+                    '@var list<string> The user roles',
+                ]
             );
 
             $manipulator->addGetter(
                 'roles',
                 'array',
-                false
-            );
-
-            $manipulator->addSetter(
-                'roles',
-                'array',
-                false
+                false,
             );
         }
+
+        $manipulator->addSetter(
+            'roles',
+            'array',
+            false,
+            ['@param list<string> $roles']
+        );
 
         // define getRoles (if it was defined above, this will override)
         $builder = $manipulator->createMethodBuilder(
             'getRoles',
             'array',
             false,
-            ['@see UserInterface']
+            ['@see UserInterface', '@return list<string>']
         );
 
         // $roles = $this->roles
