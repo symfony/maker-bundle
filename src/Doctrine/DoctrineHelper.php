@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
@@ -257,7 +258,7 @@ final class DoctrineHelper
 
     public static function getPropertyTypeForColumn(string $columnType): ?string
     {
-        return match ($columnType) {
+        $propertyType = match ($columnType) {
             Types::STRING, Types::TEXT, Types::GUID, Types::BIGINT, Types::DECIMAL => 'string',
             'array', Types::SIMPLE_ARRAY, Types::JSON => 'array',
             Types::BOOLEAN => 'bool',
@@ -271,6 +272,19 @@ final class DoctrineHelper
             'ulid' => '\\'.Ulid::class,
             default => null,
         };
+
+        if (null === $propertyType && Type::getTypeRegistry()->has($columnType)) {
+            $reflection = new \ReflectionClass(\get_class(Type::getTypeRegistry()->get($columnType)));
+            if ($reflection->hasMethod('convertToPHPValue') && $returnType = $reflection->getMethod('convertToPHPValue')->getReturnType()) {
+                if ($returnType->isBuiltin()) {
+                    $propertyType = $returnType->getName();
+                } else {
+                    $propertyType = '\\'.$returnType->getName();
+                }
+            }
+        }
+
+        return $propertyType;
     }
 
     /**
