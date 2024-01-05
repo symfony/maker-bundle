@@ -59,7 +59,7 @@ final class MakeValidator extends AbstractMaker
             $validatorClassNameDetails->getFullName(),
             'validator/Validator.tpl.php',
             [
-                'constraint_class_name' => $constraintFullClassName,
+                'constraint_class_name' => Str::getShortClassName($constraintFullClassName),
             ]
         );
 
