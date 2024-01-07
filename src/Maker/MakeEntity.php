@@ -628,7 +628,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             if ($joinTableDecision) {
                 $relation->setJoinTableName($io->ask(
                     'What should the join table be named?',
-                    lcfirst(Str::getShortClassName($relation->getOwningClass())) . ucfirst($relation->getOwningProperty())
+                    lcfirst(Str::getShortClassName($relation->getOwningClass())).ucfirst($relation->getOwningProperty())
                 ));
             }
         };
