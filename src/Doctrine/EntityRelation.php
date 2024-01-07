@@ -27,7 +27,7 @@ final class EntityRelation
     private bool $isSelfReferencing = false;
     private bool $orphanRemoval = false;
     private bool $mapInverseRelation = true;
-    private $joinTableName;
+    private ?string $joinTableName;
 
     public function __construct(
         private string $type,

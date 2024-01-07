@@ -311,7 +311,7 @@ class MakeEntityTest extends MakerTestCase
                     '',
                 ]);
 
-                $this->runCustomTest($runner, 'it_adds_many_to_many_simple.php');
+                $this->runCustomTest($runner, 'it_adds_many_to_many_with_custom_join_table.php');
             }),
         ];
 
