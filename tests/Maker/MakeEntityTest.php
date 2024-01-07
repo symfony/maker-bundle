@@ -239,6 +239,8 @@ class MakeEntityTest extends MakerTestCase
                     'y',
                     // field name on opposite side - use default 'courses'
                     '',
+                    // skip join table
+                    '',
                     // finish adding fields
                     '',
                 ]);
@@ -271,6 +273,8 @@ class MakeEntityTest extends MakerTestCase
                     // inverse side?
                     'y',
                     // field name on opposite side - use default 'courses'
+                    '',
+                    // skip join table
                     '',
                     // finish adding fields
                     '',
@@ -363,6 +367,8 @@ class MakeEntityTest extends MakerTestCase
                      * normally, we ask for the field on the *other* side, but we
                      * do not here, since the other side won't be mapped.
                      */
+                    // skip join table
+                    '',
                     // finish adding fields
                     '',
                 ]);
