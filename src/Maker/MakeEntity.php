@@ -619,6 +619,20 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $relation->setMapInverseRelation($mapInverse);
         };
 
+        $askJoinTableName = function (EntityRelation $relation) use ($io) {
+            $joinTableDecision = $io->confirm(
+                'Do you want to specify a join table? You may want to do this if you plan on having multiple many-to-many relations to the same entity.',
+                false
+            );
+
+            if ($joinTableDecision) {
+                $relation->setJoinTableName($io->ask(
+                    'What should the join table be named?',
+                    lcfirst(Str::getShortClassName($relation->getOwningClass())) . ucfirst($relation->getOwningProperty())
+                ));
+            }
+        };
+
         switch ($type) {
             case EntityRelation::MANY_TO_ONE:
                 $relation = new EntityRelation(
@@ -707,6 +721,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                         Str::singularCamelCaseToPluralCamelCase(Str::getShortClassName($relation->getOwningClass()))
                     ));
                 }
+
+                $askJoinTableName($relation);
 
                 break;
             case EntityRelation::ONE_TO_ONE:
