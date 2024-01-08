@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Security;
 
+use PhpParser\Builder\Param;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -32,7 +33,7 @@ final class SecurityControllerBuilder
         $manipulator->addUseStatementIfNecessary(AuthenticationUtils::class);
 
         $loginMethodBuilder->addParam(
-            (new \PhpParser\Builder\Param('authenticationUtils'))->setTypeHint('AuthenticationUtils')
+            (new Param('authenticationUtils'))->setType('AuthenticationUtils')
         );
 
         $manipulator->addMethodBody($loginMethodBuilder, <<<'CODE'

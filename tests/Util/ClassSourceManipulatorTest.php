@@ -698,7 +698,7 @@ class ClassSourceManipulatorTest extends TestCase
 
         $methodBuilder = $manipulator->createMethodBuilder('action', 'JsonResponse', false, ['@Route("/action", name="app_action")']);
         $methodBuilder->addParam(
-            (new Param('param'))->setTypeHint('string')
+            (new Param('param'))->setType('string')
         );
         $manipulator->addMethodBody($methodBuilder,
             <<<'CODE'
