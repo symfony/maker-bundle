@@ -23,11 +23,12 @@ use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use PhpParser\Builder;
 use PhpParser\BuilderHelpers;
+use PhpParser\Lexer;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
 use PhpParser\Parser;
-use PhpParser\ParserFactory;
+use PhpParser\PhpVersion;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\Doctrine\BaseCollectionRelation;
 use Symfony\Bundle\MakerBundle\Doctrine\BaseRelation;
@@ -48,7 +49,8 @@ final class ClassSourceManipulator
     private const CONTEXT_CLASS_METHOD = 'class_method';
     private const DEFAULT_VALUE_NONE = '__default_value_none';
 
-    private Parser\Php8 $parser;
+    private Parser $parser;
+    private Lexer\Emulative $lexer;
     private PrettyPrinter $printer;
     private ?ConsoleStyle $io = null;
 
@@ -63,7 +65,22 @@ final class ClassSourceManipulator
         private bool $overwrite = false,
         private bool $useAttributesForDoctrineMapping = true,
     ) {
-        $this->parser = (new ParserFactory())->createForNewestSupportedVersion();
+        /* @legacy Support for nikic/php-parser v4 */
+        if (class_exists(PhpVersion::class)) {
+            $version = PhpVersion::fromString(\PHP_VERSION);
+            $this->lexer = new Lexer\Emulative($version);
+            $this->parser = new Parser\Php8($this->lexer, $version);
+        } else {
+            $this->lexer = new Lexer\Emulative([
+                'usedAttributes' => [
+                    'comments',
+                    'startLine', 'endLine',
+                    'startTokenPos', 'endTokenPos',
+                ],
+            ]);
+            $this->parser = new Parser\Php7($this->lexer);
+        }
+
         $this->printer = new PrettyPrinter();
 
         $this->setSourceCode($sourceCode);
@@ -892,7 +909,13 @@ final class ClassSourceManipulator
     {
         $this->sourceCode = $sourceCode;
         $this->oldStmts = $this->parser->parse($sourceCode);
-        $this->oldTokens = $this->parser->getTokens();
+
+        /* @legacy Support for nikic/php-parser v4 */
+        if (\is_callable([$this->parser, 'getTokens'])) {
+            $this->oldTokens = $this->parser->getTokens();
+        } elseif (\is_callable([$this->lexer, 'getTokens'])) {
+            $this->oldTokens = $this->lexer->getTokens();
+        }
 
         $traverser = new NodeTraverser();
         $traverser->addVisitor(new NodeVisitor\CloningVisitor());
