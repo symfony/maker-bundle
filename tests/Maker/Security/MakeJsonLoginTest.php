@@ -11,49 +11,23 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Maker\Security;
 
-use Symfony\Bundle\MakerBundle\Maker\Security\MakeFormLogin;
+use Symfony\Bundle\MakerBundle\Maker\Security\MakeJsonLogin;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
  */
-final class MakeFormLoginTest extends AbstractSecurityMakerTestCase
+final class MakeJsonLoginTest extends AbstractSecurityMakerTestCase
 {
     protected function getMakerClass(): string
     {
-        return MakeFormLogin::class;
+        return MakeJsonLogin::class;
     }
 
     public function getTestDetails(): \Generator
     {
-        yield 'generates_form_login_using_defaults' => [$this->createMakerTest()
-            ->run(function (MakerTestRunner $runner) {
-                $this->makeUser($runner);
-
-                $output = $runner->runMaker([
-                    'SecurityController', // Controller Name
-                    'y', // Generate Logout
-                ]);
-
-                $this->assertStringContainsString('Success', $output);
-                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
-
-                $this->assertFileEquals($fixturePath.'/SecurityController.php', $runner->getPath('src/Controller/SecurityController.php'));
-                $this->assertFileEquals($fixturePath.'/login.html.twig', $runner->getPath('templates/security/login.html.twig'));
-
-                $securityConfig = $runner->readYaml('config/packages/security.yaml');
-
-                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['login_path']);
-                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['check_path']);
-                $this->assertTrue($securityConfig['security']['firewalls']['main']['form_login']['enable_csrf']);
-                $this->assertSame('app_logout', $securityConfig['security']['firewalls']['main']['logout']['path']);
-
-                $this->runLoginTest($runner);
-            }),
-        ];
-
-        yield 'generates_form_login_without_logout' => [$this->createMakerTest()
+        yield 'generates_json_login_using_defaults' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner);
 
@@ -63,20 +37,41 @@ final class MakeFormLoginTest extends AbstractSecurityMakerTestCase
                 ]);
 
                 $this->assertStringContainsString('Success', $output);
-                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
+
+                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-json-login/expected';
 
                 $this->assertFileEquals($fixturePath.'/SecurityControllerWithoutLogout.php', $runner->getPath('src/Controller/SecurityController.php'));
-                $this->assertFileEquals($fixturePath.'/login_no_logout.html.twig', $runner->getPath('templates/security/login.html.twig'));
 
                 $securityConfig = $runner->readYaml('config/packages/security.yaml');
 
-                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['login_path']);
-                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['check_path']);
-                $this->assertFalse(isset($securityConfig['security']['firewalls']['main']['logout']['path']));
+                $this->assertSame('app_api_login', $securityConfig['security']['firewalls']['main']['json_login']['check_path']);
+
+                $this->runLoginTest($runner);
             }),
         ];
 
-        yield 'generates_form_login_with_custom_controller_name' => [$this->createMakerTest()
+        yield 'generates_json_login_with_logout' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner);
+
+                $output = $runner->runMaker([
+                    'SecurityController', // Controller Name
+                    'y', // Generate Logout
+                ]);
+
+                $this->assertStringContainsString('Success', $output);
+
+                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-json-login/expected';
+
+                $this->assertFileEquals($fixturePath.'/SecurityController.php', $runner->getPath('src/Controller/SecurityController.php'));
+
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+
+                $this->assertSame('app_api_login', $securityConfig['security']['firewalls']['main']['json_login']['check_path']);
+            }),
+        ];
+
+        yield 'generates_json_login_with_custom_class_name' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner);
 
@@ -86,23 +81,44 @@ final class MakeFormLoginTest extends AbstractSecurityMakerTestCase
                 ]);
 
                 $this->assertStringContainsString('Success', $output);
-                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
+
+                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-json-login/expected';
 
                 $this->assertFileEquals($fixturePath.'/LoginController.php', $runner->getPath('src/Controller/LoginController.php'));
-                $this->assertFileEquals($fixturePath.'/login.html.twig', $runner->getPath('templates/login/login.html.twig'));
 
                 $securityConfig = $runner->readYaml('config/packages/security.yaml');
 
-                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['login_path']);
-                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['check_path']);
-                $this->assertSame('app_logout', $securityConfig['security']['firewalls']['main']['logout']['path']);
+                $this->assertSame('app_api_login', $securityConfig['security']['firewalls']['main']['json_login']['check_path']);
+            }),
+        ];
+
+        yield 'generates_json_login_using_existing_form_login_controller' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner);
+
+                $runner->copy('security/make-json-login/setup/', '');
+
+                $output = $runner->runMaker([
+                    'SecurityController', // Controller Name
+                    'n', // Generate Logout
+                ]);
+
+                $this->assertStringContainsString('Success', $output);
+
+                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-json-login/expected';
+
+                $this->assertFileEquals($fixturePath.'/SecurityControllerWithFormLogin.php', $runner->getPath('src/Controller/SecurityController.php'));
+
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+
+                $this->assertSame('app_api_login', $securityConfig['security']['firewalls']['main']['json_login']['check_path']);
             }),
         ];
     }
 
     private function runLoginTest(MakerTestRunner $runner): void
     {
-        $fixturePath = 'security/make-form-login/';
+        $fixturePath = 'security/make-json-login/';
 
         $runner->renderTemplateFile($fixturePath.'/LoginTest.php', 'tests/LoginTest.php', []);
 

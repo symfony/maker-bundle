@@ -155,5 +155,12 @@
                 <argument type="service" id="maker.security_controller_builder" />
                 <tag name="maker.command" />
             </service>
+
+            <service id="maker.maker.make_json_login" class="Symfony\Bundle\MakerBundle\Maker\Security\MakeJsonLogin">
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.security_config_updater" />
+                <argument type="service" id="maker.security_controller_builder" />
+                <tag name="maker.command" />
+            </service>
         </services>
 </container>

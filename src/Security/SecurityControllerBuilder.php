@@ -11,9 +11,16 @@
 
 namespace Symfony\Bundle\MakerBundle\Security;
 
+use PhpParser\Builder\Param;
+use PhpParser\Node\Attribute;
+use PhpParser\Node\Name;
+use PhpParser\Node\NullableType;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 /**
@@ -32,7 +39,7 @@ final class SecurityControllerBuilder
         $manipulator->addUseStatementIfNecessary(AuthenticationUtils::class);
 
         $loginMethodBuilder->addParam(
-            (new \PhpParser\Builder\Param('authenticationUtils'))->setTypeHint('AuthenticationUtils')
+            (new Param('authenticationUtils'))->setTypeHint('AuthenticationUtils')
         );
 
         $manipulator->addMethodBody($loginMethodBuilder, <<<'CODE'
@@ -79,5 +86,46 @@ final class SecurityControllerBuilder
             CODE
         );
         $manipulator->addMethodBuilder($logoutMethodBuilder);
+    }
+
+    public function addFormLoginMethod(ClassSourceManipulator $manipulator, string $loginTemplatePath): void
+    {
+        $methodBuilder = $manipulator->createMethodBuilder('login', Response::class, false);
+        $methodBuilder->addAttribute($manipulator->buildAttributeNode(Route::class, ['path' => '/login', 'name' => 'app_login']));
+
+        $this->addUseStatements($manipulator, [Route::class]);
+
+        $methodBuilder->addParam((new Param('authenticationUtils'))->setType('AuthenticationUtils'));
+
+        $contents = file_get_contents(\dirname(__DIR__).'/Resources/skeleton/security/formLogin/_LoginMethodBody.tpl.php');
+
+        $manipulator->addMethodBody($methodBuilder, $contents, ['template_path' => $loginTemplatePath]);
+        $manipulator->addMethodBuilder($methodBuilder);
+    }
+
+    public function addJsonLoginMethod(ClassSourceManipulator $manipulator, ClassNameDetails $userClass): void
+    {
+        $methodBuilder = $manipulator->createMethodBuilder('apiLogin', JsonResponse::class, false);
+
+        $methodBuilder->addAttribute($manipulator->buildAttributeNode(Route::class, ['path' => '/api/login', 'name' => 'app_api_login']));
+
+        $this->addUseStatements($manipulator, [Route::class, $userClass->getFullName(), CurrentUser::class]);
+
+        $methodBuilder->addParam(
+            (new Param('user'))
+                ->setType(new NullableType($userClass->getShortName()))
+                ->addAttribute(new Attribute(new Name('CurrentUser')))
+        );
+
+        $manipulator->addMethodBody($methodBuilder, file_get_contents(\dirname(__DIR__).'/Resources/skeleton/security/jsonLogin/_ApiLoginMethodBody.tpl.php'));
+
+        $manipulator->addMethodBuilder($methodBuilder);
+    }
+
+    private function addUseStatements(ClassSourceManipulator $manipulator, array $useStatements): void
+    {
+        foreach ($useStatements as $statement) {
+            $manipulator->addUseStatementIfNecessary($statement);
+        }
     }
 }

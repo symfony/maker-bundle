@@ -13,20 +13,17 @@ namespace Symfony\Bundle\MakerBundle\Maker\Security;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
-use Symfony\Bundle\MakerBundle\DependencyBuilder;
-use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
-use Symfony\Bundle\SecurityBundle\SecurityBundle;
-use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 /**
  * Generate Form Login Security using SecurityBundle's Authenticator.
@@ -37,52 +34,37 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
  *
  * @internal
  */
-final class MakeFormLogin extends AbstractSecurityMaker
+final class MakeJsonLogin extends AbstractSecurityMaker
 {
     public static function getCommandName(): string
     {
-        return 'make:security:form-login';
+        return 'make:security:json-login';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
-        $command->setHelp(file_get_contents(\dirname(__DIR__, 2).'/Resources/help/security/MakeFormLogin.txt'));
+        $command->setHelp(file_get_contents(\dirname(__DIR__, 2).'/Resources/help/security/MakeJsonLogin.txt'));
     }
 
     public static function getCommandDescription(): string
     {
-        return 'Generate the code needed for the form_login authenticator';
-    }
-
-    public function configureDependencies(DependencyBuilder $dependencies): void
-    {
-        $dependencies->addClassDependency(TwigBundle::class, 'twig');
-
-        parent::configureDependencies($dependencies);
-    }
-
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
-    {
-        parent::interact($input, $io, $command);
-
-        $securityData = $this->ysm->getData();
-
-        if (!isset($securityData['security']['providers']) || !$securityData['security']['providers']) {
-            throw new RuntimeCommandException('To generate a form login authentication, you must configure at least one entry under "providers" in "security.yaml".');
-        }
+        return 'Generate the code needed for the json_login authenticator';
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        $userClassDetails = new ClassNameDetails($this->userClass, '');
+
         $useStatements = new UseStatementGenerator([
+            $userClassDetails->getFullName(),
             AbstractController::class,
+            JsonResponse::class,
             Response::class,
             Route::class,
-            AuthenticationUtils::class,
+            CurrentUser::class,
         ]);
 
         $controllerNameDetails = $generator->createClassNameDetails($this->securityControllerName, 'Controller\\', 'Controller');
-        $templatePath = strtolower($controllerNameDetails->getRelativeNameWithoutSuffix());
 
         $controllerPath = $this->fileManager->getRelativePathForFutureClass($controllerNameDetails->getFullName());
 
@@ -103,25 +85,15 @@ final class MakeFormLogin extends AbstractSecurityMaker
 
         $manipulator = new ClassSourceManipulator($controllerSource);
 
-        $this->securityControllerBuilder->addFormLoginMethod($manipulator, $templatePath);
+        $this->securityControllerBuilder->addJsonLoginMethod($manipulator, $userClassDetails);
 
-        $securityData = $this->securityConfigUpdater->updateForFormLogin($this->ysm->getContents(), $this->firewallToUpdate, 'app_login', 'app_login');
+        $securityData = $this->securityConfigUpdater->updateForJsonLogin($this->ysm->getContents(), $this->firewallToUpdate, 'app_api_login');
 
         if ($this->willLogout) {
             $this->securityControllerBuilder->addLogoutMethod($manipulator);
 
             $securityData = $this->securityConfigUpdater->updateForLogout($securityData, $this->firewallToUpdate);
         }
-
-        $generator->generateTemplate(
-            sprintf('%s/login.html.twig', $templatePath),
-            'security/formLogin/login_form.tpl.php',
-            [
-                'logout_setup' => $this->willLogout,
-                'username_label' => Str::asHumanWords($this->userNameField),
-                'username_is_email' => false !== stripos($this->userNameField, 'email'),
-            ]
-        );
 
         $generator->dumpFile(self::SECURITY_CONFIG_PATH, $securityData);
         $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
@@ -131,7 +103,9 @@ final class MakeFormLogin extends AbstractSecurityMaker
         $this->writeSuccessMessage($io);
 
         $io->text([
-            sprintf('Next: Review and adapt the login template: <info>%s/login.html.twig</info> to suit your needs.', $templatePath),
+            'Next: Make a <info>POST</info> request to <info>/api/login</info> with a <info>username</info> and <info>password</info> to login.',
+            'Then: The security system intercepts the requests and authenticates the user.',
+            sprintf('And Finally: The <info>%s::apiLogin</info> method creates and returns a JsonResponse.', $controllerNameDetails->getShortName()),
         ]);
     }
 }
