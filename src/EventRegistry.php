@@ -11,74 +11,32 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
-use Symfony\Component\Console\Event\ConsoleCommandEvent;
-use Symfony\Component\Console\Event\ConsoleErrorEvent;
-use Symfony\Component\Console\Event\ConsoleTerminateEvent;
+use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
-use Symfony\Component\HttpKernel\Event\ControllerEvent;
-use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\HttpKernel\Event\FilterControllerArgumentsEvent;
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\HttpKernel\Event\FinishRequestEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
-use Symfony\Component\HttpKernel\Event\PostResponseEvent;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Symfony\Component\HttpKernel\Event\TerminateEvent;
-use Symfony\Component\HttpKernel\Event\ViewEvent;
-use Symfony\Component\Security\Core\Event\AuthenticationFailureEvent;
-use Symfony\Component\Security\Core\Event\AuthenticationSuccessEvent;
-use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
-use Symfony\Component\Security\Http\Event\SwitchUserEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\AuthenticationEvents;
+use Symfony\Component\Security\Http\SecurityEvents;
+use Symfony\Component\Workflow\WorkflowEvents;
 
 /**
  * @internal
  */
 class EventRegistry
 {
-    // list of *known* events to always include (if they exist)
-    private static array $newEventsMap = [
-        'kernel.exception' => ExceptionEvent::class,
-        'kernel.request' => RequestEvent::class,
-        'kernel.response' => ResponseEvent::class,
-        'kernel.view' => ViewEvent::class,
-        'kernel.controller_arguments' => ControllerArgumentsEvent::class,
-        'kernel.controller' => ControllerEvent::class,
-        'kernel.terminate' => TerminateEvent::class,
-    ];
-
-    private static array $eventsMap = [
-        'console.command' => ConsoleCommandEvent::class,
-        'console.terminate' => ConsoleTerminateEvent::class,
-        'console.error' => ConsoleErrorEvent::class,
-        'kernel.request' => GetResponseEvent::class,
-        'kernel.exception' => GetResponseForExceptionEvent::class,
-        'kernel.view' => GetResponseForControllerResultEvent::class,
-        'kernel.controller' => FilterControllerEvent::class,
-        'kernel.controller_arguments' => FilterControllerArgumentsEvent::class,
-        'kernel.response' => FilterResponseEvent::class,
-        'kernel.terminate' => PostResponseEvent::class,
-        'kernel.finish_request' => FinishRequestEvent::class,
-        'security.authentication.success' => AuthenticationSuccessEvent::class,
-        'security.authentication.failure' => AuthenticationFailureEvent::class,
-        'security.interactive_login' => InteractiveLoginEvent::class,
-        'security.switch_user' => SwitchUserEvent::class,
-    ];
+    private static array $eventsMap = [];
 
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
     ) {
-        // Loop through the new event classes
-        foreach (self::$newEventsMap as $eventName => $newEventClass) {
-            // Check if the new event classes exist, if so replace the old one with the new.
-            if (isset(self::$eventsMap[$eventName]) && class_exists($newEventClass)) {
-                self::$eventsMap[$eventName] = $newEventClass;
-            }
-        }
+        self::$eventsMap = array_flip([
+            ...ConsoleEvents::ALIASES,
+            ...KernelEvents::ALIASES,
+            ...(class_exists(AuthenticationEvents::class) ? AuthenticationEvents::ALIASES : []),
+            ...(class_exists(SecurityEvents::class) ? SecurityEvents::ALIASES : []),
+            ...(class_exists(WorkflowEvents::class) ? WorkflowEvents::ALIASES : []),
+            ...(class_exists(FormEvents::class) ? FormEvents::ALIASES : []),
+        ]);
     }
 
     /**
@@ -97,12 +55,7 @@ class EventRegistry
 
         $listeners = $this->eventDispatcher->getListeners();
 
-        // Check if these listeners are part of the new events.
         foreach (array_keys($listeners) as $listenerKey) {
-            if (isset(self::$newEventsMap[$listenerKey])) {
-                unset($listeners[$listenerKey]);
-            }
-
             if (!isset(self::$eventsMap[$listenerKey])) {
                 self::$eventsMap[$listenerKey] = $this->getEventClassName($listenerKey);
             }
