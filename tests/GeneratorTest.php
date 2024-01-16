@@ -76,5 +76,13 @@ class GeneratorTest extends TestCase
             'App\\Entity\\User',
             'User',
         ];
+
+        yield 'repository_fqcn' => [
+            'Repository',
+            'Repository\\',
+            'Repository',
+            'App\\Repository\\RepositoryRepository',
+            'RepositoryRepository',
+        ];
     }
 }
