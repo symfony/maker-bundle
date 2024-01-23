@@ -157,7 +157,7 @@ class MakerTestRunner
     {
         $this->replaceInFile(
             '.env',
-            'postgresql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=15&charset=utf8',
+            'postgresql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=16&charset=utf8',
             getenv('TEST_DATABASE_DSN')
         );
 
