@@ -28,6 +28,7 @@ use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
 use PhpParser\Parser;
+use PhpParser\PhpVersion;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\Doctrine\BaseCollectionRelation;
 use Symfony\Bundle\MakerBundle\Doctrine\BaseRelation;
@@ -48,7 +49,7 @@ final class ClassSourceManipulator
     private const CONTEXT_CLASS_METHOD = 'class_method';
     private const DEFAULT_VALUE_NONE = '__default_value_none';
 
-    private Parser\Php7 $parser;
+    private Parser $parser;
     private Lexer\Emulative $lexer;
     private PrettyPrinter $printer;
     private ?ConsoleStyle $io = null;
@@ -64,14 +65,22 @@ final class ClassSourceManipulator
         private bool $overwrite = false,
         private bool $useAttributesForDoctrineMapping = true,
     ) {
-        $this->lexer = new Lexer\Emulative([
-            'usedAttributes' => [
-                'comments',
-                'startLine', 'endLine',
-                'startTokenPos', 'endTokenPos',
-            ],
-        ]);
-        $this->parser = new Parser\Php7($this->lexer);
+        /* @legacy Support for nikic/php-parser v4 */
+        if (class_exists(PhpVersion::class)) {
+            $version = PhpVersion::fromString(\PHP_VERSION);
+            $this->lexer = new Lexer\Emulative($version);
+            $this->parser = new Parser\Php8($this->lexer, $version);
+        } else {
+            $this->lexer = new Lexer\Emulative([
+                'usedAttributes' => [
+                    'comments',
+                    'startLine', 'endLine',
+                    'startTokenPos', 'endTokenPos',
+                ],
+            ]);
+            $this->parser = new Parser\Php7($this->lexer);
+        }
+
         $this->printer = new PrettyPrinter();
 
         $this->setSourceCode($sourceCode);
@@ -327,7 +336,7 @@ final class ClassSourceManipulator
             if (class_exists($returnType) || interface_exists($returnType)) {
                 $returnType = $this->addUseStatementIfNecessary($returnType);
             }
-            $methodNodeBuilder->setReturnType($isReturnTypeNullable ? new Node\NullableType($returnType) : $returnType);
+            $methodNodeBuilder->setReturnType($isReturnTypeNullable ? new Node\NullableType(new Node\Identifier($returnType)) : $returnType);
         }
 
         if ($commentLines) {
@@ -414,7 +423,7 @@ final class ClassSourceManipulator
             );
 
         if (null !== $returnType) {
-            $getterNodeBuilder->setReturnType($isReturnTypeNullable ? new Node\NullableType($returnType) : $returnType);
+            $getterNodeBuilder->setReturnType($isReturnTypeNullable ? new Node\NullableType(new Node\Identifier($returnType)) : $returnType);
         }
 
         if ($commentLines) {
@@ -435,7 +444,7 @@ final class ClassSourceManipulator
 
         $paramBuilder = new Builder\Param($propertyName);
         if (null !== $type) {
-            $paramBuilder->setType($isNullable ? new Node\NullableType($type) : $type);
+            $paramBuilder->setType($isNullable ? new Node\NullableType(new Node\Identifier($type)) : $type);
         }
         $setterNodeBuilder->addParam($paramBuilder->getNode());
 
@@ -641,7 +650,7 @@ final class ClassSourceManipulator
         $removerNodeBuilder = (new Builder\Method($relation->getRemoverMethodName()))->makePublic();
 
         $paramBuilder = new Builder\Param($argName);
-        $paramBuilder->setTypeHint($typeHint);
+        $paramBuilder->setType($typeHint);
         $removerNodeBuilder->addParam($paramBuilder->getNode());
 
         // $this->avatars->removeElement($avatar)
@@ -841,7 +850,7 @@ final class ClassSourceManipulator
         $context = $this;
         $nodeArguments = array_map(static function (string $option, mixed $value) use ($context) {
             if (null === $value) {
-                return new Node\NullableType($option);
+                return new Node\NullableType(new Node\Identifier($option));
             }
 
             // Use the Doctrine Types constant
@@ -900,7 +909,13 @@ final class ClassSourceManipulator
     {
         $this->sourceCode = $sourceCode;
         $this->oldStmts = $this->parser->parse($sourceCode);
-        $this->oldTokens = $this->lexer->getTokens();
+
+        /* @legacy Support for nikic/php-parser v4 */
+        if (\is_callable([$this->parser, 'getTokens'])) {
+            $this->oldTokens = $this->parser->getTokens();
+        } elseif (\is_callable([$this->lexer, 'getTokens'])) {
+            $this->oldTokens = $this->lexer->getTokens();
+        }
 
         $traverser = new NodeTraverser();
         $traverser->addVisitor(new NodeVisitor\CloningVisitor());
