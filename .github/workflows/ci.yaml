@@ -92,7 +92,6 @@ jobs:
                 php-version:
                     - '8.2'
                 symfony-version:
-                    - '6.3.x-dev'
                     - '6.4.x-dev'
                     - '7.0.x-dev'
                 dependency-versions: ['highest']
@@ -100,11 +99,11 @@ jobs:
                 include:
                     # testing lowest PHP+dependencies with lowest Symfony
                     - php-version: '8.1'
-                      symfony-version: '6.3.*'
+                      symfony-version: '6.4.*'
                       dependency-versions: 'lowest'
                     # testing lowest PHP+dependencies with highest Symfony
                     - php-version: '8.1'
-                      symfony-version: '6.3.*'
+                      symfony-version: '6.4.*'
                       dependency-versions: 'highest'
 
         steps:
