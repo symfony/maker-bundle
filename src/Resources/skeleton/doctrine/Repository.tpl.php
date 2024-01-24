@@ -6,7 +6,7 @@ namespace <?= $namespace; ?>;
 
 /**
  * @extends ServiceEntityRepository<<?= $entity_class_name; ?>>
-<?= $with_password_upgrade ? "* @implements PasswordUpgraderInterface<$entity_class_name>\n" : "" ?>
+<?= $with_password_upgrade ? " * @implements PasswordUpgraderInterface<$entity_class_name>\n" : "" ?>
  *
  * @method <?= $entity_class_name; ?>|null find($id, $lockMode = null, $lockVersion = null)
  * @method <?= $entity_class_name; ?>|null findOneBy(array $criteria, array $orderBy = null)
