@@ -1,4 +1,4 @@
-name: "CI"
+name: "CI Linux"
 
 on:
     pull_request:
@@ -26,34 +26,34 @@ jobs:
 
         steps:
             -
-                name: "Checkout code"
+                name: Checkout code
                 uses: "actions/checkout@v3"
 
             -
-                name: "Install PHP"
+                name: Install PHP
                 uses: "shivammathur/setup-php@v2"
                 with:
                     coverage: "none"
                     php-version: "${{ matrix.php-version }}"
 
             -
-                name: "Validate composer.json"
+                name: Validate composer.json
                 run: "composer validate --strict --no-check-lock"
 
             -
-                name: "Composer install"
+                name: Composer install
                 uses: "ramsey/composer-install@v2"
                 with:
                     composer-options: "--no-scripts"
 
             -
-                name: "Composer install php-cs-fixer"
+                name: Composer install php-cs-fixer
                 uses: "ramsey/composer-install@v2"
                 with:
                     composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
 
             -
-                name: "Run friendsofphp/php-cs-fixer"
+                name: Run PHP-CS-Fixer
                 run: "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --dry-run --diff"
 
     test:
@@ -99,42 +99,42 @@ jobs:
                       dependency-versions: 'highest'
 
         steps:
-            - name: "Checkout code"
+            - name: Checkout code
               uses: actions/checkout@v3
 
-            - name: "Install PHP with extensions"
+            - name: Install PHP with extensions
               uses: shivammathur/setup-php@v2
               with:
                   coverage: "none"
                   php-version: ${{ matrix.php-version }}
 
-            - name: "Add PHPUnit matcher"
+            - name: Add PHPUnit matcher
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-            - name: "Composer install"
+            - name: Composer install
               uses: "ramsey/composer-install@v2"
               with:
                   dependency-versions: "${{ matrix.dependency-versions }}"
 
-            - name: "Composer install php-cs-fixer"
+            - name: Composer install php-cs-fixer
               uses: "ramsey/composer-install@v2"
               with:
                   composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
 
-            - name: "Composer install twigcs"
+            - name: Composer install twigcs
               uses: "ramsey/composer-install@v2"
               with:
                   composer-options: "--no-scripts --working-dir=tools/twigcs"
 
-            - name: "Install PHPUnit"
+            - name: Install PHPUnit
               run: |
                 if [[ ${{ matrix.dependency_versions == 'lowest' }} ]]; then
                   echo "SYMFONY_PHPUNIT_REQUIRE=nikic/php-parser:^4.18" >> $GITHUB_ENV
                 fi
                 vendor/bin/simple-phpunit install
 
-            - name: "PHPUnit version"
+            - name: PHPUnit version
               run: vendor/bin/simple-phpunit --version
 
-            - name: "Run tests"
+            - name: Run tests
               run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}

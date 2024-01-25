@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeTest;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
+use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
 class MakeTestTest extends MakerTestCase
@@ -79,7 +80,7 @@ class MakeTestTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_makes_PantherTestCase_type' => [$this->createMakerTest()
+        yield 'it_makes_PantherTestCase_type' => [$this->getPantherTest()
             ->addExtraDependencies('panther')
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy(
@@ -102,5 +103,14 @@ class MakeTestTest extends MakerTestCase
                 $runner->runTests();
             }),
         ];
+    }
+
+    protected function getPantherTest(): MakerTestDetails
+    {
+        return $this->createMakerTest()
+            ->skipTest(
+                message: 'Panther test skipped - MAKER_SKIP_PANTHER_TEST set to TRUE.',
+                skipped: getenv('MAKER_SKIP_PANTHER_TEST')
+            );
     }
 }
