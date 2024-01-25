@@ -34,7 +34,7 @@
         "symfony/phpunit-bridge": "^6.3|^7.0",
         "symfony/security-core": "^6.3|^7.0",
         "symfony/yaml": "^6.3|^7.0",
-        "twig/twig": "^2.0|^3.0"
+        "twig/twig": "^3.0|^4.x-dev"
     },
     "config": {
         "preferred-install": "dist",
