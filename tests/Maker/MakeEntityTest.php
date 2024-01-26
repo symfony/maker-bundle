@@ -37,22 +37,20 @@ class MakeEntityTest extends MakerTestCase
 
     private function createMakeEntityTestForMercure(): MakerTestDetails
     {
-        $testDetails = $this->createMakerTest();
-
         if (getenv('MAKER_SKIP_MERCURE_TEST')) {
-            $testDetails->skipTest('MAKER_SKIP_MERCURE_TEST set to true');
-
-            return $testDetails;
+            // This test is skipped, don't worry about persistence
+            return $this->createMakerTest()
+                ->skipTest('MAKER_SKIP_MERCURE_TEST set to true')
+            ;
         }
 
-        $testDetails
+        return $this->createMakeEntityTest()
             ->skipOnSymfony7() // legacy remove when ux-turbo-mercure supports Symfony 7
             ->preRun(function (MakerTestRunner $runner) {
                 // installed manually later so that the compatibility check can run first
                 $runner->runProcess('composer require symfony/ux-turbo-mercure');
-            });
-
-        return $testDetails;
+            })
+        ;
     }
 
     public function getTestDetails(): \Generator

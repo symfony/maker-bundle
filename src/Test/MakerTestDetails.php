@@ -43,9 +43,7 @@ final class MakerTestDetails
 
     public function run(\Closure $callback): self
     {
-        if (!$this->skipTest) {
-            $this->runCallback = $callback;
-        }
+        $this->runCallback = $callback;
 
         return $this;
     }
