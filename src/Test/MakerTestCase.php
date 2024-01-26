@@ -50,6 +50,10 @@ abstract class MakerTestCase extends TestCase
             throw new \LogicException('The MakerTestCase cannot be run as the Process component is not installed. Try running "compose require --dev symfony/process".');
         }
 
+        if ($testDetails->isTestSkipped()) {
+            $this->markTestSkipped($testDetails->getSkippedTestMessage());
+        }
+
         if (!$testDetails->isSupportedByCurrentPhpVersion()) {
             $this->markTestSkipped();
         }
