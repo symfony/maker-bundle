@@ -207,6 +207,7 @@ final class MakerTestDetails
             'v1.53.0',
             sprintf('%s() will be removed in a future version, use MakerTestDetails::isTestSkipped() instead.', __METHOD__)
         );
+
         return $this->skipOnSymfony7;
     }
 
@@ -219,10 +220,10 @@ final class MakerTestDetails
      *
      * @internal
      */
-    public function skipTest(bool $skipped = true, string $message = ''): self
+    public function skipTest(string $message = '', bool $skipped = true): self
     {
-        $this->skipTest = $skipped;
         $this->skipTestMessage = $message;
+        $this->skipTest = $skipped;
 
         return $this;
     }

@@ -44,8 +44,14 @@ class MakeEntityTest extends MakerTestCase
             ;
         }
 
+        // @legacy - MakeEntity uses ux-turbo-mercure (archived), it needs to use ux-turbo (mercure built in) for Symfony 7.0
+        if ('7.0.x-dev' === $_SERVER['SYMFONY_VERSION']) {
+            return $this->createMakerTest()
+                ->skipTest( 'symfony/ux-turbo-mercure is not supported on Symfony 7.')
+            ;
+        }
+
         return $this->createMakeEntityTest()
-            ->skipOnSymfony7() // legacy remove when ux-turbo-mercure supports Symfony 7
             ->preRun(function (MakerTestRunner $runner) {
                 // installed manually later so that the compatibility check can run first
                 $runner->runProcess('composer require symfony/ux-turbo-mercure');
