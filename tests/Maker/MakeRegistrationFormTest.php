@@ -98,7 +98,6 @@ class MakeRegistrationFormTest extends MakerTestCase
 
         yield 'it_generates_registration_form_with_verification' => [$this->createRegistrationFormTest()
             ->addExtraDependencies('symfonycasts/verify-email-bundle')
-            ->skipOnSymfony7() // legacy: remove VerifyEmailBundle supports Symfony 7
             // needed for internal functional test
             ->addExtraDependencies('symfony/web-profiler-bundle', 'mailer')
             ->run(function (MakerTestRunner $runner) {
@@ -138,7 +137,6 @@ class MakeRegistrationFormTest extends MakerTestCase
 
         yield 'it_generates_registration_form_with_verification_and_translator' => [$this->createRegistrationFormTest()
             ->addExtraDependencies('symfonycasts/verify-email-bundle')
-            ->skipOnSymfony7() // legacy: remove VerifyEmailBundle supports Symfony 7
             // needed for internal functional test
             ->addExtraDependencies('symfony/web-profiler-bundle', 'mailer', 'symfony/translation')
             ->run(function (MakerTestRunner $runner) {

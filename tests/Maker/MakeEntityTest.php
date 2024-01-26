@@ -61,7 +61,6 @@ class MakeEntityTest extends MakerTestCase
         ];
 
         yield 'it_creates_a_new_class_and_api_resource' => [$this->createMakeEntityTest()
-            ->skipOnSymfony7() // legacy: remove when API Platform supports Symfony 7
             ->addExtraDependencies('api')
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([
@@ -545,7 +544,6 @@ class MakeEntityTest extends MakerTestCase
 
         yield 'it_makes_new_entity_no_to_all_extras' => [$this->createMakeEntityTestForMercure()
             ->addExtraDependencies('api')
-            ->skipOnSymfony7() // legacy: remove when API Platform supports Symfony 7
             // special setup done in createMakeEntityTestForMercure()
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([
