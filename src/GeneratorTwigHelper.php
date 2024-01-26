@@ -83,6 +83,8 @@ final class GeneratorTwigHelper
 
     public function getFileLink($path, $text = null, $line = 0): string
     {
+        trigger_deprecation('symfony/maker-bundle', 'v1.53.0', 'getFileLink() is deprecated and will be removed in the future.');
+
         $text = $text ?: $path;
 
         return "<a href=\"{{ '$path'|file_link($line) }}\">$text</a>";
