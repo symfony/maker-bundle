@@ -27,8 +27,8 @@ class MakeResetPasswordTest extends MakerTestCase
     public function getTestDetails(): \Generator
     {
         yield 'it_generates_with_normal_setup' => [$this->createMakerTest()
+            // @legacy - drop skipped versions when PHP 8.1 is no longer supported.
             ->setSkippedPhpVersions(80100, 80109)
-            ->skipOnSymfony7() // legacy: remove ResetPasswordBundle supports Symfony 7
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner);
 
@@ -83,8 +83,8 @@ class MakeResetPasswordTest extends MakerTestCase
         ];
 
         yield 'it_generates_with_translator_installed' => [$this->createMakerTest()
+            // @legacy - drop skipped versions when PHP 8.1 is no longer supported.
             ->setSkippedPhpVersions(80100, 80109)
-            ->skipOnSymfony7() // legacy: remove ResetPasswordBundle supports Symfony 7
             ->addExtraDependencies('symfony/translation')
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner);
@@ -101,8 +101,8 @@ class MakeResetPasswordTest extends MakerTestCase
         ];
 
         yield 'it_generates_with_custom_config' => [$this->createMakerTest()
+            // @legacy - drop skipped versions when PHP 8.1 is no longer supported.
             ->setSkippedPhpVersions(80100, 80109)
-            ->skipOnSymfony7() // legacy: remove ResetPasswordBundle supports Symfony 7
             ->run(function (MakerTestRunner $runner) {
                 $runner->deleteFile('config/packages/reset_password.yaml');
                 $runner->writeFile(
@@ -132,8 +132,8 @@ class MakeResetPasswordTest extends MakerTestCase
         ];
 
         yield 'it_amends_configuration' => [$this->createMakerTest()
+            // @legacy - drop skipped versions when PHP 8.1 is no longer supported.
             ->setSkippedPhpVersions(80100, 80109)
-            ->skipOnSymfony7() // legacy: remove ResetPasswordBundle supports Symfony 7
             ->run(function (MakerTestRunner $runner) {
                 $runner->modifyYamlFile('config/packages/reset_password.yaml', function (array $config) {
                     $config['symfonycasts_reset_password']['lifetime'] = 9999;
@@ -160,8 +160,8 @@ class MakeResetPasswordTest extends MakerTestCase
         ];
 
         yield 'it_generates_with_custom_user' => [$this->createMakerTest()
+            // @legacy - drop skipped versions when PHP 8.1 is no longer supported.
             ->setSkippedPhpVersions(80100, 80109)
-            ->skipOnSymfony7() // legacy: remove ResetPasswordBundle supports Symfony 7
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner, 'emailAddress', 'UserCustom', false);
 
