@@ -42,7 +42,8 @@
     },
     "conflict": {
         "doctrine/orm": "<2.10",
-        "doctrine/doctrine-bundle": "<2.4"
+        "doctrine/doctrine-bundle": "<2.4",
+        "phpunit/phpunit": "<9.6"
     },
     "autoload": {
         "psr-4": { "Symfony\\Bundle\\MakerBundle\\": "src/" }
