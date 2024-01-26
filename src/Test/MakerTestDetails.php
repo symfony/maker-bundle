@@ -189,7 +189,11 @@ final class MakerTestDetails
 
     public function skipOnSymfony7(): self
     {
-        trigger_deprecation('symfony/maker-bundle', 'v1.53.0', 'This method will be removed in a future version, use MakerTestDetails::skipTest() instead.');
+        @trigger_deprecation(
+            'symfony/maker-bundle',
+            'v1.53.0',
+            sprintf('%s() will be removed in a future version, use MakerTestDetails::skipTest() instead.', __METHOD__)
+        );
 
         $this->skipOnSymfony7 = true;
 
@@ -198,8 +202,11 @@ final class MakerTestDetails
 
     public function getSkipOnSymfony7(): bool
     {
-        trigger_deprecation('symfony/maker-bundle', 'v1.53.0', 'This method will be removed in a future version, use MakerTestDetails::isTestSkipped() instead.');
-
+        @trigger_deprecation(
+            'symfony/maker-bundle',
+            'v1.53.0',
+            sprintf('%s() will be removed in a future version, use MakerTestDetails::isTestSkipped() instead.', __METHOD__)
+        );
         return $this->skipOnSymfony7;
     }
 
