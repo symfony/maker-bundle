@@ -38,6 +38,7 @@ use Symfony\Component\Console\Question\Question;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\LimiterInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -209,6 +210,15 @@ final class MakeAuthenticator extends AbstractMaker
                     $supportRememberMeValues[$supportRememberMeType]
                 );
             }
+
+            $command->addArgument('support-throttling', InputArgument::OPTIONAL);
+            $input->setArgument(
+                'support-throttling',
+                $io->confirm(
+                    'Do you want to enable the throttling protection?',
+                    true
+                )
+            );
         }
     }
 
@@ -219,6 +229,7 @@ final class MakeAuthenticator extends AbstractMaker
 
         $supportRememberMe = $input->hasArgument('support-remember-me') ? $input->getArgument('support-remember-me') : false;
         $alwaysRememberMe = $input->hasArgument('always-remember-me') ? $input->getArgument('always-remember-me') : false;
+        $supportThrottling = $input->hasArgument('support-throttling') ? $input->getArgument('support-throttling') : false;
 
         $this->generateAuthenticatorClass(
             $securityData,
@@ -246,7 +257,8 @@ final class MakeAuthenticator extends AbstractMaker
                 $input->getArgument('authenticator-class'),
                 $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false,
                 $supportRememberMe,
-                $alwaysRememberMe
+                $alwaysRememberMe,
+                $supportThrottling,
             );
             $generator->dumpFile($path, $newYaml);
             $securityYamlUpdated = true;
@@ -458,5 +470,13 @@ final class MakeAuthenticator extends AbstractMaker
             Yaml::class,
             'yaml'
         );
+
+        $supportThrottling = $input->hasArgument('support-throttling') ? $input->getArgument('support-throttling') : false;
+        if ($supportThrottling) {
+            $dependencies->addClassDependency(
+                LimiterInterface::class,
+                'symfony/rate-limiter'
+            );
+        }
     }
 }
