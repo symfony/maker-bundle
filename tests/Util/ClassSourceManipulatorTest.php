@@ -708,7 +708,7 @@ class ClassSourceManipulatorTest extends TestCase
         );
         $manipulator->addMethodBuilder($methodBuilder);
         $manipulator->addUseStatementIfNecessary('Symfony\\Component\\HttpFoundation\\JsonResponse');
-        $manipulator->addUseStatementIfNecessary('Symfony\\Component\\Routing\\Annotation\\Route');
+        $manipulator->addUseStatementIfNecessary('Symfony\\Component\\Routing\\Attribute\\Route');
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }

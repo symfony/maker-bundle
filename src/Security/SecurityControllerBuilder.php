@@ -14,7 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Security;
 use PhpParser\Builder\Param;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 /**
