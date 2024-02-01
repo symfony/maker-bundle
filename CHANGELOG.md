@@ -1,5 +1,23 @@
 # Changelog
 
+## [v1.53.0](https://github.com/symfony/maker-bundle/releases/tag/v1.53.0)
+
+*February 1st, 2024*
+
+### Feature
+
+- [#1423](https://github.com/symfony/maker-bundle/pull/1423) - [dx] drop twig 2.x support && open the door for 4.x - *@jrushlow*
+- [#1417](https://github.com/symfony/maker-bundle/pull/1417) - Compatibility to dependency php parser v5 - *@drieschel*
+- [#1414](https://github.com/symfony/maker-bundle/pull/1414) - Proper annotation for generated validator constraint - *@zorn-v*
+- [#1407](https://github.com/symfony/maker-bundle/pull/1407) - New Name of Docker compose file - *@Xbirdfr*
+
+### Bug
+
+- [#1419](https://github.com/symfony/maker-bundle/pull/1419) - [make:controller] remove CodeExtension::getFileLink() call when generating twig templates - *@jrushlow*
+- [#1403](https://github.com/symfony/maker-bundle/pull/1403) - Doctrine make:fixtures - Remove extra semicolon - *@MrYamous*
+- [#1342](https://github.com/symfony/maker-bundle/pull/1342) - fix missing blank space in Repository.tpl.php - *@OleksiiBulba*
+
+
 ## [v1.52.0](https://github.com/symfony/maker-bundle/releases/tag/v1.52.0)
 
 ### Feature
