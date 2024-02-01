@@ -34,9 +34,7 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 final class MakeController extends AbstractMaker
 {
-    private PhpCompatUtil $phpCompatUtil;
-
-    public function __construct(PhpCompatUtil $phpCompatUtil = null)
+    public function __construct(private PhpCompatUtil $phpCompatUtil = null)
     {
         if (null === $phpCompatUtil) {
             @trigger_error(sprintf('Passing a "%s" instance is mandatory since version 1.42.0', PhpCompatUtil::class), \E_USER_DEPRECATED);
