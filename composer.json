@@ -30,7 +30,6 @@
         "composer/semver": "^3.0",
         "doctrine/doctrine-bundle": "^2.5.0",
         "doctrine/orm": "^2.10.0",
-        "phpunit/phpunit": "^9.6",
         "symfony/http-client": "^6.4|^7.0",
         "symfony/phpunit-bridge": "^6.4.1|^7.0",
         "symfony/security-core": "^6.4|^7.0",
