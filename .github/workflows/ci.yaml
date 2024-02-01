@@ -62,14 +62,6 @@ jobs:
         runs-on: ubuntu-latest
 
         services:
-            mysql:
-                image: mysql:5.7 # Update server_version in phpunit.xml.dist if this changes.
-                env:
-                    MYSQL_ROOT_PASSWORD: root
-                    MYSQL_DATABASE: test_maker
-                ports:
-                    - 3306
-                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
             mercure:
                 image: dunglas/mercure
                 env:
@@ -110,24 +102,11 @@ jobs:
             - name: "Checkout code"
               uses: actions/checkout@v3
 
-            - name: "Start MySQL"
-              run: |
-                  sudo /etc/init.d/mysql start
-
-            - name: "Verify MySQL connection from host"
-              run: |
-                  mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "SHOW DATABASES;"
-
-            - name: "Setup Database"
-              run: |
-                  mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test_maker;"
-
             - name: "Install PHP with extensions"
               uses: shivammathur/setup-php@v2
               with:
                   coverage: "none"
                   php-version: ${{ matrix.php-version }}
-                  tools: composer:v2
 
             - name: "Add PHPUnit matcher"
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
