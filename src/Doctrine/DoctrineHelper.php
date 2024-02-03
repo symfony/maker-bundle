@@ -259,14 +259,14 @@ final class DoctrineHelper
     {
         return match ($columnType) {
             Types::STRING, Types::TEXT, Types::GUID, Types::BIGINT, Types::DECIMAL => 'string',
-            Types::ARRAY, Types::SIMPLE_ARRAY, Types::JSON => 'array',
+            'array', Types::SIMPLE_ARRAY, Types::JSON => 'array',
             Types::BOOLEAN => 'bool',
             Types::INTEGER, Types::SMALLINT => 'int',
             Types::FLOAT => 'float',
             Types::DATETIME_MUTABLE, Types::DATETIMETZ_MUTABLE, Types::DATE_MUTABLE, Types::TIME_MUTABLE => '\\'.\DateTimeInterface::class,
             Types::DATETIME_IMMUTABLE, Types::DATETIMETZ_IMMUTABLE, Types::DATE_IMMUTABLE, Types::TIME_IMMUTABLE => '\\'.\DateTimeImmutable::class,
             Types::DATEINTERVAL => '\\'.\DateInterval::class,
-            Types::OBJECT => 'object',
+            'object' => 'object',
             'uuid' => '\\'.Uuid::class,
             'ulid' => '\\'.Ulid::class,
             default => null,
