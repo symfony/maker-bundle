@@ -96,7 +96,7 @@ final class MakeCrud extends AbstractMaker
             $defaultControllerClass
         );
 
-        $this->generateTests = $io->confirm('Do you want to generate tests for the controller?. [Experimental]', false);
+        $this->generateTests = $io->confirm('Do you want to generate tests for the controller? [Experimental]', false);
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
