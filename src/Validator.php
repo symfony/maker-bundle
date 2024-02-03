@@ -68,7 +68,7 @@ final class Validator
         return $className;
     }
 
-    public static function notBlank(string $value = null): string
+    public static function notBlank(?string $value = null): string
     {
         if (null === $value || '' === $value) {
             throw new RuntimeCommandException('This value cannot be blank.');
@@ -176,7 +176,7 @@ final class Validator
         return $email;
     }
 
-    public static function existsOrNull(string $className = null, array $entities = []): ?string
+    public static function existsOrNull(?string $className = null, array $entities = []): ?string
     {
         if (null !== $className) {
             self::validateClassName($className);
@@ -204,7 +204,7 @@ final class Validator
         return $className;
     }
 
-    public static function entityExists(string $className = null, array $entities = []): string
+    public static function entityExists(?string $className = null, array $entities = []): string
     {
         self::notBlank($className);
 

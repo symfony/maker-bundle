@@ -26,9 +26,9 @@ use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
-use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -53,10 +53,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     public function __construct(
         private FileManager $fileManager,
         private DoctrineHelper $doctrineHelper,
-        string $projectDirectory = null,
-        Generator $generator = null,
-        EntityClassGenerator $entityClassGenerator = null,
-        PhpCompatUtil $phpCompatUtil = null,
+        ?string $projectDirectory = null,
+        ?Generator $generator = null,
+        ?EntityClassGenerator $entityClassGenerator = null,
+        ?PhpCompatUtil $phpCompatUtil = null,
     ) {
         if (null !== $projectDirectory) {
             @trigger_error('The $projectDirectory constructor argument is no longer used since 1.41.0', \E_USER_DEPRECATED);
@@ -309,7 +309,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null): void
+    public function configureDependencies(DependencyBuilder $dependencies, ?InputInterface $input = null): void
     {
         if (null !== $input && $input->getOption('api-resource')) {
             $dependencies->addClassDependency(

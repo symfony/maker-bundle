@@ -111,7 +111,7 @@ final class MakerCommand extends Command
         return 0;
     }
 
-    public function setApplication(Application $application = null): void
+    public function setApplication(?Application $application = null): void
     {
         parent::setApplication($application);
 

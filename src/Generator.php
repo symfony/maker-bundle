@@ -31,8 +31,8 @@ class Generator
     public function __construct(
         private FileManager $fileManager,
         private string $namespacePrefix,
-        PhpCompatUtil $phpCompatUtil = null,
-        TemplateComponentGenerator $templateComponentGenerator = null,
+        ?PhpCompatUtil $phpCompatUtil = null,
+        ?TemplateComponentGenerator $templateComponentGenerator = null,
     ) {
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
         $this->namespacePrefix = trim($namespacePrefix, '\\');

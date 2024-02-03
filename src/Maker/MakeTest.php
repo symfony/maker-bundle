@@ -160,7 +160,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null): void
+    public function configureDependencies(DependencyBuilder $dependencies, ?InputInterface $input = null): void
     {
         if (null === $input) {
             return;
