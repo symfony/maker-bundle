@@ -56,12 +56,21 @@ final class TemplateLinter
             $templateFilePath = [$templateFilePath];
         }
 
+        $ignoreEnv = str_contains(strtolower(\PHP_OS), 'win') ? 'set PHP_CS_FIXER_IGNORE_ENV=1&' : 'PHP_CS_FIXER_IGNORE_ENV=1 ';
+
+        $cmdPrefix = $this->needsPhpCmdPrefix ? 'php ' : '';
+
         foreach ($templateFilePath as $filePath) {
-            $cmdPrefix = $this->needsPhpCmdPrefix ? 'php ' : '';
-
-            $process = Process::fromShellCommandline(sprintf('PHP_CS_FIXER_IGNORE_ENV=1 %s%s --config=%s --using-cache=no fix %s', $cmdPrefix, $this->phpCsFixerBinaryPath, $this->phpCsFixerConfigPath, $filePath));
-
-            $process->run();
+            Process::fromShellCommandline(sprintf(
+                '%s%s%s --config=%s --using-cache=no fix %s',
+                $ignoreEnv,
+                $cmdPrefix,
+                $this->phpCsFixerBinaryPath,
+                $this->phpCsFixerConfigPath,
+                $filePath
+            ))
+                ->run()
+            ;
         }
     }
 
