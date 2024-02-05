@@ -28,6 +28,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
+use Symfony\Bundle\MakerBundle\Util\CSM\ClassPropertyModel;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
@@ -230,7 +231,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             if (\is_array($newField)) {
                 $annotationOptions = $newField;
                 unset($annotationOptions['fieldName']);
-                $manipulator->addEntityField($newField['fieldName'], $annotationOptions);
+//                $manipulator->addEntityField($newField['fieldName'], $annotationOptions);
+                $manipulator->addEntityField(new ClassPropertyModel(propertyName: $newField['fieldName'], type: $annotationOptions['type']));
 
                 $currentFields[] = $newField['fieldName'];
             } elseif ($newField instanceof EntityRelation) {

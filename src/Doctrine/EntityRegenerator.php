@@ -18,6 +18,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\CSM\ClassPropertyModel;
 
 /**
  * @internal
@@ -95,7 +96,11 @@ final class EntityRegenerator
                 if (str_contains($fieldName, '.')) {
                     [$fieldName, $embeddedFiledName] = explode('.', $fieldName);
 
-                    $operations[$embeddedClasses[$fieldName]]->addEntityField($embeddedFiledName, $mapping);
+//                    $operations[$embeddedClasses[$fieldName]]->addEntityField($embeddedFiledName, $mapping);
+                    $operations[$embeddedClasses[$fieldName]]->addEntityField(new ClassPropertyModel(
+                        propertyName: $embeddedFiledName,
+                        type: $mapping['type'] ?? $mapping->type
+                    ));
 
                     continue;
                 }
@@ -106,7 +111,8 @@ final class EntityRegenerator
 
                 //                dump([$classMetadata]);
 
-                $manipulator->addEntityField($fieldName, (array) $mapping);
+//                $manipulator->addEntityField($fieldName, (array) $mapping);
+                $manipulator->addEntityField(new ClassPropertyModel(propertyName: $fieldName, type: $mapping['type'] ?? $mapping->type));
             }
 
             $getIsNullable = function (array $mapping) {

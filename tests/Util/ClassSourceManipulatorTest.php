@@ -20,7 +20,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\CSM\ObjectMapping;
+use Symfony\Bundle\MakerBundle\Util\CSM\ClassPropertyModel;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class ClassSourceManipulatorTest extends TestCase
@@ -214,23 +214,23 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddEntityFieldTests
      */
-    public function testAddEntityField(string $sourceFilename, string $propertyName, ObjectMapping $fieldOptions, $expectedSourceFilename): void
+    public function testAddEntityField(string $sourceFilename, ClassPropertyModel $fieldOptions, $expectedSourceFilename): void
     {
         $sourcePath = __DIR__.'/fixtures/source';
         $expectedPath = __DIR__.'/fixtures/add_entity_field';
 
         $this->runAddEntityFieldTests(
             file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
-            $propertyName,
+//            $propertyName,
             $fieldOptions,
             file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename))
         );
     }
 
-    private function runAddEntityFieldTests(string $source, string $propertyName, ObjectMapping $fieldOptions, string $expected): void
+    private function runAddEntityFieldTests(string $source, ClassPropertyModel $fieldOptions, string $expected): void
     {
         $manipulator = new ClassSourceManipulator($source, false);
-        $manipulator->addEntityField($propertyName, $fieldOptions);
+        $manipulator->addEntityField($fieldOptions);
 
         $this->assertSame($expected, $manipulator->getSourceCode());
     }
@@ -239,8 +239,8 @@ class ClassSourceManipulatorTest extends TestCase
     {
         yield 'entity_normal_add' => [
             'User_simple.php',
-            'fooProp',
-            new ObjectMapping(type: 'string', length: 255,  nullable: false, options: ['comment' => 'new field']),
+//            'fooProp',
+            new ClassPropertyModel(propertyName: 'fooProp', type: 'string', length: 255,  nullable: false, options: ['comment' => 'new field']),
 //            [
 //                'type' => 'string',
 //                'length' => 255,
@@ -252,8 +252,8 @@ class ClassSourceManipulatorTest extends TestCase
 
         yield 'entity_add_datetime' => [
             'User_simple.php',
-            'createdAt',
-            new ObjectMapping(type: 'datetime', nullable: true),
+//            'createdAt',
+            new ClassPropertyModel(propertyName: 'createdAt', type: 'datetime', nullable: true),
 //            [
 //                'type' => 'datetime',
 //                'nullable' => true,
@@ -263,8 +263,8 @@ class ClassSourceManipulatorTest extends TestCase
 
         yield 'entity_field_property_already_exists' => [
             'User_some_props.php',
-            'firstName',
-            new ObjectMapping(type: 'string', length: 255, nullable: false),
+//            'firstName',
+            new ClassPropertyModel(propertyName: 'firstName', type: 'string', length: 255, nullable: false),
 //            [
 //                'type' => 'string',
 //                'length' => 255,
@@ -275,8 +275,8 @@ class ClassSourceManipulatorTest extends TestCase
 
         yield 'entity_field_property_zero' => [
             'User_simple.php',
-            'decimal',
-            new ObjectMapping(type: 'decimal', precision: 6, scale: 0),
+//            'decimal',
+            new ClassPropertyModel(propertyName: 'decimal', type: 'decimal', precision: 6, scale: 0),
 //            [
 //                'type' => 'decimal',
 //                'precision' => 6,
@@ -287,8 +287,8 @@ class ClassSourceManipulatorTest extends TestCase
 
         yield 'entity_add_object' => [
             'User_simple.php',
-            'someObject',
-            new ObjectMapping(type: 'object'),
+//            'someObject',
+            new ClassPropertyModel(propertyName: 'someObject', type: 'object'),
 //            [
 //                'type' => 'object',
 //            ],
@@ -297,8 +297,8 @@ class ClassSourceManipulatorTest extends TestCase
 
         yield 'entity_add_uuid' => [
             'User_simple.php',
-            'uuid',
-            new ObjectMapping(type: 'uuid'),
+//            'uuid',
+            new ClassPropertyModel(propertyName: 'uuid', type: 'uuid'),
 //            [
 //                'type' => 'uuid',
 //            ],
@@ -307,8 +307,8 @@ class ClassSourceManipulatorTest extends TestCase
 
         yield 'entity_add_ulid' => [
             'User_simple.php',
-            'ulid',
-            new ObjectMapping(type: 'ulid'),
+//            'ulid',
+            new ClassPropertyModel(propertyName: 'ulid', type: 'ulid'),
 //            [
 //                'type' => 'ulid',
 //            ],

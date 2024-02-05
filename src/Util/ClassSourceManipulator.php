@@ -38,7 +38,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Util\CSM\ObjectMapping;
+use Symfony\Bundle\MakerBundle\Util\CSM\ClassPropertyModel;
 
 /**
  * @internal
@@ -97,7 +97,7 @@ final class ClassSourceManipulator
         return $this->sourceCode;
     }
 
-    public function addEntityField(string $propertyName, ObjectMapping $columnOptions, array $comments = []): void
+    public function addEntityField(ClassPropertyModel $mapping): void
     {
 //        if ($columnOptions instanceof \Doctrine\ORM\Mapping\FieldMapping::class) {
 //            $columnOptions['type'] = $columnOptions->type;
@@ -105,40 +105,40 @@ final class ClassSourceManipulator
 //            $columnOptions['id'] = $columnOptions->id;
 //        }
 
-        if (is_array($columnOptions)) {
-            dump($columnOptions);
-            $columnOptions = \Doctrine\ORM\Mapping\FieldMapping::fromMappingArray($columnOptions);
-        }
+//        if (is_array($columnOptions)) {
+//            dump($columnOptions);
+//            $columnOptions = \Doctrine\ORM\Mapping\FieldMapping::fromMappingArray($columnOptions);
+//        }
 
-        dump($columnOptions);
-        $typeHint = DoctrineHelper::getPropertyTypeForColumn($columnOptions->type);
-        if ($typeHint && DoctrineHelper::canColumnTypeBeInferredByPropertyType($columnOptions->type, $typeHint)) {
+//        dump($columnOptions);
+        $typeHint = DoctrineHelper::getPropertyTypeForColumn($mapping->type);
+        if ($typeHint && DoctrineHelper::canColumnTypeBeInferredByPropertyType($mapping->type, $typeHint)) {
 //            unset($columnOptions['type']);
-            $columnOptions->needsTypeHint = false;
+            $mapping->needsTypeHint = false;
         }
 
 //        if (isset($columnOptions['type'])) {
-        if ($columnOptions->needsTypeHint) {
-            $typeConstant = DoctrineHelper::getTypeConstant($columnOptions->type);
+        if ($mapping->needsTypeHint) {
+            $typeConstant = DoctrineHelper::getTypeConstant($mapping->type);
             if ($typeConstant) {
                 $this->addUseStatementIfNecessary(Types::class);
-                $columnOptions->type = $typeConstant;
+                $mapping->type = $typeConstant;
             }
         }
 
         // 2) USE property type on property below, nullable
         // 3) If default value, then NOT nullable
 
-        $nullable = $columnOptions->nullable ?? false;
-        $isId = (bool) ($columnOptions->id ?? false);
+        $nullable = $mapping->nullable ?? false;
+        $isId = (bool) ($mapping->id ?? false);
 
         $someArray = [];
-        $someArray['type'] = $columnOptions->type;
+        $someArray['type'] = $mapping->type;
 //        $someArray['fieldName'] = $columnOptions->fieldName;
 
         // @TODO foreach over the properties and check if they're null. If not -> add to $someArray
 
-        $attributes[] = $this->buildAttributeNode(Column::class, $someArray, 'ORM');
+        $attributes[] = $this->buildAttributeNode(Column::class, $mapping->getAttributes(), 'ORM');
 
         $defaultValue = null;
         if ('array' === $typeHint && !$nullable) {
@@ -154,15 +154,15 @@ final class ClassSourceManipulator
         }
 
         $this->addProperty(
-            name: $propertyName,
+            name: $mapping->propertyName,
             defaultValue: $defaultValue,
             attributes: $attributes,
-            comments: $comments,
+            comments: $mapping->comments,
             propertyType: $propertyType
         );
 
         $this->addGetter(
-            $propertyName,
+            $mapping->propertyName,
             $typeHint,
             // getter methods always have nullable return values
             // because even though these are required in the db, they may not be set yet
@@ -172,7 +172,7 @@ final class ClassSourceManipulator
 
         // don't generate setters for id fields
         if (!$isId) {
-            $this->addSetter($propertyName, $typeHint, $nullable);
+            $this->addSetter($mapping->propertyName, $typeHint, $nullable);
         }
     }
 
