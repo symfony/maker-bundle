@@ -45,6 +45,8 @@ final class MakerTestProcess
 
     public function run($allowToFail = false, array $envVars = []): self
     {
+        // @TODO _ @legacy -> This needs to be a env for debugging...
+        $this->process->setTimeout(null);
         $this->process->run(null, $envVars);
 
         if (!$allowToFail && !$this->process->isSuccessful()) {

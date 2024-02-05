@@ -20,6 +20,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\CSM\ObjectMapping;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class ClassSourceManipulatorTest extends TestCase
@@ -213,7 +214,7 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddEntityFieldTests
      */
-    public function testAddEntityField(string $sourceFilename, string $propertyName, array $fieldOptions, $expectedSourceFilename): void
+    public function testAddEntityField(string $sourceFilename, string $propertyName, ObjectMapping $fieldOptions, $expectedSourceFilename): void
     {
         $sourcePath = __DIR__.'/fixtures/source';
         $expectedPath = __DIR__.'/fixtures/add_entity_field';
@@ -226,7 +227,7 @@ class ClassSourceManipulatorTest extends TestCase
         );
     }
 
-    private function runAddEntityFieldTests(string $source, string $propertyName, array $fieldOptions, string $expected): void
+    private function runAddEntityFieldTests(string $source, string $propertyName, ObjectMapping $fieldOptions, string $expected): void
     {
         $manipulator = new ClassSourceManipulator($source, false);
         $manipulator->addEntityField($propertyName, $fieldOptions);
@@ -239,71 +240,78 @@ class ClassSourceManipulatorTest extends TestCase
         yield 'entity_normal_add' => [
             'User_simple.php',
             'fooProp',
-            [
-                'type' => 'string',
-                'length' => 255,
-                'nullable' => false,
-                'options' => ['comment' => 'new field'],
-            ],
+            new ObjectMapping(type: 'string', length: 255,  nullable: false, options: ['comment' => 'new field']),
+//            [
+//                'type' => 'string',
+//                'length' => 255,
+//                'nullable' => false,
+//                'options' => ['comment' => 'new field'],
+//            ],
             'User_simple.php',
         ];
 
         yield 'entity_add_datetime' => [
             'User_simple.php',
             'createdAt',
-            [
-                'type' => 'datetime',
-                'nullable' => true,
-            ],
+            new ObjectMapping(type: 'datetime', nullable: true),
+//            [
+//                'type' => 'datetime',
+//                'nullable' => true,
+//            ],
             'User_simple_datetime.php',
         ];
 
         yield 'entity_field_property_already_exists' => [
             'User_some_props.php',
             'firstName',
-            [
-                'type' => 'string',
-                'length' => 255,
-                'nullable' => false,
-            ],
+            new ObjectMapping(type: 'string', length: 255, nullable: false),
+//            [
+//                'type' => 'string',
+//                'length' => 255,
+//                'nullable' => false,
+//            ],
             'User_simple_prop_already_exists.php',
         ];
 
         yield 'entity_field_property_zero' => [
             'User_simple.php',
             'decimal',
-            [
-                'type' => 'decimal',
-                'precision' => 6,
-                'scale' => 0,
-            ],
+            new ObjectMapping(type: 'decimal', precision: 6, scale: 0),
+//            [
+//                'type' => 'decimal',
+//                'precision' => 6,
+//                'scale' => 0,
+//            ],
             'User_simple_prop_zero.php',
         ];
 
         yield 'entity_add_object' => [
             'User_simple.php',
             'someObject',
-            [
-                'type' => 'object',
-            ],
+            new ObjectMapping(type: 'object'),
+//            [
+//                'type' => 'object',
+//            ],
             'User_simple_object.php',
         ];
 
         yield 'entity_add_uuid' => [
             'User_simple.php',
             'uuid',
-            [
-                'type' => 'uuid',
-            ],
+            new ObjectMapping(type: 'uuid'),
+//            [
+//                'type' => 'uuid',
+//            ],
             'User_simple_uuid.php',
         ];
 
         yield 'entity_add_ulid' => [
             'User_simple.php',
             'ulid',
-            [
-                'type' => 'ulid',
-            ],
+            new ObjectMapping(type: 'ulid'),
+//            [
+//                'type' => 'ulid',
+//            ],
             'User_simple_ulid.php',
         ];
     }

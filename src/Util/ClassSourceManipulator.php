@@ -38,6 +38,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\CSM\ObjectMapping;
 
 /**
  * @internal
@@ -96,27 +97,48 @@ final class ClassSourceManipulator
         return $this->sourceCode;
     }
 
-    public function addEntityField(string $propertyName, array $columnOptions, array $comments = []): void
+    public function addEntityField(string $propertyName, ObjectMapping $columnOptions, array $comments = []): void
     {
-        $typeHint = DoctrineHelper::getPropertyTypeForColumn($columnOptions['type']);
-        if ($typeHint && DoctrineHelper::canColumnTypeBeInferredByPropertyType($columnOptions['type'], $typeHint)) {
-            unset($columnOptions['type']);
+//        if ($columnOptions instanceof \Doctrine\ORM\Mapping\FieldMapping::class) {
+//            $columnOptions['type'] = $columnOptions->type;
+//            $columnOptions['nullable'] = $columnOptions->nullable;
+//            $columnOptions['id'] = $columnOptions->id;
+//        }
+
+        if (is_array($columnOptions)) {
+            dump($columnOptions);
+            $columnOptions = \Doctrine\ORM\Mapping\FieldMapping::fromMappingArray($columnOptions);
         }
 
-        if (isset($columnOptions['type'])) {
-            $typeConstant = DoctrineHelper::getTypeConstant($columnOptions['type']);
+        dump($columnOptions);
+        $typeHint = DoctrineHelper::getPropertyTypeForColumn($columnOptions->type);
+        if ($typeHint && DoctrineHelper::canColumnTypeBeInferredByPropertyType($columnOptions->type, $typeHint)) {
+//            unset($columnOptions['type']);
+            $columnOptions->needsTypeHint = false;
+        }
+
+//        if (isset($columnOptions['type'])) {
+        if ($columnOptions->needsTypeHint) {
+            $typeConstant = DoctrineHelper::getTypeConstant($columnOptions->type);
             if ($typeConstant) {
                 $this->addUseStatementIfNecessary(Types::class);
-                $columnOptions['type'] = $typeConstant;
+                $columnOptions->type = $typeConstant;
             }
         }
 
         // 2) USE property type on property below, nullable
         // 3) If default value, then NOT nullable
 
-        $nullable = $columnOptions['nullable'] ?? false;
-        $isId = (bool) ($columnOptions['id'] ?? false);
-        $attributes[] = $this->buildAttributeNode(Column::class, $columnOptions, 'ORM');
+        $nullable = $columnOptions->nullable ?? false;
+        $isId = (bool) ($columnOptions->id ?? false);
+
+        $someArray = [];
+        $someArray['type'] = $columnOptions->type;
+//        $someArray['fieldName'] = $columnOptions->fieldName;
+
+        // @TODO foreach over the properties and check if they're null. If not -> add to $someArray
+
+        $attributes[] = $this->buildAttributeNode(Column::class, $someArray, 'ORM');
 
         $defaultValue = null;
         if ('array' === $typeHint && !$nullable) {

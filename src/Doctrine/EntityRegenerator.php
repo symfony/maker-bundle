@@ -75,6 +75,8 @@ final class EntityRegenerator
                     continue;
                 }
 
+                //                dump([$fieldName => $mapping]);
+
                 $className = $mapping['class'];
 
                 $embeddedClasses[$fieldName] = $this->getPathOfClass($className);
@@ -102,7 +104,9 @@ final class EntityRegenerator
                     continue;
                 }
 
-                $manipulator->addEntityField($fieldName, $mapping);
+                //                dump([$classMetadata]);
+
+                $manipulator->addEntityField($fieldName, (array) $mapping);
             }
 
             $getIsNullable = function (array $mapping) {
