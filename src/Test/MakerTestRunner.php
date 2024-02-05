@@ -175,8 +175,10 @@ class MakerTestRunner
             // make sure the database doesn't exist...
             $this->runConsole('doctrine:database:drop', [], '--env=test --force');
 
-            // create the schema
-            $this->runConsole('doctrine:schema:create', [], '--env=test');
+            if ($createSchema) {
+                // create the schema
+                $this->runConsole('doctrine:schema:create', [], '--env=test');
+            }
 
             return;
         }
