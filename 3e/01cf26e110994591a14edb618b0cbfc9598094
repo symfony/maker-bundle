@@ -1,0 +1,17 @@
+---------------------------------------------------------------------------
+
+by derrabus at 2024-02-05T07:31:19Z
+
+What if someone still uses DBAL 3 and relies on those deprecated types?
+
+---------------------------------------------------------------------------
+
+by stof at 2024-02-05T10:06:43Z
+
+I suggest putting the type name as a string for those instead of removing them entirely for those legacy types (as done for the `uuid` and `ulid` types)
+
+---------------------------------------------------------------------------
+
+by njutn95 at 2024-02-05T10:54:02Z
+
+You're right! I've added backward compatibility. I just thought that adding the BC for something that has already been deprecated in the past is not really worth it in the maker bundle.
