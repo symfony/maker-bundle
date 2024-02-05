@@ -97,6 +97,7 @@ final class EntityRegenerator
                     [$fieldName, $embeddedFiledName] = explode('.', $fieldName);
 
 //                    $operations[$embeddedClasses[$fieldName]]->addEntityField($embeddedFiledName, $mapping);
+                    dump(['regen' => $embeddedFiledName, $mapping]);
                     $operations[$embeddedClasses[$fieldName]]->addEntityField(new ClassPropertyModel(
                         propertyName: $embeddedFiledName,
                         type: $mapping['type'] ?? $mapping->type

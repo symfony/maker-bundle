@@ -138,6 +138,7 @@ final class ClassSourceManipulator
 
         // @TODO foreach over the properties and check if they're null. If not -> add to $someArray
 
+        dump($mapping->getAttributes(), $mapping);
         $attributes[] = $this->buildAttributeNode(Column::class, $mapping->getAttributes(), 'ORM');
 
         $defaultValue = null;
