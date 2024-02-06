@@ -58,9 +58,10 @@ class ClassPropertyModel
 
     public static function createFromObject(FieldMapping|array $data): self
     {
-        if (is_array($data)) {
-            @trigger_deprecation('symfony/maker-bundle', 'v99999', 'Found some data as an array....');
-        }
+        // @TODO _ @legacy - REMOVE DEPRECATION
+//        if (is_array($data)) {
+//            @trigger_deprecation('symfony/maker-bundle', 'v99999', 'Found some data as an array....');
+//        }
 
         // @TODO - Better exception
         if (empty($data['fieldName']) || empty($data['type'])) {
