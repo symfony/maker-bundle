@@ -36,7 +36,7 @@ final class RelationOneToMany extends BaseCollectionRelation
 
     public static function createFromObject(OneToManyAssociationMapping|array $mapping): self
     {
-        /* @legacy Remove conditional when ORM x is no longer supported! */
+        /* @legacy Remove conditional when ORM 2.x is no longer supported! */
         if (\is_array($mapping)) {
             return new self(
                 propertyName: $mapping['fieldName'],

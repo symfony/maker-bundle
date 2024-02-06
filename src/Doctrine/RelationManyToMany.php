@@ -32,13 +32,13 @@ final class RelationManyToMany extends BaseCollectionRelation
 
     public static function createFromObject(ManyToManyInverseSideMapping|ManyToManyOwningSideMapping|array $mapping): self
     {
-        /* @legacy Remove conditional when ORM x is no longer supported! */
+        /* @legacy Remove conditional when ORM 2.x is no longer supported! */
         if (\is_array($mapping)) {
             return new self(
                 propertyName: $mapping['fieldName'],
                 targetClassName: $mapping['targetEntity'],
                 targetPropertyName: $mapping['mappedBy'],
-                mapInverseRelation: $mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true,
+                mapInverseRelation: !$mapping['isOwningSide'] || null !== $mapping['inversedBy'],
                 isOwning: $mapping['isOwningSide'],
             );
         }
@@ -47,7 +47,7 @@ final class RelationManyToMany extends BaseCollectionRelation
             return new self(
                 propertyName: $mapping->fieldName,
                 targetClassName: $mapping->targetEntity,
-                targetPropertyName: $mapping->inversedBy, // @TODO _ @legacy Is this correct?
+                targetPropertyName: $mapping->inversedBy,
                 mapInverseRelation: (null !== $mapping->inversedBy),
                 isOwning: $mapping->isOwningSide(),
             );

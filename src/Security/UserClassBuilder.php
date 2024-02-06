@@ -199,7 +199,6 @@ final class UserClassBuilder
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
-                // @TODO - Test for comments added to property
                 new ClassProperty(propertyName: 'password', type: 'string', comments: [$propertyDocs])
             );
         } else {
