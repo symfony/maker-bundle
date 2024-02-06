@@ -63,16 +63,6 @@ final class ClassProperty
 
     public static function createFromObject(FieldMapping|array $data): self
     {
-        // @TODO _ @legacy - REMOVE DEPRECATION
-//        if (is_array($data)) {
-//            @trigger_deprecation('symfony/maker-bundle', 'v99999', 'Found some data as an array....');
-//        }
-
-        // @TODO - Better exception
-        if (empty($data['fieldName']) || empty($data['type'])) {
-            throw new RuntimeCommandException('Cannot create property model - "fieldName" & "type" are required.');
-        }
-
         if ($data instanceof FieldMapping) {
             return new self(
                 propertyName: $data->fieldName,
@@ -85,6 +75,11 @@ final class ClassProperty
                 scale: $data->scale,
                 unique: $data->unique ?? false,
             );
+        }
+
+        /* @legacy Remove when ORM 2.x is no longer supported. */
+        if (empty($data['fieldName']) || empty($data['type'])) {
+            throw new RuntimeCommandException('Cannot create property model - "fieldName" & "type" are required.');
         }
 
         return new self(

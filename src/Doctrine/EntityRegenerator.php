@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\EmbeddedClassMapping;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
@@ -76,7 +77,8 @@ final class EntityRegenerator
                     continue;
                 }
 
-                $className = $mapping['class'];
+                /** @legacy - Remove conditional when ORM 2.x is no longer supported. */
+                $className = ($mapping instanceof EmbeddedClassMapping) ? $mapping->class : $mapping['class'];
 
                 $embeddedClasses[$fieldName] = $this->getPathOfClass($className);
 
