@@ -40,6 +40,10 @@ class ClassPropertyModel
             $attributes['options'] = $this->options;
         }
 
+        if ($this->unique) {
+            $attributes['unique'] = true;
+        }
+
         foreach (['length', 'id', 'nullable', 'precision', 'scale'] as $property) {
             if (null !== $this->$property) {
                 $attributes[$property] = $this->$property;
