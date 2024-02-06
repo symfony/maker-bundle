@@ -126,50 +126,61 @@ final class EntityRegenerator
 
                 switch ($mapping['type']) {
                     case ClassMetadata::MANY_TO_ONE:
-                        $relation = (new RelationManyToOne(
-                            propertyName: $mapping['fieldName'],
-                            targetClassName: $mapping['targetEntity'],
-                            targetPropertyName: $mapping['inversedBy'],
-                            mapInverseRelation: null !== $mapping['inversedBy'],
-                            isOwning: true,
-                            isNullable: $getIsNullable($mapping),
-                        ));
+                        //                        $relation = (new RelationManyToOne(
+                        //                            propertyName: $mapping['fieldName'],
+                        //                            targetClassName: $mapping['targetEntity'],
+                        //                            targetPropertyName: $mapping['inversedBy'],
+                        //                            mapInverseRelation: null !== $mapping['inversedBy'],
+                        //                            isOwning: true,
+                        //                            isNullable: $getIsNullable($mapping),
+                        //                        ));
+
+                        // @TODO - handle isNullable
+                        $relation = RelationManyToOne::createFromObject($mapping);
 
                         $manipulator->addManyToOneRelation($relation);
 
                         break;
                     case ClassMetadata::ONE_TO_MANY:
-                        $relation = (new RelationOneToMany(
-                            propertyName: $mapping['fieldName'],
-                            targetClassName: $mapping['targetEntity'],
-                            targetPropertyName: $mapping['mappedBy'],
-                            orphanRemoval: $mapping['orphanRemoval'],
-                        ));
+                        //                        $relation = (new RelationOneToMany(
+                        //                            propertyName: $mapping['fieldName'],
+                        //                            targetClassName: $mapping['targetEntity'],
+                        //                            targetPropertyName: $mapping['mappedBy'],
+                        //                            orphanRemoval: $mapping['orphanRemoval'],
+                        //                        ));
+
+                        $relation = RelationOneToMany::createFromObject($mapping);
 
                         $manipulator->addOneToManyRelation($relation);
 
                         break;
                     case ClassMetadata::MANY_TO_MANY:
-                        $relation = (new RelationManyToMany(
-                            propertyName: $mapping['fieldName'],
-                            targetClassName: $mapping['targetEntity'],
-                            targetPropertyName: $mapping['mappedBy'],
-                            mapInverseRelation: $mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true,
-                            isOwning: $mapping['isOwningSide'],
-                        ));
+                        // @TODO _ @legacy mappedBy Doesnt exist on object
+                        //                        $relation = (new RelationManyToMany(
+                        //                            propertyName: $mapping['fieldName'],
+                        //                            targetClassName: $mapping['targetEntity'],
+                        //                            targetPropertyName: $mapping['mappedBy'],
+                        //                            mapInverseRelation: $mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true,
+                        //                            isOwning: $mapping['isOwningSide'],
+                        //                        ));
+
+                        $relation = RelationManyToMany::createFromObject($mapping);
 
                         $manipulator->addManyToManyRelation($relation);
 
                         break;
                     case ClassMetadata::ONE_TO_ONE:
-                        $relation = (new RelationOneToOne(
-                            propertyName: $mapping['fieldName'],
-                            targetClassName: $mapping['targetEntity'],
-                            targetPropertyName: $mapping['isOwningSide'] ? $mapping['inversedBy'] : $mapping['mappedBy'],
-                            mapInverseRelation: $mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true,
-                            isOwning: $mapping['isOwningSide'],
-                            isNullable: $getIsNullable($mapping),
-                        ));
+                        // @TODO _ @legacy - mappedBy and isNullable
+                        //                        $relation = (new RelationOneToOne(
+                        //                            propertyName: $mapping['fieldName'],
+                        //                            targetClassName: $mapping['targetEntity'],
+                        //                            targetPropertyName: $mapping['isOwningSide'] ? $mapping['inversedBy'] : $mapping['mappedBy'],
+                        //                            mapInverseRelation: $mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true,
+                        //                            isOwning: $mapping['isOwningSide'],
+                        //                            isNullable: $getIsNullable($mapping),
+                        //                        ));
+
+                        $relation = RelationOneToOne::createFromObject($mapping);
 
                         $manipulator->addOneToOneRelation($relation);
 

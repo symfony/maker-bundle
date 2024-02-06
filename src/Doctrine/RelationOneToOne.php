@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
+use Doctrine\ORM\Mapping\OneToOneInverseSideMapping;
+use Doctrine\ORM\Mapping\OneToOneOwningSideMapping;
 use Symfony\Bundle\MakerBundle\Str;
 
 /**
@@ -26,5 +28,30 @@ final class RelationOneToOne extends BaseRelation
     public function getTargetSetterMethodName(): string
     {
         return 'set'.Str::asCamelCase($this->getTargetPropertyName());
+    }
+
+    public static function createFromObject(OneToOneInverseSideMapping|OneToOneOwningSideMapping $mapping): self
+    {
+        // @TODO - Handle arrays
+
+        if ($mapping instanceof OneToOneOwningSideMapping) {
+            return new self(
+                propertyName: $mapping->fieldName,
+                targetClassName: $mapping->targetEntity,
+                targetPropertyName: $mapping->inversedBy,
+                mapInverseRelation: (null !== $mapping->inversedBy),
+                isOwning: true,
+                //            isNullable: // @TODO Handle Nullable
+            );
+        }
+
+        return new self(
+            propertyName: $mapping->fieldName,
+            targetClassName: $mapping->targetEntity,
+            targetPropertyName: $mapping->mappedBy,
+            mapInverseRelation: true,
+            isOwning: false,
+            //            isNullable: // @TODO Handle Nullable
+        );
     }
 }

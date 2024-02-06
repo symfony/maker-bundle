@@ -11,9 +11,22 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
+use Doctrine\ORM\Mapping\ManyToOneAssociationMapping;
+
 /**
  * @internal
  */
 final class RelationManyToOne extends BaseRelation
 {
+    public static function createFromObject(ManyToOneAssociationMapping $data): self
+    {
+        return new self(
+            propertyName: $data->fieldName,
+            targetClassName: $data->targetEntity,
+            targetPropertyName: $data->inversedBy,
+            mapInverseRelation: null !== $data->inversedBy,
+            isOwning: true,
+            //            isNullable:
+        );
+    }
 }

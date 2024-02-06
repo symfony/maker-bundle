@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
+use Doctrine\ORM\Mapping\OneToManyAssociationMapping;
 use Symfony\Bundle\MakerBundle\Str;
 
 /**
@@ -31,5 +32,15 @@ final class RelationOneToMany extends BaseCollectionRelation
     public function isMapInverseRelation(): bool
     {
         throw new \Exception('OneToMany IS the inverse side!');
+    }
+
+    public static function createFromObject(OneToManyAssociationMapping $data): self
+    {
+        return new self(
+            propertyName: $data->fieldName,
+            targetClassName: $data->targetEntity,
+            targetPropertyName: $data->mappedBy,
+            orphanRemoval: $data->orphanRemoval,
+        );
     }
 }
