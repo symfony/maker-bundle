@@ -68,6 +68,20 @@ class ClassPropertyModel
             throw new RuntimeCommandException('Cannot create property model - "fieldName" & "type" are required.');
         }
 
+        if ($data instanceof FieldMapping) {
+            return new self(
+                propertyName: $data->fieldName,
+                type: $data->type,
+                length: $data->length,
+                id: $data->id ?? false,
+                nullable: $data->nullable ?? false,
+                options: $data->options ?? [],
+                precision: $data->precision,
+                scale: $data->scale,
+                unique: $data->unique ?? false,
+            );
+        }
+
         return new self(
             propertyName: $data['fieldName'],
             type: $data['type'],
