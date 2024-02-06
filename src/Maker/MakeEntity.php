@@ -229,15 +229,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $fileManagerOperations[$entityPath] = $manipulator;
 
             if ($newField instanceof ClassPropertyModel) {
-//            if (\is_array($newField)) {
-//                $annotationOptions = $newField;
-//                unset($annotationOptions['fieldName']);
-//                dump(['newField' => $newField]);
-//                $manipulator->addEntityField($newField['fieldName'], $annotationOptions);
                 $manipulator->addEntityField($newField);
 
                 $currentFields[] = $newField->propertyName;
-//                $currentFields[] = $newField['fieldName'];
             } elseif ($newField instanceof EntityRelation) {
                 // both overridden below for OneToMany
                 $newFieldName = $newField->getOwningProperty();
@@ -412,30 +406,24 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         // this is a normal field
-//        $data = ['fieldName' => $fieldName, 'type' => $type];
         $classProperty = new ClassPropertyModel(propertyName: $fieldName, type: $type);
 
         if ('string' === $type) {
             // default to 255, avoid the question
             $classProperty->length = $io->ask('Field length', 255, [Validator::class, 'validateLength']);
-//            $data['length'] = $io->ask('Field length', 255, [Validator::class, 'validateLength']);
         } elseif ('decimal' === $type) {
             // 10 is the default value given in \Doctrine\DBAL\Schema\Column::$_precision
-//            $data['precision'] = $io->ask('Precision (total number of digits stored: 100.00 would be 5)', 10, [Validator::class, 'validatePrecision']);
             $classProperty->precision = $io->ask('Precision (total number of digits stored: 100.00 would be 5)', 10, [Validator::class, 'validatePrecision']);
 
             // 0 is the default value given in \Doctrine\DBAL\Schema\Column::$_scale
-//            $data['scale'] = $io->ask('Scale (number of decimals to store: 100.00 would be 2)', 0, [Validator::class, 'validateScale']);
             $classProperty->scale = $io->ask('Scale (number of decimals to store: 100.00 would be 2)', 0, [Validator::class, 'validateScale']);
         }
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {
             $classProperty->nullable = true;
-//            $data['nullable'] = true;
         }
 
         return $classProperty;
-//        return $data;
     }
 
     private function printAvailableTypes(ConsoleStyle $io): void

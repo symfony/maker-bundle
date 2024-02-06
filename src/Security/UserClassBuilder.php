@@ -59,13 +59,6 @@ final class UserClassBuilder
                     length: 180,
                     unique: true,
                 )
-
-//                [
-//                    'type' => 'string',
-//                    // https://github.com/FriendsOfSymfony/FOSUserBundle/issues/1919
-//                    'length' => 180,
-//                    'unique' => true,
-//                ]
             );
         } else {
             // add normal property
@@ -107,10 +100,6 @@ final class UserClassBuilder
             // add entity property
             $manipulator->addEntityField(
                 new ClassPropertyModel(propertyName: 'roles', type: 'json')
-//                'roles',
-//                [
-//                    'type' => 'json',
-//                ]
             );
         } else {
             // add normal property
@@ -210,12 +199,8 @@ final class UserClassBuilder
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
+                // @TODO - Test for comments added to property
                 new ClassPropertyModel(propertyName: 'password', type: 'string', comments: [$propertyDocs])
-//                'password',
-//                [
-//                    'type' => 'string',
-//                ],
-//                [$propertyDocs]
             );
         } else {
             // add normal property

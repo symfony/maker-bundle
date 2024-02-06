@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle\Util\CSM;
 
+use Doctrine\ORM\Mapping\FieldMapping;
+
 class ClassPropertyModel
 {
     public function __construct(
@@ -53,7 +55,7 @@ class ClassPropertyModel
         return $attributes;
     }
 
-    public static function createFromArray(\Doctrine\ORM\Mapping\FieldMapping|array $data): self
+    public static function createFromArray(FieldMapping|array $data): self
     {
         // @TODO - Better exception
         if (empty($data['fieldName']) || empty($data['type'])) {
@@ -73,13 +75,4 @@ class ClassPropertyModel
             unique: $data['unique'] ?? false,
         );
     }
-
-//    public static function createFromObject(\Doctrine\ORM\Mapping\FieldMapping $mapping): self
-//    {
-////        return new self(
-////            type: $mapping->type,
-////            id: $mapping->id,
-////            nullable: $mapping->nullable,
-////        );
-//    }
 }

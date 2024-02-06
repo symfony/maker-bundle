@@ -106,9 +106,6 @@ final class EntityRegenerator
                     continue;
                 }
 
-//                $x = ClassPropertyModel::createFromArray($mapping);
-//                dump([$fieldName, $mapping, $x]);
-//                $manipulator->addEntityField(new ClassPropertyModel(propertyName: $fieldName, type: $mapping['type'] ?? $mapping->type));
                 $manipulator->addEntityField(ClassPropertyModel::createFromArray($mapping));
             }
 
