@@ -94,7 +94,7 @@ final class EntityRegenerator
                 if (str_contains($fieldName, '.')) {
                     [$fieldName, $embeddedFiledName] = explode('.', $fieldName);
 
-                    $property = ClassPropertyModel::createFromArray($mapping);
+                    $property = ClassPropertyModel::createFromObject($mapping);
                     $property->propertyName = $embeddedFiledName;
 
                     $operations[$embeddedClasses[$fieldName]]->addEntityField($property);
@@ -106,7 +106,7 @@ final class EntityRegenerator
                     continue;
                 }
 
-                $manipulator->addEntityField(ClassPropertyModel::createFromArray($mapping));
+                $manipulator->addEntityField(ClassPropertyModel::createFromObject($mapping));
             }
 
             // @TODO _ @legacy - Type needed for mapping

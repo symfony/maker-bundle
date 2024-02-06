@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Util\CSM;
 
 use Doctrine\ORM\Mapping\FieldMapping;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 
 class ClassPropertyModel
 {
@@ -55,11 +56,15 @@ class ClassPropertyModel
         return $attributes;
     }
 
-    public static function createFromArray(FieldMapping|array $data): self
+    public static function createFromObject(FieldMapping|array $data): self
     {
+        if (is_array($data)) {
+            @trigger_deprecation('symfony/maker-bundle', 'v99999', 'Found some data as an array....');
+        }
+
         // @TODO - Better exception
         if (empty($data['fieldName']) || empty($data['type'])) {
-            throw new \RuntimeException('Needs name and type');
+            throw new RuntimeCommandException('Cannot create property model - "fieldName" & "type" are required.');
         }
 
         return new self(
