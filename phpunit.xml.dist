@@ -18,6 +18,7 @@
         <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0"/>
         <env name="SYMFONY_PHPUNIT_VERSION" value="9.6" />
         <env name="MAKER_SKIP_MERCURE_TEST" value="false"/>
+        <env name="MAKER_SKIP_PANTHER_TEST" value="false" />
     </php>
 
     <testsuites>

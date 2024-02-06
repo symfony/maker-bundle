@@ -1,0 +1,70 @@
+name: "CI Windows"
+
+on:
+    pull_request:
+    push:
+        branches:
+            - 'main'
+    schedule:
+        -   cron: '0 0 * * *'
+
+env:
+    PHPUNIT_FLAGS: "-v"
+    SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
+    MAKER_SKIP_MERCURE_TEST: 1
+    MAKER_SKIP_PANTHER_TEST: 1
+    MAKER_DISABLE_FILE_LINKS: 1
+    MAKER_ALLOW_DEV_DEPS_IN_APP: 0
+    SYMFONY_VERSION: '7.0.x-dev'
+
+jobs:
+    tests:
+        name: Testing on Windows
+        runs-on: [windows-latest]
+        strategy:
+            fail-fast: false
+            matrix:
+                php-versions: [8.2]
+                dependency-versions: ['highest']
+        steps:
+            # This is needed in Windows, otherwise assertions comparing fixtures and generated code will fail.
+            - name: Use INPUT for autocrlf in Git Config
+              run: git config --global core.autocrlf input
+
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup SQLite For Entity Regen Tests
+              run: |
+                  choco install sqlite --params "/NoTools"
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php-versions }}
+                  extensions: pdo, pdo_sqlite
+
+            - name: Composer Install
+              uses: "ramsey/composer-install@v2"
+              with:
+                  dependency-versions: "${{ matrix.dependency-versions }}"
+
+            - name: Composer install php-cs-fixer
+              uses: "ramsey/composer-install@v2"
+              with:
+                  composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
+
+            - name: Composer install twigcs
+              uses: "ramsey/composer-install@v2"
+              with:
+                  composer-options: "--no-scripts --working-dir=tools/twigcs"
+
+            - name: Install PHPUnit
+              run: |
+                  vendor/bin/simple-phpunit install
+
+            - name: PHPUnit Version
+              run: vendor/bin/simple-phpunit --version
+
+            - name: Run Tests
+              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}

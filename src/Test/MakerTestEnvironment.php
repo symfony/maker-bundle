@@ -22,6 +22,8 @@ use Symfony\Component\Process\InputStream;
  */
 final class MakerTestEnvironment
 {
+    public const GENERATED_FILES_REGEX = '#(?:created|updated):\s(?:.*\\\\)*(.*\.[a-z]{3,4}).*(?:\\\\n)?#ui';
+
     private Filesystem $fs;
     private bool|string $rootPath;
     private string $cachePath;
@@ -213,9 +215,9 @@ final class MakerTestEnvironment
 
         $matches = [];
 
-        preg_match_all('#(created|updated): (]8;;[^]*\\\)?(.*?)(]8;;\\\)?\n#iu', $output, $matches, \PREG_PATTERN_ORDER);
+        preg_match_all(self::GENERATED_FILES_REGEX, $output, $matches, \PREG_PATTERN_ORDER);
 
-        return array_map('trim', $matches[3]);
+        return array_map('trim', $matches[1]);
     }
 
     public function fileExists(string $file): bool
