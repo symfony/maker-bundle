@@ -173,13 +173,18 @@ class MakerTestRunner
 
         // this looks silly, but it's the only way to drop the database *for sure*,
         // as doctrine:database:drop will error if there is no database
-        // also, skip for SQLITE, as it does not support --if-not-exists
-        if (!str_starts_with(getenv('TEST_DATABASE_DSN'), 'sqlite://')) {
+        if (!$usingSqlite = str_starts_with(getenv('TEST_DATABASE_DSN'), 'sqlite')) {
+            // --if-not-exists not supported on SQLite
             $this->runConsole('doctrine:database:create', [], '--env=test --if-not-exists');
         }
+
         $this->runConsole('doctrine:database:drop', [], '--env=test --force');
 
-        $this->runConsole('doctrine:database:create', [], '--env=test');
+        if (!$usingSqlite) {
+            // d:d:create not supported on SQLite
+            $this->runConsole('doctrine:database:create', [], '--env=test');
+        }
+
         if ($createSchema) {
             $this->runConsole('doctrine:schema:create', [], '--env=test');
         }

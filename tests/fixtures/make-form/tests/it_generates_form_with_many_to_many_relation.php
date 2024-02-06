@@ -6,10 +6,10 @@ use App\Entity\Library;
 use App\Entity\Book;
 use App\Form\BookType;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Form\DoctrineOrmExtension;
@@ -80,7 +80,7 @@ class GeneratedFormTest extends TypeTestCase
                 [Library::class, new ClassMetadata(Library::class)],
             ]);
 
-        $execute = $this->createMock(AbstractQuery::class);
+        $execute = $this->createMock(Query::class);
         $execute->method('execute')
             ->willReturn([
                 (new Library())->setName('foo'),

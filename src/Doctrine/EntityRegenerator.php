@@ -12,11 +12,13 @@
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\EmbeddedClassMapping;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 
 /**
@@ -75,7 +77,8 @@ final class EntityRegenerator
                     continue;
                 }
 
-                $className = $mapping['class'];
+                /** @legacy - Remove conditional when ORM 2.x is no longer supported. */
+                $className = ($mapping instanceof EmbeddedClassMapping) ? $mapping->class : $mapping['class'];
 
                 $embeddedClasses[$fieldName] = $this->getPathOfClass($className);
 
@@ -93,7 +96,10 @@ final class EntityRegenerator
                 if (str_contains($fieldName, '.')) {
                     [$fieldName, $embeddedFiledName] = explode('.', $fieldName);
 
-                    $operations[$embeddedClasses[$fieldName]]->addEntityField($embeddedFiledName, $mapping);
+                    $property = ClassProperty::createFromObject($mapping);
+                    $property->propertyName = $embeddedFiledName;
+
+                    $operations[$embeddedClasses[$fieldName]]->addEntityField($property);
 
                     continue;
                 }
@@ -102,17 +108,8 @@ final class EntityRegenerator
                     continue;
                 }
 
-                $manipulator->addEntityField($fieldName, $mapping);
+                $manipulator->addEntityField(ClassProperty::createFromObject($mapping));
             }
-
-            $getIsNullable = function (array $mapping) {
-                if (!isset($mapping['joinColumns'][0]['nullable'])) {
-                    // the default for relationships IS nullable
-                    return true;
-                }
-
-                return $mapping['joinColumns'][0]['nullable'];
-            };
 
             foreach ($classMetadata->associationMappings as $fieldName => $mapping) {
                 if (!\in_array($fieldName, $mappedFields)) {
@@ -121,52 +118,19 @@ final class EntityRegenerator
 
                 switch ($mapping['type']) {
                     case ClassMetadata::MANY_TO_ONE:
-                        $relation = (new RelationManyToOne(
-                            propertyName: $mapping['fieldName'],
-                            targetClassName: $mapping['targetEntity'],
-                            targetPropertyName: $mapping['inversedBy'],
-                            mapInverseRelation: null !== $mapping['inversedBy'],
-                            isOwning: true,
-                            isNullable: $getIsNullable($mapping),
-                        ));
-
-                        $manipulator->addManyToOneRelation($relation);
+                        $manipulator->addManyToOneRelation(RelationManyToOne::createFromObject($mapping));
 
                         break;
                     case ClassMetadata::ONE_TO_MANY:
-                        $relation = (new RelationOneToMany(
-                            propertyName: $mapping['fieldName'],
-                            targetClassName: $mapping['targetEntity'],
-                            targetPropertyName: $mapping['mappedBy'],
-                            orphanRemoval: $mapping['orphanRemoval'],
-                        ));
-
-                        $manipulator->addOneToManyRelation($relation);
+                        $manipulator->addOneToManyRelation(RelationOneToMany::createFromObject($mapping));
 
                         break;
                     case ClassMetadata::MANY_TO_MANY:
-                        $relation = (new RelationManyToMany(
-                            propertyName: $mapping['fieldName'],
-                            targetClassName: $mapping['targetEntity'],
-                            targetPropertyName: $mapping['mappedBy'],
-                            mapInverseRelation: $mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true,
-                            isOwning: $mapping['isOwningSide'],
-                        ));
-
-                        $manipulator->addManyToManyRelation($relation);
+                        $manipulator->addManyToManyRelation(RelationManyToMany::createFromObject($mapping));
 
                         break;
                     case ClassMetadata::ONE_TO_ONE:
-                        $relation = (new RelationOneToOne(
-                            propertyName: $mapping['fieldName'],
-                            targetClassName: $mapping['targetEntity'],
-                            targetPropertyName: $mapping['isOwningSide'] ? $mapping['inversedBy'] : $mapping['mappedBy'],
-                            mapInverseRelation: $mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true,
-                            isOwning: $mapping['isOwningSide'],
-                            isNullable: $getIsNullable($mapping),
-                        ));
-
-                        $manipulator->addOneToOneRelation($relation);
+                        $manipulator->addOneToOneRelation(RelationOneToOne::createFromObject($mapping));
 
                         break;
                     default:

@@ -5,10 +5,10 @@ namespace App\Tests;
 use App\Entity\Librarian;
 use App\Entity\Library;
 use App\Form\LibraryType;
-use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Form\DoctrineOrmExtension;
@@ -53,16 +53,15 @@ class GeneratedFormTest extends TypeTestCase
             ])
         ;
 
-        $execute = $this->createMock(AbstractQuery::class);
+        $execute = $this->createMock(Query::class);
         $execute->method('execute')
             ->willReturn([
-                (new Librarian())->setName('foo')
+                (new Librarian())->setName('foo'),
             ]);
 
         $query = $this->createMock(QueryBuilder::class);
         $query->method('getQuery')
             ->willReturn($execute);
-
 
         $entityRepository = $this->createMock(EntityRepository::class);
         $entityRepository->method('createQueryBuilder')

@@ -17,13 +17,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Mapping\MappingException as ORMMappingException;
 use Doctrine\ORM\Mapping\NamingStrategy;
-use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\AbstractClassMetadataFactory;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
+use Doctrine\Persistence\Mapping\StaticReflectionService;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Uid\Uuid;
@@ -174,8 +174,8 @@ final class DoctrineHelper
                     $loaded = $this->isInstanceOf($cmf, AbstractClassMetadataFactory::class) ? $cmf->getLoadedMetadata() : [];
                 }
 
-                $cmf = new DisconnectedClassMetadataFactory();
-                $cmf->setEntityManager($em);
+                // Set the reflection service that was used in the now removed DisconnectedClassMetadataFactory::class
+                $cmf->setReflectionService(new StaticReflectionService());
 
                 foreach ($loaded as $m) {
                     $cmf->setMetadataFor($m->getName(), $m);

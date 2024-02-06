@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Security;
 
 use PhpParser\Node;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -52,13 +53,12 @@ final class UserClassBuilder
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
-                $userClassConfig->getIdentityPropertyName(),
-                [
-                    'type' => 'string',
-                    // https://github.com/FriendsOfSymfony/FOSUserBundle/issues/1919
-                    'length' => 180,
-                    'unique' => true,
-                ]
+                new ClassProperty(
+                    propertyName: $userClassConfig->getIdentityPropertyName(),
+                    type: 'string',
+                    length: 180,
+                    unique: true,
+                )
             );
         } else {
             // add normal property
@@ -99,10 +99,7 @@ final class UserClassBuilder
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
-                'roles',
-                [
-                    'type' => 'json',
-                ]
+                new ClassProperty(propertyName: 'roles', type: 'json')
             );
         } else {
             // add normal property
@@ -202,11 +199,7 @@ final class UserClassBuilder
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
-                'password',
-                [
-                    'type' => 'string',
-                ],
-                [$propertyDocs]
+                new ClassProperty(propertyName: 'password', type: 'string', comments: [$propertyDocs])
             );
         } else {
             // add normal property
