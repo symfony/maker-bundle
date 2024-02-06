@@ -17,7 +17,7 @@ class User
     #[ORM\Column()]
     private ?int $id = null;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserAvatarPhoto::class)]
+    #[ORM\OneToMany(targetEntity: UserAvatarPhoto::class, mappedBy: 'user')]
     private Collection $avatarPhotos;
 
     public function __construct()

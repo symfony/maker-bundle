@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\FieldMapping;
 use PhpParser\Builder\Param;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
@@ -236,6 +237,9 @@ class ClassSourceManipulatorTest extends TestCase
 
     public function getAddEntityFieldTests(): \Generator
     {
+        /** @legacy - Remove when Doctrine/ORM 2.x is no longer supported. */
+        $isLegacy = !class_exists(FieldMapping::class);
+
         yield 'entity_normal_add' => [
             'User_simple.php',
             new ClassProperty(propertyName: 'fooProp', type: 'string', length: 255,  nullable: false, options: ['comment' => 'new field']),
@@ -263,7 +267,7 @@ class ClassSourceManipulatorTest extends TestCase
         yield 'entity_add_object' => [
             'User_simple.php',
             new ClassProperty(propertyName: 'someObject', type: 'object'),
-            'User_simple_object.php',
+            $isLegacy ? 'legacy/User_simple_object.php' : 'User_simple_object.php',
         ];
 
         yield 'entity_add_uuid' => [
@@ -384,6 +388,11 @@ class ClassSourceManipulatorTest extends TestCase
     {
         $sourcePath = __DIR__.'/fixtures/source';
         $expectedPath = __DIR__.'/fixtures/add_one_to_many_relation';
+
+        /** @legacy - Remove when Doctrine/ORM 2.x is no longer supported. */
+        if (!class_exists(FieldMapping::class)) {
+            $expectedPath.= '/legacy';
+        }
 
         $this->runAddOneToManyRelationTests(
             file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
@@ -522,6 +531,9 @@ class ClassSourceManipulatorTest extends TestCase
 
     public function getAddOneToOneRelationTests(): \Generator
     {
+        /** @legacy - Remove when Doctrine/ORM 2.x is no longer supported. */
+        $isLegacy = !class_exists(FieldMapping::class);
+
         yield 'one_to_one_owning' => [
             'User_simple.php',
             'User_simple_owning.php',
@@ -537,7 +549,7 @@ class ClassSourceManipulatorTest extends TestCase
         // a relationship to yourself - return type is self
         yield 'one_to_one_owning_self' => [
             'User_simple.php',
-            'User_simple_self.php',
+            $isLegacy ? 'legacy/User_simple_self.php' : 'User_simple_self.php',
             new RelationOneToOne(
                 propertyName: 'embeddedUser',
                 targetClassName: \App\Entity\User::class,
