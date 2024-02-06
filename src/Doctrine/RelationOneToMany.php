@@ -34,13 +34,23 @@ final class RelationOneToMany extends BaseCollectionRelation
         throw new \Exception('OneToMany IS the inverse side!');
     }
 
-    public static function createFromObject(OneToManyAssociationMapping $data): self
+    public static function createFromObject(OneToManyAssociationMapping|array $mapping): self
     {
+        /* @legacy Remove conditional when ORM x is no longer supported! */
+        if (\is_array($mapping)) {
+            return new self(
+                propertyName: $mapping['fieldName'],
+                targetClassName: $mapping['targetEntity'],
+                targetPropertyName: $mapping['mappedBy'],
+                orphanRemoval: $mapping['orphanRemoval'],
+            );
+        }
+
         return new self(
-            propertyName: $data->fieldName,
-            targetClassName: $data->targetEntity,
-            targetPropertyName: $data->mappedBy,
-            orphanRemoval: $data->orphanRemoval,
+            propertyName: $mapping->fieldName,
+            targetClassName: $mapping->targetEntity,
+            targetPropertyName: $mapping->mappedBy,
+            orphanRemoval: $mapping->orphanRemoval,
         );
     }
 }

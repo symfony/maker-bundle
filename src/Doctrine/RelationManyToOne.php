@@ -18,15 +18,27 @@ use Doctrine\ORM\Mapping\ManyToOneAssociationMapping;
  */
 final class RelationManyToOne extends BaseRelation
 {
-    public static function createFromObject(ManyToOneAssociationMapping $data): self
+    public static function createFromObject(ManyToOneAssociationMapping|array $mapping): self
     {
+        /* @legacy Remove conditional when ORM x is no longer supported! */
+        if (\is_array($mapping)) {
+            return new self(
+                propertyName: $mapping['fieldName'],
+                targetClassName: $mapping['targetEntity'],
+                targetPropertyName: $mapping['inversedBy'],
+                mapInverseRelation: null !== $mapping['inversedBy'],
+                isOwning: true,
+                isNullable: $mapping['joinColumns'][0]['nullable'] ?? true,
+            );
+        }
+
         return new self(
-            propertyName: $data->fieldName,
-            targetClassName: $data->targetEntity,
-            targetPropertyName: $data->inversedBy,
-            mapInverseRelation: null !== $data->inversedBy,
+            propertyName: $mapping->fieldName,
+            targetClassName: $mapping->targetEntity,
+            targetPropertyName: $mapping->inversedBy,
+            mapInverseRelation: null !== $mapping->inversedBy,
             isOwning: true,
-            //            isNullable:
+            isNullable: $mapping->joinColumns[0]->nullable ?? true,
         );
     }
 }

@@ -30,8 +30,19 @@ final class RelationManyToMany extends BaseCollectionRelation
         return 'remove'.Str::asCamelCase(Str::pluralCamelCaseToSingular($this->getTargetPropertyName()));
     }
 
-    public static function createFromObject(ManyToManyInverseSideMapping|ManyToManyOwningSideMapping $mapping): self
+    public static function createFromObject(ManyToManyInverseSideMapping|ManyToManyOwningSideMapping|array $mapping): self
     {
+        /* @legacy Remove conditional when ORM x is no longer supported! */
+        if (\is_array($mapping)) {
+            return new self(
+                propertyName: $mapping['fieldName'],
+                targetClassName: $mapping['targetEntity'],
+                targetPropertyName: $mapping['mappedBy'],
+                mapInverseRelation: $mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true,
+                isOwning: $mapping['isOwningSide'],
+            );
+        }
+
         if ($mapping instanceof ManyToManyOwningSideMapping) {
             return new self(
                 propertyName: $mapping->fieldName,
@@ -45,7 +56,7 @@ final class RelationManyToMany extends BaseCollectionRelation
         return new self(
             propertyName: $mapping->fieldName,
             targetClassName: $mapping->targetEntity,
-            targetPropertyName: $mapping->mappedBy, // @TODO _ @legacy mappedBy Doesnt exist on object
+            targetPropertyName: $mapping->mappedBy,
             mapInverseRelation: true,
             isOwning: $mapping->isOwningSide(),
         );

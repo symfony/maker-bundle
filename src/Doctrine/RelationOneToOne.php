@@ -30,9 +30,19 @@ final class RelationOneToOne extends BaseRelation
         return 'set'.Str::asCamelCase($this->getTargetPropertyName());
     }
 
-    public static function createFromObject(OneToOneInverseSideMapping|OneToOneOwningSideMapping $mapping): self
+    public static function createFromObject(OneToOneInverseSideMapping|OneToOneOwningSideMapping|array $mapping): self
     {
-        // @TODO - Handle arrays
+        /* @legacy Remove conditional when ORM x is no longer supported! */
+        if (\is_array($mapping)) {
+            return new self(
+                propertyName: $mapping['fieldName'],
+                targetClassName: $mapping['targetEntity'],
+                targetPropertyName: $mapping['isOwningSide'] ? $mapping['inversedBy'] : $mapping['mappedBy'],
+                mapInverseRelation: $mapping['isOwningSide'] ? (null !== $mapping['inversedBy']) : true,
+                isOwning: $mapping['isOwningSide'],
+                isNullable: $mapping['joinColumns'][0]['nullable'] ?? true,
+            );
+        }
 
         if ($mapping instanceof OneToOneOwningSideMapping) {
             return new self(
@@ -41,7 +51,7 @@ final class RelationOneToOne extends BaseRelation
                 targetPropertyName: $mapping->inversedBy,
                 mapInverseRelation: (null !== $mapping->inversedBy),
                 isOwning: true,
-                //            isNullable: // @TODO Handle Nullable
+                isNullable: $mapping->joinColumns[0]->nullable ?? true,
             );
         }
 
@@ -51,7 +61,7 @@ final class RelationOneToOne extends BaseRelation
             targetPropertyName: $mapping->mappedBy,
             mapInverseRelation: true,
             isOwning: false,
-            //            isNullable: // @TODO Handle Nullable
+            isNullable: $mapping->joinColumns[0]->nullable ?? true,
         );
     }
 }
