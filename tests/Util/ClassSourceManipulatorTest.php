@@ -20,7 +20,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\CSM\ClassPropertyModel;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class ClassSourceManipulatorTest extends TestCase
@@ -214,7 +214,7 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddEntityFieldTests
      */
-    public function testAddEntityField(string $sourceFilename, ClassPropertyModel $propertyModel, $expectedSourceFilename): void
+    public function testAddEntityField(string $sourceFilename, ClassProperty $propertyModel, $expectedSourceFilename): void
     {
         $sourcePath = __DIR__.'/fixtures/source';
         $expectedPath = __DIR__.'/fixtures/add_entity_field';
@@ -226,7 +226,7 @@ class ClassSourceManipulatorTest extends TestCase
         );
     }
 
-    private function runAddEntityFieldTests(string $source, ClassPropertyModel $fieldOptions, string $expected): void
+    private function runAddEntityFieldTests(string $source, ClassProperty $fieldOptions, string $expected): void
     {
         $manipulator = new ClassSourceManipulator($source, false);
         $manipulator->addEntityField($fieldOptions);
@@ -238,43 +238,43 @@ class ClassSourceManipulatorTest extends TestCase
     {
         yield 'entity_normal_add' => [
             'User_simple.php',
-            new ClassPropertyModel(propertyName: 'fooProp', type: 'string', length: 255,  nullable: false, options: ['comment' => 'new field']),
+            new ClassProperty(propertyName: 'fooProp', type: 'string', length: 255,  nullable: false, options: ['comment' => 'new field']),
             'User_simple.php',
         ];
 
         yield 'entity_add_datetime' => [
             'User_simple.php',
-            new ClassPropertyModel(propertyName: 'createdAt', type: 'datetime', nullable: true),
+            new ClassProperty(propertyName: 'createdAt', type: 'datetime', nullable: true),
             'User_simple_datetime.php',
         ];
 
         yield 'entity_field_property_already_exists' => [
             'User_some_props.php',
-            new ClassPropertyModel(propertyName: 'firstName', type: 'string', length: 255, nullable: false),
+            new ClassProperty(propertyName: 'firstName', type: 'string', length: 255, nullable: false),
             'User_simple_prop_already_exists.php',
         ];
 
         yield 'entity_field_property_zero' => [
             'User_simple.php',
-            new ClassPropertyModel(propertyName: 'decimal', type: 'decimal', precision: 6, scale: 0),
+            new ClassProperty(propertyName: 'decimal', type: 'decimal', precision: 6, scale: 0),
             'User_simple_prop_zero.php',
         ];
 
         yield 'entity_add_object' => [
             'User_simple.php',
-            new ClassPropertyModel(propertyName: 'someObject', type: 'object'),
+            new ClassProperty(propertyName: 'someObject', type: 'object'),
             'User_simple_object.php',
         ];
 
         yield 'entity_add_uuid' => [
             'User_simple.php',
-            new ClassPropertyModel(propertyName: 'uuid', type: 'uuid'),
+            new ClassProperty(propertyName: 'uuid', type: 'uuid'),
             'User_simple_uuid.php',
         ];
 
         yield 'entity_add_ulid' => [
             'User_simple.php',
-            new ClassPropertyModel(propertyName: 'ulid', type: 'ulid'),
+            new ClassProperty(propertyName: 'ulid', type: 'ulid'),
             'User_simple_ulid.php',
         ];
     }

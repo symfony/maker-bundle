@@ -13,7 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Security;
 
 use PhpParser\Node;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\CSM\ClassPropertyModel;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -53,7 +53,7 @@ final class UserClassBuilder
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
-                new ClassPropertyModel(
+                new ClassProperty(
                     propertyName: $userClassConfig->getIdentityPropertyName(),
                     type: 'string',
                     length: 180,
@@ -99,7 +99,7 @@ final class UserClassBuilder
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
-                new ClassPropertyModel(propertyName: 'roles', type: 'json')
+                new ClassProperty(propertyName: 'roles', type: 'json')
             );
         } else {
             // add normal property
@@ -200,7 +200,7 @@ final class UserClassBuilder
             // add entity property
             $manipulator->addEntityField(
                 // @TODO - Test for comments added to property
-                new ClassPropertyModel(propertyName: 'password', type: 'string', comments: [$propertyDocs])
+                new ClassProperty(propertyName: 'password', type: 'string', comments: [$propertyDocs])
             );
         } else {
             // add normal property

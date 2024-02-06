@@ -9,12 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bundle\MakerBundle\Util\CSM;
+namespace Symfony\Bundle\MakerBundle\Util\ClassSource\Model;
 
 use Doctrine\ORM\Mapping\FieldMapping;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 
-class ClassPropertyModel
+/**
+ * @author Jesse Rushlow <jr@rushlow.dev>
+ *
+ * @internal
+ */
+final class ClassProperty
 {
     public function __construct(
         public string $propertyName,

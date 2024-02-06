@@ -17,8 +17,8 @@ use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\CSM\ClassPropertyModel;
 
 /**
  * @internal
@@ -94,7 +94,7 @@ final class EntityRegenerator
                 if (str_contains($fieldName, '.')) {
                     [$fieldName, $embeddedFiledName] = explode('.', $fieldName);
 
-                    $property = ClassPropertyModel::createFromObject($mapping);
+                    $property = ClassProperty::createFromObject($mapping);
                     $property->propertyName = $embeddedFiledName;
 
                     $operations[$embeddedClasses[$fieldName]]->addEntityField($property);
@@ -106,7 +106,7 @@ final class EntityRegenerator
                     continue;
                 }
 
-                $manipulator->addEntityField(ClassPropertyModel::createFromObject($mapping));
+                $manipulator->addEntityField(ClassProperty::createFromObject($mapping));
             }
 
             // @TODO _ @legacy - Type needed for mapping

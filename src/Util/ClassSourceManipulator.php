@@ -38,7 +38,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Util\CSM\ClassPropertyModel;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 
 /**
  * @internal
@@ -97,7 +97,7 @@ final class ClassSourceManipulator
         return $this->sourceCode;
     }
 
-    public function addEntityField(ClassPropertyModel $mapping): void
+    public function addEntityField(ClassProperty $mapping): void
     {
         $typeHint = DoctrineHelper::getPropertyTypeForColumn($mapping->type);
         if ($typeHint && DoctrineHelper::canColumnTypeBeInferredByPropertyType($mapping->type, $typeHint)) {
