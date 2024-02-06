@@ -94,10 +94,10 @@ final class EntityRegenerator
                 if (str_contains($fieldName, '.')) {
                     [$fieldName, $embeddedFiledName] = explode('.', $fieldName);
 
-                    $operations[$embeddedClasses[$fieldName]]->addEntityField(new ClassPropertyModel(
-                        propertyName: $embeddedFiledName,
-                        type: $mapping['type'] ?? $mapping->type
-                    ));
+                    $property = ClassPropertyModel::createFromArray($mapping);
+                    $property->propertyName = $embeddedFiledName;
+
+                    $operations[$embeddedClasses[$fieldName]]->addEntityField($property);
 
                     continue;
                 }
