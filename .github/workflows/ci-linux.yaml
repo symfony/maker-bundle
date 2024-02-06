@@ -11,6 +11,7 @@ on:
 env:
     PHPUNIT_FLAGS: "-v"
     SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
+    MAKER_SKIP_MERCURE_TEST: 1
 
 jobs:
     coding-standards:
