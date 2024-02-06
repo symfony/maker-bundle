@@ -18,7 +18,7 @@ class ClassPropertyModel
         public string $type,
         public array $comments = [],
         public ?int $length = null,
-        public ?string $id = null,
+        public ?bool $id = null,
         public ?bool $nullable = null,
         public array $options = [],
         public ?int $precision = null,
@@ -51,6 +51,27 @@ class ClassPropertyModel
         }
 
         return $attributes;
+    }
+
+    public static function createFromArray(\Doctrine\ORM\Mapping\FieldMapping|array $data): self
+    {
+        // @TODO - Better exception
+        if (empty($data['fieldName']) || empty($data['type'])) {
+            throw new \RuntimeException('Needs name and type');
+        }
+
+        return new self(
+            propertyName: $data['fieldName'],
+            type: $data['type'],
+            comments: $data['comments'] ?? [],
+            length: $data['length'] ?? null,
+            id: $data['id'] ?? false,
+            nullable: $data['nullable'] ?? false,
+            options: $data['options'] ?? [],
+            precision: $data['precision'] ?? null,
+            scale: $data['scale'] ?? null,
+            unique: $data['unique'] ?? false,
+        );
     }
 
 //    public static function createFromObject(\Doctrine\ORM\Mapping\FieldMapping $mapping): self

@@ -106,7 +106,10 @@ final class EntityRegenerator
                     continue;
                 }
 
-                $manipulator->addEntityField(new ClassPropertyModel(propertyName: $fieldName, type: $mapping['type'] ?? $mapping->type));
+//                $x = ClassPropertyModel::createFromArray($mapping);
+//                dump([$fieldName, $mapping, $x]);
+//                $manipulator->addEntityField(new ClassPropertyModel(propertyName: $fieldName, type: $mapping['type'] ?? $mapping->type));
+                $manipulator->addEntityField(ClassPropertyModel::createFromArray($mapping));
             }
 
             // @TODO _ @legacy - Type needed for mapping

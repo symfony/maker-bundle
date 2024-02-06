@@ -116,7 +116,6 @@ final class ClassSourceManipulator
         // 3) If default value, then NOT nullable
 
         $nullable = $mapping->nullable ?? false;
-        $isId = (bool) ($mapping->id ?? false);
 
         $attributes[] = $this->buildAttributeNode(Column::class, $mapping->getAttributes(), 'ORM');
 
@@ -151,7 +150,7 @@ final class ClassSourceManipulator
         );
 
         // don't generate setters for id fields
-        if (!$isId) {
+        if (!($mapping->id ?? false)) {
             $this->addSetter($mapping->propertyName, $typeHint, $nullable);
         }
     }
