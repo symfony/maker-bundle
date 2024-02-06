@@ -32,11 +32,13 @@ class ClassPropertyModel
     {
         $attributes = [];
 
-        $attributes['type'] = $this->type;
+        if ($this->needsTypeHint) {
+            $attributes['type'] = $this->type;
+        }
 
-//        if (!empty($this->comments)) {
-//            $attributes['options'] = $this->comments;
-//        }
+        if (!empty($this->options)) {
+            $attributes['options'] = $this->options;
+        }
 
         foreach (['length', 'id', 'nullable', 'precision', 'scale'] as $property) {
             if (null !== $this->$property) {
