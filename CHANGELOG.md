@@ -1,5 +1,24 @@
 # Changelog
 
+## [v1.54.0](https://github.com/symfony/maker-bundle/releases/tag/v1.54.0)
+
+*February 6th, 2024*
+
+### Feature
+
+- [#1439](https://github.com/symfony/maker-bundle/pull/1439) - [make:*] improve support for ORM 3.x / DBAL 4.x - *@jrushlow*
+- [#1438](https://github.com/symfony/maker-bundle/pull/1438) - Remove mentions of undefined Doctrine constants Types::ARRAY and Types::OBJECT - *@njutn95*
+- [#1432](https://github.com/symfony/maker-bundle/pull/1432) - [make:controller] use promoted parameter - *@tacman*
+- [#1428](https://github.com/symfony/maker-bundle/pull/1428) - [make:*] use Routing\Attribute\* instead of Routing\Annotation\* - *@jrushlow*
+- [#1425](https://github.com/symfony/maker-bundle/pull/1425) - [dx] require >= PHPUnit 9.6, update phpunit schema, deprecate skipOnSymfony7()  - *@jrushlow*
+- [#1421](https://github.com/symfony/maker-bundle/pull/1421) - [make:*] drop Symfony 6.3 support - *@jrushlow*
+- [#1418](https://github.com/symfony/maker-bundle/pull/1418) - Determine events map dynamically - *@HypeMC*
+
+### Bug
+
+- [#1435](https://github.com/symfony/maker-bundle/pull/1435) - [make:*] fix bundled php-cs-fixer not working on windows - *@jrushlow*
+- [#1433](https://github.com/symfony/maker-bundle/pull/1433) - [make:crud] Remove extra dot - *@annechko*
+
 ## [v1.53.0](https://github.com/symfony/maker-bundle/releases/tag/v1.53.0)
 
 *February 1st, 2024*
