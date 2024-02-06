@@ -76,8 +76,6 @@ final class EntityRegenerator
                     continue;
                 }
 
-                //                dump([$fieldName => $mapping]);
-
                 $className = $mapping['class'];
 
                 $embeddedClasses[$fieldName] = $this->getPathOfClass($className);
@@ -96,8 +94,6 @@ final class EntityRegenerator
                 if (str_contains($fieldName, '.')) {
                     [$fieldName, $embeddedFiledName] = explode('.', $fieldName);
 
-//                    $operations[$embeddedClasses[$fieldName]]->addEntityField($embeddedFiledName, $mapping);
-                    dump(['regen' => $embeddedFiledName, $mapping]);
                     $operations[$embeddedClasses[$fieldName]]->addEntityField(new ClassPropertyModel(
                         propertyName: $embeddedFiledName,
                         type: $mapping['type'] ?? $mapping->type
@@ -110,13 +106,11 @@ final class EntityRegenerator
                     continue;
                 }
 
-                //                dump([$classMetadata]);
-
-//                $manipulator->addEntityField($fieldName, (array) $mapping);
                 $manipulator->addEntityField(new ClassPropertyModel(propertyName: $fieldName, type: $mapping['type'] ?? $mapping->type));
             }
 
-            $getIsNullable = function (array $mapping) {
+            // @TODO _ @legacy - Type needed for mapping
+            $getIsNullable = static function ($mapping) {
                 if (!isset($mapping['joinColumns'][0]['nullable'])) {
                     // the default for relationships IS nullable
                     return true;

@@ -99,25 +99,11 @@ final class ClassSourceManipulator
 
     public function addEntityField(ClassPropertyModel $mapping): void
     {
-//        if ($columnOptions instanceof \Doctrine\ORM\Mapping\FieldMapping::class) {
-//            $columnOptions['type'] = $columnOptions->type;
-//            $columnOptions['nullable'] = $columnOptions->nullable;
-//            $columnOptions['id'] = $columnOptions->id;
-//        }
-
-//        if (is_array($columnOptions)) {
-//            dump($columnOptions);
-//            $columnOptions = \Doctrine\ORM\Mapping\FieldMapping::fromMappingArray($columnOptions);
-//        }
-
-//        dump($columnOptions);
         $typeHint = DoctrineHelper::getPropertyTypeForColumn($mapping->type);
         if ($typeHint && DoctrineHelper::canColumnTypeBeInferredByPropertyType($mapping->type, $typeHint)) {
-//            unset($columnOptions['type']);
             $mapping->needsTypeHint = false;
         }
 
-//        if (isset($columnOptions['type'])) {
         if ($mapping->needsTypeHint) {
             $typeConstant = DoctrineHelper::getTypeConstant($mapping->type);
             if ($typeConstant) {
@@ -132,13 +118,6 @@ final class ClassSourceManipulator
         $nullable = $mapping->nullable ?? false;
         $isId = (bool) ($mapping->id ?? false);
 
-        $someArray = [];
-        $someArray['type'] = $mapping->type;
-//        $someArray['fieldName'] = $columnOptions->fieldName;
-
-        // @TODO foreach over the properties and check if they're null. If not -> add to $someArray
-
-        dump($mapping->getAttributes(), $mapping);
         $attributes[] = $this->buildAttributeNode(Column::class, $mapping->getAttributes(), 'ORM');
 
         $defaultValue = null;
@@ -333,7 +312,7 @@ final class ClassSourceManipulator
     /**
      * @param Node[] $params
      */
-    public function addMethodBuilder(Builder\Method $methodBuilder, array $params = [], string $methodBody = null): void
+    public function addMethodBuilder(Builder\Method $methodBuilder, array $params = [], ?string $methodBody = null): void
     {
         $this->addMethodParams($methodBuilder, $params);
 
@@ -382,7 +361,7 @@ final class ClassSourceManipulator
     /**
      * @param array<Node\Attribute|Node\AttributeGroup> $attributes
      */
-    public function addProperty(string $name, $defaultValue = self::DEFAULT_VALUE_NONE, array $attributes = [], array $comments = [], string $propertyType = null): void
+    public function addProperty(string $name, $defaultValue = self::DEFAULT_VALUE_NONE, array $attributes = [], array $comments = [], ?string $propertyType = null): void
     {
         if ($this->propertyExists($name)) {
             // we never overwrite properties
@@ -866,7 +845,7 @@ final class ClassSourceManipulator
      * @param array   $options         The named arguments for the attribute ($key = argument name, $value = argument value)
      * @param ?string $attributePrefix If a prefix is provided, the node is built using the prefix. E.g. #[ORM\Column()]
      */
-    public function buildAttributeNode(string $attributeClass, array $options, string $attributePrefix = null): Node\Attribute
+    public function buildAttributeNode(string $attributeClass, array $options, ?string $attributePrefix = null): Node\Attribute
     {
         $options = $this->sortOptionsByClassConstructorParameters($options, $attributeClass);
 
