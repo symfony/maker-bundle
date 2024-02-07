@@ -20,8 +20,8 @@ use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
-use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
+use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class ClassSourceManipulatorTest extends TestCase
@@ -185,7 +185,7 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAttributeClassTests
      */
-    public function testAddAttributeToClass(string $sourceFilename, string $expectedSourceFilename, string $attributeClass, array $attributeOptions, string $attributePrefix = null): void
+    public function testAddAttributeToClass(string $sourceFilename, string $expectedSourceFilename, string $attributeClass, array $attributeOptions, ?string $attributePrefix = null): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_class_attribute/'.$expectedSourceFilename);
@@ -242,7 +242,7 @@ class ClassSourceManipulatorTest extends TestCase
 
         yield 'entity_normal_add' => [
             'User_simple.php',
-            new ClassProperty(propertyName: 'fooProp', type: 'string', length: 255,  nullable: false, options: ['comment' => 'new field']),
+            new ClassProperty(propertyName: 'fooProp', type: 'string', length: 255, nullable: false, options: ['comment' => 'new field']),
             'User_simple.php',
         ];
 
@@ -389,9 +389,9 @@ class ClassSourceManipulatorTest extends TestCase
         $sourcePath = __DIR__.'/fixtures/source';
         $expectedPath = __DIR__.'/fixtures/add_one_to_many_relation';
 
-        /** @legacy - Remove when Doctrine/ORM 2.x is no longer supported. */
+        /* @legacy - Remove when Doctrine/ORM 2.x is no longer supported. */
         if (!class_exists(FieldMapping::class)) {
-            $expectedPath.= '/legacy';
+            $expectedPath .= '/legacy';
         }
 
         $this->runAddOneToManyRelationTests(

@@ -21,7 +21,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class InteractiveSecurityHelper
 {
-    public function guessFirewallName(SymfonyStyle $io, array $securityData, string $questionText = null): string
+    public function guessFirewallName(SymfonyStyle $io, array $securityData, ?string $questionText = null): string
     {
         $realFirewalls = array_filter(
             $securityData['security']['firewalls'] ?? [],
@@ -45,7 +45,7 @@ final class InteractiveSecurityHelper
         );
     }
 
-    public function guessUserClass(SymfonyStyle $io, array $providers, string $questionText = null): string
+    public function guessUserClass(SymfonyStyle $io, array $providers, ?string $questionText = null): string
     {
         if (1 === \count($providers) && isset(current($providers)['entity'])) {
             $entityProvider = current($providers);

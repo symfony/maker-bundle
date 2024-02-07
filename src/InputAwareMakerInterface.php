@@ -20,5 +20,5 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 interface InputAwareMakerInterface extends MakerInterface
 {
-    public function configureDependencies(DependencyBuilder $dependencies, InputInterface $input = null);
+    public function configureDependencies(DependencyBuilder $dependencies, ?InputInterface $input = null);
 }

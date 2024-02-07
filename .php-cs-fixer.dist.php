@@ -36,7 +36,7 @@ EOF
                 'arrays',
                 'parameters'
             ],
-        ]
+        ],
     ))
     ->setRiskyAllowed(true)
     ->setFinder($finder)
