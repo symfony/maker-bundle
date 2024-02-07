@@ -33,8 +33,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 final class MakeCommand extends AbstractMaker
 {
-    public function __construct(private PhpCompatUtil $phpCompatUtil)
+    public function __construct(private ?PhpCompatUtil $phpCompatUtil = null)
     {
+        if (null !== $phpCompatUtil) {
+            @trigger_deprecation(
+                'symfony/maker-bundle',
+                '1.55.0',
+                sprintf('Initializing MakeCommand while providing an instance of "%s" is deprecated. The $phpCompatUtil param will be removed in a future version.', PhpCompatUtil::class),
+            );
+        }
     }
 
     public static function getCommandName(): string
