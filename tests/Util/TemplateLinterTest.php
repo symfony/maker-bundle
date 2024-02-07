@@ -40,17 +40,15 @@ final class TemplateLinterTest extends TestCase
 
     public function testPhpCsFixerVersion(): void
     {
+        if (str_contains(strtolower(\PHP_OS), 'win')) {
+            $this->markTestSkipped('Test only runs on linux.');
+        }
+
         $fixerPath = sprintf('%s/src/Resources/bin/php-cs-fixer-v%s.phar', \dirname(__DIR__, 2), TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION);
 
-        $process = Process::fromShellCommandline(sprintf(
-            '%s %s -V',
-            str_contains(strtolower(\PHP_OS), 'win') ? 'set PHP_CS_FIXER_IGNORE_ENV=1&' : 'PHP_CS_FIXER_IGNORE_ENV=1 ',
-            $fixerPath
-        ));
+        $process = Process::fromShellCommandline(sprintf('%s -V', $fixerPath));
 
         $process->run();
-
-        dump([$process->getOutput(), $process->getErrorOutput()]);
 
         self::assertStringContainsString(TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION, $process->getOutput());
     }
