@@ -50,6 +50,8 @@ final class TemplateLinterTest extends TestCase
 
         $process->run();
 
+        dump([$process->getOutput(), $process->getErrorOutput()]);
+
         self::assertStringContainsString(TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION, $process->getOutput());
     }
 }
