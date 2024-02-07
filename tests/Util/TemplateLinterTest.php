@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Util\TemplateLinter;
+use Symfony\Component\Process\Process;
 
 /**
  * Linter tests are written in `tests/Maker/TemplateLinterTest`.
@@ -35,5 +36,20 @@ final class TemplateLinterTest extends TestCase
         $this->expectExceptionMessage('The MAKER_PHP_CS_FIXER_CONFIG_PATH provided: /bad/config/path does not exist.');
 
         new TemplateLinter(phpCsFixerConfigPath: '/bad/config/path');
+    }
+
+    public function testPhpCsFixerVersion(): void
+    {
+        if (str_contains(strtolower(\PHP_OS), 'win')) {
+            $this->markTestSkipped('Test only runs on linux.');
+        }
+
+        $fixerPath = sprintf('%s/src/Resources/bin/php-cs-fixer-v%s.phar', \dirname(__DIR__, 2), TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION);
+
+        $process = Process::fromShellCommandline(sprintf('%s -V', $fixerPath));
+
+        $process->run();
+
+        self::assertStringContainsString(TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION, $process->getOutput());
     }
 }
