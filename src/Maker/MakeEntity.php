@@ -452,9 +452,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 EntityRelation::ONE_TO_ONE => [],
             ],
             'array_object' => [
-                'array' => ['simple_array'],
                 'json' => [],
-                'object' => [],
                 'binary' => [],
                 'blob' => [],
             ],
