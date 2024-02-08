@@ -74,6 +74,32 @@ class MakeEntityTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_only_shows_supported_types' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([
+                    // entity class name
+                    'Developer',
+                    // property name
+                    'keyboards',
+                    // field type
+                    '?',
+                    // use default type
+                    '',
+                    // default length
+                    '',
+                    // nullable
+                    '',
+                    // no more properties
+                    '',
+                ]);
+
+                self::assertStringContainsString('Main Types', $output);
+                self::assertStringContainsString('* string or ascii_string', $output);
+                self::assertStringContainsString('* ManyToOne', $output);
+                self::assertStringNotContainsString('* object', $output);
+            }),
+        ];
+
         yield 'it_creates_a_new_class_and_api_resource' => [$this->createMakeEntityTest()
             ->addExtraDependencies('api')
             ->run(function (MakerTestRunner $runner) {

@@ -430,26 +430,13 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     {
         $allTypes = $this->getTypesMap();
 
-        if ('Hyper' === getenv('TERM_PROGRAM')) {
-            $wizard = 'wizard 🧙';
-        } else {
-            $wizard = '\\' === \DIRECTORY_SEPARATOR ? 'wizard' : 'wizard 🧙';
-        }
-
         $typesTable = [
             'main' => [
-                'string' => [],
+                'string' => ['ascii_string'],
                 'text' => [],
                 'boolean' => [],
                 'integer' => ['smallint', 'bigint'],
                 'float' => [],
-            ],
-            'relation' => [
-                'relation' => 'a '.$wizard.' will help you build the relation',
-                EntityRelation::MANY_TO_ONE => [],
-                EntityRelation::ONE_TO_MANY => [],
-                EntityRelation::MANY_TO_MANY => [],
-                EntityRelation::ONE_TO_ONE => [],
             ],
             'array_object' => [
                 'array' => ['simple_array'],
@@ -469,20 +456,50 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $printSection = static function (array $sectionTypes) use ($io, &$allTypes) {
             foreach ($sectionTypes as $mainType => $subTypes) {
+                if (!\array_key_exists($mainType, $allTypes)) {
+                    // The type is not a valid DBAL Type - don't show it as an option
+                    continue;
+                }
+
+                foreach ($subTypes as $key => $potentialType) {
+                    if (!\array_key_exists($potentialType, $allTypes)) {
+                        // The type is not a valid DBAL Type - don't show it as an "or" option
+                        unset($subTypes[$key]);
+                    }
+
+                    // Remove type as not to show it again in "Other Types"
+                    unset($allTypes[$potentialType]);
+                }
+
+                // Remove type as not to show it again in "Other Types"
                 unset($allTypes[$mainType]);
+
                 $line = sprintf('  * <comment>%s</comment>', $mainType);
 
-                if (\is_string($subTypes) && $subTypes) {
-                    $line .= sprintf(' or %s', $subTypes);
-                } elseif (\is_array($subTypes) && !empty($subTypes)) {
+                if (!empty($subTypes)) {
                     $line .= sprintf(' or %s', implode(' or ', array_map(
                         static fn ($subType) => sprintf('<comment>%s</comment>', $subType), $subTypes))
                     );
-
-                    foreach ($subTypes as $subType) {
-                        unset($allTypes[$subType]);
-                    }
                 }
+
+                $io->writeln($line);
+            }
+
+            $io->writeln('');
+        };
+
+        $printRelationsSection = static function () use ($io) {
+            if ('Hyper' === getenv('TERM_PROGRAM')) {
+                $wizard = 'wizard 🧙';
+            } else {
+                $wizard = '\\' === \DIRECTORY_SEPARATOR ? 'wizard' : 'wizard 🧙';
+            }
+
+            $io->writeln(sprintf('  * <comment>relation</comment> a %s will help you build the relation', $wizard));
+
+            $relations = [EntityRelation::MANY_TO_ONE, EntityRelation::ONE_TO_MANY, EntityRelation::MANY_TO_MANY, EntityRelation::ONE_TO_ONE];
+            foreach ($relations as $relation) {
+                $line = sprintf('  * <comment>%s</comment>', $relation);
 
                 $io->writeln($line);
             }
@@ -494,7 +511,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $printSection($typesTable['main']);
 
         $io->writeln('<info>Relationships/Associations</info>');
-        $printSection($typesTable['relation']);
+        $printRelationsSection();
 
         $io->writeln('<info>Array/Object Types</info>');
         $printSection($typesTable['array_object']);
