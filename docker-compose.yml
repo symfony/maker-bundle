@@ -1,0 +1,12 @@
+services:
+    mercure:
+        image: dunglas/mercure
+        environment:
+            SERVER_NAME: :1337
+            MERCURE_PUBLISHER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+            MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+            MERCURE_EXTRA_DIRECTIVES: |
+                anonymous
+                cors_origins *
+        ports:
+            - 1337:1337
