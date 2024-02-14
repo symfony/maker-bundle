@@ -96,7 +96,15 @@ class MakeEntityTest extends MakerTestCase
                 self::assertStringContainsString('Main Types', $output);
                 self::assertStringContainsString('* string or ascii_string', $output);
                 self::assertStringContainsString('* ManyToOne', $output);
-                self::assertStringNotContainsString('* object', $output);
+
+                // get the dependencies installed in the test project (tmp/cache/TEST)
+                $installedVersions = require $runner->getPath('vendor/composer/installed.php');
+
+                if (!str_starts_with($installedVersions['versions']['doctrine/dbal']['version'], '3.')) {
+                    self::assertStringNotContainsString('* object', $output);
+                } else {
+                    self::assertStringContainsString('* object', $output);
+                }
             }),
         ];
 
