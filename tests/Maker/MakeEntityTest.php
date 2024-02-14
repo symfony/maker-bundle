@@ -74,6 +74,40 @@ class MakeEntityTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_only_shows_supported_types' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([
+                    // entity class name
+                    'Developer',
+                    // property name
+                    'keyboards',
+                    // field type
+                    '?',
+                    // use default type
+                    '',
+                    // default length
+                    '',
+                    // nullable
+                    '',
+                    // no more properties
+                    '',
+                ]);
+
+                self::assertStringContainsString('Main Types', $output);
+                self::assertStringContainsString('* string or ascii_string', $output);
+                self::assertStringContainsString('* ManyToOne', $output);
+
+                // get the dependencies installed in the test project (tmp/cache/TEST)
+                $installedVersions = require $runner->getPath('vendor/composer/installed.php');
+
+                if (!str_starts_with($installedVersions['versions']['doctrine/dbal']['version'], '3.')) {
+                    self::assertStringNotContainsString('* object', $output);
+                } else {
+                    self::assertStringContainsString('* object', $output);
+                }
+            }),
+        ];
+
         yield 'it_creates_a_new_class_and_api_resource' => [$this->createMakeEntityTest()
             ->addExtraDependencies('api')
             ->run(function (MakerTestRunner $runner) {
