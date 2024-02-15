@@ -1,0 +1,5 @@
+{
+    "require": {
+        "rector/rector": "^1.0"
+    }
+}
