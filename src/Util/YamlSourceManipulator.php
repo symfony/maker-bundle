@@ -1090,9 +1090,7 @@ class YamlSourceManipulator
     private function normalizeSequences(array $data)
     {
         // https://stackoverflow.com/questions/173400/how-to-check-if-php-array-is-associative-or-sequential/4254008#4254008
-        $hasStringKeys = function (array $array) {
-            return \count(array_filter(array_keys($array), 'is_string')) > 0;
-        };
+        $hasStringKeys = fn (array $array) => \count(array_filter(array_keys($array), 'is_string')) > 0;
 
         foreach ($data as $key => $val) {
             if (!\is_array($val)) {
