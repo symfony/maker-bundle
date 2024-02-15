@@ -47,7 +47,7 @@ class <?= $class_name; ?> extends ServiceEntityRepository<?= $with_password_upgr
 //        return $this->createQueryBuilder('<?= $entity_alias; ?>')
 //            ->andWhere('<?= $entity_alias; ?>.exampleField = :val')
 //            ->setParameter('val', $value)
-//            ->orderBy('<?= $entity_alias; ?>.id', 'ASC')
+//            ->orderBy('<?= $entity_alias; ?>.id', Criteria::ASC)
 //            ->setMaxResults(10)
 //            ->getQuery()
 //            ->getResult()
