@@ -13,6 +13,7 @@ use Rector\Config\RectorConfig;
 use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\Php74\Rector\Property\RestoreDefaultNullToNullableTypePropertyRector;
 use Rector\Php80\Rector\Catch_\RemoveUnusedVariableInCatchRector;
+use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
 use Rector\Php80\Rector\Identical\StrEndsWithRector;
 use Rector\Php80\Rector\NotIdentical\StrContainsRector;
 use Rector\Php81\Rector\Array_\FirstClassCallableRector;
@@ -27,6 +28,7 @@ return static function (RectorConfig $config): void {
 
     $config->rules([
         // Remove when LevelSet is fully enabled
+        ClassPropertyAssignToConstructorPromotionRector::class,
         ClosureToArrowFunctionRector::class,
         RemoveUnusedVariableInCatchRector::class,
         FirstClassCallableRector::class,
