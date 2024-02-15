@@ -125,11 +125,11 @@ final class MakerTestDetails
     {
         $depBuilder = $this->getDependencyBuilder();
 
-        return array_merge(
-            $depBuilder->getAllRequiredDependencies(),
-            $depBuilder->getAllRequiredDevDependencies(),
-            $this->extraDependencies
-        );
+        return [
+            ...$depBuilder->getAllRequiredDependencies(),
+            ...$depBuilder->getAllRequiredDevDependencies(),
+            ...$this->extraDependencies,
+        ];
     }
 
     public function getExtraDependencies(): array
