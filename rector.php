@@ -20,6 +20,7 @@ use Rector\Php81\Rector\Array_\FirstClassCallableRector;
 use Rector\Php81\Rector\FuncCall\NullToStrictStringFuncCallArgRector;
 use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
 use Rector\Set\ValueObject\LevelSetList;
+use Rector\TypeDeclaration\Rector\ClassMethod\ReturnNeverTypeRector;
 
 return static function (RectorConfig $config): void {
     $config->paths([
@@ -35,6 +36,7 @@ return static function (RectorConfig $config): void {
         StrEndsWithRector::class,
 //        StrContainsRector::class,
         RestoreDefaultNullToNullableTypePropertyRector::class,
+        ReturnNeverTypeRector::class,
     ]);
 
     $config->sets([
