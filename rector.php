@@ -16,6 +16,7 @@ use Rector\Php80\Rector\Catch_\RemoveUnusedVariableInCatchRector;
 use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
 use Rector\Php80\Rector\Identical\StrEndsWithRector;
 use Rector\Php80\Rector\NotIdentical\StrContainsRector;
+use Rector\Php80\Rector\Switch_\ChangeSwitchToMatchRector;
 use Rector\Php81\Rector\Array_\FirstClassCallableRector;
 use Rector\Php81\Rector\FuncCall\NullToStrictStringFuncCallArgRector;
 use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
@@ -37,6 +38,7 @@ return static function (RectorConfig $config): void {
 //        StrContainsRector::class,
         RestoreDefaultNullToNullableTypePropertyRector::class,
         ReturnNeverTypeRector::class,
+        ChangeSwitchToMatchRector::class,
     ]);
 
     $config->sets([
