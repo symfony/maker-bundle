@@ -72,7 +72,7 @@ final class MakerTestDetails
 
     public function addExtraDependencies(string ...$packages): self
     {
-        $this->extraDependencies += $packages;
+        $this->extraDependencies = [...$this->extraDependencies, ...$packages];
 
         return $this;
     }
