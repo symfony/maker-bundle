@@ -11,6 +11,7 @@
 
 use Rector\Config\RectorConfig;
 use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
+use Rector\Php80\Rector\Catch_\RemoveUnusedVariableInCatchRector;
 use Rector\Php81\Rector\FuncCall\NullToStrictStringFuncCallArgRector;
 use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
 use Rector\Set\ValueObject\LevelSetList;
@@ -23,6 +24,7 @@ return static function (RectorConfig $config): void {
     $config->rules([
         // Remove when LevelSet is fully enabled
         ClosureToArrowFunctionRector::class,
+        RemoveUnusedVariableInCatchRector::class,
     ]);
 
     $config->sets([

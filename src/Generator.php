@@ -152,7 +152,7 @@ class Generator
             try {
                 Validator::classDoesNotExist($className);
                 $className = rtrim($fullNamespacePrefix, '\\').'\\'.$className;
-            } catch (RuntimeCommandException $e) {
+            } catch (RuntimeCommandException) {
             }
         }
 

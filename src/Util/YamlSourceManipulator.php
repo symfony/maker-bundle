@@ -696,7 +696,7 @@ class YamlSourceManipulator
             if ($parsedContentsData !== $newData) {
                 throw new YamlManipulationFailedException(sprintf('Content was updated, but updated content does not match expected data. Original source: "%s", updated source: "%s", updated data: %s', $this->contents, $newContents, var_export($newData, true)));
             }
-        } catch (ParseException $e) {
+        } catch (ParseException) {
             throw new YamlManipulationFailedException(sprintf('Could not update YAML: a parse error occurred in the new content: "%s"', $newContents));
         }
 
