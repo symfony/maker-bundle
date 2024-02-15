@@ -12,6 +12,7 @@
 use Rector\Config\RectorConfig;
 use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\Php80\Rector\Catch_\RemoveUnusedVariableInCatchRector;
+use Rector\Php80\Rector\Identical\StrEndsWithRector;
 use Rector\Php81\Rector\Array_\FirstClassCallableRector;
 use Rector\Php81\Rector\FuncCall\NullToStrictStringFuncCallArgRector;
 use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
@@ -27,6 +28,7 @@ return static function (RectorConfig $config): void {
         ClosureToArrowFunctionRector::class,
         RemoveUnusedVariableInCatchRector::class,
         FirstClassCallableRector::class,
+        StrEndsWithRector::class,
     ]);
 
     $config->sets([
