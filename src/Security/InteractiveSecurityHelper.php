@@ -54,7 +54,7 @@ final class InteractiveSecurityHelper
         return $io->ask(
             $questionText ?? 'Enter the User class that you want to authenticate (e.g. <fg=yellow>App\\Entity\\User</>)',
             $this->guessUserClassDefault(),
-            [Validator::class, 'classIsUserInterface']
+            Validator::classIsUserInterface(...)
         );
     }
 

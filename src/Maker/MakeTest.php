@@ -126,7 +126,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
             ]);
 
             $nameArgument = $command->getDefinition()->getArgument('name');
-            $value = $io->ask($nameArgument->getDescription(), $nameArgument->getDefault(), [Validator::class, 'notBlank']);
+            $value = $io->ask($nameArgument->getDescription(), $nameArgument->getDefault(), Validator::notBlank(...));
             $input->setArgument($nameArgument->getName(), $value);
         }
     }
