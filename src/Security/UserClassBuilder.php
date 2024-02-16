@@ -99,7 +99,7 @@ final class UserClassBuilder
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
-                new ClassProperty(propertyName: 'roles', type: 'json')
+                new ClassProperty(propertyName: 'roles', type: 'json', comments: ['@var list<string> The user roles'])
             );
         } else {
             // add normal property
