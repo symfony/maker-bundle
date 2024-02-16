@@ -29,7 +29,6 @@ use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
-use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -48,7 +47,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 {
     private Generator $generator;
     private EntityClassGenerator $entityClassGenerator;
-    private PhpCompatUtil $phpCompatUtil;
 
     public function __construct(
         private FileManager $fileManager,
@@ -56,7 +54,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         ?string $projectDirectory = null,
         ?Generator $generator = null,
         ?EntityClassGenerator $entityClassGenerator = null,
-        ?PhpCompatUtil $phpCompatUtil = null,
     ) {
         if (null !== $projectDirectory) {
             @trigger_error('The $projectDirectory constructor argument is no longer used since 1.41.0', \E_USER_DEPRECATED);
@@ -74,13 +71,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $this->entityClassGenerator = new EntityClassGenerator($generator, $this->doctrineHelper);
         } else {
             $this->entityClassGenerator = $entityClassGenerator;
-        }
-
-        if (null === $phpCompatUtil) {
-            @trigger_error(sprintf('Passing a "%s" instance as 6th argument is mandatory since version 1.41.0', PhpCompatUtil::class), \E_USER_DEPRECATED);
-            $this->phpCompatUtil = new PhpCompatUtil($this->fileManager);
-        } else {
-            $this->phpCompatUtil = $phpCompatUtil;
         }
     }
 
