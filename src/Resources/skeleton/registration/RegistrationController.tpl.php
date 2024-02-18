@@ -58,7 +58,7 @@ class <?= $class_name; ?> extends AbstractController
         }
 
         return $this->render('registration/register.html.twig', [
-            'registrationForm' => $form->createView(),
+            'registrationForm' => $form,
         ]);
     }
 <?php if ($will_verify_email): ?>
