@@ -53,8 +53,10 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotCompromisedPassword;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
 use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
@@ -116,6 +118,7 @@ class MakeResetPassword extends AbstractMaker
         $dependencies->addClassDependency(MailerInterface::class, 'symfony/mailer');
         $dependencies->addClassDependency(Form::class, 'symfony/form');
         $dependencies->addClassDependency(Validation::class, 'symfony/validator');
+        $dependencies->addClassDependency(HttpClientInterface::class, 'symfony/http-client');
         $dependencies->addClassDependency(SecurityBundle::class, 'security-bundle');
         $dependencies->addClassDependency(AppVariable::class, 'twig');
 
@@ -292,6 +295,7 @@ class MakeResetPassword extends AbstractMaker
             OptionsResolver::class,
             Length::class,
             NotBlank::class,
+            NotCompromisedPassword::class,
         ]);
 
         $generator->generateClass(
