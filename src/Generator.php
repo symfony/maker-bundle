@@ -147,7 +147,13 @@ class Generator
             // class is already "absolute" - leave it alone (but strip opening \)
             $className = substr($name, 1);
         } else {
-            $className = rtrim($fullNamespacePrefix, '\\').'\\'.Str::asClassName($name, $suffix);
+            $className = Str::asClassName($name, $suffix);
+
+            try {
+                Validator::classDoesNotExist($className);
+                $className = rtrim($fullNamespacePrefix, '\\').'\\'.$className;
+            } catch (RuntimeCommandException $e) {
+            }
         }
 
         Validator::validateClassName($className, $validationErrorMessage);
