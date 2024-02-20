@@ -8,6 +8,9 @@ class User implements UserInterface
 {
     private $userIdentifier;
 
+    /**
+     * @var list<string> The user roles
+     */
     private $roles = [];
 
     /**
@@ -29,6 +32,7 @@ class User implements UserInterface
 
     /**
      * @see UserInterface
+     * @return list<string>
      */
     public function getRoles(): array
     {
@@ -39,6 +43,9 @@ class User implements UserInterface
         return array_unique($roles);
     }
 
+    /**
+     * @param list<string> $roles
+     */
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
