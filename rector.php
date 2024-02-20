@@ -38,7 +38,7 @@ return static function (RectorConfig $config): void {
 //        StrContainsRector::class,
         RestoreDefaultNullToNullableTypePropertyRector::class,
         ReturnNeverTypeRector::class,
-        ChangeSwitchToMatchRector::class,
+//        ChangeSwitchToMatchRector::class,
     ]);
 
     $config->sets([
