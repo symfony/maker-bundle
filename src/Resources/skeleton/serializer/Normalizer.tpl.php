@@ -6,7 +6,7 @@ namespace <?= $namespace; ?>;
 
 class <?= $class_name ?> implements NormalizerInterface, CacheableSupportsMethodInterface
 {
-    public function __construct(private ObjectNormalizer $normalizer)
+    public function __construct(private NormalizerInterface $objectNormalizer)
     {
     }
 
