@@ -33,7 +33,7 @@ class <?= $class_name ?> extends AbstractController
         }
 
         return $this->render('reset_password/request.html.twig', [
-            'requestForm' => $form->createView(),
+            'requestForm' => $form,
         ]);
     }
 
@@ -109,7 +109,7 @@ class <?= $class_name ?> extends AbstractController
         }
 
         return $this->render('reset_password/reset.html.twig', [
-            'resetForm' => $form->createView(),
+            'resetForm' => $form,
         ]);
     }
 
