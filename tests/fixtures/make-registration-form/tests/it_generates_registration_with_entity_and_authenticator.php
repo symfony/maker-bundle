@@ -54,7 +54,7 @@ class RegistrationFormTest extends WebTestCase
         $form['registration_form[plainPassword]'] = 'foo';
         $client->submit($form);
 
-        $this->assertSame(422, $client->getResponse()->getStatusCode());
+        $this->assertSame(200, $client->getResponse()->getStatusCode());
         $this->assertStringContainsString(
             'There is already an account with this email',
             $client->getResponse()->getContent()
