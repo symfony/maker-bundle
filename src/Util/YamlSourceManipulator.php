@@ -456,7 +456,7 @@ class YamlSourceManipulator
      *
      * @param mixed $value The new value to set into YAML
      */
-    private function changeValueInYaml($value)
+    private function changeValueInYaml(mixed $value)
     {
         $originalVal = $this->getCurrentData();
 
