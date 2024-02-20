@@ -829,7 +829,7 @@ class YamlSourceManipulator
         }
 
         if (\is_scalar($value) || null === $value) {
-            $offset = null === $offset ? $this->currentPosition : $offset;
+            $offset ??= $this->currentPosition;
 
             if (\is_bool($value)) {
                 // (?i) & (?-i) opens/closes case insensitive match
@@ -1174,7 +1174,7 @@ class YamlSourceManipulator
 
     private function isEOF(?int $position = null)
     {
-        $position = null === $position ? $this->currentPosition : $position;
+        $position ??= $this->currentPosition;
 
         return $position === \strlen($this->contents);
     }
