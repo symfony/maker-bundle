@@ -1,5 +1,6 @@
 .* export-ignore
 *.md export-ignore
-appveyor.yml
-phpunit.xml.dist
+/appveyor.yml
+/phpunit.xml.dist
 /tests export-ignore
+/tools export-ignore
