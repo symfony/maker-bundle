@@ -395,7 +395,9 @@ final class ClassSourceManipulator
 
         $classNode = $this->getClassNode();
 
-        $classNode->attrGroups[] = new Node\AttributeGroup([$this->buildAttributeNode($attributeClass, $options)]);
+        $attributePrefix = str_starts_with($attributeClass, 'ORM\\') ? 'ORM' : null;
+
+        $classNode->attrGroups[] = new Node\AttributeGroup([$this->buildAttributeNode($attributeClass, $options, $attributePrefix)]);
 
         $this->updateSourceCodeFromNewStmts();
     }
@@ -781,6 +783,10 @@ final class ClassSourceManipulator
                     // the use statement already exists? Don't add it again
                     if ($class === (string) $use->name) {
                         return $alias;
+                    }
+
+                    if (str_starts_with($class, $alias)) {
+                        return $class;
                     }
 
                     if ($alias === $shortClassName) {
