@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.55.1](https://github.com/symfony/maker-bundle/releases/tag/v1.55.1)
+
+*February 21st, 2024*
+
+### Bug
+
+- [#1458](https://github.com/symfony/maker-bundle/pull/1458) - [make:entity] fix require mercure before asking to broadcast entity updates - *@jrushlow*
+
 ## [v1.55.0](https://github.com/symfony/maker-bundle/releases/tag/v1.55.0)
 
 *February 20th, 2024*
