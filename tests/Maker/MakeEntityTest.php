@@ -600,6 +600,22 @@ class MakeEntityTest extends MakerTestCase
                 $this->runEntityTest($runner);
             }),
         ];
+
+        yield 'it_generates_entity_with_turbo_without_mercure' => [$this->createMakeEntityTest()
+            ->preRun(function (MakerTestRunner $runner) {
+                $runner->runProcess('composer require symfony/ux-turbo');
+            })
+            ->addExtraDependencies('twig')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    'User', // entity class
+                    'n', // no broadcast
+                    '',
+                ]);
+
+                $this->assertFileExists($runner->getPath('src/Entity/User.php'));
+            }),
+        ];
     }
 
     private function runEntityTest(MakerTestRunner $runner, array $data = []): void
