@@ -141,14 +141,14 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             && class_exists(Broadcast::class)
             && !class_exists($this->generator->createClassNameDetails($entityClassName, 'Entity\\')->getFullName())
         ) {
-            // Mercure is needed
-            if (!class_exists(MercureExtension::class)) {
-                throw new RuntimeCommandException('Please run "composer require symfony/mercure". It is needed to broadcast entities.');
-            }
-
             $description = $command->getDefinition()->getOption('broadcast')->getDescription();
             $question = new ConfirmationQuestion($description, false);
             $isBroadcast = $io->askQuestion($question);
+
+            // Mercure is needed
+            if ($isBroadcast && !class_exists(MercureExtension::class)) {
+                throw new RuntimeCommandException('Please run "composer require symfony/mercure". It is needed to broadcast entities.');
+            }
 
             $input->setOption('broadcast', $isBroadcast);
         }
