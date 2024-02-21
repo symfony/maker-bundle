@@ -23,41 +23,20 @@ final class GeneratorTwigHelper
 
     public function getEntityFieldPrintCode($entity, $field): string
     {
-        $twigField = preg_replace_callback('/(?!^)_([a-z0-9])/', static function ($s) {
-            return strtoupper($s[1]);
-        }, $field['fieldName']);
+        $twigField = preg_replace_callback('/(?!^)_([a-z0-9])/', static fn ($s) => strtoupper($s[1]), $field['fieldName']);
         $printCode = $entity.'.'.str_replace('_', '', $twigField);
 
-        switch ($field['type']) {
-            case 'datetimetz_immutable':
-            case 'datetimetz':
-                $printCode .= ' ? '.$printCode.'|date(\'Y-m-d H:i:s T\') : \'\'';
-                break;
-            case 'datetime_immutable':
-            case 'datetime':
-                $printCode .= ' ? '.$printCode.'|date(\'Y-m-d H:i:s\') : \'\'';
-                break;
-            case 'dateinterval':
-                $printCode .= ' ? '.$printCode.'.format(\'%y year(s), %m month(s), %d day(s)\') : \'\'';
-                break;
-            case 'date_immutable':
-            case 'date':
-                $printCode .= ' ? '.$printCode.'|date(\'Y-m-d\') : \'\'';
-                break;
-            case 'time_immutable':
-            case 'time':
-                $printCode .= ' ? '.$printCode.'|date(\'H:i:s\') : \'\'';
-                break;
-            case 'json':
-                $printCode .= ' ? '.$printCode.'|json_encode : \'\'';
-                break;
-            case 'array':
-                $printCode .= ' ? '.$printCode.'|join(\', \') : \'\'';
-                break;
-            case 'boolean':
-                $printCode .= ' ? \'Yes\' : \'No\'';
-                break;
-        }
+        match ($field['type']) {
+            'datetimetz_immutable', 'datetimetz' => $printCode .= ' ? '.$printCode.'|date(\'Y-m-d H:i:s T\') : \'\'',
+            'datetime_immutable', 'datetime' => $printCode .= ' ? '.$printCode.'|date(\'Y-m-d H:i:s\') : \'\'',
+            'dateinterval' => $printCode .= ' ? '.$printCode.'.format(\'%y year(s), %m month(s), %d day(s)\') : \'\'',
+            'date_immutable', 'date' => $printCode .= ' ? '.$printCode.'|date(\'Y-m-d\') : \'\'',
+            'time_immutable', 'time' => $printCode .= ' ? '.$printCode.'|date(\'H:i:s\') : \'\'',
+            'json' => $printCode .= ' ? '.$printCode.'|json_encode : \'\'',
+            'array' => $printCode .= ' ? '.$printCode.'|join(\', \') : \'\'',
+            'boolean' => $printCode .= ' ? \'Yes\' : \'No\'',
+            default => $printCode,
+        };
 
         return $printCode;
     }

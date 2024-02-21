@@ -25,9 +25,7 @@ final class InteractiveSecurityHelper
     {
         $realFirewalls = array_filter(
             $securityData['security']['firewalls'] ?? [],
-            static function ($item) {
-                return !isset($item['security']) || true === $item['security'];
-            }
+            static fn ($item) => !isset($item['security']) || true === $item['security']
         );
 
         if (0 === \count($realFirewalls)) {
@@ -56,7 +54,7 @@ final class InteractiveSecurityHelper
         return $io->ask(
             $questionText ?? 'Enter the User class that you want to authenticate (e.g. <fg=yellow>App\\Entity\\User</>)',
             $this->guessUserClassDefault(),
-            [Validator::class, 'classIsUserInterface']
+            Validator::classIsUserInterface(...)
         );
     }
 
@@ -145,9 +143,7 @@ final class InteractiveSecurityHelper
     public function getAuthenticatorClasses(array $firewallData): array
     {
         if (isset($firewallData['guard'])) {
-            return array_filter($firewallData['guard']['authenticators'] ?? [], static function ($authenticator) {
-                return class_exists($authenticator);
-            });
+            return array_filter($firewallData['guard']['authenticators'] ?? [], static fn ($authenticator) => class_exists($authenticator));
         }
 
         if (isset($firewallData['custom_authenticator'])) {
@@ -156,9 +152,7 @@ final class InteractiveSecurityHelper
                 $authenticators = [$authenticators];
             }
 
-            return array_filter($authenticators, static function ($authenticator) {
-                return class_exists($authenticator);
-            });
+            return array_filter($authenticators, static fn ($authenticator) => class_exists($authenticator));
         }
 
         return [];

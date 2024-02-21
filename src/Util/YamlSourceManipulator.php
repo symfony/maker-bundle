@@ -456,7 +456,7 @@ class YamlSourceManipulator
      *
      * @param mixed $value The new value to set into YAML
      */
-    private function changeValueInYaml($value)
+    private function changeValueInYaml(mixed $value)
     {
         $originalVal = $this->getCurrentData();
 
@@ -696,7 +696,7 @@ class YamlSourceManipulator
             if ($parsedContentsData !== $newData) {
                 throw new YamlManipulationFailedException(sprintf('Content was updated, but updated content does not match expected data. Original source: "%s", updated source: "%s", updated data: %s', $this->contents, $newContents, var_export($newData, true)));
             }
-        } catch (ParseException $e) {
+        } catch (ParseException) {
             throw new YamlManipulationFailedException(sprintf('Could not update YAML: a parse error occurred in the new content: "%s"', $newContents));
         }
 
@@ -829,7 +829,7 @@ class YamlSourceManipulator
         }
 
         if (\is_scalar($value) || null === $value) {
-            $offset = null === $offset ? $this->currentPosition : $offset;
+            $offset ??= $this->currentPosition;
 
             if (\is_bool($value)) {
                 // (?i) & (?-i) opens/closes case insensitive match
@@ -1090,9 +1090,7 @@ class YamlSourceManipulator
     private function normalizeSequences(array $data)
     {
         // https://stackoverflow.com/questions/173400/how-to-check-if-php-array-is-associative-or-sequential/4254008#4254008
-        $hasStringKeys = function (array $array) {
-            return \count(array_filter(array_keys($array), 'is_string')) > 0;
-        };
+        $hasStringKeys = fn (array $array) => \count(array_filter(array_keys($array), 'is_string')) > 0;
 
         foreach ($data as $key => $val) {
             if (!\is_array($val)) {
@@ -1176,7 +1174,7 @@ class YamlSourceManipulator
 
     private function isEOF(?int $position = null)
     {
-        $position = null === $position ? $this->currentPosition : $position;
+        $position ??= $this->currentPosition;
 
         return $position === \strlen($this->contents);
     }

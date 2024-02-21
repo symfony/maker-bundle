@@ -158,13 +158,13 @@ final class MakeRegistrationForm extends AbstractMaker
             $this->fromEmailAddress = $io->ask(
                 'What email address will be used to send registration confirmations? (e.g. <fg=yellow>mailer@your-domain.com</>)',
                 null,
-                [Validator::class, 'validateEmailAddress']
+                Validator::validateEmailAddress(...)
             );
 
             $this->fromEmailName = $io->ask(
                 'What "name" should be associated with that email address? (e.g. <fg=yellow>Acme Mail Bot</>)',
                 null,
-                [Validator::class, 'notBlank']
+                Validator::notBlank(...)
             );
         }
 

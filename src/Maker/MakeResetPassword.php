@@ -160,7 +160,7 @@ class MakeResetPassword extends AbstractMaker
         $this->controllerResetSuccessRedirect = $io->ask(
             'What route should users be redirected to after their password has been successfully reset?',
             'app_home',
-            [Validator::class, 'notBlank']
+            Validator::notBlank(...)
         );
 
         $io->section('- Email -');
@@ -170,13 +170,13 @@ class MakeResetPassword extends AbstractMaker
         $this->fromEmailAddress = $io->ask(
             'What email address will be used to send reset confirmations? e.g. mailer@your-domain.com',
             null,
-            [Validator::class, 'validateEmailAddress']
+            Validator::validateEmailAddress(...)
         );
 
         $this->fromEmailName = $io->ask(
             'What "name" should be associated with that email address? e.g. "Acme Mail Bot"',
             null,
-            [Validator::class, 'notBlank']
+            Validator::notBlank(...)
         );
     }
 

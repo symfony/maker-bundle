@@ -234,9 +234,7 @@ final class ClassSourceManipulator
         $importedClassName = $this->addUseStatementIfNecessary($trait);
 
         /** @var Node\Stmt\TraitUse[] $traitNodes */
-        $traitNodes = $this->findAllNodes(function ($node) {
-            return $node instanceof Node\Stmt\TraitUse;
-        });
+        $traitNodes = $this->findAllNodes(fn ($node) => $node instanceof Node\Stmt\TraitUse);
 
         foreach ($traitNodes as $node) {
             if ($node->traits[0]->toString() === $importedClassName) {
@@ -734,7 +732,7 @@ final class ClassSourceManipulator
                         new Node\Expr\StaticCall(new Node\Name('parent'), new Node\Identifier('__construct'))
                     );
                 }
-            } catch (\ReflectionException $e) {
+            } catch (\ReflectionException) {
             }
 
             $this->addNodeAfterProperties($constructorNode);
@@ -914,7 +912,7 @@ final class ClassSourceManipulator
         /* @legacy Support for nikic/php-parser v4 */
         if (\is_callable([$this->parser, 'getTokens'])) {
             $this->oldTokens = $this->parser->getTokens();
-        } elseif (\is_callable([$this->lexer, 'getTokens'])) {
+        } elseif (\is_callable($this->lexer->getTokens(...))) {
             $this->oldTokens = $this->lexer->getTokens();
         }
 
@@ -928,9 +926,7 @@ final class ClassSourceManipulator
 
     private function getClassNode(): Node\Stmt\Class_
     {
-        $node = $this->findFirstNode(function ($node) {
-            return $node instanceof Node\Stmt\Class_;
-        });
+        $node = $this->findFirstNode(fn ($node) => $node instanceof Node\Stmt\Class_);
 
         if (!$node) {
             throw new \Exception('Could not find class node');
@@ -941,9 +937,7 @@ final class ClassSourceManipulator
 
     private function getNamespaceNode(): Node\Stmt\Namespace_
     {
-        $node = $this->findFirstNode(function ($node) {
-            return $node instanceof Node\Stmt\Namespace_;
-        });
+        $node = $this->findFirstNode(fn ($node) => $node instanceof Node\Stmt\Namespace_);
 
         if (!$node) {
             throw new \Exception('Could not find namespace node');
@@ -1114,22 +1108,16 @@ final class ClassSourceManipulator
         $classNode = $this->getClassNode();
 
         // try to add after last property
-        $targetNode = $this->findLastNode(function ($node) {
-            return $node instanceof Node\Stmt\Property;
-        }, [$classNode]);
+        $targetNode = $this->findLastNode(fn ($node) => $node instanceof Node\Stmt\Property, [$classNode]);
 
         // otherwise, try to add after the last constant
         if (!$targetNode) {
-            $targetNode = $this->findLastNode(function ($node) {
-                return $node instanceof Node\Stmt\ClassConst;
-            }, [$classNode]);
+            $targetNode = $this->findLastNode(fn ($node) => $node instanceof Node\Stmt\ClassConst, [$classNode]);
         }
 
         // otherwise, try to add after the last trait
         if (!$targetNode) {
-            $targetNode = $this->findLastNode(function ($node) {
-                return $node instanceof Node\Stmt\TraitUse;
-            }, [$classNode]);
+            $targetNode = $this->findLastNode(fn ($node) => $node instanceof Node\Stmt\TraitUse, [$classNode]);
         }
 
         // add the new property after this node
@@ -1322,12 +1310,10 @@ final class ClassSourceManipulator
                 break;
             case 'array':
                 $context = $this;
-                $arrayItems = array_map(static function ($key, $value) use ($context) {
-                    return new Node\Expr\ArrayItem(
-                        $context->buildNodeExprByValue($value),
-                        !\is_int($key) ? $context->buildNodeExprByValue($key) : null
-                    );
-                }, array_keys($value), array_values($value));
+                $arrayItems = array_map(static fn ($key, $value) => new Node\Expr\ArrayItem(
+                    $context->buildNodeExprByValue($value),
+                    !\is_int($key) ? $context->buildNodeExprByValue($key) : null
+                ), array_keys($value), array_values($value));
                 $nodeValue = new Node\Expr\Array_($arrayItems, ['kind' => Node\Expr\Array_::KIND_SHORT]);
                 break;
             default:
@@ -1361,9 +1347,7 @@ final class ClassSourceManipulator
             $classString = sprintf('Doctrine\\ORM\\Mapping\\%s', substr($classString, 4));
         }
 
-        $constructorParameterNames = array_map(static function (\ReflectionParameter $reflectionParameter) {
-            return $reflectionParameter->getName();
-        }, (new \ReflectionClass($classString))->getConstructor()->getParameters());
+        $constructorParameterNames = array_map(static fn (\ReflectionParameter $reflectionParameter) => $reflectionParameter->getName(), (new \ReflectionClass($classString))->getConstructor()->getParameters());
 
         $sorted = [];
         foreach ($constructorParameterNames as $name) {
