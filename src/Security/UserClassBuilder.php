@@ -268,7 +268,7 @@ final class UserClassBuilder
             $manipulator->addAttributeToClass(
                 'ORM\\UniqueConstraint',
                 [
-                    'name' => 'UNIQ_IDENTIFIER_' . strtoupper(Str::asSnakeCase($userClassConfig->getIdentityPropertyName())),
+                    'name' => 'UNIQ_IDENTIFIER_'.strtoupper(Str::asSnakeCase($userClassConfig->getIdentityPropertyName())),
                     'fields' => [$userClassConfig->getIdentityPropertyName()],
                 ]
             );
