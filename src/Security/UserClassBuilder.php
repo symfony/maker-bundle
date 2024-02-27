@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use PhpParser\Node;
+use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -27,6 +28,8 @@ final class UserClassBuilder
     public function addUserInterfaceImplementation(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
     {
         $manipulator->addInterface(UserInterface::class);
+
+        $this->addUniqueConstraint($manipulator, $userClassConfig);
 
         $this->addGetUsername($manipulator, $userClassConfig);
 
@@ -57,7 +60,6 @@ final class UserClassBuilder
                     propertyName: $userClassConfig->getIdentityPropertyName(),
                     type: 'string',
                     length: 180,
-                    unique: true,
                 )
             );
         } else {
@@ -258,5 +260,20 @@ final class UserClassBuilder
         );
 
         $manipulator->addMethodBuilder($builder);
+    }
+
+    private function addUniqueConstraint(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
+    {
+        if (!$userClassConfig->isEntity()) {
+            return;
+        }
+
+        $manipulator->addAttributeToClass(
+            'ORM\\UniqueConstraint',
+            [
+                'name' => 'UNIQ_IDENTIFIER_'.strtoupper(Str::asSnakeCase($userClassConfig->getIdentityPropertyName())),
+                'fields' => [$userClassConfig->getIdentityPropertyName()],
+            ]
+        );
     }
 }
