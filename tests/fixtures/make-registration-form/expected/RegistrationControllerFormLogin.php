@@ -37,12 +37,10 @@ class RegistrationController extends AbstractController
             // do anything else you need here, like send an email
 
             return $security->login($user);
-
-            return $this->redirectToRoute('app_homepage');
         }
 
         return $this->render('registration/register.html.twig', [
-            'registrationForm' => $form->createView(),
+            'registrationForm' => $form,
         ]);
     }
 }
