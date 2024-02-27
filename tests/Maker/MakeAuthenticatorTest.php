@@ -305,6 +305,7 @@ class MakeAuthenticatorTest extends MakerTestCase
 
                 $this->assertEquals('%kernel.secret%', $firewallMain['remember_me']['secret']);
                 $this->assertEquals('604800', $firewallMain['remember_me']['lifetime']);
+                $this->assertArrayNotHasKey('always_remember_me', $firewallMain['remember_me']);
             }),
         ];
 
