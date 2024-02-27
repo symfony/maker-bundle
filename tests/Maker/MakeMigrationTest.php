@@ -132,7 +132,7 @@ class MakeMigrationTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generate_a_formatted_migration' => [$this->createMakeMigrationTest()
+        yield 'it_generates_a_formatted_migration' => [$this->createMakeMigrationTest()
             ->addRequiredPackageVersion('doctrine/doctrine-migrations-bundle', '>=3')
             ->run(function (MakerTestRunner $runner) {
                 $runner->runConsole('make:migration', [], '--formatted');
