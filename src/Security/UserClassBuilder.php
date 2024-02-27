@@ -264,14 +264,16 @@ final class UserClassBuilder
 
     private function addUniqueConstraint(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
     {
-        if ($userClassConfig->isEntity()) {
-            $manipulator->addAttributeToClass(
-                'ORM\\UniqueConstraint',
-                [
-                    'name' => 'UNIQ_IDENTIFIER_'.strtoupper(Str::asSnakeCase($userClassConfig->getIdentityPropertyName())),
-                    'fields' => [$userClassConfig->getIdentityPropertyName()],
-                ]
-            );
+        if (!$userClassConfig->isEntity()) {
+            return;
         }
+
+        $manipulator->addAttributeToClass(
+            'ORM\\UniqueConstraint',
+            [
+                'name' => 'UNIQ_IDENTIFIER_'.strtoupper(Str::asSnakeCase($userClassConfig->getIdentityPropertyName())),
+                'fields' => [$userClassConfig->getIdentityPropertyName()],
+            ]
+        );
     }
 }
