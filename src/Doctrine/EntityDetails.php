@@ -61,6 +61,16 @@ final class EntityDetails
             $fieldsWithTypes[$field] = null;
         }
 
+        foreach ($this->metadata->fieldMappings as $fieldName => $fieldMapping) {
+            $propType = DoctrineHelper::getPropertyTypeForColumn($fieldMapping['type']);
+            if (($propType === '\\'.\DateTimeImmutable::class)
+                || ($propType === '\\'.\DateTimeInterface::class)) {
+                $fieldsWithTypes[$fieldName] = [
+                    'type' => null,
+                    'options_code' => "'widget' => 'single_text'",
+                ];
+            }
+        }
         foreach ($this->metadata->associationMappings as $fieldName => $relation) {
             if (\Doctrine\ORM\Mapping\ClassMetadata::ONE_TO_MANY === $relation['type']) {
                 continue;
