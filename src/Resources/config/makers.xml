@@ -97,7 +97,6 @@
             </service>
 
             <service id="maker.maker.make_serializer_normalizer" class="Symfony\Bundle\MakerBundle\Maker\MakeSerializerNormalizer">
-                <argument type="service" id="maker.file_manager" />
                 <tag name="maker.command" />
             </service>
 

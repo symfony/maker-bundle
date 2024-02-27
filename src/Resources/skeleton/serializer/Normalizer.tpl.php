@@ -4,10 +4,12 @@ namespace <?= $namespace; ?>;
 
 <?= $use_statements; ?>
 
-class <?= $class_name ?> implements NormalizerInterface, CacheableSupportsMethodInterface
+class <?= $class_name ?> implements NormalizerInterface
 {
-    public function __construct(private NormalizerInterface $objectNormalizer)
-    {
+    public function __construct(
+        #[Autowire(service: 'serializer.normalizer.object')]
+        private NormalizerInterface $normalizer
+    ) {
     }
 
     public function normalize($object, string $format = null, array $context = []): array
@@ -21,11 +23,19 @@ class <?= $class_name ?> implements NormalizerInterface, CacheableSupportsMethod
 
     public function supportsNormalization($data, string $format = null, array $context = []): bool
     {
-        return $data instanceof \App\Entity\<?= str_replace('Normalizer', '', $class_name) ?>;
+<?php if ($entity_exists): ?>
+        return $data instanceof <?= $entity_name ?>;
+<?php else: ?>
+        // TODO: return $data instanceof Object
+<?php endif ?>
     }
 
-    public function hasCacheableSupportsMethod(): bool
+    public function getSupportedTypes(?string $format): array
     {
-        return true;
+<?php if ($entity_exists): ?>
+        return [<?= $entity_name ?>::class => true];
+<?php else: ?>
+        // TODO: return [Object::class => true];
+<?php endif ?>
     }
 }
