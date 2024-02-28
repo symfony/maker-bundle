@@ -22,6 +22,7 @@ abstract class AbstractClassDependency
         public string $className,
         public string $composerPackage,
         public bool $installAsRequireDev = false,
+        public ?string $preInstallMessage = null,
     ) {
     }
 }

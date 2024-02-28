@@ -31,54 +31,66 @@ final class DependencyManager
     /** @var OptionalClassDependency[] */
     private array $optionalClassDependencies = [];
 
-    private ConsoleStyle $io;
+    public function __construct(
+        private ConsoleStyle $io,
+        private bool $interactiveMode = true,
+    ) {
+    }
 
-    public function addRequiredDependency(RequiredClassDependency $dependency): self
+    public function addDependency(RequiredClassDependency|OptionalClassDependency|array $dependency): self
     {
-        $this->requiredClassDependencies[] = $dependency;
+        $dependencies = [];
+
+        if (!\is_array($dependency)) {
+            $dependencies[] = $dependency;
+        }
+
+        foreach ($dependencies as $dependency) {
+            if ($dependency instanceof RequiredClassDependency) {
+                $this->requiredClassDependencies[] = $dependency;
+
+                continue;
+            }
+
+            $this->optionalClassDependencies[] = $dependency;
+        }
 
         return $this;
     }
 
-    public function addOptionalDependency(OptionalClassDependency $dependency): self
+    public function installRequiredDependencies(): self
     {
-        $this->optionalClassDependencies[] = $dependency;
-
-        return $this;
-    }
-
-    public function installRequiredDependencies(ConsoleStyle $io, ?string $preInstallMessage): self
-    {
-        $this->io = $io;
-
-        $preInstallMessage ?: $this->io->caution($preInstallMessage);
-
         foreach ($this->requiredClassDependencies as $dependency) {
             if (class_exists($dependency->className) || !$this->askToInstallDependency($dependency)) {
                 continue;
             }
 
+            $dependency->preInstallMessage ?: $this->io->caution($dependency->preInstallMessage);
+
             $this->runComposer($dependency);
         }
 
         return $this;
     }
 
-    public function installOptionalDependencies(ConsoleStyle $io, ?string $preInstallMessage): self
+    public function installOptionalDependencies(): self
     {
-        $this->io = $io;
-
-        $preInstallMessage ?: $this->io->caution($preInstallMessage);
-
         foreach ($this->optionalClassDependencies as $dependency) {
             if (class_exists($dependency->className) || !$this->askToInstallDependency($dependency)) {
                 continue;
             }
 
+            $dependency->preInstallMessage ?: $this->io->caution($dependency->preInstallMessage);
+
             $this->runComposer($dependency);
         }
 
         return $this;
+    }
+
+    public function installInteractively(): bool
+    {
+        return $this->interactiveMode;
     }
 
     private function askToInstallDependency(RequiredClassDependency|OptionalClassDependency $dependency): bool

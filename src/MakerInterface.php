@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
+use Symfony\Bundle\MakerBundle\Dependency\DependencyManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 
@@ -18,6 +19,7 @@ use Symfony\Component\Console\Input\InputInterface;
  * Interface that all maker commands must implement.
  *
  * @method static string getCommandDescription()
+ * @method        void   configureComposerDependencies(DependencyManager $dependencyManager)
  *
  * @author Ryan Weaver <ryan@knpuniversity.com>
  */
