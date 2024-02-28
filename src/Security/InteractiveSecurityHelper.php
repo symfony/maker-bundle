@@ -142,33 +142,34 @@ final class InteractiveSecurityHelper
     }
 
     /**
-     * @return AuthenticatorType[]
+     * @return AuthenticatorTypeEnum[]
      */
     public function getAuthenticatorClasses(array $firewallData): array
     {
         $authenticators = [];
 
         foreach ($firewallData as $potentialAuthenticator => $configData) {
-            $authenticator = \in_array(strtolower($potentialAuthenticator), AuthenticatorType::getNativeTypes(), true);
+            $authenticator = AuthenticatorTypeEnum::tryFrom($potentialAuthenticator);
+            //            $authenticator = \in_array(strtolower($potentialAuthenticator), AuthenticatorType::getNativeTypes(), true);
 
-            if (false !== $authenticator) {
-                $authenticators[] = new AuthenticatorType($potentialAuthenticator);
+            if (null !== $authenticator) {
+                $authenticators[] = $authenticator;
             }
         }
 
-        if (isset($firewallData['custom_authenticator'])) {
-            if (\is_string($firewallData['custom_authenticator'])) {
-                $authenticators[] = new AuthenticatorType($firewallData['custom_authenticator']);
-
-                return $authenticators;
-            }
-
-            foreach ($firewallData['custom_authenticator'] as $potentialAuthenticator) {
-                if (class_exists($potentialAuthenticator)) {
-                    $authenticators[] = new AuthenticatorType($potentialAuthenticator);
-                }
-            }
-        }
+        //        if (isset($firewallData['custom_authenticator'])) {
+        //            if (\is_string($firewallData['custom_authenticator'])) {
+        //                $authenticators[] = new AuthenticatorType($firewallData['custom_authenticator']);
+        //
+        //                return $authenticators;
+        //            }
+        //
+        //            foreach ($firewallData['custom_authenticator'] as $potentialAuthenticator) {
+        //                if (class_exists($potentialAuthenticator)) {
+        //                    $authenticators[] = new AuthenticatorType($potentialAuthenticator);
+        //                }
+        //            }
+        //        }
 
         return $authenticators;
     }

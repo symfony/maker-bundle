@@ -207,9 +207,15 @@ final class MakeRegistrationForm extends AbstractMaker
         // get list of authenticators
         $authenticators = $interactiveSecurityHelper->getAuthenticatorClasses($firewallsData[$firewallName]);
 
-        $canLoginAfterRegistration = $this->canSecurityBundleLogin;
+        if (empty($authenticators)) {
+            $io->note('No authenticators found - so your user won\'t be automatically authenticated after registering.');
 
-        if (!$this->canSecurityBundleLogin) {
+            return;
+        }
+
+        $canLoginAfterRegistration = class_exists(Security::class);
+
+        if (!class_exists(Security::class)) {
             foreach ($authenticators as $authenticator) {
                 if (!$authenticator->isNative()) {
                     $canLoginAfterRegistration = true;
@@ -219,12 +225,6 @@ final class MakeRegistrationForm extends AbstractMaker
 
         if (!$canLoginAfterRegistration) {
             $io->note('Skipping login after registration. This version of MakerBundle only supports logging in after registration when using custom authenticators or using Symfony 6.2 or higher');
-
-            return;
-        }
-
-        if (empty($authenticators)) {
-            $io->note('No authenticators found - so your user won\'t be automatically authenticated after registering.');
 
             return;
         }
@@ -367,7 +367,8 @@ final class MakeRegistrationForm extends AbstractMaker
                     'authenticator_full_class_name' => $this->autoLoginAuthenticator ? $this->autoLoginAuthenticator->getType() : '',
                     'firewall_name' => $this->firewallName,
                     'redirect_route_name' => $this->redirectRouteName,
-                    'password_hasher_class_details' => $generator->createClassNameDetails(UserPasswordHasherInterface::class, '\\'),
+                    'password_hasher_class_details' => $hasherDetails = $generator->createClassNameDetails(UserPasswordHasherInterface::class, '\\'),
+                    'password_hasher_variable_name' => sprintf('$%s', lcfirst($hasherDetails->getShortName())),
                     'translator_available' => $isTranslatorAvailable,
                 ],
                 $userRepoVars
