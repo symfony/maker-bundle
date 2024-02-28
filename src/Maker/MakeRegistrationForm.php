@@ -26,7 +26,8 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
-use Symfony\Bundle\MakerBundle\Security\Object\AuthenticatorType;
+use Symfony\Bundle\MakerBundle\Security\Model\Authenticator;
+use Symfony\Bundle\MakerBundle\Security\Model\AuthenticatorType;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
@@ -51,7 +52,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Validation;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -77,11 +77,9 @@ final class MakeRegistrationForm extends AbstractMaker
     private $emailGetter;
     private $fromEmailAddress;
     private $fromEmailName;
-    private ?AuthenticatorType $autoLoginAuthenticator = null;
-    private $firewallName;
+    private ?Authenticator $autoLoginAuthenticator = null;
     private $redirectRouteName;
     private $addUniqueEntityConstraint;
-    private bool $canSecurityBundleLogin = false;
 
     public function __construct(
         private FileManager $fileManager,
@@ -187,25 +185,8 @@ final class MakeRegistrationForm extends AbstractMaker
 
     private function interactAuthenticatorQuestions(ConsoleStyle $io, InteractiveSecurityHelper $interactiveSecurityHelper, array $securityData): void
     {
-        $this->canSecurityBundleLogin = class_exists(Security::class);
-
-        $firewallsData = $securityData['security']['firewalls'] ?? [];
-        $firewallName = $interactiveSecurityHelper->guessFirewallName(
-            $io,
-            $securityData,
-            'Which firewall key in security.yaml holds the authenticator you want to use for logging in?'
-        );
-
-        if (!isset($firewallsData[$firewallName])) {
-            $io->note('No firewalls found - skipping authentication after registration. You might want to configure your security before running this command.');
-
-            return;
-        }
-
-        $this->firewallName = $firewallName;
-
         // get list of authenticators
-        $authenticators = $interactiveSecurityHelper->getAuthenticatorClasses($firewallsData[$firewallName]);
+        $authenticators = $interactiveSecurityHelper->getAuthenticatorsFromConfig($securityData['security']['firewalls'] ?? []);
 
         if (empty($authenticators)) {
             $io->note('No authenticators found - so your user won\'t be automatically authenticated after registering.');
@@ -213,25 +194,9 @@ final class MakeRegistrationForm extends AbstractMaker
             return;
         }
 
-        $canLoginAfterRegistration = class_exists(Security::class);
-
-        if (!class_exists(Security::class)) {
-            foreach ($authenticators as $authenticator) {
-                if (!$authenticator->isNative()) {
-                    $canLoginAfterRegistration = true;
-                }
-            }
-        }
-
-        if (!$canLoginAfterRegistration) {
-            $io->note('Skipping login after registration. This version of MakerBundle only supports logging in after registration when using custom authenticators or using Symfony 6.2 or higher');
-
-            return;
-        }
-
         $this->autoLoginAuthenticator =
             1 === \count($authenticators) ? $authenticators[0] : $io->choice(
-                'Which authenticator\'s should be used to login the user?',
+                'Which authenticator should be used to login the user?',
                 $authenticators
             );
     }
@@ -336,11 +301,22 @@ final class MakeRegistrationForm extends AbstractMaker
             }
         }
 
-        if ($this->autoLoginAuthenticator) {
+        $autoLoginVars = [
+            'login_after_registration' => null !== $this->autoLoginAuthenticator,
+        ];
+
+        if (null !== $this->autoLoginAuthenticator) {
             $useStatements->addUseStatement([
-                $this->autoLoginAuthenticator->getType(),
-                UserAuthenticatorInterface::class,
+                Security::class,
             ]);
+
+            $autoLoginVars['firewall'] = $this->autoLoginAuthenticator->firewallName;
+            $autoLoginVars['authenticator'] = sprintf('\'%s\'', $this->autoLoginAuthenticator->type->value);
+
+            if (AuthenticatorType::CUSTOM === $this->autoLoginAuthenticator->type) {
+                $useStatements->addUseStatement($this->autoLoginAuthenticator->authenticatorClass);
+                $autoLoginVars['authenticator'] = sprintf('%s::class', Str::getShortClassName($this->autoLoginAuthenticator->authenticatorClass));
+            }
         }
 
         if ($isTranslatorAvailable = class_exists(Translator::class)) {
@@ -363,15 +339,13 @@ final class MakeRegistrationForm extends AbstractMaker
                     'from_email' => $this->fromEmailAddress,
                     'from_email_name' => addslashes($this->fromEmailName),
                     'email_getter' => $this->emailGetter,
-                    'authenticator_class_name' => $this->autoLoginAuthenticator ? Str::getShortClassName($this->autoLoginAuthenticator->getType()) : null,
-                    'authenticator_full_class_name' => $this->autoLoginAuthenticator ? $this->autoLoginAuthenticator->getType() : '',
-                    'firewall_name' => $this->firewallName,
                     'redirect_route_name' => $this->redirectRouteName,
                     'password_hasher_class_details' => $hasherDetails = $generator->createClassNameDetails(UserPasswordHasherInterface::class, '\\'),
                     'password_hasher_variable_name' => sprintf('$%s', lcfirst($hasherDetails->getShortName())),
                     'translator_available' => $isTranslatorAvailable,
                 ],
-                $userRepoVars
+                $userRepoVars,
+                $autoLoginVars,
             )
         );
 

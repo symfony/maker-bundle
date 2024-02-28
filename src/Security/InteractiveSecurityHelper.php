@@ -11,11 +11,13 @@
 
 namespace Symfony\Bundle\MakerBundle\Security;
 
-use Symfony\Bundle\MakerBundle\Security\Object\AuthenticatorType;
+use Symfony\Bundle\MakerBundle\Security\Model\Authenticator;
+use Symfony\Bundle\MakerBundle\Security\Model\AuthenticatorType;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 
 /**
  * @internal
@@ -142,34 +144,54 @@ final class InteractiveSecurityHelper
     }
 
     /**
-     * @return AuthenticatorTypeEnum[]
+     * @param array<string, array<string, mixed>> $firewalls Config data from security.firewalls
+     *
+     * @return Authenticator[]
      */
-    public function getAuthenticatorClasses(array $firewallData): array
+    public function getAuthenticatorsFromConfig(array $firewalls): array
     {
         $authenticators = [];
 
-        foreach ($firewallData as $potentialAuthenticator => $configData) {
-            $authenticator = AuthenticatorTypeEnum::tryFrom($potentialAuthenticator);
-            //            $authenticator = \in_array(strtolower($potentialAuthenticator), AuthenticatorType::getNativeTypes(), true);
+        // Iterate of each firewall that exists e.g. security.firewalls.main
+        foreach ($firewalls as $firewallName => $firewallConfig) {
+            if (!\is_array($firewallConfig)) {
+                continue;
+            }
 
-            if (null !== $authenticator) {
-                $authenticators[] = $authenticator;
+            foreach ($firewallConfig as $potentialAuthenticator => $configData) {
+                if (null === ($authenticator = AuthenticatorType::tryFrom($potentialAuthenticator))) {
+                    // This entry is probably security.firewalls.main.lazy or security.firewalls.main.providers
+                    continue;
+                }
+
+                if (AuthenticatorType::CUSTOM !== $authenticator) {
+                    // We found a "built in" authenticator - "form_login", "json_login", etc...
+                    $authenticators[] = new Authenticator($authenticator, $firewallName);
+
+                    continue;
+                }
+
+                // custom_authenticators can be set as a string or an array in security.yaml
+                if (\is_string($configData)) {
+                    $configData = [$configData];
+                }
+
+                foreach ($configData as $customAuthenticatorClass) {
+                    //                    if (!class_exists($customAuthenticatorClass)) {
+                    //                        continue;
+                    //                    }
+
+                    //                    $isValidAuthenticator = (new \ReflectionClass($customAuthenticatorClass))
+                    //                        ->implementsInterface(AuthenticatorInterface::class)
+                    //                    ;
+
+                    //                    if ($isValidAuthenticator) {
+                    // We found an actual authenticator and not something else
+                    $authenticators[] = new Authenticator($authenticator, $firewallName, $customAuthenticatorClass);
+                    //                    }
+                }
             }
         }
-
-        //        if (isset($firewallData['custom_authenticator'])) {
-        //            if (\is_string($firewallData['custom_authenticator'])) {
-        //                $authenticators[] = new AuthenticatorType($firewallData['custom_authenticator']);
-        //
-        //                return $authenticators;
-        //            }
-        //
-        //            foreach ($firewallData['custom_authenticator'] as $potentialAuthenticator) {
-        //                if (class_exists($potentialAuthenticator)) {
-        //                    $authenticators[] = new AuthenticatorType($potentialAuthenticator);
-        //                }
-        //            }
-        //        }
 
         return $authenticators;
     }

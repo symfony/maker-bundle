@@ -13,7 +13,8 @@ namespace Symfony\Bundle\MakerBundle\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
-use Symfony\Bundle\MakerBundle\Security\Object\AuthenticatorType;
+use Symfony\Bundle\MakerBundle\Security\Model\Authenticator;
+use Symfony\Bundle\MakerBundle\Security\Model\AuthenticatorType;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class InteractiveSecurityHelperTest extends TestCase
@@ -208,10 +209,10 @@ class InteractiveSecurityHelperTest extends TestCase
     }
 
     /** @dataProvider authenticatorClassProvider */
-    public function testGuessAuthenticatorClasses(array $firewallData, array $expectedResults): void
+    public function testGetAuthenticatorsFromConfig(array $firewalls, array $expectedResults): void
     {
         $helper = new InteractiveSecurityHelper();
-        $result = $helper->getAuthenticatorClasses($firewallData);
+        $result = $helper->getAuthenticatorsFromConfig($firewalls);
 
         self::assertEquals($expectedResults, $result);
     }
@@ -220,41 +221,51 @@ class InteractiveSecurityHelperTest extends TestCase
     {
         yield 'Only Custom Authenticator' => [
             [
-                'lazy' => true,
-                'custom_authenticator' => 'App\Security\CustomAuthenticator',
-                'provider' => 'a_user_provider',
+                'main' => [
+                    'lazy' => true,
+                    'custom_authenticator' => 'App\Security\CustomAuthenticator',
+                    'provider' => 'a_user_provider',
+                ],
             ],
-            [new AuthenticatorType('App\Security\CustomAuthenticator')],
+            [new Authenticator(AuthenticatorType::CUSTOM, 'main', 'App\Security\CustomAuthenticator')],
         ];
 
         yield 'Only Form Login' => [
             [
-                'form_login' => ['login_path' => 'some_path'],
-                'provider' => 'a_user_provider',
+                'main' => [
+                    'form_login' => ['login_path' => 'some_path'],
+                    'provider' => 'a_user_provider',
+                ],
             ],
-            [new AuthenticatorType(AuthenticatorType::FORM_LOGIN)],
+            [new Authenticator(AuthenticatorType::FORM_LOGIN, 'main')],
         ];
 
         yield 'Form & Json Login' => [
             [
-                'form_login' => ['login_path' => 'some_path'],
-                'json_login' => ['login_path' => 'some_path'],
-                'provider' => 'a_user_provider',
+                'main' => [
+                    'form_login' => ['login_path' => 'some_path'],
+                    'json_login' => ['login_path' => 'some_path'],
+                    'provider' => 'a_user_provider',
+                ],
             ],
-            [new AuthenticatorType(AuthenticatorType::FORM_LOGIN), new AuthenticatorType(AuthenticatorType::JSON_LOGIN)],
+            [
+                new Authenticator(AuthenticatorType::FORM_LOGIN, 'main'),
+                new Authenticator(AuthenticatorType::JSON_LOGIN, 'main')],
         ];
 
         yield 'Native & Custom' => [
             [
-                'form_login' => ['login_path' => 'some_path'],
-                'json_login' => ['login_path' => 'some_path'],
-                'custom_authenticator' => 'App\Security\CustomAuthenticator',
-                'provider' => 'a_user_provider',
+                'main' => [
+                    'form_login' => ['login_path' => 'some_path'],
+                    'json_login' => ['login_path' => 'some_path'],
+                    'custom_authenticator' => 'App\Security\CustomAuthenticator',
+                    'provider' => 'a_user_provider',
+                ],
             ],
             [
-                new AuthenticatorType(AuthenticatorType::FORM_LOGIN),
-                new AuthenticatorType(AuthenticatorType::JSON_LOGIN),
-                new AuthenticatorType('App\Security\CustomAuthenticator'),
+                new Authenticator(AuthenticatorType::FORM_LOGIN, 'main'),
+                new Authenticator(AuthenticatorType::JSON_LOGIN, 'main'),
+                new Authenticator(AuthenticatorType::CUSTOM, 'main', 'App\Security\CustomAuthenticator'),
             ],
         ];
 
