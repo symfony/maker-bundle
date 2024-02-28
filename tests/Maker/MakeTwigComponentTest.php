@@ -58,7 +58,7 @@ class MakeTwigComponentTest extends MakerTestCase
         yield 'it_generates_live_component' => [$this->createMakerTest()
             ->addExtraDependencies('symfony/ux-live-component', 'symfony/twig-bundle')
             ->run(function (MakerTestRunner $runner) {
-                $output = $runner->runMaker(['Alert']);
+                $output = $runner->runMaker(['Alert', 'y']);
 
                 $this->assertStringContainsString('src/Twig/Components/Alert.php', $output);
                 $this->assertStringContainsString('templates/components/Alert.html.twig', $output);
@@ -76,7 +76,7 @@ class MakeTwigComponentTest extends MakerTestCase
         yield 'it_generates_pascal_case_live_component' => [$this->createMakerTest()
             ->addExtraDependencies('symfony/ux-live-component', 'symfony/twig-bundle')
             ->run(function (MakerTestRunner $runner) {
-                $output = $runner->runMaker(['FormInput']);
+                $output = $runner->runMaker(['FormInput', 'y']);
 
                 $this->assertStringContainsString('src/Twig/Components/FormInput.php', $output);
                 $this->assertStringContainsString('templates/components/FormInput.html.twig', $output);

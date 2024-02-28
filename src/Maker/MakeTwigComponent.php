@@ -91,7 +91,7 @@ final class MakeTwigComponent extends AbstractMaker
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if (!$input->getOption('live')) {
-            $input->setOption('live', $io->confirm('Make this a live component?', class_exists(AsLiveComponent::class)));
+            $input->setOption('live', $io->confirm('Make this a live component?', false));
         }
     }
 }
