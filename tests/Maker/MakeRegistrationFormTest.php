@@ -50,7 +50,7 @@ class MakeRegistrationFormTest extends MakerTestCase
                     'n', // verify user
                     // firewall name guessed
                     'n', // yes authenticate after
-                    '2' // redirect to app_anonymous after registration
+                    '2', // redirect to app_anonymous after registration
                 ]);
 
                 $fixturePath = \dirname(__DIR__, 1).'/fixtures/make-registration-form/expected';
