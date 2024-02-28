@@ -89,10 +89,6 @@ final class MakeTwigComponent extends AbstractMaker
         $name = $input->getArgument('name');
         $live = $input->getOption('live');
 
-        if ($live && !class_exists(AsLiveComponent::class)) {
-            throw new \RuntimeException('You must install symfony/ux-live-component to create a live component (composer require symfony/ux-live-component)');
-        }
-
         $factory = $generator->createClassNameDetails(
             $name,
             'Twig\\Components',
