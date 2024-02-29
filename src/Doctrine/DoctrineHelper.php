@@ -273,18 +273,22 @@ final class DoctrineHelper
             default => null,
         };
 
-        if (null === $propertyType && Type::getTypeRegistry()->has($columnType)) {
-            $reflection = new \ReflectionClass(\get_class(Type::getTypeRegistry()->get($columnType)));
-            if ($reflection->hasMethod('convertToPHPValue') && $returnType = $reflection->getMethod('convertToPHPValue')->getReturnType()) {
-                if ($returnType->isBuiltin()) {
-                    $propertyType = $returnType->getName();
-                } else {
-                    $propertyType = '\\'.$returnType->getName();
-                }
-            }
+        if (null !== $propertyType || !($registry = Type::getTypeRegistry())->has($columnType)) {
+            return $propertyType;
         }
 
-        return $propertyType;
+        $reflection = new \ReflectionClass(($registry->get($columnType))::class);
+
+        $returnType = $reflection->getMethod('convertToPHPValue')->getReturnType();
+
+        /*
+         * we do not support union and intersection types
+         */
+        if (!$returnType instanceof \ReflectionNamedType) {
+            return null;
+        }
+
+        return $returnType->isBuiltin() ? $returnType->getName() : '\\'.$returnType->getName();
     }
 
     /**
