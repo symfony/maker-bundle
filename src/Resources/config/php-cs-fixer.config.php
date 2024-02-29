@@ -15,6 +15,7 @@ return (new PhpCsFixer\Config())
         '@Symfony:risky' => true,
         'native_function_invocation' => false,
         'blank_line_before_statement' => ['statements' => ['break', 'case', 'continue', 'declare', 'default', 'do', 'exit', 'for', 'foreach', 'goto', 'if', 'include', 'include_once', 'phpdoc', 'require', 'require_once', 'return', 'switch', 'throw', 'try', 'while', 'yield', 'yield_from']],
+        'array_indentation' => true,
     ])
     ->setRiskyAllowed(true)
 ;
