@@ -22,20 +22,36 @@ class MakeSerializerNormalizerTest extends MakerTestCase
         return MakeSerializerNormalizer::class;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_makes_serializer_normalizer' => [$this->createMakerTest()
-            // serializer-pack 1.1 requires symfony/property-info >= 5.4
-            // adding symfony/serializer-pack:* as an extra depends allows
-            // us to use serializer-pack < 1.1 which does not conflict with
-            // property-info < 5.4. E.g. Symfony 5.3 tests. See PR 1063
-            ->addExtraDependencies('symfony/serializer-pack:*')
             ->run(function (MakerTestRunner $runner) {
-                $runner->runMaker(
-                    [
-                        // normalizer class name
-                        'FooBarNormalizer',
-                    ]
+                $output = $runner->runMaker(
+                    ['FooBarNormalizer']
+                );
+
+                $this->assertStringContainsString('Success', $output);
+
+                self::assertFileEquals(
+                    \dirname(__DIR__).'/fixtures/make-serializer-normalizer/FooBarNormalizer.php',
+                    $runner->getPath('src/Serializer/Normalizer/FooBarNormalizer.php')
+                );
+            }),
+        ];
+
+        yield 'it_makes_serializer_normalizer_with_existing_entity' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy('make-serializer-normalizer/EntityFixture.php', 'src/Entity/EntityFixture.php');
+
+                $output = $runner->runMaker(
+                    ['EntityFixture']
+                );
+
+                $this->assertStringContainsString('Success', $output);
+
+                self::assertFileEquals(
+                    \dirname(__DIR__).'/fixtures/make-serializer-normalizer/EntityFixtureNormalizer.php',
+                    $runner->getPath('src/Serializer/Normalizer/EntityFixtureNormalizer.php')
                 );
             }),
         ];

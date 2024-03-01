@@ -17,11 +17,10 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
-use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
 
@@ -30,8 +29,15 @@ use Symfony\Component\Serializer\Serializer;
  */
 final class MakeSerializerNormalizer extends AbstractMaker
 {
-    public function __construct(private FileManager $fileManager)
+    public function __construct(private ?FileManager $fileManager = null)
     {
+        if (null !== $this->fileManager) {
+            @trigger_deprecation(
+                'symfony/maker-bundle',
+                '1.56.0',
+                sprintf('Initializing MakeSerializerNormalizer while providing an instance of "%s" is deprecated. The $fileManager param will be removed in a future version.', FileManager::class)
+            );
+        }
     }
 
     public static function getCommandName(): string
@@ -54,35 +60,41 @@ final class MakeSerializerNormalizer extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-        $nextSteps = [];
-
         $normalizerClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
             'Serializer\\Normalizer\\',
             \Normalizer::class
         );
 
-        $this->generateNormalizer($normalizerClassNameDetails->getFullName(), $generator);
+        $useStatements = new UseStatementGenerator([
+            NormalizerInterface::class,
+            Autowire::class,
+            sprintf('App\Entity\%s', str_replace('Normalizer', '', $normalizerClassNameDetails->getShortName())),
+        ]);
 
-        try {
-            $this->configureNormalizerService($normalizerClassNameDetails->getFullName(), $generator);
-        } catch (\Throwable) {
-            $nextSteps[] = "Your <info>services.yaml</> could not be updated automatically. You'll need to inject the <info>\$objectNormalizer</> argument to manually.";
+        $entityDetails = $generator->createClassNameDetails(
+            str_replace('Normalizer', '', $normalizerClassNameDetails->getShortName()),
+            'Entity\\',
+        );
+
+        if ($entityExists = class_exists($entityDetails->getFullName())) {
+            $useStatements->addUseStatement($entityDetails->getFullName());
         }
+
+        $generator->generateClass($normalizerClassNameDetails->getFullName(), 'serializer/Normalizer.tpl.php', [
+            'use_statements' => $useStatements,
+            'entity_exists' => $entityExists,
+            'entity_name' => $entityDetails->getShortName(),
+        ]);
 
         $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
 
-        array_push(
-            $nextSteps,
-            'Open your new serializer normalizer class and start customizing it.',
-            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/serializer/custom_normalizer.html</>',
-        );
-
         $io->text([
             'Next:',
-            ...array_map(static fn (string $s): string => sprintf('  - %s', $s), $nextSteps),
+            '  - Open your new serializer normalizer class and start customizing it.',
+            '  - Find the documentation at <fg=yellow>https://symfony.com/doc/current/serializer/custom_normalizer.html</>',
         ]);
     }
 
@@ -92,36 +104,5 @@ final class MakeSerializerNormalizer extends AbstractMaker
             Serializer::class,
             'serializer'
         );
-    }
-
-    private function generateNormalizer(string $className, Generator $generator): void
-    {
-        $useStatements = new UseStatementGenerator([
-            NormalizerInterface::class,
-            CacheableSupportsMethodInterface::class,
-        ]);
-
-        $generator->generateClass($className, 'serializer/Normalizer.tpl.php', [
-            'use_statements' => $useStatements,
-        ]);
-    }
-
-    private function configureNormalizerService(string $className, Generator $generator): void
-    {
-        $servicesFilePath = 'config/services.yaml';
-
-        $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents($servicesFilePath));
-        $servicesData = $manipulator->getData();
-
-        if (!isset($servicesData['services'][$className])) {
-            $servicesData['services'][$className] = [
-                'arguments' => [
-                    '$objectNormalizer' => '@serializer.normalizer.object',
-                ],
-            ];
-        }
-
-        $manipulator->setData($servicesData);
-        $generator->dumpFile($servicesFilePath, $manipulator->getContents());
     }
 }
