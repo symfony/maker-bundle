@@ -340,8 +340,6 @@ final class MakeRegistrationForm extends AbstractMaker
                     'from_email_name' => addslashes($this->fromEmailName),
                     'email_getter' => $this->emailGetter,
                     'redirect_route_name' => $this->redirectRouteName,
-                    'password_hasher_class_details' => $hasherDetails = $generator->createClassNameDetails(UserPasswordHasherInterface::class, '\\'),
-                    'password_hasher_variable_name' => sprintf('$%s', lcfirst($hasherDetails->getShortName())),
                     'translator_available' => $isTranslatorAvailable,
                 ],
                 $userRepoVars,
