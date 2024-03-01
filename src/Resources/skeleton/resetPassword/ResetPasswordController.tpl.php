@@ -113,6 +113,21 @@ class <?= $class_name ?> extends AbstractController
         ]);
     }
 
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[Route('/remove/{user}', name: 'app_reset_password_remove', methods: ['POST'])]
+    public function flushRequests(Request $request, User $user, ResetPasswordRequestRepository $repository): Response
+    {
+        // @TODO - Use the reset_password/_remove_requests.html.twig template to submit requests
+        if ($this->isCsrfTokenValid('remove'.$user->getId(), $request->getPayload()->get('_token'))) {
+        $repository->removeRequests($user);
+
+        // @TODO - Inform the user the requests have been removed
+        // $this->addFlash('SUCCESS', 'Flushed your reset password requests...');
+        }
+
+        return $this->redirectToRoute('app_forgot_password_request');
+    }
+
     private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer<?php if ($translator_available): ?>, TranslatorInterface $translator<?php endif ?>): RedirectResponse
     {
         $user = $this->entityManager->getRepository(<?= $user_class_name ?>::class)->findOneBy([
