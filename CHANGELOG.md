@@ -1,5 +1,29 @@
 # Changelog
 
+## [v1.56.0](https://github.com/symfony/maker-bundle/releases/tag/v1.56.0)
+
+*March 4th, 2024*
+
+### Feature
+
+- [#1465](https://github.com/symfony/maker-bundle/pull/1465) [make:twig-component] default to "no" when asking if is live component - *@jrushlow*
+- [#1463](https://github.com/symfony/maker-bundle/pull/1463) [make:serializer:normalizer] stop using CacheableSupportsMethodInterface - *@jrushlow*
+- [#1460](https://github.com/symfony/maker-bundle/pull/1460) [make:user] handle ORM\Column.unique deprecation - use ORM\UniqueConstrain - *@maelanleborgne*
+- [#1413](https://github.com/symfony/maker-bundle/pull/1413) [DoctrineHelper] handle property type for custom doctrine type - *@IndraGunawan*
+- [#1405](https://github.com/symfony/maker-bundle/pull/1405) [make:reset-password] increase password strength & check for comprimised password - *@Spomky*
+- [#1402](https://github.com/symfony/maker-bundle/pull/1402) [make:entity] remove PasswordUpgraderInterface annotation in phpdoc - *@AurelienPillevesse*
+- [#1393](https://github.com/symfony/maker-bundle/pull/1393) [make:*] add `single_text` widget for all date types - *@tacman*
+- [#1345](https://github.com/symfony/maker-bundle/pull/1345) [make:migration] Format the generated migration sql by passing `--formatted` to the command - *@StevenRenaux*
+- [#1243](https://github.com/symfony/maker-bundle/pull/1243) [make:registration] drop guard authentication support - *@jrushlow*
+- [#516](https://github.com/symfony/maker-bundle/pull/516) [make:migration] add ability to specify a configuration file - *@LeJeanbono*
+
+### Bug
+
+- [#1472](https://github.com/symfony/maker-bundle/pull/1472) [make:migration] --configuration is available in all versions - *@jrushlow*
+- [#1469](https://github.com/symfony/maker-bundle/pull/1469) - [make:form] fix generated field options_code indentation - *@IndraGunawan*
+- [#1468](https://github.com/symfony/maker-bundle/pull/1468) - [make:crud] fixed issues with make CRUD test Controller generation - *@dr-matt-smith*
+- [#1461](https://github.com/symfony/maker-bundle/pull/1461) - [make:auth] Fix 'always-remember-me' param always set to true - *@maelanleborgne*
+
 ## [v1.55.1](https://github.com/symfony/maker-bundle/releases/tag/v1.55.1)
 
 *February 21st, 2024*
