@@ -38,7 +38,64 @@ class MakeRegistrationFormTest extends MakerTestCase
 
     public function getTestDetails(): \Generator
     {
-        yield 'it_generates_registration_with_entity_and_authenticator' => [$this->createRegistrationFormTest()
+        yield 'it_generates_registration_with_entity_and_form_login_with_no_login' => [$this->createRegistrationFormTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner);
+
+                $runner->runMaker([
+                    // user class guessed,
+                    // username field guessed
+                    // password guessed
+                    '', // yes to add UniqueEntity
+                    'n', // verify user
+                    // firewall name guessed
+                    'n', // yes authenticate after
+                    '2', // redirect to app_anonymous after registration
+                ]);
+
+                $fixturePath = \dirname(__DIR__, 1).'/fixtures/make-registration-form/expected';
+
+                $this->assertFileEquals($fixturePath.'/RegistrationControllerNoLogin.php', $runner->getPath('src/Controller/RegistrationController.php'));
+
+                $this->runRegistrationTest($runner, 'it_generates_registration_with_entity_and_authenticator.php');
+            }),
+        ];
+
+        yield 'it_generates_registration_with_entity_and_form_login_with_security_bundle_login' => [$this->createRegistrationFormTest()
+            ->run(function (MakerTestRunner $runner) {
+                if (60200 > $runner->getSymfonyVersion()) {
+                    $this->markTestSkipped('Requires Symfony 6.2+');
+                }
+
+                $this->makeUser($runner);
+
+                $runner->modifyYamlFile('config/packages/security.yaml', function (array $data) {
+                    $data['security']['firewalls']['main']['form_login']['login_path'] = 'app_login';
+                    $data['security']['firewalls']['main']['form_login']['check_path'] = 'app_login';
+
+                    return $data;
+                });
+
+                $runner->runMaker([
+                    // user class guessed,
+                    // username field guessed
+                    // password guessed
+                    '', // yes to add UniqueEntity
+                    'n', // verify user
+                    // firewall name guessed
+                    '', // yes authenticate after
+                    // 1 authenticator will be guessed
+                ]);
+
+                $fixturePath = \dirname(__DIR__, 1).'/fixtures/make-registration-form/expected';
+
+                $this->assertFileEquals($fixturePath.'/RegistrationControllerFormLogin.php', $runner->getPath('src/Controller/RegistrationController.php'));
+
+                $this->runRegistrationTest($runner, 'it_generates_registration_with_entity_and_authenticator.php');
+            }),
+        ];
+
+        yield 'it_generates_registration_with_entity_and_custom_authenticator' => [$this->createRegistrationFormTest()
             ->run(function (MakerTestRunner $runner) {
                 $this->makeUser($runner);
 
@@ -58,6 +115,10 @@ class MakeRegistrationFormTest extends MakerTestCase
                     '', // yes authenticate after
                     // 1 authenticator will be guessed
                 ]);
+
+                $fixturePath = \dirname(__DIR__, 1).'/fixtures/make-registration-form/expected';
+
+                $this->assertFileEquals($fixturePath.'/RegistrationControllerCustomAuthenticator.php', $runner->getPath('src/Controller/RegistrationController.php'));
 
                 $this->runRegistrationTest($runner, 'it_generates_registration_with_entity_and_authenticator.php');
             }),

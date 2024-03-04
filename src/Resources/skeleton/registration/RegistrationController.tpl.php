@@ -16,7 +16,7 @@ class <?= $class_name; ?> extends AbstractController
 
 <?php endif; ?>
 <?= $generator->generateRouteForControllerMethod($route_path, $route_name) ?>
-    public function register(Request $request, <?= $password_hasher_class_details->getShortName() ?> $userPasswordHasher<?= $authenticator_full_class_name ? sprintf(', UserAuthenticatorInterface $userAuthenticator, %s $authenticator', $authenticator_class_name) : '' ?>, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher<?= $login_after_registration ? ', Security $security': '' ?>, EntityManagerInterface $entityManager): Response
     {
         $user = new <?= $user_class_name ?>();
         $form = $this->createForm(<?= $form_class_name ?>::class, $user);
@@ -25,7 +25,7 @@ class <?= $class_name; ?> extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // encode the plain password
             $user->set<?= ucfirst($password_field) ?>(
-                $userPasswordHasher->hashPassword(
+                    $userPasswordHasher->hashPassword(
                     $user,
                     $form->get('plainPassword')->getData()
                 )
@@ -44,14 +44,11 @@ class <?= $class_name; ?> extends AbstractController
                     ->htmlTemplate('registration/confirmation_email.html.twig')
             );
 <?php endif; ?>
+
             // do anything else you need here, like send an email
 
-<?php if ($authenticator_full_class_name): ?>
-            return $userAuthenticator->authenticateUser(
-                $user,
-                $authenticator,
-                $request
-            );
+<?php if ($login_after_registration): ?>
+            return $security->login($user, <?= $authenticator ?>, '<?= $firewall ?>');
 <?php else: ?>
             return $this->redirectToRoute('<?= $redirect_route_name ?>');
 <?php endif; ?>
