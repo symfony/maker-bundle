@@ -68,6 +68,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
                 ->addOption('db', null, InputOption::VALUE_REQUIRED, 'The database connection name')
                 ->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager name')
                 ->addOption('shard', null, InputOption::VALUE_REQUIRED, 'The shard connection name')
+                ->addOption('configuration', null, InputOption::VALUE_OPTIONAL, 'The path of doctrine configuration file')
             ;
         }
 
@@ -88,6 +89,10 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         }
         if ($input->hasOption('shard') && null !== $input->getOption('shard')) {
             $options[] = '--shard='.$input->getOption('shard');
+        }
+
+        if (null !== $input->getOption('configuration')) {
+            $options[] = '--configuration='.$input->getOption('configuration');
         }
         // end 2.x support
 
