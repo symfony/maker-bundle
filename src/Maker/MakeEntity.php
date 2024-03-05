@@ -103,6 +103,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if ($input->getArgument('name')) {
+            if (!$this->verifyEntityName($input->getArgument('name'))) {
+                throw new \InvalidArgumentException('An entity can only have ASCII letters');
+            }
+
             return;
         }
 
@@ -121,6 +125,11 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $argument = $command->getDefinition()->getArgument('name');
         $question = $this->createEntityClassQuestion($argument->getDescription());
         $entityClassName = $io->askQuestion($question);
+
+        while (!$this->verifyEntityName($entityClassName)) {
+            $io->error('An entity can only have ASCII letter")');
+            $entityClassName = $io->askQuestion($question);
+        }
 
         $input->setArgument('name', $entityClassName);
 
@@ -803,6 +812,11 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         });
 
         return $io->askQuestion($question);
+    }
+
+    private function verifyEntityName(string $entityName): bool
+    {
+        return preg_match('/^[a-zA-Z\\\\]+$/', $entityName);
     }
 
     private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite): ClassSourceManipulator
