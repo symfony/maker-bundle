@@ -89,7 +89,7 @@ final class DoctrineHelper
         }
 
         if (null === $em) {
-            throw new \InvalidArgumentException(sprintf('Cannot find the entity manager for class "%s"', $className));
+            throw new \InvalidArgumentException(sprintf('Cannot find the entity manager for class "%s". Ensure entity uses attribute mapping.', $className));
         }
 
         if (null === $this->mappingDriversByPrefix) {
