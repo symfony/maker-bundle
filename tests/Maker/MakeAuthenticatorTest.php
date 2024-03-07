@@ -274,50 +274,6 @@ class MakeAuthenticatorTest extends MakerTestCase
 
                 $securityConfig = $runner->readYaml('config/packages/security.yaml');
                 $this->assertEquals(
-                    'app_logout',
-                    $securityConfig['security']['firewalls']['main']['logout']['path']
-                );
-            }),
-        ];
-
-        yield 'auth_login_form_user_entity_with_logout_route_loader' => [$this->createMakerTest()
-            ->addExtraDependencies('doctrine', 'twig', 'symfony/form')
-            ->run(function (MakerTestRunner $runner) {
-                $this->makeUser($runner, 'userEmail');
-                // We pretend that the LogoutRouteLoader is registered
-                $runner->addToAutoloader('Symfony\\Bundle\\SecurityBundle\\Routing\\', \dirname(__DIR__).'/fixtures/security-bundle/routing/');
-                $runner->modifyYamlFile('config/services.yaml', function (array $config) {
-                    $config['services']['security.route_loader.logout'] = [
-                        'class' => 'Symfony\Bundle\SecurityBundle\\Routing\\LogoutRouteLoader',
-                        'tags' => ['routing.route_loader'],
-                    ];
-
-                    return $config;
-                });
-                $output = $runner->runMaker([
-                    // authenticator type => login-form
-                    1,
-                    // class name
-                    'AppCustomAuthenticator',
-                    // controller name
-                    'SecurityController',
-                    // logout support
-                    'yes',
-                    // remember me support => no
-                    'no',
-                ]);
-
-                $this->runLoginTest($runner, 'userEmail', true, 'App\\Entity\\User', true);
-
-                $this->assertStringContainsString('Success', $output);
-
-                $this->assertFileExists($runner->getPath('src/Controller/SecurityController.php'));
-                $this->assertFileEquals(\dirname(__DIR__).'/fixtures/make-auth/SecurityController-no-logout.php', $runner->getPath('src/Controller/SecurityController.php'));
-                $this->assertFileExists($runner->getPath('templates/security/login.html.twig'));
-                $this->assertFileExists($runner->getPath('src/Security/AppCustomAuthenticator.php'));
-
-                $securityConfig = $runner->readYaml('config/packages/security.yaml');
-                $this->assertEquals(
                     '/logout',
                     $securityConfig['security']['firewalls']['main']['logout']['path']
                 );

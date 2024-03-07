@@ -27,28 +27,6 @@ class SecurityControllerBuilderTest extends TestCase
         );
     }
 
-    public function testLogoutMethod(): void
-    {
-        $this->runMethodTest(
-            'addLogoutMethod',
-            sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_logout.php')
-        );
-    }
-
-    public function testLoginAndLogoutMethod(): void
-    {
-        $builder = new SecurityControllerBuilder();
-        $csm = $this->getClassSourceManipulator();
-
-        $builder->addLoginMethod($csm);
-        $builder->addLogoutMethod($csm);
-
-        $this->assertStringEqualsFile(
-            sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_login_logout.php'),
-            $csm->getSourceCode()
-        );
-    }
-
     private function runMethodTest(string $builderMethod, string $expectedFilePath): void
     {
         $builder = new SecurityControllerBuilder();

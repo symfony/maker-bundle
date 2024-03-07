@@ -28,8 +28,6 @@ use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
-use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
-use Symfony\Bundle\MakerBundle\Util\FeatureSupportTrait;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -67,8 +65,11 @@ final class MakeFormLogin extends AbstractMaker
     public function __construct(
         private FileManager $fileManager,
         private SecurityConfigUpdater $securityConfigUpdater,
-        private SecurityControllerBuilder $securityControllerBuilder,
+        private ?SecurityControllerBuilder $securityControllerBuilder = null,
     ) {
+        if (null !== $this->securityControllerBuilder) {
+            trigger_deprecation('symfony/maker-bundle', 'v1.61', 'The "%s $securityControllerBuilder" constructor argument is deprecated, you should stop using it', SecurityControllerBuilder::class);
+        }
     }
 
     public static function getCommandName(): string
@@ -146,7 +147,7 @@ final class MakeFormLogin extends AbstractMaker
         $controllerNameDetails = $generator->createClassNameDetails($this->controllerName, 'Controller\\', 'Controller');
         $templatePath = strtolower($controllerNameDetails->getRelativeNameWithoutSuffix());
 
-        $controllerPath = $generator->generateController(
+        $generator->generateController(
             $controllerNameDetails->getFullName(),
             'security/formLogin/LoginController.tpl.php',
             [
@@ -155,14 +156,6 @@ final class MakeFormLogin extends AbstractMaker
                 'template_path' => $templatePath,
             ]
         );
-
-        if ($this->willLogout && !$this->supportsLogoutRouteLoader()) {
-            $manipulator = new ClassSourceManipulator($generator->getFileContentsForPendingOperation($controllerPath));
-
-            $this->securityControllerBuilder->addLogoutMethod($manipulator);
-
-            $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
-        }
 
         $generator->generateTemplate(
             sprintf('%s/login.html.twig', $templatePath),
