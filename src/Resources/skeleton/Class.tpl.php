@@ -1,4 +1,4 @@
-<?= "<?php\n" ?>
+<?= "<?php declare(strict_types=1);\n" ?>
 
 namespace <?= $namespace; ?>;
 
