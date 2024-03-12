@@ -9,15 +9,8 @@ final class <?= $class_name."\n" ?>
      * to hold the data for this message class.
      */
 
-//     private $name;
-
-//     public function __construct(string $name)
-//     {
-//         $this->name = $name;
-//     }
-
-//    public function getName(): string
-//    {
-//        return $this->name;
-//    }
+    // public function __construct(
+    //     public readonly string $name,
+    // ) {
+    // }
 }
