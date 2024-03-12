@@ -102,6 +102,21 @@ class MakeEntityTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_does_not_validate_entity_name_with_accent' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    // entity class with accent
+                    'Usé',
+                    // entity class without accent
+                    'User',
+                    // no fields
+                    '',
+                ]);
+
+                $this->runEntityTest($runner);
+            }),
+        ];
+
         yield 'it_creates_a_new_class_and_api_resource' => [$this->createMakeEntityTest()
             ->addExtraDependencies('api')
             ->run(function (MakerTestRunner $runner) {
