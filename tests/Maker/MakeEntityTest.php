@@ -631,6 +631,19 @@ class MakeEntityTest extends MakerTestCase
                 $this->assertFileExists($runner->getPath('src/Entity/User.php'));
             }),
         ];
+
+        yield 'it_creates_a_new_class_with_name_collision' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    // entity class name
+                    'Locale',
+                    // add not additional fields
+                    '',
+                ]);
+
+                $this->runEntityTest($runner);
+            }),
+        ];
     }
 
     private function runEntityTest(MakerTestRunner $runner, array $data = []): void
