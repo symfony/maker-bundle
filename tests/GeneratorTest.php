@@ -100,5 +100,13 @@ class GeneratorTest extends TestCase
             'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
             'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
         ];
+
+        yield 'class_with_global_ns_collision' => [
+            'Locale',
+            '\\Entity',
+            '',
+            'App\\Entity\\Locale',
+            'Locale',
+        ];
     }
 }
