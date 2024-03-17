@@ -7,11 +7,8 @@ namespace <?= $namespace; ?>;
 class <?= $class_name; ?> extends AbstractController
 {
 <?php if ($will_verify_email): ?>
-    private <?= $generator->getPropertyType($email_verifier_class_details) ?>$emailVerifier;
-
-    public function __construct(<?= $email_verifier_class_details->getShortName() ?> $emailVerifier)
+    public function __construct(private <?= $generator->getPropertyType($email_verifier_class_details) ?>$emailVerifier)
     {
-        $this->emailVerifier = $emailVerifier;
     }
 
 <?php endif; ?>
