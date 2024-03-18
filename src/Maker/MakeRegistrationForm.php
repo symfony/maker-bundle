@@ -56,8 +56,8 @@ use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Validation;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
-use SymfonyCasts\Bundle\VerifyEmail\Model\VerifyEmailSignatureComponents;
 use SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle;
+use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelper;
 use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
 /**
@@ -444,13 +444,13 @@ final class MakeRegistrationForm extends AbstractMaker
         $missing = false;
         $composerMessage = 'composer require';
 
-        // verify-email-bundle 1.1.1 includes support for translations and a fix for the bad expiration time bug.
-        // we need to check that if the bundle is installed, it is version 1.1.1 or greater
+        // verify-email-bundle 1.17.0 includes the new validateEmailConfirmationFromRequest method.
+        // we need to check that if the bundle is installed, it is version 1.17.0 or greater
         if (class_exists(SymfonyCastsVerifyEmailBundle::class)) {
-            $reflectedComponents = new \ReflectionClass(VerifyEmailSignatureComponents::class);
+            $reflectedComponents = new \ReflectionClass(VerifyEmailHelper::class);
 
-            if (!$reflectedComponents->hasMethod('getExpirationMessageKey')) {
-                throw new RuntimeCommandException('Please upgrade symfonycasts/verify-email-bundle to version 1.1.1 or greater.');
+            if (!$reflectedComponents->hasMethod('validateEmailConfirmationFromRequest')) {
+                throw new RuntimeCommandException('Please upgrade symfonycasts/verify-email-bundle to version 1.17.0 or greater.');
             }
         } else {
             $missing = true;
