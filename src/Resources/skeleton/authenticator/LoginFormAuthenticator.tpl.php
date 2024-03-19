@@ -16,7 +16,7 @@ class <?= $class_name; ?> extends AbstractLoginFormAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        $<?= $username_field_var ?> = $request->getPayload()->getString('<?= $username_field ?>', '');
+        $<?= $username_field_var ?> = $request->getPayload()->getString('<?= $username_field ?>');
 
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $<?= $username_field_var ?>);
 
