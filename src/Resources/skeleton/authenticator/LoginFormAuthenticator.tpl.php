@@ -22,7 +22,7 @@ class <?= $class_name; ?> extends AbstractLoginFormAuthenticator
 
         return new Passport(
             new UserBadge($<?= $username_field_var ?>),
-            new PasswordCredentials($request->getPayload()->getString('password', '')),
+            new PasswordCredentials($request->getPayload()->getString('password')),
             [
                 new CsrfTokenBadge('authenticate', $request->getPayload()->getString('_csrf_token')),<?= $remember_me_badge ? "
                 new RememberMeBadge(),\n" : "" ?>
