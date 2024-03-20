@@ -191,12 +191,6 @@ class MakeResetPassword extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-        if ($input->getOption('uuid_id')) {
-            if (!class_exists('Symfony\Component\Uid\Uuid')) {
-                $io->warning('The symfony/uid package is not installed');
-            }
-        }
-
         $userClassNameDetails = $generator->createClassNameDetails(
             '\\'.$this->userClass,
             'Entity\\'
