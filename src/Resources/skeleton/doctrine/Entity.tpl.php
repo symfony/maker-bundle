@@ -17,9 +17,9 @@ class <?= $class_name."\n" ?>
 {
 <?php if ($uuid_id_enabled): ?>
     #[ORM\Id]
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    #[ORM\Column(type: 'uuid', unique: true)]
     private ?Uuid $id = null;
 
     public function getId(): ?Uuid

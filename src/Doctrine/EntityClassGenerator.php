@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
@@ -60,7 +61,10 @@ final class EntityClassGenerator
         }
 
         if ($useUuidIdentifier) {
-            $useStatements->addUseStatement(Uuid::class);
+            $useStatements->addUseStatement([
+                Uuid::class,
+                UuidType::class,
+            ]);
         }
 
         $entityPath = $this->generator->generateClass(
