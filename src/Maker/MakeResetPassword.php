@@ -26,6 +26,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Maker\Common\UidTrait;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
@@ -81,6 +82,8 @@ use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
  */
 class MakeResetPassword extends AbstractMaker
 {
+    use UidTrait;
+
     private string $fromEmailAddress;
     private string $fromEmailName;
     private string $controllerResetSuccessRedirect;
@@ -135,6 +138,8 @@ class MakeResetPassword extends AbstractMaker
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         $io->title('Let\'s make a password reset feature!');
+
+        $this->checkIsUsingUid($input);
 
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
 
@@ -273,7 +278,7 @@ class MakeResetPassword extends AbstractMaker
             ]
         );
 
-        $this->generateRequestEntity($generator, $requestClassNameDetails, $repositoryClassNameDetails, $input->getOption('uuid_id'));
+        $this->generateRequestEntity($generator, $requestClassNameDetails, $repositoryClassNameDetails);
 
         $this->setBundleConfig($io, $generator, $repositoryClassNameDetails->getFullName());
 
@@ -406,9 +411,9 @@ class MakeResetPassword extends AbstractMaker
         $io->newLine();
     }
 
-    private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails, $useUUIDIdentifier = false): void
+    private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails): void
     {
-        $requestEntityPath = $this->entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, false, $useUUIDIdentifier);
+        $requestEntityPath = $this->entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, false, $this->usesUid);
 
         $generator->writeChanges();
 

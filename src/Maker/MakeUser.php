@@ -21,6 +21,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Maker\Common\UidTrait;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\UserClassBuilder;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
@@ -48,6 +49,8 @@ use Symfony\Component\Yaml\Yaml;
  */
 final class MakeUser extends AbstractMaker
 {
+    use UidTrait;
+
     public function __construct(
         private FileManager $fileManager,
         private UserClassBuilder $userClassBuilder,
@@ -82,6 +85,8 @@ final class MakeUser extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
+        $this->checkIsUsingUid($input);
+
         if (null === $input->getArgument('name')) {
             $name = $io->ask(
                 $command->getDefinition()->getArgument('name')->getDescription(),
@@ -138,8 +143,7 @@ final class MakeUser extends AbstractMaker
                 $userClassNameDetails,
                 false, // api resource
                 $userClassConfiguration->hasPassword(), // security user
-                true,
-                $input->getOption('uuid_id')
+                useUuidIdentifier: $this->usesUid
             );
         } else {
             $classPath = $generator->generateClass($userClassNameDetails->getFullName(), 'Class.tpl.php');

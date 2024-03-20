@@ -36,7 +36,7 @@ final class EntityClassGenerator
     ) {
     }
 
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $useUUIDIdentifier = false, bool $broadcast = false): string
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false, bool $useUuidIdentifier = false): string
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -59,7 +59,7 @@ final class EntityClassGenerator
             $useStatements->addUseStatement(ApiResource::class);
         }
 
-        if ($useUUIDIdentifier) {
+        if ($useUuidIdentifier) {
             $useStatements->addUseStatement(Uuid::class);
         }
 
@@ -73,7 +73,7 @@ final class EntityClassGenerator
                 'broadcast' => $broadcast,
                 'should_escape_table_name' => $this->doctrineHelper->isKeyword($tableName),
                 'table_name' => $tableName,
-                'uuid_id_enabled' => $useUUIDIdentifier,
+                'uuid_id_enabled' => $useUuidIdentifier,
             ]
         );
 
