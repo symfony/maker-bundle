@@ -102,19 +102,19 @@ class MakeControllerTest extends MakerTestCase
 
                $this->assertFileExists($runner->getPath('templates/admin/foo_bar/index.html.twig'));
            }),
-       ];
+        ];
 
         yield 'it_generates_a_controller_with_full_custom_namespace' => [$this->createMakerTest()
-            ->addExtraDependencies('twig')
-            ->run(function (MakerTestRunner $runner) {
-                $output = $runner->runMaker([
-                    // controller class name
-                    '\App\Foo\Bar\CoolController',
-                ]);
+             ->addExtraDependencies('twig')
+             ->run(function (MakerTestRunner $runner) {
+                 $output = $runner->runMaker([
+                     // controller class name
+                     '\App\Foo\Bar\CoolController',
+                 ]);
 
-                $this->assertStringContainsString('src/Foo/Bar/CoolController.php', $output);
-                $this->assertStringContainsString('templates/foo/bar/cool/index.html.twig', $output);
-            }),
+                 $this->assertStringContainsString('src/Foo/Bar/CoolController.php', $output);
+                 $this->assertStringContainsString('templates/foo/bar/cool/index.html.twig', $output);
+             }),
         ];
 
         yield 'it_generates_a_controller_with_invoke' => [$this->createMakerTest()

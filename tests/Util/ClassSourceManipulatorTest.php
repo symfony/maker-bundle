@@ -764,13 +764,13 @@ class ClassSourceManipulatorTest extends TestCase
         $manipulator = new ClassSourceManipulator($source);
 
         $manipulator->addConstructor([
-                (new Param('someObjectParam'))->setType('object')->getNode(),
-                (new Param('someStringParam'))->setType('string')->getNode(),
-                ], <<<'CODE'
-                    <?php
-                    $this->someObjectParam = $someObjectParam;
-                    $this->someMethod($someStringParam);
-                    CODE
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+            <?php
+            $this->someObjectParam = $someObjectParam;
+            $this->someMethod($someStringParam);
+            CODE
         );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());

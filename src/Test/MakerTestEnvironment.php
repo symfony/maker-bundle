@@ -117,10 +117,10 @@ final class MakerTestEnvironment
 
         if ($this->fs->exists($this->path.'/config/packages/doctrine.yaml')) {
             $replacements[] = [
-                    'filename' => 'config/packages/doctrine.yaml',
-                    'find' => 'App',
-                    'replace' => $rootNamespace,
-                ];
+                'filename' => 'config/packages/doctrine.yaml',
+                'find' => 'App',
+                'replace' => $rootNamespace,
+            ];
         }
 
         $this->processReplacements($replacements, $this->path);
