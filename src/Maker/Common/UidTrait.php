@@ -23,8 +23,15 @@ use Symfony\Component\Uid\Uuid;
  */
 trait UidTrait
 {
+    /**
+     * Set by calling checkIsUsingUuid().
+     * Use in a maker's generate() to determine if entity wants to use uuid's.
+     */
     protected bool $usesUid = false;
 
+    /**
+     * Call this in a maker's configure() to consistently allow entity's with UUID's.
+     */
     protected function addWithUuidOption(Command $command): Command
     {
         $command->addOption('with-uuid', 'u', InputOption::VALUE_NONE, 'Use UUID for entity "id"');
@@ -32,6 +39,9 @@ trait UidTrait
         return $command;
     }
 
+    /**
+     * Call this as early as possible in a maker's interact().
+     */
     protected function checkIsUsingUid(InputInterface $input): void
     {
         if (($this->usesUid = $input->getOption('with-uuid')) && !class_exists(Uuid::class)) {
