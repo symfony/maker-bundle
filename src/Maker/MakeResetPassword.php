@@ -407,7 +407,12 @@ class MakeResetPassword extends AbstractMaker
 
     private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails): void
     {
-        $requestEntityPath = $this->entityClassGenerator->generateEntityClass($requestClassNameDetails, false, generateRepositoryClass: false, useUuidIdentifier: $this->usesUid);
+        $requestEntityPath = $this->entityClassGenerator->generateEntityClass(
+            entityClassDetails: $requestClassNameDetails,
+            apiResource: false,
+            generateRepositoryClass: false,
+            useUuidIdentifier: $this->getIdType()
+        );
 
         $generator->writeChanges();
 

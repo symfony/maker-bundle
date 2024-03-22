@@ -135,10 +135,10 @@ final class MakeUser extends AbstractMaker
         // A) Generate the User class
         if ($userClassConfiguration->isEntity()) {
             $classPath = $this->entityClassGenerator->generateEntityClass(
-                $userClassNameDetails,
-                false, // api resource
-                $userClassConfiguration->hasPassword(), // security user
-                useUuidIdentifier: $this->usesUid
+                entityClassDetails: $userClassNameDetails,
+                apiResource: false, // api resource
+                withPasswordUpgrade: $userClassConfiguration->hasPassword(), // security user
+                useUuidIdentifier: $this->getIdType()
             );
         } else {
             $classPath = $generator->generateClass($userClassNameDetails->getFullName(), 'Class.tpl.php');

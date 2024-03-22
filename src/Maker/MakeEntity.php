@@ -191,12 +191,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         if (!$classExists) {
             $broadcast = $input->getOption('broadcast');
             $entityPath = $this->entityClassGenerator->generateEntityClass(
-                $entityClassDetails,
-                $input->getOption('api-resource'),
-                false,
-                true,
-                $broadcast,
-                $this->usesUid
+                entityClassDetails: $entityClassDetails,
+                apiResource: $input->getOption('api-resource'),
+                broadcast: $broadcast,
+                useUuidIdentifier: $this->getIdType(),
             );
 
             if ($broadcast) {
