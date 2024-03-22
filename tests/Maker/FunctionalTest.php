@@ -33,6 +33,8 @@ class FunctionalTest extends TestCase
             ->in(__DIR__.'/../../src/Maker')
             // exclude deprecated classes
             ->notContains('/@deprecated/')
+            // exclude Maker/Common/ as no maker's should live in this dir
+            ->notPath('Common')
         ;
 
         $application = new Application($kernel);
