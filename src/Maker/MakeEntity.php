@@ -134,7 +134,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $entityClassName = $io->askQuestion($question);
 
         while (!$this->verifyEntityName($entityClassName)) {
-            $io->error('An entity can only have ASCII letter")');
+            $io->error('An entity can only have ASCII letters');
             $entityClassName = $io->askQuestion($question);
         }
 
