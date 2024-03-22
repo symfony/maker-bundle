@@ -1,5 +1,25 @@
 # Changelog
 
+## [v1.57.0](https://github.com/symfony/maker-bundle/releases/tag/v1.57.0)
+
+*March 22nd, 2024*
+
+### Feature
+
+- [#1488](https://github.com/symfony/maker-bundle/pull/1488) [make:*] allow the option to use ULID's for entity id's - *@jrushlow*
+- [#1484](https://github.com/symfony/maker-bundle/pull/1484) [make:auth] use `getString()` instead of `get()` - *@seb-jean*
+- [#1477](https://github.com/symfony/maker-bundle/pull/1477) [make:message] Modernize Messenger\Message class, use PHP8 features - *@lyrixx*
+- [#1475](https://github.com/symfony/maker-bundle/pull/1475) [make:user] better exception msg for non-attribute mapping entities - *@jrushlow*
+- [#1474](https://github.com/symfony/maker-bundle/pull/1474) [make:entity] Prevent entity name from having an accent - *@Fan2Shrek*
+- [#1473](https://github.com/symfony/maker-bundle/pull/1473) [make:*] use `getPayload()` instead of accessing `request` on Request objects - *@Fan2Shrek*
+- [#1464](https://github.com/symfony/maker-bundle/pull/1464) [make:registration-form] use validateEmailConfirmationFromRequest() when verifying emails - *@jrushlow*
+- [#1329](https://github.com/symfony/maker-bundle/pull/1329) Add support for generating UUID id fields in entities - *@Coffee2CodeNL*
+
+### Bug
+
+- [#1490](https://github.com/symfony/maker-bundle/pull/1490) [make:entity] Fix a small typo in a make:entity error message - *maelanleborgne*
+- [#1486](https://github.com/symfony/maker-bundle/pull/1486) [make:entity] Fix exception message if mercure bundle not found with --broadcast - *@cavasinf*
+
 ## [v1.56.0](https://github.com/symfony/maker-bundle/releases/tag/v1.56.0)
 
 *March 4th, 2024*
