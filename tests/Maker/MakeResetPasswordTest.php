@@ -93,7 +93,7 @@ class MakeResetPasswordTest extends MakerTestCase
                     'app_home',
                     'jr@rushlow.dev',
                     'SymfonyCasts',
-                ], '--uuid_id');
+                ], '--with-uuid');
 
                 $this->assertStringContainsString('Success', $output);
 

@@ -15,7 +15,7 @@ namespace <?= $namespace ?>;
 <?php endif ?>
 class <?= $class_name."\n" ?>
 {
-<?php if ($uuid_id_enabled): ?>
+<?php if ($uses_uuid): ?>
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]

@@ -37,7 +37,6 @@ use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -112,9 +111,10 @@ class MakeResetPassword extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->addOption('uuid_id', 'u', InputOption::VALUE_NONE, 'Use UUIDs as id fields')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeResetPassword.txt'))
         ;
+
+        $this->addWithUuidOption($command);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void
@@ -407,7 +407,7 @@ class MakeResetPassword extends AbstractMaker
 
     private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails): void
     {
-        $requestEntityPath = $this->entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, false, $this->usesUid);
+        $requestEntityPath = $this->entityClassGenerator->generateEntityClass($requestClassNameDetails, false, generateRepositoryClass: false, useUuidIdentifier: $this->usesUid);
 
         $generator->writeChanges();
 

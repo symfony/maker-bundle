@@ -147,7 +147,7 @@ class MakeEntityTest extends MakerTestCase
                     'User',
                     // add not additional fields
                     '',
-                ], '--uuid_id');
+                ], '--with-uuid');
 
                 $this->assertFileExists($runner->getPath('src/Entity/User.php'));
 

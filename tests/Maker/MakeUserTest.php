@@ -60,7 +60,7 @@ class MakeUserTest extends MakerTestCase
                     'y', // entity
                     'email', // identity property
                     'y', // with password
-                ], '--uuid_id');
+                ], '--with-uuid');
 
                 $this->runUserTest($runner, 'it_generates_entity_with_password_and_uuid.php');
             }),

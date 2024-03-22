@@ -33,8 +33,14 @@ class GeneratedUserTest extends WebTestCase
         $reflectedUser = new \ReflectionClass(User::class);
         self::assertTrue($reflectedUser->implementsInterface(PasswordAuthenticatedUserInterface::class));
         self::assertTrue($reflectedUser->hasMethod('getPassword'));
-        $idTypeValue = $reflectedUser->getProperty('id')->getAttributes('Doctrine\ORM\Mapping\CustomIdGenerator')[0]->getArguments()['type'];
-        $this->assertSame('uuid', $idTypeValue);
+
+        $idTypeValue = $reflectedUser
+            ->getProperty('id')
+            ->getAttributes('Doctrine\ORM\Mapping\CustomIdGenerator')[0]
+            ->getArguments()['class']
+        ;
+
+        $this->assertSame('doctrine.uuid_generator', $idTypeValue);
 
         $em->persist($user);
         $em->flush();

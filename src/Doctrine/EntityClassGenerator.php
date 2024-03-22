@@ -77,7 +77,7 @@ final class EntityClassGenerator
                 'broadcast' => $broadcast,
                 'should_escape_table_name' => $this->doctrineHelper->isKeyword($tableName),
                 'table_name' => $tableName,
-                'uuid_id_enabled' => $useUuidIdentifier,
+                'uses_uuid' => $useUuidIdentifier,
             ]
         );
 
