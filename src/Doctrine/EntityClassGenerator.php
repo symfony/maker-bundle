@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
@@ -22,6 +23,7 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Uid\Uuid;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 /**
@@ -35,7 +37,7 @@ final class EntityClassGenerator
     ) {
     }
 
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false): string
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false, bool $useUuidIdentifier = false): string
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -58,6 +60,13 @@ final class EntityClassGenerator
             $useStatements->addUseStatement(ApiResource::class);
         }
 
+        if ($useUuidIdentifier) {
+            $useStatements->addUseStatement([
+                Uuid::class,
+                UuidType::class,
+            ]);
+        }
+
         $entityPath = $this->generator->generateClass(
             $entityClassDetails->getFullName(),
             'doctrine/Entity.tpl.php',
@@ -68,6 +77,7 @@ final class EntityClassGenerator
                 'broadcast' => $broadcast,
                 'should_escape_table_name' => $this->doctrineHelper->isKeyword($tableName),
                 'table_name' => $tableName,
+                'uses_uuid' => $useUuidIdentifier,
             ]
         );
 

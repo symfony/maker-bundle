@@ -21,6 +21,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Maker\Common\UidTrait;
 use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\UserClassBuilder;
 use Symfony\Bundle\MakerBundle\Security\UserClassConfiguration;
@@ -48,6 +49,8 @@ use Symfony\Component\Yaml\Yaml;
  */
 final class MakeUser extends AbstractMaker
 {
+    use UidTrait;
+
     public function __construct(
         private FileManager $fileManager,
         private UserClassBuilder $userClassBuilder,
@@ -76,11 +79,15 @@ final class MakeUser extends AbstractMaker
             ->addOption('with-password', null, InputOption::VALUE_NONE, 'Will this app be responsible for checking the password? Choose <comment>No</comment> if the password is actually checked by some other system (e.g. a single sign-on server)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeUser.txt'));
 
+        $this->addWithUuidOption($command);
+
         $inputConfig->setArgumentAsNonInteractive('name');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
+        $this->checkIsUsingUid($input);
+
         if (null === $input->getArgument('name')) {
             $name = $io->ask(
                 $command->getDefinition()->getArgument('name')->getDescription(),
@@ -130,7 +137,8 @@ final class MakeUser extends AbstractMaker
             $classPath = $this->entityClassGenerator->generateEntityClass(
                 $userClassNameDetails,
                 false, // api resource
-                $userClassConfiguration->hasPassword() // security user
+                $userClassConfiguration->hasPassword(), // security user
+                useUuidIdentifier: $this->usesUid
             );
         } else {
             $classPath = $generator->generateClass($userClassNameDetails->getFullName(), 'Class.tpl.php');

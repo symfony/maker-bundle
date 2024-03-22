@@ -25,6 +25,7 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Maker\Common\UidTrait;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
@@ -47,6 +48,8 @@ use Symfony\UX\Turbo\Attribute\Broadcast;
  */
 final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 {
+    use UidTrait;
+
     private Generator $generator;
     private EntityClassGenerator $entityClassGenerator;
 
@@ -97,6 +100,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeEntity.txt'))
         ;
 
+        $this->addWithUuidOption($command);
+
         $inputConfig->setArgumentAsNonInteractive('name');
     }
 
@@ -121,6 +126,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
             return;
         }
+
+        $this->checkIsUsingUid($input);
 
         $argument = $command->getDefinition()->getArgument('name');
         $question = $this->createEntityClassQuestion($argument->getDescription());
@@ -188,7 +195,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 $input->getOption('api-resource'),
                 false,
                 true,
-                $broadcast
+                $broadcast,
+                $this->usesUid
             );
 
             if ($broadcast) {

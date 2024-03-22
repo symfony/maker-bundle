@@ -26,6 +26,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Maker\Common\UidTrait;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
@@ -80,6 +81,8 @@ use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
  */
 class MakeResetPassword extends AbstractMaker
 {
+    use UidTrait;
+
     private string $fromEmailAddress;
     private string $fromEmailName;
     private string $controllerResetSuccessRedirect;
@@ -110,6 +113,8 @@ class MakeResetPassword extends AbstractMaker
         $command
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeResetPassword.txt'))
         ;
+
+        $this->addWithUuidOption($command);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void
@@ -133,6 +138,8 @@ class MakeResetPassword extends AbstractMaker
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         $io->title('Let\'s make a password reset feature!');
+
+        $this->checkIsUsingUid($input);
 
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
 
@@ -400,7 +407,7 @@ class MakeResetPassword extends AbstractMaker
 
     private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails): void
     {
-        $requestEntityPath = $this->entityClassGenerator->generateEntityClass($requestClassNameDetails, false, false, false);
+        $requestEntityPath = $this->entityClassGenerator->generateEntityClass($requestClassNameDetails, false, generateRepositoryClass: false, useUuidIdentifier: $this->usesUid);
 
         $generator->writeChanges();
 
