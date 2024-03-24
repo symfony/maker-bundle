@@ -26,6 +26,7 @@ use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Component\Scheduler\ScheduleProviderInterface;
+use Symfony\Contracts\Cache\CacheInterface;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
@@ -114,6 +115,7 @@ final class MakeSchedule extends AbstractMaker
             RecurringMessage::class,
             Schedule::class,
             ScheduleProviderInterface::class,
+            CacheInterface::class,
         ]);
 
         if (null !== $this->message) {
