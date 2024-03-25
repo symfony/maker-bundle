@@ -1,0 +1,6 @@
+framework:
+    webhook:
+        routing:
+          remote_service:
+              service: App\Webhook\RemoteServiceRequestParser
+              secret: '%env(REMOTE_SERVICE_WEBHOOK_SECRET)%'
