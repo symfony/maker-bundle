@@ -143,11 +143,11 @@ class MakeWebhookTest extends MakerTestCase
                 );
                 $this->assertStringContainsString(
                     <<<EOF
-                            return new ChainRequestMatcher([
-                                new IsJsonRequestMatcher(),
-                                new PortRequestMatcher(443),
-                            ]);
-                    EOF,
+                                return new ChainRequestMatcher([
+                                    new IsJsonRequestMatcher(),
+                                    new PortRequestMatcher(443),
+                                ]);
+                        EOF,
                     $requestParserSource
                 );
             }),
@@ -156,7 +156,6 @@ class MakeWebhookTest extends MakerTestCase
         yield 'it_makes_webhook_with_expression_language_injection' => [$this->createMakerTest()
             ->addExtraDependencies('symfony/expression-language')
             ->run(function (MakerTestRunner $runner) {
-
                 $output = $runner->runMaker([
                     // webhook name
                     'remote_service',
@@ -190,11 +189,11 @@ class MakeWebhookTest extends MakerTestCase
                 );
                 $this->assertStringContainsString(
                     <<<EOF
-                            return new ChainRequestMatcher([
-                                new IsJsonRequestMatcher(),
-                                new ExpressionRequestMatcher(new ExpressionLanguage(), new Expression('expression')),
-                            ]);
-                    EOF,
+                                return new ChainRequestMatcher([
+                                    new IsJsonRequestMatcher(),
+                                    new ExpressionRequestMatcher(new ExpressionLanguage(), new Expression('expression')),
+                                ]);
+                        EOF,
                     $requestParserSource
                 );
             }),
