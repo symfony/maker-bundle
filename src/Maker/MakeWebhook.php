@@ -54,7 +54,6 @@ use Symfony\Component\Yaml\Yaml;
  */
 final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterface
 {
-
     private const WEBHOOK_CONFIG_PATH = 'config/packages/webhook.yaml';
     private YamlSourceManipulator $ysm;
 
@@ -77,8 +76,8 @@ final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterfac
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->addArgument('name', InputArgument::OPTIONAL, sprintf('Name of the webhook to create (e.g. <fg=yellow>github, stripe, ...</>)'))
-            ->setHelp(file_get_contents(__DIR__ . '/../Resources/help/MakeWebhook.txt'))
+            ->addArgument('name', InputArgument::OPTIONAL, 'Name of the webhook to create (e.g. <fg=yellow>github, stripe, ...</>)')
+            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeWebhook.txt'))
         ;
 
         $inputConfig->setArgumentAsNonInteractive('name');
@@ -132,11 +131,11 @@ final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterfac
     {
         $webhookName = $input->getArgument('name');
         $requestParserDetails = $this->generator->createClassNameDetails(
-            Str::asClassName($webhookName . 'RequestParser'),
+            Str::asClassName($webhookName.'RequestParser'),
             'Webhook\\'
         );
         $remoteEventHandlerDetails = $this->generator->createClassNameDetails(
-            Str::asClassName($webhookName . 'WebhookHandler'),
+            Str::asClassName($webhookName.'WebhookHandler'),
             'RemoteEvent\\'
         );
 
@@ -165,7 +164,7 @@ final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterfac
         }
         $this->ysm = new YamlSourceManipulator($yamlConfig);
         $arrayConfig = $this->ysm->getData();
-        if (key_exists($webhookName, $arrayConfig['framework']['webhook']['routing'] ?? [])) {
+        if (\array_key_exists($webhookName, $arrayConfig['framework']['webhook']['routing'] ?? [])) {
             throw new \InvalidArgumentException('A webhook with this name already exists');
         }
 
@@ -179,9 +178,6 @@ final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterfac
     }
 
     /**
-     * @param ConsoleStyle $io
-     * @param ClassNameDetails $requestParserDetails
-     * @return void
      * @throws \Exception
      */
     public function generateRequestParser(ConsoleStyle $io, ClassNameDetails $requestParserDetails): void
@@ -234,7 +230,7 @@ final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterfac
         );
     }
 
-    private function askForNextRequestMatcher(ConsoleStyle $io, array $addedMatchers, string $entityClass, bool $isFirstMatcher): string|null
+    private function askForNextRequestMatcher(ConsoleStyle $io, array $addedMatchers, string $entityClass, bool $isFirstMatcher): ?string
     {
         $io->writeln('');
         $availableMatchers = $this->getAvailableRequestMatchers();
@@ -253,6 +249,7 @@ final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterfac
                 return null;
             }
         }
+
         return $matcherName;
     }
 
