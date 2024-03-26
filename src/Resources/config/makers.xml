@@ -89,6 +89,7 @@
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.doctrine_helper" />
                 <argument type="service" id="maker.entity_class_generator" />
+                <argument type="service" id="router" on-invalid="ignore" />
                 <tag name="maker.command" />
             </service>
 

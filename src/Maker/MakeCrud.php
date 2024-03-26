@@ -24,6 +24,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Maker\Common\CanGenerateTestsTrait;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
@@ -45,6 +46,8 @@ use Symfony\Component\Validator\Validation;
  */
 final class MakeCrud extends AbstractMaker
 {
+    use CanGenerateTestsTrait;
+
     private Inflector $inflector;
     private string $controllerClassName;
     private bool $generateTests = false;
@@ -72,6 +75,7 @@ final class MakeCrud extends AbstractMaker
         ;
 
         $inputConfig->setArgumentAsNonInteractive('entity-class');
+        $this->configureCommandWithTestsOption($command);
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
@@ -96,7 +100,7 @@ final class MakeCrud extends AbstractMaker
             $defaultControllerClass
         );
 
-        $this->generateTests = $io->confirm('Do you want to generate tests for the controller? [Experimental]', false);
+        $this->interactSetGenerateTests($input, $io);
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
@@ -237,7 +241,7 @@ final class MakeCrud extends AbstractMaker
             );
         }
 
-        if ($this->generateTests) {
+        if ($this->shouldGenerateTests()) {
             $testClassDetails = $generator->createClassNameDetails(
                 $entityClassDetails->getRelativeNameWithoutSuffix(),
                 'Test\\Controller\\',
