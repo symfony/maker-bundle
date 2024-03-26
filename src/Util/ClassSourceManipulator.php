@@ -270,8 +270,27 @@ final class ClassSourceManipulator
 
     public function addGetter(string $propertyName, $returnType, bool $isReturnTypeNullable, array $commentLines = []): void
     {
-        $methodName = ('bool' === $returnType ? 'is' : 'get').Str::asCamelCase($propertyName);
+        $prefix = $this->getGetterPrefix($propertyName, $returnType);
+        $methodName = $prefix ? $prefix.Str::asCamelCase($propertyName) : Str::asLowerCamelCase($propertyName);
         $this->addCustomGetter($propertyName, $methodName, $returnType, $isReturnTypeNullable, $commentLines);
+    }
+
+    /**
+     * @return string|null : getter prefix or null if no prefix to append
+     */
+    private function getGetterPrefix($propertyName, $returnType): ?string
+    {
+        if ('bool' !== $returnType) {
+            return 'get';
+        }
+
+        // exclude is & has from getter definition if already in property name
+        $propertyName = strtolower($propertyName);
+        if (!str_starts_with($propertyName, 'is') && !str_starts_with($propertyName, 'has')) {
+            return 'is';
+        }
+
+        return null;
     }
 
     public function addSetter(string $propertyName, ?string $type, bool $isNullable, array $commentLines = []): void
