@@ -34,19 +34,16 @@ class YamlSourceManipulator
     public const ARRAY_TYPE_SEQUENCE = 'sequence';
     public const ARRAY_TYPE_HASH = 'hash';
 
-    /**
-     * @var LoggerInterface|null
-     */
-    private $logger;
+    private LoggerInterface $logger;
     private $currentData;
 
-    private $currentPosition = 0;
-    private $previousPath = [];
-    private $currentPath = [];
-    private $depth = 0;
-    private $indentationForDepths = [];
-    private $arrayFormatForDepths = [];
-    private $arrayTypeForDepths = [];
+    private int $currentPosition = 0;
+    private array $previousPath = [];
+    private array $currentPath = [];
+    private int $depth = 0;
+    private array $indentationForDepths = [];
+    private array $arrayFormatForDepths = [];
+    private array $arrayTypeForDepths = [];
 
     public function __construct(
         private string $contents,
