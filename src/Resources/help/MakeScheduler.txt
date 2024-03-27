@@ -1,0 +1,8 @@
+The <info>%command.name%</info> command generates a schedule to automate repeated
+tasks using Symfony's Scheduler Component.
+
+If the Scheduler Component is not installed, <info>%command.name%</info> will
+install it automatically using composer. You can of course do this manually by
+running <info>composer require symfony/scheduler</info>.
+
+<info>php %command.full_name%</info>
