@@ -273,11 +273,8 @@ final class ClassSourceManipulator
         $methodName = $this->getGetterName($propertyName, $returnType);
         $this->addCustomGetter($propertyName, $methodName, $returnType, $isReturnTypeNullable, $commentLines);
     }
-
-    /**
-     * @return string|null : getter prefix or null if no prefix to append
-     */
-    private function getGetterName($propertyName, $returnType): ?string
+    
+    private function getGetterName($propertyName, $returnType): string
     {
         if ('bool' !== $returnType) {
             return 'get'.Str::asCamelCase($propertyName);
