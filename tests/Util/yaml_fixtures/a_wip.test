@@ -1,7 +1,5 @@
 security:
   firewalls:
-    dev:
-      security: false
 #    main:
 
   access_control:
@@ -9,20 +7,9 @@ security:
 ===
 $data['security'] = [
     'firewalls' => [
-        'main' => [
-            'json_login' => [
-                'check_path' => '/somePath',
-            ],
-        ],
+        'something' => 'a main',
     ],
-    'providers' => [
-        'app_user_provider' => [
-            'entity' => [
-                'class' => 'App\Entity\User',
-                'property' => 'email',
-            ],
-        ],
-    ],
+    'providers' => 'a provider'
 ];
 ===
 security:
