@@ -563,7 +563,7 @@ class YamlSourceManipulator
         $this->advanceCurrentPosition($this->findEndPositionOfValue($value));
     }
 
-    private function getEndOfKeyPosition($key): int|float
+    private function getEndOfKeyPosition($key): int
     {
         preg_match($this->getKeyRegex($key), $this->contents, $matches, \PREG_OFFSET_CAPTURE, $this->currentPosition);
 
