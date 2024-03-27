@@ -48,7 +48,7 @@ class YamlSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $actualContents);
     }
 
-    private function getYamlDataTests()
+    private function getYamlDataTests(): \Generator
     {
         $finder = new Finder();
         $finder->in(__DIR__.'/yaml_fixtures')
@@ -82,14 +82,14 @@ class YamlSourceManipulatorTest extends TestCase
          */
     }
 
-    public function getYamlDataTestsUnixSlashes()
+    public function getYamlDataTestsUnixSlashes(): \Generator
     {
         foreach ($this->getYamlDataTests() as $key => $data) {
             yield 'unix_'.$key => $data;
         }
     }
 
-    public function getYamlDataTestsWindowsSlashes()
+    public function getYamlDataTestsWindowsSlashes(): \Generator
     {
         foreach ($this->getYamlDataTests() as $key => $data) {
             $data['source'] = str_replace("\n", "\r\n", $data['source']);
