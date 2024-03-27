@@ -677,7 +677,7 @@ class YamlSourceManipulator
         return $startOfKey;
     }
 
-    private function getKeyRegex($key)
+    private function getKeyRegex($key): string
     {
         return sprintf('#(?<!\w)\$?%s\'?( )*:#', preg_quote($key));
     }
@@ -706,7 +706,7 @@ class YamlSourceManipulator
         $this->currentData = $newData;
     }
 
-    private function convertToYaml($data)
+    private function convertToYaml($data): string
     {
         $indent = $this->depth > 0 && isset($this->indentationForDepths[$this->depth])
             ? intdiv($this->indentationForDepths[$this->depth], $this->depth)
@@ -1172,7 +1172,7 @@ class YamlSourceManipulator
         $this->indentationForDepths[$this->depth] += $this->getPreferredIndentationSize();
     }
 
-    private function isEOF(?int $position = null)
+    private function isEOF(?int $position = null): bool
     {
         $position ??= $this->currentPosition;
 
@@ -1223,7 +1223,7 @@ class YamlSourceManipulator
         return $this->isLineComment($line);
     }
 
-    private function getPreviousLine(int $position)
+    private function getPreviousLine(int $position): ?string
     {
         // find the previous \n by finding the last one in the content up to the position
         $endPos = strrpos(substr($this->contents, 0, $position), "\n");
@@ -1246,7 +1246,7 @@ class YamlSourceManipulator
         return trim($previousLine, "\r");
     }
 
-    private function getCurrentLine(int $position)
+    private function getCurrentLine(int $position): string
     {
         $startPos = strrpos(substr($this->contents, 0, $position), "\n") + 1;
         $endPos = strpos($this->contents, "\n", $startPos);
