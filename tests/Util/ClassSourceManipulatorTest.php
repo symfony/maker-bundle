@@ -106,6 +106,22 @@ class ClassSourceManipulatorTest extends TestCase
             'User_simple_bool.php',
         ];
 
+        yield 'getter_bool_begins_with_is' => [
+            'User_simple.php',
+            'isFooProp',
+            'bool',
+            [],
+            'User_bool_begins_with_is.php',
+        ];
+
+        yield 'getter_bool_begins_with_has' => [
+            'User_simple.php',
+            'hasFooProp',
+            'bool',
+            [],
+            'User_bool_begins_with_has.php',
+        ];
+
         yield 'getter_no_props_comments' => [
             'User_no_props.php',
             'fooProp',
@@ -179,6 +195,15 @@ class ClassSourceManipulatorTest extends TestCase
             false,
             [],
             'User_simple_null_type.php',
+        ];
+
+        yield 'setter_bool_begins_with_is' => [
+            'User_simple.php',
+            'isFooProp',
+            'bool',
+            false,
+            [],
+            'User_bool_begins_with_is.php',
         ];
     }
 

@@ -270,8 +270,22 @@ final class ClassSourceManipulator
 
     public function addGetter(string $propertyName, $returnType, bool $isReturnTypeNullable, array $commentLines = []): void
     {
-        $methodName = ('bool' === $returnType ? 'is' : 'get').Str::asCamelCase($propertyName);
+        $methodName = $this->getGetterName($propertyName, $returnType);
         $this->addCustomGetter($propertyName, $methodName, $returnType, $isReturnTypeNullable, $commentLines);
+    }
+
+    private function getGetterName(string $propertyName, $returnType): string
+    {
+        if ('bool' !== $returnType) {
+            return 'get'.Str::asCamelCase($propertyName);
+        }
+
+        // exclude is & has from getter definition if already in property name
+        if (0 !== strncasecmp($propertyName, 'is', 2) && 0 !== strncasecmp($propertyName, 'has', 3)) {
+            return 'is'.Str::asCamelCase($propertyName);
+        }
+
+        return Str::asLowerCamelCase($propertyName);
     }
 
     public function addSetter(string $propertyName, ?string $type, bool $isNullable, array $commentLines = []): void
@@ -436,7 +450,7 @@ final class ClassSourceManipulator
 
     private function createSetterNodeBuilder(string $propertyName, $type, bool $isNullable, array $commentLines = []): Builder\Method
     {
-        $methodName = 'set'.Str::asCamelCase($propertyName);
+        $methodName = $this->getSetterName($propertyName, $type);
         $setterNodeBuilder = (new Builder\Method($methodName))->makePublic();
 
         if ($commentLines) {
@@ -450,6 +464,15 @@ final class ClassSourceManipulator
         $setterNodeBuilder->addParam($paramBuilder->getNode());
 
         return $setterNodeBuilder;
+    }
+
+    private function getSetterName(string $propertyName, $type): string
+    {
+        if ('bool' === $type && 0 === strncasecmp($propertyName, 'is', 2)) {
+            return 'set'.Str::asCamelCase(substr($propertyName, 2));
+        }
+
+        return 'set'.Str::asCamelCase($propertyName);
     }
 
     private function addSingularRelation(BaseRelation $relation): void
