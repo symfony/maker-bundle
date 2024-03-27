@@ -1,29 +1,13 @@
 security:
   firewalls:
-#    main:
-
-  access_control:
-    - path
+#  main:
 ===
 $data['security'] = [
-    'firewalls' => [
-        'something' => 'a main',
-    ],
+    'firewalls' => 'a firewall',
     'providers' => 'a provider'
 ];
 ===
 security:
-  firewalls:
-    dev:
-      security: false
-#    main:
-    main:
-      json_login:
-        check_path: /somePath
-  access_control:
-    - path
-  providers:
-    app_user_provider:
-      entity:
-        class: App\Entity\User
-        property: email
+  firewalls: 'a firewall'
+  providers: 'a provider'
+#  main:
