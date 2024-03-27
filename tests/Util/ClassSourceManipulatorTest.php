@@ -196,6 +196,15 @@ class ClassSourceManipulatorTest extends TestCase
             [],
             'User_simple_null_type.php',
         ];
+
+        yield 'setter_bool_begins_with_is' => [
+            'User_simple.php',
+            'isFooProp',
+            'bool',
+            false,
+            [],
+            'User_bool_begins_with_is.php',
+        ];
     }
 
     /**

@@ -273,7 +273,7 @@ final class ClassSourceManipulator
         $methodName = $this->getGetterName($propertyName, $returnType);
         $this->addCustomGetter($propertyName, $methodName, $returnType, $isReturnTypeNullable, $commentLines);
     }
-
+    
     private function getGetterName(string $propertyName, $returnType): string
     {
         if ('bool' !== $returnType) {
@@ -450,7 +450,7 @@ final class ClassSourceManipulator
 
     private function createSetterNodeBuilder(string $propertyName, $type, bool $isNullable, array $commentLines = []): Builder\Method
     {
-        $methodName = 'set'.Str::asCamelCase($propertyName);
+        $methodName = $this->getSetterName($propertyName, $type);
         $setterNodeBuilder = (new Builder\Method($methodName))->makePublic();
 
         if ($commentLines) {
@@ -464,6 +464,15 @@ final class ClassSourceManipulator
         $setterNodeBuilder->addParam($paramBuilder->getNode());
 
         return $setterNodeBuilder;
+    }
+
+    private function getSetterName(string $propertyName, $type): string
+    {
+        if ('bool' === $type && 0 === strncasecmp($propertyName, 'is', 2)) {
+            return 'set'.Str::asCamelCase(substr($propertyName, 2));
+        }
+
+        return 'set'.Str::asCamelCase($propertyName);
     }
 
     private function addSingularRelation(BaseRelation $relation): void
