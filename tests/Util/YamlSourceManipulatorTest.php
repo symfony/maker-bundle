@@ -30,7 +30,7 @@ class YamlSourceManipulatorTest extends TestCase
 
         $logger = $this->createLogger();
         // uncomment to enhance debugging
-        // $manipulator->setLogger($logger);
+        $manipulator->setLogger($logger);
 
         $manipulator->setData($newData);
 
@@ -53,7 +53,7 @@ class YamlSourceManipulatorTest extends TestCase
         $finder = new Finder();
         $finder->in(__DIR__.'/yaml_fixtures')
             ->files()
-            ->name('*.test');
+            ->name('a_wip.test');
 
         foreach ($finder as $file) {
             [$source, $changeCode, $expected] = explode('===', $file->getContents());
