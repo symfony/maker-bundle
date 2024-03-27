@@ -563,7 +563,7 @@ class YamlSourceManipulator
         $this->advanceCurrentPosition($this->findEndPositionOfValue($value));
     }
 
-    private function getEndOfKeyPosition($key)
+    private function getEndOfKeyPosition($key): int|float
     {
         preg_match($this->getKeyRegex($key), $this->contents, $matches, \PREG_OFFSET_CAPTURE, $this->currentPosition);
 
@@ -1090,7 +1090,7 @@ class YamlSourceManipulator
     private function normalizeSequences(array $data): array
     {
         // https://stackoverflow.com/questions/173400/how-to-check-if-php-array-is-associative-or-sequential/4254008#4254008
-        $hasStringKeys = fn (array $array) => \count(array_filter(array_keys($array), 'is_string')) > 0;
+        $hasStringKeys = fn (array $array): bool => \count(array_filter(array_keys($array), 'is_string')) > 0;
 
         foreach ($data as $key => $val) {
             if (!\is_array($val)) {
