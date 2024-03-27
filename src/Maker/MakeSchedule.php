@@ -64,7 +64,6 @@ final class MakeSchedule extends AbstractMaker
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if (!class_exists(AsSchedule::class)) {
-            // throw new \RuntimeException('You must install symfony/scheduler to create a schedule (composer require symfony/scheduler)');
             $io->writeln('Running composer require symfony/scheduler');
             $process = Process::fromShellCommandline('composer require symfony/scheduler');
             $process->run();
@@ -96,8 +95,6 @@ final class MakeSchedule extends AbstractMaker
                 $scheduleNameHint = sprintf('%sSchedule', Str::removeSuffix($selectedMessage, 'Message'));
             }
         }
-
-        // Otherwise call `make:message` to create a new message
 
         // Ask the name of the new schedule
         $this->scheduleName = $io->ask(question: 'What should we call the new schedule?', default: $scheduleNameHint);
@@ -139,6 +136,5 @@ final class MakeSchedule extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
-        // TODO: Implement configureDependencies() method.
     }
 }
