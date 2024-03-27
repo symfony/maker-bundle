@@ -1,28 +1,11 @@
 security:
   firewalls:
     dev:
-      pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
 #    main:
-#      json_login:
-#        check_path: /authentication_token
 
   access_control:
-    - { path: ^/docs, roles: PUBLIC_ACCESS } # Allows accessing the Swagger UI
-    - { path: ^/authentication_token, roles: PUBLIC_ACCESS }
-
-when@test:
-  security:
-    password_hashers:
-      # By default, password hashers are resource intensive and take time. This is
-      # important to generate secure password hashes. In tests however, secure hashes
-      # are not important, waste resources and increase test times. The following
-      # reduces the work factor to the lowest possible values.
-      Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
-        algorithm: auto
-        cost: 4 # Lowest possible value for bcrypt
-        time_cost: 3 # Lowest possible value for argon
-        memory_cost: 10 # Lowest possible value for argon
+    - path
 ===
 $data['security'] = [
     'firewalls' => [
@@ -45,33 +28,15 @@ $data['security'] = [
 security:
   firewalls:
     dev:
-      pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
 #    main:
-#      json_login:
-#        check_path: /authentication_token
     main:
       json_login:
         check_path: /somePath
-
   access_control:
-    - { path: ^/docs, roles: PUBLIC_ACCESS } # Allows accessing the Swagger UI
-    - { path: ^/authentication_token, roles: PUBLIC_ACCESS }
+    - path
   providers:
     app_user_provider:
       entity:
         class: App\Entity\User
         property: email
-
-when@test:
-  security:
-    password_hashers:
-      # By default, password hashers are resource intensive and take time. This is
-      # important to generate secure password hashes. In tests however, secure hashes
-      # are not important, waste resources and increase test times. The following
-      # reduces the work factor to the lowest possible values.
-      Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
-        algorithm: auto
-        cost: 4 # Lowest possible value for bcrypt
-        time_cost: 3 # Lowest possible value for argon
-        memory_cost: 10 # Lowest possible value for argon
