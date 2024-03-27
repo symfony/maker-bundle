@@ -1191,10 +1191,6 @@ class YamlSourceManipulator
     {
         $line = $this->getCurrentLine($position);
 
-        if (null === $line) {
-            return false;
-        }
-
         return $this->isLineComment($line);
     }
 
