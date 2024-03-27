@@ -282,10 +282,12 @@ final class ClassSourceManipulator
         if ('bool' !== $returnType) {
             return 'get' . Str::asCamelCase($propertyName);
         }
+        
         // exclude is & has from getter definition if already in property name
-        if (!strncasecmp($propertyName, 'is', 2) && !strncasecmp($propertyName, 'has', 3)) {
+        if (0 !== strncasecmp($propertyName, 'is', 2) && 0 !== strncasecmp($propertyName, 'has', 3)) {
             return 'is' . Str::asCamelCase($propertyName);
         }
+
         return Str::asLowerCamelCase($propertyName);
     }
 
