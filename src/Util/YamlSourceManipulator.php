@@ -34,7 +34,7 @@ class YamlSourceManipulator
     public const ARRAY_TYPE_SEQUENCE = 'sequence';
     public const ARRAY_TYPE_HASH = 'hash';
 
-    private LoggerInterface $logger;
+    private ?LoggerInterface $logger = null;
     private $currentData;
 
     private int $currentPosition = 0;
