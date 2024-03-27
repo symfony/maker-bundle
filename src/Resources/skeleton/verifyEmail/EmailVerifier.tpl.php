@@ -43,7 +43,7 @@ class <?= $class_name; ?><?= "\n" ?>
     {
         $this->verifyEmailHelper->validateEmailConfirmationFromRequest($request, $user-><?= $id_getter ?>(), $user-><?= $email_getter?>());
 
-        $user->setIsVerified(true);
+        $user->setVerified(true);
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
