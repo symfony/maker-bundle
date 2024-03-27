@@ -116,6 +116,11 @@ security:
   access_control:
     - { path: ^/docs, roles: PUBLIC_ACCESS } # Allows accessing the Swagger UI
     - { path: ^/authentication_token, roles: PUBLIC_ACCESS }
+  providers:
+    app_user_provider:
+      entity:
+        class: App\Entity\User
+        property: email
     #- { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
