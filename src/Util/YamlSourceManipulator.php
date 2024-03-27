@@ -34,19 +34,16 @@ class YamlSourceManipulator
     public const ARRAY_TYPE_SEQUENCE = 'sequence';
     public const ARRAY_TYPE_HASH = 'hash';
 
-    /**
-     * @var LoggerInterface|null
-     */
-    private $logger;
+    private ?LoggerInterface $logger = null;
     private $currentData;
 
-    private $currentPosition = 0;
-    private $previousPath = [];
-    private $currentPath = [];
-    private $depth = 0;
-    private $indentationForDepths = [];
-    private $arrayFormatForDepths = [];
-    private $arrayTypeForDepths = [];
+    private int $currentPosition = 0;
+    private array $previousPath = [];
+    private array $currentPath = [];
+    private int $depth = 0;
+    private array $indentationForDepths = [];
+    private array $arrayFormatForDepths = [];
+    private array $arrayTypeForDepths = [];
 
     public function __construct(
         private string $contents,
@@ -110,7 +107,7 @@ class YamlSourceManipulator
         return self::COMMENT_PLACEHOLDER_VALUE.$comment;
     }
 
-    private function updateData(array $newData)
+    private function updateData(array $newData): void
     {
         ++$this->depth;
         if (0 === $this->depth) {
@@ -266,7 +263,7 @@ class YamlSourceManipulator
      * The position should be set *right* where this new key
      * should be inserted.
      */
-    private function addNewKeyToYaml($key, $value)
+    private function addNewKeyToYaml(int|string $key, $value): void
     {
         $extraOffset = 0;
         $firstItemInArray = false;
@@ -384,7 +381,7 @@ class YamlSourceManipulator
         );
     }
 
-    private function removeKeyFromYaml($key, $currentVal)
+    private function removeKeyFromYaml($key, $currentVal): void
     {
         $endKeyPosition = $this->getEndOfKeyPosition($key);
 
@@ -456,7 +453,7 @@ class YamlSourceManipulator
      *
      * @param mixed $value The new value to set into YAML
      */
-    private function changeValueInYaml(mixed $value)
+    private function changeValueInYaml(mixed $value): void
     {
         $originalVal = $this->getCurrentData();
 
@@ -522,19 +519,19 @@ class YamlSourceManipulator
         );
     }
 
-    private function advanceBeyondKey($key)
+    private function advanceBeyondKey(int|string $key): void
     {
         $this->log(sprintf('Advancing position beyond key "%s"', $key));
         $this->advanceCurrentPosition($this->getEndOfKeyPosition($key));
     }
 
-    private function advanceBeyondEndOfPreviousKey($key)
+    private function advanceBeyondEndOfPreviousKey($key): void
     {
         $this->log('Advancing position beyond PREV key');
         $this->advanceCurrentPosition($this->getEndOfPreviousKeyPosition($key));
     }
 
-    private function advanceBeyondMultilineArrayLastItem()
+    private function advanceBeyondMultilineArrayLastItem(): void
     {
         $this->log('Trying to advance beyond the last item in a multiline array');
         $this->advanceBeyondWhitespace();
@@ -553,7 +550,7 @@ class YamlSourceManipulator
         }
     }
 
-    private function advanceBeyondValue($value)
+    private function advanceBeyondValue($value): void
     {
         if (\is_array($value)) {
             throw new \LogicException('Do not pass an array to this method');
@@ -563,7 +560,7 @@ class YamlSourceManipulator
         $this->advanceCurrentPosition($this->findEndPositionOfValue($value));
     }
 
-    private function getEndOfKeyPosition($key)
+    private function getEndOfKeyPosition($key): int
     {
         preg_match($this->getKeyRegex($key), $this->contents, $matches, \PREG_OFFSET_CAPTURE, $this->currentPosition);
 
@@ -677,12 +674,12 @@ class YamlSourceManipulator
         return $startOfKey;
     }
 
-    private function getKeyRegex($key)
+    private function getKeyRegex($key): string
     {
         return sprintf('#(?<!\w)\$?%s\'?( )*:#', preg_quote($key));
     }
 
-    private function updateContents(string $newContents, array $newData, int $newPosition)
+    private function updateContents(string $newContents, array $newData, int $newPosition): void
     {
         $this->log('updateContents()');
 
@@ -706,7 +703,7 @@ class YamlSourceManipulator
         $this->currentData = $newData;
     }
 
-    private function convertToYaml($data)
+    private function convertToYaml($data): string
     {
         $indent = $this->depth > 0 && isset($this->indentationForDepths[$this->depth])
             ? intdiv($this->indentationForDepths[$this->depth], $this->depth)
@@ -727,7 +724,7 @@ class YamlSourceManipulator
      * to determine *where* in the array to put the new item (so that it's
      * placed in the middle when necessary).
      */
-    private function appendToArrayAtCurrentPath($key, $value, array $data): array
+    private function appendToArrayAtCurrentPath(string|int $key, $value, array $data): array
     {
         if ($this->isPositionAtBeginningOfArray()) {
             // this should be prepended
@@ -882,7 +879,7 @@ class YamlSourceManipulator
         throw new YamlManipulationFailedException(sprintf('Unsupported Yaml value of type "%s"', \gettype($value)));
     }
 
-    private function advanceCurrentPosition(int $newPosition)
+    private function advanceCurrentPosition(int $newPosition): void
     {
         $this->log(sprintf('advanceCurrentPosition() from %d to %d', $this->currentPosition, $newPosition), true);
         $originalPosition = $this->currentPosition;
@@ -936,7 +933,7 @@ class YamlSourceManipulator
         $this->indentationForDepths[$this->depth] = $newIndentation;
     }
 
-    private function decrementDepth()
+    private function decrementDepth(): void
     {
         $this->log('Moving up 1 level of depth');
         unset($this->indentationForDepths[$this->depth]);
@@ -954,7 +951,7 @@ class YamlSourceManipulator
         return str_repeat(' ', $indent);
     }
 
-    private function log(string $message, $includeContent = false)
+    private function log(string $message, bool $includeContent = false): void
     {
         if (null === $this->logger) {
             return;
@@ -1039,7 +1036,7 @@ class YamlSourceManipulator
         }
     }
 
-    private function advanceBeyondWhitespace()
+    private function advanceBeyondWhitespace(): void
     {
         while (' ' === substr($this->contents, $this->currentPosition, 1)) {
             if ($this->isEOF()) {
@@ -1050,7 +1047,7 @@ class YamlSourceManipulator
         }
     }
 
-    private function advanceToEndOfLine()
+    private function advanceToEndOfLine(): void
     {
         $newPosition = $this->currentPosition;
         while (!$this->isCharLineBreak(substr($this->contents, $newPosition, 1))) {
@@ -1087,10 +1084,10 @@ class YamlSourceManipulator
         return false;
     }
 
-    private function normalizeSequences(array $data)
+    private function normalizeSequences(array $data): array
     {
         // https://stackoverflow.com/questions/173400/how-to-check-if-php-array-is-associative-or-sequential/4254008#4254008
-        $hasStringKeys = fn (array $array) => \count(array_filter(array_keys($array), 'is_string')) > 0;
+        $hasStringKeys = fn (array $array): bool => \count(array_filter(array_keys($array), 'is_string')) > 0;
 
         foreach ($data as $key => $val) {
             if (!\is_array($val)) {
@@ -1110,7 +1107,7 @@ class YamlSourceManipulator
         return $data;
     }
 
-    private function removeMetadataKeys(array $data)
+    private function removeMetadataKeys(array $data): array
     {
         foreach ($data as $key => $val) {
             if (\is_array($val)) {
@@ -1131,7 +1128,7 @@ class YamlSourceManipulator
         return $data;
     }
 
-    private function replaceSpecialMetadataCharacters()
+    private function replaceSpecialMetadataCharacters(): void
     {
         while (preg_match('#\n.*'.self::EMPTY_LINE_PLACEHOLDER_VALUE.'.*\n#', $this->contents, $matches)) {
             $this->contents = str_replace($matches[0], "\n\n", $this->contents);
@@ -1167,12 +1164,12 @@ class YamlSourceManipulator
         return null === $this->previousPath[$this->depth];
     }
 
-    private function manuallyIncrementIndentation()
+    private function manuallyIncrementIndentation(): void
     {
         $this->indentationForDepths[$this->depth] += $this->getPreferredIndentationSize();
     }
 
-    private function isEOF(?int $position = null)
+    private function isEOF(?int $position = null): bool
     {
         $position ??= $this->currentPosition;
 
@@ -1193,10 +1190,6 @@ class YamlSourceManipulator
     private function isCurrentLineComment(int $position): bool
     {
         $line = $this->getCurrentLine($position);
-
-        if (null === $line) {
-            return false;
-        }
 
         return $this->isLineComment($line);
     }
@@ -1223,7 +1216,7 @@ class YamlSourceManipulator
         return $this->isLineComment($line);
     }
 
-    private function getPreviousLine(int $position)
+    private function getPreviousLine(int $position): ?string
     {
         // find the previous \n by finding the last one in the content up to the position
         $endPos = strrpos(substr($this->contents, 0, $position), "\n");
@@ -1246,7 +1239,7 @@ class YamlSourceManipulator
         return trim($previousLine, "\r");
     }
 
-    private function getCurrentLine(int $position)
+    private function getCurrentLine(int $position): string
     {
         $startPos = strrpos(substr($this->contents, 0, $position), "\n") + 1;
         $endPos = strpos($this->contents, "\n", $startPos);
