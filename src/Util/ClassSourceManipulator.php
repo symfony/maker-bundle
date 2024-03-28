@@ -17,6 +17,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\JoinTable;
 use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
@@ -590,6 +591,11 @@ final class ClassSourceManipulator
                 'ORM'
             ),
         ];
+
+        // Conditionally add joinTable attribute
+        if ($relation->getJoinTableName()) {
+            $attributes[] = $this->buildAttributeNode(JoinTable::class, ['name' => $relation->getJoinTableName()], 'ORM');
+        }
 
         $this->addProperty(
             name: $relation->getPropertyName(),

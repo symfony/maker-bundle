@@ -27,6 +27,7 @@ final class EntityRelation
     private bool $isSelfReferencing = false;
     private bool $orphanRemoval = false;
     private bool $mapInverseRelation = true;
+    private ?string $joinTableName = null;
 
     public function __construct(
         private string $type,
@@ -97,6 +98,7 @@ final class EntityRelation
                 isSelfReferencing: $this->isSelfReferencing,
                 mapInverseRelation: $this->mapInverseRelation,
                 isOwning: true,
+                joinTableName: $this->joinTableName,
             )),
             self::ONE_TO_ONE => (new RelationOneToOne(
                 propertyName: $this->owningProperty,
@@ -185,5 +187,15 @@ final class EntityRelation
         }
 
         $this->mapInverseRelation = $mapInverseRelation;
+    }
+
+    public function getJoinTableName(): ?string
+    {
+        return $this->joinTableName;
+    }
+
+    public function setJoinTableName(?string $joinTableName)
+    {
+        $this->joinTableName = $joinTableName;
     }
 }

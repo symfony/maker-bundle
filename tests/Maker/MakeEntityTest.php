@@ -335,6 +335,8 @@ class MakeEntityTest extends MakerTestCase
                     'y',
                     // field name on opposite side - use default 'courses'
                     '',
+                    // join table? - use default 'n'
+                    '',
                     // finish adding fields
                     '',
                 ]);
@@ -368,11 +370,44 @@ class MakeEntityTest extends MakerTestCase
                     'y',
                     // field name on opposite side - use default 'courses'
                     '',
+                    // join table? - use default 'n'
+                    '',
                     // finish adding fields
                     '',
                 ]);
 
                 $this->runCustomTest($runner, 'it_adds_many_to_many_with_custom_root_namespace.php');
+            }),
+        ];
+
+        yield 'it_adds_many_to_many_with_custom_join_table' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'Course',
+                    // field name
+                    'students',
+                    // add a relationship field
+                    'relation',
+                    // the target entity
+                    'User',
+                    // relation type
+                    'ManyToMany',
+                    // inverse side?
+                    'y',
+                    // field name on opposite side - use default 'courses'
+                    '',
+                    // join table?
+                    'y',
+                    // join table name - use default 'courseStudents'
+                    '',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runCustomTest($runner, 'it_adds_many_to_many_with_custom_join_table.php');
             }),
         ];
 
@@ -459,6 +494,8 @@ class MakeEntityTest extends MakerTestCase
                      * normally, we ask for the field on the *other* side, but we
                      * do not here, since the other side won't be mapped.
                      */
+                    // join table? - use default 'n'
+                    '',
                     // finish adding fields
                     '',
                 ]);
