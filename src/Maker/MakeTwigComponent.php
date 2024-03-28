@@ -12,7 +12,9 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
-use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Dependency\DependencyManager;
+use Symfony\Bundle\MakerBundle\Dependency\Model\OptionalClassDependency;
+use Symfony\Bundle\MakerBundle\Dependency\Model\RequiredClassDependency;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
@@ -28,6 +30,8 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
  */
 final class MakeTwigComponent extends AbstractMaker
 {
+    private DependencyManager $dependencyManager;
+
     public static function getCommandName(): string
     {
         return 'make:twig-component';
@@ -47,19 +51,43 @@ final class MakeTwigComponent extends AbstractMaker
         ;
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies): void
+    public function configureComposerDependencies(DependencyManager $dependencyManager): void
     {
-        $dependencies->addClassDependency(AsTwigComponent::class, 'symfony/ux-twig-component');
+        // $this is a hack - we need the manager later in `interact()`
+        $this->dependencyManager = $dependencyManager;
+
+        $dependencyManager
+            ->addDependency(new RequiredClassDependency(
+                className: AsTwigComponent::class,
+                composerPackage: 'symfony/ux-twig-component',
+                preInstallMessage: 'This command requires the Symfony UX Twig Component Package.'
+            ))
+            ->addDependency(new OptionalClassDependency(
+                className: AsLiveComponent::class,
+                composerPackage: 'symfony/ux-live-component',
+                preInstallMessage: 'The Symfony UX Live Component is needed to make this a live component.'
+            ))
+        ;
+    }
+
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
+    {
+        if (!$input->getOption('live')) {
+            $input->setOption('live', $io->confirm('Make this a live component?', false));
+        }
+
+        if (!$input->getOption('live')) {
+            return;
+        }
+
+        // @TODO - with the dependencyManager in `Command` -> we can't use it outside of configure dependencies.....
+        $this->dependencyManager->installOptionalDependencies();
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $name = $input->getArgument('name');
         $live = $input->getOption('live');
-
-        if ($live && !class_exists(AsLiveComponent::class)) {
-            throw new \RuntimeException('You must install symfony/ux-live-component to create a live component (composer require symfony/ux-live-component)');
-        }
 
         $factory = $generator->createClassNameDetails(
             $name,
@@ -86,12 +114,5 @@ final class MakeTwigComponent extends AbstractMaker
         $io->newLine();
         $io->writeln(" To render the component, use <fg=yellow><twig:{$shortName} /></>.");
         $io->newLine();
-    }
-
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
-    {
-        if (!$input->getOption('live')) {
-            $input->setOption('live', $io->confirm('Make this a live component?', false));
-        }
     }
 }

@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Command;
 
 use Symfony\Bundle\MakerBundle\ApplicationAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\Dependency\DependencyManager;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
@@ -61,6 +62,13 @@ final class MakerCommand extends Command
         if ($this->checkDependencies) {
             $dependencies = new DependencyBuilder();
             $this->maker->configureDependencies($dependencies, $input);
+
+            // env is for tests - this way we don't have to add a `y` to every test when a dependency is needed.
+            $dependencyManager = new DependencyManager($this->io, getenv('MAKER_INTERACTIVE_DEPENDS') ?? true);
+
+            $this->maker->configureComposerDependencies($dependencyManager);
+
+            $dependencyManager->installRequiredDependencies();
 
             if ($missingPackagesMessage = $dependencies->getMissingPackagesMessage($this->getName())) {
                 throw new RuntimeCommandException($missingPackagesMessage);

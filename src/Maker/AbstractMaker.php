@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\Dependency\DependencyManager;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -53,5 +54,16 @@ abstract class AbstractMaker implements MakerInterface
             static::getCommandName(),
             $message
         );
+    }
+
+    public function configureComposerDependencies(DependencyManager $dependencyManager): void
+    {
+        // @TODO - method here in abstract prevents BC with signature added to `MakerInterface::class`
+    }
+
+    public function configureDependencies(DependencyBuilder $dependencies)
+    {
+        // @TODO - do we deprecate this method in favor of the one above. then remove in 2.x
+        // @TODO - still have plenty of work todo to determine if thats possible or a good idea...
     }
 }
