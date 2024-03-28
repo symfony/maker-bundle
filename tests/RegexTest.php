@@ -14,19 +14,27 @@ namespace Symfony\Bundle\MakerBundle\Tests;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestEnvironment;
 
+/**
+ * Common class for testing regex's used in MakerBundle.
+ *
+ * Create a new test method and dataProvider to test regex
+ * expressions introduced in MakerBundle
+ *
+ * @author Jesse Rushlow <jr@rushlow.dev>
+ */
 class RegexTest extends TestCase
 {
-    /** @dataProvider regexDataProvider */
-    public function testRegex(string $data, array $expectedResult): void
+    /** @dataProvider generatedFilesRegexDataProvider */
+    public function testMakerTestEnvironmentGeneratedFilesRegex(string $subjectData, array $expectedResult): void
     {
         $result = [];
 
-        preg_match_all(MakerTestEnvironment::GENERATED_FILES_REGEX, $data, $result, \PREG_PATTERN_ORDER);
+        preg_match_all(MakerTestEnvironment::GENERATED_FILES_REGEX, $subjectData, $result, \PREG_PATTERN_ORDER);
 
         self::assertSame($expectedResult, $result[1]);
     }
 
-    public function regexDataProvider(): \Generator
+    private function generatedFilesRegexDataProvider(): \Generator
     {
         yield 'Created Prefix' => ['created: test/something.php', ['test/something.php']];
         yield 'Updated Prefix' => ['updated: test/something.php', ['test/something.php']];
