@@ -1,0 +1,13 @@
+security:
+  firewalls:
+#  main:
+===
+$data['security'] = [
+    'firewalls' => 'a firewall',
+    'providers' => 'a provider'
+];
+===
+security:
+  firewalls: 'a firewall'
+  providers: 'a provider'
+#  main:
