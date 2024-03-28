@@ -146,7 +146,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
             "test/$type.tpl.php",
             [
                 'web_assertions_are_available' => trait_exists(WebTestAssertionsTrait::class),
-                'api_test_case_fqcn' => !class_exists(ApiTestCase::class) ? LegacyApiTestCase::class : ApiTestCase::class,
+                'api_test_case_fqcn' => ApiTestCase::class,
             ]
         );
 
@@ -185,7 +185,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
 
             case 'ApiTestCase':
                 $dependencies->addClassDependency(
-                    !class_exists(ApiTestCase::class) ? LegacyApiTestCase::class : ApiTestCase::class,
+                    ApiTestCase::class,
                     'api',
                     true,
                     false
