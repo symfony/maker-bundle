@@ -89,6 +89,17 @@ final class InteractiveSecurityHelper
             return 'username';
         }
 
+        $classProperties = $this->getClassProperties($userClass);
+
+        return $io->choice(
+            sprintf('Which field on your <fg=yellow>%s</> class will people enter when logging in?', $userClass),
+            $classProperties,
+            property_exists($userClass, 'username') ? 'username' : (property_exists($userClass, 'email') ? 'email' : null)
+        );
+    }
+
+    private function getClassProperties(string $userClass): array
+    {
         $classProperties = [];
         $reflectionClass = new \ReflectionClass($userClass);
         foreach ($reflectionClass->getProperties() as $property) {
@@ -99,11 +110,7 @@ final class InteractiveSecurityHelper
             throw new \LogicException(sprintf('No properties were found in "%s" entity', $userClass));
         }
 
-        return $io->choice(
-            sprintf('Which field on your <fg=yellow>%s</> class will people enter when logging in?', $userClass),
-            $classProperties,
-            property_exists($userClass, 'username') ? 'username' : (property_exists($userClass, 'email') ? 'email' : null)
-        );
+        return $classProperties;
     }
 
     public function guessEmailField(SymfonyStyle $io, string $userClass): string
@@ -112,11 +119,7 @@ final class InteractiveSecurityHelper
             return 'email';
         }
 
-        $classProperties = [];
-        $reflectionClass = new \ReflectionClass($userClass);
-        foreach ($reflectionClass->getProperties() as $property) {
-            $classProperties[] = $property->name;
-        }
+        $classProperties = $this->getClassProperties($userClass);
 
         return $io->choice(
             sprintf('Which field on your <fg=yellow>%s</> class holds the email address?', $userClass),
@@ -130,11 +133,7 @@ final class InteractiveSecurityHelper
             return 'password';
         }
 
-        $classProperties = [];
-        $reflectionClass = new \ReflectionClass($userClass);
-        foreach ($reflectionClass->getProperties() as $property) {
-            $classProperties[] = $property->name;
-        }
+        $classProperties = $this->getClassProperties($userClass);
 
         return $io->choice(
             sprintf('Which field on your <fg=yellow>%s</> class holds the encoded password?', $userClass),
