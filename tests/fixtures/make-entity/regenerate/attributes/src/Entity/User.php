@@ -20,6 +20,9 @@ class User
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $createdAt = null;
 
+    /**
+     * @var Collection<int, UserAvatar>
+     */
     #[ORM\OneToMany(targetEntity: UserAvatar::class, mappedBy: 'user')]
     private Collection $avatars;
 

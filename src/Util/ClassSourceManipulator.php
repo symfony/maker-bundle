@@ -594,6 +594,8 @@ final class ClassSourceManipulator
         $this->addProperty(
             name: $relation->getPropertyName(),
             attributes: $attributes,
+            // add @var that advertises this as a collection of specific objects
+            comments: [sprintf('@var %s<int, %s>', $collectionTypeHint, $typeHint)],
             propertyType: $collectionTypeHint,
         );
 
