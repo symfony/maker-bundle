@@ -17,9 +17,9 @@
 
 <?php endif; ?>
         <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-        <label for="username"><?= $username_label; ?></label>
+        <label for="username" class="form-label"><?= $username_label; ?></label>
         <input type="<?= $username_is_email ? 'email' : 'text'; ?>" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="<?= $username_is_email ? 'email' : 'username'; ?>" required autofocus>
-        <label for="password">Password</label>
+        <label for="password" class="form-label">Password</label>
         <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
 
         <input type="hidden" name="_csrf_token"
