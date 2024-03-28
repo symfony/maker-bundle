@@ -915,6 +915,12 @@ class YamlSourceManipulator
             return;
         }
 
+        if (str_starts_with($advancedContent, "\n#") || str_starts_with($advancedContent, "\r\n#")) {
+            $this->log('A linebreak followed by a root-level comment, no indent changes');
+
+            return;
+        }
+
         if (str_contains($advancedContent, "\n")) {
             $lines = explode("\n", $advancedContent);
             if (!empty($lines)) {
