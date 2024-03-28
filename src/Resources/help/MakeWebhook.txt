@@ -1,0 +1,8 @@
+The <info>%command.name%</info> command creates a RequestParser, a WebhookHandler and adds the necessary configuration
+for a new Webhook.
+
+<info>php %command.full_name% stripe</info>
+
+If the argument is missing, the command will ask for the webhook name interactively.
+
+It will also interactively ask for the RequestMatchers to use for the RequestParser's getRequestMatcher function.
