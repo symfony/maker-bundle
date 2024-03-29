@@ -24,7 +24,7 @@ class MakeWebhookTest extends MakerTestCase
 
     public function getTestDetails(): \Generator
     {
-        yield 'it_makes_webhook_whit_no_prior_config_file' => [$this->createMakerTest()
+        yield 'it_makes_webhook_with_no_prior_config_file' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([
                     // webhook name
