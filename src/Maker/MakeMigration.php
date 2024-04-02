@@ -77,6 +77,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         ;
     }
 
+    /** @return void */
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $options = ['doctrine:migrations:diff'];
@@ -145,7 +146,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         ]);
     }
 
-    private function noChangesMessage(ConsoleStyle $io)
+    private function noChangesMessage(ConsoleStyle $io): void
     {
         $io->warning([
             'No database changes were detected.',
@@ -156,6 +157,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         ]);
     }
 
+    /** @return void */
     public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
