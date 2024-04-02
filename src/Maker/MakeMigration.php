@@ -78,7 +78,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         ;
     }
 
-    /** @return void */
+    /** @return void|int */
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $options = ['doctrine:migrations:diff'];
