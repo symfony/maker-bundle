@@ -228,7 +228,7 @@ final class MakerTestEnvironment
     public function runTwigCSLint(string $file): MakerTestProcess
     {
         if (!file_exists(__DIR__.'/../../tools/twigcs/vendor/bin/twigcs')) {
-            throw new \Exception('twigcs not found: run: "composer install --working-dir=tools/twigcs".');
+            throw new \Exception('twigcs not found: run: "composer upgrade -W --working-dir=tools/twigcs".');
         }
 
         return MakerTestProcess::create(sprintf('php tools/twigcs/vendor/bin/twigcs --config ./tools/twigcs/.twig_cs.dist %s', $this->path.'/'.$file), $this->rootPath)
