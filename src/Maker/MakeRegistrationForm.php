@@ -182,6 +182,7 @@ final class MakeRegistrationForm extends AbstractMaker
         }
     }
 
+    /** @param array<string, mixed> $securityData */
     private function interactAuthenticatorQuestions(ConsoleStyle $io, InteractiveSecurityHelper $interactiveSecurityHelper, array $securityData): void
     {
         // get list of authenticators

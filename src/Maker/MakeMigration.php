@@ -51,6 +51,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         return 'Create a new migration based on database changes';
     }
 
+    /** @return void */
     public function setApplication(Application $application)
     {
         $this->application = $application;

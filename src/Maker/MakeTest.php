@@ -56,6 +56,8 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
 
     /**
      * @deprecated remove this method when removing make:unit-test and make:functional-test
+     *
+     * @return string[]
      */
     public static function getCommandAliases(): iterable
     {
