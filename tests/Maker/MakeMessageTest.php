@@ -40,7 +40,7 @@ class MakeMessageTest extends MakerTestCase
             });
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_generates_basic_message' => [$this->createMakeMessageTest()
             ->run(function (MakerTestRunner $runner) {
@@ -94,7 +94,7 @@ class MakeMessageTest extends MakerTestCase
         ];
     }
 
-    private function runMessageTest(MakerTestRunner $runner, string $filename)
+    private function runMessageTest(MakerTestRunner $runner, string $filename): void
     {
         $runner->copy(
             'make-message/tests/'.$filename,
@@ -104,7 +104,7 @@ class MakeMessageTest extends MakerTestCase
         $runner->runTests();
     }
 
-    private function configureTransports(MakerTestRunner $runner)
+    private function configureTransports(MakerTestRunner $runner): void
     {
         $runner->writeFile(
             'config/packages/messenger.yaml',

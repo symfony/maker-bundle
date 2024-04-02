@@ -22,7 +22,7 @@ class MakeFormTest extends MakerTestCase
         return MakeForm::class;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_generates_basic_form' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
@@ -204,7 +204,7 @@ class MakeFormTest extends MakerTestCase
         ];
     }
 
-    private function runFormTest(MakerTestRunner $runner, string $filename)
+    private function runFormTest(MakerTestRunner $runner, string $filename): void
     {
         $runner->copy(
             'make-form/tests/'.$filename,

@@ -22,7 +22,7 @@ class MakeVoterTest extends MakerTestCase
         return MakeVoter::class;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_makes_voter' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {

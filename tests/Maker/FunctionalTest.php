@@ -24,7 +24,7 @@ class FunctionalTest extends TestCase
      * Smoke test to make sure the DI autowiring works and all makers
      * are registered and have the correct arguments.
      */
-    public function testWiring()
+    public function testWiring(): void
     {
         $kernel = new MakerTestKernel('dev', true);
 
