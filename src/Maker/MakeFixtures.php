@@ -39,6 +39,7 @@ final class MakeFixtures extends AbstractMaker
         return 'Create a new class to load Doctrine fixtures';
     }
 
+    /** @return void */
     public function configureCommand(Command $command, InputConfiguration $inputConf)
     {
         $command
@@ -47,6 +48,7 @@ final class MakeFixtures extends AbstractMaker
         ;
     }
 
+    /** @return void */
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $fixturesClassNameDetails = $generator->createClassNameDetails(
@@ -78,6 +80,7 @@ final class MakeFixtures extends AbstractMaker
         ]);
     }
 
+    /** @return void */
     public function configureDependencies(DependencyBuilder $dependencies)
     {
         $dependencies->addClassDependency(
