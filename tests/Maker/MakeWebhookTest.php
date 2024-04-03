@@ -38,10 +38,10 @@ class MakeWebhookTest extends MakerTestCase
                     'use Symfony\Component\Webhook\Client\AbstractRequestParser;',
                     file_get_contents($runner->getPath('src/Webhook/RemoteServiceRequestParser.php'))
                 );
-                $this->assertFileExists($runner->getPath('src/RemoteEvent/RemoteServiceWebhookHandler.php'));
+                $this->assertFileExists($runner->getPath('src/RemoteEvent/RemoteServiceWebhookConsumer.php'));
                 $this->assertStringContainsString(
                     '#[AsRemoteEventConsumer(\'remote_service\')]',
-                    file_get_contents($runner->getPath('src/RemoteEvent/RemoteServiceWebhookHandler.php')),
+                    file_get_contents($runner->getPath('src/RemoteEvent/RemoteServiceWebhookConsumer.php')),
                 );
                 $securityConfig = $runner->readYaml('config/packages/webhook.yaml');
                 $this->assertEquals(
@@ -59,7 +59,7 @@ class MakeWebhookTest extends MakerTestCase
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy('make-webhook/webhook.yaml', 'config/packages/webhook.yaml');
                 $runner->copy('make-webhook/RemoteServiceRequestParser.php', 'src/Webhook/RemoteServiceRequestParser.php');
-                $runner->copy('make-webhook/RemoteServiceWebhookHandler.php', 'src/RemoteEvent/RemoteServiceWebhookHandler.php');
+                $runner->copy('make-webhook/RemoteServiceWebhookConsumer.php', 'src/RemoteEvent/RemoteServiceWebhookConsumer.php');
                 $output = $runner->runMaker([
                     // webhook name
                     'another_remote_service',
@@ -68,7 +68,7 @@ class MakeWebhookTest extends MakerTestCase
                 ]);
                 $this->assertStringContainsString('created:', $output);
                 $this->assertFileExists($runner->getPath('src/Webhook/AnotherRemoteServiceRequestParser.php'));
-                $this->assertFileExists($runner->getPath('src/RemoteEvent/AnotherRemoteServiceWebhookHandler.php'));
+                $this->assertFileExists($runner->getPath('src/RemoteEvent/AnotherRemoteServiceWebhookConsumer.php'));
                 $securityConfig = $runner->readYaml('config/packages/webhook.yaml');
                 // original config should not be modified
                 $this->assertArrayHasKey('remote_service', $securityConfig['framework']['webhook']['routing']);
@@ -103,7 +103,7 @@ class MakeWebhookTest extends MakerTestCase
                 ]);
                 $this->assertStringContainsString('created:', $output);
                 $this->assertFileExists($runner->getPath('src/Webhook/RemoteServiceRequestParser.php'));
-                $this->assertFileExists($runner->getPath('src/RemoteEvent/RemoteServiceWebhookHandler.php'));
+                $this->assertFileExists($runner->getPath('src/RemoteEvent/RemoteServiceWebhookConsumer.php'));
                 $requestParserSource = file_get_contents($runner->getPath('src/Webhook/RemoteServiceRequestParser.php'));
                 $this->assertStringContainsString(
                     'use Symfony\Component\HttpFoundation\RequestMatcher\IsJsonRequestMatcher;',
@@ -127,7 +127,7 @@ class MakeWebhookTest extends MakerTestCase
                 ]);
                 $this->assertStringContainsString('created:', $output);
                 $this->assertFileExists($runner->getPath('src/Webhook/RemoteServiceRequestParser.php'));
-                $this->assertFileExists($runner->getPath('src/RemoteEvent/RemoteServiceWebhookHandler.php'));
+                $this->assertFileExists($runner->getPath('src/RemoteEvent/RemoteServiceWebhookConsumer.php'));
                 $requestParserSource = file_get_contents($runner->getPath('src/Webhook/RemoteServiceRequestParser.php'));
                 $this->assertStringContainsString(
                     'use Symfony\Component\HttpFoundation\RequestMatcher\IsJsonRequestMatcher;',
@@ -165,7 +165,7 @@ class MakeWebhookTest extends MakerTestCase
                 ]);
                 $this->assertStringContainsString('created:', $output);
                 $this->assertFileExists($runner->getPath('src/Webhook/RemoteServiceRequestParser.php'));
-                $this->assertFileExists($runner->getPath('src/RemoteEvent/RemoteServiceWebhookHandler.php'));
+                $this->assertFileExists($runner->getPath('src/RemoteEvent/RemoteServiceWebhookConsumer.php'));
                 $requestParserSource = file_get_contents($runner->getPath('src/Webhook/RemoteServiceRequestParser.php'));
                 $this->assertStringContainsString(
                     'use Symfony\Component\HttpFoundation\RequestMatcher\IsJsonRequestMatcher;',

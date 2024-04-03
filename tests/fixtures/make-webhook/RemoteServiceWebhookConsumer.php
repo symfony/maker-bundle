@@ -7,7 +7,7 @@ use Symfony\Component\RemoteEvent\Consumer\ConsumerInterface;
 use Symfony\Component\RemoteEvent\RemoteEvent;
 
 #[AsRemoteEventConsumer('remote_service')]
-final class RemoteServiceWebhookHandler implements ConsumerInterface
+final class RemoteServiceWebhookConsumer implements ConsumerInterface
 {
     public function __construct()
     {

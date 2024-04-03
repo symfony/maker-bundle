@@ -132,8 +132,8 @@ final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterfac
             Str::asClassName($this->name.'RequestParser'),
             'Webhook\\'
         );
-        $remoteEventHandlerDetails = $this->generator->createClassNameDetails(
-            Str::asClassName($this->name.'WebhookHandler'),
+        $remoteEventConsumerDetails = $this->generator->createClassNameDetails(
+            Str::asClassName($this->name.'WebhookConsumer'),
             'RemoteEvent\\'
         );
 
@@ -142,8 +142,8 @@ final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterfac
         $this->generateRequestParser($io, $requestParserDetails);
 
         $this->generator->generateClass(
-            $remoteEventHandlerDetails->getFullName(),
-            'webhook/WebhookHandler.tpl.php',
+            $remoteEventConsumerDetails->getFullName(),
+            'webhook/WebhookConsumer.tpl.php',
             [
                 'webhook_name' => $this->name,
             ]
