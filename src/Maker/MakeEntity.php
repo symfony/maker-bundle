@@ -422,13 +422,13 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         if ('string' === $type) {
             // default to 255, avoid the question
-            $classProperty->length = $io->ask('Field length', 255, Validator::validateLength(...));
+            $classProperty->length = $io->ask('Field length', '255', Validator::validateLength(...));
         } elseif ('decimal' === $type) {
             // 10 is the default value given in \Doctrine\DBAL\Schema\Column::$_precision
-            $classProperty->precision = $io->ask('Precision (total number of digits stored: 100.00 would be 5)', 10, Validator::validatePrecision(...));
+            $classProperty->precision = $io->ask('Precision (total number of digits stored: 100.00 would be 5)', '10', Validator::validatePrecision(...));
 
             // 0 is the default value given in \Doctrine\DBAL\Schema\Column::$_scale
-            $classProperty->scale = $io->ask('Scale (number of decimals to store: 100.00 would be 2)', 0, Validator::validateScale(...));
+            $classProperty->scale = $io->ask('Scale (number of decimals to store: 100.00 would be 2)', '0', Validator::validateScale(...));
         }
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {
