@@ -280,7 +280,8 @@ final class MakeAuthenticator extends AbstractMaker
         );
     }
 
-    private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, $userClass, $userNameField, bool $supportRememberMe): void
+    /** @param array<mixed> $securityData */
+    private function generateAuthenticatorClass(array $securityData, string $authenticatorType, string $authenticatorClass, ?string $userClass, ?string $userNameField, bool $supportRememberMe): void
     {
         $useStatements = new UseStatementGenerator([
             Request::class,
@@ -401,7 +402,8 @@ final class MakeAuthenticator extends AbstractMaker
         );
     }
 
-    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, $userClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): array
+    /** @return string[] */
+    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, ?string $userClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): array
     {
         $nextTexts = ['Next:'];
         $nextTexts[] = '- Customize your new authenticator.';
@@ -432,6 +434,7 @@ final class MakeAuthenticator extends AbstractMaker
         return $nextTexts;
     }
 
+    /** @param array<mixed> $securityData */
     private function userClassHasEncoder(array $securityData, string $userClass): bool
     {
         $userNeedsEncoder = false;
