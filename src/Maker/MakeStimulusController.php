@@ -131,6 +131,7 @@ final class MakeStimulusController extends AbstractMaker
         ]);
     }
 
+    /** @param string[] $targets */
     private function askForNextTarget(ConsoleStyle $io, array $targets, bool $isFirstTarget): ?string
     {
         $questionText = 'New target name (press <return> to stop adding targets)';
@@ -150,6 +151,11 @@ final class MakeStimulusController extends AbstractMaker
         return !$targetName ? null : $targetName;
     }
 
+    /**
+     * @param array<string, array<string, string>> $values
+     *
+     * @return array<string, string>|null
+     */
     private function askForNextValue(ConsoleStyle $io, array $values, bool $isFirstValue): ?array
     {
         $questionText = 'New value name (press <return> to stop adding values)';
@@ -215,6 +221,7 @@ final class MakeStimulusController extends AbstractMaker
         }
     }
 
+    /** @return string[] */
     private function getValuesTypes(): array
     {
         return [
