@@ -24,15 +24,3 @@ parameters:
         -
             message: '#Class Symfony\\Bundle\\MakerBundle\\Maker\\LegacyApiTestCase not found#'
             path: src/Maker/*
-
-#        - tests
-#    symfony:
-#        containerXmlPath: var/cache/test/App_KernelTestDebugContainer.xml
-#    doctrine:
-#        ormRepositoryClass: App\Repository\AbstractRepository
-#        objectManagerLoader: tests/phpstan-bootstrap.php
-#    ignoreErrors:
-#        -
-#            message: '#Variable \$[a-zA-Z0-9]+ might not be defined\.#'
-##            identifier: variable.undefined // Available in phpstan 1.11.0
-#            path: src/GraphQLRequest/*
