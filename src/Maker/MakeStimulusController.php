@@ -50,8 +50,8 @@ final class MakeStimulusController extends AbstractMaker
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         $command->addArgument('extension', InputArgument::OPTIONAL);
-        $command->addArgument('targets', InputArgument::OPTIONAL, '', []);
-        $command->addArgument('values', InputArgument::OPTIONAL, '', []);
+        $command->addArgument('targets', InputArgument::OPTIONAL);
+        $command->addArgument('values', InputArgument::OPTIONAL);
 
         $chosenExtension = $io->choice(
             'Language (<fg=yellow>JavaScript</> or <fg=yellow>TypeScript</>)',
@@ -139,7 +139,7 @@ final class MakeStimulusController extends AbstractMaker
             $questionText = 'Add another target? Enter the target name (or press <return> to stop adding targets)';
         }
 
-        $targetName = $io->ask($questionText, null, function (?string $name) use ($targets) {
+        $targetName = $io->ask($questionText, validator: function (?string $name) use ($targets) {
             if (\in_array($name, $targets)) {
                 throw new \InvalidArgumentException(sprintf('The "%s" target already exists.', $name));
             }
