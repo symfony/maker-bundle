@@ -51,6 +51,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         return 'Create a new migration based on database changes';
     }
 
+    /** @return void */
     public function setApplication(Application $application)
     {
         $this->application = $application;
@@ -77,7 +78,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         ;
     }
 
-    /** @return void */
+    /** @return void|int */
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $options = ['doctrine:migrations:diff'];

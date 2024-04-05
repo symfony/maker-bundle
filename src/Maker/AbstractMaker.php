@@ -41,6 +41,7 @@ abstract class AbstractMaker implements MakerInterface
         $io->newLine();
     }
 
+    /** @param array<class-string, string> $dependencies */
     protected function addDependencies(array $dependencies, ?string $message = null): string
     {
         $dependencyBuilder = new DependencyBuilder();

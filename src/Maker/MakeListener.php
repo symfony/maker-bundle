@@ -138,6 +138,7 @@ final class MakeListener extends AbstractMaker
         }
     }
 
+    /** @return void */
     public function configureDependencies(DependencyBuilder $dependencies)
     {
     }
