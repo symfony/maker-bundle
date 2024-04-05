@@ -673,6 +673,7 @@ class MakeEntityTest extends MakerTestCase
         ];
     }
 
+    /** @param array<string, mixed> $data */
     private function runEntityTest(MakerTestRunner $runner, array $data = []): void
     {
         $runner->renderTemplateFile(

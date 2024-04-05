@@ -22,7 +22,7 @@ class MakeMessengerMiddlewareTest extends MakerTestCase
         return MakeMessengerMiddleware::class;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_generates_messenger_middleware' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {

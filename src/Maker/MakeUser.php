@@ -220,6 +220,7 @@ final class MakeUser extends AbstractMaker
         } else {
             $nextSteps[] = sprintf(
                 'Open <info>%s</info> to finish implementing your user provider.',
+                /* @phpstan-ignore-next-line - $customProviderPath is defined in this else statement */
                 $this->fileManager->relativizePath($customProviderPath)
             );
         }

@@ -22,7 +22,7 @@ class MakeSerializerEncoderTest extends MakerTestCase
         return MakeSerializerEncoder::class;
     }
 
-    public function getTestDetails()
+    public function getTestDetails(): \Generator
     {
         yield 'it_makes_serializer_encoder' => [$this->createMakerTest()
             // serializer-pack 1.1 requires symfony/property-info >= 5.4

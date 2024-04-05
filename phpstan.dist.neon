@@ -1,0 +1,26 @@
+parameters:
+    level: 6
+    bootstrapFiles:
+        - vendor/autoload.php
+        - tools/phpstan/includes/vendor/autoload.php
+    paths:
+        - src/Maker
+        - tests/Command
+        - tests/Docker
+        - tests/Maker
+    excludePaths:
+        - tests/Doctrine/fixtures
+        - tests/fixtures
+        - tests/Security/fixtures
+        - tests/Security/yaml_fixtures
+        - tests/tmp
+        - tests/Util/fixtures
+        - tests/Util/yaml_fixtures
+    ignoreErrors:
+        -
+            message: '#Property .+phpCompatUtil is never read, only written\.#'
+            path: src/Maker/*
+
+        -
+            message: '#Class Symfony\\Bundle\\MakerBundle\\Maker\\LegacyApiTestCase not found#'
+            path: src/Maker/*
