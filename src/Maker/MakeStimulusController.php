@@ -50,8 +50,8 @@ final class MakeStimulusController extends AbstractMaker
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         $command->addArgument('extension', InputArgument::OPTIONAL);
-        $command->addArgument('targets', InputArgument::OPTIONAL, default: []); // @TODO - Is the default mt array even needed...
-        $command->addArgument('values', InputArgument::OPTIONAL, default: []);
+        $command->addArgument('targets', InputArgument::OPTIONAL);
+        $command->addArgument('values', InputArgument::OPTIONAL);
 
         $chosenExtension = $io->choice(
             'Language (<fg=yellow>JavaScript</> or <fg=yellow>TypeScript</>)',
