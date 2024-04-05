@@ -340,6 +340,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         ORMDependencyBuilder::buildDependencies($dependencies);
     }
 
+    /** @param string[] $fields */
     private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField): EntityRelation|ClassProperty|null
     {
         $io->writeln('');
@@ -772,7 +773,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $relation;
     }
 
-    private function askRelationType(ConsoleStyle $io, string $entityClass, string $targetEntityClass)
+    private function askRelationType(ConsoleStyle $io, string $entityClass, string $targetEntityClass): string
     {
         $io->writeln('What type of relationship is this?');
 
@@ -855,6 +856,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $regenerator->regenerateEntities($classOrNamespace);
     }
 
+    /** @return string[] */
     private function getPropertyNames(string $class): array
     {
         if (!class_exists($class)) {
@@ -871,6 +873,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $this->doctrineHelper->getEntityNamespace();
     }
 
+    /** @return string[] */
     private function getTypesMap(): array
     {
         return Type::getTypesMap();
