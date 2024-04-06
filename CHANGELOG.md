@@ -1,5 +1,22 @@
 # Changelog
 
+## [v1.58.0](https://github.com/symfony/maker-bundle/releases/tag/v1.58.0)
+
+*April 6th, 2024*
+
+### Feature
+
+- [#1502](https://github.com/symfony/maker-bundle/pull/1502) [make:*] additional type improvements - *@jrushlow*
+- [#1499](https://github.com/symfony/maker-bundle/pull/1499) [make:*] add docBlock return types for non-internal makers - *@jrushlow*
+- [#1493](https://github.com/symfony/maker-bundle/pull/1493) [make:entity] managing keyword prefixes (is, has) for boolean properties getters - *@ClemRiviere*
+- [#1491](https://github.com/symfony/maker-bundle/pull/1491) [make:webhook] Add new command for Symfony's Webhook Component - *@maelanleborgne*
+- [#1487](https://github.com/symfony/maker-bundle/pull/1487) [make:schedule] a new command for creating recurring Symfony Schedules - *@jrushlow*
+- [#1219](https://github.com/symfony/maker-bundle/pull/1219) [make:entity] Add PHPDoc var type for Collections - *@b1rdex*
+
+### Bug
+
+- [#1476](https://github.com/symfony/maker-bundle/pull/1476) [ysm] handle linebreak followed by an immediate root-level comment - *@jrushlow*
+
 ## [v1.57.0](https://github.com/symfony/maker-bundle/releases/tag/v1.57.0)
 
 *March 22nd, 2024*
