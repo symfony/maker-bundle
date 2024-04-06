@@ -67,4 +67,4 @@ jobs:
               run: vendor/bin/simple-phpunit --version
 
             - name: Run Tests
-              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }} --filter MakeWebhook
+              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
