@@ -17,6 +17,8 @@
         "symfonycasts/reset-password-bundle": "^1.21",
         "symfonycasts/verify-email-bundle": "^1.17",
         "symfony/webpack-encore-bundle": "^2.1",
-        "symfony/panther": "^2.1"
+        "symfony/panther": "^2.1",
+        "symfony/webhook": "^7.0",
+        "symfony/expression-language": "^7.0"
     }
 }

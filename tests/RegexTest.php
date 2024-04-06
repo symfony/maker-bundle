@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\MakerBundle\Maker\MakeWebhook;
 use Symfony\Bundle\MakerBundle\Test\MakerTestEnvironment;
 
 /**
@@ -65,5 +66,28 @@ class RegexTest extends TestCase
             EOT,
             ['tests/FooBarTest.php'],
         ];
+    }
+
+    /** @dataProvider webhookNameRegexDataProvider */
+    public function testWebhookNameRegex(string $subjectData, bool $expectedResult): void
+    {
+        $result = preg_match(MakeWebhook::WEBHOOK_NAME_PATTERN, $subjectData);
+
+        self::assertSame($expectedResult, (bool) $result);
+    }
+
+    private function webhookNameRegexDataProvider(): \Generator
+    {
+        // Valid cases
+        yield 'Simple word' => ['mywebhook', true];
+        yield 'With underscore' => ['my_webhook', true];
+        yield 'With hyphen' => ['my-webhook', true];
+        yield 'With extend ascii chars' => ['éÿù', true];
+        yield 'With numbers' => ['mywebh00k', true];
+
+        // Invalid cases
+        yield 'Leading number' => ['1mywebh00k', false];
+        yield 'With space' => ['my webhook', false];
+        yield 'With non-ascii characters' => ['web🪝', false];
     }
 }

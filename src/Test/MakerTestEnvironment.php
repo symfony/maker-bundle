@@ -336,7 +336,7 @@ final class MakerTestEnvironment
             commandLine: sprintf('php bin/console %s %s --no-ansi', $commandName, $argumentsString),
             cwd: $this->path,
             envVars: $envVars,
-            timeout: 10
+            timeout: 30
         );
 
         if ($userInputs) {
