@@ -779,6 +779,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $originalEntityShort = Str::getShortClassName($entityClass);
         $targetEntityShort = Str::getShortClassName($targetEntityClass);
+        if ($originalEntityShort === $targetEntityShort) {
+            [$originalDiscriminator, $targetDiscriminator] = Str::getHumanDiscriminatorBetweenTwoClasses($entityClass, $targetEntityClass);
+            $originalEntityShort = trim($originalDiscriminator.'\\'.$originalEntityShort, '\\');
+            $targetEntityShort = trim($targetDiscriminator.'\\'.$targetEntityShort, '\\');
+        }
+
         $rows = [];
         $rows[] = [
             EntityRelation::MANY_TO_ONE,

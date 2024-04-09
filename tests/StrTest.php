@@ -186,6 +186,24 @@ class StrTest extends TestCase
     }
 
     /**
+     * @dataProvider getHumanDiscriminatorBetweenTwoClassesTests
+     */
+    public function testHumanDiscriminatorBetweenTwoClasses(string $className, string $classNameOther, array $expected)
+    {
+        $this->assertSame($expected, Str::getHumanDiscriminatorBetweenTwoClasses($className, $classNameOther));
+    }
+
+    public function getHumanDiscriminatorBetweenTwoClassesTests()
+    {
+        yield ['\\User', 'App\\Entity\\User', ['', 'App\\Entity']];
+        yield ['App\\Entity\\User', 'App\\Entity\\Friend\\User', ['', 'Friend']];
+        yield ['App\\Entity\\User', 'Custom\\Entity\\User', ['App\\Entity', 'Custom\\Entity']];
+        yield ['App\\Entity\\User', 'App\\Bundle\\Entity\\User', ['Entity', 'Bundle\\Entity']];
+        yield ['App\\Entity\\User', 'App\\Bundle\\User', ['Entity', 'Bundle']];
+        yield ['App\\Entity\\User', 'Custom\\Bundle\\Friend\\Entity\\User', ['App\\Entity', 'Custom\\Bundle\\Friend\\Entity']];
+    }
+
+    /**
      * @dataProvider asHumanWordsTests
      */
     public function testAsHumanWords(string $original, string $expected)

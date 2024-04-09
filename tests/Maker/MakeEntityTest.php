@@ -376,6 +376,45 @@ class MakeEntityTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_adds_many_to_many_between_same_entity_name_different_namespace' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'User-basic.php');
+                $this->copyEntity($runner, 'Friend/User-sub-namespace.php');
+
+                $output = $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // field name
+                    'friends',
+                    // add a relationship field
+                    'relation',
+                    // the target entity
+                    'Friend\\User',
+                    // relation type
+                    'ManyToMany',
+                    // inverse side?
+                    'y',
+                    // field name on opposite side - use default 'courses'
+                    '',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->assertStringContainsString('src/Entity/User.php', $output);
+                $this->assertStringContainsString('src/Entity/Friend/User.php', $output);
+                $this->assertStringContainsString('ManyToOne    Each User relates to (has) one Friend\User.', $output);
+                $this->assertStringContainsString('Each Friend\User can relate to (can have) many User objects.', $output);
+                $this->assertStringContainsString('OneToMany    Each User can relate to (can have) many Friend\User objects.', $output);
+                $this->assertStringContainsString('Each Friend\User relates to (has) one User.', $output);
+                $this->assertStringContainsString('ManyToMany   Each User can relate to (can have) many Friend\User objects.', $output);
+                $this->assertStringContainsString('Each Friend\User can also relate to (can also have) many User objects.', $output);
+                $this->assertStringContainsString('OneToOne     Each User relates to (has) exactly one Friend\User.', $output);
+                $this->assertStringContainsString('Each Friend\User also relates to (has) exactly one User.', $output);
+
+                // $this->runCustomTest($runner, 'it_adds_many_to_many_between_same_entity_name_different_namespace.php');
+            }),
+        ];
+
         yield 'it_adds_one_to_one_simple' => [$this->createMakeEntityTest()
             ->run(function (MakerTestRunner $runner) {
                 $this->copyEntity($runner, 'User-basic.php');
