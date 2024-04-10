@@ -25,12 +25,11 @@ final class RemoteServiceRequestParser extends AbstractRequestParser
      */
     protected function doParse(Request $request, #[\SensitiveParameter] string $secret): ?RemoteEvent
     {
-        // Implement your own logic to validate and parse the request, and return a RemoteEvent object.
+        // TODO: Adapt or replace the content of this method to fit your need.
 
         // Validate the request against $secret.
         $authToken = $request->headers->get('X-Authentication-Token');
-
-        if (null === $authToken || $authToken !== $secret) {
+        if ($authToken !== $secret) {
             throw new RejectWebhookException(Response::HTTP_UNAUTHORIZED, 'Invalid authentication token.');
         }
 
@@ -41,7 +40,7 @@ final class RemoteServiceRequestParser extends AbstractRequestParser
         }
 
         // Parse the request payload and return a RemoteEvent object.
-        $payload = $request->getPayload()->getIterator()->getArrayCopy();
+        $payload = $request->getPayload()->all();
 
         return new RemoteEvent(
             $payload['name'],
