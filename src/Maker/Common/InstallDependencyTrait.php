@@ -14,6 +14,11 @@ namespace Symfony\Bundle\MakerBundle\Maker\Common;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Component\Process\Process;
 
+/**
+ * @author Jesse Rushlow <jr@rushlow.dev>
+ *
+ * @internal
+ */
 trait InstallDependencyTrait
 {
     /**
