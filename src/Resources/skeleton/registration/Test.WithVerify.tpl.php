@@ -31,6 +31,7 @@ class RegistrationControllerTest extends WebTestCase
         // Register a new user
         $this->client->request('GET', '/register');
         self::assertResponseIsSuccessful();
+        self::assertPageTitleContains('Register');
 
         $this->client->submitForm('Register', [
             'registration_form[email]' => 'me@example.com',
@@ -61,6 +62,7 @@ class RegistrationControllerTest extends WebTestCase
         /** @var TemplatedEmail $templatedEmail */
         $templatedEmail = $messages[0];
         $messageBody = $templatedEmail->getHtmlBody();
+        self::assertIsString($messageBody);
 
         preg_match('#(http://localhost/verify/email.+)">#', $messageBody, $resetLink);
 
