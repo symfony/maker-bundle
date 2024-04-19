@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpParser\Builder\Param;
 use Symfony\Bridge\Twig\AppVariable;
@@ -365,7 +364,7 @@ class MakeResetPassword extends AbstractMaker
             $useStatements = new UseStatementGenerator([
                 $userClassNameDetails->getFullName(),
                 $userRepositoryDetails->getFullName(),
-                EntityManager::class,
+                EntityManagerInterface::class,
                 KernelBrowser::class,
                 WebTestCase::class,
                 UserPasswordHasherInterface::class,

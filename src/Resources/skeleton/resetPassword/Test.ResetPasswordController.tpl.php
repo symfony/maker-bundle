@@ -6,7 +6,7 @@ namespace App\Tests;
 class ResetPasswordTest extends WebTestCase
 {
     private KernelBrowser $client;
-    private EntityManager $em;
+    private EntityManagerInterface $em;
     private <?= $user_repo_short_name ?> $userRepository;
 
     protected function setUp(): void
@@ -15,8 +15,12 @@ class ResetPasswordTest extends WebTestCase
 
         // Ensure we have a clean database
         $container = static::getContainer();
-        $this->em = $container->get('doctrine')->getManager();
-        $this->userRepository = $this->em->getRepository(<?= $user_short_name ?>::class);
+
+        /** @var EntityManagerInterface $em */
+        $em = $container->get('doctrine')->getManager();
+        $this->em = $em;
+
+        $this->userRepository = $container->get(<?= $user_repo_short_name ?>::class);
 
         foreach ($this->userRepository->findAll() as $user) {
             $this->em->remove($user);
@@ -25,7 +29,7 @@ class ResetPasswordTest extends WebTestCase
         $this->em->flush();
     }
 
-    public function testMaker(): void
+    public function testResetPasswordController(): void
     {
         // Create a test user
         $user = (new <?= $user_short_name ?>())
@@ -84,6 +88,8 @@ class ResetPasswordTest extends WebTestCase
         self::assertResponseRedirects('<?= $success_route_path ?>');
 
         $user = $this->userRepository->findOneBy(['email' => 'me@example.com']);
+
+        self::assertInstanceOf(<?= $user_short_name ?>::class, $user);
 
         /** @var UserPasswordHasherInterface $passwordHasher */
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
