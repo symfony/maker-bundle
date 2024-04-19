@@ -253,6 +253,7 @@ final class MakeRegistrationForm extends AbstractMaker
                 UserInterface::class,
                 VerifyEmailExceptionInterface::class,
                 VerifyEmailHelperInterface::class,
+                $userClassNameDetails->getFullName(),
             ]);
 
             $generator->generateClass(
@@ -263,6 +264,7 @@ final class MakeRegistrationForm extends AbstractMaker
                     'id_getter' => $this->idGetter,
                     'email_getter' => $this->emailGetter,
                     'verify_email_anonymously' => $this->verifyEmailAnonymously,
+                    'user_class_name' => $userClassNameDetails->getShortName(),
                 ],
                     $userRepoVars
                 )
