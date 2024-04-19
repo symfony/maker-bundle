@@ -392,7 +392,8 @@ final class MakeRegistrationForm extends AbstractMaker
             $userManipulator->addProperty(
                 name: 'isVerified',
                 defaultValue: false,
-                attributes: [$userManipulator->buildAttributeNode(Column::class, ['type' => 'boolean'], 'ORM')]
+                attributes: [$userManipulator->buildAttributeNode(attributeClass: Column::class, options: [], attributePrefix: 'ORM')],
+                propertyType: 'bool'
             );
             $userManipulator->addAccessorMethod('isVerified', 'isVerified', 'bool', false);
             $userManipulator->addSetter('isVerified', 'bool', false);
