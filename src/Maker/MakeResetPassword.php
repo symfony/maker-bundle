@@ -272,7 +272,7 @@ class MakeResetPassword extends AbstractMaker
             ]
         );
 
-        $this->generateRequestEntity($generator, $requestClassNameDetails, $repositoryClassNameDetails);
+        $this->generateRequestEntity($generator, $requestClassNameDetails, $repositoryClassNameDetails, $userClassNameDetails);
 
         $this->setBundleConfig($io, $generator, $repositoryClassNameDetails->getFullName());
 
@@ -405,8 +405,9 @@ class MakeResetPassword extends AbstractMaker
         $io->newLine();
     }
 
-    private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails): void
+    private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails, ClassNameDetails $userClassDetails): void
     {
+        // Generate ResetPasswordRequest Entity
         $requestEntityPath = $this->entityClassGenerator->generateEntityClass(
             entityClassDetails: $requestClassNameDetails,
             apiResource: false,
@@ -426,8 +427,10 @@ class MakeResetPassword extends AbstractMaker
 
         $manipulator->addTrait(ResetPasswordRequestTrait::class);
 
+        $manipulator->addUseStatementIfNecessary($userClassDetails->getFullName());
+
         $manipulator->addConstructor([
-            (new Param('user'))->setType('object')->getNode(),
+            (new Param('user'))->setType($userClassDetails->getShortName())->getNode(),
             (new Param('expiresAt'))->setType('\DateTimeInterface')->getNode(),
             (new Param('selector'))->setType('string')->getNode(),
             (new Param('hashedToken'))->setType('string')->getNode(),
@@ -444,7 +447,7 @@ class MakeResetPassword extends AbstractMaker
             mapInverseRelation: false,
             avoidSetter: true,
             isCustomReturnTypeNullable: false,
-            customReturnType: 'object',
+            customReturnType: $userClassDetails->getShortName(),
             isOwning: true,
         ));
 
@@ -459,6 +462,7 @@ class MakeResetPassword extends AbstractMaker
 
         $generator->writeChanges();
 
+        // Generate ResetPasswordRequestRepository
         $pathRequestRepository = $this->fileManager->getRelativePathForFutureClass(
             $repositoryClassNameDetails->getFullName()
         );
@@ -471,7 +475,14 @@ class MakeResetPassword extends AbstractMaker
 
         $manipulator->addTrait(ResetPasswordRequestRepositoryTrait::class);
 
-        $methodBuilder = $manipulator->createMethodBuilder('createResetPasswordRequest', ResetPasswordRequestInterface::class, false);
+        $methodBuilder = $manipulator->createMethodBuilder(
+            methodName: 'createResetPasswordRequest',
+            returnType: ResetPasswordRequestInterface::class,
+            isReturnTypeNullable: false,
+            commentLines: [sprintf('@param %s $user', $userClassDetails->getShortName())]
+        );
+
+        $manipulator->addUseStatementIfNecessary($userClassDetails->getFullName());
 
         $manipulator->addMethodBuilder($methodBuilder, [
             (new Param('user'))->setType('object')->getNode(),
