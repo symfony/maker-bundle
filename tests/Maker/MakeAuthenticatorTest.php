@@ -16,6 +16,9 @@ use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
+/**
+ * @group legacy
+ */
 class MakeAuthenticatorTest extends MakerTestCase
 {
     protected function getMakerClass(): string
