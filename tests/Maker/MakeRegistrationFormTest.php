@@ -192,6 +192,10 @@ class MakeRegistrationFormTest extends MakerTestCase
                     $this->assertFileExists($runner->getPath($file));
                 }
 
+                $userContents = file_get_contents($runner->getPath('src/Entity/User.php'));
+
+                $this->assertStringContainsString('private bool $isVerified = false', $userContents);
+
                 $this->runRegistrationTest($runner, 'it_generates_registration_form_with_verification.php');
             }),
         ];
