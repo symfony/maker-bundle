@@ -14,16 +14,51 @@ namespace Symfony\Bundle\MakerBundle;
 use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\MakeCommandRegistrationPass;
 use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\RemoveMissingParametersPass;
 use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\SetDoctrineAnnotatedPrefixesPass;
+use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  * @author Ryan Weaver <weaverryan@gmail.com>
  */
-class MakerBundle extends Bundle
+class MakerBundle extends AbstractBundle
 {
+    public function configure(DefinitionConfigurator $definition): void
+    {
+        $definition->rootNode()
+            ->children()
+                ->scalarNode('root_namespace')
+                    ->defaultValue('App')
+                ->end()
+            ->end()
+        ;
+    }
+
+    public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
+    {
+        $container->import('../config/services.xml');
+        $container->import('../config/makers.xml');
+
+        $rootNamespace = trim($config['root_namespace'], '\\');
+
+        $container->services()
+            ->get('maker.autoloader_finder')
+                ->arg(0, $rootNamespace)
+            ->get('maker.generator')
+                ->arg(1, $rootNamespace)
+            ->get('maker.doctrine_helper')
+                ->arg(0, $rootNamespace)
+        ;
+
+        $builder
+            ->registerForAutoconfiguration(MakerInterface::class)
+            ->addTag(MakeCommandRegistrationPass::MAKER_TAG)
+        ;
+    }
+
     public function build(ContainerBuilder $container): void
     {
         // add a priority so we run before the core command pass
