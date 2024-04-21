@@ -12,11 +12,14 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Column;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -24,6 +27,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Maker\Common\CanGenerateTestsTrait;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Security\Model\Authenticator;
@@ -68,6 +72,8 @@ use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
  */
 final class MakeRegistrationForm extends AbstractMaker
 {
+    use CanGenerateTestsTrait;
+
     private string $userClass;
     private string $usernameField;
     private string $passwordField;
@@ -104,6 +110,8 @@ final class MakeRegistrationForm extends AbstractMaker
         $command
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeRegistrationForm.txt'))
         ;
+
+        $this->configureCommandWithTestsOption($command);
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
@@ -180,6 +188,8 @@ final class MakeRegistrationForm extends AbstractMaker
             $routeNames = array_keys($this->router->getRouteCollection()->all());
             $this->redirectRouteName = $io->choice('What route should the user be redirected to after registration?', $routeNames);
         }
+
+        $this->interactSetGenerateTests($input, $io);
     }
 
     /** @param array<string, mixed> $securityData */
@@ -401,6 +411,35 @@ final class MakeRegistrationForm extends AbstractMaker
             $userManipulator->addSetter('isVerified', 'bool', false);
 
             $this->fileManager->dumpFile($classDetails->getPath(), $userManipulator->getSourceCode());
+        }
+
+        // Generate PHPUnit Tests
+        if ($this->shouldGenerateTests()) {
+            $testClassDetails = $generator->createClassNameDetails(
+                'RegistrationControllerTest',
+                'Test\\'
+            );
+
+            $useStatements = new UseStatementGenerator([
+                EntityManager::class,
+                KernelBrowser::class,
+                TemplatedEmail::class,
+                WebTestCase::class,
+                $userRepoVars['repository_full_class_name'],
+            ]);
+
+            $generator->generateFile(
+                targetPath: sprintf('tests/%s.php', $testClassDetails->getShortName()),
+                templateName: $this->willVerifyEmail ? 'registration/Test.WithVerify.tpl.php' : 'registration/Test.WithoutVerify.tpl.php',
+                variables: array_merge([
+                    'use_statements' => $useStatements,
+                    'from_email' => $this->fromEmailAddress ?? null,
+                ], $userRepoVars)
+            );
+
+            if (!class_exists(WebTestCase::class)) {
+                $io->caution('You\'ll need to install the `symfony/test-pack` to execute the tests for your new controller.');
+            }
         }
 
         $generator->writeChanges();

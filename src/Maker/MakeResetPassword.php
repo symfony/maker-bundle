@@ -16,6 +16,8 @@ use PhpParser\Builder\Param;
 use Symfony\Bridge\Twig\AppVariable;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -26,6 +28,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Maker\Common\CanGenerateTestsTrait;
 use Symfony\Bundle\MakerBundle\Maker\Common\UidTrait;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
@@ -51,6 +54,8 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Route as RouteObject;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -81,11 +86,13 @@ use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
  */
 class MakeResetPassword extends AbstractMaker
 {
+    use CanGenerateTestsTrait;
     use UidTrait;
 
     private string $fromEmailAddress;
     private string $fromEmailName;
     private string $controllerResetSuccessRedirect;
+    private ?RouteObject $controllerResetSuccessRoute = null;
     private string $userClass;
     private string $emailPropertyName;
     private string $emailGetterMethodName;
@@ -95,6 +102,7 @@ class MakeResetPassword extends AbstractMaker
         private FileManager $fileManager,
         private DoctrineHelper $doctrineHelper,
         private EntityClassGenerator $entityClassGenerator,
+        private ?RouterInterface $router = null,
     ) {
     }
 
@@ -115,6 +123,7 @@ class MakeResetPassword extends AbstractMaker
         ;
 
         $this->addWithUuidOption($command);
+        $this->configureCommandWithTestsOption($command);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void
@@ -172,6 +181,10 @@ class MakeResetPassword extends AbstractMaker
             Validator::notBlank(...)
         );
 
+        if ($this->router instanceof RouterInterface) {
+            $this->controllerResetSuccessRoute = $this->router->getRouteCollection()->get($this->controllerResetSuccessRedirect);
+        }
+
         $io->section('- Email -');
         $emailText[] = 'These are used to generate the email code. Don\'t worry, you can change them in the code later!';
         $io->text($emailText);
@@ -187,6 +200,8 @@ class MakeResetPassword extends AbstractMaker
             null,
             Validator::notBlank(...)
         );
+
+        $this->interactSetGenerateTests($input, $io);
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
@@ -333,6 +348,44 @@ class MakeResetPassword extends AbstractMaker
             'reset_password/reset.html.twig',
             'resetPassword/twig_reset.tpl.php'
         );
+
+        // Generate PHPUnit tests
+        if ($this->shouldGenerateTests()) {
+            $testClassDetails = $generator->createClassNameDetails(
+                'ResetPasswordControllerTest',
+                'Test\\',
+            );
+
+            $userRepositoryDetails = $generator->createClassNameDetails(
+                sprintf('%sRepository', $userClassNameDetails->getShortName()),
+                'Repository\\'
+            );
+
+            $useStatements = new UseStatementGenerator([
+                $userClassNameDetails->getFullName(),
+                $userRepositoryDetails->getFullName(),
+                EntityManagerInterface::class,
+                KernelBrowser::class,
+                WebTestCase::class,
+                UserPasswordHasherInterface::class,
+            ]);
+
+            $generator->generateFile(
+                targetPath: sprintf('tests/%s.php', $testClassDetails->getShortName()),
+                templateName: 'resetPassword/Test.ResetPasswordController.tpl.php',
+                variables: [
+                    'use_statements' => $useStatements,
+                    'user_short_name' => $userClassNameDetails->getShortName(),
+                    'user_repo_short_name' => $userRepositoryDetails->getShortName(),
+                    'success_route_path' => null !== $this->controllerResetSuccessRoute ? $this->controllerResetSuccessRoute->getPath() : '/',
+                    'from_email' => $this->fromEmailAddress,
+                ],
+            );
+
+            if (!class_exists(WebTestCase::class)) {
+                $io->caution('You\'ll need to install the `symfony/test-pack` to execute the tests for your new controller.');
+            }
+        }
 
         $generator->writeChanges();
 

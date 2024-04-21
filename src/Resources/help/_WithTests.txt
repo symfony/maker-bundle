@@ -1,0 +1,6 @@
+To generate tailored PHPUnit tests, simply call:
+
+<info>php %command.full_name% --with-tests</info>
+
+This will generate a unit test in <info>tests/</info> for you to review then use
+to test the new functionality of your app.
