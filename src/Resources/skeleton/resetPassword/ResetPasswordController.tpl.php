@@ -74,6 +74,7 @@ class <?= $class_name ?> extends AbstractController
         }
 
         try {
+            /** @var <?= $user_class_name ?> $user */
             $user = $this->resetPasswordHelper->validateTokenAndFetchUser($token);
         } catch (ResetPasswordExceptionInterface $e) {
             $this->addFlash('reset_password_error', sprintf(
