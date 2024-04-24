@@ -1,5 +1,27 @@
 # Changelog
 
+## [v1.59.0](https://github.com/symfony/maker-bundle/releases/tag/v1.59.0)
+
+*April 27th, 2024*
+
+### Feature
+
+- [#1523](https://github.com/symfony/maker-bundle/pull/1523) [make:auth] deprecate command - *@jrushlow*
+- [#1522](https://github.com/symfony/maker-bundle/pull/1522) [make:security:custom] create a custom authenticator - *@jrushlow*
+- [#1521](https://github.com/symfony/maker-bundle/pull/1521) [make:reset-password] improve types for static analysis in userland - *@jrushlow*
+- [#1520](https://github.com/symfony/maker-bundle/pull/1520) [make:entity] Simplify repository PHPDoc removes method annotations - *@lyrixx*
+- [#1519](https://github.com/symfony/maker-bundle/pull/1519) [make:registration] use "User" type in `EmailVerifier::class` - *@jrushlow*
+- [#1518](https://github.com/symfony/maker-bundle/pull/1518) [make:registration] add `bool` type to User::isVerified - *@jrushlow*
+- [#1515](https://github.com/symfony/maker-bundle/pull/1515) [make:security:form-login] add ability to generate tests - *@jrushlow*
+- [#1512](https://github.com/symfony/maker-bundle/pull/1512) [make:webhook] Rephrase comments to be more explicit + minor improvement of generated code - *@maelanleborgne*
+- [#1511](https://github.com/symfony/maker-bundle/pull/1511) [make:entity] helper message with two classes having the same name under different namespaces - *@jeromegxj*
+- [#1497](https://github.com/symfony/maker-bundle/pull/1497) [make:*] add ability to generate tests - *@jrushlow*
+
+### Bug
+
+- [#1525](https://github.com/symfony/maker-bundle/pull/1525) [make:serializer:encoder] fix interface signature mismatch in template - *@jrushlow*
+- [#1516](https://github.com/symfony/maker-bundle/pull/1516) [common] add missing class header - *@jrushlow*
+
 ## [v1.58.0](https://github.com/symfony/maker-bundle/releases/tag/v1.58.0)
 
 *April 6th, 2024*
