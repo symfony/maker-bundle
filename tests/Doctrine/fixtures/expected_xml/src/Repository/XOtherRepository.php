@@ -8,11 +8,6 @@ use Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity\XOther;
 
 /**
  * @extends ServiceEntityRepository<XOther>
- *
- * @method XOther|null find($id, $lockMode = null, $lockVersion = null)
- * @method XOther|null findOneBy(array $criteria, array $orderBy = null)
- * @method XOther[]    findAll()
- * @method XOther[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class XOtherRepository extends ServiceEntityRepository
 {
