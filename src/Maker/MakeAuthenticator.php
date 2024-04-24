@@ -38,6 +38,7 @@ use Symfony\Component\Console\Question\Question;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\LimiterInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -209,6 +210,15 @@ final class MakeAuthenticator extends AbstractMaker
                     $supportRememberMeValues[$supportRememberMeType]
                 );
             }
+
+            $command->addArgument('support-throttling', InputArgument::OPTIONAL);
+            $input->setArgument(
+                'support-throttling',
+                $io->confirm(
+                    'Do you want to enable the throttling protection?',
+                    true
+                )
+            );
         }
     }
 
@@ -219,6 +229,7 @@ final class MakeAuthenticator extends AbstractMaker
 
         $supportRememberMe = $input->hasArgument('support-remember-me') ? $input->getArgument('support-remember-me') : false;
         $alwaysRememberMe = $input->hasArgument('always-remember-me') && self::REMEMBER_ME_TYPE_ALWAYS === $input->getArgument('always-remember-me');
+        $supportThrottling = $input->hasArgument('support-throttling') ? $input->getArgument('support-throttling') : false;
 
         $this->generateAuthenticatorClass(
             $securityData,
@@ -246,7 +257,8 @@ final class MakeAuthenticator extends AbstractMaker
                 $input->getArgument('authenticator-class'),
                 $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false,
                 $supportRememberMe,
-                $alwaysRememberMe
+                $alwaysRememberMe,
+                $supportThrottling,
             );
             $generator->dumpFile($path, $newYaml);
             $securityYamlUpdated = true;
@@ -275,7 +287,8 @@ final class MakeAuthenticator extends AbstractMaker
                 $input->hasArgument('user-class') ? $input->getArgument('user-class') : null,
                 $input->hasArgument('logout-setup') ? $input->getArgument('logout-setup') : false,
                 $supportRememberMe,
-                $alwaysRememberMe
+                $alwaysRememberMe,
+                $supportThrottling
             )
         );
     }
@@ -403,7 +416,7 @@ final class MakeAuthenticator extends AbstractMaker
     }
 
     /** @return string[] */
-    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, ?string $userClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): array
+    private function generateNextMessage(bool $securityYamlUpdated, string $authenticatorType, string $authenticatorClass, ?string $userClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe, bool $supportThrottling): array
     {
         $nextTexts = ['Next:'];
         $nextTexts[] = '- Customize your new authenticator.';
@@ -416,7 +429,8 @@ final class MakeAuthenticator extends AbstractMaker
                 $authenticatorClass,
                 $logoutSetup,
                 $supportRememberMe,
-                $alwaysRememberMe
+                $alwaysRememberMe,
+                $supportThrottling
             );
             $nextTexts[] = "- Your <info>security.yaml</info> could not be updated automatically. You'll need to add the following config manually:\n\n".$yamlExample;
         }
@@ -461,5 +475,13 @@ final class MakeAuthenticator extends AbstractMaker
             Yaml::class,
             'yaml'
         );
+
+        $supportThrottling = $input?->hasArgument('support-throttling') ? $input->getArgument('support-throttling') : false;
+        if ($supportThrottling) {
+            $dependencies->addClassDependency(
+                LimiterInterface::class,
+                'symfony/rate-limiter'
+            );
+        }
     }
 }
