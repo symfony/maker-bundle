@@ -159,6 +159,12 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_custom_authenticator" class="Symfony\Bundle\MakerBundle\Maker\Security\MakeCustomAuthenticator">
+                <argument type="service" id="maker.file_manager" />
+                <argument type="service" id="maker.generator" />
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_webhook" class="Symfony\Bundle\MakerBundle\Maker\MakeWebhook">
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.generator" />
