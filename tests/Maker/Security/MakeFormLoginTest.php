@@ -99,6 +99,37 @@ class MakeFormLoginTest extends MakerTestCase
                 $this->assertSame('app_logout', $securityConfig['security']['firewalls']['main']['logout']['path']);
             }),
         ];
+
+        yield 'generates_form_login_using_defaults_with_test' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                // Make the UserPasswordHasherInterface available in the test
+                $runner->renderTemplateFile('security/make-form-login/FixtureController.php', 'src/Controller/FixtureController.php', []);
+
+                $this->makeUser($runner);
+
+                $output = $runner->runMaker([
+                    'SecurityController', // Controller Name
+                    'y', // Generate Logout,
+                    'y', // Generate tests
+                ]);
+
+                $this->assertStringContainsString('Success', $output);
+                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
+
+                $this->assertFileEquals($fixturePath.'/SecurityController.php', $runner->getPath('src/Controller/SecurityController.php'));
+                $this->assertFileEquals($fixturePath.'/login.html.twig', $runner->getPath('templates/security/login.html.twig'));
+
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+
+                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['login_path']);
+                $this->assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['check_path']);
+                $this->assertTrue($securityConfig['security']['firewalls']['main']['form_login']['enable_csrf']);
+                $this->assertSame('app_logout', $securityConfig['security']['firewalls']['main']['logout']['path']);
+
+                $runner->configureDatabase();
+                $runner->runTests();
+            }),
+        ];
     }
 
     private function runLoginTest(MakerTestRunner $runner): void
