@@ -54,8 +54,6 @@ use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use Symfony\Component\Yaml\Yaml;
 
-trigger_deprecation('symfony/maker-bundle', 'v1.59.0', 'The "%s" class is deprecated, use any of the Security\Make* commands instead.', MakeAuthenticator::class);
-
 /**
  * @deprecated since MakerBundle v1.59.0, use any of the Security/Make* instead.
  *
@@ -99,6 +97,8 @@ final class MakeAuthenticator extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
+        trigger_deprecation('symfony/maker-bundle', 'v1.59.0', 'The "%s" class is deprecated, use any of the Security\Make* commands instead.', self::class);
+
         $io->caution('"make:auth" is deprecated, use any of the "make:security" commands instead.');
 
         if (!$this->fileManager->fileExists($path = 'config/packages/security.yaml')) {
