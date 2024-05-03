@@ -97,7 +97,7 @@ final class MakeAuthenticator extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        trigger_deprecation('symfony/maker-bundle', 'v1.59.0', 'The "%s" class is deprecated, use any of the Security\Make* commands instead.', MakeAuthenticator::class);
+        trigger_deprecation('symfony/maker-bundle', 'v1.59.0', 'The "%s" class is deprecated, use any of the Security\Make* commands instead.', self::class);
 
         $io->caution('"make:auth" is deprecated, use any of the "make:security" commands instead.');
 
