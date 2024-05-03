@@ -424,6 +424,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         if ('string' === $type) {
             // default to 255, avoid the question
             $classProperty->length = $io->ask('Field length', '255', Validator::validateLength(...));
+
+            if ($io->confirm('Is this field an enum?', false)) {
+                $classProperty->enumType = $io->ask('Enum class', null, Validator::classIsBackedEnum(...));
+            }
         } elseif ('decimal' === $type) {
             // 10 is the default value given in \Doctrine\DBAL\Schema\Column::$_precision
             $classProperty->precision = $io->ask('Precision (total number of digits stored: 100.00 would be 5)', '10', Validator::validatePrecision(...));

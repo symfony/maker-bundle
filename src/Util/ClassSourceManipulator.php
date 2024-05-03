@@ -112,6 +112,10 @@ final class ClassSourceManipulator
             }
         }
 
+        if (null !== $mapping->enumType) {
+            $typeHint = $this->addUseStatementIfNecessary($mapping->enumType);
+        }
+
         // 2) USE property type on property below, nullable
         // 3) If default value, then NOT nullable
 
@@ -887,6 +891,16 @@ final class ClassSourceManipulator
             if ('type' === $option && str_starts_with($value, 'Types::')) {
                 return new Node\Arg(
                     new Node\Expr\ConstFetch(new Node\Name($value)),
+                    false,
+                    false,
+                    [],
+                    new Node\Identifier($option)
+                );
+            }
+
+            if ('enumType' === $option) {
+                return new Node\Arg(
+                    new Node\Expr\ConstFetch(new Node\Name(Str::getShortClassName($value).'::class')),
                     false,
                     false,
                     [],

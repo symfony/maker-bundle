@@ -81,6 +81,8 @@ class MakeEntityTest extends MakerTestCase
                     '',
                     // default length
                     '',
+                    // enum type
+                    '',
                     // nullable
                     '',
                     // no more properties
@@ -188,6 +190,8 @@ class MakeEntityTest extends MakerTestCase
                     'name',
                     'string',
                     '255', // length
+                    // enum type
+                    '',
                     // nullable
                     'y',
                     'createdAt',
@@ -214,6 +218,8 @@ class MakeEntityTest extends MakerTestCase
                     'lastName',
                     'string',
                     '', // length (default 255)
+                    // enum type
+                    '',
                     // nullable
                     'y',
                     // finish adding fields
@@ -620,6 +626,7 @@ class MakeEntityTest extends MakerTestCase
                     // field name
                     'firstName',
                     'string',
+                    '',
                     '', // length (default 255)
                     // nullable
                     '',
@@ -708,6 +715,30 @@ class MakeEntityTest extends MakerTestCase
                 ]);
 
                 $this->assertFileExists($runner->getPath('src/Entity/User.php'));
+            }),
+        ];
+
+        yield 'it_creates_a_new_class_with_enum_field' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'Enum/Role-basic.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // add not additional fields
+                    'role',
+                    'string',
+                    '255', // length
+                    // enum type
+                    'y',
+                    'App\\Entity\\Enum\\Role',
+                    // nullable
+                    'y',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runEntityTest($runner);
             }),
         ];
     }
