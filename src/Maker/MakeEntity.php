@@ -333,7 +333,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         if (null !== $input && $input->getOption('broadcast')) {
             $dependencies->addClassDependency(
                 Broadcast::class,
-                'ux-turbo'
+                'symfony/ux-turbo'
             );
         }
 
