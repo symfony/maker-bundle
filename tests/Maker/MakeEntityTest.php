@@ -81,8 +81,6 @@ class MakeEntityTest extends MakerTestCase
                     '',
                     // default length
                     '',
-                    // enum type
-                    '',
                     // nullable
                     '',
                     // no more properties
@@ -190,8 +188,6 @@ class MakeEntityTest extends MakerTestCase
                     'name',
                     'string',
                     '255', // length
-                    // enum type
-                    '',
                     // nullable
                     'y',
                     'createdAt',
@@ -218,8 +214,6 @@ class MakeEntityTest extends MakerTestCase
                     'lastName',
                     'string',
                     '', // length (default 255)
-                    // enum type
-                    '',
                     // nullable
                     'y',
                     // finish adding fields
@@ -725,12 +719,9 @@ class MakeEntityTest extends MakerTestCase
                 $runner->runMaker([
                     // entity class name
                     'User',
-                    // add not additional fields
+                    // add additional field
                     'role',
-                    'string',
-                    '255', // length
-                    // enum type
-                    'y',
+                    'enum',
                     'App\\Entity\\Enum\\Role',
                     // nullable
                     'y',

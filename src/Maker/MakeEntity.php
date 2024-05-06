@@ -393,7 +393,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $allValidTypes = array_merge(
             array_keys($types),
             EntityRelation::getValidRelationTypes(),
-            ['relation']
+            ['relation', 'enum']
         );
         while (null === $type) {
             $question = new Question('Field type (enter <comment>?</comment> to see all types)', $defaultType);
@@ -424,16 +424,18 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         if ('string' === $type) {
             // default to 255, avoid the question
             $classProperty->length = $io->ask('Field length', '255', Validator::validateLength(...));
-
-            if ($io->confirm('Is this field an enum?', false)) {
-                $classProperty->enumType = $io->ask('Enum class', null, Validator::classIsBackedEnum(...));
-            }
         } elseif ('decimal' === $type) {
             // 10 is the default value given in \Doctrine\DBAL\Schema\Column::$_precision
             $classProperty->precision = $io->ask('Precision (total number of digits stored: 100.00 would be 5)', '10', Validator::validatePrecision(...));
 
             // 0 is the default value given in \Doctrine\DBAL\Schema\Column::$_scale
             $classProperty->scale = $io->ask('Scale (number of decimals to store: 100.00 would be 2)', '0', Validator::validateScale(...));
+        } elseif ('enum' === $type) {
+            // ask for valid backed enum class
+            $classProperty->enumType = $io->ask('Enum class', null, Validator::classIsBackedEnum(...));
+
+            // reset type to "string" because enum is not a valid DBAL type
+            $classProperty->type = 'string';
         }
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {
@@ -468,6 +470,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 'date' => ['date_immutable'],
                 'time' => ['time_immutable'],
                 'dateinterval' => [],
+            ],
+            'other' => [
+                'enum' => [],
             ],
         ];
 
@@ -539,6 +544,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $io->writeln('<info>Other Types</info>');
         // empty the values
         $allTypes = array_map(static fn () => [], $allTypes);
+        $allTypes = [...$typesTable['other'], ...$allTypes];
         $printSection($allTypes);
     }
 
