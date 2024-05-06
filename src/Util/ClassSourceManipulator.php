@@ -112,10 +112,6 @@ final class ClassSourceManipulator
             }
         }
 
-        if (null !== $mapping->enumType) {
-            $typeHint = $this->addUseStatementIfNecessary($mapping->enumType);
-        }
-
         // 2) USE property type on property below, nullable
         // 3) If default value, then NOT nullable
 
@@ -124,8 +120,14 @@ final class ClassSourceManipulator
         $attributes[] = $this->buildAttributeNode(Column::class, $mapping->getAttributes(), 'ORM');
 
         $defaultValue = null;
+        $commentLines = [];
         if ('array' === $typeHint && !$nullable) {
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
+            if (null !== $mapping->enumType) {
+                $commentLines = [sprintf('@return %s[]', Str::getShortClassName($mapping->enumType))];
+            }
+        } elseif (null !== $mapping->enumType) {
+            $typeHint = $this->addUseStatementIfNecessary($mapping->enumType);
         } elseif ($typeHint && '\\' === $typeHint[0] && false !== strpos($typeHint, '\\', 1)) {
             $typeHint = $this->addUseStatementIfNecessary(substr($typeHint, 1));
         }
@@ -150,7 +152,8 @@ final class ClassSourceManipulator
             // getter methods always have nullable return values
             // because even though these are required in the db, they may not be set yet
             // unless there is a default value
-            null === $defaultValue
+            null === $defaultValue,
+            $commentLines
         );
 
         // don't generate setters for id fields

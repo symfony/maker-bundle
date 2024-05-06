@@ -434,8 +434,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             // ask for valid backed enum class
             $classProperty->enumType = $io->ask('Enum class', null, Validator::classIsBackedEnum(...));
 
-            // reset type to "string" because enum is not a valid DBAL type
-            $classProperty->type = 'string';
+            // set type according to user decision
+            $classProperty->type = $io->confirm('Can this field store multiple enum values', false) ? 'simple_array' : 'string';
         }
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {

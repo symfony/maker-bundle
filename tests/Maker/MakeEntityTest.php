@@ -723,6 +723,7 @@ class MakeEntityTest extends MakerTestCase
                     'role',
                     'enum',
                     'App\\Entity\\Enum\\Role',
+                    '',
                     // nullable
                     'y',
                     // finish adding fields
