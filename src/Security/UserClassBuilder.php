@@ -179,7 +179,7 @@ final class UserClassBuilder
             // add an empty method only
             $builder = $manipulator->createMethodBuilder(
                 'getPassword',
-                'string',
+                '?string',
                 true,
                 [
                     'This method can be removed in Symfony 6.0 - is not needed for apps that do not check user passwords.',
@@ -216,7 +216,7 @@ final class UserClassBuilder
 
             $manipulator->addGetter(
                 'password',
-                'string',
+                '?string',
                 true
             );
 
@@ -231,7 +231,7 @@ final class UserClassBuilder
         $manipulator->addAccessorMethod(
             'password',
             'getPassword',
-            'string',
+            '?string',
             false,
             [
                 '@see PasswordAuthenticatedUserInterface',
