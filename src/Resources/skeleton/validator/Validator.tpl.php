@@ -7,7 +7,7 @@ use Symfony\Component\Validator\ConstraintValidator;
 
 class <?= $class_name ?> extends ConstraintValidator
 {
-    public function validate($value, Constraint $constraint)
+    public function validate(mixed $value, Constraint $constraint): void
     {
         /** @var <?= $constraint_class_name ?> $constraint */
 
