@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 
 /**
@@ -22,7 +21,7 @@ class TemplateComponentGeneratorTest extends TestCase
 {
     public function testRouteAttributes(): void
     {
-        $generator = new TemplateComponentGenerator($this->createMock(PhpCompatUtil::class));
+        $generator = new TemplateComponentGenerator(false, false);
 
         $expected = "    #[Route('/', name: 'app_home')]\n";
 
@@ -34,7 +33,7 @@ class TemplateComponentGeneratorTest extends TestCase
      */
     public function testRouteMethods(string $expected, array $methods): void
     {
-        $generator = new TemplateComponentGenerator($this->createMock(PhpCompatUtil::class));
+        $generator = new TemplateComponentGenerator(false, false);
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod(
             '/',
@@ -54,7 +53,7 @@ class TemplateComponentGeneratorTest extends TestCase
      */
     public function testRouteIndentation(string $expected): void
     {
-        $generator = new TemplateComponentGenerator($this->createMock(PhpCompatUtil::class));
+        $generator = new TemplateComponentGenerator(false, false);
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod(
             '/',
@@ -74,7 +73,7 @@ class TemplateComponentGeneratorTest extends TestCase
      */
     public function testRouteTrailingNewLine(string $expected): void
     {
-        $generator = new TemplateComponentGenerator($this->createMock(PhpCompatUtil::class));
+        $generator = new TemplateComponentGenerator(false, false);
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod(
             '/',
@@ -88,5 +87,28 @@ class TemplateComponentGeneratorTest extends TestCase
     public function routeTrailingNewLineDataProvider(): \Generator
     {
         yield ["#[Route('/', name: 'app_home')]", true];
+    }
+
+    /**
+     * @dataProvider finalClassDataProvider
+     */
+    public function testGetFinalClassDeclaration(bool $finalClass, bool $finalEntity, bool $isEntity, string $expectedResult): void
+    {
+        $this->markTestIncomplete('We wont need this...');
+        $generator = new TemplateComponentGenerator($finalClass, $finalEntity);
+
+        self::assertSame($expectedResult, $generator->getFinalDeclaration($isEntity));
+    }
+
+    public function finalClassDataProvider(): \Generator
+    {
+        yield 'Not Final Class' => [false, false, false, ''];
+        yield 'Not Final Class w/ Entity' => [false, true, false, ''];
+        yield 'Final Class' => [true, false, false, 'final '];
+        yield 'Final Class w/ Entity' => [true, true, false, 'final '];
+        yield 'Not Final Entity' => [false, false, true, ''];
+        yield 'Not Final Entity w/ Class' => [true, false, true, ''];
+        yield 'Final Entity' => [false, true, true, 'final '];
+        yield 'Final Entity w/ Class' => [true, true, true, 'final '];
     }
 }

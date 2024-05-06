@@ -15,6 +15,7 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -46,6 +47,11 @@ final class MakeVoter extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        $classMetaData = ClassData::create(
+            class: sprintf('App\Security\Voter\%sVoter', $input->getArgument('name')),
+            extendsClass: Voter::class,
+        );
+
         $voterClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
             'Security\\Voter\\',
@@ -55,7 +61,7 @@ final class MakeVoter extends AbstractMaker
         $generator->generateClass(
             $voterClassNameDetails->getFullName(),
             'security/Voter.tpl.php',
-            []
+            ['class_data' => $classMetaData]
         );
 
         $generator->writeChanges();
