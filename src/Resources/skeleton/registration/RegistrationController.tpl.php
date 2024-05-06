@@ -20,13 +20,11 @@ class <?= $class_name; ?> extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var string $plainPassword */
+            $plainPassword = $form->get('plainPassword')->getData();
+
             // encode the plain password
-            $user->set<?= ucfirst($password_field) ?>(
-                    $userPasswordHasher->hashPassword(
-                    $user,
-                    $form->get('plainPassword')->getData()
-                )
-            );
+            $user->set<?= ucfirst($password_field) ?>($userPasswordHasher->hashPassword($user, $plainPassword));
 
             $entityManager->persist($user);
             $entityManager->flush();
@@ -36,7 +34,7 @@ class <?= $class_name; ?> extends AbstractController
             $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                 (new TemplatedEmail())
                     ->from(new Address('<?= $from_email ?>', '<?= $from_email_name ?>'))
-                    ->to($user-><?= $email_getter ?>())
+                    ->to((string) $user-><?= $email_getter ?>())
                     ->subject('Please Confirm your Email')
                     ->htmlTemplate('registration/confirmation_email.html.twig')
             );
@@ -84,7 +82,11 @@ class <?= $class_name; ?> extends AbstractController
 
         // validate email confirmation link, sets User::isVerified=true and persists
         try {
-            $this->emailVerifier->handleEmailConfirmation($request, <?= $verify_email_anonymously ? '$user' : '$this->getUser()' ?>);
+<?php if (!$verify_email_anonymously): ?>
+            /** @var <?= $user_class_name ?> $user */
+            $user = $this->getUser();
+<?php endif; ?>
+            $this->emailVerifier->handleEmailConfirmation($request, $user);
         } catch (VerifyEmailExceptionInterface $exception) {
             $this->addFlash('verify_email_error', <?php if ($translator_available): ?>$translator->trans($exception->getReason(), [], 'VerifyEmailBundle')<?php else: ?>$exception->getReason()<?php endif ?>);
 
