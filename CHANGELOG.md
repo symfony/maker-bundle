@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.59.1](https://github.com/symfony/maker-bundle/releases/tag/v1.59.1)
+
+*May 5th, 2024*
+
+### Bug
+
+- [#1532](https://github.com/symfony/maker-bundle/pull/1532) [make:auth] only fire deprecation when command is called - *@eltharin*
+
 ## [v1.59.0](https://github.com/symfony/maker-bundle/releases/tag/v1.59.0)
 
 *April 27th, 2024*
