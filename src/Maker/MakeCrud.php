@@ -27,6 +27,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Maker\Common\CanGenerateTestsTrait;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -131,6 +132,11 @@ final class MakeCrud extends AbstractMaker
             ];
         }
 
+        $controllerClassData = ClassData::create(
+            class: sprintf('App\Controller\%sController', $this->controllerClassName),
+            extendsClass: AbstractController::class,
+        );
+
         $controllerClassDetails = $generator->createClassNameDetails(
             $this->controllerClassName,
             'Controller\\',
@@ -174,6 +180,7 @@ final class MakeCrud extends AbstractMaker
             $controllerClassDetails->getFullName(),
             'crud/controller/Controller.tpl.php',
             array_merge([
+                'class_data' => $controllerClassData,
                 'use_statements' => $useStatements,
                 'entity_class_name' => $entityClassDetails->getShortName(),
                 'form_class_name' => $formClassDetails->getShortName(),
@@ -242,10 +249,9 @@ final class MakeCrud extends AbstractMaker
         }
 
         if ($this->shouldGenerateTests()) {
-            $testClassDetails = $generator->createClassNameDetails(
-                $entityClassDetails->getRelativeNameWithoutSuffix(),
-                'Test\\Controller\\',
-                'ControllerTest'
+            $testClassData = ClassData::create(
+                class: sprintf('App\Tests\Controller\%sControllerTest', $entityClassDetails->getRelativeNameWithoutSuffix()),
+                extendsClass: WebTestCase::class,
             );
 
             $useStatements = new UseStatementGenerator([
@@ -261,18 +267,17 @@ final class MakeCrud extends AbstractMaker
                 $useStatements->addUseStatement(EntityManagerInterface::class);
             }
 
-            $generator->generateFile(
-                'tests/Controller/'.$testClassDetails->getShortName().'.php',
+            $generator->generateClass(
+                $testClassData->fullClassName,
                 'crud/test/Test.EntityManager.tpl.php',
                 [
+                    'class_data' => $testClassData,
                     'use_statements' => $useStatements,
                     'entity_full_class_name' => $entityClassDetails->getFullName(),
                     'entity_class_name' => $entityClassDetails->getShortName(),
                     'entity_var_singular' => $entityVarSingular,
                     'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
                     'route_name' => $routeName,
-                    'class_name' => Str::getShortClassName($testClassDetails->getFullName()),
-                    'namespace' => Str::getNamespace($testClassDetails->getFullName()),
                     'form_fields' => $entityDoctrineDetails->getFormFields(),
                     'repository_class_name' => EntityManagerInterface::class,
                     'form_field_prefix' => strtolower(Str::asSnakeCase($entityTwigVarSingular)),

@@ -45,6 +45,12 @@ class MakerExtension extends Extension
         $doctrineHelperDefinition = $container->getDefinition('maker.doctrine_helper');
         $doctrineHelperDefinition->replaceArgument(0, $rootNamespace.'\\Entity');
 
+        $componentGeneratorDefinition = $container->getDefinition('maker.template_component_generator');
+        $componentGeneratorDefinition
+            ->replaceArgument(0, $config['generate_final_classes'])
+            ->replaceArgument(1, $config['generate_final_entities'])
+        ;
+
         $container->registerForAutoconfiguration(MakerInterface::class)
             ->addTag(MakeCommandRegistrationPass::MAKER_TAG);
     }
