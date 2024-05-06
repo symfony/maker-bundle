@@ -100,5 +100,13 @@ class GeneratorTest extends TestCase
             'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
             'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
         ];
+
+        yield 'simple_class_with_name_collision' => [
+            'locale',
+            'Controller\\',
+            '',
+            'App\\Controller\\Locale',
+            'Locale',
+        ];
     }
 }
