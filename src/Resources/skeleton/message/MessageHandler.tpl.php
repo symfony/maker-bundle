@@ -7,7 +7,7 @@ namespace <?= $namespace; ?>;
 #[AsMessageHandler]
 final class <?= $class_name ?>
 {
-    public function __invoke(<?= $message_class_name ?> $message)
+    public function __invoke(<?= $message_class_name ?> $message): void
     {
         // do something with your message
     }
