@@ -41,12 +41,12 @@ final class <?= $class_name ?> extends AbstractRequestParser
         }
 
         // Parse the request payload and return a RemoteEvent object.
-        $payload = $request->getPayload()->all();
+        $payload = $request->getPayload();
 
         return new RemoteEvent(
-            $payload['name'],
-            $payload['id'],
-            $payload,
+            $payload->getString('name'),
+            $payload->getString('id'),
+            $payload->all(),
         );
     }
 }
