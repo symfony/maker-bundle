@@ -216,7 +216,7 @@ final class UserClassBuilder
 
             $manipulator->addGetter(
                 'password',
-                'string',
+                '?string',
                 true
             );
 
@@ -231,7 +231,7 @@ final class UserClassBuilder
         $manipulator->addAccessorMethod(
             'password',
             'getPassword',
-            'string',
+            '?string',
             false,
             [
                 '@see PasswordAuthenticatedUserInterface',
