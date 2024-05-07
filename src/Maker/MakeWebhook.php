@@ -300,7 +300,7 @@ final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterfac
             IsJsonRequestMatcher::class => '',
             MethodRequestMatcher::class => '\'POST\'',
             PortRequestMatcher::class => '443',
-            SchemeRequestMatcher::class => 'https',
+            SchemeRequestMatcher::class => '\'https\'',
             default => '[]',
         };
     }
