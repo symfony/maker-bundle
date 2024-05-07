@@ -13,21 +13,13 @@ class <?= $class_name; ?> extends AbstractController
 
 <?php endif; ?>
 <?= $generator->generateRouteForControllerMethod($route_path, $route_name) ?>
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher<?= $login_after_registration ? ', Security $security': '' ?>, EntityManagerInterface $entityManager): Response
+    public function register(Request $request<?= $login_after_registration ? ', Security $security': '' ?>, EntityManagerInterface $entityManager): Response
     {
         $user = new <?= $user_class_name ?>();
         $form = $this->createForm(<?= $form_class_name ?>::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // encode the plain password
-            $user->set<?= ucfirst($password_field) ?>(
-                    $userPasswordHasher->hashPassword(
-                    $user,
-                    $form->get('plainPassword')->getData()
-                )
-            );
-
             $entityManager->persist($user);
             $entityManager->flush();
 <?php if ($will_verify_email): ?>
