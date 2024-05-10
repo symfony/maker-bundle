@@ -437,10 +437,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $classProperty->nullable = true;
         }
 
-
-        if (in_array($classProperty->type, DefaultValueValidator::SUPPORTED_TYPES)) {
-            $defaultValue = $io->ask('Please enter your default value (press <return> if no default value)',null, DefaultValueValidator::getValidator($classProperty->type));
-            if ($defaultValue !== null) {
+        if (\in_array($classProperty->type, DefaultValueValidator::SUPPORTED_TYPES)) {
+            $defaultValue = $io->ask('Please enter your default value (press <return> if no default value)', null, DefaultValueValidator::getValidator($classProperty->type));
+            if (null !== $defaultValue) {
                 $classProperty->defaultValue = $defaultValue;
                 $classProperty->options['default'] = $classProperty->defaultValue;
             }
