@@ -18,5 +18,5 @@
 {% endblock %}
 
 {% block remove %}
-<turbo-stream action="remove" target="<?= $class_name ?>_{{ id }}"></turbo-stream>
+    <turbo-stream action="remove" target="<?= $class_name ?>_{{ id }}"></turbo-stream>
 {% endblock %}
