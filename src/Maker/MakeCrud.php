@@ -243,8 +243,8 @@ final class MakeCrud extends AbstractMaker
 
         if ($this->shouldGenerateTests()) {
             $testClassDetails = $generator->createClassNameDetails(
-                $entityClassDetails->getRelativeNameWithoutSuffix(),
-                'Test\\Controller\\',
+                sprintf('\\App\\Tests\\Controller\\%s', $entityClassDetails->getRelativeNameWithoutSuffix()),
+                'Controller\\',
                 'ControllerTest'
             );
 
@@ -261,8 +261,8 @@ final class MakeCrud extends AbstractMaker
                 $useStatements->addUseStatement(EntityManagerInterface::class);
             }
 
-            $generator->generateFile(
-                'tests/Controller/'.$testClassDetails->getShortName().'.php',
+            $generator->generateClass(
+                $testClassDetails->getFullName(),
                 'crud/test/Test.EntityManager.tpl.php',
                 [
                     'use_statements' => $useStatements,

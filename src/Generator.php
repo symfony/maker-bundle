@@ -153,6 +153,10 @@ class Generator
             }
         }
 
+        if (!str_ends_with($className, $suffix)) {
+            $className = sprintf('%s%s', $className, $suffix);
+        }
+
         Validator::validateClassName($className, $validationErrorMessage);
 
         // if this is a custom class, we may be completely different than the namespace prefix
