@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Util\ClassSource\Model;
 
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
@@ -26,18 +27,26 @@ final class ClassData
         public readonly string $fullClassName,
         public readonly ?string $extends,
         public readonly bool $isEntity,
+        private UseStatementGenerator $useStatementGenerator,
         private bool $isFinal = true,
     ) {
     }
 
-    public static function create(string $class, ?string $extendsClass = null, bool $isEntity = false): self
+    public static function create(string $class, ?string $extendsClass = null, bool $isEntity = false, array $useStatements = []): self
     {
+        $useStatements = new UseStatementGenerator($useStatements);
+
+        if ($extendsClass) {
+            $useStatements->addUseStatement($extendsClass);
+        }
+
         return new self(
             className: Str::getShortClassName($class),
             namespace: Str::getNamespace($class),
             fullClassName: $class,
             extends: null === $extendsClass ? null : Str::getShortClassName($extendsClass),
             isEntity: $isEntity,
+            useStatementGenerator: $useStatements,
         );
     }
 
@@ -61,5 +70,17 @@ final class ClassData
         $this->isFinal = $isFinal;
 
         return $this;
+    }
+
+    public function addUseStatement(array|string $useStatement): self
+    {
+        $this->useStatementGenerator->addUseStatement($useStatement);
+
+        return $this;
+    }
+
+    public function getUseStatements(): string
+    {
+        return (string) $this->useStatementGenerator;
     }
 }

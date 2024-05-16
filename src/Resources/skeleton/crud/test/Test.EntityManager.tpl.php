@@ -3,7 +3,7 @@
 
 namespace <?= $namespace ?>;
 
-<?= $use_statements; ?>
+<?= $class_data->getUseStatements(); ?>
 
 <?= $class_data->getClassDeclaration() ?>
 {

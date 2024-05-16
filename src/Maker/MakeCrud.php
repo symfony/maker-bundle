@@ -28,7 +28,6 @@ use Symfony\Bundle\MakerBundle\Maker\Common\CanGenerateTestsTrait;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
-use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -132,11 +131,6 @@ final class MakeCrud extends AbstractMaker
             ];
         }
 
-        $controllerClassData = ClassData::create(
-            class: sprintf('App\Controller\%sController', $this->controllerClassName),
-            extendsClass: AbstractController::class,
-        );
-
         $controllerClassDetails = $generator->createClassNameDetails(
             $this->controllerClassName,
             'Controller\\',
@@ -153,6 +147,20 @@ final class MakeCrud extends AbstractMaker
             ++$iter;
         } while (class_exists($formClassDetails->getFullName()));
 
+        $controllerClassData = ClassData::create(
+            class: sprintf('App\Controller\%sController', $this->controllerClassName),
+            extendsClass: AbstractController::class,
+            useStatements: [
+                $entityClassDetails->getFullName(),
+                $formClassDetails->getFullName(),
+                $repositoryClassName,
+                AbstractController::class,
+                Request::class,
+                Response::class,
+                Route::class,
+            ],
+        );
+
         $entityVarPlural = lcfirst($this->inflector->pluralize($entityClassDetails->getShortName()));
         $entityVarSingular = lcfirst($this->inflector->singularize($entityClassDetails->getShortName()));
 
@@ -162,18 +170,8 @@ final class MakeCrud extends AbstractMaker
         $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
         $templatesPath = Str::asFilePath($controllerClassDetails->getRelativeNameWithoutSuffix());
 
-        $useStatements = new UseStatementGenerator([
-            $entityClassDetails->getFullName(),
-            $formClassDetails->getFullName(),
-            $repositoryClassName,
-            AbstractController::class,
-            Request::class,
-            Response::class,
-            Route::class,
-        ]);
-
         if (EntityManagerInterface::class !== $repositoryClassName) {
-            $useStatements->addUseStatement(EntityManagerInterface::class);
+            $controllerClassData->addUseStatement(EntityManagerInterface::class);
         }
 
         $generator->generateController(
@@ -181,7 +179,6 @@ final class MakeCrud extends AbstractMaker
             'crud/controller/Controller.tpl.php',
             array_merge([
                 'class_data' => $controllerClassData,
-                'use_statements' => $useStatements,
                 'entity_class_name' => $entityClassDetails->getShortName(),
                 'form_class_name' => $formClassDetails->getShortName(),
                 'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
@@ -252,19 +249,17 @@ final class MakeCrud extends AbstractMaker
             $testClassData = ClassData::create(
                 class: sprintf('App\Tests\Controller\%sControllerTest', $entityClassDetails->getRelativeNameWithoutSuffix()),
                 extendsClass: WebTestCase::class,
+                useStatements: [
+                    $entityClassDetails->getFullName(),
+                    WebTestCase::class,
+                    KernelBrowser::class,
+                    $repositoryClassName,
+                    EntityRepository::class,
+                ],
             );
 
-            $useStatements = new UseStatementGenerator([
-                $entityClassDetails->getFullName(),
-                WebTestCase::class,
-                KernelBrowser::class,
-                $repositoryClassName,
-            ]);
-
-            $useStatements->addUseStatement(EntityRepository::class);
-
             if (EntityManagerInterface::class !== $repositoryClassName) {
-                $useStatements->addUseStatement(EntityManagerInterface::class);
+                $testClassData->addUseStatement(EntityManagerInterface::class);
             }
 
             $generator->generateClass(
@@ -272,7 +267,6 @@ final class MakeCrud extends AbstractMaker
                 'crud/test/Test.EntityManager.tpl.php',
                 [
                     'class_data' => $testClassData,
-                    'use_statements' => $useStatements,
                     'entity_full_class_name' => $entityClassDetails->getFullName(),
                     'entity_class_name' => $entityClassDetails->getShortName(),
                     'entity_var_singular' => $entityVarSingular,

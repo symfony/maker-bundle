@@ -2,7 +2,7 @@
 
 namespace <?= $namespace ?>;
 
-<?= $use_statements; ?>
+<?= $class_data->getUseStatements(); ?>
 
 #[Route('<?= $route_path ?>')]
 <?= $class_data->getClassDeclaration() ?>
