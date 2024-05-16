@@ -12,6 +12,8 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\MakerBundle\MakerBundle;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 
 /**
@@ -94,10 +96,13 @@ class TemplateComponentGeneratorTest extends TestCase
      */
     public function testGetFinalClassDeclaration(bool $finalClass, bool $finalEntity, bool $isEntity, string $expectedResult): void
     {
-        $this->markTestIncomplete('We wont need this...');
         $generator = new TemplateComponentGenerator($finalClass, $finalEntity);
 
-        self::assertSame($expectedResult, $generator->getFinalDeclaration($isEntity));
+        $classData = ClassData::create(MakerBundle::class, isEntity: $isEntity);
+
+        $generator->configureClass($classData);
+
+        self::assertSame(sprintf('%sclass MakerBundle', $expectedResult), $classData->getClassDeclaration());
     }
 
     public function finalClassDataProvider(): \Generator
