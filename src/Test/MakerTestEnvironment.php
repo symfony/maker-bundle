@@ -22,6 +22,9 @@ use Symfony\Component\Process\InputStream;
  */
 final class MakerTestEnvironment
 {
+    // Config used for creating tmp flex project and test app's
+    private const GIT_CONFIG = 'git config user.name "symfony" && git config user.email "test@symfony.com" && git config commit.gpgsign false && git config user.signingkey false';
+
     public const GENERATED_FILES_REGEX = '#(?:created|updated):\s(?:.*\\\\)*(.*\.[a-z]{3,4}).*(?:\\\\n)?#ui';
 
     private Filesystem $fs;
@@ -173,7 +176,7 @@ final class MakerTestEnvironment
 
                 file_put_contents($this->path.'/.gitignore', "var/cache/\nvendor/\n");
 
-                MakerTestProcess::create('git diff --quiet || ( git config user.name "symfony" && git config user.email "test@symfony.com" && git add . && git commit -a -m "second commit" )',
+                MakerTestProcess::create(sprintf('git diff --quiet || ( %s && git add . && git commit -a -m "second commit" )', self::GIT_CONFIG),
                     $this->path
                 )->run();
             } catch (\Exception $e) {
@@ -291,7 +294,7 @@ final class MakerTestEnvironment
         file_put_contents($this->flexPath.'/.gitignore', "var/cache/\n");
 
         // Force adding vendor/ dir to Git repo in case users exclude it in global .gitignore
-        MakerTestProcess::create('git init && git config user.name "symfony" && git config user.email "test@symfony.com" && git add . && git add vendor/ -f && git commit -a -m "first commit"',
+        MakerTestProcess::create(sprintf('git init && %s && git add . && git add vendor/ -f && git commit -a -m "first commit"', self::GIT_CONFIG),
             $this->flexPath
         )->run();
     }
