@@ -45,6 +45,9 @@ class MakeControllerTest extends MakerTestCase
                     'FooTwig',
                 ]);
 
+                $controllerPath = $runner->getPath('templates/foo_twig/index.html.twig');
+                self::assertFileExists($controllerPath);
+
                 $this->runControllerTest($runner, 'it_generates_a_controller_with_twig.php');
             }),
         ];
@@ -58,6 +61,9 @@ class MakeControllerTest extends MakerTestCase
                     // controller class name
                     'FooTwig',
                 ]);
+
+                $controllerPath = $runner->getPath('templates/foo_twig/index.html.twig');
+                self::assertFileExists($controllerPath);
 
                 $this->runControllerTest($runner, 'it_generates_a_controller_with_twig.php');
             }),
@@ -100,6 +106,9 @@ class MakeControllerTest extends MakerTestCase
                    'Admin\\FooBar',
                ]);
 
+               $controllerPath = $runner->getPath('templates/admin/foo_bar/index.html.twig');
+               self::assertFileExists($controllerPath);
+
                $this->assertFileExists($runner->getPath('templates/admin/foo_bar/index.html.twig'));
            }),
         ];
@@ -111,6 +120,9 @@ class MakeControllerTest extends MakerTestCase
                      // controller class name
                      '\App\Foo\Bar\CoolController',
                  ]);
+
+                 $controllerPath = $runner->getPath('templates/foo/bar/cool/index.html.twig');
+                 self::assertFileExists($controllerPath);
 
                  $this->assertStringContainsString('src/Foo/Bar/CoolController.php', $output);
                  $this->assertStringContainsString('templates/foo/bar/cool/index.html.twig', $output);
@@ -125,6 +137,9 @@ class MakeControllerTest extends MakerTestCase
                     'FooInvokable',
                 ], '--invokable');
 
+                $controllerPath = $runner->getPath('templates/foo_invokable.html.twig');
+                self::assertFileExists($controllerPath);
+
                 $this->assertStringContainsString('src/Controller/FooInvokableController.php', $output);
                 $this->assertStringContainsString('templates/foo_invokable.html.twig', $output);
                 $this->runControllerTest($runner, 'it_generates_an_invokable_controller.php');
@@ -138,6 +153,9 @@ class MakeControllerTest extends MakerTestCase
                     // controller class name
                     'Admin\\FooInvokable',
                 ], '--invokable');
+
+                $controllerPath = $runner->getPath('templates/admin/foo_invokable.html.twig');
+                self::assertFileExists($controllerPath);
 
                 $this->assertStringContainsString('src/Controller/Admin/FooInvokableController.php', $output);
                 $this->assertStringContainsString('templates/admin/foo_invokable.html.twig', $output);
