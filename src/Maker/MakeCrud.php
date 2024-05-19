@@ -148,7 +148,8 @@ final class MakeCrud extends AbstractMaker
         } while (class_exists($formClassDetails->getFullName()));
 
         $controllerClassData = ClassData::create(
-            class: sprintf('App\Controller\%sController', $this->controllerClassName),
+            class: sprintf('Controller\%s', $this->controllerClassName),
+            suffix: 'Controller',
             extendsClass: AbstractController::class,
             useStatements: [
                 $entityClassDetails->getFullName(),
@@ -175,7 +176,7 @@ final class MakeCrud extends AbstractMaker
         }
 
         $generator->generateController(
-            $controllerClassDetails->getFullName(),
+            $controllerClassData->getFullClassName(),
             'crud/controller/Controller.tpl.php',
             array_merge([
                 'class_data' => $controllerClassData,
@@ -247,7 +248,8 @@ final class MakeCrud extends AbstractMaker
 
         if ($this->shouldGenerateTests()) {
             $testClassData = ClassData::create(
-                class: sprintf('App\Tests\Controller\%sControllerTest', $entityClassDetails->getRelativeNameWithoutSuffix()),
+                class: sprintf('Tests\Controller\%s', $entityClassDetails->getRelativeNameWithoutSuffix()),
+                suffix: 'ControllerTest',
                 extendsClass: WebTestCase::class,
                 useStatements: [
                     $entityClassDetails->getFullName(),
@@ -263,7 +265,7 @@ final class MakeCrud extends AbstractMaker
             }
 
             $generator->generateClass(
-                $testClassData->fullClassName,
+                $testClassData->getFullClassName(),
                 'crud/test/Test.EntityManager.tpl.php',
                 [
                     'class_data' => $testClassData,

@@ -25,9 +25,9 @@ class ClassDataTest extends TestCase
         // Sanity check in case Maker's NS changes
         self::assertSame('Symfony\Bundle\MakerBundle\MakerBundle', MakerBundle::class);
 
-        self::assertSame('MakerBundle', $meta->className);
-        self::assertSame('Symfony\Bundle\MakerBundle', $meta->namespace);
-        self::assertSame('Symfony\Bundle\MakerBundle\MakerBundle', $meta->fullClassName);
+        self::assertSame('MakerBundle', $meta->getClassName());
+        self::assertSame('App\Symfony\Bundle\MakerBundle', $meta->getNamespace());
+        self::assertSame('App\Symfony\Bundle\MakerBundle\MakerBundle', $meta->getFullClassName());
     }
 
     public function testGetClassDeclaration(): void
@@ -54,5 +54,41 @@ class ClassDataTest extends TestCase
         $meta = ClassData::create(class: MakerBundle::class, extendsClass: MakerTestKernel::class);
 
         self::assertSame('final class MakerBundle extends MakerTestKernel', $meta->getClassDeclaration());
+    }
+
+    /** @dataProvider suffixDataProvider */
+    public function testSuffix(?string $suffix, string $expectedResult): void
+    {
+        $data = ClassData::create(class: MakerBundle::class, suffix: $suffix);
+
+        self::assertSame($expectedResult, $data->getClassName());
+    }
+
+    public function suffixDataProvider(): \Generator
+    {
+        yield [null, 'MakerBundle'];
+        yield ['Testing', 'MakerBundleTesting'];
+        yield ['Bundle', 'MakerBundle'];
+    }
+
+    /** @dataProvider namespaceDataProvider */
+    public function testNamespace(string $class, ?string $rootNamespace, string $expectedNamespace, string $expectedFullClassName): void
+    {
+        $class = ClassData::create($class);
+
+        if (null !== $rootNamespace) {
+            $class->setRootNamespace($rootNamespace);
+        }
+
+        self::assertSame($expectedNamespace, $class->getNamespace());
+        self::assertSame($expectedFullClassName, $class->getFullClassName());
+    }
+
+    public function namespaceDataProvider(): \Generator
+    {
+        yield ['MyController', null, 'App', 'App\MyController'];
+        yield ['Controller\MyController', null, 'App\Controller', 'App\Controller\MyController'];
+        yield ['MyController', 'Maker', 'Maker', 'Maker\MyController'];
+        yield ['Controller\MyController', 'Maker', 'Maker\Controller', 'Maker\Controller\MyController'];
     }
 }

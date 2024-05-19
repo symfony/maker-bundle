@@ -55,14 +55,15 @@ class Generator
      */
     public function generateClass(string $className, string $templateName, array $variables = []): string
     {
+        if (\array_key_exists('class_data', $variables) && $variables['class_data'] instanceof ClassData) {
+            $classData = $this->templateComponentGenerator->configureClass($variables['class_data']);
+            $className = $classData->getFullClassName();
+        }
+
         $targetPath = $this->fileManager->getRelativePathForFutureClass($className);
 
         if (null === $targetPath) {
             throw new \LogicException(\sprintf('Could not determine where to locate the new class "%s", maybe try with a full namespace like "\\My\\Full\\Namespace\\%s"', $className, Str::getShortClassName($className)));
-        }
-
-        if (\array_key_exists('class_data', $variables) && $variables['class_data'] instanceof ClassData) {
-            $this->templateComponentGenerator->configureClass($variables['class_data']);
         }
 
         $variables = array_merge($variables, [
