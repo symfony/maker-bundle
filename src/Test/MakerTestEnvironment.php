@@ -23,11 +23,7 @@ use Symfony\Component\Process\InputStream;
 final class MakerTestEnvironment
 {
     // Config used for creating tmp flex project and test app's
-    private const GIT_CONFIG = 'git config user.name "symfony" &&\
-        git config user.email "test@symfony.com" &&\
-        git config commit.gpgsign false &&\
-        git config user.signingkey false'
-    ;
+    private const GIT_CONFIG = 'git config user.name "symfony" && git config user.email "test@symfony.com" && git config commit.gpgsign false && git config user.signingkey false';
 
     public const GENERATED_FILES_REGEX = '#(?:created|updated):\s(?:.*\\\\)*(.*\.[a-z]{3,4}).*(?:\\\\n)?#ui';
 
