@@ -130,7 +130,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $entityClassName ??= $io->askQuestion($question);
 
         while ($dangerous = $this->verifyEntityName($entityClassName)) {
-            if ($io->confirm(sprintf('The %s character is non-ASCII, which are potentially problematic with some database. It is recommended to use only ASCII characters in entity names. Would you keep entered name ?', $dangerous[0]), false)) {
+            if ($io->confirm(sprintf('"%s" contains one or more non-ASCII characters, which are potentially problematic with some database. It is recommended to use only ASCII characters for entity names. Continue anyway?', $entityClassName), false)) {
                 break;
             }
 
