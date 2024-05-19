@@ -821,7 +821,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     private function verifyEntityName(string $entityName): array
     {
-        preg_match('/[^\x00-\x7F]/u', $entityName, $matches);
+        preg_match('/([^\x00-\x7F]+)/u', $entityName, $matches);
 
         return $matches;
     }
