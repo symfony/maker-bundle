@@ -107,11 +107,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        if ($input->getArgument('name')) {
-            if (!$this->verifyEntityName($input->getArgument('name'))) {
-                throw new \InvalidArgumentException('An entity can only have ASCII letters');
-            }
-
+        if (($entityClassName = $input->getArgument('name')) && empty($this->verifyEntityName($entityClassName))) {
             return;
         }
 
@@ -131,10 +127,13 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $argument = $command->getDefinition()->getArgument('name');
         $question = $this->createEntityClassQuestion($argument->getDescription());
-        $entityClassName = $io->askQuestion($question);
+        $entityClassName ??= $io->askQuestion($question);
 
-        while (!$this->verifyEntityName($entityClassName)) {
-            $io->error('An entity can only have ASCII letters');
+        while ($dangerous = $this->verifyEntityName($entityClassName)) {
+            if ($io->confirm(sprintf('"%s" contains one or more non-ASCII characters, which are potentially problematic with some database. It is recommended to use only ASCII characters for entity names. Continue anyway?', $entityClassName), false)) {
+                break;
+            }
+
             $entityClassName = $io->askQuestion($question);
         }
 
@@ -837,9 +836,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $io->askQuestion($question);
     }
 
-    private function verifyEntityName(string $entityName): bool
+    /** @return string[] */
+    private function verifyEntityName(string $entityName): array
     {
-        return preg_match('/^[a-zA-Z\\\\]+$/', $entityName);
+        preg_match('/([^\x00-\x7F]+)/u', $entityName, $matches);
+
+        return $matches;
     }
 
     private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite): ClassSourceManipulator

@@ -107,6 +107,8 @@ class MakeEntityTest extends MakerTestCase
                 $runner->runMaker([
                     // entity class with accent
                     'Usé',
+                    // Say no,
+                    'n',
                     // entity class without accent
                     'User',
                     // no fields
