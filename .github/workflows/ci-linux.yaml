@@ -43,6 +43,7 @@ jobs:
                 symfony-version:
                     - '6.4.x-dev'
                     - '7.0.x-dev'
+                    - '7.1.x-dev'
                 dependency-versions: ['highest']
                 allow-dev-deps-in-apps: ['0']
                 include:
