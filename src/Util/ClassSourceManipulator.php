@@ -120,8 +120,14 @@ final class ClassSourceManipulator
         $attributes[] = $this->buildAttributeNode(Column::class, $mapping->getAttributes(), 'ORM');
 
         $defaultValue = null;
+        $commentLines = [];
         if ('array' === $typeHint && !$nullable) {
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
+            if (null !== $mapping->enumType) {
+                $commentLines = [sprintf('@return %s[]', Str::getShortClassName($mapping->enumType))];
+            }
+        } elseif (null !== $mapping->enumType) {
+            $typeHint = $this->addUseStatementIfNecessary($mapping->enumType);
         } elseif ($typeHint && '\\' === $typeHint[0] && false !== strpos($typeHint, '\\', 1)) {
             $typeHint = $this->addUseStatementIfNecessary(substr($typeHint, 1));
         }
@@ -146,7 +152,8 @@ final class ClassSourceManipulator
             // getter methods always have nullable return values
             // because even though these are required in the db, they may not be set yet
             // unless there is a default value
-            null === $defaultValue
+            null === $defaultValue,
+            $commentLines
         );
 
         // don't generate setters for id fields
@@ -887,6 +894,16 @@ final class ClassSourceManipulator
             if ('type' === $option && str_starts_with($value, 'Types::')) {
                 return new Node\Arg(
                     new Node\Expr\ConstFetch(new Node\Name($value)),
+                    false,
+                    false,
+                    [],
+                    new Node\Identifier($option)
+                );
+            }
+
+            if ('enumType' === $option) {
+                return new Node\Arg(
+                    new Node\Expr\ConstFetch(new Node\Name(Str::getShortClassName($value).'::class')),
                     false,
                     false,
                     [],

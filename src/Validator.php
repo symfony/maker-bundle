@@ -244,4 +244,15 @@ final class Validator
 
         return $userClassName;
     }
+
+    public static function classIsBackedEnum($backedEnum): string
+    {
+        self::classExists($backedEnum);
+
+        if (!isset(class_implements($backedEnum)[\BackedEnum::class])) {
+            throw new RuntimeCommandException(sprintf('The class "%s" is not a valid BackedEnum.', $backedEnum));
+        }
+
+        return $backedEnum;
+    }
 }
