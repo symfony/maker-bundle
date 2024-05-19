@@ -23,7 +23,7 @@ class TemplateComponentGeneratorTest extends TestCase
 {
     public function testRouteAttributes(): void
     {
-        $generator = new TemplateComponentGenerator(false, false);
+        $generator = new TemplateComponentGenerator(false, false, 'App');
 
         $expected = "    #[Route('/', name: 'app_home')]\n";
 
@@ -35,7 +35,7 @@ class TemplateComponentGeneratorTest extends TestCase
      */
     public function testRouteMethods(string $expected, array $methods): void
     {
-        $generator = new TemplateComponentGenerator(false, false);
+        $generator = new TemplateComponentGenerator(false, false, 'App');
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod(
             '/',
@@ -55,7 +55,7 @@ class TemplateComponentGeneratorTest extends TestCase
      */
     public function testRouteIndentation(string $expected): void
     {
-        $generator = new TemplateComponentGenerator(false, false);
+        $generator = new TemplateComponentGenerator(false, false, 'App');
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod(
             '/',
@@ -75,7 +75,7 @@ class TemplateComponentGeneratorTest extends TestCase
      */
     public function testRouteTrailingNewLine(string $expected): void
     {
-        $generator = new TemplateComponentGenerator(false, false);
+        $generator = new TemplateComponentGenerator(false, false, 'App');
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod(
             '/',
@@ -96,7 +96,7 @@ class TemplateComponentGeneratorTest extends TestCase
      */
     public function testGetFinalClassDeclaration(bool $finalClass, bool $finalEntity, bool $isEntity, string $expectedResult): void
     {
-        $generator = new TemplateComponentGenerator($finalClass, $finalEntity);
+        $generator = new TemplateComponentGenerator($finalClass, $finalEntity, 'App');
 
         $classData = ClassData::create(MakerBundle::class, isEntity: $isEntity);
 
@@ -115,5 +115,16 @@ class TemplateComponentGeneratorTest extends TestCase
         yield 'Not Final Entity w/ Class' => [true, false, true, ''];
         yield 'Final Entity' => [false, true, true, 'final '];
         yield 'Final Entity w/ Class' => [true, true, true, 'final '];
+    }
+
+    public function testConfiguresClassDataWithRootNamespace(): void
+    {
+        $generator = new TemplateComponentGenerator(false, false, 'MakerTest');
+
+        $classData = ClassData::create(MakerBundle::class);
+
+        $generator->configureClass($classData);
+
+        self::assertSame('MakerTest\Symfony\Bundle\MakerBundle', $classData->getNamespace());
     }
 }

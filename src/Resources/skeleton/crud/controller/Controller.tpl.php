@@ -1,6 +1,6 @@
 <?= "<?php\n" ?>
 
-namespace <?= $namespace ?>;
+namespace <?= $class_data->getNamespace() ?>;
 
 <?= $class_data->getUseStatements(); ?>
 

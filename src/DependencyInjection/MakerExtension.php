@@ -49,6 +49,7 @@ class MakerExtension extends Extension
         $componentGeneratorDefinition
             ->replaceArgument(0, $config['generate_final_classes'])
             ->replaceArgument(1, $config['generate_final_entities'])
+            ->replaceArgument(2, $rootNamespace)
         ;
 
         $container->registerForAutoconfiguration(MakerInterface::class)

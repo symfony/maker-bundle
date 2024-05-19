@@ -19,7 +19,9 @@ use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -47,21 +49,21 @@ final class MakeVoter extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-        $classMetaData = ClassData::create(
-            class: sprintf('App\Security\Voter\%sVoter', $input->getArgument('name')),
+        $voterClassData = ClassData::create(
+            class: sprintf('Security\Voter\%s', $input->getArgument('name')),
+            suffix: 'Voter',
             extendsClass: Voter::class,
-        );
-
-        $voterClassNameDetails = $generator->createClassNameDetails(
-            $input->getArgument('name'),
-            'Security\\Voter\\',
-            'Voter'
+            useStatements: [
+                TokenInterface::class,
+                Voter::class,
+                UserInterface::class,
+            ]
         );
 
         $generator->generateClass(
-            $voterClassNameDetails->getFullName(),
+            $voterClassData->getFullClassName(),
             'security/Voter.tpl.php',
-            ['class_data' => $classMetaData]
+            ['class_data' => $voterClassData]
         );
 
         $generator->writeChanges();
