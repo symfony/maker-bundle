@@ -17,7 +17,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
-use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Dependency\DependencyManager;
+use Symfony\Bundle\MakerBundle\Dependency\Model\RequiredClassDependency;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -87,22 +88,15 @@ final class MakeFormLogin extends AbstractMaker
         return 'Generate the code needed for the form_login authenticator';
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies): void
+    public function configureComposerDependencies(DependencyManager $dependencyManager): void
     {
-        $dependencies->addClassDependency(
-            SecurityBundle::class,
-            'security'
-        );
-
-        $dependencies->addClassDependency(TwigBundle::class, 'twig');
-
-        // needed to update the YAML files
-        $dependencies->addClassDependency(
-            Yaml::class,
-            'yaml'
-        );
-
-        $dependencies->addClassDependency(DoctrineBundle::class, 'orm');
+        $dependencyManager
+            ->addDependency([
+                new RequiredClassDependency(SecurityBundle::class, 'security'),
+                new RequiredClassDependency(TwigBundle::class, 'twig'),
+                new RequiredClassDependency(Yaml::class, 'yaml'),
+                new RequiredClassDependency(DoctrineBundle::class, 'orm'),
+        ]);
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
