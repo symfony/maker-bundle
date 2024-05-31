@@ -31,9 +31,8 @@
             See https://symfony.com/doc/current/security/remember_me.html
 
             <div class="checkbox mb-3">
-                <label>
-                    <input type="checkbox" name="_remember_me"> Remember me
-                </label>
+                <input type="checkbox" name="_remember_me" id="_remember_me">
+                <label for="_remember_me">Remember me</label>
             </div>
         #}
 

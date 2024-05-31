@@ -109,6 +109,8 @@ class MakeEntityTest extends MakerTestCase
                 $runner->runMaker([
                     // entity class with accent
                     'Usé',
+                    // Say no,
+                    'n',
                     // entity class without accent
                     'User',
                     // no fields
@@ -624,6 +626,7 @@ class MakeEntityTest extends MakerTestCase
                     // field name
                     'firstName',
                     'string',
+                    '',
                     '', // length (default 255)
                     // nullable
                     '',
@@ -714,6 +717,28 @@ class MakeEntityTest extends MakerTestCase
                 ]);
 
                 $this->assertFileExists($runner->getPath('src/Entity/User.php'));
+            }),
+        ];
+
+        yield 'it_creates_a_new_class_with_enum_field' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'Enum/Role-basic.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // add additional field
+                    'role',
+                    'enum',
+                    'App\\Entity\\Enum\\Role',
+                    '',
+                    // nullable
+                    'y',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runEntityTest($runner);
             }),
         ];
     }

@@ -108,11 +108,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        if ($input->getArgument('name')) {
-            if (!$this->verifyEntityName($input->getArgument('name'))) {
-                throw new \InvalidArgumentException('An entity can only have ASCII letters');
-            }
-
+        if (($entityClassName = $input->getArgument('name')) && empty($this->verifyEntityName($entityClassName))) {
             return;
         }
 
@@ -132,10 +128,13 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $argument = $command->getDefinition()->getArgument('name');
         $question = $this->createEntityClassQuestion($argument->getDescription());
-        $entityClassName = $io->askQuestion($question);
+        $entityClassName ??= $io->askQuestion($question);
 
-        while (!$this->verifyEntityName($entityClassName)) {
-            $io->error('An entity can only have ASCII letters');
+        while ($dangerous = $this->verifyEntityName($entityClassName)) {
+            if ($io->confirm(sprintf('"%s" contains one or more non-ASCII characters, which are potentially problematic with some database. It is recommended to use only ASCII characters for entity names. Continue anyway?', $entityClassName), false)) {
+                break;
+            }
+
             $entityClassName = $io->askQuestion($question);
         }
 
@@ -394,7 +393,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $allValidTypes = array_merge(
             array_keys($types),
             EntityRelation::getValidRelationTypes(),
-            ['relation']
+            ['relation', 'enum']
         );
         while (null === $type) {
             $question = new Question('Field type (enter <comment>?</comment> to see all types)', $defaultType);
@@ -431,6 +430,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
             // 0 is the default value given in \Doctrine\DBAL\Schema\Column::$_scale
             $classProperty->scale = $io->ask('Scale (number of decimals to store: 100.00 would be 2)', '0', Validator::validateScale(...));
+        } elseif ('enum' === $type) {
+            // ask for valid backed enum class
+            $classProperty->enumType = $io->ask('Enum class', null, Validator::classIsBackedEnum(...));
+
+            // set type according to user decision
+            $classProperty->type = $io->confirm('Can this field store multiple enum values', false) ? 'simple_array' : 'string';
         }
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {
@@ -473,6 +478,9 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 'date' => ['date_immutable'],
                 'time' => ['time_immutable'],
                 'dateinterval' => [],
+            ],
+            'other' => [
+                'enum' => [],
             ],
         ];
 
@@ -544,6 +552,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $io->writeln('<info>Other Types</info>');
         // empty the values
         $allTypes = array_map(static fn () => [], $allTypes);
+        $allTypes = [...$typesTable['other'], ...$allTypes];
         $printSection($allTypes);
     }
 
@@ -836,9 +845,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $io->askQuestion($question);
     }
 
-    private function verifyEntityName(string $entityName): bool
+    /** @return string[] */
+    private function verifyEntityName(string $entityName): array
     {
-        return preg_match('/^[a-zA-Z\\\\]+$/', $entityName);
+        preg_match('/([^\x00-\x7F]+)/u', $entityName, $matches);
+
+        return $matches;
     }
 
     private function createClassManipulator(string $path, ConsoleStyle $io, bool $overwrite): ClassSourceManipulator
