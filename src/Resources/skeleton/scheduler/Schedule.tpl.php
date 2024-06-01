@@ -4,7 +4,11 @@ namespace <?= $namespace; ?>;
 
 <?= $use_statements; ?>
 
+<?php if ($has_transport_name): ?>
+#[AsSchedule('<?= $transport_name; ?>')]
+<?php else: ?>
 #[AsSchedule]
+<?php endif ?>
 final class <?= $class_name; ?> implements ScheduleProviderInterface
 {
     public function __construct(

@@ -37,6 +37,7 @@ final class MakeSchedule extends AbstractMaker
 {
     private string $scheduleName;
     private ?string $message = null;
+    private ?string $transportName = null;
 
     public function __construct(
         private FileManager $fileManager,
@@ -82,6 +83,8 @@ final class MakeSchedule extends AbstractMaker
             }
         }
 
+        $this->transportName = $io->ask('What should we call the new transport? (To be used for the attribute #[AsSchedule(name)])');
+
         $scheduleNameHint = 'MainSchedule';
 
         // If the count is 1, no other messages were found - don't ask to create a message
@@ -126,6 +129,8 @@ final class MakeSchedule extends AbstractMaker
                 'use_statements' => $useStatements,
                 'has_custom_message' => null !== $this->message,
                 'message_class_name' => $this->message,
+                'has_transport_name' => null !== $this->transportName,
+                'transport_name' => $this->transportName,
             ],
         );
 
