@@ -36,7 +36,7 @@ class MakeEvent extends AbstractMaker
         return 'Create a event class.';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConfig)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the event class (e.g. <fg=yellow>OrderPlacedEvent</>)')
@@ -44,14 +44,14 @@ class MakeEvent extends AbstractMaker
         ;
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies
             ->addClassDependency(Event::class, 'event-dispatcher')
         ;
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $name = $input->getArgument('name');
         if (null === $name) {
