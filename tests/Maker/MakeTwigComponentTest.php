@@ -90,6 +90,24 @@ class MakeTwigComponentTest extends MakerTestCase
                 $runner->runTests();
             }),
         ];
+
+        yield 'it_generates_live_component_on_subdirectory' => [$this->createMakerTest()
+            ->addExtraDependencies('symfony/ux-live-component', 'symfony/twig-bundle')
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker(['Form\Input', 'y']);
+
+                $this->assertStringContainsString('src/Twig/Components/Form/Input.php', $output);
+                $this->assertStringContainsString('templates/components/Form/Input.html.twig', $output);
+                $this->assertStringContainsString('To render the component, use <twig:Form:Input />.', $output);
+
+                $runner->copy(
+                    'make-twig-component/tests/it_generates_live_component.php',
+                    'tests/GeneratedLiveComponentTest.php'
+                );
+                $runner->replaceInFile('tests/GeneratedLiveComponentTest.php', '{name}', 'Form:Input');
+                $runner->runTests();
+            }),
+        ];
     }
 
     protected function getMakerClass(): string

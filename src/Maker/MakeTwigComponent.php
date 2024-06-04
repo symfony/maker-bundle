@@ -15,7 +15,6 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -66,7 +65,8 @@ final class MakeTwigComponent extends AbstractMaker
             'Twig\\Components',
         );
 
-        $shortName = Str::getShortClassName($factory->getShortName());
+        $templatePath = str_replace('\\', '/', $factory->getRelativeNameWithoutSuffix());
+        $shortName = str_replace('\\', ':', $factory->getRelativeNameWithoutSuffix());
 
         $generator->generateClass(
             $factory->getFullName(),
@@ -76,7 +76,7 @@ final class MakeTwigComponent extends AbstractMaker
             ]
         );
         $generator->generateTemplate(
-            "components/{$shortName}.html.twig",
+            "components/{$templatePath}.html.twig",
             sprintf('%s/../Resources/skeleton/twig/%s', __DIR__, 'component_template.tpl.php')
         );
 
