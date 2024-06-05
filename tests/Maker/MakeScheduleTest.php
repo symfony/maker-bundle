@@ -24,9 +24,26 @@ class MakeScheduleTest extends MakerTestCase
 
     public function getTestDetails(): \Generator
     {
+        yield 'it_generates_a_schedule_with_transport_name' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([
+                    'dummy', // use transport name "dummy"
+                    '', // use default schedule name "MainSchedule"
+                ]);
+
+                $this->assertStringContainsString('Success', $output);
+
+                self::assertFileEquals(
+                    \dirname(__DIR__).'/fixtures/make-schedule/expected/DefaultScheduleWithTransportName.php',
+                    $runner->getPath('src/Scheduler/MainSchedule.php')
+                );
+            }),
+        ];
+
         yield 'it_generates_a_schedule' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([
+                    '', // use default transport name
                     '', // use default schedule name "MainSchedule"
                 ]);
 
@@ -48,6 +65,7 @@ class MakeScheduleTest extends MakerTestCase
             })
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([
+                    '', // Use the default transport name
                     0,  // Select "Empty Schedule"
                     'MySchedule', // Go with the default name "MainSchedule"
                 ]);
@@ -70,6 +88,7 @@ class MakeScheduleTest extends MakerTestCase
             })
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([
+                    '', // Use the default transport name
                     1,  // Select "MyMessage" from choice
                     '', // Go with the default name "MessageFixtureSchedule"
                 ]);
