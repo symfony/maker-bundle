@@ -13,12 +13,14 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Yaml\Yaml;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
@@ -27,6 +29,10 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
  */
 final class MakeTwigComponent extends AbstractMaker
 {
+    public function __construct(private FileManager $fileManager)
+    {
+    }
+
     public static function getCommandName(): string
     {
         return 'make:twig-component';
@@ -60,9 +66,18 @@ final class MakeTwigComponent extends AbstractMaker
             throw new \RuntimeException('You must install symfony/ux-live-component to create a live component (composer require symfony/ux-live-component)');
         }
 
+        $path = 'config/packages/twig_component.yaml';
+        $nameSpacePrefix = 'Twig\\Components';
+
+        if ($this->fileManager->fileExists($path)) {
+            $value = Yaml::parse($this->fileManager->getFileContents($path));
+
+            $nameSpacePrefix = \array_key_first($value['twig_component']['defaults']);
+        }
+
         $factory = $generator->createClassNameDetails(
             $name,
-            'Twig\\Components',
+            $nameSpacePrefix,
         );
 
         $templatePath = str_replace('\\', '/', $factory->getRelativeNameWithoutSuffix());
