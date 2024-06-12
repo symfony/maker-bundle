@@ -52,7 +52,7 @@ final class MakeForm extends AbstractMaker
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, sprintf('The name of the form class (e.g. <fg=yellow>%sType</>)', Str::asClassName(Str::getRandomTerm())))
-            ->addArgument('bound-class', InputArgument::OPTIONAL, 'The name of Entity or fully qualified model class name that the new form will be bound to (empty for none)')
+            ->addArgument('bound-class', InputArgument::OPTIONAL, 'The name of Entity or fully qualified model class name (prefixed with a "\") that the new form will be bound to (empty for none)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeForm.txt'))
         ;
 
@@ -94,7 +94,14 @@ final class MakeForm extends AbstractMaker
                 'Entity\\'
             );
 
-            $doctrineEntityDetails = $this->entityHelper->createDoctrineDetails($boundClassDetails->getFullName());
+            try {
+                $doctrineEntityDetails = $this->entityHelper->createDoctrineDetails($boundClassDetails->getFullName());
+            } catch (\Exception $e) {
+                // DoctrineBundle isn't installed
+                $io->comment($e->getMessage());
+
+                $doctrineEntityDetails = null;
+            }
 
             if (null !== $doctrineEntityDetails) {
                 $formFields = $doctrineEntityDetails->getFormFields();
