@@ -22,6 +22,7 @@
 
             <service id="maker.maker.make_twig_component" class="Symfony\Bundle\MakerBundle\Maker\MakeTwigComponent">
                 <tag name="maker.command" />
+                <argument type="service" id="maker.file_manager" />
             </service>
 
             <service id="maker.maker.make_controller" class="Symfony\Bundle\MakerBundle\Maker\MakeController">
