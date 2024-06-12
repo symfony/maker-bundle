@@ -72,7 +72,7 @@ final class MakeTwigComponent extends AbstractMaker
         if ($this->fileManager->fileExists($path)) {
             $value = Yaml::parse($this->fileManager->getFileContents($path));
 
-            $nameSpacePrefix = \array_key_first($value['twig_component']['defaults']);
+            $nameSpacePrefix = \substr(\array_key_first($value['twig_component']['defaults']), 4);
         }
 
         $factory = $generator->createClassNameDetails(
