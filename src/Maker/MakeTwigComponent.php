@@ -20,6 +20,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
@@ -29,6 +30,8 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
  */
 final class MakeTwigComponent extends AbstractMaker
 {
+    private string $namespace = 'Twig\\Components';
+
     public function __construct(private FileManager $fileManager)
     {
     }
@@ -66,18 +69,9 @@ final class MakeTwigComponent extends AbstractMaker
             throw new \RuntimeException('You must install symfony/ux-live-component to create a live component (composer require symfony/ux-live-component)');
         }
 
-        $path = 'config/packages/twig_component.yaml';
-        $nameSpacePrefix = 'Twig\\Components';
-
-        if ($this->fileManager->fileExists($path)) {
-            $value = Yaml::parse($this->fileManager->getFileContents($path));
-
-            $nameSpacePrefix = \substr(\array_key_first($value['twig_component']['defaults']), 4);
-        }
-
         $factory = $generator->createClassNameDetails(
             $name,
-            $nameSpacePrefix,
+            $this->namespace,
         );
 
         $templatePath = str_replace('\\', '/', $factory->getRelativeNameWithoutSuffix());
@@ -107,6 +101,14 @@ final class MakeTwigComponent extends AbstractMaker
     {
         if (!$input->getOption('live')) {
             $input->setOption('live', $io->confirm('Make this a live component?', false));
+        }
+
+        $path = 'config/packages/twig_component.yaml';
+
+        if ($this->fileManager->fileExists($path)) {
+            $value = Yaml::parse($this->fileManager->getFileContents($path));
+
+            $this->namespace = \substr(\array_key_first($value['twig_component']['defaults']), 4);
         }
     }
 }
