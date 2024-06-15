@@ -115,7 +115,7 @@ final class MakeTwigComponent extends AbstractMaker
             return;
         }
 
-        if (!array_key_exists('twig_component', $value) || !array_key_exists('defaults', $value['twig_component'])) {
+        if (!\array_key_exists('twig_component', $value) || !\array_key_exists('defaults', $value['twig_component'])) {
             return;
         }
 
