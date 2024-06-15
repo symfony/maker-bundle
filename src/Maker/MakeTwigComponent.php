@@ -20,6 +20,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
@@ -104,10 +105,20 @@ final class MakeTwigComponent extends AbstractMaker
 
         $path = 'config/packages/twig_component.yaml';
 
-        if ($this->fileManager->fileExists($path)) {
-            $value = Yaml::parse($this->fileManager->getFileContents($path));
-
-            $this->namespace = substr(array_key_first($value['twig_component']['defaults']), 4);
+        if (!$this->fileManager->fileExists($path)) {
+            return;
         }
+
+        try {
+            $value = Yaml::parse($this->fileManager->getFileContents($path));
+        } catch (ParseException $e) {
+            return;
+        }
+
+        if (!array_key_exists('twig_component', $value) || !array_key_exists('defaults', $value['twig_component'])) {
+            return;
+        }
+
+        $this->namespace = substr(array_key_first($value['twig_component']['defaults']), 4);
     }
 }
