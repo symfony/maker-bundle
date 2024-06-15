@@ -37,6 +37,28 @@ class MakeTwigComponentTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_generates_twig_component_in_non_default_namespace' => [$this->createMakerTest()
+            ->addExtraDependencies('symfony/ux-twig-component', 'symfony/twig-bundle')
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker(['Alert']);
+
+                $this->assertStringContainsString('src/Site/Twig/Components/Alert.php', $output);
+                $this->assertStringContainsString('templates/components/Alert.html.twig', $output);
+                $this->assertStringContainsString('To render the component, use <twig:Alert />.', $output);
+
+                $runner->copy(
+                    'make-twig-component/tests/custom_twig_component.yaml',
+                    'config/packages/twig_component.yaml'
+                );
+                $runner->copy(
+                    'make-twig-component/tests/it_generates_twig_component.php',
+                    'tests/GeneratedTwigComponentTest.php'
+                );
+                $runner->replaceInFile('tests/GeneratedTwigComponentTest.php', '{name}', 'Alert');
+                $runner->runTests();
+            }),
+        ];
+
         yield 'it_generates_pascal_case_twig_component' => [$this->createMakerTest()
             ->addExtraDependencies('symfony/ux-twig-component', 'symfony/twig-bundle')
             ->run(function (MakerTestRunner $runner) {
