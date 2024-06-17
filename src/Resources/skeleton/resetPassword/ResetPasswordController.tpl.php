@@ -25,11 +25,10 @@ class <?= $class_name ?> extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return $this->processSendingPasswordResetEmail(
-                $form->get('<?= $email_field ?>')->getData(),
-                $mailer<?php if ($translator_available): ?>,
-                $translator<?php endif ?><?= "\n" ?>
-            );
+            /** @var string $email */
+            $email = $form->get('<?= $email_field ?>')->getData();
+
+            return $this->processSendingPasswordResetEmail($email, $mailer<?php if ($translator_available): ?>, $translator<?php endif ?><?= "\n" ?>);
         }
 
         return $this->render('reset_password/request.html.twig', [
@@ -94,13 +93,11 @@ class <?= $class_name ?> extends AbstractController
             // A password reset token should be used only once, remove it.
             $this->resetPasswordHelper->removeResetRequest($token);
 
-            // Encode(hash) the plain password, and set it.
-            $encodedPassword = $passwordHasher->hashPassword(
-                $user,
-                $form->get('plainPassword')->getData()
-            );
+            /** @var string $plainPassword */
+            $plainPassword = $form->get('plainPassword')->getData();
 
-            $user-><?= $password_setter ?>($encodedPassword);
+            // Encode(hash) the plain password, and set it.
+            $user-><?= $password_setter ?>($passwordHasher->hashPassword($user, $plainPassword));
             $this->entityManager->flush();
 
             // The session is cleaned up after the password has been changed.
@@ -143,7 +140,7 @@ class <?= $class_name ?> extends AbstractController
 
         $email = (new TemplatedEmail())
             ->from(new Address('<?= $from_email ?>', '<?= $from_email_name ?>'))
-            ->to($user-><?= $email_getter ?>())
+            ->to((string) $user-><?= $email_getter ?>())
             ->subject('Your password reset request')
             ->htmlTemplate('reset_password/email.html.twig')
             ->context([
