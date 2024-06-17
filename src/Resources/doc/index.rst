@@ -69,6 +69,7 @@ This bundle doesn't require any configuration. But, you *can* override the defau
 configuration:
 
 .. code-block:: yaml
+
     # config/packages/maker.yaml
     when@dev:
         maker:
@@ -87,7 +88,7 @@ this to ``Acme`` would cause MakerBundle to create new classes like
 (e.g. ``Acme\Entity\Article``, ``Acme\Command\MyCommand``, etc).
 
 generate_final_classes
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 **type**: ``boolean`` **default**: ``true``
 
@@ -98,6 +99,7 @@ to override this behavior for all maker commands.
 See https://www.php.net/manual/en/language.oop5.final.php
 
 .. code-block:: php
+
     final class MyVoter
     {
         ...
@@ -121,6 +123,7 @@ entities.
 See https://www.php.net/manual/en/language.oop5.final.php
 
 .. code-block:: php
+
     #[ORM\Entity(repositoryClass: TaskRepository::class)]
     class Task extends AbstractEntity
     {
@@ -156,6 +159,5 @@ For that reason, in general, the generated code cannot be modified. In many case
 adding your *own* maker command is so easy, that we recommend that. However, if there
 is some extension point that you'd like, please open an issue so we can discuss!
 
-.. _`SensioGeneratorBundle`: https://github.com/sensiolabs/SensioGeneratorBundle
 .. _`AbstractMaker`: https://github.com/symfony/maker-bundle/blob/main/src/Maker/AbstractMaker.php
 .. _`core maker commands`: https://github.com/symfony/maker-bundle/tree/main/src/Maker
