@@ -1,0 +1,41 @@
+name: "CI Docs Analysis"
+
+on:
+  pull_request:
+  push:
+    branches:
+      - 'main'
+  schedule:
+    -   cron: '0 0 * * *'
+
+env:
+  PHPUNIT_FLAGS: "-v"
+  SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
+
+jobs:
+  doctor-rst:
+    name: Lint (DOCtor-RST)
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+
+      - name: "Create cache dir"
+        run: mkdir .cache
+
+      - name: "Extract base branch name"
+        run: echo "branch=$(echo ${GITHUB_BASE_REF:=${GITHUB_REF##*/}})" >> $GITHUB_OUTPUT
+        id: extract_base_branch
+
+      - name: "Cache DOCtor-RST"
+        uses: actions/cache@v3
+        with:
+          path: .cache
+          key: ${{ runner.os }}-doctor-rst-${{ steps.extract_base_branch.outputs.branch }}
+
+      - name: "Run DOCtor-RST"
+        uses: docker://oskarstark/doctor-rst:1.61.1
+        with:
+          args: --short --error-format=github --cache-file=/github/workspace/.cache/doctor-rst.cache
