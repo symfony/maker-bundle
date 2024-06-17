@@ -69,46 +69,46 @@ rules:
 
   #   master
   versionadded_directive_major_version:
-    major_version: 7
+    major_version: 1
 
   versionadded_directive_min_version:
-    min_version: '7.0'
+    min_version: '1.0'
 
   deprecated_directive_major_version:
     major_version: 7
 
   deprecated_directive_min_version:
-    min_version: '7.0'
+    min_version: '1.0'
 
-exclude_rule_for_file:
-  - path: configuration/multiple_kernels.rst
-    rule_name: replacement
-  - path: page_creation.rst
-    rule_name: no_php_open_tag_in_code_block_php_directive
-  - path: frontend/create_ux_bundle.rst
-    rule_name: argument_variable_must_match_type
+#exclude_rule_for_file:
+#  - path: configuration/multiple_kernels.rst
+#    rule_name: replacement
+#  - path: page_creation.rst
+#    rule_name: no_php_open_tag_in_code_block_php_directive
+#  - path: frontend/create_ux_bundle.rst
+#    rule_name: argument_variable_must_match_type
 
 # do not report as violation
 whitelist:
-  regex:
-    - '/``.yml``/'
-    - '/(.*)\.orm\.yml/' # currently DoctrineBundle only supports .yml
-  lines:
-    - 'in config files, so the old ``app/config/config_dev.yml`` goes to'
-    - '#. The most important config file is ``app/config/services.yml``, which now is'
-    - 'The bin/console Command'
-    - '.. _`LDAP injection`: http://projects.webappsec.org/w/page/13246947/LDAP%20Injection'
-    - '.. versionadded:: 2.7.2' # Doctrine
-    - '.. versionadded:: 1.9.0' # Encore
-    - '.. versionadded:: 1.18' # Flex in setup/upgrade_minor.rst
-    - '.. versionadded:: 1.0.0' # Encore
-    - '.. versionadded:: 2.7.1' # Doctrine
-    - '123,' # assertion for var_dumper - components/var_dumper.rst
-    - '"foo",' # assertion for var_dumper - components/var_dumper.rst
-    - '$var .= "Because of this `\xE9` octet (\\xE9),\n";'
-    - '.. versionadded:: 0.2' # MercureBundle
-    - '.. versionadded:: 3.6' # MonologBundle
-    - '.. versionadded:: 3.8' # MonologBundle
-    - '.. versionadded:: 3.5' # Monolog
-    - '.. _`a feature to test applications using Mercure`: https://github.com/symfony/panther#creating-isolated-browsers-to-test-apps-using-mercure-or-websocket'
-    - 'End to End Tests (E2E)'
+#  regex:
+#    - '/``.yml``/'
+#    - '/(.*)\.orm\.yml/' # currently DoctrineBundle only supports .yml
+#  lines:
+#    - 'in config files, so the old ``app/config/config_dev.yml`` goes to'
+#    - '#. The most important config file is ``app/config/services.yml``, which now is'
+#    - 'The bin/console Command'
+#    - '.. _`LDAP injection`: http://projects.webappsec.org/w/page/13246947/LDAP%20Injection'
+#    - '.. versionadded:: 2.7.2' # Doctrine
+#    - '.. versionadded:: 1.9.0' # Encore
+#    - '.. versionadded:: 1.18' # Flex in setup/upgrade_minor.rst
+#    - '.. versionadded:: 1.0.0' # Encore
+#    - '.. versionadded:: 2.7.1' # Doctrine
+#    - '123,' # assertion for var_dumper - components/var_dumper.rst
+#    - '"foo",' # assertion for var_dumper - components/var_dumper.rst
+#    - '$var .= "Because of this `\xE9` octet (\\xE9),\n";'
+#    - '.. versionadded:: 0.2' # MercureBundle
+#    - '.. versionadded:: 3.6' # MonologBundle
+#    - '.. versionadded:: 3.8' # MonologBundle
+#    - '.. versionadded:: 3.5' # Monolog
+#    - '.. _`a feature to test applications using Mercure`: https://github.com/symfony/panther#creating-isolated-browsers-to-test-apps-using-mercure-or-websocket'
+#    - 'End to End Tests (E2E)'
