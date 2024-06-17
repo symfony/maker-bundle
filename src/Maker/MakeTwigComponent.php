@@ -111,14 +111,9 @@ final class MakeTwigComponent extends AbstractMaker
 
         try {
             $value = Yaml::parse($this->fileManager->getFileContents($path));
-        } catch (ParseException $e) {
+            $this->namespace = substr(array_key_first($value['twig_component']['defaults']), 4);
+        } catch (\Throwable) {
             return;
         }
-
-        if (!\array_key_exists('twig_component', $value) || !\array_key_exists('defaults', $value['twig_component'])) {
-            return;
-        }
-
-        $this->namespace = substr(array_key_first($value['twig_component']['defaults']), 4);
     }
 }
