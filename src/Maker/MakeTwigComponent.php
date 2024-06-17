@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
@@ -105,14 +106,14 @@ final class MakeTwigComponent extends AbstractMaker
         $path = 'config/packages/twig_component.yaml';
 
         if (!$this->fileManager->fileExists($path)) {
-            return;
+            throw new RuntimeCommandException(message: 'Unable to find twig_components.yaml');
         }
 
         try {
             $value = Yaml::parse($this->fileManager->getFileContents($path));
             $this->namespace = substr(array_key_first($value['twig_component']['defaults']), 4);
-        } catch (\Throwable) {
-            return;
+        } catch (\Throwable $throwable) {
+            throw new RuntimeCommandException(message: 'Unable to parse twig_components.yaml', previous: $throwable);
         }
     }
 }
