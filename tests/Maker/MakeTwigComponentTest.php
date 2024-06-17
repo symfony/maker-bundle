@@ -47,7 +47,7 @@ class MakeTwigComponentTest extends MakerTestCase
                 $this->assertStringContainsString('To render the component, use <twig:Alert />.', $output);
 
                 $runner->copy(
-                    'make-twig-component/tests/custom_twig_component.yaml',
+                    'make-twig-component/custom_twig_component.yaml',
                     'config/packages/twig_component.yaml'
                 );
                 $runner->copy(
