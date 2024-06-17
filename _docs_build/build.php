@@ -23,7 +23,6 @@ use SymfonyDocsBuilder\DocBuilder;
 (new Application('Symfony Docs Builder', '1.0'))
     ->register('build-docs')
     ->addOption('generate-fjson-files', null, InputOption::VALUE_NONE, 'Use this option to generate docs both in HTML and JSON formats')
-    ->addOption('disable-cache', null, InputOption::VALUE_NONE, 'Use this option to force a full regeneration of all doc contents')
     ->setCode(function (InputInterface $input, OutputInterface $output) {
         $io = new SymfonyStyle($input, $output);
         $io->text('Building all Symfony Docs...');
@@ -36,6 +35,7 @@ use SymfonyDocsBuilder\DocBuilder;
             ->setImagesDir(__DIR__.'/output/_images')
             ->setImagesPublicPrefix('_images')
             ->setTheme('rtd')
+            ->diableBuildCache()
         ;
 
         $buildConfig->setExcludedPaths(['.github/', '_build/']);
@@ -44,14 +44,7 @@ use SymfonyDocsBuilder\DocBuilder;
             $buildConfig->disableJsonFileGeneration();
         }
 
-        if ($isCacheDisabled = $input->getOption('disable-cache')) {
-            $buildConfig->disableBuildCache();
-        }
-
-        $io->comment(sprintf('cache: %s / output file type(s): %s', $isCacheDisabled ? 'disabled' : 'enabled', $generateJsonFiles ? 'HTML and JSON' : 'HTML'));
-        if (!$isCacheDisabled) {
-            $io->comment('Tip: add the --disable-cache option to this command to force the re-build of all docs.');
-        }
+        $io->comment(sprintf('cache: disabled / output file type(s): %s', $generateJsonFiles ? 'HTML and JSON' : 'HTML'));
 
         $result = (new DocBuilder())->build($buildConfig);
 
