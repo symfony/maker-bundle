@@ -111,7 +111,7 @@ See https://www.php.net/manual/en/language.oop5.final.php
 
 
 generate_final_entities
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 **type**: ``boolean`` **default**: ``false``
 
