@@ -99,7 +99,7 @@ class EntityRegeneratorTest extends TestCase
 
         $fileManager = new FileManager($fs, $autoloaderUtil, new MakerFileLinkFormatter(null), $tmpDir);
         $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
-        $generator = new Generator($fileManager, 'App\\');
+        $generator = new Generator($fileManager, 'App\\', true);
         $entityClassGenerator = new EntityClassGenerator($generator, $doctrineHelper);
         $regenerator = new EntityRegenerator(
             $doctrineHelper,

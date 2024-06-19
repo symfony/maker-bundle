@@ -57,6 +57,7 @@ final class MakeUser extends AbstractMaker
         private SecurityConfigUpdater $configUpdater,
         private EntityClassGenerator $entityClassGenerator,
         private DoctrineHelper $doctrineHelper,
+        private Generator $generator,
     ) {
     }
 
@@ -156,7 +157,8 @@ final class MakeUser extends AbstractMaker
         $manipulator = new ClassSourceManipulator(
             sourceCode: $this->fileManager->getFileContents($classPath),
             overwrite: true,
-            useAttributesForDoctrineMapping: $entityUsesAttributes
+            useAttributesForDoctrineMapping: $entityUsesAttributes,
+            fluentMutators: $this->generator->getFluentSetters(),
         );
 
         $manipulator->setIo($io);

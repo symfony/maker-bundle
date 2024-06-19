@@ -849,6 +849,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $manipulator = new ClassSourceManipulator(
             sourceCode: $this->fileManager->getFileContents($path),
             overwrite: $overwrite,
+            fluentMutators: $this->generator->getFluentSetters(),
         );
 
         $manipulator->setIo($io);

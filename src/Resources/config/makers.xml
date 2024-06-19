@@ -140,6 +140,7 @@
                 <argument type="service" id="maker.security_config_updater" />
                 <argument type="service" id="maker.entity_class_generator" />
                 <argument type="service" id="maker.doctrine_helper" />
+                <argument type="service" id="maker.generator" />
                 <tag name="maker.command" />
             </service>
 

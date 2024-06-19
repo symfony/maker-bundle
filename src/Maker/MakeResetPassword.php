@@ -474,6 +474,7 @@ class MakeResetPassword extends AbstractMaker
             sourceCode: $this->fileManager->getFileContents($requestEntityPath),
             overwrite: false,
             useAttributesForDoctrineMapping: $this->doctrineHelper->doesClassUsesAttributes($requestClassNameDetails->getFullName()),
+            fluentMutators: $generator->getFluentSetters(),
         );
 
         $manipulator->addInterface(ResetPasswordRequestInterface::class);
@@ -521,7 +522,8 @@ class MakeResetPassword extends AbstractMaker
         );
 
         $manipulator = new ClassSourceManipulator(
-            sourceCode: $this->fileManager->getFileContents($pathRequestRepository)
+            sourceCode: $this->fileManager->getFileContents($pathRequestRepository),
+            fluentMutators: $generator->getFluentSetters(),
         );
 
         $manipulator->addInterface(ResetPasswordRequestRepositoryInterface::class);

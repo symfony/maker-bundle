@@ -32,6 +32,7 @@ class Generator
         private string $namespacePrefix,
         ?PhpCompatUtil $phpCompatUtil = null,
         private ?TemplateComponentGenerator $templateComponentGenerator = null,
+        private $fluentSetters = true,
     ) {
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
         $this->namespacePrefix = trim($namespacePrefix, '\\');
@@ -202,6 +203,11 @@ class Generator
     public function getRootNamespace(): string
     {
         return $this->namespacePrefix;
+    }
+
+    public function getFluentSetters(): bool
+    {
+        return $this->fluentSetters;
     }
 
     public function generateController(string $controllerClassName, string $controllerTemplatePath, array $parameters = []): string
