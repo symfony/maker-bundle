@@ -155,7 +155,7 @@ final class EntityRegenerator
             // some non-annotation config is being used (e.g. XML), and so, the
             // properties should not have annotations added to them
             useAttributesForDoctrineMapping: false,
-            fluentMutators: $this->generator->getFluentSetters()
+            fluentMutators: $this->generator->getFluentSetters(),
         );
     }
 

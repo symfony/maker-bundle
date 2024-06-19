@@ -32,7 +32,7 @@ class Generator
         private string $namespacePrefix,
         ?PhpCompatUtil $phpCompatUtil = null,
         private ?TemplateComponentGenerator $templateComponentGenerator = null,
-        private fluentSetters = true
+        private $fluentSetters = true,
     ) {
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
         $this->namespacePrefix = trim($namespacePrefix, '\\');
