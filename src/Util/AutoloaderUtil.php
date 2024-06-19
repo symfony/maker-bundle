@@ -20,36 +20,29 @@ use Composer\Autoload\ClassLoader;
  */
 class AutoloaderUtil
 {
-    /**
-     * @var ComposerAutoloaderFinder
-     */
-    private $autoloaderFinder;
-
-    public function __construct(ComposerAutoloaderFinder $autoloaderFinder)
-    {
-        $this->autoloaderFinder = $autoloaderFinder;
+    public function __construct(
+        private ComposerAutoloaderFinder $autoloaderFinder,
+    ) {
     }
 
     /**
      * Returns the relative path to where a new class should live.
      *
-     * @return string|null
-     *
      * @throws \Exception
      */
-    public function getPathForFutureClass(string $className)
+    public function getPathForFutureClass(string $className): ?string
     {
         $classLoader = $this->getClassLoader();
 
         // lookup is obviously modeled off of Composer's autoload logic
         foreach ($classLoader->getPrefixesPsr4() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
+            if (str_starts_with($className, $prefix)) {
                 return $paths[0].'/'.str_replace('\\', '/', substr($className, \strlen($prefix))).'.php';
             }
         }
 
         foreach ($classLoader->getPrefixes() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
+            if (str_starts_with($className, $prefix)) {
                 return $paths[0].'/'.str_replace('\\', '/', $className).'.php';
             }
         }
@@ -68,7 +61,7 @@ class AutoloaderUtil
     public function getNamespacePrefixForClass(string $className): string
     {
         foreach ($this->getClassLoader()->getPrefixesPsr4() as $prefix => $paths) {
-            if (0 === strpos($className, $prefix)) {
+            if (str_starts_with($className, $prefix)) {
                 return $prefix;
             }
         }
@@ -85,13 +78,13 @@ class AutoloaderUtil
         $classLoader = $this->getClassLoader();
 
         foreach ($classLoader->getPrefixesPsr4() as $prefix => $paths) {
-            if (0 === strpos($namespace, $prefix)) {
+            if (str_starts_with($namespace, $prefix)) {
                 return true;
             }
         }
 
         foreach ($classLoader->getPrefixes() as $prefix => $paths) {
-            if (0 === strpos($namespace, $prefix)) {
+            if (str_starts_with($namespace, $prefix)) {
                 return true;
             }
         }

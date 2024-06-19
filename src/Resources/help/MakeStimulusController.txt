@@ -1,0 +1,5 @@
+The <info>%command.name%</info> command generates new Stimulus Controller.
+
+<info>php %command.full_name% hello</info>
+
+If the argument is missing, the command will ask for the controller name interactively.

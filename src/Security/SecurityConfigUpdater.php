@@ -12,29 +12,55 @@
 namespace Symfony\Bundle\MakerBundle\Security;
 
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
-use Symfony\Component\Security\Core\Encoder\NativePasswordEncoder;
+use Symfony\Component\HttpKernel\Log\Logger;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
+ * @author Ryan Weaver   <ryan@symfonycasts.com>
+ * @author Jesse Rushlow <jr@rushlow.dev>
+ *
  * @internal
  */
 final class SecurityConfigUpdater
 {
-    /** @var YamlSourceManipulator */
-    private $manipulator;
+    private ?YamlSourceManipulator $manipulator = null;
+
+    public function __construct(
+        private ?Logger $ysmLogger = null,
+    ) {
+    }
+
+    public function updateForFormLogin(string $yamlSource, string $firewallToUpdate, string $loginPath, string $checkPath): string
+    {
+        $newData = $this->createYamlSourceManipulator($yamlSource);
+
+        $newData['security']['firewalls'][$firewallToUpdate]['form_login']['login_path'] = $loginPath;
+        $newData['security']['firewalls'][$firewallToUpdate]['form_login']['check_path'] = $checkPath;
+        $newData['security']['firewalls'][$firewallToUpdate]['form_login']['enable_csrf'] = true;
+
+        return $this->getYamlContentsFromData($newData);
+    }
+
+    public function updateForJsonLogin(string $yamlSource, string $firewallToUpdate, string $checkPath): string
+    {
+        $data = $this->createYamlSourceManipulator($yamlSource);
+
+        $data['security']['firewalls'][$firewallToUpdate]['json_login']['check_path'] = $checkPath;
+
+        return $this->getYamlContentsFromData($data);
+    }
 
     /**
      * Updates security.yaml contents based on a new User class.
      */
     public function updateForUserClass(string $yamlSource, UserClassConfiguration $userConfig, string $userClass): string
     {
-        $this->manipulator = new YamlSourceManipulator($yamlSource);
-
-        $this->normalizeSecurityYamlFile();
+        $this->createYamlSourceManipulator($yamlSource);
 
         $this->updateProviders($userConfig, $userClass);
 
         if ($userConfig->hasPassword()) {
-            $this->updateEncoders($userConfig, $userClass);
+            $this->updatePasswordHashers($userClass);
         }
 
         $contents = $this->manipulator->getContents();
@@ -43,36 +69,45 @@ final class SecurityConfigUpdater
         return $contents;
     }
 
-    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup): string
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): string
     {
-        $this->manipulator = new YamlSourceManipulator($yamlSource);
-
-        $this->normalizeSecurityYamlFile();
+        $this->createYamlSourceManipulator($yamlSource);
 
         $newData = $this->manipulator->getData();
 
         if (!isset($newData['security']['firewalls'])) {
+            if ($newData['security']) {
+                $newData['security']['_firewalls'] = $this->manipulator->createEmptyLine();
+            }
+
             $newData['security']['firewalls'] = [];
         }
 
         if (!isset($newData['security']['firewalls'][$firewallName])) {
-            $newData['security']['firewalls'][$firewallName] = ['anonymous' => true];
+            $newData['security']['firewalls'][$firewallName] = ['lazy' => true];
         }
 
         $firewall = $newData['security']['firewalls'][$firewallName];
 
-        if (!isset($firewall['guard'])) {
-            $firewall['guard'] = [];
+        if (isset($firewall['custom_authenticator'])) {
+            if (\is_array($firewall['custom_authenticator'])) {
+                $firewall['custom_authenticator'][] = $authenticatorClass;
+            } else {
+                $stringValue = $firewall['custom_authenticator'];
+                $firewall['custom_authenticator'] = [];
+                $firewall['custom_authenticator'][] = $stringValue;
+                $firewall['custom_authenticator'][] = $authenticatorClass;
+            }
+        } else {
+            $firewall['custom_authenticator'] = $authenticatorClass;
         }
 
-        if (!isset($firewall['guard']['authenticators'])) {
-            $firewall['guard']['authenticators'] = [];
-        }
-
-        $firewall['guard']['authenticators'][] = $authenticatorClass;
-
-        if (\count($firewall['guard']['authenticators']) > 1) {
-            $firewall['guard']['entry_point'] = $chosenEntryPoint ?? current($firewall['guard']['authenticators']);
+        if (!isset($firewall['entry_point']) && $chosenEntryPoint) {
+            $firewall['entry_point_empty_line'] = $this->manipulator->createEmptyLine();
+            $firewall['entry_point_comment'] = $this->manipulator->createCommentLine(
+                ' the entry_point start() method determines what happens when an anonymous user accesses a protected page'
+            );
+            $firewall['entry_point'] = $authenticatorClass;
         }
 
         if (!isset($firewall['logout']) && $logoutSetup) {
@@ -85,14 +120,90 @@ final class SecurityConfigUpdater
             );
         }
 
-        $newData['security']['firewalls'][$firewallName] = $firewall;
-        $this->manipulator->setData($newData);
-        $contents = $this->manipulator->getContents();
+        if ($supportRememberMe) {
+            if (!isset($firewall['remember_me'])) {
+                $firewall['remember_me_empty_line'] = $this->manipulator->createEmptyLine();
+                $firewall['remember_me'] = [
+                    'secret' => '%kernel.secret%',
+                    'lifetime' => 604800,
+                    'path' => '/',
+                ];
+                if (!$alwaysRememberMe) {
+                    $firewall['remember_me'][] = $this->manipulator->createCommentLine(' by default, the feature is enabled by checking a checkbox in the');
+                    $firewall['remember_me'][] = $this->manipulator->createCommentLine(' login form, uncomment the following line to always enable it.');
+                }
+            } else {
+                $firewall['remember_me']['secret'] ??= '%kernel.secret%';
+                $firewall['remember_me']['lifetime'] ??= 604800;
+                $firewall['remember_me']['path'] ??= '/';
+            }
 
-        return $contents;
+            if ($alwaysRememberMe) {
+                $firewall['remember_me']['always_remember_me'] = true;
+            } else {
+                $firewall['remember_me'][] = $this->manipulator->createCommentLine('always_remember_me: true');
+            }
+        }
+
+        $newData['security']['firewalls'][$firewallName] = $firewall;
+
+        if (!isset($firewall['logout']) && $logoutSetup) {
+            $this->configureLogout($newData, $firewallName);
+
+            return $this->manipulator->getContents();
+        }
+
+        $this->manipulator->setData($newData);
+
+        return $this->manipulator->getContents();
     }
 
-    private function normalizeSecurityYamlFile()
+    public function updateForLogout(string $yamlSource, string $firewallName): string
+    {
+        $this->createYamlSourceManipulator($yamlSource);
+
+        $this->configureLogout($this->manipulator->getData(), $firewallName);
+
+        return $this->manipulator->getContents();
+    }
+
+    /**
+     * @legacy This can be removed once we deprecate/remove `make:auth`
+     */
+    private function configureLogout(array $securityData, string $firewallName): void
+    {
+        $securityData['security']['firewalls'][$firewallName]['logout'] = ['path' => 'app_logout'];
+        $securityData['security']['firewalls'][$firewallName]['logout'][] = $this->manipulator->createCommentLine(
+            ' where to redirect after logout'
+        );
+        $securityData['security']['firewalls'][$firewallName]['logout'][] = $this->manipulator->createCommentLine(
+            ' target: app_any_route'
+        );
+
+        $this->manipulator->setData($securityData);
+    }
+
+    private function createYamlSourceManipulator(string $yamlSource): array
+    {
+        $this->manipulator = new YamlSourceManipulator($yamlSource);
+
+        if (null !== $this->ysmLogger) {
+            $this->manipulator->setLogger($this->ysmLogger);
+        }
+
+        $this->normalizeSecurityYamlFile();
+
+        return $this->manipulator->getData();
+    }
+
+    private function getYamlContentsFromData(array $yamlData): string
+    {
+        $this->manipulator->setData($yamlData);
+
+        return $this->manipulator->getContents();
+    }
+
+    private function normalizeSecurityYamlFile(): void
     {
         if (!isset($this->manipulator->getData()['security'])) {
             $newData = $this->manipulator->getData();
@@ -101,11 +212,15 @@ final class SecurityConfigUpdater
         }
     }
 
-    private function updateProviders(UserClassConfiguration $userConfig, string $userClass)
+    private function updateProviders(UserClassConfiguration $userConfig, string $userClass): void
     {
         $this->removeMemoryProviderIfIsSingleConfigured();
 
         $newData = $this->manipulator->getData();
+        if ($newData['security'] && !\array_key_exists('providers', $newData['security'])) {
+            $newData['security']['_providers'] = $this->manipulator->createEmptyLine();
+        }
+
         $newData['security']['providers']['__'] = $this->manipulator->createCommentLine(
             ' used to reload user from session & other features (e.g. switch_user)'
         );
@@ -128,23 +243,42 @@ final class SecurityConfigUpdater
         $this->manipulator->setData($newData);
     }
 
-    private function updateEncoders(UserClassConfiguration $userConfig, string $userClass)
+    private function updatePasswordHashers(string $userClass): void
     {
         $newData = $this->manipulator->getData();
-        if (!isset($newData['security']['encoders'])) {
-            // encoders is usually the first key, by convention
-            $newData['security'] = ['encoders' => []] + $newData['security'];
+
+        if (isset($newData['security']['encoders'])) {
+            throw new \RuntimeException('Password Encoders are no longer supported by MakerBundle. Please update your "config/packages/security.yaml" file to use Password Hashers instead.');
         }
 
-        $newData['security']['encoders'][$userClass] = [
-            'algorithm' => $userConfig->shouldUseArgon2() ? 'argon2i' : (class_exists(NativePasswordEncoder::class) ? 'auto' : 'bcrypt'),
+        // The security-bundle recipe sets the password hasher via Flex. If it exists, move on...
+        if (isset($newData['security']['password_hashers'][PasswordAuthenticatedUserInterface::class])) {
+            return;
+        }
+
+        // by convention, password_hashers are put before the user provider option
+        $providersIndex = array_search('providers', array_keys($newData['security']));
+
+        if (false === $providersIndex) {
+            $newData['security'] = ['password_hashers' => []] + $newData['security'];
+        } else {
+            $newData['security'] = array_merge(
+                \array_slice($newData['security'], 0, $providersIndex),
+                ['password_hashers' => []],
+                \array_slice($newData['security'], $providersIndex)
+            );
+        }
+
+        $newData['security']['password_hashers'][$userClass] = [
+            'algorithm' => 'auto',
         ];
-        $newData['security']['encoders']['_'] = $this->manipulator->createEmptyLine();
+
+        $newData['security']['password_hashers']['_'] = $this->manipulator->createEmptyLine();
 
         $this->manipulator->setData($newData);
     }
 
-    private function removeMemoryProviderIfIsSingleConfigured()
+    private function removeMemoryProviderIfIsSingleConfigured(): void
     {
         if (!$this->isSingleInMemoryProviderConfigured()) {
             return;

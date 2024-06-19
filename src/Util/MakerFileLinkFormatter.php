@@ -12,23 +12,17 @@
 namespace Symfony\Bundle\MakerBundle\Util;
 
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
+use Symfony\Component\ErrorHandler\ErrorRenderer\FileLinkFormatter;
+use Symfony\Component\HttpKernel\Debug\FileLinkFormatter as LegacyFileLinkFormatter;
 
 /**
  * @internal
  */
 final class MakerFileLinkFormatter
 {
-    private $fileLinkFormatter;
-
-    public function __construct(FileLinkFormatter $fileLinkFormatter = null)
-    {
-        // Since nullable types are not available in 7.0; can be removed when php >= 7.1 required
-        if (0 == \func_num_args()) {
-            throw new \LogicException('$fileLinkFormatter argument is required');
-        }
-
-        $this->fileLinkFormatter = $fileLinkFormatter;
+    public function __construct(
+        private FileLinkFormatter|LegacyFileLinkFormatter|null $fileLinkFormatter = null,
+    ) {
     }
 
     public function makeLinkedPath(string $absolutePath, string $relativePath): string
@@ -47,7 +41,10 @@ final class MakerFileLinkFormatter
         }
 
         $outputFormatterStyle = new OutputFormatterStyle();
-        $outputFormatterStyle->setHref($formatted);
+
+        if (method_exists(OutputFormatterStyle::class, 'setHref')) {
+            $outputFormatterStyle->setHref($formatted);
+        }
 
         return $outputFormatterStyle->apply($relativePath);
     }

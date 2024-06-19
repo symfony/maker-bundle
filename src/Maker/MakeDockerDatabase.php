@@ -30,33 +30,26 @@ use Symfony\Component\Yaml\Yaml;
  */
 final class MakeDockerDatabase extends AbstractMaker
 {
-    private $fileManager;
-    private $composeFilePath;
+    private string $composeFilePath;
+    private ?ComposeFileManipulator $composeFileManipulator = null;
 
     /**
-     * @var ComposeFileManipulator
+     * @var ?string type of database selected by the user
      */
-    private $composeFileManipulator;
+    private ?string $databaseChoice = null;
 
     /**
-     * @var string type of database selected by the user
+     * @var string Service identifier to be set in compose.yaml
      */
-    private $databaseChoice;
+    private string $serviceName = 'database';
 
     /**
-     * @var string Service identifier to be set in docker-compose.yaml
+     * @var string Version set in compose.yaml for the service. e.g. latest
      */
-    private $serviceName = 'database';
+    private string $serviceVersion = 'latest';
 
-    /**
-     * @var string Version set in docker-compose.yaml for the service. e.g. latest
-     */
-    private $serviceVersion = 'latest';
-
-    public function __construct(FileManager $fileManager)
+    public function __construct(private FileManager $fileManager)
     {
-        $this->fileManager = $fileManager;
-        $this->composeFilePath = sprintf('%s/docker-compose.yaml', $this->fileManager->getRootDirectory());
     }
 
     public static function getCommandName(): string
@@ -64,10 +57,15 @@ final class MakeDockerDatabase extends AbstractMaker
         return 'make:docker:database';
     }
 
+    public static function getCommandDescription(): string
+    {
+        return 'Add a database container to your compose.yaml file';
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->setDescription('Adds a database container to your docker-compose.yaml file')
+            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeDockerDatabase.txt'))
         ;
     }
 
@@ -75,18 +73,7 @@ final class MakeDockerDatabase extends AbstractMaker
     {
         $io->section('- Docker Compose Setup-');
 
-        $composeFileContents = '';
-        $statusMessage = 'Existing docker-compose.yaml not found: a new one will be generated!';
-
-        if ($this->fileManager->fileExists($this->composeFilePath)) {
-            $composeFileContents = $this->fileManager->getFileContents($this->composeFilePath);
-
-            $statusMessage = 'We found your existing docker-compose.yaml: Let\'s update it!';
-        }
-
-        $io->text($statusMessage);
-
-        $this->composeFileManipulator = new ComposeFileManipulator($composeFileContents);
+        $this->composeFileManipulator = new ComposeFileManipulator($this->getComposeFileContents($io));
 
         $io->newLine();
 
@@ -115,7 +102,7 @@ final class MakeDockerDatabase extends AbstractMaker
 
             $io->text($serviceNameMsg);
 
-            $this->serviceName = $io->ask(sprintf('What name should we call the new %s service? e.g. database', $this->serviceName), null, [Validator::class, 'notBlank']);
+            $this->serviceName = $io->ask(sprintf('What name should we call the new %s service? (e.g. <fg=yellow>database</>)', $this->serviceName), null, Validator::notBlank(...));
         }
 
         $this->checkForPDOSupport($this->databaseChoice, $io);
@@ -141,13 +128,13 @@ final class MakeDockerDatabase extends AbstractMaker
         $ports = DockerDatabaseServices::getDefaultPorts($this->databaseChoice);
         $closing[] = 'Next:';
         $closing[] = sprintf(' A) Run <fg=yellow>docker-compose up -d %s</> to start your database container', $this->serviceName);
-        $closing[] = sprintf('    or <fg=yellow>docker-compose up -d</> to start all of them.');
+        $closing[] = '    or <fg=yellow>docker-compose up -d</> to start all of them.';
         $closing[] = '';
         $closing[] = ' B) If you are using the Symfony Binary, it will detect the new service automatically.';
         $closing[] = '    Run <fg=yellow>symfony var:export --multiline</> to see the environment variables the binary is exposing.';
         $closing[] = '    These will override any values you have in your .env files.';
         $closing[] = '';
-        $closing[] = ' C) Run <fg=yellow>docker-compose stop</> will stop all the containers in docker-compose.yaml.';
+        $closing[] = ' C) Run <fg=yellow>docker-compose stop</> will stop all the containers in compose.yaml.';
         $closing[] = '    <fg=yellow>docker-compose down</> will stop and destroy the containers.';
         $closing[] = '';
         $closing[] = sprintf(
@@ -179,5 +166,35 @@ final class MakeDockerDatabase extends AbstractMaker
                 sprintf('Cannot find PHP\'s pdo_%s extension. Be sure it\'s installed & enabled to talk to the database.', $extension)
             );
         }
+    }
+
+    /**
+     * Determines and sets the correct Compose File Path and retrieves its contents
+     * if the file exists else an empty string.
+     */
+    private function getComposeFileContents(ConsoleStyle $io): string
+    {
+        $this->composeFilePath = sprintf('%s/compose.yaml', $this->fileManager->getRootDirectory());
+
+        $composeFileExists = false;
+        $statusMessage = 'Existing compose.yaml not found: a new one will be generated!';
+        $contents = '';
+
+        foreach (['.yml', '.yaml'] as $extension) {
+            $composeFilePath = sprintf('%s/compose%s', $this->fileManager->getRootDirectory(), $extension);
+
+            if (!$composeFileExists && $this->fileManager->fileExists($composeFilePath)) {
+                $composeFileExists = true;
+
+                $statusMessage = sprintf('We found your existing compose%s: Let\'s update it!', $extension);
+
+                $this->composeFilePath = $composeFilePath;
+                $contents = $this->fileManager->getFileContents($composeFilePath);
+            }
+        }
+
+        $io->text($statusMessage);
+
+        return $contents;
     }
 }

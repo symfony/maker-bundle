@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
-use Doctrine\Common\Inflector\Inflector as LegacyInflector;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use Symfony\Component\DependencyInjection\Container;
@@ -22,8 +21,7 @@ use Symfony\Component\DependencyInjection\Container;
  */
 final class Str
 {
-    /** @var Inflector|null */
-    private static $inflector;
+    private static ?Inflector $inflector = null;
 
     /**
      * Looks for suffixes in strings in a case-insensitive way.
@@ -102,7 +100,9 @@ final class Str
 
     public static function asRouteName(string $value): string
     {
-        return self::asTwigVariable($value);
+        $routeName = self::asTwigVariable($value);
+
+        return str_starts_with($routeName, 'app_') ? $routeName : 'app_'.$routeName;
     }
 
     public static function asSnakeCase(string $value): string
@@ -127,6 +127,38 @@ final class Str
         }
 
         return substr($fullClassName, strrpos($fullClassName, '\\') + 1);
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    public static function getHumanDiscriminatorBetweenTwoClasses(string $className, string $classNameOther): array
+    {
+        $namespace = self::getNamespace($className);
+        $namespaceOther = self::getNamespace($classNameOther);
+        if (empty($namespace) || empty($namespaceOther)) {
+            return [$namespace, $namespaceOther];
+        }
+
+        $namespaceParts = explode('\\', $namespace);
+        $namespacePartsOther = explode('\\', $namespaceOther);
+
+        $min = min(\count($namespaceParts), \count($namespacePartsOther));
+        for ($i = 0; $i < $min; ++$i) {
+            $part = $namespaceParts[$i];
+            $partOther = $namespacePartsOther[$i];
+            if ($part !== $partOther) {
+                break;
+            }
+
+            $namespaceParts[$i] = null;
+            $namespacePartsOther[$i] = null;
+        }
+
+        return [
+            implode('\\', array_filter($namespaceParts)),
+            implode('\\', array_filter($namespacePartsOther)),
+        ];
     }
 
     public static function getNamespace(string $fullClassName): string
@@ -202,6 +234,9 @@ final class Str
         return (bool) preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $name, $matches);
     }
 
+    /**
+     * @return bool
+     */
     public static function areClassesAlphabetical(string $class1, string $class2)
     {
         $arr1 = [$class1, $class2];
@@ -213,25 +248,17 @@ final class Str
 
     public static function asHumanWords(string $variableName): string
     {
-        return implode(' ', preg_split('/(?=[A-Z])/', $variableName));
+        return str_replace('  ', ' ', ucfirst(trim(implode(' ', preg_split('/(?=[A-Z])/', $variableName)))));
     }
 
     private static function pluralize(string $word): string
     {
-        if (class_exists(Inflector::class)) {
-            return static::getInflector()->pluralize($word);
-        }
-
-        return LegacyInflector::pluralize($word);
+        return static::getInflector()->pluralize($word);
     }
 
     private static function singularize(string $word): string
     {
-        if (class_exists(Inflector::class)) {
-            return static::getInflector()->singularize($word);
-        }
-
-        return LegacyInflector::singularize($word);
+        return static::getInflector()->singularize($word);
     }
 
     private static function getInflector(): Inflector

@@ -4,34 +4,24 @@ namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\MappedSuperclass()
- */
+#[ORM\MappedSuperclass]
 class BaseClient
 {
     use TeamTrait;
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string")
-     */
-    private $name;
+    #[ORM\Column]
+    private ?string $name = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     */
-    private $creator;
+    #[ORM\ManyToOne]
+    private ?User $creator = null;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $magic;
+    #[ORM\Column()]
+    private int $magic;
 
     public function __construct()
     {

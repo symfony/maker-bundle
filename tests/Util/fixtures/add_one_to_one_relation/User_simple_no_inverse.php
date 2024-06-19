@@ -4,22 +4,16 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class User
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    /**
-     * @ORM\OneToOne(targetEntity=UserProfile::class, cascade={"persist", "remove"})
-     */
-    private $userProfile;
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?UserProfile $userProfile = null;
 
     public function getId(): ?int
     {
@@ -31,7 +25,7 @@ class User
         return $this->userProfile;
     }
 
-    public function setUserProfile(?UserProfile $userProfile): self
+    public function setUserProfile(?UserProfile $userProfile): static
     {
         $this->userProfile = $userProfile;
 

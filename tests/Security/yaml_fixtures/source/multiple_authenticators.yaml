@@ -1,0 +1,7 @@
+security:
+    enable_authenticator_manager: true
+
+    firewalls:
+        main:
+            lazy: true
+            custom_authenticator: App\Security\SomeOtherAuthenticator

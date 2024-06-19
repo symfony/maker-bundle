@@ -13,13 +13,13 @@ namespace Symfony\Bundle\MakerBundle;
 
 final class InputConfiguration
 {
-    private $nonInteractiveArguments = [];
+    private array $nonInteractiveArguments = [];
 
     /**
      * Call in MakerInterface::configureCommand() to disable the automatic interactive
      * prompt for an argument.
      */
-    public function setArgumentAsNonInteractive(string $argumentName)
+    public function setArgumentAsNonInteractive(string $argumentName): void
     {
         $this->nonInteractiveArguments[] = $argumentName;
     }

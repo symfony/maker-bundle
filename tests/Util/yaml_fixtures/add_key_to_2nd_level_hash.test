@@ -1,0 +1,44 @@
+# Next key without an empty line in between
+volumes:
+  abc-data:
+networks:
+
+
+# Next key with an empty line in between
+volumes1:
+  abc-data:
+
+networks1:
+
+
+# Next key with an empty line in between, with comment on the previous line after the value
+volumes2:
+  abc-data: # nothing here
+
+networks2:
+===
+$data['volumes']['foo-data'] = 'bar';
+$data['volumes1']['foo-data'] = 'bar';
+$data['volumes2']['foo-data'] = 'bar';
+===
+# Next key without an empty line in between
+volumes:
+  abc-data:
+  foo-data: bar
+networks:
+
+
+# Next key with an empty line in between
+volumes1:
+  abc-data:
+  foo-data: bar
+
+networks1:
+
+
+# Next key with an empty line in between, with comment on the previous line after the value
+volumes2:
+  abc-data: # nothing here
+  foo-data: bar
+
+networks2:

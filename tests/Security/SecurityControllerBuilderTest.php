@@ -17,43 +17,49 @@ use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 
 class SecurityControllerBuilderTest extends TestCase
 {
-    public function testAddLoginMethod()
+    private string $expectedBasePath = __DIR__.'/fixtures/expected';
+
+    public function testLoginMethod(): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/SecurityController.php');
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/expected/SecurityController_login.php');
-
-        $manipulator = new ClassSourceManipulator($source);
-
-        $securityControllerBuilder = new SecurityControllerBuilder();
-        $securityControllerBuilder->addLoginMethod($manipulator);
-
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        $this->runMethodTest(
+            'addLoginMethod',
+            sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_login.php')
+        );
     }
 
-    public function testLogoutMethod()
+    public function testLogoutMethod(): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/SecurityController.php');
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/expected/SecurityController_logout.php');
-
-        $manipulator = new ClassSourceManipulator($source);
-
-        $securityControllerBuilder = new SecurityControllerBuilder();
-        $securityControllerBuilder->addLogoutMethod($manipulator);
-
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        $this->runMethodTest(
+            'addLogoutMethod',
+            sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_logout.php')
+        );
     }
 
-    public function testLoginAndLogoutMethod()
+    public function testLoginAndLogoutMethod(): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/SecurityController.php');
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/expected/SecurityController_login_logout.php');
+        $builder = new SecurityControllerBuilder();
+        $csm = $this->getClassSourceManipulator();
 
-        $manipulator = new ClassSourceManipulator($source);
+        $builder->addLoginMethod($csm);
+        $builder->addLogoutMethod($csm);
 
-        $securityControllerBuilder = new SecurityControllerBuilder();
-        $securityControllerBuilder->addLoginMethod($manipulator);
-        $securityControllerBuilder->addLogoutMethod($manipulator);
+        $this->assertStringEqualsFile(
+            sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_login_logout.php'),
+            $csm->getSourceCode()
+        );
+    }
 
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+    private function runMethodTest(string $builderMethod, string $expectedFilePath): void
+    {
+        $builder = new SecurityControllerBuilder();
+        $csm = $this->getClassSourceManipulator();
+
+        $builder->$builderMethod($csm);
+        $this->assertStringEqualsFile($expectedFilePath, $csm->getSourceCode());
+    }
+
+    private function getClassSourceManipulator(): ClassSourceManipulator
+    {
+        return new ClassSourceManipulator(file_get_contents(__DIR__.'/fixtures/source/SecurityController.php'));
     }
 }

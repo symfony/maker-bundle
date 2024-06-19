@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Tests;
+
+use {{ userClass|default('App\\Entity\\User') }};
+use App\Security\AppCustomAuthenticator;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+
+class LoginFlowTest extends WebTestCase
+{
+    public function testCommand()
+    {
+        $client = self::createClient();
+        $crawler = $client->request('GET', '/login');
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+
+        {% if isEntity %}
+        /** @var EntityManagerInterface $em */
+        $em = self::$kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
+
+        $user = (new User())->set{{ userIdentifier|title }}('test@symfony.com')
+            ->setPassword('passw0rd');
+        $em->persist($user);
+        $em->flush();
+        {% endif %}
+
+        $form = $crawler->filter('form')->form();
+        $form->setValues(
+            [
+                '{{ userIdentifier }}' => 'test@symfony.com',
+                'password' => 'foo',
+            ]
+        );
+        $crawler = $client->submit($form);
+
+        if (500 === $client->getResponse()->getStatusCode()) {
+            $this->assertEquals('', $crawler->filter('h1.exception-message')->text());
+        }
+
+        $this->assertEquals(302, $client->getResponse()->getStatusCode());
+        $client->followRedirect();
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertStringContainsString('Invalid credentials.', $client->getResponse()->getContent());
+
+        $form->setValues(
+            [
+                '{{ userIdentifier }}' => 'test@symfony.com',
+                'password' => 'passw0rd',
+            ]
+        );
+        $client->submit($form);
+
+        $this->assertStringContainsString('TODO: provide a valid redirect', $client->getResponse()->getContent());
+
+        $token = $this->getToken();
+        self::assertNotNull($token);
+        $this->assertInstanceOf(User::class, $token->getUser());
+
+        {% if testLogin %}
+        $client->request('GET', '/logout');
+        $this->assertNull($this->getToken());
+        {% endif %}
+    }
+
+   /**
+    * Handle Session deprecations in Symfony 5.3+
+    */
+   private function getToken(): ?TokenInterface
+   {
+       $tokenStorage = static::getContainer()->get('security.token_storage');
+       $tokenStorage->disableUsageTracking();
+
+       return $tokenStorage->getToken();
+   }
+}

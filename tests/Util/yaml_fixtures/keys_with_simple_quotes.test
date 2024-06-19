@@ -1,0 +1,19 @@
+framework:
+    messenger:
+        routing:
+            # route all messages that extend this example base class or interface
+            'App\Message\AbstractAsyncMessage': async
+            'App\Message\AsyncMessageInterface': async
+
+            'My\Message\ToBeSentToTwoSenders': [async, audit]
+===
+
+===
+framework:
+    messenger:
+        routing:
+            # route all messages that extend this example base class or interface
+            'App\Message\AbstractAsyncMessage': async
+            'App\Message\AsyncMessageInterface': async
+
+            'My\Message\ToBeSentToTwoSenders': [async, audit]

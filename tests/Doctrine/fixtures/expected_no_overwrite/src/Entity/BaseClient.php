@@ -4,34 +4,24 @@ namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\MappedSuperclass()
- */
+#[ORM\MappedSuperclass]
 class BaseClient
 {
     use TeamTrait;
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string")
-     */
-    private $name;
+    #[ORM\Column]
+    private ?string $name = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     */
-    private $creator;
+    #[ORM\ManyToOne]
+    private ?User $creator = null;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $magic;
+    #[ORM\Column()]
+    private int $magic;
 
     public function __construct()
     {
@@ -48,7 +38,7 @@ class BaseClient
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(string $name): static
     {
         $this->name = $name;
 
@@ -60,7 +50,7 @@ class BaseClient
         return $this->magic;
     }
 
-    public function setMagic(int $magic): self
+    public function setMagic(int $magic): static
     {
         $this->magic = $magic;
 
@@ -72,7 +62,7 @@ class BaseClient
         return $this->creator;
     }
 
-    public function setCreator(?User $creator): self
+    public function setCreator(?User $creator): static
     {
         $this->creator = $creator;
 

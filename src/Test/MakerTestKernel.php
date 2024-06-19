@@ -20,13 +20,12 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
-use Symfony\Component\Routing\RouteCollectionBuilder;
 
 class MakerTestKernel extends Kernel implements CompilerPassInterface
 {
     use MicroKernelTrait;
 
-    private $testRootDir;
+    private string $testRootDir;
 
     public function __construct(string $environment, bool $debug)
     {
@@ -35,7 +34,7 @@ class MakerTestKernel extends Kernel implements CompilerPassInterface
         parent::__construct($environment, $debug);
     }
 
-    public function registerBundles()
+    public function registerBundles(): iterable
     {
         return [
             new FrameworkBundle(),
@@ -43,7 +42,7 @@ class MakerTestKernel extends Kernel implements CompilerPassInterface
         ];
     }
 
-    protected function configureRoutes(RouteCollectionBuilder $routes)
+    protected function configureRoutes(RoutingConfigurator $routes)
     {
     }
 
@@ -58,19 +57,27 @@ class MakerTestKernel extends Kernel implements CompilerPassInterface
             'router' => [
                 'utf8' => true,
             ],
+            'http_method_override' => false,
+            'handle_all_throwables' => true,
+            'php_errors' => [
+                'log' => true,
+            ],
         ]);
     }
 
-    public function getProjectDir()
+    public function getProjectDir(): string
     {
         return $this->getRootDir();
     }
 
-    public function getRootDir()
+    public function getRootDir(): string
     {
         return $this->testRootDir;
     }
 
+    /**
+     * @return void
+     */
     public function process(ContainerBuilder $container)
     {
         // makes all makers public to help the tests

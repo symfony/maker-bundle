@@ -6,22 +6,19 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class User
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column()]
+    private ?int $id = null;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Recipe::class, mappedBy="foods")
+     * @var Collection<int, Recipe>
      */
-    private $recipes;
+    #[ORM\ManyToMany(targetEntity: Recipe::class, mappedBy: 'foods')]
+    private Collection $recipes;
 
     public function __construct()
     {
@@ -34,27 +31,26 @@ class User
     }
 
     /**
-     * @return Collection|Recipe[]
+     * @return Collection<int, Recipe>
      */
     public function getRecipes(): Collection
     {
         return $this->recipes;
     }
 
-    public function addRecipe(Recipe $recipe): self
+    public function addRecipe(Recipe $recipe): static
     {
         if (!$this->recipes->contains($recipe)) {
-            $this->recipes[] = $recipe;
+            $this->recipes->add($recipe);
             $recipe->addFood($this);
         }
 
         return $this;
     }
 
-    public function removeRecipe(Recipe $recipe): self
+    public function removeRecipe(Recipe $recipe): static
     {
-        if ($this->recipes->contains($recipe)) {
-            $this->recipes->removeElement($recipe);
+        if ($this->recipes->removeElement($recipe)) {
             $recipe->removeFood($this);
         }
 

@@ -14,6 +14,8 @@ namespace Symfony\Bundle\MakerBundle;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
+use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -21,18 +23,23 @@ use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
  */
 class Generator
 {
-    private $fileManager;
-    private $twigHelper;
-    private $pendingOperations = [];
-    private $namespacePrefix;
-    private $fluentSetters;
+    private GeneratorTwigHelper $twigHelper;
+    private array $pendingOperations = [];
+    private array $generatedFiles = [];
 
-    public function __construct(FileManager $fileManager, string $namespacePrefix, bool $fluentSetters)
-    {
-        $this->fileManager = $fileManager;
+    public function __construct(
+        private FileManager $fileManager,
+        private string $namespacePrefix,
+        ?PhpCompatUtil $phpCompatUtil = null,
+        private ?TemplateComponentGenerator $templateComponentGenerator = null,
+        private fluentSetters = true
+    ) {
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
         $this->namespacePrefix = trim($namespacePrefix, '\\');
-        $this->fluentSetters = $fluentSetters;
+
+        if (null !== $phpCompatUtil) {
+            trigger_deprecation('symfony/maker-bundle', 'v1.44.0', 'Initializing Generator while providing an instance of PhpCompatUtil is deprecated.');
+        }
     }
 
     /**
@@ -66,6 +73,8 @@ class Generator
 
     /**
      * Generate a normal file from a template.
+     *
+     * @return void
      */
     public function generateFile(string $targetPath, string $templateName, array $variables = [])
     {
@@ -76,6 +85,9 @@ class Generator
         $this->addOperation($targetPath, $templateName, $variables);
     }
 
+    /**
+     * @return void
+     */
     public function dumpFile(string $targetPath, string $contents)
     {
         $this->pendingOperations[$targetPath] = [
@@ -111,10 +123,10 @@ class Generator
      *      // App\Controller\FooController
      *      $gen->createClassNameDetails('foo', 'Controller', 'Controller');
      *
-     *      // App\Controller\Admin\FooController
+     *      // App\Controller\Foo\AdminController
      *      $gen->createClassNameDetails('Foo\\Admin', 'Controller', 'Controller');
      *
-     *      // App\Controller\Security\Voter\CoolController
+     *      // App\Security\Voter\CoolVoter
      *      $gen->createClassNameDetails('Cool', 'Security\Voter', 'Voter');
      *
      *      // Full class names can also be passed. Imagine the user has an autoload
@@ -133,14 +145,20 @@ class Generator
             // class is already "absolute" - leave it alone (but strip opening \)
             $className = substr($name, 1);
         } else {
-            $className = rtrim($fullNamespacePrefix, '\\').'\\'.Str::asClassName($name, $suffix);
+            $className = Str::asClassName($name, $suffix);
+
+            try {
+                Validator::classDoesNotExist($className);
+                $className = rtrim($fullNamespacePrefix, '\\').'\\'.$className;
+            } catch (RuntimeCommandException) {
+            }
         }
 
         Validator::validateClassName($className, $validationErrorMessage);
 
         // if this is a custom class, we may be completely different than the namespace prefix
         // the best way can do, is find the PSR4 prefix and use that
-        if (0 !== strpos($className, $fullNamespacePrefix)) {
+        if (!str_starts_with($className, $fullNamespacePrefix)) {
             $fullNamespacePrefix = $this->fileManager->getNamespacePrefixForClass($className);
         }
 
@@ -152,29 +170,6 @@ class Generator
         return $this->fileManager->getRootDirectory();
     }
 
-    private function addOperation(string $targetPath, string $templateName, array $variables)
-    {
-        if ($this->fileManager->fileExists($targetPath)) {
-            throw new RuntimeCommandException(sprintf('The file "%s" can\'t be generated because it already exists.', $this->fileManager->relativizePath($targetPath)));
-        }
-
-        $variables['relative_path'] = $this->fileManager->relativizePath($targetPath);
-
-        $templatePath = $templateName;
-        if (!file_exists($templatePath)) {
-            $templatePath = __DIR__.'/Resources/skeleton/'.$templateName;
-
-            if (!file_exists($templatePath)) {
-                throw new \Exception(sprintf('Cannot find template "%s"', $templateName));
-            }
-        }
-
-        $this->pendingOperations[$targetPath] = [
-            'template' => $templatePath,
-            'variables' => $variables,
-        ];
-    }
-
     public function hasPendingOperations(): bool
     {
         return !empty($this->pendingOperations);
@@ -182,10 +177,14 @@ class Generator
 
     /**
      * Actually writes and file changes that are pending.
+     *
+     * @return void
      */
     public function writeChanges()
     {
         foreach ($this->pendingOperations as $targetPath => $templateData) {
+            $this->generatedFiles[] = $targetPath;
+
             if (isset($templateData['contents'])) {
                 $this->fileManager->dumpFile($targetPath, $templateData['contents']);
 
@@ -194,7 +193,7 @@ class Generator
 
             $this->fileManager->dumpFile(
                 $targetPath,
-                $this->getFileContentsForPendingOperation($targetPath, $templateData)
+                $this->getFileContentsForPendingOperation($targetPath)
             );
         }
 
@@ -218,13 +217,15 @@ class Generator
             $controllerTemplatePath,
             $parameters +
             [
-                'parent_class_name' => method_exists(AbstractController::class, 'getParameter') ? 'AbstractController' : 'Controller',
+                'generator' => $this->templateComponentGenerator,
             ]
         );
     }
 
     /**
      * Generate a template file.
+     *
+     * @return void
      */
     public function generateTemplate(string $targetPath, string $templateName, array $variables = [])
     {
@@ -233,5 +234,46 @@ class Generator
             $templateName,
             $variables
         );
+    }
+
+    /**
+     * Get the full path of each file created by the Generator.
+     */
+    public function getGeneratedFiles(): array
+    {
+        return $this->generatedFiles;
+    }
+
+    /**
+     * @deprecated MakerBundle only supports AbstractController::class. This method will be removed in the future.
+     */
+    public static function getControllerBaseClass(): ClassNameDetails
+    {
+        trigger_deprecation('symfony/maker-bundle', 'v1.41.0', 'MakerBundle only supports AbstractController. This method will be removed in the future.');
+
+        return new ClassNameDetails(AbstractController::class, '\\');
+    }
+
+    private function addOperation(string $targetPath, string $templateName, array $variables): void
+    {
+        if ($this->fileManager->fileExists($targetPath)) {
+            throw new RuntimeCommandException(sprintf('The file "%s" can\'t be generated because it already exists.', $this->fileManager->relativizePath($targetPath)));
+        }
+
+        $variables['relative_path'] = $this->fileManager->relativizePath($targetPath);
+
+        $templatePath = $templateName;
+        if (!file_exists($templatePath)) {
+            $templatePath = __DIR__.'/Resources/skeleton/'.$templateName;
+
+            if (!file_exists($templatePath)) {
+                throw new \Exception(sprintf('Cannot find template "%s"', $templateName));
+            }
+        }
+
+        $this->pendingOperations[$targetPath] = [
+            'template' => $templatePath,
+            'variables' => $variables,
+        ];
     }
 }

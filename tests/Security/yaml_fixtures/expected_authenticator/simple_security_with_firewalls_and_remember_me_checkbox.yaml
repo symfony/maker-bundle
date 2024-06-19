@@ -1,0 +1,20 @@
+security:
+    enable_authenticator_manager: true
+
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        in_memory: { memory: ~ }
+
+    firewalls:
+        dev: ~
+        main:
+            lazy: true
+            custom_authenticator: App\Security\AppCustomAuthenticator
+
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800
+                path: /
+                # by default, the feature is enabled by checking a checkbox in the
+                # login form, uncomment the following line to always enable it.
+                #always_remember_me: true

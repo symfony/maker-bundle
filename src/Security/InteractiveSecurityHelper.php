@@ -11,7 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle\Security;
 
-use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\Security\Model\Authenticator;
+use Symfony\Bundle\MakerBundle\Security\Model\AuthenticatorType;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -22,13 +23,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class InteractiveSecurityHelper
 {
-    public function guessFirewallName(SymfonyStyle $io, array $securityData, string $questionText = null): string
+    public function guessFirewallName(SymfonyStyle $io, array $securityData, ?string $questionText = null): string
     {
         $realFirewalls = array_filter(
             $securityData['security']['firewalls'] ?? [],
-            function ($item) {
-                return !isset($item['security']) || true === $item['security'];
-            }
+            static fn ($item) => !isset($item['security']) || true === $item['security']
         );
 
         if (0 === \count($realFirewalls)) {
@@ -46,44 +45,7 @@ final class InteractiveSecurityHelper
         );
     }
 
-    public function guessEntryPoint(SymfonyStyle $io, array $securityData, string $authenticatorClass, string $firewallName)
-    {
-        if (!isset($securityData['security'])) {
-            $securityData['security'] = [];
-        }
-
-        if (!isset($securityData['security']['firewalls'])) {
-            $securityData['security']['firewalls'] = [];
-        }
-
-        $firewalls = $securityData['security']['firewalls'];
-        if (!isset($firewalls[$firewallName])) {
-            throw new RuntimeCommandException(sprintf('Firewall "%s" does not exist', $firewallName));
-        }
-
-        if (!isset($firewalls[$firewallName]['guard'])
-            || !isset($firewalls[$firewallName]['guard']['authenticators'])
-            || !$firewalls[$firewallName]['guard']['authenticators']
-            || isset($firewalls[$firewallName]['guard']['entry_point'])) {
-            return null;
-        }
-
-        $authenticators = $firewalls[$firewallName]['guard']['authenticators'];
-        $authenticators[] = $authenticatorClass;
-
-        return $io->choice(
-            'The entry point for your firewall is what should happen when an anonymous user tries to access
-a protected page. For example, a common "entry point" behavior is to redirect to the login page.
-The "entry point" behavior is controlled by the start() method on your authenticator.
-However, you will now have multiple authenticators. You need to choose which authenticator\'s
-start() method should be used as the entry point (the start() method on all other
-authenticators will be ignored, and can be blank.',
-            $authenticators,
-            current($authenticators)
-        );
-    }
-
-    public function guessUserClass(SymfonyStyle $io, array $providers, string $questionText = null): string
+    public function guessUserClass(SymfonyStyle $io, array $providers, ?string $questionText = null): string
     {
         if (1 === \count($providers) && isset(current($providers)['entity'])) {
             $entityProvider = current($providers);
@@ -91,13 +53,11 @@ authenticators will be ignored, and can be blank.',
             return $entityProvider['entity']['class'];
         }
 
-        $userClass = $io->ask(
+        return $io->ask(
             $questionText ?? 'Enter the User class that you want to authenticate (e.g. <fg=yellow>App\\Entity\\User</>)',
             $this->guessUserClassDefault(),
-            [Validator::class, 'classIsUserInterface']
+            Validator::classIsUserInterface(...)
         );
-
-        return $userClass;
     }
 
     private function guessUserClassDefault(): string
@@ -182,28 +142,6 @@ authenticators will be ignored, and can be blank.',
         );
     }
 
-    public function getAuthenticatorClasses(array $firewallData): array
-    {
-        $authenticatorClasses = [];
-
-        if (!isset($firewallData['guard'])) {
-            return [];
-        }
-
-        if (!isset($firewallData['guard']['authenticators'])) {
-            return [];
-        }
-
-        foreach ($firewallData['guard']['authenticators'] as $authenticator) {
-            // skip service id's - as they won't work for autowiring
-            if (class_exists($authenticator)) {
-                $authenticatorClasses[] = $authenticator;
-            }
-        }
-
-        return $authenticatorClasses;
-    }
-
     public function guessPasswordSetter(SymfonyStyle $io, string $userClass): string
     {
         if (null === ($methodChoices = $this->methodNameGuesser($userClass, 'setPassword'))) {
@@ -240,6 +178,96 @@ authenticators will be ignored, and can be blank.',
             sprintf('Which method on your <fg=yellow>%s</> class can be used to get the unique user identifier (e.g. getId())?', $userClass),
             $methodChoices
         );
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $firewalls Config data from security.firewalls
+     *
+     * @return Authenticator[]
+     */
+    public function getAuthenticatorsFromConfig(array $firewalls): array
+    {
+        $authenticators = [];
+
+        /* Iterate over each firewall that exists e.g. security.firewalls.main
+         * $firewallName could be "main" or "dev", etc...
+         * $firewallConfig should be an array of the firewalls params
+         */
+        foreach ($firewalls as $firewallName => $firewallConfig) {
+            if (!\is_array($firewallConfig)) {
+                continue;
+            }
+
+            $authenticators = [
+                ...$authenticators,
+                ...$this->getAuthenticatorsFromConfigData($firewallConfig, $firewallName),
+            ];
+        }
+
+        return $authenticators;
+    }
+
+    /**
+     * Pass in a firewalls config e.g. security.firewalls.main like:
+     *      pattern: ^/path
+     *      form_login:
+     *          login_path: app_login
+     *      custom_authenticator:
+     *          - App\Security\MyAuthenticator
+     *
+     * @param array<string, mixed> $firewallConfig
+     *
+     * @return Authenticator[]
+     */
+    private function getAuthenticatorsFromConfigData(array $firewallConfig, string $firewallName): array
+    {
+        $authenticators = [];
+
+        foreach ($firewallConfig as $potentialAuthenticator => $configData) {
+            // Check if $potentialAuthenticator is a supported authenticator or if its some other key.
+            if (null === ($authenticator = AuthenticatorType::tryFrom($potentialAuthenticator))) {
+                // $potentialAuthenticator is probably something like "pattern" or "lazy", not an authenticator
+                continue;
+            }
+
+            // $potentialAuthenticator is a supported authenticator. Check if it's a custom_authenticator.
+            if (AuthenticatorType::CUSTOM !== $authenticator) {
+                // We found a "built in" authenticator - "form_login", "json_login", etc...
+                $authenticators[] = new Authenticator($authenticator, $firewallName);
+
+                continue;
+            }
+
+            /*
+             * $potentialAuthenticator = custom_authenticator.
+             * $configData is either [App\MyAuthenticator] or (string) App\MyAuthenticator
+             */
+            $customAuthenticators = $this->getCustomAuthenticators($configData, $firewallName);
+
+            $authenticators = [...$authenticators, ...$customAuthenticators];
+        }
+
+        return $authenticators;
+    }
+
+    /**
+     * @param string|array<string> $customAuthenticators A single entry from custom_authenticators or an array of authenticators
+     *
+     * @return Authenticator[]
+     */
+    private function getCustomAuthenticators(string|array $customAuthenticators, string $firewallName): array
+    {
+        if (\is_string($customAuthenticators)) {
+            $customAuthenticators = [$customAuthenticators];
+        }
+
+        $authenticators = [];
+
+        foreach ($customAuthenticators as $customAuthenticatorClass) {
+            $authenticators[] = new Authenticator(AuthenticatorType::CUSTOM, $firewallName, $customAuthenticatorClass);
+        }
+
+        return $authenticators;
     }
 
     private function methodNameGuesser(string $className, string $suspectedMethodName): ?array

@@ -15,17 +15,12 @@ use Symfony\Bundle\MakerBundle\Str;
 
 final class ClassNameDetails
 {
-    private $fullClassName;
-
-    private $namespacePrefix;
-
-    private $suffix;
-
-    public function __construct(string $fullClassName, string $namespacePrefix, string $suffix = null)
-    {
-        $this->fullClassName = $fullClassName;
+    public function __construct(
+        private string $fullClassName,
+        private string $namespacePrefix,
+        private ?string $suffix = null,
+    ) {
         $this->namespacePrefix = trim($namespacePrefix, '\\');
-        $this->suffix = $suffix;
     }
 
     public function getFullName(): string

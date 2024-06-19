@@ -2,13 +2,9 @@
 
 namespace <?= $namespace; ?>;
 
-use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
-<?= ($password_upgrader = interface_exists('Symfony\Component\Security\Core\User\PasswordUpgraderInterface')) ? "use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;\n" : '' ?>
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
+<?= $use_statements; ?>
 
-class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader ? ", PasswordUpgraderInterface\n" : "\n" ?>
+class <?= $class_name ?> implements UserProviderInterface, PasswordUpgraderInterface
 {
     /**
      * Symfony calls this method if you use features like switch_user
@@ -17,17 +13,23 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
      * If you're not using these features, you do not need to implement
      * this method.
      *
-     * @return UserInterface
-     *
-     * @throws UsernameNotFoundException if the user is not found
+     * @throws UserNotFoundException if the user is not found
      */
-    public function loadUserByUsername($username)
+    public function loadUserByIdentifier($identifier): UserInterface
     {
-        // Load a User object from your data source or throw UsernameNotFoundException.
-        // The $username argument may not actually be a username:
-        // it is whatever value is being returned by the getUsername()
+        // Load a User object from your data source or throw UserNotFoundException.
+        // The $identifier argument may not actually be a username:
+        // it is whatever value is being returned by the getUserIdentifier()
         // method in your User class.
-        throw new \Exception('TODO: fill in loadUserByUsername() inside '.__FILE__);
+        throw new \Exception('TODO: fill in loadUserByIdentifier() inside '.__FILE__);
+    }
+
+    /**
+     * @deprecated since Symfony 5.3, loadUserByIdentifier() is used instead
+     */
+    public function loadUserByUsername($username): UserInterface
+    {
+        return $this->loadUserByIdentifier($username);
     }
 
     /**
@@ -40,13 +42,11 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
      *
      * If your firewall is "stateless: true" (for a pure API), this
      * method is not called.
-     *
-     * @return UserInterface
      */
-    public function refreshUser(UserInterface $user)
+    public function refreshUser(UserInterface $user): UserInterface
     {
         if (!$user instanceof <?= $user_short_name ?>) {
-            throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
+            throw new UnsupportedUserException(sprintf('Invalid user class "%s".', $user::class));
         }
 
         // Return a User object after making sure its data is "fresh".
@@ -57,20 +57,18 @@ class <?= $class_name ?> implements UserProviderInterface<?= $password_upgrader 
     /**
      * Tells Symfony to use this provider for this User class.
      */
-    public function supportsClass($class)
+    public function supportsClass(string $class): bool
     {
-        return <?= $user_short_name ?>::class === $class;
+        return <?= $user_short_name ?>::class === $class || is_subclass_of($class, <?= $user_short_name ?>::class);
     }
-<?php if ($password_upgrader): ?>
 
     /**
-     * Upgrades the encoded password of a user, typically for using a better hash algorithm.
+     * Upgrades the hashed password of a user, typically for using a better hash algorithm.
      */
-    public function upgradePassword(UserInterface $user, string $newEncodedPassword): void
+    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
-        // TODO: when encoded passwords are in use, this method should:
+        // TODO: when hashed passwords are in use, this method should:
         // 1. persist the new password in the user storage
-        // 2. update the $user object with $user->setPassword($newEncodedPassword);
+        // 2. update the $user object with $user->setPassword($newHashedPassword);
     }
-<?php endif ?>
 }

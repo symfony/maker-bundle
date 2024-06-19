@@ -1,6 +1,9 @@
+/.php-cs-fixer.cache
+/.phpunit.cache
 /composer.lock
+/fake
 /phpunit.xml
-/vendor/
 /tests/tmp/*
-/.php_cs.cache
-/.phpunit.result.cache
+/tools/*/composer.lock
+/tools/*/vendor
+/vendor/

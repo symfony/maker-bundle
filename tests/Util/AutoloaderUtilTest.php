@@ -65,7 +65,7 @@ class AutoloaderUtilTest extends TestCase
         }
     }
 
-    private function createComposerAutoloaderFinder(array $composerJsonParams = null): ComposerAutoloaderFinder
+    private function createComposerAutoloaderFinder(?array $composerJsonParams = null): ComposerAutoloaderFinder
     {
         $composerJsonParams = $composerJsonParams ?: [
             'autoload' => [

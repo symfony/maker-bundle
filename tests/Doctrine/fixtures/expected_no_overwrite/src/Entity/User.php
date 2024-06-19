@@ -6,32 +6,28 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class User
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=UserAvatar::class, mappedBy="user")
+     * @var Collection<int, UserAvatar>
      */
-    private $avatars;
+    #[ORM\OneToMany(targetEntity: UserAvatar::class, mappedBy: 'user')]
+    private Collection $avatars;
+
+    #[ORM\OneToOne(mappedBy: 'user')]
+    private ?UserProfile $userProfile = null;
 
     /**
-     * @ORM\OneToOne(targetEntity=UserProfile::class, mappedBy="user")
+     * @var Collection<int, Tag>
      */
-    private $userProfile;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=Tag::class)
-     */
-    private $tags;
+    #[ORM\ManyToMany(targetEntity: Tag::class)]
+    private Collection $tags;
 
     public function __construct()
     {
@@ -56,27 +52,26 @@ class User
     }
 
     /**
-     * @return Collection|UserAvatar[]
+     * @return Collection<int, UserAvatar>
      */
     public function getAvatars(): Collection
     {
         return $this->avatars;
     }
 
-    public function addAvatar(UserAvatar $avatar): self
+    public function addAvatar(UserAvatar $avatar): static
     {
         if (!$this->avatars->contains($avatar)) {
-            $this->avatars[] = $avatar;
+            $this->avatars->add($avatar);
             $avatar->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeAvatar(UserAvatar $avatar): self
+    public function removeAvatar(UserAvatar $avatar): static
     {
-        if ($this->avatars->contains($avatar)) {
-            $this->avatars->removeElement($avatar);
+        if ($this->avatars->removeElement($avatar)) {
             // set the owning side to null (unless already changed)
             if ($avatar->getUser() === $this) {
                 $avatar->setUser(null);
@@ -92,27 +87,25 @@ class User
     }
 
     /**
-     * @return Collection|Tag[]
+     * @return Collection<int, Tag>
      */
     public function getTags(): Collection
     {
         return $this->tags;
     }
 
-    public function addTag(Tag $tag): self
+    public function addTag(Tag $tag): static
     {
         if (!$this->tags->contains($tag)) {
-            $this->tags[] = $tag;
+            $this->tags->add($tag);
         }
 
         return $this;
     }
 
-    public function removeTag(Tag $tag): self
+    public function removeTag(Tag $tag): static
     {
-        if ($this->tags->contains($tag)) {
-            $this->tags->removeElement($tag);
-        }
+        $this->tags->removeElement($tag);
 
         return $this;
     }

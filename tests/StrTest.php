@@ -184,4 +184,53 @@ class StrTest extends TestCase
         yield ['App\\Entity\\Foo', 'Foo'];
         yield ['Foo', 'Foo'];
     }
+
+    /**
+     * @dataProvider getHumanDiscriminatorBetweenTwoClassesTests
+     */
+    public function testHumanDiscriminatorBetweenTwoClasses(string $className, string $classNameOther, array $expected)
+    {
+        $this->assertSame($expected, Str::getHumanDiscriminatorBetweenTwoClasses($className, $classNameOther));
+    }
+
+    public function getHumanDiscriminatorBetweenTwoClassesTests()
+    {
+        yield ['\\User', 'App\\Entity\\User', ['', 'App\\Entity']];
+        yield ['App\\Entity\\User', 'App\\Entity\\Friend\\User', ['', 'Friend']];
+        yield ['App\\Entity\\User', 'Custom\\Entity\\User', ['App\\Entity', 'Custom\\Entity']];
+        yield ['App\\Entity\\User', 'App\\Bundle\\Entity\\User', ['Entity', 'Bundle\\Entity']];
+        yield ['App\\Entity\\User', 'App\\Bundle\\User', ['Entity', 'Bundle']];
+        yield ['App\\Entity\\User', 'Custom\\Bundle\\Friend\\Entity\\User', ['App\\Entity', 'Custom\\Bundle\\Friend\\Entity']];
+    }
+
+    /**
+     * @dataProvider asHumanWordsTests
+     */
+    public function testAsHumanWords(string $original, string $expected)
+    {
+        $this->assertSame($expected, Str::asHumanWords($original));
+    }
+
+    public function asHumanWordsTests()
+    {
+        yield ['fooBar', 'Foo Bar'];
+        yield ['FooBar', 'Foo Bar'];
+        yield [' FooBar', 'Foo Bar'];
+        yield [' Foo Bar ', 'Foo Bar'];
+    }
+
+    /**
+     * @dataProvider provideAsRouteName
+     */
+    public function testAsRouteName(string $value, string $expectedRouteName)
+    {
+        $this->assertSame($expectedRouteName, Str::asRouteName($value));
+    }
+
+    public function provideAsRouteName()
+    {
+        yield ['Example', 'app_example'];
+        yield ['AppExample', 'app_example'];
+        yield ['Apple', 'app_apple'];
+    }
 }

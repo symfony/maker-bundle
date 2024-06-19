@@ -1,0 +1,6 @@
+branches: ["main"]
+
+maintained_branches: ["main"]
+
+doc_dir: "src/Resources/doc"
+

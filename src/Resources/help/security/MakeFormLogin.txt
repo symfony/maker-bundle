@@ -1,0 +1,9 @@
+The <info>%command.name%</info> command generates a controller and twig template
+to allow users to login using the form_login authenticator.
+
+The controller name, and logout ability can be customized by answering the
+questions asked when running <info>%command.name%</info>.
+
+This will also update your <info>security.yaml</info> for the new authenticator.
+
+<info>php %command.full_name%</info>

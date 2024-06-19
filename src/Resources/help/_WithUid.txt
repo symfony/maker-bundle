@@ -1,0 +1,10 @@
+Instead of using the default "int" type for the entity's "id", you can use the
+UUID type from Symfony's Uid component.
+<href=https://symfony.com/doc/current/components/uid.html#storing-uuids-in-databases>https://symfony.com/doc/current/components/uid.html#storing-uuids-in-databases</>
+
+<info>php %command.full_name% --with-uuid</info>
+
+Or you can use the ULID type from Symfony's Uid component.
+<href=https://symfony.com/doc/current/components/uid.html#storing-ulids-in-databases>https://symfony.com/doc/current/components/uid.html#storing-ulids-in-databases</>
+
+<info>php %command.full_name% --with-ulid</info>

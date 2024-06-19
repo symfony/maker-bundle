@@ -21,21 +21,19 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 final class ConsoleStyle extends SymfonyStyle
 {
-    private $output;
-
-    public function __construct(InputInterface $input, OutputInterface $output)
-    {
-        $this->output = $output;
-
+    public function __construct(
+        InputInterface $input,
+        private OutputInterface $output,
+    ) {
         parent::__construct($input, $output);
     }
 
-    public function success($message)
+    public function success($message): void
     {
         $this->writeln('<fg=green;options=bold,underscore>OK</> '.$message);
     }
 
-    public function comment($message)
+    public function comment($message): void
     {
         $this->text($message);
     }

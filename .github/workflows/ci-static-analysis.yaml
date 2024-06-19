@@ -1,0 +1,81 @@
+name: "CI Static Analysis"
+
+on:
+    pull_request:
+    push:
+        branches:
+            - 'main'
+    schedule:
+        -   cron: '0 0 * * *'
+
+env:
+    PHPUNIT_FLAGS: "-v"
+    SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
+
+jobs:
+    coding-standards:
+        name: "Coding Standards"
+
+        runs-on: ubuntu-latest
+
+        steps:
+            -
+                name: Checkout code
+                uses: "actions/checkout@v3"
+
+            -
+                name: Install PHP
+                uses: "shivammathur/setup-php@v2"
+
+            -
+                name: Validate composer.json
+                run: "composer validate --strict --no-check-lock"
+
+            -
+                name: Composer install
+                uses: "ramsey/composer-install@v2"
+                with:
+                    composer-options: "--no-scripts"
+
+            -
+                name: Composer install php-cs-fixer
+                uses: "ramsey/composer-install@v2"
+                with:
+                    composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
+
+            -
+                name: Run PHP-CS-Fixer
+                run: "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --dry-run --diff"
+
+    phpstan:
+        name: PHPStan
+
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: Checkout
+                uses: "actions/checkout@v4"
+
+            -   name: Install PHP
+                uses: "shivammathur/setup-php@v2"
+
+            -   name: Install Composer Dependencies
+                uses: "ramsey/composer-install@v2"
+                with:
+                    composer-options: "--no-scripts"
+
+            -   name: Install PHPStan
+                uses: "ramsey/composer-install@v2"
+                with:
+                    composer-options: "--no-scripts --working-dir=tools/phpstan"
+
+            -   name: Install Optional Dependencies
+                uses: "ramsey/composer-install@v2"
+                with:
+                    composer-options: "--no-scripts --working-dir=tools/phpstan/includes"
+
+            -   name: Install PHPUnit
+                run: "vendor/bin/simple-phpunit --version"
+
+            -   name: Run PHPStan
+                run: "tools/phpstan/vendor/bin/phpstan analyze --memory-limit=1G --error-format=github"

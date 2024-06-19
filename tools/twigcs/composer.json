@@ -1,0 +1,8 @@
+{
+    "autoload": {
+        "psr-4": { "Symfony\\Bundle\\MakerBundle\\Tools\\TwigCS\\": "src/" }
+    },
+    "require": {
+        "friendsoftwig/twigcs": "^4.1|^5.1"
+    }
+}

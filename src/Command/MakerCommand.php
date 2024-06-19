@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\MakerInterface;
+use Symfony\Bundle\MakerBundle\Util\TemplateLinter;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
@@ -32,30 +33,27 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class MakerCommand extends Command
 {
-    private $maker;
-    private $fileManager;
-    private $inputConfig;
-    /** @var ConsoleStyle */
-    private $io;
-    private $checkDependencies = true;
-    private $generator;
+    private InputConfiguration $inputConfig;
+    private ConsoleStyle $io;
+    private bool $checkDependencies = true;
 
-    public function __construct(MakerInterface $maker, FileManager $fileManager, Generator $generator)
-    {
-        $this->maker = $maker;
-        $this->fileManager = $fileManager;
+    public function __construct(
+        private MakerInterface $maker,
+        private FileManager $fileManager,
+        private Generator $generator,
+        private TemplateLinter $linter,
+    ) {
         $this->inputConfig = new InputConfiguration();
-        $this->generator = $generator;
 
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->maker->configureCommand($this, $this->inputConfig);
     }
 
-    protected function initialize(InputInterface $input, OutputInterface $output)
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->io = new ConsoleStyle($input, $output);
         $this->fileManager->setIO($this->io);
@@ -64,17 +62,13 @@ final class MakerCommand extends Command
             $dependencies = new DependencyBuilder();
             $this->maker->configureDependencies($dependencies, $input);
 
-            if (!$dependencies->isPhpVersionSatisfied()) {
-                throw new RuntimeCommandException('The make:entity command requires that you use PHP 7.1 or higher.');
-            }
-
             if ($missingPackagesMessage = $dependencies->getMissingPackagesMessage($this->getName())) {
                 throw new RuntimeCommandException($missingPackagesMessage);
             }
         }
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function interact(InputInterface $input, OutputInterface $output): void
     {
         if (!$this->fileManager->isNamespaceConfiguredToAutoload($this->generator->getRootNamespace())) {
             $this->io->note([
@@ -92,7 +86,7 @@ final class MakerCommand extends Command
                 continue;
             }
 
-            $value = $this->io->ask($argument->getDescription(), $argument->getDefault(), [Validator::class, 'notBlank']);
+            $value = $this->io->ask($argument->getDescription(), $argument->getDefault(), Validator::notBlank(...));
             $input->setArgument($argument->getName(), $value);
         }
 
@@ -101,6 +95,10 @@ final class MakerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        if ($output->isVerbose()) {
+            $this->linter->writeLinterMessage($output);
+        }
+
         $this->maker->generate($input, $this->io, $this->generator);
 
         // sanity check for custom makers
@@ -108,10 +106,12 @@ final class MakerCommand extends Command
             throw new \LogicException('Make sure to call the writeChanges() method on the generator.');
         }
 
+        $this->linter->lintFiles($this->generator->getGeneratedFiles());
+
         return 0;
     }
 
-    public function setApplication(Application $application = null)
+    public function setApplication(?Application $application = null): void
     {
         parent::setApplication($application);
 
@@ -127,7 +127,7 @@ final class MakerCommand extends Command
     /**
      * @internal Used for testing commands
      */
-    public function setCheckDependencies(bool $checkDeps)
+    public function setCheckDependencies(bool $checkDeps): void
     {
         $this->checkDependencies = $checkDeps;
     }

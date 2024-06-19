@@ -1,4 +1,6 @@
 security:
+    enable_authenticator_manager: true
+
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
         in_memory: { memory: ~ }
@@ -6,5 +8,5 @@ security:
     firewalls:
         dev: ~
         main:
-            anonymous: true
+            lazy: true
             provider: in_memory

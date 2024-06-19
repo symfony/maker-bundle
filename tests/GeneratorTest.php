@@ -20,20 +20,22 @@ class GeneratorTest extends TestCase
     /**
      * @dataProvider getClassNameDetailsTests
      */
-    public function testCreateClassNameDetails(string $name, string $prefix, string $suffix = '', string $expectedFullClassName, string $expectedRelativeClassName)
+    public function testCreateClassNameDetails(string $name, string $prefix, string $suffix, string $expectedFullClassName, string $expectedRelativeClassName): void
     {
         $fileManager = $this->createMock(FileManager::class);
         $fileManager->expects($this->any())
             ->method('getNamespacePrefixForClass')
             ->willReturn('Foo');
-        $generator = new Generator($fileManager, 'App\\', true);
+
+        $generator = new Generator($fileManager, 'App\\');
+
         $classNameDetails = $generator->createClassNameDetails($name, $prefix, $suffix);
 
         $this->assertSame($expectedFullClassName, $classNameDetails->getFullName());
         $this->assertSame($expectedRelativeClassName, $classNameDetails->getRelativeName());
     }
 
-    public function getClassNameDetailsTests()
+    public function getClassNameDetailsTests(): \Generator
     {
         yield 'simple_class' => [
             'foo',
@@ -73,6 +75,30 @@ class GeneratorTest extends TestCase
             '',
             'App\\Entity\\User',
             'User',
+        ];
+
+        yield 'non_prefixed_fake_fqcn' => [
+            'App\\Entity\\User',
+            '',
+            '',
+            'App\\App\\Entity\\User',
+            'Entity\\User',
+        ];
+
+        yield 'real_fqcn_with_suffix' => [
+            'Symfony\\Bundle\\MakerBundle\\Tests\\Generator',
+            'Test',
+            'Test',
+            'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
+            'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
+        ];
+
+        yield 'real_fqcn_without_suffix' => [
+            'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
+            '',
+            '',
+            'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
+            'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
         ];
     }
 }

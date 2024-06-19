@@ -25,9 +25,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 final class ConsoleErrorSubscriber implements EventSubscriberInterface
 {
-    private $setExitCode = false;
+    private bool $setExitCode = false;
 
-    public function onConsoleError(ConsoleErrorEvent $event)
+    public function onConsoleError(ConsoleErrorEvent $event): void
     {
         if (!$event->getError() instanceof RuntimeCommandException) {
             return;
@@ -43,7 +43,7 @@ final class ConsoleErrorSubscriber implements EventSubscriberInterface
         $io->error($event->getError()->getMessage());
     }
 
-    public function onConsoleTerminate(ConsoleTerminateEvent $event)
+    public function onConsoleTerminate(ConsoleTerminateEvent $event): void
     {
         if (!$this->setExitCode) {
             return;
@@ -53,7 +53,7 @@ final class ConsoleErrorSubscriber implements EventSubscriberInterface
         $event->setExitCode(1);
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             ConsoleEvents::ERROR => 'onConsoleError',

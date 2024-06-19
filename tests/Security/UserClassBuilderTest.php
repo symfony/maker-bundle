@@ -21,61 +21,77 @@ class UserClassBuilderTest extends TestCase
     /**
      * @dataProvider getUserInterfaceTests
      */
-    public function testAddUserInterfaceImplementation(UserClassConfiguration $userClassConfig, string $expectedFilename)
+    public function testAddUserInterfaceImplementation(UserClassConfiguration $userClassConfig, string $expectedFilename): void
     {
-        $sourceFilename = __DIR__.'/fixtures/source/'.($userClassConfig->isEntity() ? 'UserEntity.php' : 'UserModel.php');
-
-        $manipulator = new ClassSourceManipulator(
-            file_get_contents($sourceFilename),
-            true
-        );
+        $manipulator = $this->getClassSourceManipulator($userClassConfig);
 
         $classBuilder = new UserClassBuilder();
         $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig);
 
-        $expectedPath = __DIR__.'/fixtures/expected/'.$expectedFilename;
+        $expectedPath = $this->getExpectedPath($expectedFilename, null);
+        $expectedSource = file_get_contents($expectedPath);
+
+        self::assertSame($expectedSource, $manipulator->getSourceCode());
+    }
+
+    public function getUserInterfaceTests(): \Generator
+    {
+        yield 'entity_with_email_as_identifier' => [
+            new UserClassConfiguration(true, 'email', true),
+            'UserEntityWithEmailAsIdentifier.php',
+        ];
+
+        yield 'entity_with_password' => [
+            new UserClassConfiguration(true, 'userIdentifier', true),
+            'UserEntityWithPassword.php',
+        ];
+
+        yield 'entity_with_user_identifier_as_identifier' => [
+            new UserClassConfiguration(true, 'user_identifier', true),
+            'UserEntityWithUser_IdentifierAsIdentifier.php',
+        ];
+
+        yield 'entity_without_password' => [
+            new UserClassConfiguration(true, 'userIdentifier', false),
+            'UserEntityWithoutPassword.php',
+        ];
+
+        yield 'model_with_email_as_identifier' => [
+            new UserClassConfiguration(false, 'email', true),
+            'UserModelWithEmailAsIdentifier.php',
+        ];
+
+        yield 'model_with_password' => [
+            new UserClassConfiguration(false, 'userIdentifier', true),
+            'UserModelWithPassword.php',
+        ];
+
+        yield 'model_without_password' => [
+            new UserClassConfiguration(false, 'userIdentifier', false),
+            'UserModelWithoutPassword.php',
+        ];
+    }
+
+    private function getClassSourceManipulator(UserClassConfiguration $userClassConfiguration): ClassSourceManipulator
+    {
+        $sourceFilename = __DIR__.'/fixtures/source/'.($userClassConfiguration->isEntity() ? 'UserEntity.php' : 'UserModel.php');
+
+        return new ClassSourceManipulator(
+            file_get_contents($sourceFilename),
+            true
+        );
+    }
+
+    private function getExpectedPath(string $expectedFilename): string
+    {
+        $basePath = __DIR__.'/fixtures/expected';
+
+        $expectedPath = sprintf('%s/%s', $basePath, $expectedFilename);
+
         if (!file_exists($expectedPath)) {
             throw new \Exception(sprintf('Expected file missing: "%s"', $expectedPath));
         }
 
-        $this->assertSame(file_get_contents($expectedPath), $manipulator->getSourceCode());
-    }
-
-    public function getUserInterfaceTests()
-    {
-        yield 'entity_email_password' => [
-            new UserClassConfiguration(true, 'email', true),
-            'UserEntityEmailWithPassword.php',
-        ];
-
-        yield 'entity_username_password' => [
-            new UserClassConfiguration(true, 'username', true),
-            'UserEntityUsernameWithPassword.php',
-        ];
-
-        yield 'entity_user_name_password' => [
-            new UserClassConfiguration(true, 'user_name', true),
-            'UserEntityUser_nameWithPassword.php',
-        ];
-
-        yield 'entity_username_no_password' => [
-            new UserClassConfiguration(true, 'username', false),
-            'UserEntityUsernameNoPassword.php',
-        ];
-
-        yield 'model_email_password' => [
-            new UserClassConfiguration(false, 'email', true),
-            'UserModelEmailWithPassword.php',
-        ];
-
-        yield 'model_username_password' => [
-            new UserClassConfiguration(false, 'username', true),
-            'UserModelUsernameWithPassword.php',
-        ];
-
-        yield 'model_username_no_password' => [
-            new UserClassConfiguration(false, 'username', false),
-            'UserModelUsernameNoPassword.php',
-        ];
+        return $expectedPath;
     }
 }

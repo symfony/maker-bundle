@@ -16,50 +16,34 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
  */
 abstract class BaseRelation
 {
-    private $propertyName;
-    private $targetClassName;
-    private $targetPropertyName;
-    private $customReturnType;
-    private $isSelfReferencing = false;
-    private $mapInverseRelation = true;
-    private $avoidSetter = false;
+    public function __construct(
+        private string $propertyName,
+        private string $targetClassName,
+        private ?string $targetPropertyName = null,
+        private bool $isSelfReferencing = false,
+        private bool $mapInverseRelation = true,
+        private bool $avoidSetter = false,
+        private bool $isCustomReturnTypeNullable = false,
+        private ?string $customReturnType = null,
+        private bool $isOwning = false,
+        private bool $orphanRemoval = false,
+        private bool $isNullable = false,
+    ) {
+    }
 
-    abstract public function isOwning(): bool;
-
-    public function getPropertyName()
+    public function getPropertyName(): string
     {
         return $this->propertyName;
     }
 
-    public function setPropertyName($propertyName)
-    {
-        $this->propertyName = $propertyName;
-
-        return $this;
-    }
-
-    public function getTargetClassName()
+    public function getTargetClassName(): string
     {
         return $this->targetClassName;
     }
 
-    public function setTargetClassName($targetClassName)
-    {
-        $this->targetClassName = $targetClassName;
-
-        return $this;
-    }
-
-    public function getTargetPropertyName()
+    public function getTargetPropertyName(): ?string
     {
         return $this->targetPropertyName;
-    }
-
-    public function setTargetPropertyName($targetPropertyName)
-    {
-        $this->targetPropertyName = $targetPropertyName;
-
-        return $this;
     }
 
     public function isSelfReferencing(): bool
@@ -67,35 +51,14 @@ abstract class BaseRelation
         return $this->isSelfReferencing;
     }
 
-    public function setIsSelfReferencing(bool $isSelfReferencing)
-    {
-        $this->isSelfReferencing = $isSelfReferencing;
-
-        return $this;
-    }
-
     public function getMapInverseRelation(): bool
     {
         return $this->mapInverseRelation;
     }
 
-    public function setMapInverseRelation(bool $mapInverseRelation)
-    {
-        $this->mapInverseRelation = $mapInverseRelation;
-
-        return $this;
-    }
-
     public function shouldAvoidSetter(): bool
     {
         return $this->avoidSetter;
-    }
-
-    public function avoidSetter(bool $avoidSetter = true)
-    {
-        $this->avoidSetter = $avoidSetter;
-
-        return $this;
     }
 
     public function getCustomReturnType(): ?string
@@ -108,11 +71,18 @@ abstract class BaseRelation
         return $this->isCustomReturnTypeNullable;
     }
 
-    public function setCustomReturnType(string $customReturnType, bool $isNullable)
+    public function isOwning(): bool
     {
-        $this->customReturnType = $customReturnType;
-        $this->isCustomReturnTypeNullable = $isNullable;
+        return $this->isOwning;
+    }
 
-        return $this;
+    public function getOrphanRemoval(): bool
+    {
+        return $this->orphanRemoval;
+    }
+
+    public function isNullable(): bool
+    {
+        return $this->isNullable;
     }
 }

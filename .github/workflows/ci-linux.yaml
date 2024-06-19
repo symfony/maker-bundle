@@ -1,0 +1,98 @@
+name: "CI Linux"
+
+on:
+    pull_request:
+    push:
+        branches:
+            - 'main'
+    schedule:
+        -   cron: '0 0 * * *'
+
+env:
+    PHPUNIT_FLAGS: "-v"
+    SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
+
+jobs:
+    test:
+        name: "PHP ${{ matrix.php-version }} + @${{ matrix.symfony-version }} ${{ matrix.dependency-versions }} deps"
+
+        runs-on: ubuntu-latest
+
+        services:
+            mercure:
+                image: dunglas/mercure
+                env:
+                    SERVER_NAME: :1337
+                    MERCURE_PUBLISHER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+                    MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+                    MERCURE_EXTRA_DIRECTIVES: |
+                        anonymous
+                        cors_origins *
+                ports:
+                    - 1337:1337
+
+        env:
+            SYMFONY_VERSION: ${{ matrix.symfony-version }}
+            MAKER_ALLOW_DEV_DEPS_IN_APP: ${{ matrix.allow-dev-deps-in-apps }}
+
+        strategy:
+            fail-fast: false
+            matrix:
+                php-version:
+                    - '8.3'
+                symfony-version:
+                    - '6.4.x-dev'
+                    - '7.0.x-dev'
+                    - '7.1.x-dev'
+                dependency-versions: ['highest']
+                allow-dev-deps-in-apps: ['0']
+                include:
+                    # testing lowest PHP+dependencies with lowest Symfony
+                    - php-version: '8.1'
+                      symfony-version: '6.4.*'
+                      dependency-versions: 'lowest'
+                    # testing lowest PHP+dependencies with highest Symfony
+                    - php-version: '8.1'
+                      symfony-version: '6.4.*'
+                      dependency-versions: 'highest'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Install PHP with extensions
+              uses: shivammathur/setup-php@v2
+              with:
+                  coverage: "none"
+                  php-version: ${{ matrix.php-version }}
+
+            - name: Add PHPUnit matcher
+              run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+            - name: Composer install
+              uses: "ramsey/composer-install@v2"
+              with:
+                  dependency-versions: "${{ matrix.dependency-versions }}"
+
+            - name: Composer install php-cs-fixer
+              uses: "ramsey/composer-install@v2"
+              with:
+                  composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
+
+            - name: Composer install twigcs
+              uses: "ramsey/composer-install@v2"
+              with:
+                  composer-options: "--no-scripts --working-dir=tools/twigcs"
+
+            - name: Install PHPUnit
+              run: |
+                if [[ ${{ matrix.dependency_versions == 'lowest' }} ]]; then
+                  echo "SYMFONY_PHPUNIT_REQUIRE=nikic/php-parser:^4.18" >> $GITHUB_ENV
+                fi
+                vendor/bin/simple-phpunit install
+
+            - name: PHPUnit version
+              run: vendor/bin/simple-phpunit --version
+
+            - name: Run tests
+              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}

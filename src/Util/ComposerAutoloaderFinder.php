@@ -20,12 +20,8 @@ use Symfony\Component\ErrorHandler\DebugClassLoader as ErrorHandlerDebugClassLoa
  */
 class ComposerAutoloaderFinder
 {
-    private $rootNamespace;
-
-    /**
-     * @var ClassLoader|null
-     */
-    private $classLoader = null;
+    private array $rootNamespace;
+    private ?ClassLoader $classLoader = null;
 
     public function __construct(string $rootNamespace)
     {
@@ -48,10 +44,7 @@ class ComposerAutoloaderFinder
         return $this->classLoader;
     }
 
-    /**
-     * @return ClassLoader|null
-     */
-    private function findComposerClassLoader()
+    private function findComposerClassLoader(): ?ClassLoader
     {
         $autoloadFunctions = spl_autoload_functions();
 
@@ -74,10 +67,7 @@ class ComposerAutoloaderFinder
         return null;
     }
 
-    /**
-     * @return ClassLoader|null
-     */
-    private function extractComposerClassLoader(array $autoloader)
+    private function extractComposerClassLoader(array $autoloader): ?ClassLoader
     {
         if (isset($autoloader[0]) && \is_object($autoloader[0])) {
             if ($autoloader[0] instanceof ClassLoader) {
@@ -95,23 +85,20 @@ class ComposerAutoloaderFinder
         return null;
     }
 
-    /**
-     * @return ClassLoader|null
-     */
-    private function locateMatchingClassLoader(ClassLoader $classLoader)
+    private function locateMatchingClassLoader(ClassLoader $classLoader): ?ClassLoader
     {
         $makerClassLoader = null;
         foreach ($classLoader->getPrefixesPsr4() as $prefix => $paths) {
             if ('Symfony\\Bundle\\MakerBundle\\' === $prefix) {
                 $makerClassLoader = $classLoader;
             }
-            if (0 === strpos($this->rootNamespace['psr4'], $prefix)) {
+            if (str_starts_with($this->rootNamespace['psr4'], $prefix)) {
                 return $classLoader;
             }
         }
 
         foreach ($classLoader->getPrefixes() as $prefix => $paths) {
-            if (0 === strpos($this->rootNamespace['psr0'], $prefix)) {
+            if (str_starts_with($this->rootNamespace['psr0'], $prefix)) {
                 return $classLoader;
             }
         }

@@ -11,12 +11,16 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\FieldMapping;
 use PhpParser\Builder\Param;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationManyToOne;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToMany;
 use Symfony\Bundle\MakerBundle\Doctrine\RelationOneToOne;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -25,20 +29,18 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddPropertyTests
      */
-    public function testAddProperty(string $sourceFilename, $propertyName, array $commentLines, $expectedSourceFilename)
+    public function testAddProperty(string $sourceFilename, $propertyName, array $commentLines, $expectedSourceFilename): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_property/'.$expectedSourceFilename);
 
         $manipulator = new ClassSourceManipulator($source);
-        $method = (new \ReflectionObject($manipulator))->getMethod('addProperty');
-        $method->setAccessible(true);
-        $method->invoke($manipulator, $propertyName, $commentLines);
+        $manipulator->addProperty(name: $propertyName, comments: $commentLines);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function getAddPropertyTests()
+    public function getAddPropertyTests(): \Generator
     {
         yield 'normal_property_add' => [
             'User_simple.php',
@@ -75,20 +77,18 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddGetterTests
      */
-    public function testAddGetter(string $sourceFilename, string $propertyName, string $type, array $commentLines, $expectedSourceFilename)
+    public function testAddGetter(string $sourceFilename, string $propertyName, string $type, array $commentLines, $expectedSourceFilename): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_getter/'.$expectedSourceFilename);
 
         $manipulator = new ClassSourceManipulator($source);
-        $method = (new \ReflectionObject($manipulator))->getMethod('addGetter');
-        $method->setAccessible(true);
-        $method->invoke($manipulator, $propertyName, $type, true, $commentLines);
+        $manipulator->addGetter($propertyName, $type, true, $commentLines);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function getAddGetterTests()
+    public function getAddGetterTests(): \Generator
     {
         yield 'normal_getter_add' => [
             'User_simple.php',
@@ -96,6 +96,30 @@ class ClassSourceManipulatorTest extends TestCase
             'string',
             [],
             'User_simple.php',
+        ];
+
+        yield 'normal_getter_add_bool' => [
+            'User_simple.php',
+            'fooProp',
+            'bool',
+            [],
+            'User_simple_bool.php',
+        ];
+
+        yield 'getter_bool_begins_with_is' => [
+            'User_simple.php',
+            'isFooProp',
+            'bool',
+            [],
+            'User_bool_begins_with_is.php',
+        ];
+
+        yield 'getter_bool_begins_with_has' => [
+            'User_simple.php',
+            'hasFooProp',
+            'bool',
+            [],
+            'User_bool_begins_with_has.php',
         ];
 
         yield 'getter_no_props_comments' => [
@@ -121,20 +145,18 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddSetterTests
      */
-    public function testAddSetter(string $sourceFilename, string $propertyName, string $type, bool $isNullable, array $commentLines, $expectedSourceFilename)
+    public function testAddSetter(string $sourceFilename, string $propertyName, ?string $type, bool $isNullable, array $commentLines, $expectedSourceFilename): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_setter/'.$expectedSourceFilename);
 
         $manipulator = new ClassSourceManipulator($source);
-        $method = (new \ReflectionObject($manipulator))->getMethod('addSetter');
-        $method->setAccessible(true);
-        $method->invoke($manipulator, $propertyName, $type, $isNullable, $commentLines);
+        $manipulator->addSetter($propertyName, $type, $isNullable, $commentLines);
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function getAddSetterTests()
+    public function getAddSetterTests(): \Generator
     {
         yield 'normal_setter_add' => [
             'User_simple.php',
@@ -165,203 +187,263 @@ class ClassSourceManipulatorTest extends TestCase
             [],
             'User_empty.php',
         ];
+
+        yield 'setter_null_type' => [
+            'User_simple.php',
+            'fooProp',
+            null,
+            false,
+            [],
+            'User_simple_null_type.php',
+        ];
+
+        yield 'setter_bool_begins_with_is' => [
+            'User_simple.php',
+            'isFooProp',
+            'bool',
+            false,
+            [],
+            'User_bool_begins_with_is.php',
+        ];
     }
 
     /**
-     * @dataProvider getAnnotationTests
+     * @dataProvider getAttributeClassTests
      */
-    public function testBuildAnnotationLine(string $annotationClass, array $annotationOptions, string $expectedAnnotation)
+    public function testAddAttributeToClass(string $sourceFilename, string $expectedSourceFilename, string $attributeClass, array $attributeOptions, ?string $attributePrefix = null): void
     {
-        $manipulator = new ClassSourceManipulator('');
-        $method = (new \ReflectionObject($manipulator))->getMethod('buildAnnotationLine');
-        $method->setAccessible(true);
-        $actualAnnotation = $method->invoke($manipulator, $annotationClass, $annotationOptions);
+        $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
+        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_class_attribute/'.$expectedSourceFilename);
+        $manipulator = new ClassSourceManipulator($source);
+        $manipulator->addAttributeToClass($attributeClass, $attributeOptions, $attributePrefix);
 
-        $this->assertSame($expectedAnnotation, $actualAnnotation);
+        self::assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function getAnnotationTests()
+    public function getAttributeClassTests(): \Generator
     {
-        yield 'empty_annotation' => [
-            '@ORM\Column',
+        yield 'Empty class' => [
+            'User_empty.php',
+            'User_empty.php',
+            Entity::class,
             [],
-            '@ORM\Column()',
         ];
 
-        yield 'complex_annotation' => [
-            '@ORM\Column',
-            [
-                'name' => 'firstName',
-                'length' => 10,
-                'nullable' => false,
-            ],
-            '@ORM\Column(name="firstName", length=10, nullable=false)',
+        yield 'Class already has attributes' => [
+            'User_simple.php',
+            'User_simple.php',
+            Column::class,
+            ['message' => 'We use this attribute for class level tests so we dont have to add additional test dependencies.'],
         ];
     }
 
     /**
      * @dataProvider getAddEntityFieldTests
      */
-    public function testAddEntityField(string $sourceFilename, string $propertyName, array $fieldOptions, $expectedSourceFilename)
+    public function testAddEntityField(string $sourceFilename, ClassProperty $propertyModel, $expectedSourceFilename): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_entity_field/'.$expectedSourceFilename);
+        $sourcePath = __DIR__.'/fixtures/source';
+        $expectedPath = __DIR__.'/fixtures/add_entity_field';
 
-        $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addEntityField($propertyName, $fieldOptions);
-
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        $this->runAddEntityFieldTests(
+            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            $propertyModel,
+            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename))
+        );
     }
 
-    public function getAddEntityFieldTests()
+    private function runAddEntityFieldTests(string $source, ClassProperty $fieldOptions, string $expected): void
     {
+        $manipulator = new ClassSourceManipulator($source, false);
+        $manipulator->addEntityField($fieldOptions);
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function getAddEntityFieldTests(): \Generator
+    {
+        /** @legacy - Remove when Doctrine/ORM 2.x is no longer supported. */
+        $isLegacy = !class_exists(FieldMapping::class);
+
         yield 'entity_normal_add' => [
             'User_simple.php',
-            'fooProp',
-            [
-                'type' => 'string',
-                'length' => 255,
-                'nullable' => false,
-                'options' => ['comment' => 'new field'],
-            ],
+            new ClassProperty(propertyName: 'fooProp', type: 'string', length: 255, nullable: false, options: ['comment' => 'new field']),
             'User_simple.php',
         ];
 
         yield 'entity_add_datetime' => [
             'User_simple.php',
-            'createdAt',
-            [
-                'type' => 'datetime',
-                'nullable' => true,
-            ],
+            new ClassProperty(propertyName: 'createdAt', type: 'datetime', nullable: true),
             'User_simple_datetime.php',
         ];
 
         yield 'entity_field_property_already_exists' => [
             'User_some_props.php',
-            'firstName',
-            [
-                'type' => 'string',
-                'length' => 255,
-                'nullable' => false,
-            ],
+            new ClassProperty(propertyName: 'firstName', type: 'string', length: 255, nullable: false),
             'User_simple_prop_already_exists.php',
         ];
 
         yield 'entity_field_property_zero' => [
             'User_simple.php',
-            'decimal',
-            [
-                'type' => 'decimal',
-                'precision' => 6,
-                'scale' => 0,
-            ],
+            new ClassProperty(propertyName: 'decimal', type: 'decimal', precision: 6, scale: 0),
             'User_simple_prop_zero.php',
+        ];
+
+        yield 'entity_add_object' => [
+            'User_simple.php',
+            new ClassProperty(propertyName: 'someObject', type: 'object'),
+            $isLegacy ? 'legacy/User_simple_object.php' : 'User_simple_object.php',
+        ];
+
+        yield 'entity_add_uuid' => [
+            'User_simple.php',
+            new ClassProperty(propertyName: 'uuid', type: 'uuid'),
+            'User_simple_uuid.php',
+        ];
+
+        yield 'entity_add_ulid' => [
+            'User_simple.php',
+            new ClassProperty(propertyName: 'ulid', type: 'ulid'),
+            'User_simple_ulid.php',
         ];
     }
 
     /**
      * @dataProvider getAddManyToOneRelationTests
      */
-    public function testAddManyToOneRelation(string $sourceFilename, $expectedSourceFilename, RelationManyToOne $manyToOne)
+    public function testAddManyToOneRelation(string $sourceFilename, $expectedSourceFilename, RelationManyToOne $manyToOne): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_many_to_one_relation/'.$expectedSourceFilename);
+        $sourcePath = __DIR__.'/fixtures/source';
+        $expectedPath = __DIR__.'/fixtures/add_many_to_one_relation';
 
-        $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addManyToOneRelation($manyToOne);
-
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        $this->runAddManyToOneRelationTests(
+            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            $manyToOne
+        );
     }
 
-    public function getAddManyToOneRelationTests()
+    public function runAddManyToOneRelationTests(string $source, string $expected, RelationManyToOne $manyToOne): void
+    {
+        $manipulator = new ClassSourceManipulator($source, false);
+        $manipulator->addManyToOneRelation($manyToOne);
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function getAddManyToOneRelationTests(): \Generator
     {
         yield 'many_to_one_not_nullable' => [
             'User_simple.php',
             'User_simple_not_nullable.php',
-            (new RelationManyToOne())
-                ->setPropertyName('category')
-                ->setTargetClassName('App\Entity\Category')
-                ->setTargetPropertyName('foods')
-                ->setIsNullable(false),
+            new RelationManyToOne(
+                propertyName: 'category',
+                targetClassName: \App\Entity\Category::class,
+                targetPropertyName: 'foods',
+                isOwning: true,
+            ),
         ];
 
         yield 'many_to_one_nullable' => [
             'User_simple.php',
             'User_simple_nullable.php',
-            (new RelationManyToOne())
-                ->setPropertyName('category')
-                ->setTargetClassName('App\Entity\Category')
-                ->setTargetPropertyName('foods')
-                ->setIsNullable(true),
+            new RelationManyToOne(
+                propertyName: 'category',
+                targetClassName: \App\Entity\Category::class,
+                targetPropertyName: 'foods',
+                isOwning: true,
+                isNullable: true,
+            ),
         ];
 
         yield 'many_to_one_other_namespace' => [
             'User_simple.php',
             'User_simple_other_namespace.php',
-            (new RelationManyToOne())
-                ->setPropertyName('category')
-                ->setTargetClassName('Foo\Entity\Category')
-                ->setTargetPropertyName('foods')
-                ->setIsNullable(true),
+            new RelationManyToOne(
+                propertyName: 'category',
+                targetClassName: \Foo\Entity\Category::class,
+                targetPropertyName: 'foods',
+                isOwning: true,
+                isNullable: true,
+            ),
         ];
 
         yield 'many_to_one_empty_other_namespace' => [
             'User_empty.php',
             'User_empty_other_namespace.php',
-            (new RelationManyToOne())
-                ->setPropertyName('category')
-                ->setTargetClassName('Foo\Entity\Category')
-                ->setTargetPropertyName('foods')
-                ->setIsNullable(true),
+            new RelationManyToOne(
+                propertyName: 'category',
+                targetClassName: \Foo\Entity\Category::class,
+                targetPropertyName: 'foods',
+                isOwning: true,
+                isNullable: true,
+            ),
         ];
 
         yield 'many_to_one_same_and_other_namespaces' => [
             'User_with_relation.php',
             'User_with_relation_same_and_other_namespaces.php',
-            (new RelationManyToOne())
-                ->setPropertyName('subCategory')
-                ->setTargetClassName('App\Entity\SubDirectory\Category')
-                ->setTargetPropertyName('foods')
-                ->setIsNullable(true),
+            new RelationManyToOne(
+                propertyName: 'subCategory',
+                targetClassName: \App\Entity\SubDirectory\Category::class,
+                targetPropertyName: 'foods',
+                isOwning: true,
+                isNullable: true,
+            ),
         ];
 
         yield 'many_to_one_no_inverse' => [
             'User_simple.php',
             'User_simple_no_inverse.php',
-            (new RelationManyToOne())
-                ->setPropertyName('category')
-                ->setTargetClassName('App\Entity\Category')
-                ->setTargetPropertyName('foods')
-                ->setIsNullable(true)
-                ->setMapInverseRelation(false),
+            new RelationManyToOne(
+                propertyName: 'category',
+                targetClassName: \App\Entity\Category::class,
+                targetPropertyName: 'foods',
+                mapInverseRelation: false,
+                isOwning: true,
+                isNullable: true,
+            ),
         ];
     }
 
     /**
      * @dataProvider getAddOneToManyRelationTests
      */
-    public function testAddOneToManyRelation(string $sourceFilename, $expectedSourceFilename, RelationOneToMany $oneToMany)
+    public function testAddOneToManyRelation(string $sourceFilename, string $expectedSourceFilename, RelationOneToMany $oneToMany): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_one_to_many_relation/'.$expectedSourceFilename);
+        $sourcePath = __DIR__.'/fixtures/source';
+        $expectedPath = __DIR__.'/fixtures/add_one_to_many_relation';
 
-        $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addOneToManyRelation($oneToMany);
+        /* @legacy - Remove when Doctrine/ORM 2.x is no longer supported. */
+        if (!class_exists(FieldMapping::class)) {
+            $expectedPath .= '/legacy';
+        }
 
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        $this->runAddOneToManyRelationTests(
+            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            $oneToMany
+        );
     }
 
-    public function getAddOneToManyRelationTests()
+    private function runAddOneToManyRelationTests(string $source, string $expected, RelationOneToMany $oneToMany): void
+    {
+        $manipulator = new ClassSourceManipulator($source, false);
+        $manipulator->addOneToManyRelation($oneToMany);
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function getAddOneToManyRelationTests(): \Generator
     {
         yield 'one_to_many_simple' => [
             'User_simple.php',
             'User_simple.php',
-            (new RelationOneToMany())
-                ->setPropertyName('avatarPhotos')
-                ->setTargetClassName('App\Entity\UserAvatarPhoto')
-                ->setTargetPropertyName('user')
-                ->setOrphanRemoval(false),
+            new RelationOneToMany(
+                propertyName: 'avatarPhotos',
+                targetClassName: \App\Entity\UserAvatarPhoto::class,
+                targetPropertyName: 'user',
+            ),
         ];
 
         // interesting also because the source file has its
@@ -369,21 +451,22 @@ class ClassSourceManipulatorTest extends TestCase
         yield 'one_to_many_simple_no_duplicate_use' => [
             'User_with_use_statements.php',
             'User_with_use_statements.php',
-            (new RelationOneToMany())
-                ->setPropertyName('avatarPhotos')
-                ->setTargetClassName('App\Entity\UserAvatarPhoto')
-                ->setTargetPropertyName('user')
-                ->setOrphanRemoval(false),
+            new RelationOneToMany(
+                propertyName: 'avatarPhotos',
+                targetClassName: \App\Entity\UserAvatarPhoto::class,
+                targetPropertyName: 'user',
+            ),
         ];
 
         yield 'one_to_many_orphan_removal' => [
             'User_simple.php',
             'User_simple_orphan_removal.php',
-            (new RelationOneToMany())
-                ->setPropertyName('avatarPhotos')
-                ->setTargetClassName('App\Entity\UserAvatarPhoto')
-                ->setTargetPropertyName('user')
-                ->setOrphanRemoval(true),
+            new RelationOneToMany(
+                propertyName: 'avatarPhotos',
+                targetClassName: \App\Entity\UserAvatarPhoto::class,
+                targetPropertyName: 'user',
+                orphanRemoval: true,
+            ),
         ];
 
         // todo test existing constructor
@@ -392,178 +475,185 @@ class ClassSourceManipulatorTest extends TestCase
     /**
      * @dataProvider getAddManyToManyRelationTests
      */
-    public function testAddManyToManyRelation(string $sourceFilename, $expectedSourceFilename, RelationManyToMany $manyToMany)
+    public function testAddManyToManyRelation(string $sourceFilename, $expectedSourceFilename, RelationManyToMany $manyToMany): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_many_to_many_relation/'.$expectedSourceFilename);
+        $sourcePath = __DIR__.'/fixtures/source';
+        $expectedPath = __DIR__.'/fixtures/add_many_to_many_relation';
 
-        $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addManyToManyRelation($manyToMany);
-
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        $this->runAddManyToManyRelationTest(
+            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            $manyToMany
+        );
     }
 
-    public function getAddManyToManyRelationTests()
+    private function runAddManyToManyRelationTest(string $source, string $expected, RelationManyToMany $manyToMany): void
+    {
+        $manipulator = new ClassSourceManipulator($source, false);
+        $manipulator->addManyToManyRelation($manyToMany);
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function getAddManyToManyRelationTests(): \Generator
     {
         yield 'many_to_many_owning' => [
             'User_simple.php',
             'User_simple_owning.php',
-            (new RelationManyToMany())
-                ->setPropertyName('recipes')
-                ->setTargetClassName('App\Entity\Recipe')
-                ->setTargetPropertyName('foods')
-                ->setIsOwning(true),
+            new RelationManyToMany(
+                propertyName: 'recipes',
+                targetClassName: \App\Entity\Recipe::class,
+                targetPropertyName: 'foods',
+                isOwning: true,
+            ),
         ];
 
         yield 'many_to_many_inverse' => [
             'User_simple.php',
             'User_simple_inverse.php',
-            (new RelationManyToMany())
-                ->setPropertyName('recipes')
-                ->setTargetClassName('App\Entity\Recipe')
-                ->setTargetPropertyName('foods')
-                ->setIsOwning(false),
+            new RelationManyToMany(
+                propertyName: 'recipes',
+                targetClassName: \App\Entity\Recipe::class,
+                targetPropertyName: 'foods',
+            ),
         ];
 
         yield 'many_to_many_owning_inverse' => [
             'User_simple.php',
             'User_simple_no_inverse.php',
-            (new RelationManyToMany())
-                ->setPropertyName('recipes')
-                ->setTargetClassName('App\Entity\Recipe')
-                ->setTargetPropertyName('foods')
-                ->setIsOwning(true)
-                ->setMapInverseRelation(false),
+            new RelationManyToMany(
+                propertyName: 'recipes',
+                targetClassName: \App\Entity\Recipe::class,
+                targetPropertyName: 'foods',
+                mapInverseRelation: false,
+                isOwning: true,
+            ),
         ];
     }
 
     /**
      * @dataProvider getAddOneToOneRelationTests
      */
-    public function testAddOneToOneRelation(string $sourceFilename, $expectedSourceFilename, RelationOneToOne $oneToOne)
+    public function testAddOneToOneRelation(string $sourceFilename, $expectedSourceFilename, RelationOneToOne $oneToOne): void
     {
-        $source = file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename);
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/add_one_to_one_relation/'.$expectedSourceFilename);
+        $sourcePath = __DIR__.'/fixtures/source';
+        $expectedPath = __DIR__.'/fixtures/add_one_to_one_relation';
 
-        $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addOneToOneRelation($oneToOne);
-
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
+        $this->runAddOneToOneRelation(
+            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            $oneToOne
+        );
     }
 
-    public function getAddOneToOneRelationTests()
+    private function runAddOneToOneRelation(string $source, string $expected, RelationOneToOne $oneToOne): void
     {
+        $manipulator = new ClassSourceManipulator($source, false);
+        $manipulator->addOneToOneRelation($oneToOne);
+
+        $this->assertSame($expected, $manipulator->getSourceCode());
+    }
+
+    public function getAddOneToOneRelationTests(): \Generator
+    {
+        /** @legacy - Remove when Doctrine/ORM 2.x is no longer supported. */
+        $isLegacy = !class_exists(FieldMapping::class);
+
         yield 'one_to_one_owning' => [
             'User_simple.php',
             'User_simple_owning.php',
-            (new RelationOneToOne())
-                ->setPropertyName('userProfile')
-                ->setTargetClassName('App\Entity\UserProfile')
-                ->setTargetPropertyName('user')
-                ->setIsNullable(true)
-                ->setIsOwning(true),
+            new RelationOneToOne(
+                propertyName: 'userProfile',
+                targetClassName: \App\Entity\UserProfile::class,
+                targetPropertyName: 'user',
+                isOwning: true,
+                isNullable: true,
+            ),
         ];
 
         // a relationship to yourself - return type is self
         yield 'one_to_one_owning_self' => [
             'User_simple.php',
-            'User_simple_self.php',
-            (new RelationOneToOne())
-                ->setPropertyName('embeddedUser')
-                ->setTargetClassName('App\Entity\User')
-                ->setTargetPropertyName('user')
-                ->setIsNullable(true)
-                ->setIsOwning(true),
+            $isLegacy ? 'legacy/User_simple_self.php' : 'User_simple_self.php',
+            new RelationOneToOne(
+                propertyName: 'embeddedUser',
+                targetClassName: \App\Entity\User::class,
+                targetPropertyName: 'user',
+                isOwning: true,
+                isNullable: true,
+            ),
         ];
 
         yield 'one_to_one_inverse' => [
             'UserProfile_simple.php',
             'UserProfile_simple_inverse.php',
-            (new RelationOneToOne())
-                ->setPropertyName('user')
-                ->setTargetClassName('App\Entity\User')
-                ->setTargetPropertyName('userProfile')
-                ->setIsNullable(true)
-                ->setIsOwning(false),
+            new RelationOneToOne(
+                propertyName: 'user',
+                targetClassName: \App\Entity\User::class,
+                targetPropertyName: 'userProfile',
+                isNullable: true,
+            ),
         ];
 
         yield 'one_to_one_inverse_not_nullable' => [
             'UserProfile_simple.php',
             'UserProfile_simple_inverse_not_nullable.php',
-            (new RelationOneToOne())
-                ->setPropertyName('user')
-                ->setTargetClassName('App\Entity\User')
-                ->setTargetPropertyName('userProfile')
-                ->setIsNullable(false)
-                ->setIsOwning(false),
+            new RelationOneToOne(
+                propertyName: 'user',
+                targetClassName: \App\Entity\User::class,
+                targetPropertyName: 'userProfile',
+            ),
         ];
 
         yield 'one_to_one_no_inverse' => [
             'User_simple.php',
             'User_simple_no_inverse.php',
-            (new RelationOneToOne())
-                ->setPropertyName('userProfile')
-                ->setTargetClassName('App\Entity\UserProfile')
-                //->setTargetPropertyName('user')
-                ->setIsNullable(true)
-                ->setIsOwning(true)
-                ->setMapInverseRelation(false),
+            new RelationOneToOne(
+                propertyName: 'userProfile',
+                targetClassName: \App\Entity\UserProfile::class,
+                mapInverseRelation: false,
+                isOwning: true,
+                isNullable: true,
+            ),
         ];
 
         yield 'one_to_one_no_inverse_not_nullable' => [
             'User_simple.php',
             'User_simple_no_inverse_not_nullable.php',
-            (new RelationOneToOne())
-                ->setPropertyName('userProfile')
-                ->setTargetClassName('App\Entity\UserProfile')
-                //->setTargetPropertyName('user')
-                ->setIsNullable(false)
-                ->setIsOwning(true)
-                ->setMapInverseRelation(false),
+            new RelationOneToOne(
+                propertyName: 'userProfile',
+                targetClassName: \App\Entity\UserProfile::class,
+                mapInverseRelation: false,
+                isOwning: true,
+            ),
         ];
 
         yield 'avoid_duplicate_use_statement' => [
             'User_with_use_statements.php',
             'User_with_use_statements_avoid_duplicate_use.php',
-            (new RelationOneToOne())
-                ->setPropertyName('userProfile')
-                ->setTargetClassName('App\OtherEntity\UserProfile')
-                ->setTargetPropertyName('user')
-                ->setIsNullable(true)
-                ->setIsOwning(true),
+            new RelationOneToOne(
+                propertyName: 'userProfile',
+                targetClassName: \App\OtherEntity\UserProfile::class,
+                targetPropertyName: 'user',
+                isOwning: true,
+                isNullable: true,
+            ),
         ];
 
         yield 'avoid_duplicate_use_statement_with_alias' => [
             'User_with_use_statements.php',
             'User_with_use_statements_avoid_duplicate_use_alias.php',
-            (new RelationOneToOne())
-                ->setPropertyName('category')
-                ->setTargetClassName('App\OtherEntity\Category')
-                ->setTargetPropertyName('user')
-                ->setIsNullable(true)
-                ->setIsOwning(true),
+            new RelationOneToOne(
+                propertyName: 'category',
+                targetClassName: \App\OtherEntity\Category::class,
+                targetPropertyName: 'user',
+                isOwning: true,
+                isNullable: true,
+            ),
         ];
     }
 
-    public function testGenerationWithTabs()
-    {
-        $source = file_get_contents(__DIR__.'/fixtures/source/ProductWithTabs.php');
-        $expectedSource = file_get_contents(__DIR__.'/fixtures/with_tabs/ProductWithTabs.php');
-
-        $manipulator = new ClassSourceManipulator($source);
-
-        $method = (new \ReflectionObject($manipulator))->getMethod('addProperty');
-        $method->setAccessible(true);
-        $method->invoke($manipulator, 'name', ['@ORM\Column(type="string", length=255)']);
-
-        $method = (new \ReflectionObject($manipulator))->getMethod('addGetter');
-        $method->setAccessible(true);
-        $method->invoke($manipulator, 'id', 'int', false);
-
-        $this->assertSame($expectedSource, $manipulator->getSourceCode());
-    }
-
-    public function testAddInterface()
+    public function testAddInterface(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/implements_interface/User_simple.php');
@@ -574,7 +664,7 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddInterfaceToClassWithOtherInterface()
+    public function testAddInterfaceToClassWithOtherInterface(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_simple_with_interface.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/implements_interface/User_simple_with_interface.php');
@@ -585,7 +675,7 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddMethodBuilder()
+    public function testAddMethodBuilder(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_method/UserEmpty_with_newMethod.php');
@@ -599,15 +689,15 @@ class ClassSourceManipulatorTest extends TestCase
             [
                 (new Param('someParam'))->setType('string')->getNode(),
             ], <<<'CODE'
-<?php
-$this->someParam = $someParam;
-CODE
-);
+                <?php
+                $this->someParam = $someParam;
+                CODE
+        );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddMethodWithBody()
+    public function testAddMethodWithBody(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/EmptyController.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_method/Controller_with_action.php');
@@ -616,154 +706,22 @@ CODE
 
         $methodBuilder = $manipulator->createMethodBuilder('action', 'JsonResponse', false, ['@Route("/action", name="app_action")']);
         $methodBuilder->addParam(
-            (new Param('param'))->setTypeHint('string')
+            (new Param('param'))->setType('string')
         );
         $manipulator->addMethodBody($methodBuilder,
-<<<'CODE'
-<?php
-return new JsonResponse(['param' => $param]);
-CODE
+            <<<'CODE'
+                <?php
+                return new JsonResponse(['param' => $param]);
+                CODE
         );
         $manipulator->addMethodBuilder($methodBuilder);
         $manipulator->addUseStatementIfNecessary('Symfony\\Component\\HttpFoundation\\JsonResponse');
-        $manipulator->addUseStatementIfNecessary('Symfony\\Component\\Routing\\Annotation\\Route');
+        $manipulator->addUseStatementIfNecessary('Symfony\\Component\\Routing\\Attribute\\Route');
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    /**
-     * @dataProvider getTestsForAddAnnotationToClass
-     */
-    public function testAddAnnotationToClass(string $source, string $expectedSource)
-    {
-        $manipulator = new ClassSourceManipulator($source);
-        $manipulator->addAnnotationToClass('Bar\\SomeAnnotation', [
-            'message' => 'Foo',
-        ]);
-
-        $this->assertEquals($expectedSource, $manipulator->getSourceCode());
-    }
-
-    public function getTestsForAddAnnotationToClass()
-    {
-        yield 'no_doc_block' => [
-<<<EOF
-<?php
-
-namespace Acme;
-
-class Foo
-{
-}
-EOF
-,
-<<<EOF
-<?php
-
-namespace Acme;
-
-use Bar\SomeAnnotation;
-
-/**
- * @SomeAnnotation(message="Foo")
- */
-class Foo
-{
-}
-EOF
-];
-
-        yield 'normal_doc_block' => [
-<<<EOF
-<?php
-
-namespace Acme;
-
-/**
- * I'm a class!
- */
-class Foo
-{
-}
-EOF
-,
-<<<EOF
-<?php
-
-namespace Acme;
-
-use Bar\SomeAnnotation;
-
-/**
- * I'm a class!
- * @SomeAnnotation(message="Foo")
- */
-class Foo
-{
-}
-EOF
-];
-
-        yield 'simple_inline_doc_block' => [
-<<<EOF
-<?php
-
-namespace Acme;
-
-/** I'm a class! */
-class Foo
-{
-}
-EOF
-,
-<<<EOF
-<?php
-
-namespace Acme;
-
-use Bar\SomeAnnotation;
-
-/**
- * I'm a class!
- * @SomeAnnotation(message="Foo")
- */
-class Foo
-{
-}
-EOF
-        ];
-
-        yield 'weird_inline_doc_block' => [
-<<<EOF
-<?php
-
-namespace Acme;
-
-/** **I'm a class!** ***/
-class Foo
-{
-}
-EOF
-,
-<<<EOF
-<?php
-
-namespace Acme;
-
-use Bar\SomeAnnotation;
-
-/**
- * **I'm a class!**
- * @SomeAnnotation(message="Foo")
- ***/
-class Foo
-{
-}
-EOF
-];
-    }
-
-    public function testAddTraitInEmptyClass()
+    public function testAddTraitInEmptyClass(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_only_trait.php');
@@ -775,7 +733,7 @@ EOF
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddTraitWithProperty()
+    public function testAddTraitWithProperty(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_prop_trait.php');
@@ -787,7 +745,7 @@ EOF
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddTraitWithConstant()
+    public function testAddTraitWithConstant(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_const_trait.php');
@@ -799,7 +757,7 @@ EOF
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddTraitWithTrait()
+    public function testAddTraitWithTrait(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_trait.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
@@ -811,7 +769,7 @@ EOF
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddTraitAlReadyExists()
+    public function testAddTraitAlReadyExists(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_trait/User_with_trait_trait.php');
@@ -823,7 +781,7 @@ EOF
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddConstructor()
+    public function testAddConstructor(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserEmpty_with_constructor.php');
@@ -831,19 +789,19 @@ EOF
         $manipulator = new ClassSourceManipulator($source);
 
         $manipulator->addConstructor([
-                (new Param('someObjectParam'))->setType('object')->getNode(),
-                (new Param('someStringParam'))->setType('string')->getNode(),
-                ], <<<'CODE'
-<?php
-$this->someObjectParam = $someObjectParam;
-$this->someMethod($someStringParam);
-CODE
+            (new Param('someObjectParam'))->setType('object')->getNode(),
+            (new Param('someStringParam'))->setType('string')->getNode(),
+        ], <<<'CODE'
+            <?php
+            $this->someObjectParam = $someObjectParam;
+            $this->someMethod($someStringParam);
+            CODE
         );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddConstructorInClassContainsPropsAndMethods()
+    public function testAddConstructorInClassContainsPropsAndMethods(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_simple.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/UserSimple_with_constructor.php');
@@ -854,16 +812,16 @@ CODE
             (new Param('someObjectParam'))->setType('object')->getNode(),
             (new Param('someStringParam'))->setType('string')->getNode(),
         ], <<<'CODE'
-<?php
-$this->someObjectParam = $someObjectParam;
-$this->someMethod($someStringParam);
-CODE
+            <?php
+            $this->someObjectParam = $someObjectParam;
+            $this->someMethod($someStringParam);
+            CODE
         );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddConstructorInClassContainsOnlyConstants()
+    public function testAddConstructorInClassContainsOnlyConstants(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_const.php');
         $expectedSource = file_get_contents(__DIR__.'/fixtures/add_constructor/User_with_constructor_constante.php');
@@ -874,16 +832,16 @@ CODE
             (new Param('someObjectParam'))->setType('object')->getNode(),
             (new Param('someStringParam'))->setType('string')->getNode(),
         ], <<<'CODE'
-<?php
-$this->someObjectParam = $someObjectParam;
-$this->someMethod($someStringParam);
-CODE
+            <?php
+            $this->someObjectParam = $someObjectParam;
+            $this->someMethod($someStringParam);
+            CODE
         );
 
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
-    public function testAddConstructorInClassContainsConstructor()
+    public function testAddConstructorInClassContainsConstructor(): void
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_with_constructor.php');
 
@@ -896,10 +854,10 @@ CODE
             (new Param('someObjectParam'))->setType('object')->getNode(),
             (new Param('someStringParam'))->setType('string')->getNode(),
         ], <<<'CODE'
-<?php
-$this->someObjectParam = $someObjectParam;
-$this->someMethod($someStringParam);
-CODE
+            <?php
+            $this->someObjectParam = $someObjectParam;
+            $this->someMethod($someStringParam);
+            CODE
         );
     }
 }

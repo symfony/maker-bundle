@@ -5,9 +5,7 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=UserRepository::class)
- */
+#[ORM\Entity(repositoryClass: UserRepository::class)]
 class User
 // extra space to keep things interesting
 {
@@ -20,7 +18,7 @@ class User
      * @param string $fooProp
      * @internal
      */
-    public function setFooProp(?string $fooProp): self
+    public function setFooProp(?string $fooProp): static
     {
         $this->fooProp = $fooProp;
 

@@ -4,9 +4,9 @@ namespace Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity;
 
 class UserAvatar
 {
-    private $id;
+    private ?int $id = null;
 
-    private $user;
+    private ?UserXml $user = null;
 
     public function getId(): ?int
     {
@@ -18,7 +18,7 @@ class UserAvatar
         return $this->user;
     }
 
-    public function setUser(?UserXml $user): self
+    public function setUser(?UserXml $user): static
     {
         $this->user = $user;
 

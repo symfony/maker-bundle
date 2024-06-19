@@ -6,28 +6,25 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class Client extends BaseClient
 {
     use TimestampableTrait;
 
     /**
-     * @ORM\Column(type="string")
      * @var string
      */
-    private $apiKey;
+    #[ORM\Column]
+    private ?string $apiKey = null;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Tag::class)
+     * @var Collection<int, Tag>
      */
-    private $tags;
+    #[ORM\ManyToMany(targetEntity: Tag::class)]
+    private Collection $tags;
 
-    /**
-     * @ORM\Embedded(class=Embed::class)
-     */
-    private $embed;
+    #[ORM\Embedded()]
+    private Embed $embed;
 
     public function __construct()
     {
@@ -41,7 +38,7 @@ class Client extends BaseClient
         return $this->embed;
     }
 
-    public function setEmbed(Embed $embed): self
+    public function setEmbed(Embed $embed): static
     {
         $this->embed = $embed;
 
@@ -53,7 +50,7 @@ class Client extends BaseClient
         return $this->apiKey;
     }
 
-    public function setApiKey(string $apiKey): self
+    public function setApiKey(string $apiKey): static
     {
         $this->apiKey = $apiKey;
 
@@ -61,27 +58,25 @@ class Client extends BaseClient
     }
 
     /**
-     * @return Collection|Tag[]
+     * @return Collection<int, Tag>
      */
     public function getTags(): Collection
     {
         return $this->tags;
     }
 
-    public function addTag(Tag $tag): self
+    public function addTag(Tag $tag): static
     {
         if (!$this->tags->contains($tag)) {
-            $this->tags[] = $tag;
+            $this->tags->add($tag);
         }
 
         return $this;
     }
 
-    public function removeTag(Tag $tag): self
+    public function removeTag(Tag $tag): static
     {
-        if ($this->tags->contains($tag)) {
-            $this->tags->removeElement($tag);
-        }
+        $this->tags->removeElement($tag);
 
         return $this;
     }

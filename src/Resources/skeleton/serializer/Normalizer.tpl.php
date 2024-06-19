@@ -2,37 +2,40 @@
 
 namespace <?= $namespace; ?>;
 
-<?= ($cacheable_interface = interface_exists('Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface')) ? "use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;\n" : '' ?>
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+<?= $use_statements; ?>
 
-class <?= $class_name ?> implements NormalizerInterface<?= $cacheable_interface ? ', CacheableSupportsMethodInterface' : '' ?><?= "\n" ?>
+class <?= $class_name ?> implements NormalizerInterface
 {
-    private $normalizer;
-
-    public function __construct(ObjectNormalizer $normalizer)
-    {
-        $this->normalizer = $normalizer;
+    public function __construct(
+        #[Autowire(service: 'serializer.normalizer.object')]
+        private NormalizerInterface $normalizer
+    ) {
     }
 
-    public function normalize($object, $format = null, array $context = array()): array
+    public function normalize($object, string $format = null, array $context = []): array
     {
         $data = $this->normalizer->normalize($object, $format, $context);
 
-        // Here: add, edit, or delete some data
+        // TODO: add, edit, or delete some data
 
         return $data;
     }
 
-    public function supportsNormalization($data, $format = null): bool
+    public function supportsNormalization($data, string $format = null, array $context = []): bool
     {
-        return $data instanceof \App\Entity\BlogPost;
+<?php if ($entity_exists): ?>
+        return $data instanceof <?= $entity_name ?>;
+<?php else: ?>
+        // TODO: return $data instanceof Object
+<?php endif ?>
     }
-<?php if ($cacheable_interface): ?>
 
-    public function hasCacheableSupportsMethod(): bool
+    public function getSupportedTypes(?string $format): array
     {
-        return true;
+<?php if ($entity_exists): ?>
+        return [<?= $entity_name ?>::class => true];
+<?php else: ?>
+        // TODO: return [Object::class => true];
+<?php endif ?>
     }
-<?php endif; ?>
 }

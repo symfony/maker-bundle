@@ -6,22 +6,19 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class User
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column()]
+    private ?int $id = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=UserAvatarPhoto::class, mappedBy="user")
+     * @var Collection<int, UserAvatarPhoto>
      */
-    private $avatarPhotos;
+    #[ORM\OneToMany(targetEntity: UserAvatarPhoto::class, mappedBy: 'user')]
+    private Collection $avatarPhotos;
 
     public function __construct()
     {
@@ -34,27 +31,26 @@ class User
     }
 
     /**
-     * @return Collection|UserAvatarPhoto[]
+     * @return Collection<int, UserAvatarPhoto>
      */
     public function getAvatarPhotos(): Collection
     {
         return $this->avatarPhotos;
     }
 
-    public function addAvatarPhoto(UserAvatarPhoto $avatarPhoto): self
+    public function addAvatarPhoto(UserAvatarPhoto $avatarPhoto): static
     {
         if (!$this->avatarPhotos->contains($avatarPhoto)) {
-            $this->avatarPhotos[] = $avatarPhoto;
+            $this->avatarPhotos->add($avatarPhoto);
             $avatarPhoto->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeAvatarPhoto(UserAvatarPhoto $avatarPhoto): self
+    public function removeAvatarPhoto(UserAvatarPhoto $avatarPhoto): static
     {
-        if ($this->avatarPhotos->contains($avatarPhoto)) {
-            $this->avatarPhotos->removeElement($avatarPhoto);
+        if ($this->avatarPhotos->removeElement($avatarPhoto)) {
             // set the owning side to null (unless already changed)
             if ($avatarPhoto->getUser() === $this) {
                 $avatarPhoto->setUser(null);

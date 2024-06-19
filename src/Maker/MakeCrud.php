@@ -12,16 +12,22 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
-use Doctrine\Common\Inflector\Inflector as LegacyInflector;
+use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Maker\Common\CanGenerateTestsTrait;
 use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -29,7 +35,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Validation;
 
@@ -38,20 +46,15 @@ use Symfony\Component\Validator\Validation;
  */
 final class MakeCrud extends AbstractMaker
 {
-    private $doctrineHelper;
+    use CanGenerateTestsTrait;
 
-    private $formTypeRenderer;
+    private Inflector $inflector;
+    private string $controllerClassName;
+    private bool $generateTests = false;
 
-    private $inflector;
-
-    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer)
+    public function __construct(private DoctrineHelper $doctrineHelper, private FormTypeRenderer $formTypeRenderer)
     {
-        $this->doctrineHelper = $doctrineHelper;
-        $this->formTypeRenderer = $formTypeRenderer;
-
-        if (class_exists(InflectorFactory::class)) {
-            $this->inflector = InflectorFactory::create()->build();
-        }
+        $this->inflector = InflectorFactory::create()->build();
     }
 
     public static function getCommandName(): string
@@ -59,21 +62,23 @@ final class MakeCrud extends AbstractMaker
         return 'make:crud';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function configureCommand(Command $command, InputConfiguration $inputConfig)
+    public static function getCommandDescription(): string
+    {
+        return 'Create CRUD for Doctrine entity class';
+    }
+
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->setDescription('Creates CRUD for Doctrine entity class')
             ->addArgument('entity-class', InputArgument::OPTIONAL, sprintf('The class name of the entity to create CRUD (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCrud.txt'))
         ;
 
         $inputConfig->setArgumentAsNonInteractive('entity-class');
+        $this->configureCommandWithTestsOption($command);
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if (null === $input->getArgument('entity-class')) {
             $argument = $command->getDefinition()->getArgument('entity-class');
@@ -87,9 +92,18 @@ final class MakeCrud extends AbstractMaker
 
             $input->setArgument('entity-class', $value);
         }
+
+        $defaultControllerClass = Str::asClassName(sprintf('%s Controller', $input->getArgument('entity-class')));
+
+        $this->controllerClassName = $io->ask(
+            sprintf('Choose a name for your controller class (e.g. <fg=yellow>%s</>)', $defaultControllerClass),
+            $defaultControllerClass
+        );
+
+        $this->interactSetGenerateTests($input, $io);
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $entityClassDetails = $generator->createClassNameDetails(
             Validator::entityExists($input->getArgument('entity-class'), $this->doctrineHelper->getEntitiesForAutocomplete()),
@@ -99,6 +113,7 @@ final class MakeCrud extends AbstractMaker
         $entityDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($entityClassDetails->getFullName());
 
         $repositoryVars = [];
+        $repositoryClassName = EntityManagerInterface::class;
 
         if (null !== $entityDoctrineDetails->getRepositoryClass()) {
             $repositoryClassDetails = $generator->createClassNameDetails(
@@ -107,15 +122,17 @@ final class MakeCrud extends AbstractMaker
                 'Repository'
             );
 
+            $repositoryClassName = $repositoryClassDetails->getFullName();
+
             $repositoryVars = [
-                'repository_full_class_name' => $repositoryClassDetails->getFullName(),
+                'repository_full_class_name' => $repositoryClassName,
                 'repository_class_name' => $repositoryClassDetails->getShortName(),
-                'repository_var' => lcfirst($this->singularize($repositoryClassDetails->getShortName())),
+                'repository_var' => lcfirst($this->inflector->singularize($repositoryClassDetails->getShortName())),
             ];
         }
 
         $controllerClassDetails = $generator->createClassNameDetails(
-            $entityClassDetails->getRelativeNameWithoutSuffix().'Controller',
+            $this->controllerClassName,
             'Controller\\',
             'Controller'
         );
@@ -130,8 +147,8 @@ final class MakeCrud extends AbstractMaker
             ++$iter;
         } while (class_exists($formClassDetails->getFullName()));
 
-        $entityVarPlural = lcfirst($this->pluralize($entityClassDetails->getShortName()));
-        $entityVarSingular = lcfirst($this->singularize($entityClassDetails->getShortName()));
+        $entityVarPlural = lcfirst($this->inflector->pluralize($entityClassDetails->getShortName()));
+        $entityVarSingular = lcfirst($this->inflector->singularize($entityClassDetails->getShortName()));
 
         $entityTwigVarPlural = Str::asTwigVariable($entityVarPlural);
         $entityTwigVarSingular = Str::asTwigVariable($entityVarSingular);
@@ -139,23 +156,36 @@ final class MakeCrud extends AbstractMaker
         $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
         $templatesPath = Str::asFilePath($controllerClassDetails->getRelativeNameWithoutSuffix());
 
+        $useStatements = new UseStatementGenerator([
+            $entityClassDetails->getFullName(),
+            $formClassDetails->getFullName(),
+            $repositoryClassName,
+            AbstractController::class,
+            Request::class,
+            Response::class,
+            Route::class,
+        ]);
+
+        if (EntityManagerInterface::class !== $repositoryClassName) {
+            $useStatements->addUseStatement(EntityManagerInterface::class);
+        }
+
         $generator->generateController(
             $controllerClassDetails->getFullName(),
             'crud/controller/Controller.tpl.php',
             array_merge([
-                    'entity_full_class_name' => $entityClassDetails->getFullName(),
-                    'entity_class_name' => $entityClassDetails->getShortName(),
-                    'form_full_class_name' => $formClassDetails->getFullName(),
-                    'form_class_name' => $formClassDetails->getShortName(),
-                    'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
-                    'route_name' => $routeName,
-                    'templates_path' => $templatesPath,
-                    'entity_var_plural' => $entityVarPlural,
-                    'entity_twig_var_plural' => $entityTwigVarPlural,
-                    'entity_var_singular' => $entityVarSingular,
-                    'entity_twig_var_singular' => $entityTwigVarSingular,
-                    'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
-                ],
+                'use_statements' => $useStatements,
+                'entity_class_name' => $entityClassDetails->getShortName(),
+                'form_class_name' => $formClassDetails->getShortName(),
+                'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
+                'route_name' => $routeName,
+                'templates_path' => $templatesPath,
+                'entity_var_plural' => $entityVarPlural,
+                'entity_twig_var_plural' => $entityTwigVarPlural,
+                'entity_var_singular' => $entityVarSingular,
+                'entity_twig_var_singular' => $entityTwigVarSingular,
+                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
+            ],
                 $repositoryVars
             )
         );
@@ -178,6 +208,7 @@ final class MakeCrud extends AbstractMaker
                 'entity_twig_var_singular' => $entityTwigVarSingular,
                 'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
                 'route_name' => $routeName,
+                'templates_path' => $templatesPath,
             ],
             'index' => [
                 'entity_class_name' => $entityClassDetails->getShortName(),
@@ -190,6 +221,7 @@ final class MakeCrud extends AbstractMaker
             'new' => [
                 'entity_class_name' => $entityClassDetails->getShortName(),
                 'route_name' => $routeName,
+                'templates_path' => $templatesPath,
             ],
             'show' => [
                 'entity_class_name' => $entityClassDetails->getShortName(),
@@ -197,6 +229,7 @@ final class MakeCrud extends AbstractMaker
                 'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
                 'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
                 'route_name' => $routeName,
+                'templates_path' => $templatesPath,
             ],
         ];
 
@@ -208,6 +241,49 @@ final class MakeCrud extends AbstractMaker
             );
         }
 
+        if ($this->shouldGenerateTests()) {
+            $testClassDetails = $generator->createClassNameDetails(
+                $entityClassDetails->getRelativeNameWithoutSuffix(),
+                'Test\\Controller\\',
+                'ControllerTest'
+            );
+
+            $useStatements = new UseStatementGenerator([
+                $entityClassDetails->getFullName(),
+                WebTestCase::class,
+                KernelBrowser::class,
+                $repositoryClassName,
+            ]);
+
+            $useStatements->addUseStatement(EntityRepository::class);
+
+            if (EntityManagerInterface::class !== $repositoryClassName) {
+                $useStatements->addUseStatement(EntityManagerInterface::class);
+            }
+
+            $generator->generateFile(
+                'tests/Controller/'.$testClassDetails->getShortName().'.php',
+                'crud/test/Test.EntityManager.tpl.php',
+                [
+                    'use_statements' => $useStatements,
+                    'entity_full_class_name' => $entityClassDetails->getFullName(),
+                    'entity_class_name' => $entityClassDetails->getShortName(),
+                    'entity_var_singular' => $entityVarSingular,
+                    'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
+                    'route_name' => $routeName,
+                    'class_name' => Str::getShortClassName($testClassDetails->getFullName()),
+                    'namespace' => Str::getNamespace($testClassDetails->getFullName()),
+                    'form_fields' => $entityDoctrineDetails->getFormFields(),
+                    'repository_class_name' => EntityManagerInterface::class,
+                    'form_field_prefix' => strtolower(Str::asSnakeCase($entityTwigVarSingular)),
+                ]
+            );
+
+            if (!class_exists(WebTestCase::class)) {
+                $io->caution('You\'ll need to install the `symfony/test-pack` to execute the tests for your new controller.');
+            }
+        }
+
         $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
@@ -215,10 +291,7 @@ final class MakeCrud extends AbstractMaker
         $io->text(sprintf('Next: Check your new CRUD by going to <fg=yellow>%s/</>', Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix())));
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Route::class,
@@ -242,35 +315,12 @@ final class MakeCrud extends AbstractMaker
 
         $dependencies->addClassDependency(
             DoctrineBundle::class,
-            'orm-pack'
+            'orm'
         );
 
         $dependencies->addClassDependency(
             CsrfTokenManager::class,
             'security-csrf'
         );
-
-        $dependencies->addClassDependency(
-            ParamConverter::class,
-            'annotations'
-        );
-    }
-
-    private function pluralize(string $word): string
-    {
-        if (null !== $this->inflector) {
-            return $this->inflector->pluralize($word);
-        }
-
-        return LegacyInflector::pluralize($word);
-    }
-
-    private function singularize(string $word): string
-    {
-        if (null !== $this->inflector) {
-            return $this->inflector->singularize($word);
-        }
-
-        return LegacyInflector::singularize($word);
     }
 }

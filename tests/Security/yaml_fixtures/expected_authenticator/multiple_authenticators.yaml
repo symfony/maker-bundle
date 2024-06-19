@@ -1,0 +1,12 @@
+security:
+    enable_authenticator_manager: true
+
+    firewalls:
+        main:
+            lazy: true
+            custom_authenticator:
+                - App\Security\SomeOtherAuthenticator
+                - App\Security\AppCustomAuthenticator
+
+            # the entry_point start() method determines what happens when an anonymous user accesses a protected page
+            entry_point: App\Security\AppCustomAuthenticator

@@ -30,7 +30,7 @@ class YamlSourceManipulatorTest extends TestCase
 
         $logger = $this->createLogger();
         // uncomment to enhance debugging
-        //$manipulator->setLogger($logger);
+        // $manipulator->setLogger($logger);
 
         $manipulator->setData($newData);
 
@@ -48,7 +48,7 @@ class YamlSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $actualContents);
     }
 
-    private function getYamlDataTests()
+    private function getYamlDataTests(): \Generator
     {
         $finder = new Finder();
         $finder->in(__DIR__.'/yaml_fixtures')
@@ -56,10 +56,10 @@ class YamlSourceManipulatorTest extends TestCase
             ->name('*.test');
 
         foreach ($finder as $file) {
-            list($source, $changeCode, $expected) = explode('===', $file->getContents());
+            [$source, $changeCode, $expected] = explode('===', $file->getContents());
 
             // Multiline string ends with an \n
-            $source = rtrim($source, "\n");
+            $source = substr_replace($source, '', \strlen($source) - 1);
             $expected = ltrim($expected, "\n");
 
             $data = Yaml::parse($source);
@@ -82,14 +82,14 @@ class YamlSourceManipulatorTest extends TestCase
          */
     }
 
-    public function getYamlDataTestsUnixSlashes()
+    public function getYamlDataTestsUnixSlashes(): \Generator
     {
         foreach ($this->getYamlDataTests() as $key => $data) {
             yield 'unix_'.$key => $data;
         }
     }
 
-    public function getYamlDataTestsWindowsSlashes()
+    public function getYamlDataTestsWindowsSlashes(): \Generator
     {
         foreach ($this->getYamlDataTests() as $key => $data) {
             $data['source'] = str_replace("\n", "\r\n", $data['source']);
@@ -104,12 +104,12 @@ class YamlSourceManipulatorTest extends TestCase
             $maxLen = max(array_map('strlen', array_keys($context)));
 
             foreach ($context as $key => $val) {
-                $message .= sprintf(sprintf(
+                $message .= sprintf(
                     "\n    %s%s: %s",
                     str_repeat(' ', $maxLen - \strlen($key)),
                     $key,
                     $val
-                ));
+                );
             }
 
             return $message."\n\n";

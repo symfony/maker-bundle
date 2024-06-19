@@ -16,75 +16,74 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class MigrationDiffFilteredOutput implements OutputInterface
 {
-    private $output;
-    private $buffer = '';
-    private $previousLineWasRemoved = false;
+    private string $buffer = '';
+    private bool $previousLineWasRemoved = false;
 
-    public function __construct(OutputInterface $output)
-    {
-        $this->output = $output;
+    public function __construct(
+        private OutputInterface $output,
+    ) {
     }
 
-    public function write($messages, $newline = false, $options = 0)
+    public function write($messages, bool $newline = false, $options = 0): void
     {
         $messages = $this->filterMessages($messages, $newline);
 
         $this->output->write($messages, $newline, $options);
     }
 
-    public function writeln($messages, $options = 0)
+    public function writeln($messages, int $options = 0): void
     {
         $messages = $this->filterMessages($messages, true);
 
         $this->output->writeln($messages, $options);
     }
 
-    public function setVerbosity($level)
+    public function setVerbosity(int $level): void
     {
         $this->output->setVerbosity($level);
     }
 
-    public function getVerbosity()
-    {
-        return $this->output->getVerbosity();
-    }
-
-    public function isQuiet()
-    {
-        return $this->output->isQuiet();
-    }
-
-    public function isVerbose()
-    {
-        return $this->output->isVerbose();
-    }
-
-    public function isVeryVerbose()
-    {
-        return $this->output->isVeryVerbose();
-    }
-
-    public function isDebug()
-    {
-        return $this->output->isDebug();
-    }
-
-    public function setDecorated($decorated)
+    public function setDecorated(bool $decorated): void
     {
         $this->output->setDecorated($decorated);
     }
 
-    public function isDecorated()
+    public function getVerbosity(): int
+    {
+        return $this->output->getVerbosity();
+    }
+
+    public function isQuiet(): bool
+    {
+        return $this->output->isQuiet();
+    }
+
+    public function isVerbose(): bool
+    {
+        return $this->output->isVerbose();
+    }
+
+    public function isVeryVerbose(): bool
+    {
+        return $this->output->isVeryVerbose();
+    }
+
+    public function isDebug(): bool
+    {
+        return $this->output->isDebug();
+    }
+
+    public function isDecorated(): bool
     {
         return $this->output->isDecorated();
     }
 
-    public function setFormatter(OutputFormatterInterface $formatter)
+    public function setFormatter(OutputFormatterInterface $formatter): void
     {
         $this->output->setFormatter($formatter);
     }
 
-    public function getFormatter()
+    public function getFormatter(): OutputFormatterInterface
     {
         return $this->output->getFormatter();
     }
@@ -110,7 +109,7 @@ class MigrationDiffFilteredOutput implements OutputInterface
             $this->buffer .= $message;
 
             if ($newLine) {
-                $this->buffer .= PHP_EOL;
+                $this->buffer .= \PHP_EOL;
             }
 
             if ($this->previousLineWasRemoved && !trim($message)) {
@@ -123,7 +122,7 @@ class MigrationDiffFilteredOutput implements OutputInterface
 
             $this->previousLineWasRemoved = false;
             foreach ($hiddenPhrases as $hiddenPhrase) {
-                if (false !== strpos($message, $hiddenPhrase)) {
+                if (str_contains($message, $hiddenPhrase)) {
                     $this->previousLineWasRemoved = true;
                     unset($messages[$key]);
 

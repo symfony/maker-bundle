@@ -6,17 +6,15 @@ use Foo\Entity\Category;
 
 class User
 {
-    /**
-     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="foods")
-     */
-    private $category;
+    #[ORM\ManyToOne(inversedBy: 'foods')]
+    private ?Category $category = null;
 
     public function getCategory(): ?Category
     {
         return $this->category;
     }
 
-    public function setCategory(?Category $category): self
+    public function setCategory(?Category $category): static
     {
         $this->category = $category;
 

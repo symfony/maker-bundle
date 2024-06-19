@@ -13,18 +13,26 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeVoter;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
+use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
 class MakeVoterTest extends MakerTestCase
 {
-    public function getTestDetails()
+    protected function getMakerClass(): string
     {
-        yield 'voter' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeVoter::class),
-            [
-                // voter class name
-                'FooBar',
-            ]),
+        return MakeVoter::class;
+    }
+
+    public function getTestDetails(): \Generator
+    {
+        yield 'it_makes_voter' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // voter class name
+                        'FooBar',
+                    ]
+                );
+            }),
         ];
     }
 }

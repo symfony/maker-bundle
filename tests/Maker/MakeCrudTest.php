@@ -13,81 +13,203 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeCrud;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
+use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
+use Symfony\Component\Yaml\Yaml;
 
 class MakeCrudTest extends MakerTestCase
 {
-    public function getTestDetails()
+    protected function getMakerClass(): string
     {
-        yield 'crud_basic' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeCrud::class),
-            [
-                // entity class name
-                'SweetFood',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
-            // need for crud web tests
-            ->configureDatabase()
-            ->assert(function (string $output, string $directory) {
-                $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
-                $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
-            })
-            // workaround for segfault in PHP 7.1 CI :/
-            ->setRequiredPhpVersion(70200),
+        return MakeCrud::class;
+    }
+
+    public function getTestDetails(): \Generator
+    {
+        yield 'it_generates_basic_crud' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-crud/SweetFood.php',
+                    'src/Entity/SweetFood.php'
+                );
+
+                $output = $runner->runMaker([
+                    'SweetFood', // entity class name
+                    '',          // default controller,
+                    'n',         // Generate Tests
+                ]);
+
+                $this->assertStringContainsString('src/Controller/SweetFoodController.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+
+                $this->runCrudTest($runner, 'it_generates_basic_crud.php');
+            }),
         ];
 
-        yield 'crud_basic_in_custom_root_namespace' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeCrud::class),
-            [
-                // entity class name
-                'SweetFood',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudInCustomRootNamespace')
+        yield 'it_generates_crud_with_custom_controller' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-crud/SweetFood.php',
+                    'src/Entity/SweetFood.php'
+                );
+
+                $output = $runner->runMaker([
+                    'SweetFood',                // entity class name
+                    'SweetFoodAdminController', // default controller,
+                    'y',                        // Generate Tests
+                ]);
+
+                $this->assertStringContainsString('src/Controller/SweetFoodAdminController.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+
+                $this->runCrudTest($runner, 'it_generates_crud_with_custom_controller.php');
+            }),
+        ];
+
+        yield 'it_generates_crud_with_tests' => [$this->createMakerTest()
+            ->addExtraDependencies('symfony/test-pack')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-crud/SweetFood.php',
+                    'src/Entity/SweetFood.php'
+                );
+
+                $output = $runner->runMaker([
+                    'SweetFood', // Entity Class Name
+                    '',          // Default Controller,
+                    'y',         // Generate Tests
+                ]);
+
+                $this->assertStringContainsString('src/Controller/SweetFoodController.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('tests/Controller/SweetFoodControllerTest.php', $output);
+
+                $this->runCrudTest($runner, 'it_generates_basic_crud.php');
+            }),
+        ];
+
+        yield 'it_generates_crud_custom_repository_with_test' => [$this->createMakerTest()
+            ->addExtraDependencies('symfony/test-pack')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-crud/SweetFoodCustomRepository.php',
+                    'src/Entity/SweetFood.php'
+                );
+
+                $runner->copy(
+                    'make-crud/SweetFoodRepository.php',
+                    'src/Repository/SweetFoodRepository.php'
+                );
+
+                $output = $runner->runMaker([
+                    'SweetFood', // Entity Class Name
+                    '',          // Default Controller,
+                    'y',         // Generate Tests
+                ]);
+
+                $this->assertStringContainsString('src/Controller/SweetFoodController.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('tests/Controller/SweetFoodControllerTest.php', $output);
+
+                $this->runCrudTest($runner, 'it_generates_basic_crud.php');
+            }),
+        ];
+
+        yield 'it_generates_crud_with_custom_root_namespace' => [$this->createMakerTest()
             ->changeRootNamespace('Custom')
-            // need for crud web tests
-            ->configureDatabase()
-            ->assert(function (string $output, string $directory) {
-                $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
-                $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
-            })
-            // workaround for segfault in PHP 7.1 CI :/
-            ->setRequiredPhpVersion(70200),
+            ->run(function (MakerTestRunner $runner) {
+                $runner->writeFile(
+                    'config/packages/dev/maker.yaml',
+                    Yaml::dump(['maker' => ['root_namespace' => 'Custom']])
+                );
+
+                // Symfony 6.2 sets the path and namespace for router resources
+                $runner->modifyYamlFile('config/routes.yaml', function (array $config) {
+                    if (!isset($config['controllers']['resource']['namespace'])) {
+                        return $config;
+                    }
+
+                    $config['controllers']['resource']['namespace'] = 'Custom\Controller';
+
+                    return $config;
+                });
+
+                $runner->copy(
+                    'make-crud/SweetFood-custom-namespace.php',
+                    'src/Entity/SweetFood.php'
+                );
+
+                $output = $runner->runMaker([
+                    'SweetFood', // entity class name
+                    '',          // default controller,
+                    'n',         // Generate Tests
+                ]);
+
+                $this->assertStringContainsString('src/Controller/SweetFoodController.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+
+                $this->runCrudTest($runner, 'it_generates_crud_with_custom_root_namespace.php');
+            }),
         ];
 
-        yield 'crud_repository' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeCrud::class),
-            [
-                // entity class name
-                'SweetFood',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrudRepository')
-            // need for crud web tests
-            ->configureDatabase()
-            ->assert(function (string $output, string $directory) {
-                $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
-                $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
-            })
-            // workaround for segfault in PHP 7.1 CI :/
-            ->setRequiredPhpVersion(70200),
+        yield 'it_generates_crud_using_custom_repository' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-crud/SweetFoodCustomRepository.php',
+                    'src/Entity/SweetFood.php'
+                );
+                $runner->copy(
+                    'make-crud/SweetFoodRepository.php',
+                    'src/Repository/SweetFoodRepository.php'
+                );
+
+                $output = $runner->runMaker([
+                    'SweetFood', // entity class name
+                    '',          // default controller,
+                    'n',         // Generate Tests
+                ]);
+
+                $this->assertStringContainsString('src/Controller/SweetFoodController.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+
+                $this->runCrudTest($runner, 'it_generates_basic_crud.php');
+                self::assertFileEquals(
+                    sprintf('%s/fixtures/make-crud/expected/WithCustomRepository.php', \dirname(__DIR__)),
+                    $runner->getPath('src/Controller/SweetFoodController.php')
+                );
+            }),
         ];
 
-        yield 'crud_with_no_base' => [MakerTestDetails::createTest(
-            $this->getMakerInstance(MakeCrud::class),
-            [
-                // entity class name
-                'SweetFood',
-            ])
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeCrud')
-            // need for crud web tests
-            ->addExtraDependencies('symfony/css-selector')
-            ->configureDatabase()
-            ->deleteFile('templates/base.html.twig')
-            ->assert(function (string $output, string $directory) {
-                $this->assertStringContainsString('created: src/Controller/SweetFoodController.php', $output);
-                $this->assertStringContainsString('created: src/Form/SweetFoodType.php', $output);
-            })
-            // workaround for segfault in PHP 7.1 CI :/
-            ->setRequiredPhpVersion(70200),
+        yield 'it_generates_crud_with_no_base_template' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-crud/SweetFood.php',
+                    'src/Entity/SweetFood.php'
+                );
+
+                $runner->deleteFile('templates/base.html.twig');
+
+                $output = $runner->runMaker([
+                    'SweetFood', // entity class name
+                    '',          // default controller,
+                    'n',         // Generate Tests
+                ]);
+
+                $this->assertStringContainsString('src/Controller/SweetFoodController.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+
+                $this->runCrudTest($runner, 'it_generates_basic_crud.php');
+            }),
         ];
+    }
+
+    private function runCrudTest(MakerTestRunner $runner, string $filename): void
+    {
+        $runner->copy(
+            'make-crud/tests/'.$filename,
+            'tests/GeneratedCrudControllerTest.php'
+        );
+
+        $runner->configureDatabase();
+        $runner->runTests();
     }
 }

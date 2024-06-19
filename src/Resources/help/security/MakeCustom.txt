@@ -1,0 +1,8 @@
+The <info>%command.name%</info> command generates a simple custom authenticator
+class based off the example provided in:
+
+<href=https://symfony.com/doc/current/security/custom_authenticator.html>https://symfony.com/doc/current/security/custom_authenticator.html</>
+
+This will also update your <info>security.yaml</info> for the new custom authenticator.
+
+<info>php %command.full_name%</info>

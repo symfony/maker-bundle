@@ -12,7 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Doctrine;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\Reflection\RuntimeReflectionProperty;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -31,27 +31,13 @@ use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\RouteCollectionBuilder;
 
-/**
- * @requires PHP 7.1
- */
 class EntityRegeneratorTest extends TestCase
 {
     /**
      * @dataProvider getRegenerateEntitiesTests
      */
-    public function testRegenerateEntities(string $expectedDirName, bool $overwrite)
+    public function testRegenerateEntities(string $expectedDirName, bool $overwrite): void
     {
-        /*
-         * Prior to symfony/doctrine-bridge 5.0 (which require
-         * PHP 7.3), the deprecated Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain
-         * is used when our test container. This shows up as a *direct*
-         * deprecation. We're choosing to silence it here, instead of
-         * ignoring all direct deprecations.
-         */
-        if (\PHP_VERSION_ID < 70300) {
-            $this->setGroups(['@legacy']);
-        }
-
         $kernel = new TestEntityRegeneratorKernel('dev', true);
         $this->doTestRegeneration(
             __DIR__.'/fixtures/source_project',
@@ -63,7 +49,7 @@ class EntityRegeneratorTest extends TestCase
         );
     }
 
-    public function getRegenerateEntitiesTests()
+    public function getRegenerateEntitiesTests(): \Generator
     {
         yield 'regenerate_no_overwrite' => [
             'expected_no_overwrite',
@@ -76,7 +62,7 @@ class EntityRegeneratorTest extends TestCase
         ];
     }
 
-    public function testXmlRegeneration()
+    public function testXmlRegeneration(): void
     {
         $kernel = new TestXmlEntityRegeneratorKernel('dev', true);
         $this->doTestRegeneration(
@@ -89,7 +75,7 @@ class EntityRegeneratorTest extends TestCase
         );
     }
 
-    private function doTestRegeneration(string $sourceDir, Kernel $kernel, string $namespace, string $expectedDirName, bool $overwrite, string $targetDirName)
+    private function doTestRegeneration(string $sourceDir, Kernel $kernel, string $namespace, string $expectedDirName, bool $overwrite, string $targetDirName): void
     {
         $fs = new Filesystem();
         $tmpDir = __DIR__.'/../tmp/'.$targetDirName;
@@ -115,7 +101,6 @@ class EntityRegeneratorTest extends TestCase
         $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
         $generator = new Generator($fileManager, 'App\\', true);
         $entityClassGenerator = new EntityClassGenerator($generator, $doctrineHelper);
-        $entityClassGenerator->setMangerRegistryClassName(ManagerRegistry::class);
         $regenerator = new EntityRegenerator(
             $doctrineHelper,
             $fileManager,
@@ -155,7 +140,7 @@ class TestEntityRegeneratorKernel extends Kernel
 {
     use MicroKernelTrait;
 
-    public function registerBundles()
+    public function registerBundles(): array
     {
         return [
             new FrameworkBundle(),
@@ -163,44 +148,49 @@ class TestEntityRegeneratorKernel extends Kernel
         ];
     }
 
-    protected function configureRoutes(RouteCollectionBuilder $routes)
+    protected function configureRoutes(RouteCollectionBuilder $routes): void
     {
     }
 
-    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
+    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader): void
     {
         $c->loadFromExtension('framework', [
             'secret' => 123,
             'router' => [
                 'utf8' => true,
             ],
+            'http_method_override' => false,
         ]);
 
-        $c->prependExtensionConfig('doctrine', [
-            'dbal' => [
-                'driver' => 'pdo_sqlite',
-                'url' => 'sqlite:///fake',
-            ],
-            'orm' => [
-                'mappings' => [
-                    'EntityRegenerator' => [
-                        'is_bundle' => false,
-                        'type' => 'annotation',
-                        'dir' => '%kernel.project_dir%/src/Entity',
-                        'prefix' => 'Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity',
-                        'alias' => 'EntityRegeneratorApp',
-                    ],
+        $dbal = [
+            'driver' => 'pdo_sqlite',
+            'url' => 'sqlite:///fake',
+        ];
+
+        $orm = [
+            'mappings' => [
+                'EntityRegenerator' => [
+                    'is_bundle' => false,
+                    'dir' => '%kernel.project_dir%/src/Entity',
+                    'prefix' => 'Symfony\Bundle\MakerBundle\Tests\tmp\current_project\src\Entity',
+                    'alias' => 'EntityRegeneratorApp',
+                    'type' => 'attribute',
                 ],
             ],
+        ];
+
+        /* @legacy Remove conditional when doctrine/persistence <3.1 are no longer supported. */
+        if (class_exists(RuntimeReflectionProperty::class)) {
+            $orm['enable_lazy_ghost_objects'] = true;
+        }
+
+        $c->prependExtensionConfig('doctrine', [
+            'dbal' => $dbal,
+            'orm' => $orm,
         ]);
     }
 
-    public function getProjectDir()
-    {
-        return $this->getRootDir();
-    }
-
-    public function getRootDir()
+    public function getProjectDir(): string
     {
         return __DIR__.'/../tmp/current_project';
     }
@@ -210,7 +200,7 @@ class TestXmlEntityRegeneratorKernel extends Kernel
 {
     use MicroKernelTrait;
 
-    public function registerBundles()
+    public function registerBundles(): array
     {
         return [
             new FrameworkBundle(),
@@ -218,45 +208,50 @@ class TestXmlEntityRegeneratorKernel extends Kernel
         ];
     }
 
-    protected function configureRoutes(RouteCollectionBuilder $routes)
+    protected function configureRoutes(RouteCollectionBuilder $routes): void
     {
     }
 
-    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
+    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader): void
     {
         $c->loadFromExtension('framework', [
             'secret' => 123,
             'router' => [
                 'utf8' => true,
             ],
+            'http_method_override' => false,
         ]);
 
-        $c->prependExtensionConfig('doctrine', [
-            'dbal' => [
-                'driver' => 'pdo_sqlite',
-                'url' => 'sqlite:///fake',
-            ],
-            'orm' => [
-                'auto_generate_proxy_classes' => true,
-                'mappings' => [
-                    'EntityRegenerator' => [
-                        'is_bundle' => false,
-                        'type' => 'xml',
-                        'dir' => '%kernel.project_dir%/config/doctrine',
-                        'prefix' => 'Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity',
-                        'alias' => 'EntityRegeneratorApp',
-                    ],
+        $dbal = [
+            'driver' => 'pdo_sqlite',
+            'url' => 'sqlite:///fake',
+        ];
+
+        $orm = [
+            'auto_generate_proxy_classes' => true,
+            'mappings' => [
+                'EntityRegenerator' => [
+                    'is_bundle' => false,
+                    'type' => 'xml',
+                    'dir' => '%kernel.project_dir%/config/doctrine',
+                    'prefix' => 'Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity',
+                    'alias' => 'EntityRegeneratorApp',
                 ],
             ],
+        ];
+
+        /* @legacy Remove conditional when doctrine/persistence <3.1 are no longer supported. */
+        if (class_exists(RuntimeReflectionProperty::class)) {
+            $orm['enable_lazy_ghost_objects'] = true;
+        }
+
+        $c->prependExtensionConfig('doctrine', [
+            'dbal' => $dbal,
+            'orm' => $orm,
         ]);
     }
 
-    public function getProjectDir()
-    {
-        return $this->getRootDir();
-    }
-
-    public function getRootDir()
+    public function getProjectDir(): string
     {
         return __DIR__.'/../tmp/current_project_xml';
     }
@@ -264,7 +259,7 @@ class TestXmlEntityRegeneratorKernel extends Kernel
 
 class AllButTraitsIterator extends \RecursiveFilterIterator
 {
-    public function accept()
+    public function accept(): bool
     {
         return !\in_array($this->current()->getFilename(), []);
     }

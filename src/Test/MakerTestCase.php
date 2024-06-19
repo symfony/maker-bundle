@@ -15,13 +15,17 @@ use Composer\Semver\Semver;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Process\Process;
 
 abstract class MakerTestCase extends TestCase
 {
-    private $kernel;
+    private ?KernelInterface $kernel = null;
 
     /**
      * @dataProvider getTestDetails
+     *
+     * @return void
      */
     public function testExecute(MakerTestDetails $makerTestDetails)
     {
@@ -30,75 +34,81 @@ abstract class MakerTestCase extends TestCase
 
     abstract public function getTestDetails();
 
+    abstract protected function getMakerClass(): string;
+
+    protected function createMakerTest(): MakerTestDetails
+    {
+        return new MakerTestDetails($this->getMakerInstance($this->getMakerClass()));
+    }
+
+    /**
+     * @return void
+     */
     protected function executeMakerCommand(MakerTestDetails $testDetails)
     {
-        if (!$testDetails->isSupportedByCurrentPhpVersion()) {
-            $this->markTestSkipped();
+        if (!class_exists(Process::class)) {
+            throw new \LogicException('The MakerTestCase cannot be run as the Process component is not installed. Try running "compose require --dev symfony/process".');
+        }
+
+        if ($testDetails->isTestSkipped() || !$testDetails->isSupportedByCurrentPhpVersion()) {
+            $this->markTestSkipped($testDetails->getSkippedTestMessage());
         }
 
         $testEnv = MakerTestEnvironment::create($testDetails);
 
         // prepare environment to test
-        $testEnv->prepare();
+        $testEnv->prepareDirectory();
 
         if (!$this->hasRequiredDependencyVersions($testDetails, $testEnv)) {
             $this->markTestSkipped('Some dependencies versions are too low');
         }
 
+        $makerRunner = new MakerTestRunner($testEnv);
+        foreach ($testDetails->getPreRunCallbacks() as $preRunCallback) {
+            $preRunCallback($makerRunner);
+        }
+
+        $callback = $testDetails->getRunCallback();
+        $callback($makerRunner);
+
         // run tests
-        $makerTestProcess = $testEnv->runMaker();
         $files = $testEnv->getGeneratedFilesFromOutputText();
 
         foreach ($files as $file) {
             $this->assertTrue($testEnv->fileExists($file), sprintf('The file "%s" does not exist after generation', $file));
 
-            if ('.php' === substr($file, -4)) {
-                $csProcess = $testEnv->runPhpCSFixer($file);
-
-                $this->assertTrue($csProcess->isSuccessful(), sprintf(
-                    "File '%s' has a php-cs problem: %s\n",
-                    $file,
-                    $csProcess->getErrorOutput()."\n".$csProcess->getOutput()
-                ));
-            }
-
-            if ('.twig' === substr($file, -5)) {
+            if (str_ends_with($file, '.twig')) {
                 $csProcess = $testEnv->runTwigCSLint($file);
 
                 $this->assertTrue($csProcess->isSuccessful(), sprintf('File "%s" has a twig-cs problem: %s', $file, $csProcess->getErrorOutput()."\n".$csProcess->getOutput()));
             }
         }
-
-        // run internal tests
-        $internalTestProcess = $testEnv->runInternalTests();
-        if (null !== $internalTestProcess) {
-            $this->assertTrue($internalTestProcess->isSuccessful(), sprintf("Error while running the PHPUnit tests *in* the project: \n\n %s \n\n Command Output: %s", $internalTestProcess->getErrorOutput()."\n".$internalTestProcess->getOutput(), $makerTestProcess->getErrorOutput()."\n".$makerTestProcess->getOutput()));
-        }
-
-        // checkout user asserts
-        if (null === $testDetails->getAssert()) {
-            $this->assertStringContainsString('Success', $makerTestProcess->getOutput(), $makerTestProcess->getErrorOutput());
-        } else {
-            ($testDetails->getAssert())($makerTestProcess->getOutput(), $testEnv->getPath());
-        }
     }
 
+    /**
+     * @return void
+     */
     protected function assertContainsCount(string $needle, string $haystack, int $count)
     {
         $this->assertEquals(1, substr_count($haystack, $needle), sprintf('Found more than %d occurrences of "%s" in "%s"', $count, $needle, $haystack));
     }
 
-    protected function getMakerInstance(string $makerClass): MakerInterface
+    private function getMakerInstance(string $makerClass): MakerInterface
     {
         if (null === $this->kernel) {
-            $this->kernel = new MakerTestKernel('dev', true);
+            $this->kernel = $this->createKernel();
             $this->kernel->boot();
         }
 
         // a cheap way to guess the service id
-        $serviceId = $serviceId ?? sprintf('maker.maker.%s', Str::asRouteName((new \ReflectionClass($makerClass))->getShortName()));
+        $serviceId ??= sprintf('maker.maker.%s', Str::asSnakeCase((new \ReflectionClass($makerClass))->getShortName()));
 
         return $this->kernel->getContainer()->get($serviceId);
+    }
+
+    protected function createKernel(): KernelInterface
+    {
+        return new MakerTestKernel('dev', true);
     }
 
     private function hasRequiredDependencyVersions(MakerTestDetails $testDetails, MakerTestEnvironment $testEnv): bool
@@ -107,9 +117,10 @@ abstract class MakerTestCase extends TestCase
             return true;
         }
 
-        $installedPackages = json_decode($testEnv->readFile('vendor/composer/installed.json'), true);
+        $installedPackages = json_decode($testEnv->readFile('vendor/composer/installed.json'), true, 512, \JSON_THROW_ON_ERROR);
         $packageVersions = [];
-        foreach ($installedPackages as $installedPackage) {
+
+        foreach ($installedPackages['packages'] ?? $installedPackages as $installedPackage) {
             $packageVersions[$installedPackage['name']] = $installedPackage['version_normalized'];
         }
 

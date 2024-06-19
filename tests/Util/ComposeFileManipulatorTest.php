@@ -40,10 +40,10 @@ class ComposeFileManipulatorTest extends TestCase
     public function testServiceExists(): void
     {
         $composeFile = <<< 'EOT'
-version: '3.7'
-services:
-    database:
-EOT;
+            version: '3.7'
+            services:
+                database:
+            EOT;
         $manipulator = new ComposeFileManipulator($composeFile);
 
         self::assertTrue($manipulator->serviceExists('database'));
@@ -70,11 +70,11 @@ EOT;
     public function testRemoveDockerService(): void
     {
         $composeFile = <<< 'EOT'
-version: '3.7'
-services:
-    database:
-    rabbitmq:
-EOT;
+            version: '3.7'
+            services:
+                database:
+                rabbitmq:
+            EOT;
         $manipulator = new ComposeFileManipulator($composeFile);
         $manipulator->removeDockerService('rabbitmq');
 
@@ -91,11 +91,11 @@ EOT;
     public function testExposePorts(): void
     {
         $composeFile = <<< 'EOT'
-version: '3.7'
-services:
-    rabbitmq:
-        am: 'I next?'
-EOT;
+            version: '3.7'
+            services:
+                rabbitmq:
+                    am: 'I next?'
+            EOT;
         $manipulator = new ComposeFileManipulator($composeFile);
         $manipulator->exposePorts('rabbitmq', ['15672']);
 
@@ -117,11 +117,11 @@ EOT;
     public function testAddVolume(): void
     {
         $composeFile = <<< 'EOT'
-version: '3.7'
-services:
-    php:
-        yes: 'this looks fun'
-EOT;
+            version: '3.7'
+            services:
+                php:
+                    yes: 'this looks fun'
+            EOT;
 
         $manipulator = new ComposeFileManipulator($composeFile);
         $manipulator->addVolume('php', '/var/htdocs', '/var');
@@ -146,7 +146,7 @@ EOT;
         new ComposeFileManipulator('version: \'2\'');
 
         $this->expectException(RuntimeCommandException::class);
-        $this->expectExceptionMessage('docker-compose.yaml version 1.9 is not supported. Please update your docker-compose.yaml file to the latest version.');
+        $this->expectExceptionMessage('compose.yaml version 1.9 is not supported. Please update your compose.yaml file to the latest version.');
 
         new ComposeFileManipulator('version: \'1.9\'');
     }
@@ -154,11 +154,11 @@ EOT;
     public function testCheckComposeFileVersionThrowsExceptionWithMissingVersion(): void
     {
         $composeFile = <<< 'EOT'
-services:
-    []
-EOT;
+            services:
+                []
+            EOT;
         $this->expectException(RuntimeCommandException::class);
-        $this->expectExceptionMessage('docker-compose.yaml file version is not set.');
+        $this->expectExceptionMessage('compose.yaml file version is not set.');
 
         new ComposeFileManipulator($composeFile);
     }

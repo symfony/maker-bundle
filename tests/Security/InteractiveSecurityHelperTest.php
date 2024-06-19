@@ -13,6 +13,8 @@ namespace Symfony\Bundle\MakerBundle\Tests\Security;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
+use Symfony\Bundle\MakerBundle\Security\Model\Authenticator;
+use Symfony\Bundle\MakerBundle\Security\Model\AuthenticatorType;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class InteractiveSecurityHelperTest extends TestCase
@@ -72,60 +74,6 @@ class InteractiveSecurityHelperTest extends TestCase
             ['security' => ['firewalls' => ['dev' => ['security' => false], 'foo' => null, 'bar' => null]]],
             'bar',
             true,
-        ];
-    }
-
-    public function testGuessEntryPointWithNonExistingFirewallThrowsException()
-    {
-        $this->expectException(\Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException::class);
-
-        /** @var SymfonyStyle|\PHPUnit_Framework_MockObject_MockObject $io */
-        $io = $this->createMock(SymfonyStyle::class);
-
-        $helper = new InteractiveSecurityHelper();
-        $helper->guessEntryPoint($io, [], '', 'foo');
-    }
-
-    /**
-     * @dataProvider getEntryPointTests
-     */
-    public function testGuestEntryPoint(array $securityData, string $firewallName, bool $multipleAuthenticators = false)
-    {
-        /** @var SymfonyStyle|\PHPUnit_Framework_MockObject_MockObject $io */
-        $io = $this->createMock(SymfonyStyle::class);
-        $io->expects($this->exactly(false === $multipleAuthenticators ? 0 : 1))
-            ->method('choice');
-
-        $helper = new InteractiveSecurityHelper();
-        $helper->guessEntryPoint($io, $securityData, 'App\\Security\\NewAuthenticator', $firewallName);
-    }
-
-    public function getEntryPointTests()
-    {
-        yield 'no_guard' => [
-            ['security' => ['firewalls' => ['main' => []]]],
-            'main',
-        ];
-
-        yield 'no_authenticators_key' => [
-            ['security' => ['firewalls' => ['main' => ['guard' => []]]]],
-            'main',
-        ];
-
-        yield 'no_authenticator' => [
-            ['security' => ['firewalls' => ['main' => ['guard' => ['authenticators' => []]]]]],
-            'main',
-        ];
-
-        yield 'one_authenticator' => [
-            ['security' => ['firewalls' => ['main' => ['guard' => ['authenticators' => ['App\\Security\\Authenticator']]]]]],
-            'main',
-            true,
-        ];
-
-        yield 'one_authenticator_entry_point' => [
-            ['security' => ['firewalls' => ['main' => ['guard' => ['entry_point' => 'App\\Security\\Authenticator', 'authenticators' => ['App\\Security\\Authenticator']]]]]],
-            'main',
         ];
     }
 
@@ -257,6 +205,73 @@ class InteractiveSecurityHelperTest extends TestCase
             false,
             FixtureClass4::class,
             ['myEmail'],
+        ];
+    }
+
+    /** @dataProvider authenticatorClassProvider */
+    public function testGetAuthenticatorsFromConfig(array $firewalls, array $expectedResults): void
+    {
+        $helper = new InteractiveSecurityHelper();
+        $result = $helper->getAuthenticatorsFromConfig($firewalls);
+
+        self::assertEquals($expectedResults, $result);
+    }
+
+    public function authenticatorClassProvider(): \Generator
+    {
+        yield 'Only Custom Authenticator' => [
+            [
+                'main' => [
+                    'lazy' => true,
+                    'custom_authenticator' => 'App\Security\CustomAuthenticator',
+                    'provider' => 'a_user_provider',
+                ],
+            ],
+            [new Authenticator(AuthenticatorType::CUSTOM, 'main', 'App\Security\CustomAuthenticator')],
+        ];
+
+        yield 'Only Form Login' => [
+            [
+                'main' => [
+                    'form_login' => ['login_path' => 'some_path'],
+                    'provider' => 'a_user_provider',
+                ],
+            ],
+            [new Authenticator(AuthenticatorType::FORM_LOGIN, 'main')],
+        ];
+
+        yield 'Form & Json Login' => [
+            [
+                'main' => [
+                    'form_login' => ['login_path' => 'some_path'],
+                    'json_login' => ['login_path' => 'some_path'],
+                    'provider' => 'a_user_provider',
+                ],
+            ],
+            [
+                new Authenticator(AuthenticatorType::FORM_LOGIN, 'main'),
+                new Authenticator(AuthenticatorType::JSON_LOGIN, 'main')],
+        ];
+
+        yield 'Native & Custom' => [
+            [
+                'main' => [
+                    'form_login' => ['login_path' => 'some_path'],
+                    'json_login' => ['login_path' => 'some_path'],
+                    'custom_authenticator' => 'App\Security\CustomAuthenticator',
+                    'provider' => 'a_user_provider',
+                ],
+            ],
+            [
+                new Authenticator(AuthenticatorType::FORM_LOGIN, 'main'),
+                new Authenticator(AuthenticatorType::JSON_LOGIN, 'main'),
+                new Authenticator(AuthenticatorType::CUSTOM, 'main', 'App\Security\CustomAuthenticator'),
+            ],
+        ];
+
+        yield 'No Authenticators' => [
+            ['provider' => 'a_user_provider'],
+            [],
         ];
     }
 

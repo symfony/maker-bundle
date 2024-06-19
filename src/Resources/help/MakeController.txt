@@ -4,6 +4,11 @@ The <info>%command.name%</info> command generates a new controller class.
 
 If the argument is missing, the command will ask for the controller class name interactively.
 
+If you have the <info>symfony/twig-bundle</info> installed, a Twig template will also be
+generated for the controller.
+
+<info>composer require symfony/twig-bundle</info>
+
 You can also generate the controller alone, without template with this option:
 
 <info>php %command.full_name% --no-template</info>

@@ -2,27 +2,22 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Some\Other\UserProfile;
 use Some\Other\FooCategory as Category;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class User
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column()]
+    private ?int $id = null;
 
-    /**
-     * @ORM\OneToOne(targetEntity=\App\OtherEntity\UserProfile::class, inversedBy="user", cascade={"persist", "remove"})
-     */
-    private $userProfile;
+    #[ORM\OneToOne(inversedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?\App\OtherEntity\UserProfile $userProfile = null;
 
     public function getId(): ?int
     {
@@ -34,7 +29,7 @@ class User
         return $this->userProfile;
     }
 
-    public function setUserProfile(?\App\OtherEntity\UserProfile $userProfile): self
+    public function setUserProfile(?\App\OtherEntity\UserProfile $userProfile): static
     {
         $this->userProfile = $userProfile;
 

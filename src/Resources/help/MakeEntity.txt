@@ -9,6 +9,11 @@ automatically be available for this entity class:
 
 <info>php %command.full_name% --api-resource</info>
 
+Symfony can also broadcast all changes made to the entity to the client using Symfony
+UX Turbo.
+
+<info>php %command.full_name% --broadcast</info>
+
 You can also generate all the getter/setter/adder/remover methods
 for the properties of existing entities:
 

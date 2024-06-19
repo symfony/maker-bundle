@@ -1,0 +1,21 @@
+security:
+    firewalls:
+        main:
+            custom_authenticator: App\Security\SomeOtherAuthenticator
+
+
+
+===
+$string = $data['security']['firewalls']['main']['custom_authenticator'];
+$data['security']['firewalls']['main']['custom_authenticator'] = [];
+$data['security']['firewalls']['main']['custom_authenticator'][] = $string;
+$data['security']['firewalls']['main']['custom_authenticator'][] = 'App\Security\AppCustomAuthenticator';
+===
+security:
+    firewalls:
+        main:
+            custom_authenticator:
+                - App\Security\SomeOtherAuthenticator
+                - App\Security\AppCustomAuthenticator
+
+

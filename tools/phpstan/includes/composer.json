@@ -1,0 +1,24 @@
+{
+    "require": {
+        "api-platform/core": "^3.2",
+        "doctrine/doctrine-bundle": "^2.12",
+        "doctrine/doctrine-fixtures-bundle": "^3.5",
+        "symfony/form": "^7.0",
+        "symfony/mailer": "^7.0",
+        "symfony/messenger": "^7.0",
+        "symfony/orm-pack": "^2.4",
+        "symfony/scheduler": "^7.0",
+        "symfony/security-bundle": "^7.0",
+        "symfony/test-pack": "^1.1",
+        "symfony/twig-bundle": "^7.0",
+        "symfony/ux-live-component": "^2.16",
+        "symfony/ux-turbo": "^2.16",
+        "symfony/validator": "^7.0",
+        "symfonycasts/reset-password-bundle": "^1.21",
+        "symfonycasts/verify-email-bundle": "^1.17",
+        "symfony/webpack-encore-bundle": "^2.1",
+        "symfony/panther": "^2.1",
+        "symfony/webhook": "^7.0",
+        "symfony/expression-language": "^7.0"
+    }
+}

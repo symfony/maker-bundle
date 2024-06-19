@@ -13,97 +13,112 @@ namespace Symfony\Bundle\MakerBundle\Tests\Maker;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
-use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Yaml\Yaml;
+use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
+/**
+ * @group legacy
+ */
 class MakeAuthenticatorTest extends MakerTestCase
 {
-    public function getTestDetails()
+    protected function getMakerClass(): string
     {
-        yield 'auth_empty_one_firewall' => [
-            MakerTestDetails::createTest(
-                $this->getMakerInstance(MakeAuthenticator::class),
-                [
+        return MakeAuthenticator::class;
+    }
+
+    public function getTestDetails(): \Generator
+    {
+        yield 'auth_empty_one_firewall' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([
                     // authenticator type => empty-auth
                     0,
                     // authenticator class name
                     'AppCustomAuthenticator',
-                ]
-            )
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticator')
-            ->assert(
-                function (string $output, string $directory) {
-                    $this->assertStringContainsString('Success', $output);
+                ]);
 
-                    $fs = new Filesystem();
-                    $this->assertTrue($fs->exists(sprintf('%s/src/Security/AppCustomAuthenticator.php', $directory)));
-
-                    $securityConfig = Yaml::parse(file_get_contents(sprintf('%s/config/packages/security.yaml', $directory)));
-                    $this->assertEquals(
-                        'App\\Security\\AppCustomAuthenticator',
-                        $securityConfig['security']['firewalls']['main']['guard']['authenticators'][0]
-                    );
-                }
-            ),
+                $this->assertStringContainsString('Success', $output);
+                $this->assertFileExists($runner->getPath('src/Security/AppCustomAuthenticator.php'));
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+                $this->assertEquals(
+                    'App\\Security\\AppCustomAuthenticator',
+                    $securityConfig['security']['firewalls']['main']['custom_authenticator']
+                );
+            }),
         ];
 
-        yield 'auth_empty_multiple_firewalls' => [
-            MakerTestDetails::createTest(
-                $this->getMakerInstance(MakeAuthenticator::class),
-                [
+        yield 'auth_empty_multiple_firewalls' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
+                    $config['security']['firewalls']['second']['lazy'] = true;
+
+                    return $config;
+                });
+
+                $output = $runner->runMaker([
+                    // authenticator type => empty-auth
+                    0,
+                    // class name
+                    'AppCustomAuthenticator',
+                    // firewall name (1 will be the "second" firewall)
+                    1,
+                ]);
+
+                $this->assertStringContainsString('Success', $output);
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+                $this->assertEquals(
+                    'App\\Security\\AppCustomAuthenticator',
+                    $securityConfig['security']['firewalls']['second']['custom_authenticator']
+                );
+            }),
+        ];
+
+        yield 'auth_empty_existing_authenticator' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-auth/BlankAuthenticator.php',
+                    'src/Security/BlankAuthenticator.php'
+                );
+
+                $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
+                    $config['security']['firewalls']['main']['custom_authenticator'] = 'App\Security\BlankAuthenticator';
+
+                    return $config;
+                });
+
+                $output = $runner->runMaker([
                     // authenticator type => empty-auth
                     0,
                     // class name
                     'AppCustomAuthenticator',
                     // firewall name
                     1,
-                ]
-            )
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorMultipleFirewalls')
-            ->assert(
-                function (string $output, string $directory) {
-                    $this->assertStringContainsString('Success', $output);
+                ]);
 
-                    $securityConfig = Yaml::parse(file_get_contents(sprintf('%s/config/packages/security.yaml', $directory)));
-                    $this->assertEquals(
-                        'App\\Security\\AppCustomAuthenticator',
-                        $securityConfig['security']['firewalls']['second']['guard']['authenticators'][0]
-                    );
-                }
-            ),
+                $this->assertStringContainsString('Success', $output);
+
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+                $this->assertEquals(
+                    'App\\Security\\AppCustomAuthenticator',
+                    $securityConfig['security']['firewalls']['main']['custom_authenticator'][1]
+                );
+            }),
         ];
 
-        yield 'auth_empty_existing_authenticator' => [
-            MakerTestDetails::createTest(
-                $this->getMakerInstance(MakeAuthenticator::class),
-                [
-                    // authenticator type => empty-auth
-                    0,
-                    // class name
-                    'AppCustomAuthenticator',
-                    // firewall name
-                    1,
-                ]
-            )
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorExistingAuthenticator')
-            ->assert(
-                function (string $output, string $directory) {
-                    $this->assertStringContainsString('Success', $output);
+        yield 'auth_empty_multiple_firewalls_existing_authenticator' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-auth/BlankAuthenticator.php',
+                    'src/Security/BlankAuthenticator.php'
+                );
 
-                    $securityConfig = Yaml::parse(file_get_contents(sprintf('%s/config/packages/security.yaml', $directory)));
-                    $this->assertEquals(
-                        'App\\Security\\AppCustomAuthenticator',
-                        $securityConfig['security']['firewalls']['main']['guard']['entry_point']
-                    );
-                }
-            ),
-        ];
+                $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
+                    $config['security']['firewalls']['second'] = ['lazy' => true, 'custom_authenticator' => 'App\Security\BlankAuthenticator'];
 
-        yield 'auth_empty_multiple_firewalls_existing_authenticator' => [
-            MakerTestDetails::createTest(
-                $this->getMakerInstance(MakeAuthenticator::class),
-                [
+                    return $config;
+                });
+
+                $output = $runner->runMaker([
                     // authenticator type => empty-auth
                     0,
                     // class name
@@ -112,26 +127,24 @@ class MakeAuthenticatorTest extends MakerTestCase
                     1,
                     // entry point
                     1,
-                ]
-            )
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorMultipleFirewallsExistingAuthenticator')
-            ->assert(
-                function (string $output, string $directory) {
-                    $this->assertStringContainsString('Success', $output);
+                ]);
 
-                    $securityConfig = Yaml::parse(file_get_contents(sprintf('%s/config/packages/security.yaml', $directory)));
-                    $this->assertEquals(
-                        'App\\Security\\AppCustomAuthenticator',
-                        $securityConfig['security']['firewalls']['second']['guard']['entry_point']
-                    );
-                }
-            ),
+                $this->assertStringContainsString('Success', $output);
+
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+                $this->assertEquals(
+                    'App\\Security\\AppCustomAuthenticator',
+                    $securityConfig['security']['firewalls']['second']['custom_authenticator'][1]
+                );
+            }),
         ];
 
-        yield 'auth_login_form_user_entity_with_encoder' => [
-            MakerTestDetails::createTest(
-                $this->getMakerInstance(MakeAuthenticator::class),
-                [
+        yield 'auth_login_form_user_entity_with_hasher' => [$this->createMakerTest()
+            ->addExtraDependencies('doctrine', 'twig', 'symfony/form')
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner, 'userEmail');
+
+                $output = $runner->runMaker([
                     // authenticator type => login-form
                     1,
                     // class name
@@ -141,30 +154,26 @@ class MakeAuthenticatorTest extends MakerTestCase
                     // field name
                     'userEmail',
                     'no',
-                ]
-            )
-            ->addExtraDependencies('doctrine')
-            ->addExtraDependencies('twig')
-            ->addExtraDependencies('symfony/form')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntity')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand()
-            ->assert(
-                function (string $output, string $directory) {
-                    $this->assertStringContainsString('Success', $output);
+                    // remember me support => no
+                    'no',
+                ]);
 
-                    $fs = new Filesystem();
-                    $this->assertTrue($fs->exists(sprintf('%s/src/Controller/SecurityController.php', $directory)));
-                    $this->assertTrue($fs->exists(sprintf('%s/templates/security/login.html.twig', $directory)));
-                    $this->assertTrue($fs->exists(sprintf('%s/src/Security/AppCustomAuthenticator.php', $directory)));
-                }
-            ),
+                $this->runLoginTest($runner, 'userEmail');
+
+                $this->assertStringContainsString('Success', $output);
+
+                $this->assertFileExists($runner->getPath('src/Controller/SecurityController.php'));
+                $this->assertFileExists($runner->getPath('templates/security/login.html.twig'));
+                $this->assertFileExists($runner->getPath('src/Security/AppCustomAuthenticator.php'));
+            }),
         ];
 
-        yield 'auth_login_form_custom_username_field' => [
-            MakerTestDetails::createTest(
-                $this->getMakerInstance(MakeAuthenticator::class),
-                [
+        yield 'auth_login_form_no_entity_custom_username_field' => [$this->createMakerTest()
+            ->addExtraDependencies('twig', 'symfony/form')
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner, 'userEmail', false);
+
+                $runner->runMaker([
                     // authenticator type => login-form
                     1,
                     // class name
@@ -176,39 +185,26 @@ class MakeAuthenticatorTest extends MakerTestCase
                     // username field => userEmail
                     0,
                     'no',
-                ]
-            )
-            ->addExtraDependencies('doctrine/annotations')
-            ->addExtraDependencies('twig')
-            ->addExtraDependencies('symfony/form')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormCustomUsernameField'),
-        ];
-
-        yield 'auth_login_form_user_entity_no_encoder' => [
-            MakerTestDetails::createTest(
-                $this->getMakerInstance(MakeAuthenticator::class),
-                [
-                    // authenticator type => login-form
-                    1,
-                    // class name
-                    'AppCustomAuthenticator',
-                    // controller name
-                    'SecurityController',
+                    // remember me support => no
                     'no',
-                ]
-            )
-            ->addExtraDependencies('doctrine')
-            ->addExtraDependencies('twig')
-            ->addExtraDependencies('symfony/form')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntityNoEncoder')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+                ]);
+
+                $runner->runTests();
+                $this->runLoginTest(
+                    $runner,
+                    'userEmail',
+                    false,
+                    'App\\Security\\User'
+                );
+            }),
         ];
 
-        yield 'auth_login_form_user_not_entity_with_encoder' => [
-            MakerTestDetails::createTest(
-                $this->getMakerInstance(MakeAuthenticator::class),
-                [
+        yield 'auth_login_form_user_not_entity_with_hasher' => [$this->createMakerTest()
+            ->addExtraDependencies('twig', 'symfony/form')
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner, 'email', false);
+
+                $runner->runMaker([
                     // authenticator type => login-form
                     1,
                     // class name
@@ -218,39 +214,23 @@ class MakeAuthenticatorTest extends MakerTestCase
                     // user class
                     'App\Security\User',
                     'no',
-                ]
-            )
-            ->addExtraDependencies('twig')
-            ->addExtraDependencies('doctrine/annotations')
-            ->addExtraDependencies('symfony/form')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserNotEntity'),
-        ];
-
-        yield 'auth_login_form_user_not_entity_no_encoder' => [
-            MakerTestDetails::createTest(
-                $this->getMakerInstance(MakeAuthenticator::class),
-                [
-                    // authenticator type => login-form
-                    1,
-                    // class name
-                    'AppCustomAuthenticator',
-                    // controller name
-                    'SecurityController',
-                    // user class
-                    'App\Security\User',
+                    // remember me support => no
                     'no',
-                ]
-            )
-            ->addExtraDependencies('twig')
-            ->addExtraDependencies('doctrine/annotations')
-            ->addExtraDependencies('symfony/form')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserNotEntityNoEncoder'),
+                ]);
+            }),
         ];
 
-        yield 'auth_login_form_existing_controller' => [
-            MakerTestDetails::createTest(
-                $this->getMakerInstance(MakeAuthenticator::class),
-                [
+        yield 'auth_login_form_existing_controller' => [$this->createMakerTest()
+            ->addExtraDependencies('doctrine', 'twig', 'symfony/form')
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner, 'email');
+
+                $runner->copy(
+                    'make-auth/SecurityController-empty.php',
+                    'src/Controller/SecurityController.php'
+                );
+
+                $runner->runMaker([
                     // authenticator type => login-form
                     1,
                     // class name
@@ -258,20 +238,20 @@ class MakeAuthenticatorTest extends MakerTestCase
                     // controller name
                     'SecurityController',
                     'no',
-                ]
-            )
-            ->addExtraDependencies('doctrine')
-            ->addExtraDependencies('twig')
-            ->addExtraDependencies('symfony/form')
-            ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormExistingController')
-            ->configureDatabase()
-            ->updateSchemaAfterCommand(),
+                    // remember me support => no
+                    'no',
+                ]);
+
+                $this->runLoginTest($runner, 'email');
+            }),
         ];
 
-        yield 'auth_login_form_user_entity_with_encoder_logout' => [
-            MakerTestDetails::createTest(
-                $this->getMakerInstance(MakeAuthenticator::class),
-                [
+        yield 'auth_login_form_user_entity_with_logout' => [$this->createMakerTest()
+            ->addExtraDependencies('doctrine', 'twig', 'symfony/form')
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner, 'userEmail');
+
+                $output = $runner->runMaker([
                     // authenticator type => login-form
                     1,
                     // class name
@@ -280,30 +260,134 @@ class MakeAuthenticatorTest extends MakerTestCase
                     'SecurityController',
                     // logout support
                     'yes',
-                ]
-            )
-                ->addExtraDependencies('doctrine')
-                ->addExtraDependencies('twig')
-                ->addExtraDependencies('symfony/form')
-                ->setFixtureFilesPath(__DIR__.'/../fixtures/MakeAuthenticatorLoginFormUserEntityLogout')
-                ->configureDatabase()
-                ->updateSchemaAfterCommand()
-                ->assert(
-                    function (string $output, string $directory) {
-                        $this->assertStringContainsString('Success', $output);
+                    // remember me support => no
+                    'no',
+                ]);
 
-                        $fs = new Filesystem();
-                        $this->assertTrue($fs->exists(sprintf('%s/src/Controller/SecurityController.php', $directory)));
-                        $this->assertTrue($fs->exists(sprintf('%s/templates/security/login.html.twig', $directory)));
-                        $this->assertTrue($fs->exists(sprintf('%s/src/Security/AppCustomAuthenticator.php', $directory)));
+                $this->runLoginTest($runner, 'userEmail', true, 'App\\Entity\\User', true);
 
-                        $securityConfig = Yaml::parse(file_get_contents(sprintf('%s/config/packages/security.yaml', $directory)));
-                        $this->assertEquals(
-                            'app_logout',
-                            $securityConfig['security']['firewalls']['main']['logout']['path']
-                        );
-                    }
-                ),
+                $this->assertStringContainsString('Success', $output);
+
+                $this->assertFileExists($runner->getPath('src/Controller/SecurityController.php'));
+                $this->assertFileExists($runner->getPath('templates/security/login.html.twig'));
+                $this->assertFileExists($runner->getPath('src/Security/AppCustomAuthenticator.php'));
+
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+                $this->assertEquals(
+                    'app_logout',
+                    $securityConfig['security']['firewalls']['main']['logout']['path']
+                );
+            }),
         ];
+
+        yield 'auth_login_form_remember_me_via_checkbox' => [$this->createMakerTest()
+            ->addExtraDependencies('doctrine', 'twig', 'symfony/form')
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner, 'userEmail');
+
+                $output = $runner->runMaker([
+                    // authenticator type => login-form
+                    1,
+                    // class name
+                    'AppCustomAuthenticator',
+                    // controller name
+                    'SecurityController',
+                    // logout support
+                    'yes',
+                    // remember me support => yes
+                    'yes',
+                    // remember me type => checkbox
+                    0,
+                ]);
+
+                $this->runLoginTest($runner, 'userEmail');
+
+                $this->assertStringContainsString('Success', $output);
+                $seucrityConfig = $runner->readYaml('config/packages/security.yaml');
+                $firewallMain = $seucrityConfig['security']['firewalls']['main'];
+
+                $this->assertEquals('%kernel.secret%', $firewallMain['remember_me']['secret']);
+                $this->assertEquals('604800', $firewallMain['remember_me']['lifetime']);
+                $this->assertArrayNotHasKey('always_remember_me', $firewallMain['remember_me']);
+            }),
+        ];
+
+        yield 'auth_login_form_always_remember_me' => [$this->createMakerTest()
+            ->addExtraDependencies('doctrine', 'twig', 'symfony/form')
+            ->run(function (MakerTestRunner $runner) {
+                $this->makeUser($runner, 'userEmail');
+
+                $output = $runner->runMaker([
+                    // authenticator type => login-form
+                    1,
+                    // class name
+                    'AppCustomAuthenticator',
+                    // controller name
+                    'SecurityController',
+                    // logout support
+                    'yes',
+                    // remember me support => yes
+                    'yes',
+                    // remember me type => always
+                    1,
+                ]);
+
+                $this->runLoginTest($runner, 'userEmail');
+
+                $this->assertStringContainsString('Success', $output);
+                $seucrityConfig = $runner->readYaml('config/packages/security.yaml');
+                $firewallMain = $seucrityConfig['security']['firewalls']['main'];
+
+                $this->assertEquals('%kernel.secret%', $firewallMain['remember_me']['secret']);
+                $this->assertTrue($firewallMain['remember_me']['always_remember_me']);
+            }),
+        ];
+    }
+
+    private function runLoginTest(MakerTestRunner $runner, string $userIdentifier, bool $isEntity = true, string $userClass = 'App\\Entity\\User', bool $testLogin = false): void
+    {
+        $runner->renderTemplateFile(
+            'make-auth/LoginFlowTest.php.twig',
+            'tests/LoginFlowTest.php',
+            [
+                'userIdentifier' => $userIdentifier,
+                'isEntity' => $isEntity,
+                'userClass' => $userClass,
+                'testLogin' => $testLogin,
+            ]
+        );
+
+        // plaintext password: needed for entities, simplifies overall
+        $runner->modifyYamlFile('config/packages/security.yaml', function (array $config) {
+            if (isset($config['when@test']['security']['password_hashers'])) {
+                $config['when@test']['security']['password_hashers'] = [PasswordAuthenticatedUserInterface::class => 'plaintext'];
+
+                return $config;
+            }
+
+            return $config;
+        });
+
+        if ($isEntity) {
+            $runner->configureDatabase();
+        }
+        $runner->runTests();
+    }
+
+    private function makeUser(MakerTestRunner $runner, string $userIdentifier, bool $isEntity = true): void
+    {
+        $runner->runConsole('make:user', [
+            'User', // class name
+            $isEntity ? 'y' : 'n', // entity
+            $userIdentifier, // identifier
+            'y', // password
+        ]);
+
+        if (!$isEntity) {
+            $runner->copy(
+                'make-auth/UserProvider-no-entity.php',
+                'src/Security/UserProvider.php'
+            );
+        }
     }
 }
