@@ -106,14 +106,14 @@ final class MakeTwigComponent extends AbstractMaker
         $path = 'config/packages/twig_component.yaml';
 
         if (!$this->fileManager->fileExists($path)) {
-            throw new RuntimeCommandException(message: 'Unable to find twig_components.yaml');
+            throw new RuntimeCommandException(message: 'Unable to find twig_component.yaml');
         }
 
         try {
             $value = Yaml::parse($this->fileManager->getFileContents($path));
             $this->namespace = substr(array_key_first($value['twig_component']['defaults']), 4);
         } catch (\Throwable $throwable) {
-            throw new RuntimeCommandException(message: 'Unable to parse twig_components.yaml', previous: $throwable);
+            throw new RuntimeCommandException(message: 'Unable to parse twig_component.yaml', previous: $throwable);
         }
     }
 }
