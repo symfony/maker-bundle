@@ -32,6 +32,7 @@
         "doctrine/orm": "^2.15|^3",
         "symfony/http-client": "^6.4|^7.0",
         "symfony/phpunit-bridge": "^6.4.1|^7.0",
+        "symfony/rate-limiter": "^6.4|^7.0",
         "symfony/security-core": "^6.4|^7.0",
         "symfony/yaml": "^6.4|^7.0",
         "twig/twig": "^3.0|^4.x-dev"

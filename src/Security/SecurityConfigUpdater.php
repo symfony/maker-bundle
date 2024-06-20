@@ -69,7 +69,7 @@ final class SecurityConfigUpdater
         return $contents;
     }
 
-    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe): string
+    public function updateForAuthenticator(string $yamlSource, string $firewallName, $chosenEntryPoint, string $authenticatorClass, bool $logoutSetup, bool $supportRememberMe, bool $alwaysRememberMe, bool $supportThrottling): string
     {
         $this->createYamlSourceManipulator($yamlSource);
 
@@ -143,6 +143,10 @@ final class SecurityConfigUpdater
             } else {
                 $firewall['remember_me'][] = $this->manipulator->createCommentLine('always_remember_me: true');
             }
+        }
+
+        if ($supportThrottling) {
+            $firewall['throttling'] = null;
         }
 
         $newData['security']['firewalls'][$firewallName] = $firewall;
