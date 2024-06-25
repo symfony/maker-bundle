@@ -25,9 +25,6 @@ use Symfony\Component\Process\Process;
  */
 final class TemplateLinter
 {
-    // Version must match bundled version file name. e.g. php-cs-fixer-v3.49.9.phar
-    public const BUNDLED_PHP_CS_FIXER_VERSION = '3.49.0';
-
     private bool $usingBundledPhpCsFixer = true;
     private bool $usingBundledPhpCsFixerConfig = true;
     private bool $needsPhpCmdPrefix = true;
@@ -100,7 +97,18 @@ final class TemplateLinter
     {
         // Use Bundled PHP-CS-Fixer
         if (null === $this->phpCsFixerBinaryPath) {
-            $this->phpCsFixerBinaryPath = \sprintf('%s/Resources/bin/php-cs-fixer-v%s.phar', \dirname(__DIR__), self::BUNDLED_PHP_CS_FIXER_VERSION);
+            $pathCandidates = [
+                __DIR__.'/../../vendor/php-cs-fixer/shim/php-cs-fixer',
+                __DIR__.'/../../../php-cs-fixer/shim/php-cs-fixer',
+            ];
+
+            foreach ($pathCandidates as $pathCandidate) {
+                if (is_file($pathCandidate)) {
+                    $this->phpCsFixerBinaryPath = $pathCandidate;
+
+                    return;
+                }
+            }
 
             return;
         }

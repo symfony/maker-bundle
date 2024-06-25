@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
+use Composer\InstalledVersions;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Util\TemplateLinter;
 use Symfony\Component\Process\Process;
@@ -42,13 +43,14 @@ final class TemplateLinterTest extends TestCase
     {
         $this->markTestSkippedOnWindows();
 
-        $fixerPath = \sprintf('%s/src/Resources/bin/php-cs-fixer-v%s.phar', \dirname(__DIR__, 2), TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION);
+        $fixerPath = __DIR__.'/../../vendor/php-cs-fixer/shim/php-cs-fixer';
+        $expectedVersion = InstalledVersions::getVersion('php-cs-fixer/shim');
 
         $process = Process::fromShellCommandline(\sprintf('%s -V', $fixerPath));
 
         $process->run();
 
-        self::assertStringContainsString(TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION, $process->getOutput());
+        self::assertStringContainsString($expectedVersion, $process->getOutput());
     }
 
     private function markTestSkippedOnWindows(): void
