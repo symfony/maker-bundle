@@ -11,8 +11,6 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
-use DateTime;
-use DateTimeImmutable;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -24,7 +22,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Contracts\EventDispatcher\Event;
-use function in_array;
 
 /**
  * @author Ippei Sumida <ippey.s@gmail.com>
@@ -89,7 +86,7 @@ class MakeEvent extends AbstractMaker
             };
             if (
                 $useClass
-                && !in_array($useClass, $useClasses, true)
+                && !\in_array($useClass, $useClasses, true)
             ) {
                 $useClasses[] = $useClass;
             }
@@ -127,7 +124,7 @@ class MakeEvent extends AbstractMaker
         }
 
         $question = new Question('Field type (e.g. <fg=yellow>string</>)', 'string');
-        $autocompleteValues = ['string', 'int', 'float', 'bool', 'array', 'object', 'callable', 'iterable', 'void', DateTime::class, DateTimeImmutable::class];
+        $autocompleteValues = ['string', 'int', 'float', 'bool', 'array', 'object', 'callable', 'iterable', 'void', \DateTime::class, \DateTimeImmutable::class];
         $autocompleteValues = array_merge($autocompleteValues, $this->doctrineHelper->getEntitiesForAutocomplete());
         $question->setAutocompleterValues($autocompleteValues);
         $question->setValidator([Validator::class, 'notBlank']);
