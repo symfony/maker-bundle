@@ -18,6 +18,7 @@ use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 class MakeEventTest extends MakerTestCase
 {
     private const EXPECTED_EVENT_PATH = __DIR__.'/../../tests/fixtures/make-event/tests/Event/';
+
     protected function getMakerClass(): string
     {
         return MakeEvent::class;
