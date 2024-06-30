@@ -171,8 +171,7 @@
                 <tag name="maker.command" />
             </service>
             <service id="maker.maker.make_event" class="Symfony\Bundle\MakerBundle\Maker\MakeEvent">
-                <argument type="service" id="maker.file_manager" />
-                <argument type="service" id="maker.generator" />
+                <argument type="service" id="maker.doctrine_helper" />
                 <tag name="maker.command" />
             </service>
         </services>
