@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
+use DateTime;
+use DateTimeImmutable;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -22,6 +24,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Contracts\EventDispatcher\Event;
+use function in_array;
 
 /**
  * @author Ippei Sumida <ippey.s@gmail.com>
@@ -78,11 +81,17 @@ class MakeEvent extends AbstractMaker
                 break;
             }
             $fields[] = $newField;
+            $useClass = match (true) {
+                class_exists($this->doctrineHelper->getEntityNamespace().'\\'.$newField['type']) => $this->doctrineHelper->getEntityNamespace().'\\'.$newField['type'],
+                class_exists($newField['type']) => $newField['type'],
+
+                default => null,
+            };
             if (
-                class_exists($this->doctrineHelper->getEntityNamespace().'\\'.$newField['type'])
-                && !\in_array($this->doctrineHelper->getEntityNamespace().'\\'.$newField['type'], $useClasses, true)
+                $useClass
+                && !in_array($useClass, $useClasses, true)
             ) {
-                $useClasses[] = $this->doctrineHelper->getEntityNamespace().'\\'.$newField['type'];
+                $useClasses[] = $useClass;
             }
         }
 
@@ -118,17 +127,19 @@ class MakeEvent extends AbstractMaker
         }
 
         $question = new Question('Field type (e.g. <fg=yellow>string</>)', 'string');
-        $autocompleteValues = ['string', 'int', 'float', 'bool', 'array', 'object', 'callable', 'iterable', 'void'];
+        $autocompleteValues = ['string', 'int', 'float', 'bool', 'array', 'object', 'callable', 'iterable', 'void', DateTime::class, DateTimeImmutable::class];
         $autocompleteValues = array_merge($autocompleteValues, $this->doctrineHelper->getEntitiesForAutocomplete());
         $question->setAutocompleterValues($autocompleteValues);
         $question->setValidator([Validator::class, 'notBlank']);
         $fieldType = $io->askQuestion($question);
 
+        $visibility = $io->choice('Field visibility (public, protected, private)', ['public', 'private', 'protected'], 'public');
         $nullable = $io->confirm('Can this field be null (nullable)', false);
 
         return [
             'name' => $fieldName,
             'type' => $fieldType,
+            'visibility' => $visibility,
             'nullable' => $nullable,
         ];
     }

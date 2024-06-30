@@ -36,14 +36,26 @@ class MakeEventTest extends MakerTestCase
                         'id',
                         // first property type
                         'int',
+                        // first property visibility
+                        'public',
                         // first property nullable
                         'no',
                         // second property name
                         'name',
                         // second property type
                         'string',
+                        // second property visibility
+                        'private',
                         // second property nullable
                         'yes',
+                        // third property name
+                        'createdAt',
+                        // third property type
+                        'DateTimeInterface',
+                        // third property visibility
+                        'protected',
+                        // third property nullable
+                        'no',
                         '',
                     ]
                 );

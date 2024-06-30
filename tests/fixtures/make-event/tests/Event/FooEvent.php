@@ -8,7 +8,8 @@ final class FooEvent extends Event
 {
     public function __construct(
         public readonly int $id,
-        public readonly ?string $name,
+        private readonly ?string $name,
+        protected readonly DateTimeInterface $createdAt,
     ) {
     }
 }
