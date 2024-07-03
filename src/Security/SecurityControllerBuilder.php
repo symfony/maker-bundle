@@ -66,19 +66,4 @@ final class SecurityControllerBuilder
         );
         $manipulator->addMethodBuilder($loginMethodBuilder);
     }
-
-    public function addLogoutMethod(ClassSourceManipulator $manipulator): void
-    {
-        $logoutMethodBuilder = $manipulator->createMethodBuilder('logout', 'void', false);
-
-        $logoutMethodBuilder->addAttribute($manipulator->buildAttributeNode(Route::class, ['path' => '/logout', 'name' => 'app_logout']));
-
-        $manipulator->addUseStatementIfNecessary(Route::class);
-        $manipulator->addMethodBody($logoutMethodBuilder, <<<'CODE'
-            <?php
-            throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
-            CODE
-        );
-        $manipulator->addMethodBuilder($logoutMethodBuilder);
-    }
 }

@@ -274,7 +274,7 @@ class MakeAuthenticatorTest extends MakerTestCase
 
                 $securityConfig = $runner->readYaml('config/packages/security.yaml');
                 $this->assertEquals(
-                    'app_logout',
+                    '/logout',
                     $securityConfig['security']['firewalls']['main']['logout']['path']
                 );
             }),
