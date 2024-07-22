@@ -166,6 +166,8 @@ class MakeResetPassword extends AbstractMaker
             'What is the User entity that should be used with the "forgotten password" feature? (e.g. <fg=yellow>App\\Entity\\User</>)'
         );
 
+        // @TODO - if more than 1 $providerData - ask if we should handle more than $this->userClass
+
         $this->emailPropertyName = $interactiveSecurityHelper->guessEmailField($io, $this->userClass);
         $this->emailGetterMethodName = $interactiveSecurityHelper->guessEmailGetter($io, $this->userClass, $this->emailPropertyName);
         $this->passwordSetterMethodName = $interactiveSecurityHelper->guessPasswordSetter($io, $this->userClass);
@@ -284,6 +286,7 @@ class MakeResetPassword extends AbstractMaker
                 'problem_validate_message_or_constant' => $problemValidateMessageOrConstant,
                 'problem_handle_message_or_constant' => $problemHandleMessageOrConstant,
                 'translator_available' => $isTranslatorAvailable,
+                'multiple_entities' => false,
             ]
         );
 
@@ -481,6 +484,14 @@ class MakeResetPassword extends AbstractMaker
         $manipulator->addTrait(ResetPasswordRequestTrait::class);
 
         $manipulator->addUseStatementIfNecessary($userClassDetails->getFullName());
+
+        /**
+         * @TODO - If Multiple Entities
+         *       1) $user -> `nullable: true`
+         *       2) add "other" user ManyToOne
+         *       3) __construct(User|OTHER_USER $user) { $user instanceOf User ? $this->user = $user : $this->OTHER_USER = $user }
+         *       4) getUser(): User|OTHER_USER
+         */
 
         $manipulator->addConstructor([
             (new Param('user'))->setType($userClassDetails->getShortName())->getNode(),
