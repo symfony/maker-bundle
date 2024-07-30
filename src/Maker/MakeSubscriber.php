@@ -68,7 +68,7 @@ final class MakeSubscriber extends AbstractMaker
 
             $io->writeln(' <fg=green>Suggested Events:</>');
             $io->listing($this->eventRegistry->listActiveEvents($events));
-            $question = new Question(sprintf(' <fg=green>%s</>', $command->getDefinition()->getArgument('event')->getDescription()));
+            $question = new Question(\sprintf(' <fg=green>%s</>', $command->getDefinition()->getArgument('event')->getDescription()));
             $question->setAutocompleterValues($events);
             $question->setValidator(Validator::notBlank(...));
             $event = $io->askQuestion($question);
@@ -97,7 +97,7 @@ final class MakeSubscriber extends AbstractMaker
             $useStatements->addUseStatement(KernelEvents::class);
             $eventName = $eventConstant;
         } else {
-            $eventName = class_exists($event) ? sprintf('%s::class', $eventClassName) : sprintf('\'%s\'', $event);
+            $eventName = class_exists($event) ? \sprintf('%s::class', $eventClassName) : \sprintf('\'%s\'', $event);
         }
 
         if (null !== $eventFullClassName) {
@@ -110,7 +110,7 @@ final class MakeSubscriber extends AbstractMaker
             [
                 'use_statements' => $useStatements,
                 'event' => $eventName,
-                'event_arg' => $eventClassName ? sprintf('%s $event', $eventClassName) : '$event',
+                'event_arg' => $eventClassName ? \sprintf('%s $event', $eventClassName) : '$event',
                 'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
             ]
         );
@@ -134,7 +134,7 @@ final class MakeSubscriber extends AbstractMaker
         $constants = (new \ReflectionClass(KernelEvents::class))->getConstants();
 
         if (false !== ($name = array_search($event, $constants, true))) {
-            return sprintf('KernelEvents::%s', $name);
+            return \sprintf('KernelEvents::%s', $name);
         }
 
         return null;

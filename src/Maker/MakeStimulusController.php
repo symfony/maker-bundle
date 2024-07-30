@@ -106,10 +106,10 @@ final class MakeStimulusController extends AbstractMaker
         $targets = $input->getArgument('targets');
         $values = $input->getArgument('values');
 
-        $targets = empty($targets) ? $targets : sprintf("['%s']", implode("', '", $targets));
+        $targets = empty($targets) ? $targets : \sprintf("['%s']", implode("', '", $targets));
 
-        $fileName = sprintf('%s_controller.%s', $controllerName, $chosenExtension);
-        $filePath = sprintf('assets/controllers/%s', $fileName);
+        $fileName = \sprintf('%s_controller.%s', $controllerName, $chosenExtension);
+        $filePath = \sprintf('assets/controllers/%s', $fileName);
 
         $generator->generateFile(
             $filePath,
@@ -126,7 +126,7 @@ final class MakeStimulusController extends AbstractMaker
 
         $io->text([
             'Next:',
-            sprintf('- Open <info>%s</info> and add the code you need', $filePath),
+            \sprintf('- Open <info>%s</info> and add the code you need', $filePath),
             'Find the documentation at <fg=yellow>https://github.com/symfony/stimulus-bridge</>',
         ]);
     }
@@ -142,7 +142,7 @@ final class MakeStimulusController extends AbstractMaker
 
         $targetName = $io->ask($questionText, validator: function (?string $name) use ($targets) {
             if (\in_array($name, $targets)) {
-                throw new \InvalidArgumentException(sprintf('The "%s" target already exists.', $name));
+                throw new \InvalidArgumentException(\sprintf('The "%s" target already exists.', $name));
             }
 
             return $name;
@@ -166,7 +166,7 @@ final class MakeStimulusController extends AbstractMaker
 
         $valueName = $io->ask($questionText, null, function ($name) use ($values) {
             if (\array_key_exists($name, $values)) {
-                throw new \InvalidArgumentException(sprintf('The "%s" value already exists.', $name));
+                throw new \InvalidArgumentException(\sprintf('The "%s" value already exists.', $name));
             }
 
             return $name;
@@ -204,7 +204,7 @@ final class MakeStimulusController extends AbstractMaker
                 $type = null;
             } elseif (!\in_array($type, $types)) {
                 $this->printAvailableTypes($io);
-                $io->error(sprintf('Invalid type "%s".', $type));
+                $io->error(\sprintf('Invalid type "%s".', $type));
                 $io->writeln('');
 
                 $type = null;
@@ -217,7 +217,7 @@ final class MakeStimulusController extends AbstractMaker
     private function printAvailableTypes(ConsoleStyle $io): void
     {
         foreach ($this->getValuesTypes() as $type) {
-            $io->writeln(sprintf('<info>%s</info>', $type));
+            $io->writeln(\sprintf('<info>%s</info>', $type));
         }
     }
 

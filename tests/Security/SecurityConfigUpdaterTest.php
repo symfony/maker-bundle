@@ -254,7 +254,7 @@ class SecurityConfigUpdaterTest extends TestCase
             $maxLen = max(array_map('strlen', array_keys($context)));
 
             foreach ($context as $key => $val) {
-                $message .= sprintf(
+                $message .= \sprintf(
                     "\n    %s%s: %s",
                     str_repeat(' ', $maxLen - \strlen($key)),
                     $key,
@@ -268,11 +268,11 @@ class SecurityConfigUpdaterTest extends TestCase
 
     private function getYamlSource(string $yamlFileName): string
     {
-        return file_get_contents(sprintf('%s/yaml_fixtures/source/%s', __DIR__, $yamlFileName));
+        return file_get_contents(\sprintf('%s/yaml_fixtures/source/%s', __DIR__, $yamlFileName));
     }
 
     private function getExpectedYaml(string $subDirectory, string $yamlFileName): string
     {
-        return file_get_contents(sprintf('%s/yaml_fixtures/%s/%s', __DIR__, $subDirectory, $yamlFileName));
+        return file_get_contents(\sprintf('%s/yaml_fixtures/%s/%s', __DIR__, $subDirectory, $yamlFileName));
     }
 }

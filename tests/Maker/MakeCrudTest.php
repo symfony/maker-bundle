@@ -173,7 +173,7 @@ class MakeCrudTest extends MakerTestCase
 
                 $this->runCrudTest($runner, 'it_generates_basic_crud.php');
                 self::assertFileEquals(
-                    sprintf('%s/fixtures/make-crud/expected/WithCustomRepository.php', \dirname(__DIR__)),
+                    \sprintf('%s/fixtures/make-crud/expected/WithCustomRepository.php', \dirname(__DIR__)),
                     $runner->getPath('src/Controller/SweetFoodController.php')
                 );
             }),

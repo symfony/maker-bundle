@@ -95,7 +95,7 @@ final class MakeSchedule extends AbstractMaker
                 $this->message = $selectedMessage;
 
                 // We don't want SomeMessageSchedule, so remove the "Message" suffix to give us SomeSchedule
-                $scheduleNameHint = sprintf('%sSchedule', Str::removeSuffix($selectedMessage, 'Message'));
+                $scheduleNameHint = \sprintf('%sSchedule', Str::removeSuffix($selectedMessage, 'Message'));
             }
         }
 

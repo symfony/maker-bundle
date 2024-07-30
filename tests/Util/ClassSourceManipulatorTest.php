@@ -246,9 +246,9 @@ class ClassSourceManipulatorTest extends TestCase
         $expectedPath = __DIR__.'/fixtures/add_entity_field';
 
         $this->runAddEntityFieldTests(
-            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(\sprintf('%s/%s', $sourcePath, $sourceFilename)),
             $propertyModel,
-            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename))
+            file_get_contents(\sprintf('%s/%s', $expectedPath, $expectedSourceFilename))
         );
     }
 
@@ -317,8 +317,8 @@ class ClassSourceManipulatorTest extends TestCase
         $expectedPath = __DIR__.'/fixtures/add_many_to_one_relation';
 
         $this->runAddManyToOneRelationTests(
-            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
-            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            file_get_contents(\sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(\sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
             $manyToOne
         );
     }
@@ -420,8 +420,8 @@ class ClassSourceManipulatorTest extends TestCase
         }
 
         $this->runAddOneToManyRelationTests(
-            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
-            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            file_get_contents(\sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(\sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
             $oneToMany
         );
     }
@@ -481,8 +481,8 @@ class ClassSourceManipulatorTest extends TestCase
         $expectedPath = __DIR__.'/fixtures/add_many_to_many_relation';
 
         $this->runAddManyToManyRelationTest(
-            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
-            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            file_get_contents(\sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(\sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
             $manyToMany
         );
     }
@@ -540,8 +540,8 @@ class ClassSourceManipulatorTest extends TestCase
         $expectedPath = __DIR__.'/fixtures/add_one_to_one_relation';
 
         $this->runAddOneToOneRelation(
-            file_get_contents(sprintf('%s/%s', $sourcePath, $sourceFilename)),
-            file_get_contents(sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
+            file_get_contents(\sprintf('%s/%s', $sourcePath, $sourceFilename)),
+            file_get_contents(\sprintf('%s/%s', $expectedPath, $expectedSourceFilename)),
             $oneToOne
         );
     }

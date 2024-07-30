@@ -89,7 +89,7 @@ final class DoctrineHelper
         }
 
         if (null === $em) {
-            throw new \InvalidArgumentException(sprintf('Cannot find the entity manager for class "%s". Ensure entity uses attribute mapping.', $className));
+            throw new \InvalidArgumentException(\sprintf('Cannot find the entity manager for class "%s". Ensure entity uses attribute mapping.', $className));
         }
 
         if (null === $this->mappingDriversByPrefix) {
@@ -306,7 +306,7 @@ final class DoctrineHelper
             return null;
         }
 
-        return sprintf('Types::%s', $constants[$columnType]);
+        return \sprintf('Types::%s', $constants[$columnType]);
     }
 
     private function isInstanceOf($object, string $class): bool

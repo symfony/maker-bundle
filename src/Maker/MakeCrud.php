@@ -70,7 +70,7 @@ final class MakeCrud extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->addArgument('entity-class', InputArgument::OPTIONAL, sprintf('The class name of the entity to create CRUD (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
+            ->addArgument('entity-class', InputArgument::OPTIONAL, \sprintf('The class name of the entity to create CRUD (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCrud.txt'))
         ;
 
@@ -93,10 +93,10 @@ final class MakeCrud extends AbstractMaker
             $input->setArgument('entity-class', $value);
         }
 
-        $defaultControllerClass = Str::asClassName(sprintf('%s Controller', $input->getArgument('entity-class')));
+        $defaultControllerClass = Str::asClassName(\sprintf('%s Controller', $input->getArgument('entity-class')));
 
         $this->controllerClassName = $io->ask(
-            sprintf('Choose a name for your controller class (e.g. <fg=yellow>%s</>)', $defaultControllerClass),
+            \sprintf('Choose a name for your controller class (e.g. <fg=yellow>%s</>)', $defaultControllerClass),
             $defaultControllerClass
         );
 
@@ -288,7 +288,7 @@ final class MakeCrud extends AbstractMaker
 
         $this->writeSuccessMessage($io);
 
-        $io->text(sprintf('Next: Check your new CRUD by going to <fg=yellow>%s/</>', Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix())));
+        $io->text(\sprintf('Next: Check your new CRUD by going to <fg=yellow>%s/</>', Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix())));
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void

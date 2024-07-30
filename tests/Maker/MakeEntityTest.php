@@ -802,15 +802,15 @@ class MakeEntityTest extends MakerTestCase
         );
 
         $runner->copy(
-            sprintf('make-entity/entities/attributes/%s', $filename),
-            sprintf('src/Entity/%s.php', $entityClassName)
+            \sprintf('make-entity/entities/attributes/%s', $filename),
+            \sprintf('src/Entity/%s.php', $entityClassName)
         );
     }
 
     private function copyEntityDirectory(MakerTestRunner $runner, string $directory): void
     {
         $runner->copy(
-            sprintf('make-entity/%s/attributes', $directory),
+            \sprintf('make-entity/%s/attributes', $directory),
             ''
         );
     }

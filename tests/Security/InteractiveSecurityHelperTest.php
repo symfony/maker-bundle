@@ -125,7 +125,7 @@ class InteractiveSecurityHelperTest extends TestCase
         $io = $this->createMock(SymfonyStyle::class);
         $io->expects($this->exactly(true === $fieldAutomaticallyGuessed ? 0 : 1))
             ->method('choice')
-            ->with(sprintf('Which field on your <fg=yellow>%s</> class will people enter when logging in?', $class), $choices, 'username')
+            ->with(\sprintf('Which field on your <fg=yellow>%s</> class will people enter when logging in?', $class), $choices, 'username')
             ->willReturn($expectedUsernameField);
 
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
@@ -182,7 +182,7 @@ class InteractiveSecurityHelperTest extends TestCase
         $io = $this->createMock(SymfonyStyle::class);
         $io->expects($this->exactly(true === $fieldAutomaticallyGuessed ? 0 : 1))
             ->method('choice')
-            ->with(sprintf('Which field on your <fg=yellow>%s</> class holds the email address?', $class), $choices, null)
+            ->with(\sprintf('Which field on your <fg=yellow>%s</> class holds the email address?', $class), $choices, null)
             ->willReturn($expectedEmailField);
 
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
@@ -284,7 +284,7 @@ class InteractiveSecurityHelperTest extends TestCase
         $io = $this->createMock(SymfonyStyle::class);
         $io->expects($this->exactly(true === $automaticallyGuessed ? 0 : 1))
             ->method('choice')
-            ->with(sprintf('Which method on your <fg=yellow>%s</> class can be used to set the encoded password (e.g. setPassword())?', $class), $choices, null)
+            ->with(\sprintf('Which method on your <fg=yellow>%s</> class can be used to set the encoded password (e.g. setPassword())?', $class), $choices, null)
             ->willReturn($expectedPasswordSetter);
 
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
@@ -319,7 +319,7 @@ class InteractiveSecurityHelperTest extends TestCase
         $io = $this->createMock(SymfonyStyle::class);
         $io->expects($this->exactly(true === $automaticallyGuessed ? 0 : 1))
             ->method('choice')
-            ->with(sprintf('Which method on your <fg=yellow>%s</> class can be used to get the email address (e.g. getEmail())?', $class), $choices, null)
+            ->with(\sprintf('Which method on your <fg=yellow>%s</> class can be used to get the email address (e.g. getEmail())?', $class), $choices, null)
             ->willReturn($expectedEmailGetter);
 
         $interactiveSecurityHelper = new InteractiveSecurityHelper();

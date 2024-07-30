@@ -39,7 +39,7 @@ final class CliOutputHelper
         $binaryNameEnvVar = getenv(self::ENV_BIN_NAME);
 
         if (false !== $binaryNameEnvVar && false !== getenv(self::ENV_VERSION)) {
-            $prompt = sprintf('%s console', $binaryNameEnvVar);
+            $prompt = \sprintf('%s console', $binaryNameEnvVar);
         }
 
         return $prompt;

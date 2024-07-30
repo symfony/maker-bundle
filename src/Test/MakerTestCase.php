@@ -75,12 +75,12 @@ abstract class MakerTestCase extends TestCase
         $files = $testEnv->getGeneratedFilesFromOutputText();
 
         foreach ($files as $file) {
-            $this->assertTrue($testEnv->fileExists($file), sprintf('The file "%s" does not exist after generation', $file));
+            $this->assertTrue($testEnv->fileExists($file), \sprintf('The file "%s" does not exist after generation', $file));
 
             if (str_ends_with($file, '.twig')) {
                 $csProcess = $testEnv->runTwigCSLint($file);
 
-                $this->assertTrue($csProcess->isSuccessful(), sprintf('File "%s" has a twig-cs problem: %s', $file, $csProcess->getErrorOutput()."\n".$csProcess->getOutput()));
+                $this->assertTrue($csProcess->isSuccessful(), \sprintf('File "%s" has a twig-cs problem: %s', $file, $csProcess->getErrorOutput()."\n".$csProcess->getOutput()));
             }
         }
     }
@@ -90,7 +90,7 @@ abstract class MakerTestCase extends TestCase
      */
     protected function assertContainsCount(string $needle, string $haystack, int $count)
     {
-        $this->assertEquals(1, substr_count($haystack, $needle), sprintf('Found more than %d occurrences of "%s" in "%s"', $count, $needle, $haystack));
+        $this->assertEquals(1, substr_count($haystack, $needle), \sprintf('Found more than %d occurrences of "%s" in "%s"', $count, $needle, $haystack));
     }
 
     private function getMakerInstance(string $makerClass): MakerInterface
@@ -101,7 +101,7 @@ abstract class MakerTestCase extends TestCase
         }
 
         // a cheap way to guess the service id
-        $serviceId ??= sprintf('maker.maker.%s', Str::asSnakeCase((new \ReflectionClass($makerClass))->getShortName()));
+        $serviceId ??= \sprintf('maker.maker.%s', Str::asSnakeCase((new \ReflectionClass($makerClass))->getShortName()));
 
         return $this->kernel->getContainer()->get($serviceId);
     }
@@ -129,7 +129,7 @@ abstract class MakerTestCase extends TestCase
             $versionConstraint = $requiredPackageData['version_constraint'];
 
             if (!isset($packageVersions[$name])) {
-                throw new \Exception(sprintf('Package "%s" is required in the test project at version "%s" but it is not installed?', $name, $versionConstraint));
+                throw new \Exception(\sprintf('Package "%s" is required in the test project at version "%s" but it is not installed?', $name, $versionConstraint));
             }
 
             if (!Semver::satisfies($packageVersions[$name], $versionConstraint)) {
