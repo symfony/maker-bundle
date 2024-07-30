@@ -7,7 +7,7 @@ namespace <?= $namespace ?>;
 #[Route('<?= $route_path ?>')]
 class <?= $class_name ?> extends AbstractController
 {
-<?= $generator->generateRouteForControllerMethod('/', sprintf('%s_index', $route_name), ['GET']) ?>
+<?= $generator->generateRouteForControllerMethod('', sprintf('%s_index', $route_name), ['GET']) ?>
 <?php if (isset($repository_full_class_name)): ?>
     public function index(<?= $repository_class_name ?> $<?= $repository_var ?>): Response
     {
