@@ -210,15 +210,15 @@ final class MakeUser extends AbstractMaker
 
         $io->text('Next Steps:');
         $nextSteps = [
-            sprintf('Review your new <info>%s</info> class.', $userClassNameDetails->getFullName()),
+            \sprintf('Review your new <info>%s</info> class.', $userClassNameDetails->getFullName()),
         ];
         if ($userClassConfiguration->isEntity()) {
-            $nextSteps[] = sprintf(
+            $nextSteps[] = \sprintf(
                 'Use <comment>make:entity</comment> to add more fields to your <info>%s</info> entity and then run <comment>make:migration</comment>.',
                 $userClassNameDetails->getShortName()
             );
         } else {
-            $nextSteps[] = sprintf(
+            $nextSteps[] = \sprintf(
                 'Open <info>%s</info> to finish implementing your user provider.',
                 /* @phpstan-ignore-next-line - $customProviderPath is defined in this else statement */
                 $this->fileManager->relativizePath($customProviderPath)
@@ -236,7 +236,7 @@ final class MakeUser extends AbstractMaker
 
         $nextSteps[] = 'Create a way to authenticate! See https://symfony.com/doc/current/security.html';
 
-        $nextSteps = array_map(static fn ($step) => sprintf('  - %s', $step), $nextSteps);
+        $nextSteps = array_map(static fn ($step) => \sprintf('  - %s', $step), $nextSteps);
         $io->text($nextSteps);
     }
 

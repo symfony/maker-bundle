@@ -81,7 +81,7 @@ final class MakeCustomAuthenticator extends AbstractMaker
         );
 
         if (!$this->fileManager->fileExists(self::SECURITY_CONFIG_PATH)) {
-            throw new RuntimeCommandException(sprintf('The file "%s" does not exist. PHP & XML configuration formats are currently not supported.', self::SECURITY_CONFIG_PATH));
+            throw new RuntimeCommandException(\sprintf('The file "%s" does not exist. PHP & XML configuration formats are currently not supported.', self::SECURITY_CONFIG_PATH));
         }
 
         $name = $io->ask(

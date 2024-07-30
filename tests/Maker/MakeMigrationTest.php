@@ -62,7 +62,7 @@ class MakeMigrationTest extends MakerTestCase
                 // see that the exact filename is in the output
                 $iterator = $finder->getIterator();
                 $iterator->rewind();
-                $this->assertStringContainsString(sprintf('%s/%s', $migrationsDirectoryPath, $iterator->current()->getFilename()), $output);
+                $this->assertStringContainsString(\sprintf('%s/%s', $migrationsDirectoryPath, $iterator->current()->getFilename()), $output);
             }),
         ];
 

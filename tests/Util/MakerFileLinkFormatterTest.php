@@ -47,7 +47,7 @@ final class MakerFileLinkFormatterTest extends TestCase
             }
 
             $return = $linkFormatterReturnsLink ? $this->returnCallback(function ($path, $line) {
-                return sprintf('subl://open?url=file://%s&line=%d', $path, $line);
+                return \sprintf('subl://open?url=file://%s&line=%d', $path, $line);
             }) : $this->returnValue(false);
             $fileLinkFormatter
                ->method('format')

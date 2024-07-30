@@ -79,14 +79,14 @@ final class MakeTwigComponent extends AbstractMaker
 
         $generator->generateClass(
             $factory->getFullName(),
-            sprintf('%s/../Resources/skeleton/twig/%s', __DIR__, $live ? 'LiveComponent.tpl.php' : 'Component.tpl.php'),
+            \sprintf('%s/../Resources/skeleton/twig/%s', __DIR__, $live ? 'LiveComponent.tpl.php' : 'Component.tpl.php'),
             [
                 'live' => $live,
             ]
         );
         $generator->generateTemplate(
             "components/{$templatePath}.html.twig",
-            sprintf('%s/../Resources/skeleton/twig/%s', __DIR__, 'component_template.tpl.php')
+            \sprintf('%s/../Resources/skeleton/twig/%s', __DIR__, 'component_template.tpl.php')
         );
 
         $generator->writeChanges();

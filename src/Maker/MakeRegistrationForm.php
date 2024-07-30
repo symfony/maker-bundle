@@ -135,7 +135,7 @@ final class MakeRegistrationForm extends AbstractMaker
             $providersData,
             'Enter the User class that you want to create during registration (e.g. <fg=yellow>App\\Entity\\User</>)'
         );
-        $io->text(sprintf('Creating a registration form for <info>%s</info>', $this->userClass));
+        $io->text(\sprintf('Creating a registration form for <info>%s</info>', $this->userClass));
 
         $this->usernameField = $interactiveSecurityHelper->guessUserNameField($io, $this->userClass, $providersData);
 
@@ -145,7 +145,7 @@ final class MakeRegistrationForm extends AbstractMaker
         $userClassDetails = new ClassDetails($this->userClass);
 
         if (!$userClassDetails->hasAttribute(UniqueEntity::class)) {
-            $this->addUniqueEntityConstraint = (bool) $io->confirm(sprintf('Do you want to add a <comment>#[UniqueEntity]</comment> validation attribute to your <comment>%s</comment> class to make sure duplicate accounts aren\'t created?', Str::getShortClassName($this->userClass)));
+            $this->addUniqueEntityConstraint = (bool) $io->confirm(\sprintf('Do you want to add a <comment>#[UniqueEntity]</comment> validation attribute to your <comment>%s</comment> class to make sure duplicate accounts aren\'t created?', Str::getShortClassName($this->userClass)));
         }
 
         $this->willVerifyEmail = (bool) $io->confirm('Do you want to send an email to verify the user\'s email address after registration?');
@@ -234,7 +234,7 @@ final class MakeRegistrationForm extends AbstractMaker
             $userRepoVars = [
                 'repository_full_class_name' => $userRepoClassDetails->getFullName(),
                 'repository_class_name' => $userRepoClassDetails->getShortName(),
-                'repository_var' => sprintf('$%s', lcfirst($userRepoClassDetails->getShortName())),
+                'repository_var' => \sprintf('$%s', lcfirst($userRepoClassDetails->getShortName())),
             ];
         }
 
@@ -334,11 +334,11 @@ final class MakeRegistrationForm extends AbstractMaker
             ]);
 
             $autoLoginVars['firewall'] = $this->autoLoginAuthenticator->firewallName;
-            $autoLoginVars['authenticator'] = sprintf('\'%s\'', $this->autoLoginAuthenticator->type->value);
+            $autoLoginVars['authenticator'] = \sprintf('\'%s\'', $this->autoLoginAuthenticator->type->value);
 
             if (AuthenticatorType::CUSTOM === $this->autoLoginAuthenticator->type) {
                 $useStatements->addUseStatement($this->autoLoginAuthenticator->authenticatorClass);
-                $autoLoginVars['authenticator'] = sprintf('%s::class', Str::getShortClassName($this->autoLoginAuthenticator->authenticatorClass));
+                $autoLoginVars['authenticator'] = \sprintf('%s::class', Str::getShortClassName($this->autoLoginAuthenticator->authenticatorClass));
             }
         }
 
@@ -386,7 +386,7 @@ final class MakeRegistrationForm extends AbstractMaker
             if ($this->doctrineHelper->isDoctrineSupportingAttributes()) {
                 $userManipulator->addAttributeToClass(
                     UniqueEntity::class,
-                    ['fields' => [$usernameField], 'message' => sprintf('There is already an account with this %s', $usernameField)]
+                    ['fields' => [$usernameField], 'message' => \sprintf('There is already an account with this %s', $usernameField)]
                 );
             }
 
@@ -429,7 +429,7 @@ final class MakeRegistrationForm extends AbstractMaker
             ]);
 
             $generator->generateFile(
-                targetPath: sprintf('tests/%s.php', $testClassDetails->getShortName()),
+                targetPath: \sprintf('tests/%s.php', $testClassDetails->getShortName()),
                 templateName: $this->willVerifyEmail ? 'registration/Test.WithVerify.tpl.php' : 'registration/Test.WithoutVerify.tpl.php',
                 variables: array_merge([
                     'use_statements' => $useStatements,
@@ -458,15 +458,15 @@ final class MakeRegistrationForm extends AbstractMaker
             $index = 1;
             if ($missingPackagesMessage = $this->getMissingComponentsComposerMessage()) {
                 $closing[] = '1) Install some missing packages:';
-                $closing[] = sprintf('     <fg=green>%s</>', $missingPackagesMessage);
+                $closing[] = \sprintf('     <fg=green>%s</>', $missingPackagesMessage);
                 ++$index;
             }
 
-            $closing[] = sprintf('%d) In <fg=yellow>RegistrationController::verifyUserEmail()</>:', $index++);
+            $closing[] = \sprintf('%d) In <fg=yellow>RegistrationController::verifyUserEmail()</>:', $index++);
             $closing[] = '   * Customize the last <fg=yellow>redirectToRoute()</> after a successful email verification.';
             $closing[] = '   * Make sure you\'re rendering <fg=yellow>success</> flash messages or change the <fg=yellow>$this->addFlash()</> line.';
-            $closing[] = sprintf('%d) Review and customize the form, controller, and templates as needed.', $index++);
-            $closing[] = sprintf('%d) Run <fg=yellow>"%s make:migration"</> to generate a migration for the newly added <fg=yellow>%s::isVerified</> property.', $index++, CliOutputHelper::getCommandPrefix(), $userClass);
+            $closing[] = \sprintf('%d) Review and customize the form, controller, and templates as needed.', $index++);
+            $closing[] = \sprintf('%d) Run <fg=yellow>"%s make:migration"</> to generate a migration for the newly added <fg=yellow>%s::isVerified</> property.', $index++, CliOutputHelper::getCommandPrefix(), $userClass);
         }
 
         $io->text($closing);
@@ -502,12 +502,12 @@ final class MakeRegistrationForm extends AbstractMaker
             }
         } else {
             $missing = true;
-            $composerMessage = sprintf('%s symfonycasts/verify-email-bundle', $composerMessage);
+            $composerMessage = \sprintf('%s symfonycasts/verify-email-bundle', $composerMessage);
         }
 
         if (!interface_exists(MailerInterface::class)) {
             $missing = true;
-            $composerMessage = sprintf('%s symfony/mailer', $composerMessage);
+            $composerMessage = \sprintf('%s symfony/mailer', $composerMessage);
         }
 
         if (!$missing) {

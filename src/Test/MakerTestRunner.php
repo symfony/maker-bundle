@@ -46,7 +46,7 @@ class MakerTestRunner
         $path = __DIR__.'/../../tests/fixtures/'.$source;
 
         if (!file_exists($path)) {
-            throw new \Exception(sprintf('Cannot find file "%s"', $path));
+            throw new \Exception(\sprintf('Cannot find file "%s"', $path));
         }
 
         if (is_file($path)) {
@@ -198,7 +198,7 @@ class MakerTestRunner
     public function runTests(): void
     {
         $internalTestProcess = MakerTestProcess::create(
-            sprintf('php %s', $this->getPath('/bin/phpunit')),
+            \sprintf('php %s', $this->getPath('/bin/phpunit')),
             $this->environment->getPath())
             ->run(true)
         ;
@@ -207,7 +207,7 @@ class MakerTestRunner
             return;
         }
 
-        throw new ExpectationFailedException(sprintf("Error while running the PHPUnit tests *in* the project: \n\n %s \n\n Command Output: %s", $internalTestProcess->getErrorOutput()."\n".$internalTestProcess->getOutput(), $this->getExecutedMakerProcess()->getErrorOutput()."\n".$this->getExecutedMakerProcess()->getOutput()));
+        throw new ExpectationFailedException(\sprintf("Error while running the PHPUnit tests *in* the project: \n\n %s \n\n Command Output: %s", $internalTestProcess->getErrorOutput()."\n".$internalTestProcess->getOutput(), $this->getExecutedMakerProcess()->getErrorOutput()."\n".$this->getExecutedMakerProcess()->getOutput()));
     }
 
     public function writeFile(string $filename, string $contents): void

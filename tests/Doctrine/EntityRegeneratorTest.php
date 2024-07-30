@@ -111,7 +111,7 @@ class EntityRegeneratorTest extends TestCase
 
         $regenerator->regenerateEntities($namespace);
 
-        $expectedDir = sprintf(__DIR__.'/fixtures/%s/src', $expectedDirName);
+        $expectedDir = \sprintf(__DIR__.'/fixtures/%s/src', $expectedDirName);
         $finder = (new Finder())->in($expectedDir)->files();
 
         foreach ($finder as $file) {
@@ -119,11 +119,11 @@ class EntityRegeneratorTest extends TestCase
             $expectedContents = file_get_contents($file->getPathname());
 
             $actualRelativePath = ltrim(str_replace($expectedDir, '', $file->getPathname()), '/');
-            $actualPath = sprintf('%s/src/%s', $tmpDir, $actualRelativePath);
-            $this->assertFileExists($actualPath, sprintf('Could not find expected file src/%s', $actualRelativePath));
+            $actualPath = \sprintf('%s/src/%s', $tmpDir, $actualRelativePath);
+            $this->assertFileExists($actualPath, \sprintf('Could not find expected file src/%s', $actualRelativePath));
             $actualContents = file_get_contents($actualPath);
 
-            $this->assertEquals($expectedContents, $actualContents, sprintf('File "%s" does not match: %s', $file->getFilename(), $actualContents));
+            $this->assertEquals($expectedContents, $actualContents, \sprintf('File "%s" does not match: %s', $file->getFilename(), $actualContents));
         }
     }
 

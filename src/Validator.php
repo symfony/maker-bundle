@@ -48,19 +48,19 @@ final class Validator
 
         foreach ($pieces as $piece) {
             if (!mb_check_encoding($piece, 'UTF-8')) {
-                $errorMessage = $errorMessage ?: sprintf('"%s" is not a UTF-8-encoded string.', $piece);
+                $errorMessage = $errorMessage ?: \sprintf('"%s" is not a UTF-8-encoded string.', $piece);
 
                 throw new RuntimeCommandException($errorMessage);
             }
 
             if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $piece)) {
-                $errorMessage = $errorMessage ?: sprintf('"%s" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)', $className);
+                $errorMessage = $errorMessage ?: \sprintf('"%s" is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores)', $className);
 
                 throw new RuntimeCommandException($errorMessage);
             }
 
             if (\in_array(strtolower($shortClassName), $reservedKeywords, true)) {
-                throw new RuntimeCommandException(sprintf('"%s" is a reserved keyword and thus cannot be used as class name in PHP.', $shortClassName));
+                throw new RuntimeCommandException(\sprintf('"%s" is a reserved keyword and thus cannot be used as class name in PHP.', $shortClassName));
             }
         }
 
@@ -88,7 +88,7 @@ final class Validator
         ]);
 
         if (false === $result) {
-            throw new RuntimeCommandException(sprintf('Invalid length "%s".', $length));
+            throw new RuntimeCommandException(\sprintf('Invalid length "%s".', $length));
         }
 
         return $result;
@@ -105,7 +105,7 @@ final class Validator
         ]);
 
         if (false === $result) {
-            throw new RuntimeCommandException(sprintf('Invalid precision "%s".', $precision));
+            throw new RuntimeCommandException(\sprintf('Invalid precision "%s".', $precision));
         }
 
         return $result;
@@ -122,7 +122,7 @@ final class Validator
         ]);
 
         if (false === $result) {
-            throw new RuntimeCommandException(sprintf('Invalid scale "%s".', $scale));
+            throw new RuntimeCommandException(\sprintf('Invalid scale "%s".', $scale));
         }
 
         return $result;
@@ -139,7 +139,7 @@ final class Validator
         }
 
         if (null === $valueAsBool = filter_var($value, \FILTER_VALIDATE_BOOLEAN, \FILTER_NULL_ON_FAILURE)) {
-            throw new RuntimeCommandException(sprintf('Invalid bool value "%s".', $value));
+            throw new RuntimeCommandException(\sprintf('Invalid bool value "%s".', $value));
         }
 
         return $valueAsBool;
@@ -149,7 +149,7 @@ final class Validator
     {
         // check for valid PHP variable name
         if (!Str::isValidPhpVariableName($name)) {
-            throw new \InvalidArgumentException(sprintf('"%s" is not a valid PHP property name.', $name));
+            throw new \InvalidArgumentException(\sprintf('"%s" is not a valid PHP property name.', $name));
         }
 
         return $name;
@@ -159,7 +159,7 @@ final class Validator
     {
         // check reserved words
         if ($registry->getConnection()->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name)) {
-            throw new \InvalidArgumentException(sprintf('Name "%s" is a reserved word.', $name));
+            throw new \InvalidArgumentException(\sprintf('Name "%s" is a reserved word.', $name));
         }
 
         self::validatePropertyName($name);
@@ -170,7 +170,7 @@ final class Validator
     public static function validateEmailAddress(?string $email): string
     {
         if (!filter_var($email, \FILTER_VALIDATE_EMAIL)) {
-            throw new RuntimeCommandException(sprintf('"%s" is not a valid email address.', $email));
+            throw new RuntimeCommandException(\sprintf('"%s" is not a valid email address.', $email));
         }
 
         return $email;
@@ -196,7 +196,7 @@ final class Validator
         self::notBlank($className);
 
         if (!class_exists($className)) {
-            $errorMessage = $errorMessage ?: sprintf('Class "%s" doesn\'t exist; please enter an existing full class name.', $className);
+            $errorMessage = $errorMessage ?: \sprintf('Class "%s" doesn\'t exist; please enter an existing full class name.', $className);
 
             throw new RuntimeCommandException($errorMessage);
         }
@@ -213,11 +213,11 @@ final class Validator
         }
 
         if (str_starts_with($className, '\\')) {
-            self::classExists($className, sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
+            self::classExists($className, \sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
         }
 
         if (!\in_array($className, $entities) && !\in_array(ltrim($className, '\\'), $entities)) {
-            throw new RuntimeCommandException(sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
+            throw new RuntimeCommandException(\sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
         }
 
         return $className;
@@ -228,7 +228,7 @@ final class Validator
         self::notBlank($className);
 
         if (class_exists($className)) {
-            throw new RuntimeCommandException(sprintf('Class "%s" already exists.', $className));
+            throw new RuntimeCommandException(\sprintf('Class "%s" already exists.', $className));
         }
 
         return $className;
@@ -239,7 +239,7 @@ final class Validator
         self::classExists($userClassName);
 
         if (!isset(class_implements($userClassName)[UserInterface::class])) {
-            throw new RuntimeCommandException(sprintf('The class "%s" must implement "%s".', $userClassName, UserInterface::class));
+            throw new RuntimeCommandException(\sprintf('The class "%s" must implement "%s".', $userClassName, UserInterface::class));
         }
 
         return $userClassName;
@@ -250,7 +250,7 @@ final class Validator
         self::classExists($backedEnum);
 
         if (!isset(class_implements($backedEnum)[\BackedEnum::class])) {
-            throw new RuntimeCommandException(sprintf('The class "%s" is not a valid BackedEnum.', $backedEnum));
+            throw new RuntimeCommandException(\sprintf('The class "%s" is not a valid BackedEnum.', $backedEnum));
         }
 
         return $backedEnum;

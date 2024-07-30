@@ -75,8 +75,8 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
         $typesDesc = [];
         $typesHelp = [];
         foreach (self::DESCRIPTIONS as $type => $desc) {
-            $typesDesc[] = sprintf('<fg=yellow>%s</> (%s)', $type, $desc);
-            $typesHelp[] = sprintf('* <info>%s</info>: %s', $type, $desc);
+            $typesDesc[] = \sprintf('<fg=yellow>%s</> (%s)', $type, $desc);
+            $typesHelp[] = \sprintf('* <info>%s</info>: %s', $type, $desc);
         }
 
         $command
@@ -95,7 +95,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
 
         if (null !== $type = $input->getArgument('type')) {
             if (!isset(self::DESCRIPTIONS[$type])) {
-                throw new RuntimeCommandException(sprintf('The test type must be one of "%s", "%s" given.', implode('", "', array_keys(self::DESCRIPTIONS)), $type));
+                throw new RuntimeCommandException(\sprintf('The test type must be one of "%s", "%s" given.', implode('", "', array_keys(self::DESCRIPTIONS)), $type));
             }
         } else {
             $input->setArgument(
@@ -158,7 +158,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
 
         $io->text([
             'Next: Open your new test class and start customizing it.',
-            sprintf('Find the documentation at <fg=yellow>%s</>', self::DOCS[$type]),
+            \sprintf('Find the documentation at <fg=yellow>%s</>', self::DOCS[$type]),
         ]);
     }
 

@@ -203,7 +203,7 @@ class FileManagerTest extends TestCase
         $fileLinkFormatter
             ->method('format')
             ->willReturnCallback(function ($path, $line) {
-                return sprintf('subl://open?url=file://%s&line=%d', $path, $line);
+                return \sprintf('subl://open?url=file://%s&line=%d', $path, $line);
             });
 
         $fileManager = new FileManager(

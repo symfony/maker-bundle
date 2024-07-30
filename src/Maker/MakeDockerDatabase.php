@@ -82,7 +82,7 @@ final class MakeDockerDatabase extends AbstractMaker
             ['MySQL', 'MariaDB', 'Postgres']
         ));
 
-        $io->text([sprintf(
+        $io->text([\sprintf(
             'For a list of supported versions, check out https://hub.docker.com/_/%s',
             $this->databaseChoice
         )]);
@@ -90,7 +90,7 @@ final class MakeDockerDatabase extends AbstractMaker
         $this->serviceVersion = $io->ask('What version would you like to use?', DockerDatabaseServices::getSuggestedServiceVersion($this->databaseChoice));
 
         if ($this->composeFileManipulator->serviceExists($this->serviceName)) {
-            $io->comment(sprintf('A <fg=yellow>"%s"</> service is already defined.', $this->serviceName));
+            $io->comment(\sprintf('A <fg=yellow>"%s"</> service is already defined.', $this->serviceName));
             $io->newLine();
 
             $serviceNameMsg[] = 'If you are using the Symfony Binary, it will expose the connection config for';
@@ -102,7 +102,7 @@ final class MakeDockerDatabase extends AbstractMaker
 
             $io->text($serviceNameMsg);
 
-            $this->serviceName = $io->ask(sprintf('What name should we call the new %s service? (e.g. <fg=yellow>database</>)', $this->serviceName), null, Validator::notBlank(...));
+            $this->serviceName = $io->ask(\sprintf('What name should we call the new %s service? (e.g. <fg=yellow>database</>)', $this->serviceName), null, Validator::notBlank(...));
         }
 
         $this->checkForPDOSupport($this->databaseChoice, $io);
@@ -122,12 +122,12 @@ final class MakeDockerDatabase extends AbstractMaker
 
         $this->writeSuccessMessage($io);
 
-        $io->text(sprintf('The new <fg=yellow>"%s"</> service is now ready!', $this->serviceName));
+        $io->text(\sprintf('The new <fg=yellow>"%s"</> service is now ready!', $this->serviceName));
         $io->newLine();
 
         $ports = DockerDatabaseServices::getDefaultPorts($this->databaseChoice);
         $closing[] = 'Next:';
-        $closing[] = sprintf(' A) Run <fg=yellow>docker-compose up -d %s</> to start your database container', $this->serviceName);
+        $closing[] = \sprintf(' A) Run <fg=yellow>docker-compose up -d %s</> to start your database container', $this->serviceName);
         $closing[] = '    or <fg=yellow>docker-compose up -d</> to start all of them.';
         $closing[] = '';
         $closing[] = ' B) If you are using the Symfony Binary, it will detect the new service automatically.';
@@ -137,7 +137,7 @@ final class MakeDockerDatabase extends AbstractMaker
         $closing[] = ' C) Run <fg=yellow>docker-compose stop</> will stop all the containers in compose.yaml.';
         $closing[] = '    <fg=yellow>docker-compose down</> will stop and destroy the containers.';
         $closing[] = '';
-        $closing[] = sprintf(
+        $closing[] = \sprintf(
             'Port%s %s will be exposed to %s random port%s on your host machine.',
             1 === \count($ports) ? '' : 's',
             implode(' ', $ports),
@@ -163,7 +163,7 @@ final class MakeDockerDatabase extends AbstractMaker
 
         if (null !== $extension) {
             $io->note(
-                sprintf('Cannot find PHP\'s pdo_%s extension. Be sure it\'s installed & enabled to talk to the database.', $extension)
+                \sprintf('Cannot find PHP\'s pdo_%s extension. Be sure it\'s installed & enabled to talk to the database.', $extension)
             );
         }
     }
@@ -174,19 +174,19 @@ final class MakeDockerDatabase extends AbstractMaker
      */
     private function getComposeFileContents(ConsoleStyle $io): string
     {
-        $this->composeFilePath = sprintf('%s/compose.yaml', $this->fileManager->getRootDirectory());
+        $this->composeFilePath = \sprintf('%s/compose.yaml', $this->fileManager->getRootDirectory());
 
         $composeFileExists = false;
         $statusMessage = 'Existing compose.yaml not found: a new one will be generated!';
         $contents = '';
 
         foreach (['.yml', '.yaml'] as $extension) {
-            $composeFilePath = sprintf('%s/compose%s', $this->fileManager->getRootDirectory(), $extension);
+            $composeFilePath = \sprintf('%s/compose%s', $this->fileManager->getRootDirectory(), $extension);
 
             if (!$composeFileExists && $this->fileManager->fileExists($composeFilePath)) {
                 $composeFileExists = true;
 
-                $statusMessage = sprintf('We found your existing compose%s: Let\'s update it!', $extension);
+                $statusMessage = \sprintf('We found your existing compose%s: Let\'s update it!', $extension);
 
                 $this->composeFilePath = $composeFilePath;
                 $contents = $this->fileManager->getFileContents($composeFilePath);

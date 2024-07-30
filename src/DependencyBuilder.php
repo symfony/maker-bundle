@@ -91,18 +91,18 @@ final class DependencyBuilder
 
         $packagesCount = \count($packages) + \count($packagesDev);
 
-        $message = sprintf(
+        $message = \sprintf(
             "Missing package%s: %s, run:\n",
             $packagesCount > 1 ? 's' : '',
-            $message ?: sprintf('to use the %s command', $commandName)
+            $message ?: \sprintf('to use the %s command', $commandName)
         );
 
         if (!empty($packages)) {
-            $message .= sprintf("\ncomposer require %s", implode(' ', $packages));
+            $message .= \sprintf("\ncomposer require %s", implode(' ', $packages));
         }
 
         if (!empty($packagesDev)) {
-            $message .= sprintf("\ncomposer require %s --dev", implode(' ', $packagesDev));
+            $message .= \sprintf("\ncomposer require %s --dev", implode(' ', $packagesDev));
         }
 
         return $message;

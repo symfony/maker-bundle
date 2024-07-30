@@ -20,13 +20,13 @@ final class TemplateComponentGenerator
 {
     public function generateRouteForControllerMethod(string $routePath, string $routeName, array $methods = [], bool $indent = true, bool $trailingNewLine = true): string
     {
-        $attribute = sprintf('%s#[Route(\'%s\', name: \'%s\'', $indent ? '    ' : null, $routePath, $routeName);
+        $attribute = \sprintf('%s#[Route(\'%s\', name: \'%s\'', $indent ? '    ' : null, $routePath, $routeName);
 
         if (!empty($methods)) {
             $attribute .= ', methods: [';
 
             foreach ($methods as $method) {
-                $attribute .= sprintf('\'%s\', ', $method);
+                $attribute .= \sprintf('\'%s\', ', $method);
             }
 
             $attribute = rtrim($attribute, ', ');
@@ -34,13 +34,13 @@ final class TemplateComponentGenerator
             $attribute .= ']';
         }
 
-        $attribute .= sprintf(')]%s', $trailingNewLine ? "\n" : null);
+        $attribute .= \sprintf(')]%s', $trailingNewLine ? "\n" : null);
 
         return $attribute;
     }
 
     public function getPropertyType(ClassNameDetails $classNameDetails): ?string
     {
-        return sprintf('%s ', $classNameDetails->getShortName());
+        return \sprintf('%s ', $classNameDetails->getShortName());
     }
 }

@@ -45,7 +45,7 @@ class AutoloaderUtilTest extends TestCase
                 str_replace('\\', '/', self::$currentRootDir.'/'.$expectedPath),
                 // normalize slashes for Windows comparison
                 str_replace('\\', '/', $autoloaderUtil->getPathForFutureClass($className)),
-                sprintf('class "%s" should have been in path "%s"', $className, $expectedPath)
+                \sprintf('class "%s" should have been in path "%s"', $className, $expectedPath)
             );
         }
     }
@@ -58,9 +58,9 @@ class AutoloaderUtilTest extends TestCase
             $configured = $autoloaderUtil->isNamespaceConfiguredToAutoload($namespace);
 
             if ($expected) {
-                $this->assertTrue($configured, sprintf('namespace "%s" is not found but must be', $namespace));
+                $this->assertTrue($configured, \sprintf('namespace "%s" is not found but must be', $namespace));
             } else {
-                $this->assertFalse($configured, sprintf('namespace "%s" is found but must not be', $namespace));
+                $this->assertFalse($configured, \sprintf('namespace "%s" is found but must not be', $namespace));
             }
         }
     }

@@ -108,7 +108,7 @@ final class MakeFormLogin extends AbstractMaker
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if (!$this->fileManager->fileExists(self::SECURITY_CONFIG_PATH)) {
-            throw new RuntimeCommandException(sprintf('The file "%s" does not exist. PHP & XML configuration formats are currently not supported.', self::SECURITY_CONFIG_PATH));
+            throw new RuntimeCommandException(\sprintf('The file "%s" does not exist. PHP & XML configuration formats are currently not supported.', self::SECURITY_CONFIG_PATH));
         }
 
         $this->ysm = new YamlSourceManipulator($this->fileManager->getFileContents(self::SECURITY_CONFIG_PATH));
@@ -164,7 +164,7 @@ final class MakeFormLogin extends AbstractMaker
         }
 
         $generator->generateTemplate(
-            sprintf('%s/login.html.twig', $templatePath),
+            \sprintf('%s/login.html.twig', $templatePath),
             'security/formLogin/login_form.tpl.php',
             [
                 'logout_setup' => $this->willLogout,
@@ -199,7 +199,7 @@ final class MakeFormLogin extends AbstractMaker
             ]);
 
             $generator->generateFile(
-                targetPath: sprintf('tests/%s.php', $testClassDetails->getShortName()),
+                targetPath: \sprintf('tests/%s.php', $testClassDetails->getShortName()),
                 templateName: 'security/formLogin/Test.LoginController.tpl.php',
                 variables: [
                     'use_statements' => $useStatements,
@@ -220,7 +220,7 @@ final class MakeFormLogin extends AbstractMaker
         $this->writeSuccessMessage($io);
 
         $io->text([
-            sprintf('Next: Review and adapt the login template: <info>%s/login.html.twig</info> to suit your needs.', $templatePath),
+            \sprintf('Next: Review and adapt the login template: <info>%s/login.html.twig</info> to suit your needs.', $templatePath),
         ]);
     }
 }

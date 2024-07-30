@@ -60,12 +60,12 @@ final class UseStatementGenerator implements \Stringable
             $importedClass = $this->classesToBeImported[$key];
 
             if (!\is_array($importedClass)) {
-                $statements .= sprintf("use %s;\n", $importedClass);
+                $statements .= \sprintf("use %s;\n", $importedClass);
                 continue;
             }
 
             $aliasClass = key($importedClass);
-            $statements .= sprintf("use %s as %s;\n", $aliasClass, $aliases[$aliasClass]);
+            $statements .= \sprintf("use %s as %s;\n", $aliasClass, $aliases[$aliasClass]);
         }
 
         return $statements;

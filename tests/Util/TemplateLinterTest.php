@@ -44,9 +44,9 @@ final class TemplateLinterTest extends TestCase
             $this->markTestSkipped('Test only runs on linux.');
         }
 
-        $fixerPath = sprintf('%s/src/Resources/bin/php-cs-fixer-v%s.phar', \dirname(__DIR__, 2), TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION);
+        $fixerPath = \sprintf('%s/src/Resources/bin/php-cs-fixer-v%s.phar', \dirname(__DIR__, 2), TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION);
 
-        $process = Process::fromShellCommandline(sprintf('%s -V', $fixerPath));
+        $process = Process::fromShellCommandline(\sprintf('%s -V', $fixerPath));
 
         $process->run();
 

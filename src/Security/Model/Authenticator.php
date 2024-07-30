@@ -30,7 +30,7 @@ final class Authenticator
      */
     public function __toString(): string
     {
-        return sprintf(
+        return \sprintf(
             '"%s" in the "%s" firewall',
             $this->authenticatorClass ?? $this->type->value,
             $this->firewallName,

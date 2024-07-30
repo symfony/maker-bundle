@@ -57,7 +57,7 @@ class Generator
         $targetPath = $this->fileManager->getRelativePathForFutureClass($className);
 
         if (null === $targetPath) {
-            throw new \LogicException(sprintf('Could not determine where to locate the new class "%s", maybe try with a full namespace like "\\My\\Full\\Namespace\\%s"', $className, Str::getShortClassName($className)));
+            throw new \LogicException(\sprintf('Could not determine where to locate the new class "%s", maybe try with a full namespace like "\\My\\Full\\Namespace\\%s"', $className, Str::getShortClassName($className)));
         }
 
         $variables = array_merge($variables, [
@@ -97,7 +97,7 @@ class Generator
     public function getFileContentsForPendingOperation(string $targetPath): string
     {
         if (!isset($this->pendingOperations[$targetPath])) {
-            throw new RuntimeCommandException(sprintf('File "%s" is not in the Generator\'s pending operations', $targetPath));
+            throw new RuntimeCommandException(\sprintf('File "%s" is not in the Generator\'s pending operations', $targetPath));
         }
 
         $templatePath = $this->pendingOperations[$targetPath]['template'];
@@ -251,7 +251,7 @@ class Generator
     private function addOperation(string $targetPath, string $templateName, array $variables): void
     {
         if ($this->fileManager->fileExists($targetPath)) {
-            throw new RuntimeCommandException(sprintf('The file "%s" can\'t be generated because it already exists.', $this->fileManager->relativizePath($targetPath)));
+            throw new RuntimeCommandException(\sprintf('The file "%s" can\'t be generated because it already exists.', $this->fileManager->relativizePath($targetPath)));
         }
 
         $variables['relative_path'] = $this->fileManager->relativizePath($targetPath);
@@ -261,7 +261,7 @@ class Generator
             $templatePath = __DIR__.'/Resources/skeleton/'.$templateName;
 
             if (!file_exists($templatePath)) {
-                throw new \Exception(sprintf('Cannot find template "%s"', $templateName));
+                throw new \Exception(\sprintf('Cannot find template "%s"', $templateName));
             }
         }
 
