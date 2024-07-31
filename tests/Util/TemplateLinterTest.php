@@ -53,7 +53,7 @@ final class TemplateLinterTest extends TestCase
 
     private function markTestSkippedOnWindows(): void
     {
-        $isOnWindows = defined('PHP_WINDOWS_VERSION_MAJOR');
+        $isOnWindows = \defined('PHP_WINDOWS_VERSION_MAJOR');
 
         if ($isOnWindows) {
             $this->markTestSkipped('Test only runs on linux.');
