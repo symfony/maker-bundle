@@ -167,6 +167,82 @@ class MakeListenerTest extends MakerTestCase
                 );
             }),
         ];
+
+        yield 'it_makes_listener_for_known_event_by_id' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // listener name
+                        'FooListener',
+                        // event name
+                        'kernel.request',
+                        // accept the suggestion
+                        'y',
+                    ]
+                );
+                self::assertFileEquals(
+                    self::EXPECTED_LISTENER_PATH.'FooListener.php',
+                    $runner->getPath('src/EventListener/FooListener.php')
+                );
+            }),
+        ];
+
+        yield 'it_makes_listener_for_known_event_by_short_class_name' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // listener name
+                        'BarListener',
+                        // event name
+                        'RequestEvent',
+                        // accept the suggestion
+                        'y',
+                    ]
+                );
+                self::assertFileEquals(
+                    self::EXPECTED_LISTENER_PATH.'BarListener.php',
+                    $runner->getPath('src/EventListener/BarListener.php')
+                );
+            }),
+        ];
+
+        yield 'it_makes_listener_for_known_event_by_id_with_2_letters_typo' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // listener name
+                        'FooListener',
+                        // event name
+                        'kernem.reques',
+                        // accept the suggestion
+                        'y',
+                    ]
+                );
+                self::assertFileEquals(
+                    self::EXPECTED_LISTENER_PATH.'FooListener.php',
+                    $runner->getPath('src/EventListener/FooListener.php')
+                );
+            }),
+        ];
+
+        yield 'it_makes_listener_for_known_event_by_short_class_name_with_2_letters_typo' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // listener name
+                        'BarListener',
+                        // event name
+                        'RequstEveny',
+                        // accept the suggestion
+                        'y',
+                    ]
+                );
+                self::assertFileEquals(
+                    self::EXPECTED_LISTENER_PATH.'BarListener.php',
+                    $runner->getPath('src/EventListener/BarListener.php')
+                );
+            }),
+        ];
     }
 
     protected function getMakerClass(): string
