@@ -59,7 +59,8 @@ final class TemplateLinter
             $templateFilePath = [$templateFilePath];
         }
 
-        $ignoreEnv = str_starts_with(strtolower(\PHP_OS), 'win') ? 'set PHP_CS_FIXER_IGNORE_ENV=1& ' : 'PHP_CS_FIXER_IGNORE_ENV=1 ';
+        $isWindows = \defined('PHP_WINDOWS_VERSION_MAJOR');
+        $ignoreEnv = $isWindows ? 'set PHP_CS_FIXER_IGNORE_ENV=1& ' : 'PHP_CS_FIXER_IGNORE_ENV=1 ';
 
         $cmdPrefix = $this->needsPhpCmdPrefix ? 'php ' : '';
 

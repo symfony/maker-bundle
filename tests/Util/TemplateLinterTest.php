@@ -40,9 +40,7 @@ final class TemplateLinterTest extends TestCase
 
     public function testPhpCsFixerVersion(): void
     {
-        if (str_contains(strtolower(\PHP_OS), 'win')) {
-            $this->markTestSkipped('Test only runs on linux.');
-        }
+        $this->markTestSkippedOnWindows();
 
         $fixerPath = \sprintf('%s/src/Resources/bin/php-cs-fixer-v%s.phar', \dirname(__DIR__, 2), TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION);
 
@@ -51,5 +49,14 @@ final class TemplateLinterTest extends TestCase
         $process->run();
 
         self::assertStringContainsString(TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION, $process->getOutput());
+    }
+
+    private function markTestSkippedOnWindows(): void
+    {
+        $isOnWindows = \defined('PHP_WINDOWS_VERSION_MAJOR');
+
+        if ($isOnWindows) {
+            $this->markTestSkipped('Test only runs on linux.');
+        }
     }
 }
