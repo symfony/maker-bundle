@@ -735,6 +735,29 @@ class MakeEntityTest extends MakerTestCase
                 $this->runEntityTest($runner);
             }),
         ];
+
+        yield 'it_creates_a_new_class_with_enum_field_multiple_and_nullable' => [$this->createMakeEntityTest()
+        ->run(function (MakerTestRunner $runner) {
+            $this->copyEntity($runner, 'Enum/Role-basic.php');
+
+            $runner->runMaker([
+                // entity class name
+                'User',
+                // add additional field
+                'role',
+                'enum',
+                'App\\Entity\\Enum\\Role',
+                // multiple
+                'y',
+                // nullable
+                'y',
+                // finish adding fields
+                '',
+            ]);
+
+            $this->runEntityTest($runner);
+        }),
+        ];
     }
 
     /** @param array<string, mixed> $data */
