@@ -3,7 +3,7 @@ namespace App\Tests;
 
 <?= $use_statements ?>
 
-class ResetPasswordTest extends WebTestCase
+class ResetPasswordControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
     private EntityManagerInterface $em;
