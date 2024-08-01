@@ -24,6 +24,7 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('root_namespace')->defaultValue('App')->end()
+                ->booleanNode('fluent_setters')->defaultValue(true)->end()
             ->end()
         ;
 

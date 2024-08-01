@@ -65,6 +65,7 @@ final class ClassSourceManipulator
         private string $sourceCode,
         private bool $overwrite = false,
         private bool $useAttributesForDoctrineMapping = true,
+        private bool $fluentMutators = true,
     ) {
         /* @legacy Support for nikic/php-parser v4 */
         if (class_exists(PhpVersion::class)) {
@@ -1128,6 +1129,10 @@ final class ClassSourceManipulator
 
     private function makeMethodFluent(Builder\Method $methodBuilder): void
     {
+        if (!$this->fluentMutators) {
+            return;
+        }
+
         $methodBuilder
             ->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD))
             ->addStmt(new Node\Stmt\Return_(new Node\Expr\Variable('this')));

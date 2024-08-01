@@ -382,7 +382,8 @@ final class MakeAuthenticator extends AbstractMaker
 
         $manipulator = new ClassSourceManipulator(
             sourceCode: $controllerSourceCode,
-            overwrite: true
+            overwrite: true,
+            fluentMutators: $this->generator->getFluentSetters(),
         );
 
         $this->securityControllerBuilder->addLoginMethod($manipulator);

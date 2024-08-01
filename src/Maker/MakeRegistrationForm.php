@@ -379,7 +379,8 @@ final class MakeRegistrationForm extends AbstractMaker
         if ($this->addUniqueEntityConstraint) {
             $classDetails = new ClassDetails($this->userClass);
             $userManipulator = new ClassSourceManipulator(
-                sourceCode: file_get_contents($classDetails->getPath())
+                sourceCode: file_get_contents($classDetails->getPath()),
+                fluentMutators: $generator->getFluentSetters(),
             );
             $userManipulator->setIo($io);
 
@@ -398,6 +399,7 @@ final class MakeRegistrationForm extends AbstractMaker
             $userManipulator = new ClassSourceManipulator(
                 sourceCode: file_get_contents($classDetails->getPath()),
                 overwrite: false,
+                fluentMutators: $generator->getFluentSetters(),
             );
             $userManipulator->setIo($io);
 
