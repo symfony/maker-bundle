@@ -80,6 +80,9 @@
             </service>
 
             <service id="maker.template_component_generator" class="Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator">
+                <argument /> <!-- generate_final_classes -->
+                <argument /> <!-- generate_final_entities -->
+                <argument /> <!-- root_namespace -->
             </service>
         </services>
 </container>

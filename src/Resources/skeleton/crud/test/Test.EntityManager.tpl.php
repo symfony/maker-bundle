@@ -3,9 +3,9 @@
 
 namespace <?= $namespace ?>;
 
-<?= $use_statements; ?>
+<?= $class_data->getUseStatements(); ?>
 
-class <?= $class_name ?> extends WebTestCase<?= "\n" ?>
+<?= $class_data->getClassDeclaration() ?>
 {
     private KernelBrowser $client;
     private EntityManagerInterface $manager;

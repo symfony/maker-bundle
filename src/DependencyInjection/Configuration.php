@@ -24,6 +24,8 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('root_namespace')->defaultValue('App')->end()
+                ->booleanNode('generate_final_classes')->defaultTrue()->end()
+                ->booleanNode('generate_final_entities')->defaultFalse()->end()
             ->end()
         ;
 
