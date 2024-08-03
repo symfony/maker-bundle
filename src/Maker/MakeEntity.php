@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\DefaultValueValidator;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
@@ -439,6 +440,14 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {
             $classProperty->nullable = true;
+        }
+
+        if (\in_array($classProperty->type, DefaultValueValidator::SUPPORTED_TYPES)) {
+            $defaultValue = $io->ask('Please enter your default value (press <return> if no default value)', null, DefaultValueValidator::getValidator($classProperty->type));
+            if (null !== $defaultValue) {
+                $classProperty->defaultValue = $defaultValue;
+                $classProperty->options['default'] = $classProperty->defaultValue;
+            }
         }
 
         return $classProperty;

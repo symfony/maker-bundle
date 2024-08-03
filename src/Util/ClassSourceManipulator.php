@@ -118,7 +118,6 @@ final class ClassSourceManipulator
         $nullable = $mapping->nullable ?? false;
 
         $attributes[] = $this->buildAttributeNode(Column::class, $mapping->getAttributes(), 'ORM');
-
         $defaultValue = null;
         $commentLines = [];
         if ('array' === $typeHint && !$nullable) {
@@ -130,6 +129,8 @@ final class ClassSourceManipulator
             $typeHint = $this->addUseStatementIfNecessary($mapping->enumType);
         } elseif ($typeHint && '\\' === $typeHint[0] && false !== strpos($typeHint, '\\', 1)) {
             $typeHint = $this->addUseStatementIfNecessary(substr($typeHint, 1));
+        } elseif ($mapping->defaultValue) {
+            $defaultValue = $mapping->defaultValue;
         }
 
         $propertyType = $typeHint;
