@@ -110,25 +110,30 @@ final class MakeListener extends AbstractMaker
             $eventFQCNList = array_filter(array_map($this->eventRegistry->getEventClassName(...), $eventList), fn ($eventFQCN) => \is_string($eventFQCN));
             $eventIdAndFQCNList = array_unique(array_merge($eventList, $eventFQCNList));
             $suggestionList = [];
+
             foreach ($eventIdAndFQCNList as $eventSuggestion) {
                 if (levenshtein($event, Str::getShortClassName($eventSuggestion)) < 3) {
                     $suggestionList[] = $eventSuggestion;
                 }
             }
+
             if (!$suggestionList) {
                 return;
             }
+
             if (1 === \count($suggestionList)) {
-                $question = new ConfirmationQuestion(sprintf('<fg=green>Did you mean</> <fg=yellow>"%s"</> <fg=green>?</>', $suggestionList[0]), false);
-                $event = $io->askQuestion($question) ? $suggestionList[0] : $event;
-            } else {
-                $io->writeln(' <fg=yellow>Did you mean one of these events?</>');
-                $io->listing($suggestionList);
-                $question = new Question(sprintf(' <fg=green>%s</>', $command->getDefinition()->getArgument('event')->getDescription()), $event);
-                $question->setAutocompleterValues(array_merge($suggestionList, [$event]));
-                $event = $io->askQuestion($question);
+                $question = new ConfirmationQuestion(\sprintf('<fg=green>Did you mean</> <fg=yellow>"%s"</> <fg=green>?</>', $suggestionList[0]), false);
+                $input->setArgument('event', $io->askQuestion($question) ? $suggestionList[0] : $event);
+
+                return;
             }
-            $input->setArgument('event', $event);
+
+            $io->writeln(' <fg=yellow>Did you mean one of these events?</>');
+            $io->listing($suggestionList);
+            $question = new Question(\sprintf(' <fg=green>%s</>', $command->getDefinition()->getArgument('event')->getDescription()), $event);
+            $question->setAutocompleterValues(array_merge($suggestionList, [$event]));
+
+            $input->setArgument('event', $io->askQuestion($question));
         }
     }
 
