@@ -9,7 +9,7 @@ class GeneratedCrudControllerTest extends WebTestCase
     public function testIndexAction()
     {
         $client = self::createClient();
-        $crawler = $client->request('GET', '/sweet/food/');
+        $crawler = $client->request('GET', '/sweet/food');
         $this->assertTrue($client->getResponse()->isSuccessful());
         $this->assertStringContainsString('<!DOCTYPE html>', $client->getResponse()->getContent());
         $this->assertStringContainsString('SweetFood index', $client->getResponse()->getContent());
