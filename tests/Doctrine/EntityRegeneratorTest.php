@@ -162,6 +162,10 @@ class TestEntityRegeneratorKernel extends Kernel
                 'utf8' => true,
             ],
             'http_method_override' => false,
+            'handle_all_throwables' => true,
+            'php_errors' => [
+                'log' => true,
+            ],
         ]);
 
         $dbal = [
@@ -178,6 +182,9 @@ class TestEntityRegeneratorKernel extends Kernel
                     'alias' => 'EntityRegeneratorApp',
                     'type' => 'attribute',
                 ],
+            ],
+            'controller_resolver' => [
+                'auto_mapping' => false,
             ],
         ];
 
@@ -222,6 +229,10 @@ class TestXmlEntityRegeneratorKernel extends Kernel
                 'utf8' => true,
             ],
             'http_method_override' => false,
+            'handle_all_throwables' => true,
+            'php_errors' => [
+                'log' => true,
+            ],
         ]);
 
         $dbal = [
@@ -239,6 +250,9 @@ class TestXmlEntityRegeneratorKernel extends Kernel
                     'prefix' => 'Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity',
                     'alias' => 'EntityRegeneratorApp',
                 ],
+            ],
+            'controller_resolver' => [
+                'auto_mapping' => false,
             ],
         ];
 
