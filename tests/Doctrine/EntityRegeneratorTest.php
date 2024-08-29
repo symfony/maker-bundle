@@ -162,6 +162,10 @@ class TestEntityRegeneratorKernel extends Kernel
                 'utf8' => true,
             ],
             'http_method_override' => false,
+            'handle_all_throwables' => true,
+            'php_errors' => [
+                'log' => true,
+            ],
         ]);
 
         $dbal = [
@@ -225,6 +229,10 @@ class TestXmlEntityRegeneratorKernel extends Kernel
                 'utf8' => true,
             ],
             'http_method_override' => false,
+            'handle_all_throwables' => true,
+            'php_errors' => [
+                'log' => true,
+            ],
         ]);
 
         $dbal = [
