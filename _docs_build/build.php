@@ -49,38 +49,16 @@ use SymfonyDocsBuilder\DocBuilder;
         $result = (new DocBuilder())->build($buildConfig);
 
         if ($result->isSuccessful()) {
-            // fix assets URLs to make them absolute (otherwise, they don't work in subdirectories)
-            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($outputDir));
-
-            foreach (new RegexIterator($iterator, '/^.+\.html$/i', RegexIterator::GET_MATCH) as $match) {
-                $htmlFilePath = array_shift($match);
-                $htmlContents = file_get_contents($htmlFilePath);
-
-                $htmlRelativeFilePath = str_replace($outputDir.'/', '', $htmlFilePath);
-                $subdirLevel = substr_count($htmlRelativeFilePath, '/');
-                $baseHref = str_repeat('../', $subdirLevel);
-
-                $htmlContents = str_replace('<head>', '<head><base href="'.$baseHref.'">', $htmlContents);
-                $htmlContents = str_replace('<img src="/_images/', '<img src="_images/', $htmlContents);
-                file_put_contents($htmlFilePath, $htmlContents);
-            }
-
-            foreach (new RegexIterator($iterator, '/^.+\.css/i', RegexIterator::GET_MATCH) as $match) {
-                $htmlFilePath = array_shift($match);
-                $htmlContents = file_get_contents($htmlFilePath);
-                file_put_contents($htmlFilePath, str_replace('fonts/', '../fonts/', $htmlContents));
-            }
-
             $io->success(sprintf('The Symfony Docs were successfully built at %s', realpath($outputDir)));
-        } else {
-            $io->error(sprintf("There were some errors while building the docs:\n\n%s\n", $result->getErrorTrace()));
-            $io->newLine();
-            $io->comment('Tip: you can add the -v, -vv or -vvv flags to this command to get debug information.');
 
-            return 1;
+            return 0;
         }
 
-        return 0;
+        $io->error(sprintf("There were some errors while building the docs:\n\n%s\n", $result->getErrorTrace()));
+        $io->newLine();
+        $io->comment('Tip: you can add the -v, -vv or -vvv flags to this command to get debug information.');
+
+        return 1;
     })
     ->getApplication()
     ->setDefaultCommand('build-docs', true)
