@@ -105,9 +105,9 @@ See https://www.php.net/manual/en/language.oop5.final.php
         ...
     }
 
-.. versionadded:: 1.60.0
+.. versionadded:: 1.61
 
-    ``generate_final_classes`` was introduced in MakerBundle v1.60
+    ``generate_final_classes`` was introduced in MakerBundle 1.61
 
 
 generate_final_entities
@@ -125,14 +125,14 @@ See https://www.php.net/manual/en/language.oop5.final.php
 .. code-block:: php
 
     #[ORM\Entity(repositoryClass: TaskRepository::class)]
-    class Task extends AbstractEntity
+    final class Task extends AbstractEntity
     {
         ...
     }
 
-.. versionadded:: 1.60.0
+.. versionadded:: 1.61
 
-    ``generate_final_entities`` was introduced in MakerBundle v1.60
+    ``generate_final_entities`` was introduced in MakerBundle 1.61.
 
 Creating your Own Makers
 ------------------------
