@@ -37,7 +37,7 @@ final class ClassData
         $className = Str::getShortClassName($class);
 
         if (null !== $suffix && !str_ends_with($className, $suffix)) {
-            $className = Str::asClassName(sprintf('%s%s', $className, $suffix));
+            $className = Str::asClassName(\sprintf('%s%s', $className, $suffix));
         }
 
         $useStatements = new UseStatementGenerator($useStatements);
@@ -66,12 +66,12 @@ final class ClassData
             return $this->rootNamespace;
         }
 
-        return sprintf('%s\%s', $this->rootNamespace, $this->namespace);
+        return \sprintf('%s\%s', $this->rootNamespace, $this->namespace);
     }
 
     public function getFullClassName(): string
     {
-        return sprintf('%s\%s', $this->getNamespace(), $this->className);
+        return \sprintf('%s\%s', $this->getNamespace(), $this->className);
     }
 
     public function setRootNamespace(string $rootNamespace): self
@@ -86,10 +86,10 @@ final class ClassData
         $extendsDeclaration = '';
 
         if (null !== $this->extends) {
-            $extendsDeclaration = sprintf(' extends %s', $this->extends);
+            $extendsDeclaration = \sprintf(' extends %s', $this->extends);
         }
 
-        return sprintf('%sclass %s%s',
+        return \sprintf('%sclass %s%s',
             $this->isFinal ? 'final ' : '',
             $this->className,
             $extendsDeclaration,

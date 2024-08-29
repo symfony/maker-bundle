@@ -102,7 +102,7 @@ class TemplateComponentGeneratorTest extends TestCase
 
         $generator->configureClass($classData);
 
-        self::assertSame(sprintf('%sclass MakerBundle', $expectedResult), $classData->getClassDeclaration());
+        self::assertSame(\sprintf('%sclass MakerBundle', $expectedResult), $classData->getClassDeclaration());
     }
 
     public function finalClassDataProvider(): \Generator

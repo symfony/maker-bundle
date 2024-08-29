@@ -148,7 +148,7 @@ final class MakeCrud extends AbstractMaker
         } while (class_exists($formClassDetails->getFullName()));
 
         $controllerClassData = ClassData::create(
-            class: sprintf('Controller\%s', $this->controllerClassName),
+            class: \sprintf('Controller\%s', $this->controllerClassName),
             suffix: 'Controller',
             extendsClass: AbstractController::class,
             useStatements: [
@@ -248,7 +248,7 @@ final class MakeCrud extends AbstractMaker
 
         if ($this->shouldGenerateTests()) {
             $testClassData = ClassData::create(
-                class: sprintf('Tests\Controller\%s', $entityClassDetails->getRelativeNameWithoutSuffix()),
+                class: \sprintf('Tests\Controller\%s', $entityClassDetails->getRelativeNameWithoutSuffix()),
                 suffix: 'ControllerTest',
                 extendsClass: WebTestCase::class,
                 useStatements: [
