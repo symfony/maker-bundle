@@ -23,6 +23,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -101,6 +102,38 @@ final class MakeListener extends AbstractMaker
             $question->setValidator(Validator::notBlank(...));
             $event = $io->askQuestion($question);
             $input->setArgument('event', $event);
+        }
+
+        $event = $input->getArgument('event');
+        if (null === $this->getEventConstant($event) && null === $this->eventRegistry->getEventClassName($event)) {
+            $eventList = $this->eventRegistry->getAllActiveEvents();
+            $eventFQCNList = array_filter(array_map($this->eventRegistry->getEventClassName(...), $eventList), fn ($eventFQCN) => \is_string($eventFQCN));
+            $eventIdAndFQCNList = array_unique(array_merge($eventList, $eventFQCNList));
+            $suggestionList = [];
+
+            foreach ($eventIdAndFQCNList as $eventSuggestion) {
+                if (levenshtein($event, Str::getShortClassName($eventSuggestion)) < 3) {
+                    $suggestionList[] = $eventSuggestion;
+                }
+            }
+
+            if (!$suggestionList) {
+                return;
+            }
+
+            if (1 === \count($suggestionList)) {
+                $question = new ConfirmationQuestion(\sprintf('<fg=green>Did you mean</> <fg=yellow>"%s"</> <fg=green>?</>', $suggestionList[0]), false);
+                $input->setArgument('event', $io->askQuestion($question) ? $suggestionList[0] : $event);
+
+                return;
+            }
+
+            $io->writeln(' <fg=yellow>Did you mean one of these events?</>');
+            $io->listing($suggestionList);
+            $question = new Question(\sprintf(' <fg=green>%s</>', $command->getDefinition()->getArgument('event')->getDescription()), $event);
+            $question->setAutocompleterValues(array_merge($suggestionList, [$event]));
+
+            $input->setArgument('event', $io->askQuestion($question));
         }
     }
 
