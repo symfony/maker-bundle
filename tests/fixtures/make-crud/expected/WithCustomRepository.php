@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/sweet/food')]
-class SweetFoodController extends AbstractController
+final class SweetFoodController extends AbstractController
 {
     #[Route('/', name: 'app_sweet_food_index', methods: ['GET'])]
     public function index(SweetFoodRepository $sweetFoodRepository): Response

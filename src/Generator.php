@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 
@@ -54,6 +55,11 @@ class Generator
      */
     public function generateClass(string $className, string $templateName, array $variables = []): string
     {
+        if (\array_key_exists('class_data', $variables) && $variables['class_data'] instanceof ClassData) {
+            $classData = $this->templateComponentGenerator->configureClass($variables['class_data']);
+            $className = $classData->getFullClassName();
+        }
+
         $targetPath = $this->fileManager->getRelativePathForFutureClass($className);
 
         if (null === $targetPath) {
