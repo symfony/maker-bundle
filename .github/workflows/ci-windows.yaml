@@ -43,6 +43,7 @@ jobs:
               with:
                   php-version: ${{ matrix.php-versions }}
                   extensions: pdo, pdo_sqlite
+                  ini-values: memory_limit=-1
 
             - name: Composer Install
               uses: "ramsey/composer-install@v2"
