@@ -179,6 +179,9 @@ class TestEntityRegeneratorKernel extends Kernel
                     'type' => 'attribute',
                 ],
             ],
+            'controller_resolver' => [
+                'auto_mapping' => false,
+            ],
         ];
 
         /* @legacy Remove conditional when doctrine/persistence <3.1 are no longer supported. */
@@ -239,6 +242,9 @@ class TestXmlEntityRegeneratorKernel extends Kernel
                     'prefix' => 'Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity',
                     'alias' => 'EntityRegeneratorApp',
                 ],
+            ],
+            'controller_resolver' => [
+                'auto_mapping' => false,
             ],
         ];
 
