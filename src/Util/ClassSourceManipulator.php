@@ -121,13 +121,23 @@ final class ClassSourceManipulator
 
         $defaultValue = null;
         $commentLines = [];
-        if ('array' === $typeHint && !$nullable) {
-            $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
-            if (null !== $mapping->enumType) {
+
+        if (null !== $mapping->enumType) {
+            if ('array' === $typeHint) {
+                // still need to add the use statement
+                $this->addUseStatementIfNecessary($mapping->enumType);
+
                 $commentLines = [\sprintf('@return %s[]', Str::getShortClassName($mapping->enumType))];
+                if ($nullable) {
+                    $commentLines[0] = \sprintf('%s|null', $commentLines[0]);
+                } else {
+                    $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
+                }
+            } else {
+                $typeHint = $this->addUseStatementIfNecessary($mapping->enumType);
             }
-        } elseif (null !== $mapping->enumType) {
-            $typeHint = $this->addUseStatementIfNecessary($mapping->enumType);
+        } elseif ('array' === $typeHint && !$nullable) {
+            $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
         } elseif ($typeHint && '\\' === $typeHint[0] && false !== strpos($typeHint, '\\', 1)) {
             $typeHint = $this->addUseStatementIfNecessary(substr($typeHint, 1));
         }
