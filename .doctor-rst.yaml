@@ -1,0 +1,80 @@
+rules:
+  american_english: ~
+  avoid_repetetive_words: ~
+  blank_line_after_anchor: ~
+  blank_line_after_directive: ~
+  blank_line_before_directive: ~
+  composer_dev_option_not_at_the_end: ~
+  correct_code_block_directive_based_on_the_content: ~
+  deprecated_directive_should_have_version: ~
+  ensure_bash_prompt_before_composer_command: ~
+  ensure_correct_format_for_phpfunction: ~
+  ensure_exactly_one_space_before_directive_type: ~
+  ensure_exactly_one_space_between_link_definition_and_link: ~
+  ensure_explicit_nullable_types: ~
+  ensure_github_directive_start_with_prefix:
+    prefix: 'Symfony'
+  ensure_link_bottom: ~
+  ensure_link_definition_contains_valid_url: ~
+  ensure_order_of_code_blocks_in_configuration_block: ~
+  ensure_php_reference_syntax: ~
+  extend_abstract_controller: ~
+  # extension_xlf_instead_of_xliff: ~
+  forbidden_directives:
+    directives:
+      - '.. index::'
+  indention: ~
+  lowercase_as_in_use_statements: ~
+  max_blank_lines:
+    max: 2
+  max_colons: ~
+  no_app_console: ~
+  no_attribute_redundant_parenthesis: ~
+  no_blank_line_after_filepath_in_php_code_block: ~
+  no_blank_line_after_filepath_in_twig_code_block: ~
+  no_blank_line_after_filepath_in_xml_code_block: ~
+  no_blank_line_after_filepath_in_yaml_code_block: ~
+  no_brackets_in_method_directive: ~
+  no_composer_req: ~
+  no_directive_after_shorthand: ~
+  no_duplicate_use_statements: ~
+  no_footnotes: ~
+  no_inheritdoc: ~
+  no_merge_conflict: ~
+  no_namespace_after_use_statements: ~
+  no_php_open_tag_in_code_block_php_directive: ~
+  no_space_before_self_xml_closing_tag: ~
+  only_backslashes_in_namespace_in_php_code_block: ~
+  only_backslashes_in_use_statements_in_php_code_block: ~
+  ordered_use_statements: ~
+  php_prefix_before_bin_console: ~
+  remove_trailing_whitespace: ~
+  replace_code_block_types: ~
+  replacement: ~
+  short_array_syntax: ~
+  space_between_label_and_link_in_doc: ~
+  space_between_label_and_link_in_ref: ~
+  string_replacement: ~
+  title_underline_length_must_match_title_length: ~
+  typo: ~
+  unused_links: ~
+  use_deprecated_directive_instead_of_versionadded: ~
+  use_named_constructor_without_new_keyword_rule: ~
+  use_https_xsd_urls: ~
+  valid_inline_highlighted_namespaces: ~
+  valid_use_statements: ~
+  versionadded_directive_should_have_version: ~
+  yaml_instead_of_yml_suffix: ~
+
+  #   master
+  versionadded_directive_major_version:
+    major_version: 1
+
+  versionadded_directive_min_version:
+    min_version: '1.0'
+
+  deprecated_directive_major_version:
+    major_version: 7
+
+  deprecated_directive_min_version:
+    min_version: '1.0'

@@ -4,3 +4,4 @@
 /tests export-ignore
 /tools export-ignore
 docker-compose.yml export-ignore
+/_docs_build export-ignore

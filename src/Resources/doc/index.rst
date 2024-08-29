@@ -3,7 +3,7 @@ The Symfony MakerBundle
 
 Symfony Maker helps you create empty commands, controllers, form classes,
 tests and more so you can forget about writing boilerplate code. This bundle
-assumes you're using a standard Symfony 5 directory structure, but many
+assumes you're using a standard Symfony 6.4 directory structure, but many
 commands can generate code into any application.
 
 Installation
@@ -65,18 +65,74 @@ file by their respective environment variables:
 Configuration
 -------------
 
-This bundle doesn't require any configuration. But, you *can* configure
-the root namespace that is used to "guess" what classes you want to generate:
+This bundle doesn't require any configuration. But, you *can* override the default
+configuration:
 
 .. code-block:: yaml
 
-    # config/packages/dev/maker.yaml
-    # create this file if you need to configure anything
-    maker:
-        # tell MakerBundle that all of your classes live in an
-        # Acme namespace, instead of the default App
-        # (e.g. Acme\Entity\Article, Acme\Command\MyCommand, etc)
-        root_namespace: 'Acme'
+    # config/packages/maker.yaml
+    when@dev:
+        maker:
+            root_namespace: 'App'
+            generate_final_classes: true
+            generate_final_entities: false
+
+root_namespace
+~~~~~~~~~~~~~~
+
+**type**: ``string`` **default**: ``App``
+
+The root namespace used when generating all of your classes
+(e.g. ``App\Entity\Article``, ``App\Command\MyCommand``, etc). Changing
+this to ``Acme`` would cause MakerBundle to create new classes like
+(e.g. ``Acme\Entity\Article``, ``Acme\Command\MyCommand``, etc).
+
+generate_final_classes
+~~~~~~~~~~~~~~~~~~~~~~
+
+**type**: ``boolean`` **default**: ``true``
+
+By default, MakerBundle will generate all of your classes with the
+``final`` PHP keyword except for doctrine entities. Set this to ``false``
+to override this behavior for all maker commands.
+
+See https://www.php.net/manual/en/language.oop5.final.php
+
+.. code-block:: php
+
+    final class MyVoter
+    {
+        ...
+    }
+
+.. versionadded:: 1.61
+
+    ``generate_final_classes`` was introduced in MakerBundle 1.61
+
+
+generate_final_entities
+~~~~~~~~~~~~~~~~~~~~~~~
+
+**type**: ``boolean`` **default**: ``false``
+
+By default, MakerBundle will not generate any of your doctrine entity
+classes with the ``final`` PHP keyword. Set this to ``true``
+to override this behavior for all maker commands that create
+entities.
+
+See https://www.php.net/manual/en/language.oop5.final.php
+
+.. code-block:: php
+
+    #[ORM\Entity(repositoryClass: TaskRepository::class)]
+    final class Task extends AbstractEntity
+    {
+        ...
+    }
+
+.. versionadded:: 1.61
+
+    ``generate_final_entities`` was introduced in MakerBundle 1.61.
 
 Creating your Own Makers
 ------------------------
@@ -103,6 +159,5 @@ For that reason, in general, the generated code cannot be modified. In many case
 adding your *own* maker command is so easy, that we recommend that. However, if there
 is some extension point that you'd like, please open an issue so we can discuss!
 
-.. _`SensioGeneratorBundle`: https://github.com/sensiolabs/SensioGeneratorBundle
 .. _`AbstractMaker`: https://github.com/symfony/maker-bundle/blob/main/src/Maker/AbstractMaker.php
 .. _`core maker commands`: https://github.com/symfony/maker-bundle/tree/main/src/Maker

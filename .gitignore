@@ -7,3 +7,5 @@
 /tools/*/composer.lock
 /tools/*/vendor
 /vendor/
+/_docs_build/vendor
+/_docs_build/output
