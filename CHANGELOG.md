@@ -1,5 +1,25 @@
 # Changelog
 
+## [v1.61.0](https://github.com/symfony/maker-bundle/releases/tag/v1.61.0)
+
+*August 29th, 2024*
+
+### Feature
+
+- [#1583](https://github.com/symfony/maker-bundle/pull/1583) [make:crud] Remove / from from index action URL - *@seb-jean*
+- [#1579](https://github.com/symfony/maker-bundle/pull/1579) [make:listener] Match event name against active events class/id - *@maelanleborgne*
+- [#1571](https://github.com/symfony/maker-bundle/pull/1571) [make:twig-component] Improve `make:twig-component` by reading the configuration file - *@shadowc*
+- [#1549](https://github.com/symfony/maker-bundle/pull/1549) [make:registration-form] improve generated types for phpstan - *@seb-jean*
+- [#1548](https://github.com/symfony/maker-bundle/pull/1548) [make:reset-password] improve generated typehints for phpstan - *@seb-jean*
+- [#1539](https://github.com/symfony/maker-bundle/pull/1539) [make:crud|voter] generate classes with final keyword - *@jrushlow*
+
+### Bug
+
+- [#1584](https://github.com/symfony/maker-bundle/pull/1584) [make:entity] fix multiple and nullable enums - *@Fan2Shrek*
+- [#1581](https://github.com/symfony/maker-bundle/pull/1581) [make:reset-password] fix generated test name - *@mvhirsch*
+- [#1573](https://github.com/symfony/maker-bundle/pull/1573) [make:twig-component] Fix config file in error messages - *@smnandre*
+- [#1550](https://github.com/symfony/maker-bundle/pull/1550) [make:user] fix `getPassword()` return type in certain instance with `PasswordAuthenticatedUserInterface` - *@seb-jean*
+
 ## [v1.60.0](https://github.com/symfony/maker-bundle/releases/tag/v1.60.0)
 
 *June 10th, 2024*
