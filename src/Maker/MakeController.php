@@ -17,8 +17,8 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
-use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -76,22 +76,48 @@ final class MakeController extends AbstractMaker
         $withTemplate = $this->isTwigInstalled() && !$input->getOption('no-template');
         $isInvokable = (bool) $input->getOption('invokable');
 
-        $useStatements = new UseStatementGenerator([
-            AbstractController::class,
-            $withTemplate ? Response::class : JsonResponse::class,
-            Route::class,
-        ]);
+        $controllerClass = $input->getArgument('controller-class');
 
-        $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix())
+        $controllerClassData = ClassData::create(
+            class: '\\' === $controllerClass[0] ? substr($controllerClass, 1) : \sprintf('Controller\%s', $input->getArgument('controller-class')),
+            suffix: 'Controller',
+            extendsClass: AbstractController::class,
+            useStatements: [
+                $withTemplate ? Response::class : JsonResponse::class,
+                Route::class,
+            ]
+        );
+
+        //        dd([
+        //            $controllerClassNameDetails,
+        //            $controllerClassNameDetails->getRelativeName(),
+        //            $controllerClassNameDetails->getShortName(),
+        //            $controllerClassNameDetails->getFullName(),
+        //            $controllerClassNameDetails->getRelativeNameWithoutSuffix(),
+        //        ],
+        //            [
+        //                $controllerClassData,
+        //                $controllerClassData->getClassName(relative: true),
+        //                $controllerClassData->getClassName(),
+        //                $controllerClassData->getFullClassName(),
+        //                $controllerClassData->getClassName(relative: true, withoutSuffix: true),
+        //            ]
+        //        );
+
+        //        $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix())
+        $templateName = Str::asFilePath($controllerClassData->getClassName(relative: true, withoutSuffix: true))
             .($isInvokable ? '.html.twig' : '/index.html.twig');
 
         $controllerPath = $generator->generateController(
-            $controllerClassNameDetails->getFullName(),
+            $controllerClassData->getFullClassName(),
             'controller/Controller.tpl.php',
             [
-                'use_statements' => $useStatements,
-                'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
-                'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
+                'class_data' => $controllerClassData,
+                //                'use_statements' => $useStatements,
+                //                'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
+                'route_path' => Str::asRoutePath($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+                'route_name' => Str::AsRouteName($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+                //                'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'method_name' => $isInvokable ? '__invoke' : 'index',
                 'with_template' => $withTemplate,
                 'template_name' => $templateName,
@@ -105,7 +131,7 @@ final class MakeController extends AbstractMaker
                 [
                     'controller_path' => $controllerPath,
                     'root_directory' => $generator->getRootDirectory(),
-                    'class_name' => $controllerClassNameDetails->getShortName(),
+                    'class_name' => $controllerClassData->getClassName(),
                 ]
             );
         }

@@ -29,7 +29,11 @@ final class ClassData
         private UseStatementGenerator $useStatementGenerator,
         private bool $isFinal = true,
         private string $rootNamespace = 'App',
+        private ?string $classSuffix = null,
     ) {
+        if (str_starts_with(haystack: $this->namespace, needle: $this->rootNamespace)) {
+            $this->namespace = substr_replace(string: $this->namespace, replace: '', offset: 0, length: \strlen($this->rootNamespace) + 1);
+        }
     }
 
     public static function create(string $class, ?string $suffix = null, ?string $extendsClass = null, bool $isEntity = false, array $useStatements = []): self
@@ -52,12 +56,30 @@ final class ClassData
             extends: null === $extendsClass ? null : Str::getShortClassName($extendsClass),
             isEntity: $isEntity,
             useStatementGenerator: $useStatements,
+            classSuffix: $suffix,
         );
     }
 
-    public function getClassName(): string
+    public function getClassName(bool $relative = false, bool $withoutSuffix = false): string
     {
-        return $this->className;
+        if (!$withoutSuffix && !$relative) {
+            return $this->className;
+        }
+
+        if ($relative) {
+            $class = \sprintf('%s\%s', $this->namespace, $this->className);
+
+            $firstNsSeparatorPosition = stripos($class, '\\');
+            $class = substr_replace(string: $class, replace: '', offset: 0, length: $firstNsSeparatorPosition + 1);
+
+            if ($withoutSuffix) {
+                $class = Str::removeSuffix($class, $this->classSuffix);
+            }
+
+            return $class;
+        }
+
+        return Str::removeSuffix($this->className, $this->classSuffix);
     }
 
     public function getNamespace(): string

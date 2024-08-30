@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Util\ClassSource;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\MakerBundle;
 use Symfony\Bundle\MakerBundle\Test\MakerTestKernel;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 
 class ClassDataTest extends TestCase
@@ -91,4 +92,48 @@ class ClassDataTest extends TestCase
         yield ['MyController', 'Maker', 'Maker', 'Maker\MyController'];
         yield ['Controller\MyController', 'Maker', 'Maker\Controller', 'Maker\Controller\MyController'];
     }
+
+    public function testGetClassName(): void
+    {
+        $class = ClassData::create(class: 'Controller\\Foo', suffix: 'Controller');
+        self::assertSame('FooController', $class->getClassName());
+        self::assertSame('Foo', $class->getClassName(relative: false, withoutSuffix: true));
+        self::assertSame('FooController', $class->getClassName(relative: true, withoutSuffix: false));
+        self::assertSame('Foo', $class->getClassName(relative: true, withoutSuffix: true));
+        self::assertSame('App\Controller\FooController', $class->getFullClassName());
+    }
+
+    public function testGetClassNameRelativeNamespace(): void
+    {
+        $class = ClassData::create(class: 'Controller\\Admin\\Foo', suffix: 'Controller');
+        self::assertSame('FooController', $class->getClassName());
+        self::assertSame('Foo', $class->getClassName(relative: false, withoutSuffix: true));
+        self::assertSame('Admin\FooController', $class->getClassName(relative: true, withoutSuffix: false));
+        self::assertSame('Admin\Foo', $class->getClassName(relative: true, withoutSuffix: true));
+        self::assertSame('App\Controller\Admin\FooController', $class->getFullClassName());
+    }
+
+    public function testGetClassNameWithAbsoluteNamespace(): void
+    {
+        $class = ClassData::create(class: '\\Foo\\Bar\\Admin\\Baz', suffix: 'Controller');
+        self::assertSame('BazController', $class->getClassName());
+        self::assertSame('Baz', $class->getClassName(relative: false, withoutSuffix: true));
+        //        self::assertSame('Admin\FooController', $class->getClassName(relative: true, withoutSuffix: false));
+        //        self::assertSame('Admin\Baz', $class->getClassName(relative: true, withoutSuffix: true));
+        self::assertSame('Foo\Bar\Admin\BazController', $class->getFullClassName());
+    }
+
+    //    public function testClassNameDetails(): void
+    //    {
+    //        $class = new ClassNameDetails(
+    //            fullClassName: 'Foo',
+    //            namespacePrefix: 'Controller\\',
+    //            suffix: 'Controller',
+    //        );
+    //
+    //        self::assertSame('FooController', $class->getFullName());
+    //        self::assertSame('MyController', $class->getShortName());
+    //        self::assertSame('My', $class->getRelativeNameWithoutSuffix());
+    //        self::assertSame('MyController', $class->getRelativeName());
+    //    }
 }

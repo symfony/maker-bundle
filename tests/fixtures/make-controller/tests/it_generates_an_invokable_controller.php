@@ -4,7 +4,7 @@ namespace App\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class GeneratedControllerTest extends WebTestCase
+final class GeneratedControllerTest extends WebTestCase
 {
     public function testControllerValidity()
     {

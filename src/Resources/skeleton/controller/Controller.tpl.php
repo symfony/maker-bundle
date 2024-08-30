@@ -1,10 +1,10 @@
 <?= "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?= $class_data->getNamespace(); ?>;
 
-<?= $use_statements; ?>
+<?= $class_data->getUseStatements(); ?>
 
-class <?= $class_name; ?> extends AbstractController
+<?= $class_data->getClassDeclaration(); ?>
 {
 <?= $generator->generateRouteForControllerMethod($route_path, $route_name); ?>
     public function <?= $method_name ?>(): <?php if ($with_template) { ?>Response<?php } else { ?>JsonResponse<?php } ?>
