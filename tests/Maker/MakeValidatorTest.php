@@ -32,6 +32,18 @@ class MakeValidatorTest extends MakerTestCase
                         'FooBar',
                     ]
                 );
+
+                // Validator
+                $expectedVoterPath = \dirname(__DIR__).'/fixtures/make-validator/expected/FooBarValidator.php';
+                $generatedVoter = $runner->getPath('src/Validator/FooBarValidator.php');
+
+                self::assertSame(file_get_contents($expectedVoterPath), file_get_contents($generatedVoter));
+
+                // Constraint
+                $expectedVoterPath = \dirname(__DIR__).'/fixtures/make-validator/expected/FooBar.php';
+                $generatedVoter = $runner->getPath('src/Validator/FooBar.php');
+
+                self::assertSame(file_get_contents($expectedVoterPath), file_get_contents($generatedVoter));
             }),
         ];
     }

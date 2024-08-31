@@ -1,14 +1,15 @@
-<?= "<?php\n" ?>
+<?php
 
-namespace <?= $class_data->getNamespace(); ?>;
+namespace App\Validator;
 
-<?= $class_data->getUseStatements(); ?>
+use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\ConstraintValidator;
 
-<?= $class_data->getClassDeclaration(); ?>
+final class FooBarValidator extends ConstraintValidator
 {
     public function validate(mixed $value, Constraint $constraint): void
     {
-        /** @var <?= $constraint_class_name ?> $constraint */
+        /* @var FooBar $constraint */
 
         if (null === $value || '' === $value) {
             return;
