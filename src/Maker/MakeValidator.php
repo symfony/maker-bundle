@@ -66,21 +66,17 @@ final class MakeValidator extends AbstractMaker
             extendsClass: Constraint::class,
         );
 
-        $generator->generateClass(
-            $validatorClassData->getFullClassName(),
+        $generator->generateClassFromClassData(
+            $validatorClassData,
             'validator/Validator.tpl.php',
             [
-                'class_data' => $validatorClassData,
                 'constraint_class_name' => $constraintDataClass->getClassName(),
             ]
         );
 
-        $generator->generateClass(
-            $constraintDataClass->getFullClassName(),
+        $generator->generateClassFromClassData(
+            $constraintDataClass,
             'validator/Constraint.tpl.php',
-            [
-                'class_data' => $constraintDataClass,
-            ]
         );
 
         $generator->writeChanges();
