@@ -24,6 +24,8 @@
 
     <input type="hidden" name="_csrf_token"
            value="{{ csrf_token('authenticate') }}"
+           autocomplete="off"
+           data-controller="csrf-protection"
     >
 <?php if($support_remember_me && !$always_remember_me): ?>
 
