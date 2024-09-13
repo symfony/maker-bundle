@@ -95,19 +95,14 @@ final class TemplateLinter
 
     private function setBinary(): void
     {
-        // Use Bundled PHP-CS-Fixer
+        // Use Bundled (shim) PHP-CS-Fixer
         if (null === $this->phpCsFixerBinaryPath) {
-            $pathCandidates = [
-                __DIR__.'/../../vendor/php-cs-fixer/shim/php-cs-fixer',
-                __DIR__.'/../../../php-cs-fixer/shim/php-cs-fixer',
-            ];
+            $shimLocation = \sprintf('%s/vendor/bin/php-cs-fixer', \dirname(__DIR__, 2));
 
-            foreach ($pathCandidates as $pathCandidate) {
-                if (is_file($pathCandidate)) {
-                    $this->phpCsFixerBinaryPath = $pathCandidate;
+            if (is_file($shimLocation)) {
+                $this->phpCsFixerBinaryPath = $shimLocation;
 
-                    return;
-                }
+                return;
             }
 
             return;
