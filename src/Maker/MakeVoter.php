@@ -60,10 +60,9 @@ final class MakeVoter extends AbstractMaker
             ]
         );
 
-        $generator->generateClass(
-            $voterClassData->getFullClassName(),
+        $generator->generateClassFromClassData(
+            $voterClassData,
             'security/Voter.tpl.php',
-            ['class_data' => $voterClassData]
         );
 
         $generator->writeChanges();

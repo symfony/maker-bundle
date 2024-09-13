@@ -16,9 +16,12 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Validation;
 
 /**
@@ -49,26 +52,31 @@ final class MakeValidator extends AbstractMaker
     /** @return void */
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $validatorClassNameDetails = $generator->createClassNameDetails(
-            $input->getArgument('name'),
-            'Validator\\',
-            'Validator'
+        $validatorClassData = ClassData::create(
+            class: \sprintf('Validator\\%s', $input->getArgument('name')),
+            suffix: 'Validator',
+            extendsClass: ConstraintValidator::class,
+            useStatements: [
+                Constraint::class,
+            ],
         );
 
-        $constraintFullClassName = Str::removeSuffix($validatorClassNameDetails->getFullName(), 'Validator');
+        $constraintDataClass = ClassData::create(
+            class: \sprintf('Validator\\%s', Str::removeSuffix($validatorClassData->getClassName(), 'Validator')),
+            extendsClass: Constraint::class,
+        );
 
-        $generator->generateClass(
-            $validatorClassNameDetails->getFullName(),
+        $generator->generateClassFromClassData(
+            $validatorClassData,
             'validator/Validator.tpl.php',
             [
-                'constraint_class_name' => Str::getShortClassName($constraintFullClassName),
+                'constraint_class_name' => $constraintDataClass->getClassName(),
             ]
         );
 
-        $generator->generateClass(
-            $constraintFullClassName,
+        $generator->generateClassFromClassData(
+            $constraintDataClass,
             'validator/Constraint.tpl.php',
-            []
         );
 
         $generator->writeChanges();

@@ -1,11 +1,11 @@
-<?= "<?php\n" ?>
+<?php
 
-namespace <?= $class_data->getNamespace(); ?>;
+namespace App\Validator;
 
-<?= $class_data->getUseStatements(); ?>
+use Symfony\Component\Validator\Constraint;
 
 #[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
-<?= $class_data->getClassDeclaration(); ?>
+final class FooBar extends Constraint
 {
     public string $message = 'The string "{{ string }}" contains an illegal character: it can only contain letters or numbers.';
 
