@@ -43,7 +43,7 @@ final class TemplateLinterTest extends TestCase
     {
         $this->markTestSkippedOnWindows();
 
-        $fixerPath = __DIR__.'/../../vendor/php-cs-fixer/shim/php-cs-fixer';
+        $fixerPath = \sprintf('%s/vendor/php-cs-fixer/shim/php-cs-fixer', \dirname(__DIR__, 2));
 
         // Get the installed version and remove the preceding "v"
         $expectedVersion = ltrim(InstalledVersions::getPrettyVersion('php-cs-fixer/shim'), 'v');
