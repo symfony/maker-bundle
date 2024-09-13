@@ -116,6 +116,14 @@ class <?= $class_name ?> extends AbstractController
         $user = $this->entityManager->getRepository(<?= $user_class_name ?>::class)->findOneBy([
             '<?= $email_field ?>' => $emailFormData,
         ]);
+<?php if ($multiple_entities:) ?>
+
+        if (null === $user) {
+            $user = $this->entityManager->getRepository(ANOTHER_USER::class)->findOneBy([
+                'email' => $emailFormData,
+            ]);
+        }
+<?php endif ?>
 
         // Do not reveal whether a user account was found or not.
         if (!$user) {
