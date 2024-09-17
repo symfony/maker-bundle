@@ -50,6 +50,7 @@ trait CanGenerateTestsTrait
 
         if (!$this->generateTests) {
             $this->generateTests = $io->confirm('Do you want to generate PHPUnit tests? [Experimental]', false);
+            $input->setOption('with-tests', $this->generateTests);
         }
     }
 
