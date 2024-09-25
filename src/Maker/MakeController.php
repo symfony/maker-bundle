@@ -77,9 +77,10 @@ final class MakeController extends AbstractMaker
         $isInvokable = (bool) $input->getOption('invokable');
 
         $controllerClass = $input->getArgument('controller-class');
+        $isAbsolute = '\\' === $controllerClass[0];
 
         $controllerClassData = ClassData::create(
-            class: '\\' === $controllerClass[0] ? substr($controllerClass, 1) : \sprintf('Controller\%s', $input->getArgument('controller-class')),
+            class: $isAbsolute ? substr($controllerClass, 1) : \sprintf('Controller\%s', $input->getArgument('controller-class')),
             suffix: 'Controller',
             extendsClass: AbstractController::class,
             useStatements: [
@@ -88,25 +89,9 @@ final class MakeController extends AbstractMaker
             ]
         );
 
-        //        dd([
-        //            $controllerClassNameDetails,
-        //            $controllerClassNameDetails->getRelativeName(),
-        //            $controllerClassNameDetails->getShortName(),
-        //            $controllerClassNameDetails->getFullName(),
-        //            $controllerClassNameDetails->getRelativeNameWithoutSuffix(),
-        //        ],
-        //            [
-        //                $controllerClassData,
-        //                $controllerClassData->getClassName(relative: true),
-        //                $controllerClassData->getClassName(),
-        //                $controllerClassData->getFullClassName(),
-        //                $controllerClassData->getClassName(relative: true, withoutSuffix: true),
-        //            ]
-        //        );
-
-        //        $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix())
-        $templateName = Str::asFilePath($controllerClassData->getClassName(relative: true, withoutSuffix: true))
-            .($isInvokable ? '.html.twig' : '/index.html.twig');
+        $templateName = Str::asFilePath($isAbsolute ? $controllerClassData->getFullClassName(withoutRootNamespace: true, withoutSuffix: true) : $controllerClassData->getClassName(relative: true, withoutSuffix: true))
+            .($isInvokable ? '.html.twig' : '/index.html.twig')
+        ;
 
         $controllerPath = $generator->generateController(
             $controllerClassData->getFullClassName(),

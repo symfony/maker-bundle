@@ -91,9 +91,23 @@ final class ClassData
         return \sprintf('%s\%s', $this->rootNamespace, $this->namespace);
     }
 
-    public function getFullClassName(): string
+    /**
+     * Get the full class name.
+     *
+     * @param bool $withoutRootNamespace Get the full class name without global root namespace. e.g. "App"
+     * @param bool $withoutSuffix        Get the full class name without the class suffix. e.g. "MyController" instead of "MyControllerController"
+     */
+    public function getFullClassName($withoutRootNamespace = false, $withoutSuffix = false): string
     {
-        return \sprintf('%s\%s', $this->getNamespace(), $this->className);
+        $className = \sprintf('%s\%s', $this->getNamespace(), $withoutSuffix ? Str::removeSuffix($this->className, $this->classSuffix) : $this->className);
+
+        if ($withoutRootNamespace) {
+            if (str_starts_with(haystack: $className, needle: $this->rootNamespace)) {
+                $className = substr_replace(string: $className, replace: '', offset: 0, length: \strlen($this->rootNamespace) + 1);
+            }
+        }
+
+        return $className;
     }
 
     public function setRootNamespace(string $rootNamespace): self
