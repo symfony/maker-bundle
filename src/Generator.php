@@ -83,12 +83,15 @@ class Generator
      *
      * @param string $templateName Template name in Resources/skeleton to use
      * @param array  $variables    Array of variables to pass to the template
+     * @param bool   $isController Set to true if generating a Controller that needs
+     *                             access to the TemplateComponentGenerator ("generator") in
+     *                             the twig template. e.g. to create route attributes on the index method
      *
      * @return string The path where the file will be created
      *
      * @throws \Exception
      */
-    final public function generateClassFromClassData(ClassData $classData, string $templateName, array $variables = []): string
+    final public function generateClassFromClassData(ClassData $classData, string $templateName, array $variables = [], bool $isController = false): string
     {
         $classData = $this->templateComponentGenerator->configureClass($classData);
         $targetPath = $this->fileManager->getRelativePathForFutureClass($classData->getFullClassName());
@@ -97,11 +100,13 @@ class Generator
             throw new \LogicException(\sprintf('Could not determine where to locate the new class "%s", maybe try with a full namespace like "\\My\\Full\\Namespace\\%s"', $classData->getFullClassName(), $classData->getClassName()));
         }
 
-        $variables = array_merge($variables, [
-            'class_data' => $classData,
-        ]);
+        $globalTemplateVars = ['class_data' => $classData];
 
-        $this->addOperation($targetPath, $templateName, $variables);
+        if ($isController) {
+            $globalTemplateVars['generator'] = $this->templateComponentGenerator;
+        }
+
+        $this->addOperation($targetPath, $templateName, array_merge($variables, $globalTemplateVars));
 
         return $targetPath;
     }

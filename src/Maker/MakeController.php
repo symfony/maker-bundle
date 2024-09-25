@@ -93,21 +93,29 @@ final class MakeController extends AbstractMaker
             .($isInvokable ? '.html.twig' : '/index.html.twig')
         ;
 
-        $controllerPath = $generator->generateController(
-            $controllerClassData->getFullClassName(),
-            'controller/Controller.tpl.php',
-            [
-                'class_data' => $controllerClassData,
-                //                'use_statements' => $useStatements,
-                //                'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
-                'route_path' => Str::asRoutePath($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
-                'route_name' => Str::AsRouteName($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
-                //                'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
-                'method_name' => $isInvokable ? '__invoke' : 'index',
-                'with_template' => $withTemplate,
-                'template_name' => $templateName,
-            ]
-        );
+        $controllerPath = $generator->generateClassFromClassData($controllerClassData, 'controller/Controller.tpl.php', [
+            'route_path' => Str::asRoutePath($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+            'route_name' => Str::AsRouteName($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+            'method_name' => $isInvokable ? '__invoke' : 'index',
+            'with_template' => $withTemplate,
+            'template_name' => $templateName,
+        ], true);
+
+        //        $controllerPath = $generator->generateController(
+        //            $controllerClassData->getFullClassName(),
+        //            'controller/Controller.tpl.php',
+        //            [
+        //                'class_data' => $controllerClassData,
+        //                //                'use_statements' => $useStatements,
+        //                //                'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
+        //                'route_path' => Str::asRoutePath($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+        //                'route_name' => Str::AsRouteName($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+        //                //                'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
+        //                'method_name' => $isInvokable ? '__invoke' : 'index',
+        //                'with_template' => $withTemplate,
+        //                'template_name' => $templateName,
+        //            ]
+        //        );
 
         if ($withTemplate) {
             $generator->generateTemplate(
