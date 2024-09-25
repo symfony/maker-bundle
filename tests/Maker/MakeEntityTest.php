@@ -120,6 +120,8 @@ class MakeEntityTest extends MakerTestCase
         ];
 
         yield 'it_creates_a_new_class_and_api_resource' => [$this->createMakeEntityTest()
+            // @legacy - re-enable test when https://github.com/symfony/recipes/pull/1339 is merged
+            ->skipTest('Waiting for https://github.com/symfony/recipes/pull/1339')
             ->addExtraDependencies('api')
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([
@@ -679,6 +681,8 @@ class MakeEntityTest extends MakerTestCase
         ];
 
         yield 'it_makes_new_entity_no_to_all_extras' => [$this->createMakeEntityTestForMercure()
+            // @legacy - re-enable test when https://github.com/symfony/recipes/pull/1339 is merged
+            ->skipTest('Waiting for https://github.com/symfony/recipes/pull/1339')
             ->addExtraDependencies('api')
             // special setup done in createMakeEntityTestForMercure()
             ->run(function (MakerTestRunner $runner) {
