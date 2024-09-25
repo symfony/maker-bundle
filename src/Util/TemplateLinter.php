@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Util;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
@@ -30,6 +31,7 @@ final class TemplateLinter
     private bool $needsPhpCmdPrefix = true;
 
     public function __construct(
+        private FileManager $fileManager,
         private ?string $phpCsFixerBinaryPath = null,
         private ?string $phpCsFixerConfigPath = null,
     ) {
@@ -132,7 +134,7 @@ final class TemplateLinter
     private function setConfig(): void
     {
         // No config provided, but there is a dist config file in the project dir
-        $defaultConfigPath = \sprintf('.php-cs-fixer.dist.php', \dirname(__DIR__, 2));
+        $defaultConfigPath = \sprintf('%s/.php-cs-fixer.dist.php', $this->fileManager->getRootDirectory());
         if (null === $this->phpCsFixerConfigPath && file_exists($defaultConfigPath)) {
             $this->phpCsFixerConfigPath = $defaultConfigPath;
 

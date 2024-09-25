@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
 use Composer\InstalledVersions;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Util\TemplateLinter;
 use Symfony\Component\Process\Process;
 
@@ -29,14 +30,14 @@ final class TemplateLinterTest extends TestCase
     {
         $this->expectExceptionMessage('The MAKER_PHP_CS_FIXER_BINARY_PATH provided: /some/bad/path does not exist.');
 
-        new TemplateLinter(phpCsFixerBinaryPath: '/some/bad/path');
+        new TemplateLinter($this->createMock(FileManager::class), phpCsFixerBinaryPath: '/some/bad/path');
     }
 
     public function testExceptionThrownIfConfigPathDoesntExist(): void
     {
         $this->expectExceptionMessage('The MAKER_PHP_CS_FIXER_CONFIG_PATH provided: /bad/config/path does not exist.');
 
-        new TemplateLinter(phpCsFixerConfigPath: '/bad/config/path');
+        new TemplateLinter($this->createMock(FileManager::class), phpCsFixerConfigPath: '/bad/config/path');
     }
 
     public function testPhpCsFixerVersion(): void
