@@ -132,7 +132,8 @@ final class TemplateLinter
     private function setConfig(): void
     {
         // No config provided, but there is a dist config file in the project dir
-        if (null === $this->phpCsFixerConfigPath && file_exists($defaultConfigPath = '.php-cs-fixer.dist.php')) {
+        $defaultConfigPath = \sprintf('.php-cs-fixer.dist.php', \dirname(__DIR__, 2));
+        if (null === $this->phpCsFixerConfigPath && file_exists($defaultConfigPath)) {
             $this->phpCsFixerConfigPath = $defaultConfigPath;
 
             $this->usingBundledPhpCsFixerConfig = false;
