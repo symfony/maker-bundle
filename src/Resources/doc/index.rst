@@ -41,6 +41,55 @@ optional arguments and options. Check them out with the ``--help`` option:
 
     $ php bin/console make:controller --help
 
+Creating a Twig Component
+~~~~~~~
+
+Run this command to install the `Symfony UX package`_:
+
+.. code-block:: terminal
+
+    $ composer require symfony/ux-twig-component
+
+Make a basic `twig component`_:
+
+.. code-block:: terminal
+    $ php bin/console make:twig-component
+     The name of your twig component (ie Notification):
+     > Notification
+
+     Make this a live component? (yes/no) [no]:
+     > no
+
+     created: src/Twig/Components/Notification.php
+     created: templates/components/Notification.html.twig
+
+
+      Success!
+
+This will create::
+
+    // src/Twig/Components/Notification.php
+
+    <?php
+
+    namespace App\Twig\Components;
+
+    use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
+
+    #[AsTwigComponent]
+    final class Notification
+    {
+    }
+
+.. code-block:: twig
+
+    {# templates/components/Notification.html.twig #}
+
+    <div{{ attributes }}>
+        <!-- component html -->
+    </div>
+
+Similarly, to make a `live component`_, enter ``yes`` when prompted whether to make this a live component.
 
 Linting Generated Code
 ______________________
@@ -161,3 +210,6 @@ is some extension point that you'd like, please open an issue so we can discuss!
 
 .. _`AbstractMaker`: https://github.com/symfony/maker-bundle/blob/main/src/Maker/AbstractMaker.php
 .. _`core maker commands`: https://github.com/symfony/maker-bundle/tree/main/src/Maker
+.. _`live component`: https://symfony.com/bundles/ux-live-component/current/index.html
+.. _`Symfony UX package`: https://ux.symfony.com/packages
+.. _`twig component`: https://symfony.com/bundles/ux-twig-component/current/index.html
