@@ -88,6 +88,11 @@ final class ClassData
             return $this->rootNamespace;
         }
 
+        // Namespace is already absolute, don't add the rootNamespace.
+        if (str_starts_with($this->namespace, '\\')) {
+            return substr_replace($this->namespace, '', 0, 1);
+        }
+
         return \sprintf('%s\%s', $this->rootNamespace, $this->namespace);
     }
 

@@ -14,7 +14,6 @@ namespace Symfony\Bundle\MakerBundle\Tests\Util\ClassSource;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\MakerBundle;
 use Symfony\Bundle\MakerBundle\Test\MakerTestKernel;
-use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 
 class ClassDataTest extends TestCase
@@ -115,12 +114,9 @@ class ClassDataTest extends TestCase
 
     public function testGetClassNameWithAbsoluteNamespace(): void
     {
-        $this->markTestSkipped();
         $class = ClassData::create(class: '\\Foo\\Bar\\Admin\\Baz', suffix: 'Controller');
         self::assertSame('BazController', $class->getClassName());
-        self::assertSame('Baz', $class->getClassName(relative: false, withoutSuffix: true));
-        //        self::assertSame('Admin\FooController', $class->getClassName(relative: true, withoutSuffix: false));
-        //        self::assertSame('Admin\Baz', $class->getClassName(relative: true, withoutSuffix: true));
+        self::assertSame('Foo\Bar\Admin', $class->getNamespace());
         self::assertSame('Foo\Bar\Admin\BazController', $class->getFullClassName());
     }
 
@@ -147,18 +143,4 @@ class ClassDataTest extends TestCase
         yield ['Controller\MyController', 'Custom', false, true, 'Custom\Controller\My'];
         yield ['Controller\MyController', 'Custom', true, true, 'Controller\My'];
     }
-
-    //    public function testClassNameDetails(): void
-    //    {
-    //        $class = new ClassNameDetails(
-    //            fullClassName: 'Foo',
-    //            namespacePrefix: 'Controller\\',
-    //            suffix: 'Controller',
-    //        );
-    //
-    //        self::assertSame('FooController', $class->getFullName());
-    //        self::assertSame('MyController', $class->getShortName());
-    //        self::assertSame('My', $class->getRelativeNameWithoutSuffix());
-    //        self::assertSame('MyController', $class->getRelativeName());
-    //    }
 }
