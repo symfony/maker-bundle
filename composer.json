@@ -16,6 +16,7 @@
         "php": ">=8.1",
         "doctrine/inflector": "^2.0",
         "nikic/php-parser": "^4.18|^5.0",
+        "php-cs-fixer/shim": "^v3.64",
         "symfony/config": "^6.4|^7.0",
         "symfony/console": "^6.4|^7.0",
         "symfony/dependency-injection": "^6.4|^7.0",

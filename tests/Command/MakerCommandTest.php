@@ -40,7 +40,7 @@ class MakerCommandTest extends TestCase
 
         $fileManager = $this->createMock(FileManager::class);
 
-        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, 'App'), new TemplateLinter());
+        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, 'App'), new TemplateLinter($fileManager));
         // needed because it's normally set by the Application
         $command->setName('make:foo');
         $tester = new CommandTester($command);
@@ -53,7 +53,7 @@ class MakerCommandTest extends TestCase
 
         $fileManager = $this->createMock(FileManager::class);
 
-        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, 'Unknown'), new TemplateLinter());
+        $command = new MakerCommand($maker, $fileManager, new Generator($fileManager, 'Unknown'), new TemplateLinter($fileManager));
         // needed because it's normally set by the Application
         $command->setName('make:foo');
         $tester = new CommandTester($command);

@@ -11,7 +11,9 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
+use Composer\InstalledVersions;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Util\TemplateLinter;
 use Symfony\Component\Process\Process;
 
@@ -28,27 +30,30 @@ final class TemplateLinterTest extends TestCase
     {
         $this->expectExceptionMessage('The MAKER_PHP_CS_FIXER_BINARY_PATH provided: /some/bad/path does not exist.');
 
-        new TemplateLinter(phpCsFixerBinaryPath: '/some/bad/path');
+        new TemplateLinter($this->createMock(FileManager::class), phpCsFixerBinaryPath: '/some/bad/path');
     }
 
     public function testExceptionThrownIfConfigPathDoesntExist(): void
     {
         $this->expectExceptionMessage('The MAKER_PHP_CS_FIXER_CONFIG_PATH provided: /bad/config/path does not exist.');
 
-        new TemplateLinter(phpCsFixerConfigPath: '/bad/config/path');
+        new TemplateLinter($this->createMock(FileManager::class), phpCsFixerConfigPath: '/bad/config/path');
     }
 
     public function testPhpCsFixerVersion(): void
     {
         $this->markTestSkippedOnWindows();
 
-        $fixerPath = \sprintf('%s/src/Resources/bin/php-cs-fixer-v%s.phar', \dirname(__DIR__, 2), TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION);
+        $fixerPath = \sprintf('%s/vendor/php-cs-fixer/shim/php-cs-fixer', \dirname(__DIR__, 2));
+
+        // Get the installed version and remove the preceding "v"
+        $expectedVersion = ltrim(InstalledVersions::getPrettyVersion('php-cs-fixer/shim'), 'v');
 
         $process = Process::fromShellCommandline(\sprintf('%s -V', $fixerPath));
 
         $process->run();
 
-        self::assertStringContainsString(TemplateLinter::BUNDLED_PHP_CS_FIXER_VERSION, $process->getOutput());
+        self::assertStringContainsString($expectedVersion, $process->getOutput());
     }
 
     private function markTestSkippedOnWindows(): void
