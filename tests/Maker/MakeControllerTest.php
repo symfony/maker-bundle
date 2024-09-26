@@ -128,6 +128,10 @@ class MakeControllerTest extends MakerTestCase
         ];
 
         yield 'it_generates_a_controller_in_sub_namespace__no_input' => [$this->createMakerTest()
+            ->skipTest(
+                message: 'Test Skipped - MAKER_TEST_WINDOWS is true.',
+                skipped: getenv('MAKER_TEST_WINDOWS')
+            )
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([], 'Admin\\\\FooBar');
 
@@ -168,6 +172,10 @@ class MakeControllerTest extends MakerTestCase
         ];
 
         yield 'it_generates_a_controller_with_full_custom_namespace__no_input' => [$this->createMakerTest()
+            ->skipTest(
+                message: 'Test Skipped - MAKER_TEST_WINDOWS is true.',
+                skipped: getenv('MAKER_TEST_WINDOWS')
+            )
             ->addExtraDependencies('twig')
             ->run(function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([], '\\\\App\\\\Foo\\\\Bar\\\\CoolController');
