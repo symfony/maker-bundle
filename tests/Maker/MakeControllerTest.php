@@ -15,6 +15,11 @@ use Symfony\Bundle\MakerBundle\Maker\MakeController;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
+/**
+ * Passing namespaces interactively can be done like "App\Controller\MyController"
+ * but passing as a command argument, you must add a double set of slashes. e.g.
+ * "App\\\\Controller\\\\MyController".
+ */
 class MakeControllerTest extends MakerTestCase
 {
     protected function getMakerClass(): string
@@ -37,6 +42,18 @@ class MakeControllerTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_generates_a_controller__no_input' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], 'FooBar');
+
+                $this->assertContainsCount('created: ', $output, 1);
+
+                $this->assertFileExists($runner->getPath('src/Controller/FooBarController.php'));
+
+                $this->runControllerTest($runner, 'it_generates_a_controller.php');
+            }),
+        ];
+
         yield 'it_generates_a_controller_with_twig' => [$this->createMakerTest()
             ->addExtraDependencies('twig')
             ->run(function (MakerTestRunner $runner) {
@@ -47,6 +64,18 @@ class MakeControllerTest extends MakerTestCase
 
                 $controllerPath = $runner->getPath('templates/foo_twig/index.html.twig');
                 self::assertFileExists($controllerPath);
+
+                $this->runControllerTest($runner, 'it_generates_a_controller_with_twig.php');
+            }),
+        ];
+
+        yield 'it_generates_a_controller_with_twig__no_input' => [$this->createMakerTest()
+            ->addExtraDependencies('twig')
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([], 'FooTwig');
+
+                $this->assertFileExists($runner->getPath('src/Controller/FooTwigController.php'));
+                $this->assertFileExists($runner->getPath('templates/foo_twig/index.html.twig'));
 
                 $this->runControllerTest($runner, 'it_generates_a_controller_with_twig.php');
             }),
@@ -98,6 +127,19 @@ class MakeControllerTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_generates_a_controller_in_sub_namespace__no_input' => [$this->createMakerTest()
+            ->skipTest(
+                message: 'Test Skipped - MAKER_TEST_WINDOWS is true.',
+                skipped: getenv('MAKER_TEST_WINDOWS')
+            )
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], 'Admin\\\\FooBar');
+
+                $this->assertFileExists($runner->getPath('src/Controller/Admin/FooBarController.php'));
+                $this->assertStringContainsString('src/Controller/Admin/FooBarController.php', $output);
+            }),
+        ];
+
         yield 'it_generates_a_controller_in_sub_namespace_with_template' => [$this->createMakerTest()
             ->addExtraDependencies('twig')
            ->run(function (MakerTestRunner $runner) {
@@ -127,6 +169,22 @@ class MakeControllerTest extends MakerTestCase
                  $this->assertStringContainsString('src/Foo/Bar/CoolController.php', $output);
                  $this->assertStringContainsString('templates/foo/bar/cool/index.html.twig', $output);
              }),
+        ];
+
+        yield 'it_generates_a_controller_with_full_custom_namespace__no_input' => [$this->createMakerTest()
+            ->skipTest(
+                message: 'Test Skipped - MAKER_TEST_WINDOWS is true.',
+                skipped: getenv('MAKER_TEST_WINDOWS')
+            )
+            ->addExtraDependencies('twig')
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '\\\\App\\\\Foo\\\\Bar\\\\CoolController');
+
+                self::assertFileExists($runner->getPath('templates/foo/bar/cool/index.html.twig'));
+
+                $this->assertStringContainsString('src/Foo/Bar/CoolController.php', $output);
+                $this->assertStringContainsString('templates/foo/bar/cool/index.html.twig', $output);
+            }),
         ];
 
         yield 'it_generates_a_controller_with_invoke' => [$this->createMakerTest()
