@@ -91,4 +91,56 @@ class ClassDataTest extends TestCase
         yield ['MyController', 'Maker', 'Maker', 'Maker\MyController'];
         yield ['Controller\MyController', 'Maker', 'Maker\Controller', 'Maker\Controller\MyController'];
     }
+
+    public function testGetClassName(): void
+    {
+        $class = ClassData::create(class: 'Controller\\Foo', suffix: 'Controller');
+        self::assertSame('FooController', $class->getClassName());
+        self::assertSame('Foo', $class->getClassName(relative: false, withoutSuffix: true));
+        self::assertSame('FooController', $class->getClassName(relative: true, withoutSuffix: false));
+        self::assertSame('Foo', $class->getClassName(relative: true, withoutSuffix: true));
+        self::assertSame('App\Controller\FooController', $class->getFullClassName());
+    }
+
+    public function testGetClassNameRelativeNamespace(): void
+    {
+        $class = ClassData::create(class: 'Controller\\Admin\\Foo', suffix: 'Controller');
+        self::assertSame('FooController', $class->getClassName());
+        self::assertSame('Foo', $class->getClassName(relative: false, withoutSuffix: true));
+        self::assertSame('Admin\FooController', $class->getClassName(relative: true, withoutSuffix: false));
+        self::assertSame('Admin\Foo', $class->getClassName(relative: true, withoutSuffix: true));
+        self::assertSame('App\Controller\Admin\FooController', $class->getFullClassName());
+    }
+
+    public function testGetClassNameWithAbsoluteNamespace(): void
+    {
+        $class = ClassData::create(class: '\\Foo\\Bar\\Admin\\Baz', suffix: 'Controller');
+        self::assertSame('BazController', $class->getClassName());
+        self::assertSame('Foo\Bar\Admin', $class->getNamespace());
+        self::assertSame('Foo\Bar\Admin\BazController', $class->getFullClassName());
+    }
+
+    /** @dataProvider fullClassNameProvider */
+    public function testGetFullClassName(string $class, ?string $rootNamespace, bool $withoutRootNamespace, bool $withoutSuffix, string $expectedFullClassName): void
+    {
+        $class = ClassData::create($class, suffix: 'Controller');
+
+        if (null !== $rootNamespace) {
+            $class->setRootNamespace($rootNamespace);
+        }
+
+        self::assertSame($expectedFullClassName, $class->getFullClassName(withoutRootNamespace: $withoutRootNamespace, withoutSuffix: $withoutSuffix));
+    }
+
+    public function fullClassNameProvider(): \Generator
+    {
+        yield ['Controller\MyController', null, false, false, 'App\Controller\MyController'];
+        yield ['Controller\MyController', null, true, false, 'Controller\MyController'];
+        yield ['Controller\MyController', null, false, true, 'App\Controller\My'];
+        yield ['Controller\MyController', null, true, true, 'Controller\My'];
+        yield ['Controller\MyController', 'Custom', false, false, 'Custom\Controller\MyController'];
+        yield ['Controller\MyController', 'Custom', true, false, 'Controller\MyController'];
+        yield ['Controller\MyController', 'Custom', false, true, 'Custom\Controller\My'];
+        yield ['Controller\MyController', 'Custom', true, true, 'Controller\My'];
+    }
 }

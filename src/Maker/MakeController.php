@@ -17,8 +17,8 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
-use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -67,45 +67,56 @@ final class MakeController extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-        $controllerClassNameDetails = $generator->createClassNameDetails(
-            $input->getArgument('controller-class'),
-            'Controller\\',
-            'Controller'
-        );
-
         $withTemplate = $this->isTwigInstalled() && !$input->getOption('no-template');
         $isInvokable = (bool) $input->getOption('invokable');
 
-        $useStatements = new UseStatementGenerator([
-            AbstractController::class,
-            $withTemplate ? Response::class : JsonResponse::class,
-            Route::class,
-        ]);
+        $controllerClass = $input->getArgument('controller-class');
+        $controllerClassName = \sprintf('Controller\%s', $controllerClass);
 
-        $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix())
-            .($isInvokable ? '.html.twig' : '/index.html.twig');
+        // If the class name provided is absolute, we do not assume it will live in src/Controller
+        // e.g. src/Custom/Location/For/MyController instead of src/Controller/MyController
+        if ($isAbsolute = '\\' === $controllerClass[0]) {
+            $controllerClassName = substr($controllerClass, 1);
+        }
 
-        $controllerPath = $generator->generateController(
-            $controllerClassNameDetails->getFullName(),
-            'controller/Controller.tpl.php',
-            [
-                'use_statements' => $useStatements,
-                'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
-                'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
-                'method_name' => $isInvokable ? '__invoke' : 'index',
-                'with_template' => $withTemplate,
-                'template_name' => $templateName,
+        $controllerClassData = ClassData::create(
+            class: $controllerClassName,
+            suffix: 'Controller',
+            extendsClass: AbstractController::class,
+            useStatements: [
+                $withTemplate ? Response::class : JsonResponse::class,
+                Route::class,
             ]
         );
 
+        // Again if the class name is absolute, lets not make assumptions about where the twig template
+        // should live. E.g. templates/custom/location/for/my_controller.html.twig instead of
+        // templates/my/controller.html.twig. We do however remove the root_namespace prefix in either case
+        // so we don't end up with templates/app/my/controller.html.twig
+        $templateName = $isAbsolute ?
+            $controllerClassData->getFullClassName(withoutRootNamespace: true, withoutSuffix: true) :
+            $controllerClassData->getClassName(relative: true, withoutSuffix: true)
+        ;
+
+        // Convert the twig template name into a file path where it will be generated.
+        $templatePath = \sprintf('%s%s', Str::asFilePath($templateName), $isInvokable ? '.html.twig' : '/index.html.twig');
+
+        $controllerPath = $generator->generateClassFromClassData($controllerClassData, 'controller/Controller.tpl.php', [
+            'route_path' => Str::asRoutePath($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+            'route_name' => Str::AsRouteName($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+            'method_name' => $isInvokable ? '__invoke' : 'index',
+            'with_template' => $withTemplate,
+            'template_name' => $templatePath,
+        ], true);
+
         if ($withTemplate) {
             $generator->generateTemplate(
-                $templateName,
+                $templatePath,
                 'controller/twig_template.tpl.php',
                 [
                     'controller_path' => $controllerPath,
                     'root_directory' => $generator->getRootDirectory(),
-                    'class_name' => $controllerClassNameDetails->getShortName(),
+                    'class_name' => $controllerClassData->getClassName(),
                 ]
             );
         }

@@ -1,10 +1,10 @@
 <?= "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?= $class_data->getNamespace(); ?>;
 
-<?= $use_statements; ?>
+<?= $class_data->getUseStatements(); ?>
 
-class <?= $class_name; ?> extends AbstractController
+<?= $class_data->getClassDeclaration(); ?>
 {
 <?= $generator->generateRouteForControllerMethod($route_path, $route_name); ?>
     public function <?= $method_name ?>(): <?php if ($with_template) { ?>Response<?php } else { ?>JsonResponse<?php } ?>
@@ -12,7 +12,7 @@ class <?= $class_name; ?> extends AbstractController
     {
 <?php if ($with_template) { ?>
         return $this->render('<?= $template_name ?>', [
-            'controller_name' => '<?= $class_name ?>',
+            'controller_name' => '<?= $class_data->getClassName() ?>',
         ]);
 <?php } else { ?>
         return $this->json([

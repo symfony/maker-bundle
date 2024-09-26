@@ -37,8 +37,13 @@ class MakeControllerTest extends MakerTestCase
                 ]);
 
                 $this->assertContainsCount('created: ', $output, 1);
-
                 $this->runControllerTest($runner, 'it_generates_a_controller.php');
+
+                // Ensure the generated controller matches what we expect
+                self::assertSame(
+                    expected: file_get_contents(\dirname(__DIR__).'/fixtures/make-controller/expected/FinalController.php'),
+                    actual: file_get_contents($runner->getPath('src/Controller/FooBarController.php'))
+                );
             }),
         ];
 
@@ -66,6 +71,12 @@ class MakeControllerTest extends MakerTestCase
                 self::assertFileExists($controllerPath);
 
                 $this->runControllerTest($runner, 'it_generates_a_controller_with_twig.php');
+
+                // Ensure the generated controller matches what we expect
+                self::assertSame(
+                    expected: file_get_contents(\dirname(__DIR__).'/fixtures/make-controller/expected/FinalControllerWithTemplate.php'),
+                    actual: file_get_contents($runner->getPath('src/Controller/FooTwigController.php'))
+                );
             }),
         ];
 
