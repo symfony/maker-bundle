@@ -207,7 +207,7 @@ class MakerTestRunner
     public function runTests(): void
     {
         $internalTestProcess = MakerTestProcess::create(
-            \sprintf('php %s', $this->getPath('/bin/phpunit')),
+            \sprintf('php %s', $this->getPath('bin/phpunit')),
             $this->environment->getPath())
             ->run(true)
         ;
