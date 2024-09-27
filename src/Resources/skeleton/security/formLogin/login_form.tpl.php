@@ -24,6 +24,8 @@
 
         <input type="hidden" name="_csrf_token"
                value="{{ csrf_token('authenticate') }}"
+               autocomplete="off"
+               data-controller="csrf-protection"
         >
 
         {#
