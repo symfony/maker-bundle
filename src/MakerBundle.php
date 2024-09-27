@@ -52,7 +52,7 @@ class MakerBundle extends AbstractBundle
             ->get('maker.generator')
                 ->arg(1, $rootNamespace)
             ->get('maker.doctrine_helper')
-                ->arg(0, $rootNamespace)
+                ->arg(0, \sprintf('%s\\Entity', $rootNamespace))
             ->get('maker.template_component_generator')
                 ->arg(0, $config['generate_final_classes'])
                 ->arg(1, $config['generate_final_entities'])
