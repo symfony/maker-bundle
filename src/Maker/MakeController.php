@@ -12,10 +12,12 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Maker\Common\CanGenerateTestsTrait;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
@@ -34,6 +36,8 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 final class MakeController extends AbstractMaker
 {
+    use CanGenerateTestsTrait;
+
     public function __construct(private ?PhpCompatUtil $phpCompatUtil = null)
     {
         if (null !== $phpCompatUtil) {
@@ -63,6 +67,13 @@ final class MakeController extends AbstractMaker
             ->addOption('invokable', 'i', InputOption::VALUE_NONE, 'Use this option to create an invokable controller')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeController.txt'))
         ;
+
+        $this->configureCommandWithTestsOption($command);
+    }
+
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
+    {
+        $this->interactSetGenerateTests($input, $io);
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
@@ -119,6 +130,24 @@ final class MakeController extends AbstractMaker
                     'class_name' => $controllerClassData->getClassName(),
                 ]
             );
+        }
+
+        if ($this->shouldGenerateTests()) {
+            $testClassData = ClassData::create(
+                class: \sprintf('Tests\Controller\%s', $controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+                suffix: 'ControllerTest',
+                extendsClass: WebTestCase::class,
+                useStatements: [
+                ]
+            );
+
+            $generator->generateClassFromClassData($testClassData, 'controller/test/Test.tpl.php', [
+                'route_path' => Str::asRoutePath($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+            ]);
+
+            if (!class_exists(WebTestCase::class)) {
+                $io->caution('You\'ll need to install the `symfony/test-pack` to execute the tests for your new controller.');
+            }
         }
 
         $generator->writeChanges();
