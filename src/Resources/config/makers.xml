@@ -59,6 +59,11 @@
                 <tag name="maker.command" />
             </service>
 
+            <service id="maker.maker.make_form_extension" class="Symfony\Bundle\MakerBundle\Maker\MakeFormExtension">
+                <argument type="collection" />
+                <tag name="maker.command" />
+            </service>
+
             <service id="maker.maker.make_functional_test" class="Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest">
                 <tag name="maker.command" />
                 <deprecated package="symfony/maker-bundle" version="1.29">The "%service_id%" service is deprecated, use "maker.maker.make_test" instead.</deprecated>

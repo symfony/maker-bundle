@@ -1,0 +1,5 @@
+The <info>%command.name%</info> generates a new form extension class.
+
+<info>php %command.full_name% ImageTypeExtension</info>
+
+If the argument is missing, the command will ask for the form class interactively.
