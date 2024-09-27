@@ -26,6 +26,8 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
  */
 class MakerBundle extends AbstractBundle
 {
+    protected string $extensionAlias = 'maker';
+
     public function configure(DefinitionConfigurator $definition): void
     {
         $definition->rootNode()
