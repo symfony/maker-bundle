@@ -24,6 +24,7 @@ use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -68,8 +69,10 @@ final class MakeCustomAuthenticator extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
+            ->addArgument('name', InputArgument::OPTIONAL, 'The class name of the authenticator (e.g. <fg=yellow>CustomAuthenticator</>)')
             ->setHelp(file_get_contents(__DIR__.'/../../Resources/help/security/MakeCustom.txt'))
         ;
+        $inputConfig->setArgumentAsNonInteractive('name');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
@@ -84,7 +87,7 @@ final class MakeCustomAuthenticator extends AbstractMaker
             throw new RuntimeCommandException(\sprintf('The file "%s" does not exist. PHP & XML configuration formats are currently not supported.', self::SECURITY_CONFIG_PATH));
         }
 
-        $name = $io->ask(
+        $name = $input->getArgument('name') ?? $io->ask(
             question: 'What is the class name of the authenticator (e.g. <fg=yellow>CustomAuthenticator</>)',
             validator: static function (mixed $answer) {
                 return Validator::notBlank($answer);
