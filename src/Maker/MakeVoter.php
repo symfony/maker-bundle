@@ -43,7 +43,7 @@ final class MakeVoter extends AbstractMaker
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the security voter class (e.g. <fg=yellow>BlogPostVoter</>)')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeVoter.txt'))
+            ->setHelp($this->getHelpFileContents('MakeVoter.txt'))
         ;
     }
 

@@ -34,7 +34,7 @@ trait UidTrait
      */
     protected function addWithUuidOption(Command $command): Command
     {
-        $uidHelp = file_get_contents(\dirname(__DIR__, 2).'/Resources/help/_WithUid.txt');
+        $uidHelp = file_get_contents(\dirname(__DIR__, 3).'/config/help/_WithUid.txt');
         $help = $command->getHelp()."\n".$uidHelp;
 
         $command

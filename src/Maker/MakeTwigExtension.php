@@ -44,7 +44,7 @@ final class MakeTwigExtension extends AbstractMaker
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the Twig extension class (e.g. <fg=yellow>AppExtension</>)')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeTwigExtension.txt'))
+            ->setHelp($this->getHelpFileContents('MakeTwigExtension.txt'))
         ;
     }
 

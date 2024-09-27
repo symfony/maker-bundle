@@ -70,7 +70,7 @@ final class MakeController extends AbstractMaker
             ->addArgument('controller-class', InputArgument::OPTIONAL, \sprintf('Choose a name for your controller class (e.g. <fg=yellow>%sController</>)', Str::asClassName(Str::getRandomTerm())))
             ->addOption('no-template', null, InputOption::VALUE_NONE, 'Use this option to disable template generation')
             ->addOption('invokable', 'i', InputOption::VALUE_NONE, 'Use this option to create an invokable controller')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeController.txt'))
+            ->setHelp($this->getHelpFileContents('MakeController.txt'))
         ;
 
         $this->configureCommandWithTestsOption($command);

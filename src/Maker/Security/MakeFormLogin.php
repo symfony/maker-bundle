@@ -77,7 +77,9 @@ final class MakeFormLogin extends AbstractMaker
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
-        $command->setHelp(file_get_contents(\dirname(__DIR__, 2).'/Resources/help/security/MakeFormLogin.txt'));
+        $command
+            ->setHelp($this->getHelpFileContents('security/MakeFormLogin.txt'))
+        ;
 
         $this->configureCommandWithTestsOption($command);
     }

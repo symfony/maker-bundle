@@ -66,7 +66,7 @@ final class MakeListener extends AbstractMaker
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'Choose a class name for your event listener or subscriber (e.g. <fg=yellow>ExceptionListener</> or <fg=yellow>ExceptionSubscriber</>)')
             ->addArgument('event', InputArgument::OPTIONAL, 'What event do you want to listen to?')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeListener.txt'))
+            ->setHelp($this->getHelpFileContents('MakeListener.txt'))
         ;
 
         $inputConfig->setArgumentAsNonInteractive('event');
