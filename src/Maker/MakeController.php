@@ -38,6 +38,11 @@ final class MakeController extends AbstractMaker
 {
     use CanGenerateTestsTrait;
 
+    private bool $isInvokable;
+    private ClassData $controllerClassData;
+    private bool $usesTwigTemplate;
+    private string $twigTemplatePath;
+
     public function __construct(private ?PhpCompatUtil $phpCompatUtil = null)
     {
         if (null !== $phpCompatUtil) {
@@ -73,29 +78,24 @@ final class MakeController extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        $this->interactSetGenerateTests($input, $io);
-    }
-
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
-    {
-        $withTemplate = $this->isTwigInstalled() && !$input->getOption('no-template');
-        $isInvokable = (bool) $input->getOption('invokable');
+        $this->usesTwigTemplate = $this->isTwigInstalled() && !$input->getOption('no-template');
+        $this->isInvokable = (bool) $input->getOption('invokable');
 
         $controllerClass = $input->getArgument('controller-class');
         $controllerClassName = \sprintf('Controller\%s', $controllerClass);
 
         // If the class name provided is absolute, we do not assume it will live in src/Controller
         // e.g. src/Custom/Location/For/MyController instead of src/Controller/MyController
-        if ($isAbsolute = '\\' === $controllerClass[0]) {
+        if ($isAbsoluteNamespace = '\\' === $controllerClass[0]) {
             $controllerClassName = substr($controllerClass, 1);
         }
 
-        $controllerClassData = ClassData::create(
+        $this->controllerClassData = ClassData::create(
             class: $controllerClassName,
             suffix: 'Controller',
             extendsClass: AbstractController::class,
             useStatements: [
-                $withTemplate ? Response::class : JsonResponse::class,
+                $this->usesTwigTemplate ? Response::class : JsonResponse::class,
                 Route::class,
             ]
         );
@@ -104,45 +104,48 @@ final class MakeController extends AbstractMaker
         // should live. E.g. templates/custom/location/for/my_controller.html.twig instead of
         // templates/my/controller.html.twig. We do however remove the root_namespace prefix in either case
         // so we don't end up with templates/app/my/controller.html.twig
-        $templateName = $isAbsolute ?
-            $controllerClassData->getFullClassName(withoutRootNamespace: true, withoutSuffix: true) :
-            $controllerClassData->getClassName(relative: true, withoutSuffix: true)
+        $templateName = $isAbsoluteNamespace ?
+            $this->controllerClassData->getFullClassName(withoutRootNamespace: true, withoutSuffix: true) :
+            $this->controllerClassData->getClassName(relative: true, withoutSuffix: true)
         ;
 
         // Convert the twig template name into a file path where it will be generated.
-        $templatePath = \sprintf('%s%s', Str::asFilePath($templateName), $isInvokable ? '.html.twig' : '/index.html.twig');
+        $this->twigTemplatePath = \sprintf('%s%s', Str::asFilePath($templateName), $this->isInvokable ? '.html.twig' : '/index.html.twig');
 
-        $controllerPath = $generator->generateClassFromClassData($controllerClassData, 'controller/Controller.tpl.php', [
-            'route_path' => Str::asRoutePath($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
-            'route_name' => Str::AsRouteName($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
-            'method_name' => $isInvokable ? '__invoke' : 'index',
-            'with_template' => $withTemplate,
-            'template_name' => $templatePath,
+        $this->interactSetGenerateTests($input, $io);
+    }
+
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
+    {
+        $controllerPath = $generator->generateClassFromClassData($this->controllerClassData, 'controller/Controller.tpl.php', [
+            'route_path' => Str::asRoutePath($this->controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+            'route_name' => Str::AsRouteName($this->controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+            'method_name' => $this->isInvokable ? '__invoke' : 'index',
+            'with_template' => $this->usesTwigTemplate,
+            'template_name' => $this->twigTemplatePath,
         ], true);
 
-        if ($withTemplate) {
+        if ($this->usesTwigTemplate) {
             $generator->generateTemplate(
-                $templatePath,
+                $this->twigTemplatePath,
                 'controller/twig_template.tpl.php',
                 [
                     'controller_path' => $controllerPath,
                     'root_directory' => $generator->getRootDirectory(),
-                    'class_name' => $controllerClassData->getClassName(),
+                    'class_name' => $this->controllerClassData->getClassName(),
                 ]
             );
         }
 
         if ($this->shouldGenerateTests()) {
             $testClassData = ClassData::create(
-                class: \sprintf('Tests\Controller\%s', $controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+                class: \sprintf('Tests\Controller\%s', $this->controllerClassData->getClassName(relative: true, withoutSuffix: true)),
                 suffix: 'ControllerTest',
                 extendsClass: WebTestCase::class,
-                useStatements: [
-                ]
             );
 
             $generator->generateClassFromClassData($testClassData, 'controller/test/Test.tpl.php', [
-                'route_path' => Str::asRoutePath($controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+                'route_path' => Str::asRoutePath($this->controllerClassData->getClassName(relative: true, withoutSuffix: true)),
             ]);
 
             if (!class_exists(WebTestCase::class)) {
