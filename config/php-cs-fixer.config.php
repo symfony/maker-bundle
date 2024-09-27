@@ -9,6 +9,14 @@
  * file that was distributed with this source code.
  */
 
+/*
+ * This PHP-CS-Fixer config file is used by the TemplateLinter for userland
+ * code when say make:controller is run. If a user does not have a php-cs-fixer
+ * config file, this one is used on the generated PHP files.
+ *
+ * It should not be confused by the root level .php-cs-fixer.dist.php config
+ * which is used to maintain the MakerBundle codebase itself.
+ */
 return (new PhpCsFixer\Config())
     ->setRules([
         '@Symfony' => true,
