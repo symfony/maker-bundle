@@ -145,7 +145,7 @@ final class TemplateLinter
 
         // No config provided and no project dist config - use our config
         if (null === $this->phpCsFixerConfigPath) {
-            $this->phpCsFixerConfigPath = \dirname(__DIR__).'/Resources/config/php-cs-fixer.config.php';
+            $this->phpCsFixerConfigPath = \sprintf('%s/config/php-cs-fixer.config.php', \dirname(__DIR__, 2));
 
             return;
         }
