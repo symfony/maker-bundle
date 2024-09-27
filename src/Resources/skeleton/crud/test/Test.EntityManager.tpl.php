@@ -18,7 +18,7 @@ namespace <?= $namespace ?>;
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this-><?= lcfirst($entity_var_singular); ?>Repository = $this->manager->getRepository(<?= $entity_class_name; ?>::class);
 
-        foreach ($this-><?= lcfirst($entity_var_singular); ?>Repository>findAll() as $object) {
+        foreach ($this-><?= lcfirst($entity_var_singular); ?>Repository->findAll() as $object) {
             $this->manager->remove($object);
         }
 
@@ -52,7 +52,7 @@ namespace <?= $namespace ?>;
 
         self::assertResponseRedirects($this->path);
 
-        self::assertSame(1, $this-><?= lcfirst($entity_var_singular); ?>Repository>count([]));
+        self::assertSame(1, $this-><?= lcfirst($entity_var_singular); ?>Repository->count([]));
     }
 
     public function testShow(): void
@@ -95,7 +95,7 @@ namespace <?= $namespace ?>;
 
         self::assertResponseRedirects('<?= $route_path; ?>/');
 
-        $fixture = $this-><?= lcfirst($entity_var_singular); ?>Repository>findAll();
+        $fixture = $this-><?= lcfirst($entity_var_singular); ?>Repository->findAll();
 
 <?php foreach ($form_fields as $form_field => $typeOptions): ?>
         self::assertSame('Something New', $fixture[0]->get<?= ucfirst($form_field); ?>());
@@ -117,6 +117,6 @@ namespace <?= $namespace ?>;
         $this->client->submitForm('Delete');
 
         self::assertResponseRedirects('<?= $route_path; ?>/');
-        self::assertSame(0, $this-><?= lcfirst($entity_var_singular); ?>Repository>count([]));
+        self::assertSame(0, $this-><?= lcfirst($entity_var_singular); ?>Repository->count([]));
     }
 }
