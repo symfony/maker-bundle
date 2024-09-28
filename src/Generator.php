@@ -81,7 +81,7 @@ class Generator
      *
      * @internal
      *
-     * @param string $templateName Template name in Resources/skeleton to use
+     * @param string $templateName Template name in the templates/ dir to use
      * @param array  $variables    Array of variables to pass to the template
      * @param bool   $isController Set to true if generating a Controller that needs
      *                             access to the TemplateComponentGenerator ("generator") in
@@ -299,10 +299,14 @@ class Generator
 
         $templatePath = $templateName;
         if (!file_exists($templatePath)) {
-            $templatePath = __DIR__.'/Resources/skeleton/'.$templateName;
+            $templatePath = \sprintf('%s/templates/%s', \dirname(__DIR__), $templateName);
 
             if (!file_exists($templatePath)) {
-                throw new \Exception(\sprintf('Cannot find template "%s"', $templateName));
+                $templatePath = $this->getTemplateFromLegacySkeletonPath($templateName);
+            }
+
+            if (!file_exists($templatePath)) {
+                throw new \Exception(\sprintf('Cannot find template "%s" in the templates/ dir.', $templateName));
             }
         }
 
@@ -310,5 +314,28 @@ class Generator
             'template' => $templatePath,
             'variables' => $variables,
         ];
+    }
+
+    /**
+     * @legacy - Remove when public generate methods become "internal" to MakerBundle in v2
+     */
+    private function getTemplateFromLegacySkeletonPath(string $templateName): string
+    {
+        $templatePath = $templateName;
+        if (!file_exists($templatePath)) {
+            $templatePath = __DIR__.'/Resources/skeleton/'.$templateName;
+
+            if (!file_exists($templatePath)) {
+                throw new \Exception(\sprintf('Cannot find template "%s"', $templateName));
+            }
+        }
+
+        @trigger_deprecation(
+            'symfony/maker-bundle',
+            '1.62.0',
+            'Storing templates in src/Resources/skeleton is deprecated. Store MakerBundle templates in the "~/templates/" dir instead.',
+        );
+
+        return $templatePath;
     }
 }
