@@ -58,7 +58,7 @@ final class MakeCommand extends AbstractMaker
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, \sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCommand.txt'))
+            ->setHelp($this->getHelpFileContents('MakeCommand.txt'))
         ;
     }
 

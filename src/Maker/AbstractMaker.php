@@ -55,4 +55,17 @@ abstract class AbstractMaker implements MakerInterface
             $message
         );
     }
+
+    /**
+     * Get the help file contents needed for "setHelp()" of a maker.
+     *
+     * @param string $helpFileName the filename (omit path) of the help file located in config/help/
+     *                             e.g. MakeController.txt
+     *
+     * @internal
+     */
+    final protected function getHelpFileContents(string $helpFileName): string
+    {
+        return file_get_contents(\sprintf('%s/config/help/%s', \dirname(__DIR__, 2), $helpFileName));
+    }
 }

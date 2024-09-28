@@ -65,7 +65,7 @@ final class MakeDockerDatabase extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeDockerDatabase.txt'))
+            ->setHelp($this->getHelpFileContents('MakeDockerDatabase.txt'))
         ;
     }
 

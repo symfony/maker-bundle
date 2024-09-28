@@ -60,7 +60,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeMigration.txt'))
+            ->setHelp($this->getHelpFileContents('MakeMigration.txt'))
         ;
 
         if (class_exists(MigrationsDiffDoctrineCommand::class)) {

@@ -77,7 +77,8 @@ final class MakeUser extends AbstractMaker
             ->addOption('is-entity', null, InputOption::VALUE_NONE, 'Do you want to store user data in the database (via Doctrine)?')
             ->addOption('identity-property-name', null, InputOption::VALUE_REQUIRED, 'Enter a property name that will be the unique "display" name for the user (e.g. <comment>email, username, uuid</comment>)')
             ->addOption('with-password', null, InputOption::VALUE_NONE, 'Will this app be responsible for checking the password? Choose <comment>No</comment> if the password is actually checked by some other system (e.g. a single sign-on server)')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeUser.txt'));
+            ->setHelp($this->getHelpFileContents('MakeUser.txt'))
+        ;
 
         $this->addWithUuidOption($command);
 

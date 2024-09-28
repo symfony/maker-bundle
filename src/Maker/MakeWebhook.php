@@ -90,7 +90,7 @@ final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterfac
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'Name of the webhook to create (e.g. <fg=yellow>github, stripe, ...</>)')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeWebhook.txt'))
+            ->setHelp($this->getHelpFileContents('MakeWebhook.txt'))
         ;
 
         $inputConfig->setArgumentAsNonInteractive('name');

@@ -58,7 +58,7 @@ final class MakeSchedule extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeScheduler.txt'))
+            ->setHelp($this->getHelpFileContents('MakeScheduler.txt'))
         ;
     }
 

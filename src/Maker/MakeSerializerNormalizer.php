@@ -54,7 +54,7 @@ final class MakeSerializerNormalizer extends AbstractMaker
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'Choose a class name for your normalizer (e.g. <fg=yellow>UserNormalizer</>)')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeSerializerNormalizer.txt'))
+            ->setHelp($this->getHelpFileContents('MakeSerializerNormalizer.txt'))
         ;
     }
 

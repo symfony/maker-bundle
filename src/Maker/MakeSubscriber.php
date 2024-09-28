@@ -55,7 +55,7 @@ final class MakeSubscriber extends AbstractMaker
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'Choose a class name for your event subscriber (e.g. <fg=yellow>ExceptionSubscriber</>)')
             ->addArgument('event', InputArgument::OPTIONAL, 'What event do you want to subscribe to?')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeSubscriber.txt'))
+            ->setHelp($this->getHelpFileContents('MakeSubscriber.txt'))
         ;
 
         $inputConfig->setArgumentAsNonInteractive('event');

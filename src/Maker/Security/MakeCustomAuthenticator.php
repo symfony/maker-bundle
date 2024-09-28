@@ -68,7 +68,7 @@ final class MakeCustomAuthenticator extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->setHelp(file_get_contents(__DIR__.'/../../Resources/help/security/MakeCustom.txt'))
+            ->setHelp($this->getHelpFileContents('security/MakeCustom.txt'))
         ;
     }
 

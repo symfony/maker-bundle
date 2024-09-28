@@ -44,7 +44,8 @@ final class MakeStimulusController extends AbstractMaker
     {
         $command
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the Stimulus controller (e.g. <fg=yellow>hello</>)')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeStimulusController.txt'));
+            ->setHelp($this->getHelpFileContents('MakeStimulusController.txt'))
+        ;
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
