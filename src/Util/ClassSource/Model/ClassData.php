@@ -30,13 +30,14 @@ final class ClassData
         private bool $isFinal = true,
         private string $rootNamespace = 'App',
         private ?string $classSuffix = null,
+        public readonly ?array $implements = null,
     ) {
         if (str_starts_with(haystack: $this->namespace, needle: $this->rootNamespace)) {
             $this->namespace = substr_replace(string: $this->namespace, replace: '', offset: 0, length: \strlen($this->rootNamespace) + 1);
         }
     }
 
-    public static function create(string $class, ?string $suffix = null, ?string $extendsClass = null, bool $isEntity = false, array $useStatements = []): self
+    public static function create(string $class, ?string $suffix = null, ?string $extendsClass = null, bool $isEntity = false, array $useStatements = [], ?array $implements = null): self
     {
         $className = Str::getShortClassName($class);
 
@@ -44,19 +45,29 @@ final class ClassData
             $className = Str::asClassName(\sprintf('%s%s', $className, $suffix));
         }
 
-        $useStatements = new UseStatementGenerator($useStatements);
+        $className = Str::asClassName($className);
+
+        $useStatements = new UseStatementGenerator($useStatements, [$className]);
 
         if ($extendsClass) {
-            $useStatements->addUseStatement($extendsClass);
+            $useStatements->addUseStatement($extendsClass, 'Base');
+        }
+
+        if ($implements) {
+            array_walk($implements, function (string &$interface) use ($useStatements) {
+                $useStatements->addUseStatement($interface, 'Base');
+                $interface = $useStatements->getShortName($interface);
+            });
         }
 
         return new self(
-            className: Str::asClassName($className),
+            className: $className,
             namespace: Str::getNamespace($class),
-            extends: null === $extendsClass ? null : Str::getShortClassName($extendsClass),
+            extends: null === $extendsClass ? null : $useStatements->getShortName($extendsClass),
             isEntity: $isEntity,
             useStatementGenerator: $useStatements,
             classSuffix: $suffix,
+            implements: $implements,
         );
     }
 
@@ -130,10 +141,17 @@ final class ClassData
             $extendsDeclaration = \sprintf(' extends %s', $this->extends);
         }
 
-        return \sprintf('%sclass %s%s',
+        $implementsDeclaration = '';
+
+        if (null !== $this->implements) {
+            $implementsDeclaration = \sprintf(' implements %s', implode(', ', $this->implements));
+        }
+
+        return \sprintf('%sclass %s%s%s',
             $this->isFinal ? 'final ' : '',
             $this->className,
             $extendsDeclaration,
+            $implementsDeclaration,
         );
     }
 
@@ -144,9 +162,9 @@ final class ClassData
         return $this;
     }
 
-    public function addUseStatement(array|string $useStatement): self
+    public function addUseStatement(array|string $useStatement, ?string $aliasPrefixIfExist = null): self
     {
-        $this->useStatementGenerator->addUseStatement($useStatement);
+        $this->useStatementGenerator->addUseStatement($useStatement, $aliasPrefixIfExist);
 
         return $this;
     }
@@ -154,5 +172,15 @@ final class ClassData
     public function getUseStatements(): string
     {
         return (string) $this->useStatementGenerator;
+    }
+
+    public function getUseStatementShortName(string $className): string
+    {
+        return $this->useStatementGenerator->getShortName($className);
+    }
+
+    public function hasUseStatement(string $className): bool
+    {
+        return $this->useStatementGenerator->hasUseStatement($className);
     }
 }
