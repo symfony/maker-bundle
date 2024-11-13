@@ -156,10 +156,6 @@ final class DecoratorInfo
                         $default = 'null';
                     }
                 }
-
-                if (!empty($default)) {
-                    $default = ' = '.$default;
-                }
             }
 
             yield new MethodArgument(
