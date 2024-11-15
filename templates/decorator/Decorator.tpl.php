@@ -4,7 +4,8 @@ namespace <?= $class_data->getNamespace() ?>;
 
 <?= $class_data->getUseStatements(); ?>
 
-#[AsDecorator(<?= $decorated_info->getDecoratedIdDeclaration(); ?>)]
+<?= $decorated_info->getDecorateAttributeDeclaration(); ?>
+
 <?= $class_data->getClassDeclaration(); ?>
 
 {
@@ -18,7 +19,9 @@ namespace <?= $class_data->getNamespace() ?>;
     <?= $method->getDeclaration() ?>
 
     {
-        <?php if (!$method->isReturnVoid()): ?>return <?php endif; ?><?= ($method->isStatic()) ? 'parent::' : '$this->inner->' ; ?><?php echo $method->getName() ?>(<?= $method->getArgumentsUse() ?>);
+        <?php if ($method->isStatic() && !$class_data->hasExtends()): ?>// @TODO Implements this static method<?php endif; ?>
+
+        <?php if ($method->isStatic() && !$class_data->hasExtends()): ?>// <?php endif; ?><?php if (!$method->isReturnVoid()): ?>return <?php endif; ?><?= ($method->isStatic()) ? 'parent::' : '$this->inner->' ; ?><?php echo $method->getName() ?>(<?= $method->getArgumentsUse() ?>);
     }
 <?php endforeach; ?>
 }

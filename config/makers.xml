@@ -36,8 +36,7 @@
             </service>
 
             <service id="maker.maker.make_decorator" class="Symfony\Bundle\MakerBundle\Maker\MakeDecorator">
-                <argument /> <!-- Service locator of all existing services -->
-                <argument /> <!-- Array of services' ids -->
+                <argument type="service" id="maker.decorator_helper" />
                 <tag name="maker.command" />
             </service>
 

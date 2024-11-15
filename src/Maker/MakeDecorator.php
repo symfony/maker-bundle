@@ -11,9 +11,10 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
-use Psr\Container\ContainerInterface;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\DependencyInjection\DecoratorHelper;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
@@ -22,6 +23,8 @@ use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
 
@@ -30,12 +33,8 @@ use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
  */
 final class MakeDecorator extends AbstractMaker
 {
-    /**
-     * @param array<string> $ids
-     */
     public function __construct(
-        private readonly ContainerInterface $container,
-        private readonly array $ids,
+        private readonly DecoratorHelper $helper,
     ) {
     }
 
@@ -46,7 +45,7 @@ final class MakeDecorator extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Create CRUD for Doctrine entity class';
+        return 'Create a decorator of a service';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
@@ -54,8 +53,13 @@ final class MakeDecorator extends AbstractMaker
         $command
             ->addArgument('id', InputArgument::OPTIONAL, 'The ID of the service to decorate.')
             ->addArgument('decorator-class', InputArgument::OPTIONAL, \sprintf('The class name of the service to create (e.g. <fg=yellow>%sDecorator</>)', Str::asClassName(Str::getRandomTerm())))
+            ->addOption('priority', null, InputOption::VALUE_REQUIRED, 'The priority of this decoration when multiple decorators are declared for the same service.')
+            ->addOption('on-invalid', null, InputOption::VALUE_REQUIRED, 'The behavior to adopt when the decoration is invalid.')
             ->setHelp($this->getHelpFileContents('MakeDecorator.txt'))
         ;
+
+        $inputConfig->setArgumentAsNonInteractive('id');
+        $inputConfig->setArgumentAsNonInteractive('decorator-class');
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void
@@ -73,14 +77,36 @@ final class MakeDecorator extends AbstractMaker
             $argument = $command->getDefinition()->getArgument('id');
 
             ($question = new Question($argument->getDescription()))
-                ->setAutocompleterValues($this->ids)
-                ->setValidator(fn ($answer) => Validator::serviceExists($answer, $this->ids))
+                ->setAutocompleterValues($suggestIds = $this->helper->suggestIds())
+                ->setValidator(fn ($answer) => Validator::serviceExists($answer, $suggestIds))
                 ->setMaxAttempts(3);
 
             $input->setArgument('id', $io->askQuestion($question));
         }
 
         $id = $input->getArgument('id');
+        if (null === $realId = $this->helper->getRealId($id)) {
+            $guessCount = \count($guessRealIds = $this->helper->guessRealIds($id));
+
+            if (0 === $guessCount) {
+                throw new RuntimeCommandException(\sprintf('Cannot find nor guess service for given id "%s".', $id));
+            } elseif (1 === $guessCount) {
+                $question = new ConfirmationQuestion(\sprintf('<fg=green>Did you mean</> <fg=yellow>"%s"</> <fg=green>?</>', $guessRealIds[0]), true);
+
+                if (!$io->askQuestion($question)) {
+                    throw new RuntimeCommandException(\sprintf('Cannot find nor guess service for given id "%s".', $id));
+                }
+
+                $input->setArgument('id', $id = $guessRealIds[0]);
+            } else {
+                $input->setArgument(
+                    'id',
+                    $id = $io->choice(\sprintf('Multiple services found for "%s", choice which one you want to decorate?', $id), $guessRealIds),
+                );
+            }
+        } else {
+            $input->setArgument('id', $id = $realId);
+        }
 
         // Ask for decorator classname.
         if (null === $input->getArgument('decorator-class')) {
@@ -111,7 +137,17 @@ final class MakeDecorator extends AbstractMaker
             '',
         );
 
-        $decoratedInfo = $this->createDecoratorInfo($id, $classNameDetails->getFullName());
+        $priority = $input->getOption('priority');
+        $onInvalid = $input->getOption('on-invalid');
+
+        $decoratedInfo = new DecoratorInfo(
+            $classNameDetails->getFullName(),
+            $id,
+            $this->helper->getClass($id),
+            empty($priority) ? null : $priority,
+            null === $onInvalid || 1 === $onInvalid ? null : $onInvalid,
+        );
+
         $classData = $decoratedInfo->getClassData();
 
         $generator->generateClassFromClassData(
@@ -125,17 +161,5 @@ final class MakeDecorator extends AbstractMaker
         $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
-    }
-
-    private function createDecoratorInfo(string $id, string $decoratorClass): DecoratorInfo
-    {
-        return new DecoratorInfo(
-            $decoratorClass,
-            match (true) {
-                class_exists($id), interface_exists($id) => $id,
-                default => $this->container->get($id)::class,
-            },
-            $id,
-        );
     }
 }

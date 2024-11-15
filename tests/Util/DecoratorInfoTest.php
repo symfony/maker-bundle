@@ -181,22 +181,31 @@ class DecoratorInfoTest extends TestCase
         ];
     }
 
-    /** @dataProvider decoratedIdDeclarationProvider */
-    public function testGetDecoratedIdDeclaration(string $serviceId, string $decoratedClassOrInterface, string $expected, bool $idAsClassOrInterface)
+    /** @dataProvider decorateAttributeDeclarationProvider */
+    public function testGetDecorateAttributeDeclaration(string $serviceId, string $decoratedClassOrInterface, ?int $priority, ?int $onInvalid, string $expected, bool $idAsClassOrInterface)
     {
-        $decoratorInfo = new DecoratorInfo('FooBar', $serviceId, $decoratedClassOrInterface);
+        $decoratorInfo = new DecoratorInfo('FooBar', $serviceId, $decoratedClassOrInterface, $priority, $onInvalid);
 
-        $this->assertSame($expected, $decoratorInfo->getDecoratedIdDeclaration());
+        $this->assertSame($expected, $decoratorInfo->getDecorateAttributeDeclaration());
 
         if ($idAsClassOrInterface) {
             $this->assertTrue($decoratorInfo->getClassData()->hasUseStatement($serviceId));
         }
     }
 
-    public function decoratedIdDeclarationProvider(): \Generator
+    public function decorateAttributeDeclarationProvider(): \Generator
     {
-        yield ['foo.bar', ServiceInterface::class, '\'foo.bar\'', false];
-        yield [ServiceInterface::class, ServiceInterface::class, 'ServiceInterface::class', true];
+        yield ['foo.bar', ServiceInterface::class, null, null, '#[AsDecorator(decorates: \'foo.bar\')]', false];
+        yield [ServiceInterface::class, ServiceInterface::class, null, null, '#[AsDecorator(decorates: ServiceInterface::class)]', true];
+        yield ['foo.bar', ServiceInterface::class, 50, null, '#[AsDecorator(decorates: \'foo.bar\', priority: 50)]', false];
+        yield ['foo.bar', ServiceInterface::class, null, 0, '#[AsDecorator(decorates: \'foo.bar\', onInvalid: ContainerInterface::RUNTIME_EXCEPTION_ON_INVALID_REFERENCE)]', false];
+        yield ['foo.bar', ServiceInterface::class, 50, 0, '#[AsDecorator(decorates: \'foo.bar\', priority: 50, onInvalid: ContainerInterface::RUNTIME_EXCEPTION_ON_INVALID_REFERENCE)]', false];
+    }
+
+    public function testInvalidOnInvalid()
+    {
+        $this->expectException(RuntimeCommandException::class);
+        new DecoratorInfo('FooBar', 'foo.bar', ServiceInterface::class, null, -1);
     }
 
     /** @dataProvider shortNameInnerTypeProvider */

@@ -11,8 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass;
 
+use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
-use Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -22,13 +22,45 @@ class MakeDecoratorPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        if (!$container->hasDefinition('maker.maker.make_decorator')) {
+        if (!$container->hasDefinition('maker.decorator_helper')) {
             return;
         }
 
-        $container->getDefinition('maker.maker.make_decorator')
-            ->replaceArgument(0, ServiceLocatorTagPass::register($container, $ids = $container->getServiceIds()))
-            ->replaceArgument(1, $ids)
+        $shortNameMap = [];
+        $serviceClasses = [];
+        foreach ($container->getServiceIds() as $id) {
+            if (str_starts_with($id, '.')) {
+                continue;
+            }
+
+            if (interface_exists($id) || class_exists($id)) {
+                $shortClass = Str::getShortClassName($id);
+                $shortNameMap[$shortClass][] = $id;
+            }
+
+            if (!$container->hasDefinition($id)) {
+                continue;
+            }
+
+            if (
+                (null === $class = $container->getDefinition($id)->getClass())
+                || $class === $id
+            ) {
+                continue;
+            }
+
+            $shortClass = Str::getShortClassName($class);
+            $shortNameMap[$shortClass][] = $id;
+            $serviceClasses[$id] = $class;
+        }
+
+        $shortNameMap = array_map(array_unique(...), $shortNameMap);
+
+        $ids = $container->getServiceIds();
+        $container->getDefinition('maker.decorator_helper')
+            ->replaceArgument(0, $ids)
+            ->replaceArgument(1, $serviceClasses)
+            ->replaceArgument(2, $shortNameMap)
         ;
     }
 }

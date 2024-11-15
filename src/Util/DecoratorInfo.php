@@ -17,6 +17,7 @@ use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassMethod;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\MethodArgument;
 use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
 use Symfony\Component\DependencyInjection\Attribute\AutowireDecorated;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @internal
@@ -31,6 +32,8 @@ final class DecoratorInfo
 
     private readonly string $decoratedIdDeclaration;
 
+    private readonly ?string $onInvalid;
+
     /**
      * @param class-string $decoratorClassName
      * @param class-string $decoratedClassOrInterface
@@ -39,6 +42,8 @@ final class DecoratorInfo
         private readonly string $decoratorClassName,
         string $decoratedId,
         string $decoratedClassOrInterface,
+        private readonly ?int $priority = null,
+        ?int $onInvalid = null,
     ) {
         $decoratedTypeRef = new \ReflectionClass($decoratedClassOrInterface);
 
@@ -80,6 +85,28 @@ final class DecoratorInfo
             $this->decoratedIdDeclaration = \sprintf('\'%s\'', $decoratedId);
         }
 
+        if (null === $onInvalid) {
+            $this->onInvalid = null;
+        } else {
+            $this->classData->addUseStatement(ContainerInterface::class);
+
+            $ok = false;
+            $allowedValues = [];
+            $ref = new \ReflectionClass(ContainerInterface::class);
+            foreach ($ref->getConstants(\ReflectionClassConstant::IS_PUBLIC) as $name => $value) {
+                if ($onInvalid === $value) {
+                    $this->onInvalid = \sprintf('ContainerInterface::%s', $name);
+                    $ok = true;
+                    break;
+                }
+                $allowedValues[] = $value;
+            }
+
+            if (!$ok) {
+                throw new RuntimeCommandException(\sprintf('Invalid "onInvalid" value "%d", it must be one of %s.', $onInvalid, implode(', ', $allowedValues)));
+            }
+        }
+
         // Trigger methods parsing to register methods arguments type in use statement.
         $this->methods = $this->doGetPublicMethods();
     }
@@ -97,14 +124,19 @@ final class DecoratorInfo
         return $this->classData;
     }
 
-    public function getDecoratedIdDeclaration(): string
-    {
-        return $this->decoratedIdDeclaration;
-    }
-
     public function getShortNameInnerType(): string
     {
         return implode('&', array_map($this->classData->getUseStatementShortName(...), $this->decoratedClassOrInterfaces));
+    }
+
+    public function getDecorateAttributeDeclaration(): string
+    {
+        return \sprintf(
+            '#[AsDecorator(decorates: %s%s%s)]',
+            $this->decoratedIdDeclaration,
+            null !== $this->priority ? \sprintf(', priority: %d', $this->priority) : '',
+            null !== $this->onInvalid ? \sprintf(', onInvalid: %s', $this->onInvalid) : '',
+        );
     }
 
     /**
@@ -117,7 +149,7 @@ final class DecoratorInfo
             $ref = new \ReflectionClass($classOrInterface);
 
             foreach ($ref->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-                if ($method->isFinal() || \array_key_exists($method->getName(), $methods)) {
+                if ($method->isFinal() || \array_key_exists($method->getName(), $methods) || '__construct' === $method->getName()) {
                     continue;
                 }
 
@@ -173,7 +205,7 @@ final class DecoratorInfo
         }
 
         if ($type instanceof \ReflectionNamedType) {
-            if (class_exists($type->getName()) || interface_exists($type->getName())) {
+            if (!$type->isBuiltin()) {
                 $this->classData->addUseStatement($type->getName(), 'Arg');
 
                 return $this->classData->getUseStatementShortName($type->getName());
@@ -199,12 +231,22 @@ final class DecoratorInfo
             return false;
         }
 
-        $methodCount = array_sum(array_map(
-            fn (\ReflectionClass $ref) => \count($ref->getMethods(\ReflectionMethod::IS_PUBLIC)),
-            $interfaceRefs,
-        ));
+        $interfaceMethods = [];
+        foreach ($interfaceRefs as $ref) {
+            $methodRefs = $ref->getMethods(\ReflectionMethod::IS_PUBLIC);
+            foreach ($methodRefs as $methodRef) {
+                $interfaceMethods[] = $methodRef->getName();
+            }
+        }
 
-        return $methodCount === \count($classRef->getMethods(\ReflectionMethod::IS_PUBLIC));
+        $interfaceMethods = array_unique($interfaceMethods);
+
+        $classMethodsCount = \count($classRef->getMethods(\ReflectionMethod::IS_PUBLIC));
+        if ($classRef->hasMethod('__construct')) {
+            --$classMethodsCount;
+        }
+
+        return \count($interfaceMethods) === $classMethodsCount;
     }
 
     private static function isClassEquivalentToItsParentClass(\ReflectionClass $classRef): bool
@@ -213,7 +255,16 @@ final class DecoratorInfo
             return false;
         }
 
-        return \count($classRef->getMethods(\ReflectionMethod::IS_PUBLIC))
-            === \count($parentClassRef->getMethods(\ReflectionMethod::IS_PUBLIC));
+        $classMethodsCount = \count($classRef->getMethods(\ReflectionMethod::IS_PUBLIC));
+        if ($classRef->hasMethod('__construct')) {
+            --$classMethodsCount;
+        }
+
+        $parentMethodsCount = \count($parentClassRef->getMethods(\ReflectionMethod::IS_PUBLIC));
+        if ($parentClassRef->hasMethod('__construct')) {
+            --$parentMethodsCount;
+        }
+
+        return $classMethodsCount === $parentMethodsCount;
     }
 }

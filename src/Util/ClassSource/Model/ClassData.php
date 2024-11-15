@@ -183,4 +183,9 @@ final class ClassData
     {
         return $this->useStatementGenerator->hasUseStatement($className);
     }
+
+    public function hasExtends(): bool
+    {
+        return null !== $this->extends;
+    }
 }
