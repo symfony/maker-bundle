@@ -42,7 +42,7 @@ class FunctionalTest extends TestCase
             $classNameFromPath = str_replace(
                 ['/', '.php'], // We need to flip and "/" to "\" and remove ".php"
                 ['\\', ''],
-                sprintf('Symfony\Bundle\MakerBundle\Maker\%s', $file->getRelativePathname())
+                \sprintf('Symfony\Bundle\MakerBundle\Maker\%s', $file->getRelativePathname())
             );
 
             $maker = new \ReflectionClass($classNameFromPath);

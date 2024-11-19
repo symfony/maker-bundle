@@ -33,7 +33,6 @@ final class TemplateLinterTest extends MakerTestCase
     public function getTestDetails(): \Generator
     {
         yield 'lints_templates_with_custom_php_cs_fixer_and_config' => [$this->createMakerTest()
-            ->addExtraDependencies('php-cs-fixer/shim')
             ->run(function (MakerTestRunner $runner) {
                 $runner->copy('template-linter/php-cs-fixer.test.php', 'php-cs-fixer.test.php');
 
@@ -53,13 +52,12 @@ final class TemplateLinterTest extends MakerTestCase
 
                 self::assertStringContainsString('Linted by custom php-cs-config', $generatedTemplate);
 
-                $expectedOutput = 'System PHP-CS-Fixer (bin/php-cs-fixer) & System PHP-CS-Fixer Configuration (php-cs-fixer.test.php)';
+                $expectedOutput = 'System PHP-CS-Fixer (bin/php-cs-fixer) & System PHP-CS-Fixer Configuration';
                 self::assertStringContainsString($expectedOutput, $output);
             }),
         ];
 
         yield 'lints_templates_with_flex_generated_config_file' => [$this->createMakerTest()
-            ->addExtraDependencies('php-cs-fixer/shim')
             ->run(function (MakerTestRunner $runner) {
                 $runner->replaceInFile(
                     '.php-cs-fixer.dist.php',
@@ -79,13 +77,14 @@ final class TemplateLinterTest extends MakerTestCase
 
                 self::assertStringContainsString('Linted with stock php-cs-config', $generatedTemplate);
 
-                $expectedOutput = 'Bundled PHP-CS-Fixer & System PHP-CS-Fixer Configuration (.php-cs-fixer.dist.php)';
+                $expectedOutput = 'Bundled PHP-CS-Fixer & System PHP-CS-Fixer Configuration';
                 self::assertStringContainsString($expectedOutput, $output);
             }),
         ];
 
         yield 'lints_templates_with_bundled_php_cs_fixer' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
+                $runner->deleteFile('.php-cs-fixer.dist.php');
                 // Voter class name
                 $output = $runner->runMaker(['FooBar']);
 

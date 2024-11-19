@@ -60,7 +60,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeMigration.txt'))
+            ->setHelp($this->getHelpFileContents('MakeMigration.txt'))
         ;
 
         if (class_exists(MigrationsDiffDoctrineCommand::class)) {
@@ -142,7 +142,7 @@ final class MakeMigration extends AbstractMaker implements ApplicationAwareMaker
         $this->writeSuccessMessage($io);
 
         $io->text([
-            sprintf('Review the new migration then run it with <info>%s doctrine:migrations:migrate</info>', CliOutputHelper::getCommandPrefix()),
+            \sprintf('Review the new migration then run it with <info>%s doctrine:migrations:migrate</info>', CliOutputHelper::getCommandPrefix()),
             'See <fg=yellow>https://symfony.com/doc/current/bundles/DoctrineMigrationsBundle/index.html</>',
         ]);
     }

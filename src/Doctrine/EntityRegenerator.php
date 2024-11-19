@@ -46,9 +46,9 @@ final class EntityRegenerator
         if ($metadata instanceof ClassMetadata) {
             $metadata = [$metadata];
         } elseif (class_exists($classOrNamespace)) {
-            throw new RuntimeCommandException(sprintf('Could not find Doctrine metadata for "%s". Is it mapped as an entity?', $classOrNamespace));
+            throw new RuntimeCommandException(\sprintf('Could not find Doctrine metadata for "%s". Is it mapped as an entity?', $classOrNamespace));
         } elseif (empty($metadata)) {
-            throw new RuntimeCommandException(sprintf('No entities were found in the "%s" namespace.', $classOrNamespace));
+            throw new RuntimeCommandException(\sprintf('No entities were found in the "%s" namespace.', $classOrNamespace));
         }
 
         /** @var ClassSourceManipulator[] $operations */

@@ -19,8 +19,12 @@
         <env name="SYMFONY_PHPUNIT_VERSION" value="9.6" />
         <env name="MAKER_SKIP_MERCURE_TEST" value="false"/>
         <env name="MAKER_SKIP_PANTHER_TEST" value="false" />
+        <env name="MAKER_TEST_WINDOWS" value="false" />
 <!--    Overrides process timeout when step debugging -->
 <!--    <env name="MAKER_PROCESS_TIMEOUT" value="null" /> -->
+<!--    Dump the CLI output for a test runner process immediately after running a test -->
+<!--    You should only set this to true when you need to debug the actual output of a maker command within a test -->
+<!--    <env name="MAKER_TEST_DUMP_OUTPUT" value="false" /> -->
     </php>
 
     <testsuites>

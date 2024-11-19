@@ -1,0 +1,22 @@
+{
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "platform": {
+            "php": "8.1.0"
+        },
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true,
+        "allow-plugins": {
+            "symfony/flex": true
+        }
+    },
+    "require": {
+        "php": ">=8.1",
+        "symfony-tools/docs-builder": "^0.23",
+        "symfony/console": "^6.2",
+        "symfony/process": "^6.2"
+    }
+}

@@ -232,7 +232,7 @@ final class UserClassBuilder
             'password',
             'getPassword',
             'string',
-            false,
+            true,
             [
                 '@see PasswordAuthenticatedUserInterface',
             ]

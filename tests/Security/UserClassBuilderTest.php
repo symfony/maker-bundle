@@ -86,10 +86,10 @@ class UserClassBuilderTest extends TestCase
     {
         $basePath = __DIR__.'/fixtures/expected';
 
-        $expectedPath = sprintf('%s/%s', $basePath, $expectedFilename);
+        $expectedPath = \sprintf('%s/%s', $basePath, $expectedFilename);
 
         if (!file_exists($expectedPath)) {
-            throw new \Exception(sprintf('Expected file missing: "%s"', $expectedPath));
+            throw new \Exception(\sprintf('Expected file missing: "%s"', $expectedPath));
         }
 
         return $expectedPath;

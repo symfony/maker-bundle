@@ -35,7 +35,16 @@ class MakerTestRunner
     {
         $this->executedMakerProcess = $this->environment->runMaker($inputs, $argumentsString, $allowedToFail, $envVars);
 
-        return $this->executedMakerProcess->getOutput();
+        $output = $this->executedMakerProcess->getOutput();
+
+        // Allows for debugging the actual CLI output from within a test process. E.g. Manually viewing the output of the
+        // `make:voter` command that was run within the MakeVoterTest from your local command line.
+        // You should never use this in CI unless you know what you're doing - resource intensive.
+        if ('true' === getenv('MAKER_TEST_DUMP_OUTPUT')) {
+            dump(['Maker Process Output' => $output, 'Maker Process Error Output' => $this->executedMakerProcess->getErrorOutput()]);
+        }
+
+        return $output;
     }
 
     /**
@@ -46,7 +55,7 @@ class MakerTestRunner
         $path = __DIR__.'/../../tests/fixtures/'.$source;
 
         if (!file_exists($path)) {
-            throw new \Exception(sprintf('Cannot find file "%s"', $path));
+            throw new \Exception(\sprintf('Cannot find file "%s"', $path));
         }
 
         if (is_file($path)) {
@@ -198,7 +207,7 @@ class MakerTestRunner
     public function runTests(): void
     {
         $internalTestProcess = MakerTestProcess::create(
-            sprintf('php %s', $this->getPath('/bin/phpunit')),
+            \sprintf('php %s', $this->getPath('bin/phpunit')),
             $this->environment->getPath())
             ->run(true)
         ;
@@ -207,7 +216,7 @@ class MakerTestRunner
             return;
         }
 
-        throw new ExpectationFailedException(sprintf("Error while running the PHPUnit tests *in* the project: \n\n %s \n\n Command Output: %s", $internalTestProcess->getErrorOutput()."\n".$internalTestProcess->getOutput(), $this->getExecutedMakerProcess()->getErrorOutput()."\n".$this->getExecutedMakerProcess()->getOutput()));
+        throw new ExpectationFailedException(\sprintf("Error while running the PHPUnit tests *in* the project: \n\n %s \n\n Command Output: %s", $internalTestProcess->getErrorOutput()."\n".$internalTestProcess->getOutput(), $this->getExecutedMakerProcess()->getErrorOutput()."\n".$this->getExecutedMakerProcess()->getOutput()));
     }
 
     public function writeFile(string $filename, string $contents): void

@@ -23,7 +23,7 @@ class SecurityControllerBuilderTest extends TestCase
     {
         $this->runMethodTest(
             'addLoginMethod',
-            sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_login.php')
+            \sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_login.php')
         );
     }
 
@@ -31,7 +31,7 @@ class SecurityControllerBuilderTest extends TestCase
     {
         $this->runMethodTest(
             'addLogoutMethod',
-            sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_logout.php')
+            \sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_logout.php')
         );
     }
 
@@ -44,7 +44,7 @@ class SecurityControllerBuilderTest extends TestCase
         $builder->addLogoutMethod($csm);
 
         $this->assertStringEqualsFile(
-            sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_login_logout.php'),
+            \sprintf('%s/%s', $this->expectedBasePath, 'SecurityController_login_logout.php'),
             $csm->getSourceCode()
         );
     }

@@ -44,7 +44,7 @@ final class MakeFixtures extends AbstractMaker
     {
         $command
             ->addArgument('fixtures-class', InputArgument::OPTIONAL, 'The class name of the fixtures to create (e.g. <fg=yellow>AppFixtures</>)')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeFixture.txt'))
+            ->setHelp($this->getHelpFileContents('MakeFixture.txt'))
         ;
     }
 
@@ -75,7 +75,7 @@ final class MakeFixtures extends AbstractMaker
 
         $io->text([
             'Next: Open your new fixtures class and start customizing it.',
-            sprintf('Load your fixtures by running: <comment>php %s doctrine:fixtures:load</comment>', $_SERVER['PHP_SELF']),
+            \sprintf('Load your fixtures by running: <comment>php %s doctrine:fixtures:load</comment>', $_SERVER['PHP_SELF']),
             'Docs: <fg=yellow>https://symfony.com/doc/current/bundles/DoctrineFixturesBundle/index.html</>',
         ]);
     }

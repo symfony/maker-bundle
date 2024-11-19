@@ -2,5 +2,5 @@ branches: ["main"]
 
 maintained_branches: ["main"]
 
-doc_dir: "src/Resources/doc"
+doc_dir: "docs"
 

@@ -50,7 +50,7 @@ final class MakeMessage extends AbstractMaker
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the message class (e.g. <fg=yellow>SendEmailMessage</>)')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeMessage.txt'))
+            ->setHelp($this->getHelpFileContents('MakeMessage.txt'))
         ;
     }
 

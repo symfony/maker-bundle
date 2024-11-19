@@ -122,6 +122,8 @@ class MakeEntityTest extends MakerTestCase
         ];
 
         yield 'it_creates_a_new_class_and_api_resource' => [$this->createMakeEntityTest()
+            // @legacy - re-enable test when https://github.com/symfony/recipes/pull/1339 is merged
+            ->skipTest('Waiting for https://github.com/symfony/recipes/pull/1339')
             ->addExtraDependencies('api')
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([
@@ -685,6 +687,8 @@ class MakeEntityTest extends MakerTestCase
         ];
 
         yield 'it_makes_new_entity_no_to_all_extras' => [$this->createMakeEntityTestForMercure()
+            // @legacy - re-enable test when https://github.com/symfony/recipes/pull/1339 is merged
+            ->skipTest('Waiting for https://github.com/symfony/recipes/pull/1339')
             ->addExtraDependencies('api')
             // special setup done in createMakeEntityTestForMercure()
             ->run(function (MakerTestRunner $runner) {
@@ -740,6 +744,29 @@ class MakeEntityTest extends MakerTestCase
 
                 $this->runEntityTest($runner);
             }),
+        ];
+
+        yield 'it_creates_a_new_class_with_enum_field_multiple_and_nullable' => [$this->createMakeEntityTest()
+        ->run(function (MakerTestRunner $runner) {
+            $this->copyEntity($runner, 'Enum/Role-basic.php');
+
+            $runner->runMaker([
+                // entity class name
+                'User',
+                // add additional field
+                'role',
+                'enum',
+                'App\\Entity\\Enum\\Role',
+                // multiple
+                'y',
+                // nullable
+                'y',
+                // finish adding fields
+                '',
+            ]);
+
+            $this->runEntityTest($runner);
+        }),
         ];
     }
 
@@ -808,15 +835,15 @@ class MakeEntityTest extends MakerTestCase
         );
 
         $runner->copy(
-            sprintf('make-entity/entities/attributes/%s', $filename),
-            sprintf('src/Entity/%s.php', $entityClassName)
+            \sprintf('make-entity/entities/attributes/%s', $filename),
+            \sprintf('src/Entity/%s.php', $entityClassName)
         );
     }
 
     private function copyEntityDirectory(MakerTestRunner $runner, string $directory): void
     {
         $runner->copy(
-            sprintf('make-entity/%s/attributes', $directory),
+            \sprintf('make-entity/%s/attributes', $directory),
             ''
         );
     }

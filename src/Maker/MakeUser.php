@@ -77,7 +77,8 @@ final class MakeUser extends AbstractMaker
             ->addOption('is-entity', null, InputOption::VALUE_NONE, 'Do you want to store user data in the database (via Doctrine)?')
             ->addOption('identity-property-name', null, InputOption::VALUE_REQUIRED, 'Enter a property name that will be the unique "display" name for the user (e.g. <comment>email, username, uuid</comment>)')
             ->addOption('with-password', null, InputOption::VALUE_NONE, 'Will this app be responsible for checking the password? Choose <comment>No</comment> if the password is actually checked by some other system (e.g. a single sign-on server)')
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeUser.txt'));
+            ->setHelp($this->getHelpFileContents('MakeUser.txt'))
+        ;
 
         $this->addWithUuidOption($command);
 
@@ -210,15 +211,15 @@ final class MakeUser extends AbstractMaker
 
         $io->text('Next Steps:');
         $nextSteps = [
-            sprintf('Review your new <info>%s</info> class.', $userClassNameDetails->getFullName()),
+            \sprintf('Review your new <info>%s</info> class.', $userClassNameDetails->getFullName()),
         ];
         if ($userClassConfiguration->isEntity()) {
-            $nextSteps[] = sprintf(
+            $nextSteps[] = \sprintf(
                 'Use <comment>make:entity</comment> to add more fields to your <info>%s</info> entity and then run <comment>make:migration</comment>.',
                 $userClassNameDetails->getShortName()
             );
         } else {
-            $nextSteps[] = sprintf(
+            $nextSteps[] = \sprintf(
                 'Open <info>%s</info> to finish implementing your user provider.',
                 /* @phpstan-ignore-next-line - $customProviderPath is defined in this else statement */
                 $this->fileManager->relativizePath($customProviderPath)
@@ -236,7 +237,7 @@ final class MakeUser extends AbstractMaker
 
         $nextSteps[] = 'Create a way to authenticate! See https://symfony.com/doc/current/security.html';
 
-        $nextSteps = array_map(static fn ($step) => sprintf('  - %s', $step), $nextSteps);
+        $nextSteps = array_map(static fn ($step) => \sprintf('  - %s', $step), $nextSteps);
         $io->text($nextSteps);
     }
 

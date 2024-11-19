@@ -104,7 +104,7 @@ class YamlSourceManipulatorTest extends TestCase
             $maxLen = max(array_map('strlen', array_keys($context)));
 
             foreach ($context as $key => $val) {
-                $message .= sprintf(
+                $message .= \sprintf(
                     "\n    %s%s: %s",
                     str_repeat(' ', $maxLen - \strlen($key)),
                     $key,

@@ -352,8 +352,8 @@ class MakeResetPasswordTest extends MakerTestCase
                 $contentResetPasswordController = file_get_contents($runner->getPath('src/Controller/ResetPasswordController.php'));
                 $this->assertStringContainsString('$form->get(\'emailAddress\')->getData()', $contentResetPasswordController);
                 $this->assertStringContainsString('\'emailAddress\' => $emailFormData,', $contentResetPasswordController);
-                $this->assertStringContainsString('$user->setMyPassword($encodedPassword);', $contentResetPasswordController);
-                $this->assertStringContainsString('->to($user->getEmailAddress())', $contentResetPasswordController);
+                $this->assertStringContainsString('$user->setMyPassword($passwordHasher->hashPassword($user, $plainPassword));', $contentResetPasswordController);
+                $this->assertStringContainsString('->to((string) $user->getEmailAddress())', $contentResetPasswordController);
 
                 // check ResetPasswordRequest
                 $contentResetPasswordRequest = file_get_contents($runner->getPath('src/Entity/ResetPasswordRequest.php'));

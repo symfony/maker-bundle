@@ -92,7 +92,8 @@ final class MakeAuthenticator extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeAuth.txt'));
+            ->setHelp($this->getHelpFileContents('MakeAuth.txt'))
+        ;
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
@@ -377,7 +378,7 @@ final class MakeAuthenticator extends AbstractMaker
         }
 
         if (method_exists($controllerClassNameDetails->getFullName(), 'login')) {
-            throw new RuntimeCommandException(sprintf('Method "login" already exists on class %s', $controllerClassNameDetails->getFullName()));
+            throw new RuntimeCommandException(\sprintf('Method "login" already exists on class %s', $controllerClassNameDetails->getFullName()));
         }
 
         $manipulator = new ClassSourceManipulator(
@@ -428,10 +429,10 @@ final class MakeAuthenticator extends AbstractMaker
         }
 
         if (self::AUTH_TYPE_FORM_LOGIN === $authenticatorType) {
-            $nextTexts[] = sprintf('- Finish the redirect "TODO" in the <info>%s::onAuthenticationSuccess()</info> method.', $authenticatorClass);
+            $nextTexts[] = \sprintf('- Finish the redirect "TODO" in the <info>%s::onAuthenticationSuccess()</info> method.', $authenticatorClass);
 
             if (!$this->doctrineHelper->isClassAMappedEntity($userClass)) {
-                $nextTexts[] = sprintf('- Review <info>%s::getUser()</info> to make sure it matches your needs.', $authenticatorClass);
+                $nextTexts[] = \sprintf('- Review <info>%s::getUser()</info> to make sure it matches your needs.', $authenticatorClass);
             }
 
             $nextTexts[] = '- Review & adapt the login template: <info>'.$this->fileManager->getPathForTemplate('security/login.html.twig').'</info>.';
