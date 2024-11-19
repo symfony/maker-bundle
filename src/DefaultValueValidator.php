@@ -60,7 +60,7 @@ class DefaultValueValidator
         if (\in_array($value, ['true', 'false'])) {
             return 'true' === $value;
         }
-        throw new RuntimeCommandException(sprintf('Value %s is invalid for type boolean', $value));
+        throw new RuntimeCommandException(\sprintf('Value %s is invalid for type boolean', $value));
     }
 
     public static function validateFloat(mixed $value): float
@@ -68,7 +68,7 @@ class DefaultValueValidator
         if (is_numeric($value)) {
             return (float) $value;
         }
-        throw new RuntimeCommandException(sprintf('Value %s is invalid for type float', $value));
+        throw new RuntimeCommandException(\sprintf('Value %s is invalid for type float', $value));
     }
 
     public static function validateInt(mixed $value): int
@@ -81,6 +81,6 @@ class DefaultValueValidator
                 return $val;
             }
         }
-        throw new RuntimeCommandException(sprintf('Value %s is invalid for type int', $value));
+        throw new RuntimeCommandException(\sprintf('Value %s is invalid for type int', $value));
     }
 }

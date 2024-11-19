@@ -738,6 +738,8 @@ class MakeEntityTest extends MakerTestCase
                     '',
                     // nullable
                     'y',
+                    // no default value
+                    '',
                     // finish adding fields
                     '',
                 ]);

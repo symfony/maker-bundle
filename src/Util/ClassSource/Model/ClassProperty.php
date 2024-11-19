@@ -80,7 +80,7 @@ final class ClassProperty
                 precision: $data->precision,
                 scale: $data->scale,
                 unique: $data->unique ?? false,
-                defaultValue: $data->defaultValue ?? null
+                defaultValue: $data->defaultValue ?? null,
                 enumType: $data->enumType,
             );
         }
@@ -101,7 +101,7 @@ final class ClassProperty
             precision: $data['precision'] ?? null,
             scale: $data['scale'] ?? null,
             unique: $data['unique'] ?? false,
-            defaultValue: $data['defaultValue'] ?? null
+            defaultValue: $data['defaultValue'] ?? null,
             enumType: $data['enumType'] ?? null,
         );
     }
