@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bundle\MakerBundle\Maker;
+namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 
