@@ -458,6 +458,18 @@ class ClassSourceManipulatorTest extends TestCase
             ),
         ];
 
+        // interesting also becaue the source file has
+        // multiple use statements
+        yield 'one_to_many_simple_multiple_use' => [
+            'User_with_multiple_use_statements.php',
+            'User_with_multiple_use_statements.php',
+            (new RelationOneToMany())
+                ->setPropertyName('avatarPhotos')
+                ->setTargetClassName('App\Entity\UserAvatarPhoto')
+                ->setTargetPropertyName('user')
+                ->setOrphanRemoval(false),
+        ];
+
         yield 'one_to_many_orphan_removal' => [
             'User_simple.php',
             'User_simple_orphan_removal.php',
