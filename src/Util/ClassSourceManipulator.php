@@ -485,10 +485,6 @@ final class ClassSourceManipulator
 
     private function getSetterName(string $propertyName, $type): string
     {
-        if ('bool' === $type && 0 === strncasecmp($propertyName, 'is', 2)) {
-            return 'set'.Str::asCamelCase(substr($propertyName, 2));
-        }
-
         return 'set'.Str::asCamelCase($propertyName);
     }
 
