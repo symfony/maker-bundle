@@ -41,6 +41,9 @@ optional arguments and options. Check them out with the ``--help`` option:
 
     $ php bin/console make:controller --help
 
+.. caution::
+
+    ``make:entity`` requires ``doctrine/orm`` to be installed and configured. This maker support only ORM, not ODM.
 
 Linting Generated Code
 ______________________
