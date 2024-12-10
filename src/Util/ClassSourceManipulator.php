@@ -143,7 +143,7 @@ final class ClassSourceManipulator
         }
 
         $propertyType = $typeHint;
-        if ($propertyType && !$defaultValue && $propertyType !== 'mixed') {
+        if ($propertyType && !$defaultValue && 'mixed' !== $propertyType) {
             // all property types
             $propertyType = '?'.$propertyType;
         }
@@ -162,13 +162,13 @@ final class ClassSourceManipulator
             // getter methods always have nullable return values
             // because even though these are required in the db, they may not be set yet
             // unless there is a default value
-            null === $defaultValue && $propertyType !== 'mixed',
+            null === $defaultValue && 'mixed' !== $propertyType,
             $commentLines
         );
 
         // don't generate setters for id fields
         if (!($mapping->id ?? false)) {
-            $this->addSetter($mapping->propertyName, $typeHint, $nullable && $propertyType !== 'mixed');
+            $this->addSetter($mapping->propertyName, $typeHint, $nullable && 'mixed' !== $propertyType);
         }
     }
 
