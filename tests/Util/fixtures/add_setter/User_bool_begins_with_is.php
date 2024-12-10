@@ -17,7 +17,7 @@ class User
         return $this->id;
     }
 
-    public function setFooProp(bool $isFooProp): static
+    public function setIsFooProp(bool $isFooProp): static
     {
         $this->isFooProp = $isFooProp;
 
