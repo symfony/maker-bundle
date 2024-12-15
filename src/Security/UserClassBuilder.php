@@ -201,7 +201,7 @@ final class UserClassBuilder
             return;
         }
 
-        $propertyDocs = '@var string The hashed password';
+        $propertyDocs = '@var ?string The hashed password';
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
