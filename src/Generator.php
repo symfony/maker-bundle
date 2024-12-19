@@ -188,7 +188,7 @@ class Generator
             $className = Str::asClassName($name, $suffix);
 
             try {
-                Validator::classDoesNotExist($className);
+                Validator::classDoesNotExist(\sprintf('%s/%s', $namespacePrefix, $className));
                 $className = rtrim($fullNamespacePrefix, '\\').'\\'.$className;
             } catch (RuntimeCommandException) {
             }
