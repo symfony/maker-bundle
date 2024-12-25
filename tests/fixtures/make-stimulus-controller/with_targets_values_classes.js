@@ -7,15 +7,12 @@ import { Controller } from '@hotwired/stimulus';
 
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
-<?= $targets ? "    static targets = $targets\n" : "" ?>
-<?php if ($values) { ?>
+    static targets = ['aaa', 'bbb']
     static values = {
-<?php foreach ($values as $value): ?>
-        <?= $value['name'] ?>: <?= $value['type'] ?>,
-<?php endforeach; ?>
+        ccc: Number,
+        ddd: String,
     }
-<?php } ?>
-<?= $classes ? "    static classes = $classes\n" : '' ?>
+    static classes = ['eee', 'fff']
 
     initialize() {
         // Called once when the controller is first instantiated (per element)

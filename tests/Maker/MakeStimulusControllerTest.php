@@ -36,7 +36,7 @@ class MakeStimulusControllerTest extends MakerTestCase
                 $this->assertFileExists($generatedFilePath);
             }),
         ];
-        
+
         yield 'it_generates_stimulus_controller_with_targets' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
@@ -87,6 +87,99 @@ class MakeStimulusControllerTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_generates_stimulus_controller_with_values' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        'with_values', // controller name
+                        'js', // controller language
+                        'no', // no targets
+                        'yes', // values
+                        'min', // first value
+                        'Number', // first value type
+                        'email', // second values
+                        'String', // second value type
+                        '', // empty input to stop adding values
+                    ]);
+
+                $generatedFilePath = $runner->getPath('assets/controllers/with_values_controller.js');
+
+                $this->assertFileExists($generatedFilePath);
+
+                $generatedFileContents = file_get_contents($generatedFilePath);
+                $expectedContents = file_get_contents(__DIR__.'/../fixtures/make-stimulus-controller/with_values.js');
+
+                $this->assertSame(
+                    $expectedContents,
+                    $generatedFileContents
+                );
+            }),
+        ];
+
+        yield 'it_generates_stimulus_controller_with_classes' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        'with_classes', // controller name
+                        'js', // use default extension (js)
+                        'no', // do not add targets
+                        'no', // do not add values
+                        'yes', // add classes
+                        'foo', // first class
+                        'bar', // second class
+                        '', // empty input to stop adding classes
+                    ]);
+
+                $generatedFilePath = $runner->getPath('assets/controllers/with_classes_controller.js');
+
+                $this->assertFileExists($generatedFilePath);
+
+                $generatedFileContents = file_get_contents($generatedFilePath);
+                $expectedContents = file_get_contents(__DIR__.'/../fixtures/make-stimulus-controller/with_classes.js');
+
+                $this->assertSame(
+                    $expectedContents,
+                    $generatedFileContents
+                );
+            }),
+        ];
+
+        yield 'it_generates_stimulus_controller_with_targets_values_and_classes' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        'with_targets_values_classes',
+                        'js',
+                        'yes', // add targets
+                        'aaa',
+                        'bbb',
+                        '',    // end
+                        'yes', // add values
+                        'ccc',
+                        'Number',
+                        'ddd',
+                        'String',
+                        '',    // end
+                        'yes', // add classes
+                        'eee',
+                        'fff',
+                        '',    // end
+                    ]);
+
+                $generatedFilePath = $runner->getPath('assets/controllers/with_targets_values_classes_controller.js');
+
+                $this->assertFileExists($generatedFilePath);
+
+                $generatedFileContents = file_get_contents($generatedFilePath);
+                $expectedContents = file_get_contents(__DIR__.'/../fixtures/make-stimulus-controller/with_targets_values_classes.js');
+
+                $this->assertSame(
+                    $expectedContents,
+                    $generatedFileContents
+                );
+            }),
+        ];
+
         yield 'it_generates_typescript_stimulus_controller_interactively' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
@@ -101,7 +194,7 @@ class MakeStimulusControllerTest extends MakerTestCase
                 $this->assertFileDoesNotExist($runner->getPath('assets/controllers/typescript_controller.js'));
             }),
         ];
-        
+
         yield 'it_generates_typescript_stimulus_controller_when_option_is_set' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(

@@ -57,12 +57,13 @@ final class MakeStimulusController extends AbstractMaker
         $command->addArgument('extension', InputArgument::OPTIONAL);
         $command->addArgument('targets', InputArgument::OPTIONAL);
         $command->addArgument('values', InputArgument::OPTIONAL);
+        $command->addArgument('classes', InputArgument::OPTIONAL);
 
         if ($input->getOption('typescript')) {
             $input->setArgument('extension', 'ts');
         } else {
             $chosenExtension = $io->choice(
-            'Language (<fg=yellow>JavaScript</> or <fg=yellow>TypeScript</>)',
+                'Language (<fg=yellow>JavaScript</> or <fg=yellow>TypeScript</>)',
                 [
                     'js' => 'JavaScript',
                     'ts' => 'TypeScript',
@@ -107,16 +108,35 @@ final class MakeStimulusController extends AbstractMaker
 
             $input->setArgument('values', $values);
         }
+
+        if ($io->confirm('Do you want to add classes?', false)) {
+            $classes = [];
+            $isFirstClass = true;
+
+            while (true) {
+                $newClass = $this->askForNextClass($io, $classes, $isFirstClass);
+                if (null === $newClass) {
+                    break;
+                }
+
+                $isFirstClass = false;
+                $classes[] = $newClass;
+            }
+
+            $input->setArgument('classes', $classes);
+        }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $controllerName = Str::asSnakeCase($input->getArgument('name'));
         $chosenExtension = $input->getArgument('extension');
-        $targets = $input->getArgument('targets');
-        $values = $input->getArgument('values');
+        $targets = $targetArgs = $input->getArgument('targets') ?? [];
+        $values = $valuesArg = $input->getArgument('values') ?? [];
+        $classes = $classesArgs = $input->getArgument('classes') ?? [];
 
         $targets = empty($targets) ? $targets : \sprintf("['%s']", implode("', '", $targets));
+        $classes = $classes ? \sprintf("['%s']", implode("', '", $classes)) : null;
 
         $fileName = \sprintf('%s_controller.%s', $controllerName, $chosenExtension);
         $filePath = \sprintf('assets/controllers/%s', $fileName);
@@ -127,6 +147,7 @@ final class MakeStimulusController extends AbstractMaker
             [
                 'targets' => $targets,
                 'values' => $values,
+                'classes' => $classes,
             ]
         );
 
@@ -222,6 +243,29 @@ final class MakeStimulusController extends AbstractMaker
         }
 
         return ['name' => $valueName, 'type' => $type];
+    }
+
+    /** @param string[] $classes */
+    private function askForNextClass(ConsoleStyle $io, array $classes, bool $isFirstClass): ?string
+    {
+        $questionText = 'New class name (press <return> to stop adding classes)';
+
+        if (!$isFirstClass) {
+            $questionText = 'Add another class? Enter the class name (or press <return> to stop adding classes)';
+        }
+
+        $className = $io->ask($questionText, validator: function (?string $name) use ($classes) {
+            if (str_contains($name, ' ')) {
+                throw new \InvalidArgumentException('Class name cannot contain spaces.');
+            }
+            if (\in_array($name, $classes, true)) {
+                throw new \InvalidArgumentException(\sprintf('The "%s" class already exists.', $name));
+            }
+
+            return $name;
+        });
+
+        return $className ?: null;
     }
 
     private function printAvailableTypes(ConsoleStyle $io): void
