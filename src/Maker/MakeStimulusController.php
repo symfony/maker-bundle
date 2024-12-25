@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\Question;
 use Symfony\UX\StimulusBundle\StimulusBundle;
 use Symfony\WebpackEncoreBundle\WebpackEncoreBundle;
@@ -44,8 +45,11 @@ final class MakeStimulusController extends AbstractMaker
     {
         $command
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the Stimulus controller (e.g. <fg=yellow>hello</>)')
+            ->addOption('typescript', 'ts', InputOption::VALUE_NONE, 'Create a TypeScript controller (default is JavaScript)')
             ->setHelp($this->getHelpFileContents('MakeStimulusController.txt'))
         ;
+
+        $inputConfig->setArgumentAsNonInteractive('typescript');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
@@ -54,16 +58,20 @@ final class MakeStimulusController extends AbstractMaker
         $command->addArgument('targets', InputArgument::OPTIONAL);
         $command->addArgument('values', InputArgument::OPTIONAL);
 
-        $chosenExtension = $io->choice(
+        if ($input->getOption('typescript')) {
+            $input->setArgument('extension', 'ts');
+        } else {
+            $chosenExtension = $io->choice(
             'Language (<fg=yellow>JavaScript</> or <fg=yellow>TypeScript</>)',
-            [
-                'js' => 'JavaScript',
-                'ts' => 'TypeScript',
-            ],
-            'js',
-        );
+                [
+                    'js' => 'JavaScript',
+                    'ts' => 'TypeScript',
+                ],
+                'js',
+            );
 
-        $input->setArgument('extension', $chosenExtension);
+            $input->setArgument('extension', $chosenExtension);
+        }
 
         if ($io->confirm('Do you want to include targets?')) {
             $targets = [];

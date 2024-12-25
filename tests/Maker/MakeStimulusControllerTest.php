@@ -24,6 +24,19 @@ class MakeStimulusControllerTest extends MakerTestCase
 
     public function getTestDetails(): \Generator
     {
+        yield 'it_generates_stimulus_controller' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        'default', // controller name
+                    ],
+                );
+
+                $generatedFilePath = $runner->getPath('assets/controllers/default_controller.js');
+                $this->assertFileExists($generatedFilePath);
+            }),
+        ];
+        
         yield 'it_generates_stimulus_controller_with_targets' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
@@ -74,16 +87,34 @@ class MakeStimulusControllerTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_generates_typescript_stimulus_controller' => [$this->createMakerTest()
+        yield 'it_generates_typescript_stimulus_controller_interactively' => [$this->createMakerTest()
             ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker(
                     [
                         'typescript', // controller name
                         'ts', // controller language
                         'no', // do not add targets
-                    ]);
+                    ],
+                );
 
                 $this->assertFileExists($runner->getPath('assets/controllers/typescript_controller.ts'));
+                $this->assertFileDoesNotExist($runner->getPath('assets/controllers/typescript_controller.js'));
+            }),
+        ];
+        
+        yield 'it_generates_typescript_stimulus_controller_when_option_is_set' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        'typescript', // controller name
+                        // '', // language is not asked interactively
+                        'no', // do not add targets
+                    ],
+                    ' --typescript'
+                );
+
+                $this->assertFileExists($runner->getPath('assets/controllers/typescript_controller.ts'));
+                $this->assertFileDoesNotExist($runner->getPath('assets/controllers/typescript_controller.js'));
             }),
         ];
     }
