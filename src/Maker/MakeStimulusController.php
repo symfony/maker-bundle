@@ -59,7 +59,8 @@ final class MakeStimulusController extends AbstractMaker
             [
                 'js' => 'JavaScript',
                 'ts' => 'TypeScript',
-            ]
+            ],
+            'js',
         );
 
         $input->setArgument('extension', $chosenExtension);
