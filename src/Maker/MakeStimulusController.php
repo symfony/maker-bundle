@@ -293,9 +293,9 @@ final class MakeStimulusController extends AbstractMaker
     }
 
     /**
-     * @param array<int, string>                $targets
-     * @param array{name: string, type: string} $values
-     * @param array<int, string>                $classes
+     * @param array<int, string>                       $targets
+     * @param array<array{name: string, type: string}> $values
+     * @param array<int, string>                       $classes
      */
     private function generateUsageExample(string $name, array $targets, array $values, array $classes): string
     {
@@ -331,7 +331,7 @@ final class MakeStimulusController extends AbstractMaker
             $controller,
             $htmlValues ? ("\n    ".implode("\n    ", $htmlValues)) : '',
             $htmlClasses ? ("\n    ".implode("\n    ", $htmlClasses)) : '',
-            $htmlValues || $htmlClasses ? "\n" : '',
+            ($htmlValues || $htmlClasses) ? "\n" : '',
             $htmlTargets ? ("\n        ".implode("\n        ", $htmlTargets)) : '',
             "\n        <!-- ... -->\n",
         );
