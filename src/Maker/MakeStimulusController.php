@@ -137,7 +137,7 @@ final class MakeStimulusController extends AbstractMaker
         $io->text([
             'Next:',
             \sprintf('- Open <info>%s</info> and add the code you need', $filePath),
-            'Find the documentation at <fg=yellow>https://github.com/symfony/stimulus-bridge</>',
+            'Find the documentation at <fg=yellow>https://symfony.com/bundles/StimulusBundle</>',
         ]);
     }
 
