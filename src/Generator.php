@@ -85,7 +85,7 @@ class Generator
      * @param array  $variables    Array of variables to pass to the template
      * @param bool   $isController Set to true if generating a Controller that needs
      *                             access to the TemplateComponentGenerator ("generator") in
-     *                             the twig template. e.g. to create route attributes for a route method
+     *                             the Twig template. e.g. to create route attributes for a route method
      *
      * @return string The path where the file will be created
      *

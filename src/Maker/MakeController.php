@@ -100,7 +100,7 @@ final class MakeController extends AbstractMaker
             ]
         );
 
-        // Again if the class name is absolute, lets not make assumptions about where the twig template
+        // Again if the class name is absolute, lets not make assumptions about where the Twig template
         // should live. E.g. templates/custom/location/for/my_controller.html.twig instead of
         // templates/my/controller.html.twig. We do however remove the root_namespace prefix in either case
         // so we don't end up with templates/app/my/controller.html.twig
@@ -109,7 +109,7 @@ final class MakeController extends AbstractMaker
             $this->controllerClassData->getClassName(relative: true, withoutSuffix: true)
         ;
 
-        // Convert the twig template name into a file path where it will be generated.
+        // Convert the Twig template name into a file path where it will be generated.
         $this->twigTemplatePath = \sprintf('%s%s', Str::asFilePath($templateName), $this->isInvokable ? '.html.twig' : '/index.html.twig');
 
         $this->interactSetGenerateTests($input, $io);

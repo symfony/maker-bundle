@@ -43,15 +43,15 @@ final class MakeTwigComponent extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Create a twig (or live) component';
+        return 'Create a Twig (or Live) component';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->setDescription(self::getCommandDescription())
-            ->addArgument('name', InputArgument::OPTIONAL, 'The name of your twig component (ie <fg=yellow>Notification</>)')
-            ->addOption('live', null, InputOption::VALUE_NONE, 'Whether to create a live twig component (requires <fg=yellow>symfony/ux-live-component</>)')
+            ->addArgument('name', InputArgument::OPTIONAL, 'The name of your Twig component (ie <fg=yellow>Notification</>)')
+            ->addOption('live', null, InputOption::VALUE_NONE, 'Whether to create a Live component (requires <fg=yellow>symfony/ux-live-component</>)')
         ;
     }
 
@@ -66,7 +66,7 @@ final class MakeTwigComponent extends AbstractMaker
         $live = $input->getOption('live');
 
         if ($live && !class_exists(AsLiveComponent::class)) {
-            throw new \RuntimeException('You must install symfony/ux-live-component to create a live component (composer require symfony/ux-live-component)');
+            throw new \RuntimeException('You must install symfony/ux-live-component to create a Live component (composer require symfony/ux-live-component)');
         }
 
         $factory = $generator->createClassNameDetails(
@@ -100,20 +100,20 @@ final class MakeTwigComponent extends AbstractMaker
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if (!$input->getOption('live')) {
-            $input->setOption('live', $io->confirm('Make this a live component?', false));
+            $input->setOption('live', $io->confirm('Make this a Live component?', false));
         }
 
         $path = 'config/packages/twig_component.yaml';
 
         if (!$this->fileManager->fileExists($path)) {
-            throw new RuntimeCommandException(message: 'Unable to find twig_component.yaml');
+            throw new RuntimeCommandException(message: 'Unable to find config/packages/twig_component.yaml');
         }
 
         try {
             $value = Yaml::parse($this->fileManager->getFileContents($path));
             $this->namespace = substr(array_key_first($value['twig_component']['defaults']), 4);
         } catch (\Throwable $throwable) {
-            throw new RuntimeCommandException(message: 'Unable to parse twig_component.yaml', previous: $throwable);
+            throw new RuntimeCommandException(message: 'Unable to parse config/packages/twig_component.yaml', previous: $throwable);
         }
     }
 }
