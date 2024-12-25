@@ -158,6 +158,11 @@ final class MakeStimulusController extends AbstractMaker
         $io->text([
             'Next:',
             \sprintf('- Open <info>%s</info> and add the code you need', $filePath),
+            '- Use the controller in your templates:',
+            ...array_map(
+                fn (string $line): string => "    $line",
+                explode("\n", $this->generateUsageExample($controllerName, $targetArgs, $valuesArg, $classesArgs)),
+            ),
             'Find the documentation at <fg=yellow>https://symfony.com/bundles/StimulusBundle</>',
         ]);
     }
@@ -285,6 +290,51 @@ final class MakeStimulusController extends AbstractMaker
             'Object',
             'String',
         ];
+    }
+
+    /**
+     * @param array<int, string>                $targets
+     * @param array{name: string, type: string} $values
+     * @param array<int, string>                $classes
+     */
+    private function generateUsageExample(string $name, array $targets, array $values, array $classes): string
+    {
+        $slugify = fn (string $name) => str_replace('_', '-', Str::asSnakeCase($name));
+        $controller = $slugify($name);
+
+        $htmlTargets = [];
+        foreach ($targets as $target) {
+            $htmlTargets[] = \sprintf('<div data-%s-target="%s"></div>', $controller, $target);
+        }
+
+        $htmlValues = [];
+        foreach ($values as ['name' => $name, 'type' => $type]) {
+            $value = match ($type) {
+                'Array' => '[]',
+                'Boolean' => 'false',
+                'Number' => '123',
+                'Object' => '{}',
+                'String' => 'abc',
+                default => '',
+            };
+            $htmlValues[] = \sprintf('data-%s-%s-value="%s"', $controller, $slugify($name), $value);
+        }
+
+        $htmlClasses = [];
+        foreach ($classes as $class) {
+            $value = Str::asLowerCamelCase($class);
+            $htmlClasses[] = \sprintf('data-%s-%s-class="%s"', $controller, $slugify($class), $value);
+        }
+
+        return \sprintf(
+            '<div data-controller="%s"%s%s%s>%s%s</div>',
+            $controller,
+            $htmlValues ? ("\n    ".implode("\n    ", $htmlValues)) : '',
+            $htmlClasses ? ("\n    ".implode("\n    ", $htmlClasses)) : '',
+            $htmlValues || $htmlClasses ? "\n" : '',
+            $htmlTargets ? ("\n        ".implode("\n        ", $htmlTargets)) : '',
+            "\n        <!-- ... -->\n",
+        );
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void

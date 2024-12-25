@@ -210,5 +210,70 @@ class MakeStimulusControllerTest extends MakerTestCase
                 $this->assertFileDoesNotExist($runner->getPath('assets/controllers/typescript_controller.js'));
             }),
         ];
+
+        yield 'it_displays_controller_basic_usage_example' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker(
+                    [
+                        'fooBar',
+                        'js',
+                    ],
+                );
+
+                $usageExample = <<<HTML
+                        <div data-controller="foo-bar">
+                            <!-- ... -->
+                        </div>
+                    HTML;
+
+                $this->assertStringContainsString('- Use the controller in your templates:', $output);
+                foreach (explode("\n", $usageExample) as $line) {
+                    $this->assertStringContainsString($line, $output);
+                }
+            }),
+        ];
+
+        yield 'it_displays_controller_complete_usage_example' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                $output = $runner->runMaker(
+                    [
+                        'fooBar',
+                        'js',
+                        'yes', // add targets
+                        'firstOne',
+                        'secondOne',
+                        '',
+                        'yes', // add values
+                        'minItems',
+                        'Number',
+                        'email',
+                        'String',
+                        '',
+                        'yes', // add classes
+                        'isVisible',
+                        'hidden',
+                        '',
+                    ],
+                );
+
+                $usageExample = <<<HTML
+                        <div data-controller="foo-bar"
+                            data-foo-bar-min-items-value="123"
+                            data-foo-bar-email-value="abc"
+                            data-foo-bar-is-visible-class="isVisible"
+                            data-foo-bar-hidden-class="hidden"
+                        >
+                            <div data-foo-bar-target="firstOne"></div>
+                            <div data-foo-bar-target="secondOne"></div>
+                            <!-- ... -->
+                        </div>
+                    HTML;
+
+                $this->assertStringContainsString('- Use the controller in your templates:', $output);
+                foreach (explode("\n", $usageExample) as $line) {
+                    $this->assertStringContainsString($line, $output);
+                }
+            }),
+        ];
     }
 }
