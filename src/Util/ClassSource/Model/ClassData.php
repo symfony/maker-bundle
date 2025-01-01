@@ -30,13 +30,14 @@ final class ClassData
         private bool $isFinal = true,
         private string $rootNamespace = 'App',
         private ?string $classSuffix = null,
+        public readonly ?string $implements = null,
     ) {
         if (str_starts_with(haystack: $this->namespace, needle: $this->rootNamespace)) {
             $this->namespace = substr_replace(string: $this->namespace, replace: '', offset: 0, length: \strlen($this->rootNamespace) + 1);
         }
     }
 
-    public static function create(string $class, ?string $suffix = null, ?string $extendsClass = null, bool $isEntity = false, array $useStatements = []): self
+    public static function create(string $class, ?string $suffix = null, ?string $extendsClass = null, bool $isEntity = false, array $useStatements = [], ?string $implements = null): self
     {
         $className = Str::getShortClassName($class);
 
@@ -50,6 +51,10 @@ final class ClassData
             $useStatements->addUseStatement($extendsClass);
         }
 
+        if ($implements) {
+            $useStatements->addUseStatement($implements);
+        }
+
         return new self(
             className: Str::asClassName($className),
             namespace: Str::getNamespace($class),
@@ -57,6 +62,7 @@ final class ClassData
             isEntity: $isEntity,
             useStatementGenerator: $useStatements,
             classSuffix: $suffix,
+            implements: null === $implements ? null : Str::getShortClassName($implements),
         );
     }
 
@@ -130,10 +136,17 @@ final class ClassData
             $extendsDeclaration = \sprintf(' extends %s', $this->extends);
         }
 
+        $implementsDeclaration = '';
+
+        if (null !== $this->implements) {
+            $implementsDeclaration = \sprintf(' implements %s', $this->implements);
+        }
+
         return \sprintf('%sclass %s%s',
             $this->isFinal ? 'final ' : '',
             $this->className,
             $extendsDeclaration,
+            $implementsDeclaration
         );
     }
 
