@@ -71,7 +71,7 @@ final class MakeTwigComponent extends AbstractMaker
 
         $factory = $generator->createClassNameDetails(
             $name,
-            $this->namespace,
+            str_replace($generator->getRootNamespace().'\\', '', $this->namespace),
         );
 
         $templatePath = str_replace('\\', '/', $factory->getRelativeNameWithoutSuffix());
@@ -111,7 +111,7 @@ final class MakeTwigComponent extends AbstractMaker
 
         try {
             $value = Yaml::parse($this->fileManager->getFileContents($path));
-            $this->namespace = substr(array_key_first($value['twig_component']['defaults']), 4);
+            $this->namespace = array_key_first($value['twig_component']['defaults']);
         } catch (\Throwable $throwable) {
             throw new RuntimeCommandException(message: 'Unable to parse twig_component.yaml', previous: $throwable);
         }
