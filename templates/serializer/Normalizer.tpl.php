@@ -12,7 +12,7 @@ class <?= $class_name ?> implements NormalizerInterface
     ) {
     }
 
-    public function normalize($object, string $format = null, array $context = []): array
+    public function normalize($object, ?string $format = null, array $context = []): array
     {
         $data = $this->normalizer->normalize($object, $format, $context);
 
@@ -21,7 +21,7 @@ class <?= $class_name ?> implements NormalizerInterface
         return $data;
     }
 
-    public function supportsNormalization($data, string $format = null, array $context = []): bool
+    public function supportsNormalization($data, ?string $format = null, array $context = []): bool
     {
 <?php if ($entity_exists): ?>
         return $data instanceof <?= $entity_name ?>;
