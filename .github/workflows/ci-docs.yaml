@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: "Create cache dir"
         run: mkdir .cache
@@ -30,12 +30,12 @@ jobs:
         id: extract_base_branch
 
       - name: "Cache DOCtor-RST"
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .cache
           key: ${{ runner.os }}-doctor-rst-${{ steps.extract_base_branch.outputs.branch }}
 
       - name: "Run DOCtor-RST"
-        uses: docker://oskarstark/doctor-rst:1.61.1
+        uses: docker://oskarstark/doctor-rst:1.64.0
         with:
           args: --short --error-format=github --cache-file=/github/workspace/.cache/doctor-rst.cache

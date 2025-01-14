@@ -70,17 +70,17 @@ jobs:
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
             - name: Composer install
-              uses: "ramsey/composer-install@v2"
+              uses: "ramsey/composer-install@v3"
               with:
                   dependency-versions: "${{ matrix.dependency-versions }}"
 
             - name: Composer install php-cs-fixer
-              uses: "ramsey/composer-install@v2"
+              uses: "ramsey/composer-install@v3"
               with:
                   composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
 
             - name: Composer install twigcs
-              uses: "ramsey/composer-install@v2"
+              uses: "ramsey/composer-install@v3"
               with:
                   composer-options: "--no-scripts --working-dir=tools/twigcs"
 
