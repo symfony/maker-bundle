@@ -21,7 +21,7 @@ jobs:
         steps:
             -
                 name: Checkout code
-                uses: "actions/checkout@v3"
+                uses: "actions/checkout@v4"
 
             -
                 name: Install PHP
@@ -35,13 +35,13 @@ jobs:
 
             -
                 name: Composer install
-                uses: "ramsey/composer-install@v2"
+                uses: "ramsey/composer-install@v3"
                 with:
                     composer-options: "--no-scripts"
 
             -
                 name: Composer install php-cs-fixer
-                uses: "ramsey/composer-install@v2"
+                uses: "ramsey/composer-install@v3"
                 with:
                     composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
 
@@ -64,17 +64,17 @@ jobs:
                     php-version: 8.2
 
             -   name: Install Composer Dependencies
-                uses: "ramsey/composer-install@v2"
+                uses: "ramsey/composer-install@v3"
                 with:
                     composer-options: "--no-scripts"
 
             -   name: Install PHPStan
-                uses: "ramsey/composer-install@v2"
+                uses: "ramsey/composer-install@v3"
                 with:
                     composer-options: "--no-scripts --working-dir=tools/phpstan"
 
             -   name: Install Optional Dependencies
-                uses: "ramsey/composer-install@v2"
+                uses: "ramsey/composer-install@v3"
                 with:
                     composer-options: "--no-scripts --working-dir=tools/phpstan/includes"
 
