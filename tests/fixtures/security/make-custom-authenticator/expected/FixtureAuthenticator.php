@@ -63,7 +63,7 @@ class FixtureAuthenticator extends AbstractAuthenticator
         return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
     }
 
-    // public function start(Request $request, AuthenticationException $authException = null): Response
+    // public function start(Request $request, ?AuthenticationException $authException = null): Response
     // {
     //     /*
     //      * If you would like this class to control what happens when an anonymous user accesses a

@@ -16,7 +16,7 @@ class Money
     #[ORM\Column(name: 'amount')]
     private ?int $amount;
 
-    public function __construct($amount = null, Currency $currency = null)
+    public function __construct($amount = null, ?Currency $currency = null)
     {
         $this->amount = $amount;
         $this->currency = $currency ?? new Currency();

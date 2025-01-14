@@ -26,7 +26,7 @@ class <?= $class_name ?> extends AbstractAuthenticator
         // TODO: Implement onAuthenticationFailure() method.
     }
 
-//    public function start(Request $request, AuthenticationException $authException = null): Response
+//    public function start(Request $request, ?AuthenticationException $authException = null): Response
 //    {
 //        /*
 //         * If you would like this class to control what happens when an anonymous user accesses a
