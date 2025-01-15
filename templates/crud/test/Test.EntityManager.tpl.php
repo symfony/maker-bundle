@@ -6,6 +6,7 @@ namespace <?= $namespace ?>;
 <?= $class_data->getUseStatements(); ?>
 
 <?= $class_data->getClassDeclaration() ?>
+
 {
     private KernelBrowser $client;
     private EntityManagerInterface $manager;

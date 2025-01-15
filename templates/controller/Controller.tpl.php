@@ -5,6 +5,7 @@ namespace <?= $class_data->getNamespace(); ?>;
 <?= $class_data->getUseStatements(); ?>
 
 <?= $class_data->getClassDeclaration(); ?>
+
 {
 <?= $generator->generateRouteForControllerMethod($route_path, $route_name); ?>
     public function <?= $method_name ?>(): <?php if ($with_template) { ?>Response<?php } else { ?>JsonResponse<?php } ?>
