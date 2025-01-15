@@ -1,5 +1,23 @@
 # Changelog
 
+## [v1.62.0](https://github.com/symfony/maker-bundle/releases/tag/v1.62.0)
+
+*September 30th, 2024*
+
+### Feature
+
+- [#1603](https://github.com/symfony/maker-bundle/pull/1603) [make:controller] add ability to create controller with tests - *@jrushlow*
+- [#1601](https://github.com/symfony/maker-bundle/pull/1601) [tests] allow dev's to view test process output locally - *@jrushlow*
+- [#1597](https://github.com/symfony/maker-bundle/pull/1597) [make:crud] name repository variable with entity prefix when generating tests - *@dr-matt-smith*
+- [#1590](https://github.com/symfony/maker-bundle/pull/1590) [make:validator] drop annotation support in constraint - *@jrushlow*
+- [#1589](https://github.com/symfony/maker-bundle/pull/1589) [make:validator] generate final classes - *@jrushlow*
+- [#1588](https://github.com/symfony/maker-bundle/pull/1588) [make:controller] generate final controller class - *@jrushlow*
+- [#1575](https://github.com/symfony/maker-bundle/pull/1575) [make:*] Use a PHP-CS-Fixer shim rather than an external PHAR - *@theofidry*
+
+### Bug
+
+- [#1596](https://github.com/symfony/maker-bundle/pull/1596) [tests] Fix double slashes in tmp PHPUnit path - *@symfonyaml*
+
 ## [v1.61.0](https://github.com/symfony/maker-bundle/releases/tag/v1.61.0)
 
 *August 29th, 2024*
