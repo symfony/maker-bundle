@@ -132,7 +132,7 @@ final class UserClassBuilder
             'getRoles',
             'array',
             false,
-            ['@see UserInterface', '@return list<string>']
+            ['@see UserInterface']
         );
 
         // $roles = $this->roles
