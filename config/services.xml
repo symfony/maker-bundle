@@ -41,7 +41,6 @@
             </service>
 
             <service id="maker.template_linter" class="Symfony\Bundle\MakerBundle\Util\TemplateLinter">
-                <argument type="service" id="maker.file_manager" />
                 <argument>%env(default::string:MAKER_PHP_CS_FIXER_BINARY_PATH)%</argument>
                 <argument>%env(default::string:MAKER_PHP_CS_FIXER_CONFIG_PATH)%</argument>
             </service>
