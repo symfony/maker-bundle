@@ -97,7 +97,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             ->addOption('broadcast', 'b', InputOption::VALUE_NONE, 'Add the ability to broadcast entity updates using Symfony UX Turbo?')
             ->addOption('regenerate', null, InputOption::VALUE_NONE, 'Instead of adding new fields, simply generate the methods (e.g. getter/setter) for existing fields')
             ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite any existing getter/setter methods')
-            ->addOption('table-name', null, InputOption::VALUE_NONE, 'Overwrite default table name')
+            ->addOption('table-name', 't', InputOption::VALUE_NONE, 'Overwrite default table name')
             ->setHelp($this->getHelpFileContents('MakeEntity.txt'))
         ;
 
