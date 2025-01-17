@@ -7,6 +7,7 @@ import { Controller } from '@hotwired/stimulus';
 
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
+    static classes = ['foo', 'bar']
 
     initialize() {
         // Called once when the controller is first instantiated (per element)
