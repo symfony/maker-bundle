@@ -1,5 +1,15 @@
-The <info>%command.name%</info> command generates new Stimulus Controller.
+The <info>%command.name%</info> command generates a new Stimulus controller.
 
 <info>php %command.full_name% hello</info>
 
 If the argument is missing, the command will ask for the controller name interactively.
+
+To generate a TypeScript file (instead of a JavaScript file) use the <info>--typescript</info> 
+(or <info>--ts</info>) option:
+
+<info>php %command.full_name% hello --typescript</info>
+
+It will also interactively ask for values, targets, classes to add to the Stimulus 
+controller (optional).
+
+<info>php %command.full_name%</info>

@@ -7,6 +7,10 @@ import { Controller } from '@hotwired/stimulus';
 
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
+    static values = {
+        min: Number,
+        email: String,
+    }
 
     initialize() {
         // Called once when the controller is first instantiated (per element)
