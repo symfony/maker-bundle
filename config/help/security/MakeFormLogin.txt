@@ -1,4 +1,4 @@
-The <info>%command.name%</info> command generates a controller and twig template
+The <info>%command.name%</info> command generates a controller and Twig template
 to allow users to login using the form_login authenticator.
 
 The controller name, and logout ability can be customized by answering the

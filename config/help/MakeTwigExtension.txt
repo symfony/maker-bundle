@@ -1,4 +1,4 @@
-The <info>%command.name%</info> command generates a new twig extension with its runtime class.
+The <info>%command.name%</info> command generates a new Twig extension with its runtime class.
 
 <info>php %command.full_name% AppExtension</info>
 
