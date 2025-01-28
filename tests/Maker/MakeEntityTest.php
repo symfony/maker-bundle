@@ -119,6 +119,26 @@ class MakeEntityTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_creates_a_new_class_with_custom_table_name' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // table name
+                    'users',
+                    // no fields
+                    '',
+                ]);
+
+                $this->assertFileExists($runner->getPath('src/Entity/User.php'));
+
+                $content = file_get_contents($runner->getPath('src/Entity/User.php'));
+                $this->assertStringContainsString('#[ORM\Table(name: users)]', $content);
+
+                $this->runEntityTest($runner);
+            }),
+        ];
+
         yield 'it_creates_a_new_class_and_api_resource' => [$this->createMakeEntityTest()
             // @legacy - re-enable test when https://github.com/symfony/recipes/pull/1339 is merged
             ->skipTest('Waiting for https://github.com/symfony/recipes/pull/1339')
