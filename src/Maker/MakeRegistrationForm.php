@@ -52,7 +52,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -291,7 +290,8 @@ final class MakeRegistrationForm extends AbstractMaker
         $formClassDetails = $this->generateFormClass(
             $userClassNameDetails,
             $generator,
-            $usernameField
+            $usernameField,
+            $this->passwordField
         );
 
         // 2) Generate the controller
@@ -307,7 +307,6 @@ final class MakeRegistrationForm extends AbstractMaker
             Request::class,
             Response::class,
             Route::class,
-            UserPasswordHasherInterface::class,
             EntityManagerInterface::class,
         ]);
 
@@ -355,7 +354,6 @@ final class MakeRegistrationForm extends AbstractMaker
                 'route_name' => 'app_register',
                 'form_class_name' => $formClassDetails->getShortName(),
                 'user_class_name' => $userClassNameDetails->getShortName(),
-                'password_field' => $this->passwordField,
                 'redirect_route_name' => $this->redirectRouteName ?? null,
                 'translator_available' => $isTranslatorAvailable,
             ],
@@ -545,7 +543,7 @@ final class MakeRegistrationForm extends AbstractMaker
         );
     }
 
-    private function generateFormClass(ClassNameDetails $userClassDetails, Generator $generator, string $usernameField): ClassNameDetails
+    private function generateFormClass(ClassNameDetails $userClassDetails, Generator $generator, string $usernameField, string $passwordField): ClassNameDetails
     {
         $formClassDetails = $generator->createClassNameDetails(
             'RegistrationFormType',
@@ -568,9 +566,8 @@ final class MakeRegistrationForm extends AbstractMaker
             'plainPassword' => [
                 'type' => PasswordType::class,
                 'options_code' => <<<EOF
-                                    // instead of being set onto the object directly,
-                                    // this is read and encoded in the controller
                                     'mapped' => false,
+                                    'hash_property_path' => '$passwordField',
                                     'attr' => ['autocomplete' => 'new-password'],
                                     'constraints' => [
                                         new NotBlank([
