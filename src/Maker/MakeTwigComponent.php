@@ -106,7 +106,7 @@ final class MakeTwigComponent extends AbstractMaker
         $path = 'config/packages/twig_component.yaml';
 
         if (!$this->fileManager->fileExists($path)) {
-            throw new RuntimeCommandException(message: 'Unable to find twig_component.yaml');
+            return;
         }
 
         try {
