@@ -3,7 +3,7 @@ The Symfony MakerBundle
 
 Symfony Maker helps you create empty commands, controllers, form classes,
 tests and more so you can forget about writing boilerplate code. This bundle
-assumes you're using a standard Symfony 6.4 directory structure, but many
+assumes you're using a standard Symfony directory structure, but many
 commands can generate code into any application.
 
 Installation
