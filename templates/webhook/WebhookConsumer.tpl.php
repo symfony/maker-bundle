@@ -1,13 +1,11 @@
 <?= "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?= $class_data->getNamespace(); ?>;
 
-use Symfony\Component\RemoteEvent\Attribute\AsRemoteEventConsumer;
-use Symfony\Component\RemoteEvent\Consumer\ConsumerInterface;
-use Symfony\Component\RemoteEvent\RemoteEvent;
+<?= $class_data->getUseStatements(); ?>
 
 #[AsRemoteEventConsumer('<?= $webhook_name ?>')]
-final class <?= $class_name ?> implements ConsumerInterface
+<?= $class_data->getClassDeclaration(); ?> implements ConsumerInterface
 {
     public function __construct()
     {
