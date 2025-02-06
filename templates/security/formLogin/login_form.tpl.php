@@ -21,10 +21,7 @@
         <input type="<?= $username_is_email ? 'email' : 'text'; ?>" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="<?= $username_is_email ? 'email' : 'username'; ?>" required autofocus>
         <label for="password">Password</label>
         <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
-
-        <input type="hidden" name="_csrf_token"
-               value="{{ csrf_token('authenticate') }}"
-        >
+        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
 
         {#
             Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
