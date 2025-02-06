@@ -40,6 +40,12 @@
                 <argument type="service" id="doctrine" on-invalid="ignore" />
             </service>
 
+            <service id="maker.decorator_helper" class="Symfony\Bundle\MakerBundle\DependencyInjection\DecoratorHelper">
+                <argument /> <!-- Service locator -->
+                <argument /> <!-- Services ids -->
+                <argument /> <!-- ShortName map of services -->
+            </service>
+
             <service id="maker.template_linter" class="Symfony\Bundle\MakerBundle\Util\TemplateLinter">
                 <argument>%env(default::string:MAKER_PHP_CS_FIXER_BINARY_PATH)%</argument>
                 <argument>%env(default::string:MAKER_PHP_CS_FIXER_CONFIG_PATH)%</argument>
