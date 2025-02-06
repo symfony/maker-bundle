@@ -6,6 +6,7 @@ namespace <?= $class_data->getNamespace(); ?>;
 
 #[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 <?= $class_data->getClassDeclaration(); ?>
+
 {
     public string $message = 'The string "{{ string }}" contains an illegal character: it can only contain letters or numbers.';
 
