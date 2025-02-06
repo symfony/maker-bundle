@@ -40,7 +40,7 @@ final class EntityClassGenerator
     ) {
     }
 
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false, EntityIdTypeEnum $useUuidIdentifier = EntityIdTypeEnum::INT): string
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false, EntityIdTypeEnum $useUuidIdentifier = EntityIdTypeEnum::INT, ?string $tableName = null): string
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -48,7 +48,9 @@ final class EntityClassGenerator
             'Repository'
         );
 
-        $tableName = $this->doctrineHelper->getPotentialTableName($entityClassDetails->getFullName());
+        if (null === $tableName) {
+            $tableName = $this->doctrineHelper->getPotentialTableName($entityClassDetails->getFullName());
+        }
 
         $useStatements = new UseStatementGenerator([
             $repoClassDetails->getFullName(),
