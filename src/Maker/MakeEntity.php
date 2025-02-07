@@ -435,6 +435,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
             // set type according to user decision
             $classProperty->type = $io->confirm('Can this field store multiple enum values', false) ? 'simple_array' : 'string';
+        } else if ('integer' === $type) {
+            $classProperty->options['unsigned'] = $io->confirm('Is this an unsigned integer', false);
         }
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {
