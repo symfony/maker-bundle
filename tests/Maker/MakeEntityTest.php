@@ -198,8 +198,8 @@ class MakeEntityTest extends MakerTestCase
                     'integer',
                     // Unsigned
                     'y',
-                    // Not nullable
-                    'n',
+                    // Nullable
+                    'y',
                     'createdAt',
                     // use default datetime
                     '',
