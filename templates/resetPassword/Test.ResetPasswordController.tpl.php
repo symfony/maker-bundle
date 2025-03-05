@@ -72,7 +72,7 @@ class ResetPasswordControllerTest extends WebTestCase
         // Test the link sent in the email is valid
         /** @var array<TemplatedEmail> $messages */
         $email = $messages[0]->getTextBody();
-        self::assertIsString($emailBody);
+        self::assertIsString($email);
         preg_match('#(/reset-password/reset/[a-zA-Z0-9]+)#', $email, $resetLink);
 
         $this->client->request('GET', $resetLink[1]);
