@@ -1,4 +1,4 @@
-<?= $helper->getHeadPrintCode('Register'); ?>
+<?= $helper->getHeadPrintCode('Register', $templates_inherited); ?>
 
 {% block body %}
 <?php if ($will_verify_email): ?>

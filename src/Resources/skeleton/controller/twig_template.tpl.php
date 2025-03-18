@@ -1,4 +1,4 @@
-<?= $helper->getHeadPrintCode("Hello $class_name!"); ?>
+<?= $helper->getHeadPrintCode("Hello $class_name!", $templates_inherited); ?>
 
 {% block body %}
 <style>

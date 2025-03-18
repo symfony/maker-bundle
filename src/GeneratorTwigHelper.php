@@ -41,11 +41,11 @@ final class GeneratorTwigHelper
         return $printCode;
     }
 
-    public function getHeadPrintCode($title): string
+    public function getHeadPrintCode($title, $templates_inherited): string
     {
         if ($this->fileManager->fileExists($this->fileManager->getPathForTemplate('base.html.twig'))) {
             return <<<TWIG
-                {% extends 'base.html.twig' %}
+                {% extends '$templates_inherited' %}
 
                 {% block title %}$title{% endblock %}
 

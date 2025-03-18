@@ -1,4 +1,4 @@
-<?= $helper->getHeadPrintCode($entity_class_name) ?>
+<?= $helper->getHeadPrintCode($entity_class_name, $templates_inherited) ?>
 
 {% block body %}
     <h1><?= $entity_class_name ?></h1>

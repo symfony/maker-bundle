@@ -51,6 +51,8 @@ final class MakeCrud extends AbstractMaker
     private Inflector $inflector;
     private string $controllerClassName;
     private bool $generateTests = false;
+    private bool $customTemplateAsk = false;
+    private string $customTemplate = 'base.html.twig';
 
     public function __construct(private DoctrineHelper $doctrineHelper, private FormTypeRenderer $formTypeRenderer)
     {
@@ -99,6 +101,16 @@ final class MakeCrud extends AbstractMaker
             sprintf('Choose a name for your controller class (e.g. <fg=yellow>%s</>)', $defaultControllerClass),
             $defaultControllerClass
         );
+
+        $customTemplateAsk = $io->confirm('Do you want to inherit a custom template? [Custom]', false);
+
+        if ($customTemplateAsk) {
+            $nameCustomTemplate = $this->customTemplate;
+            $customTemplate = $io->ask(
+                sprintf('Enter the location of your custom template (e.g. <fg=yellow>%s</>)', $nameCustomTemplate),
+                $nameCustomTemplate
+            );
+        }
 
         $this->interactSetGenerateTests($input, $io);
     }
@@ -196,6 +208,7 @@ final class MakeCrud extends AbstractMaker
             $entityClassDetails
         );
 
+        $customTemplate = $this->customTemplate;
         $templates = [
             '_delete_form' => [
                 'route_name' => $routeName,
@@ -209,6 +222,7 @@ final class MakeCrud extends AbstractMaker
                 'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
                 'route_name' => $routeName,
                 'templates_path' => $templatesPath,
+                'templates_inherited' => $customTemplate,
             ],
             'index' => [
                 'entity_class_name' => $entityClassDetails->getShortName(),
@@ -217,11 +231,13 @@ final class MakeCrud extends AbstractMaker
                 'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
                 'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
                 'route_name' => $routeName,
+                'templates_inherited' => $customTemplate,
             ],
             'new' => [
                 'entity_class_name' => $entityClassDetails->getShortName(),
                 'route_name' => $routeName,
                 'templates_path' => $templatesPath,
+                'templates_inherited' => $customTemplate,
             ],
             'show' => [
                 'entity_class_name' => $entityClassDetails->getShortName(),
@@ -230,6 +246,7 @@ final class MakeCrud extends AbstractMaker
                 'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
                 'route_name' => $routeName,
                 'templates_path' => $templatesPath,
+                'templates_inherited' => $customTemplate,
             ],
         ];
 
