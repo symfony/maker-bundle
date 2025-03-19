@@ -49,4 +49,9 @@ final class ClassNameDetails
     {
         return Str::removeSuffix($this->getRelativeName(), $this->suffix);
     }
+
+    public function getNamespacePrefix(): string
+    {
+        return $this->namespacePrefix;
+    }
 }
