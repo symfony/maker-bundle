@@ -762,6 +762,19 @@ class MakeEntityTest extends MakerTestCase
             $this->runEntityTest($runner);
         }),
         ];
+
+        yield 'its_can_create_classes_with_native_class_name' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    // entity class name
+                    'Directory',
+                    // add not additional fields
+                    '',
+                ]);
+
+                $this->runEntityTest($runner);
+            }),
+        ];
     }
 
     /** @param array<string, mixed> $data */
