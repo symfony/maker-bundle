@@ -5,6 +5,7 @@ namespace <?= $class_data->getNamespace(); ?>;
 <?= $class_data->getUseStatements(); ?>
 
 <?= $class_data->getClassDeclaration() ?>
+
 {
     public const EDIT = 'POST_EDIT';
     public const VIEW = 'POST_VIEW';

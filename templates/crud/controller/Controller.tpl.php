@@ -6,6 +6,7 @@ namespace <?= $class_data->getNamespace() ?>;
 
 #[Route('<?= $route_path ?>')]
 <?= $class_data->getClassDeclaration() ?>
+
 {
 <?= $generator->generateRouteForControllerMethod('', sprintf('%s_index', $route_name), ['GET']) ?>
 <?php if (isset($repository_full_class_name)): ?>

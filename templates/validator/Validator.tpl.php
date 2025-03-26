@@ -5,6 +5,7 @@ namespace <?= $class_data->getNamespace(); ?>;
 <?= $class_data->getUseStatements(); ?>
 
 <?= $class_data->getClassDeclaration(); ?>
+
 {
     public function validate(mixed $value, Constraint $constraint): void
     {
