@@ -8,7 +8,7 @@ namespace <?= $class_data->getNamespace(); ?>;
 <?= $class_data->getClassDeclaration(); ?>
 
 {
-    public string $message = 'The string "{{ string }}" contains an illegal character: it can only contain letters or numbers.';
+    public string $message = 'The string "{{ value }}" contains an illegal character: it can only contain letters or numbers.';
 
     // You can use #[HasNamedArguments] to make some constraint options required.
     // All configurable options must be passed to the constructor.
