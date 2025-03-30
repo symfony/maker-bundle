@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle;
 
 use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\MakeCommandRegistrationPass;
+use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\MakeDecoratorPass;
 use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\RemoveMissingParametersPass;
 use Symfony\Bundle\MakerBundle\DependencyInjection\CompilerPass\SetDoctrineAnnotatedPrefixesPass;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -69,6 +70,7 @@ class MakerBundle extends AbstractBundle
     {
         // add a priority so we run before the core command pass
         $container->addCompilerPass(new MakeCommandRegistrationPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 10);
+        $container->addCompilerPass(new MakeDecoratorPass());
         $container->addCompilerPass(new RemoveMissingParametersPass());
         $container->addCompilerPass(new SetDoctrineAnnotatedPrefixesPass());
     }
