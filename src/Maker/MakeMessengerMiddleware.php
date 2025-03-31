@@ -53,7 +53,7 @@ final class MakeMessengerMiddleware extends AbstractMaker
     {
         $middlewareClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Middleware\\',
+            $generator->getNamespacesHelper()->getMiddlewareNamespace(),
             'Middleware'
         );
 

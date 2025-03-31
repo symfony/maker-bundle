@@ -107,7 +107,7 @@ final class MakeSchedule extends AbstractMaker
     {
         $scheduleClassDetails = $generator->createClassNameDetails(
             $this->scheduleName,
-            'Scheduler\\',
+            $generator->getNamespacesHelper()->getSchedulerNamespace(),
         );
 
         $useStatements = new UseStatementGenerator([
@@ -119,7 +119,13 @@ final class MakeSchedule extends AbstractMaker
         ]);
 
         if (null !== $this->message) {
-            $useStatements->addUseStatement('App\\Message\\'.$this->message);
+            $messageClass = \sprintf(
+                $generator->getRootNamespace(),
+                $generator->getNamespacesHelper()->getMessageNamespace(),
+                '%s\\%s\\%s', $this->message
+            );
+
+            $useStatements->addUseStatement($messageClass);
         }
 
         $generator->generateClass(

@@ -62,19 +62,24 @@ final class MakeSerializerNormalizer extends AbstractMaker
     {
         $normalizerClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Serializer\\Normalizer\\',
+            $generator->getNamespacesHelper()->getSerializerNamespace().'\\Normalizer\\',
             \Normalizer::class
         );
 
         $useStatements = new UseStatementGenerator([
             NormalizerInterface::class,
             Autowire::class,
-            \sprintf('App\Entity\%s', str_replace('Normalizer', '', $normalizerClassNameDetails->getShortName())),
+            \sprintf(
+                '%s\%s\%s',
+                $generator->getRootNamespace(),
+                $generator->getNamespacesHelper()->getEntityNamespace(),
+                str_replace('Normalizer', '', $normalizerClassNameDetails->getShortName())
+            ),
         ]);
 
         $entityDetails = $generator->createClassNameDetails(
             str_replace('Normalizer', '', $normalizerClassNameDetails->getShortName()),
-            'Entity\\',
+            $generator->getNamespacesHelper()->getEntityNamespace(),
         );
 
         if ($entityExists = class_exists($entityDetails->getFullName())) {

@@ -23,6 +23,7 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -98,10 +99,11 @@ class EntityRegeneratorTest extends TestCase
                 return $tmpDir.'/src/'.str_replace('\\', '/', $shortClassName).'.php';
             });
 
+        $namespacesHelper = new NamespacesHelper();
         $fileManager = new FileManager($fs, $autoloaderUtil, new MakerFileLinkFormatter(null), $tmpDir);
-        $doctrineHelper = new DoctrineHelper('App\\Entity', $container->get('doctrine'));
-        $templateComponentGenerator = new TemplateComponentGenerator(false, false, 'App');
-        $generator = new Generator(fileManager: $fileManager, namespacePrefix: 'App\\', templateComponentGenerator: $templateComponentGenerator);
+        $doctrineHelper = new DoctrineHelper($namespacesHelper, $container->get('doctrine'));
+        $templateComponentGenerator = new TemplateComponentGenerator(false, false, $namespacesHelper);
+        $generator = new Generator(fileManager: $fileManager, namespacesHelper: $namespacesHelper, templateComponentGenerator: $templateComponentGenerator);
         $entityClassGenerator = new EntityClassGenerator($generator, $doctrineHelper);
         $regenerator = new EntityRegenerator(
             $doctrineHelper,

@@ -191,7 +191,7 @@ final class MakeListener extends AbstractMaker
     {
         $subscriberClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'EventSubscriber\\',
+            $generator->getNamespacesHelper()->getSubscriberNamespace(),
             'Subscriber'
         );
 
@@ -220,7 +220,7 @@ final class MakeListener extends AbstractMaker
     {
         $listenerClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'EventListener\\',
+            $generator->getNamespacesHelper()->getListenerNamespace(),
             'Listener'
         );
 

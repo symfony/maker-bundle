@@ -20,6 +20,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Maker\Common\CanGenerateTestsTrait;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
@@ -43,8 +44,10 @@ final class MakeController extends AbstractMaker
     private bool $usesTwigTemplate;
     private string $twigTemplatePath;
 
-    public function __construct(private ?PhpCompatUtil $phpCompatUtil = null)
-    {
+    public function __construct(
+        private NamespacesHelper $namespacesHelper,
+        private ?PhpCompatUtil $phpCompatUtil = null,
+    ) {
         if (null !== $phpCompatUtil) {
             @trigger_deprecation(
                 'symfony/maker-bundle',
@@ -82,7 +85,7 @@ final class MakeController extends AbstractMaker
         $this->isInvokable = (bool) $input->getOption('invokable');
 
         $controllerClass = $input->getArgument('controller-class');
-        $controllerClassName = \sprintf('Controller\%s', $controllerClass);
+        $controllerClassName = \sprintf('%s\%s', $this->namespacesHelper->getControllerNamespace(), $controllerClass);
 
         // If the class name provided is absolute, we do not assume it will live in src/Controller
         // e.g. src/Custom/Location/For/MyController instead of src/Controller/MyController
@@ -92,6 +95,7 @@ final class MakeController extends AbstractMaker
 
         $this->controllerClassData = ClassData::create(
             class: $controllerClassName,
+            rootNamespace: $this->namespacesHelper->getRootNamespace(),
             suffix: 'Controller',
             extendsClass: AbstractController::class,
             useStatements: [
@@ -138,8 +142,15 @@ final class MakeController extends AbstractMaker
         }
 
         if ($this->shouldGenerateTests()) {
+            $testClassName =\sprintf(
+                '%s\%s\%s',
+                $this->namespacesHelper->getTestNamespace(),
+                $this->namespacesHelper->getControllerNamespace(),
+                $this->controllerClassData->getClassName(relative: true, withoutSuffix: true)
+            );
             $testClassData = ClassData::create(
-                class: \sprintf('Tests\Controller\%s', $this->controllerClassData->getClassName(relative: true, withoutSuffix: true)),
+                class: $testClassName,
+                rootNamespace: $this->namespacesHelper->getRootNamespace(),
                 suffix: 'ControllerTest',
                 extendsClass: WebTestCase::class,
             );

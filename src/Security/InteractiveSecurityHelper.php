@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Security;
 use Symfony\Bundle\MakerBundle\Security\Model\Authenticator;
 use Symfony\Bundle\MakerBundle\Security\Model\AuthenticatorType;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -23,6 +24,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class InteractiveSecurityHelper
 {
+    public function __construct(private NamespacesHelper $namespacesHelper)
+    {
+    }
+
     public function guessFirewallName(SymfonyStyle $io, array $securityData, ?string $questionText = null): string
     {
         $realFirewalls = array_filter(
@@ -53,8 +58,14 @@ final class InteractiveSecurityHelper
             return $entityProvider['entity']['class'];
         }
 
+        $defaultQuestion = \sprintf(
+            'Enter the User class that you want to authenticate (e.g. <fg=yellow>%s\\%s\\User</>)',
+            $this->namespacesHelper->getRootNamespace(),
+            $this->namespacesHelper->getEntityNamespace()
+        );
+
         return $io->ask(
-            $questionText ?? 'Enter the User class that you want to authenticate (e.g. <fg=yellow>App\\Entity\\User</>)',
+            $questionText ?? $defaultQuestion,
             $this->guessUserClassDefault(),
             Validator::classIsUserInterface(...)
         );
@@ -62,12 +73,24 @@ final class InteractiveSecurityHelper
 
     private function guessUserClassDefault(): string
     {
-        if (class_exists('App\\Entity\\User') && isset(class_implements('App\\Entity\\User')[UserInterface::class])) {
-            return 'App\\Entity\\User';
+        $entityUserClass = \sprintf(
+            '%s\\%s\\User',
+            $this->namespacesHelper->getRootNamespace(),
+            $this->namespacesHelper->getEntityNamespace()
+        );
+
+        $securityUserClass = \sprintf(
+            '%s\\%s\\User',
+            $this->namespacesHelper->getRootNamespace(),
+            $this->namespacesHelper->getSecurityNamespace()
+        );
+
+        if (class_exists($entityUserClass) && isset(class_implements($entityUserClass)[UserInterface::class])) {
+            return $entityUserClass;
         }
 
-        if (class_exists('App\\Security\\User') && isset(class_implements('App\\Security\\User')[UserInterface::class])) {
-            return 'App\\Security\\User';
+        if (class_exists($securityUserClass) && isset(class_implements($securityUserClass)[UserInterface::class])) {
+            return $securityUserClass;
         }
 
         return '';

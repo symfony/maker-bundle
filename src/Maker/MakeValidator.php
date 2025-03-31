@@ -53,7 +53,8 @@ final class MakeValidator extends AbstractMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $validatorClassData = ClassData::create(
-            class: \sprintf('Validator\\%s', $input->getArgument('name')),
+            class: \sprintf('%s\\%s', $generator->getNamespacesHelper()->getValidatorNamespace(), $input->getArgument('name')),
+            rootNamespace: $generator->getRootNamespace(),
             suffix: 'Validator',
             extendsClass: ConstraintValidator::class,
             useStatements: [
@@ -62,7 +63,8 @@ final class MakeValidator extends AbstractMaker
         );
 
         $constraintDataClass = ClassData::create(
-            class: \sprintf('Validator\\%s', Str::removeSuffix($validatorClassData->getClassName(), 'Validator')),
+            class: \sprintf('%s\\%s', $generator->getNamespacesHelper()->getValidatorNamespace(), Str::removeSuffix($validatorClassData->getClassName(), 'Validator')),
+            rootNamespace: $generator->getRootNamespace(),
             extendsClass: Constraint::class,
         );
 

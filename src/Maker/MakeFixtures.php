@@ -53,7 +53,7 @@ final class MakeFixtures extends AbstractMaker
     {
         $fixturesClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('fixtures-class'),
-            'DataFixtures\\'
+            $generator->getNamespacesHelper()->getFixturesNamespace()
         );
 
         $useStatements = new UseStatementGenerator([

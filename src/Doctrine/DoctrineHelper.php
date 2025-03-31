@@ -26,6 +26,7 @@ use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use Doctrine\Persistence\Mapping\StaticReflectionService;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Uid\Uuid;
 
@@ -39,11 +40,10 @@ use Symfony\Component\Uid\Uuid;
 final class DoctrineHelper
 {
     public function __construct(
-        private string $entityNamespace,
+        private NamespacesHelper $namespacesHelper,
         private ?ManagerRegistry $registry = null,
         private ?array $mappingDriversByPrefix = null,
     ) {
-        $this->entityNamespace = trim($entityNamespace, '\\');
     }
 
     public function getRegistry(): ManagerRegistry
@@ -64,7 +64,11 @@ final class DoctrineHelper
 
     public function getEntityNamespace(): string
     {
-        return $this->entityNamespace;
+        return sprintf(
+            '%s\\%s',
+            $this->namespacesHelper->getRootNamespace(),
+            $this->namespacesHelper->getEntityNamespace()
+        );
     }
 
     public function doesClassUseDriver(string $className, string $driverClass): bool
@@ -138,7 +142,7 @@ final class DoctrineHelper
             $allMetadata = $this->getMetadata();
 
             foreach (array_keys($allMetadata) as $classname) {
-                $entityClassDetails = new ClassNameDetails($classname, $this->entityNamespace);
+                $entityClassDetails = new ClassNameDetails($classname, $this->getEntityNamespace());
                 $entities[] = $entityClassDetails->getRelativeName();
             }
         }

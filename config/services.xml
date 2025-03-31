@@ -16,7 +16,7 @@
             </service>
 
             <service id="maker.autoloader_finder" class="Symfony\Bundle\MakerBundle\Util\ComposerAutoloaderFinder" >
-                <argument /> <!-- root namespace -->
+                <argument type="service" id="maker.namespaces_helper" />
             </service>
 
             <service id="maker.autoloader_util" class="Symfony\Bundle\MakerBundle\Util\AutoloaderUtil">
@@ -36,8 +36,12 @@
             </service>
 
             <service id="maker.doctrine_helper" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper">
-                <argument /> <!-- entity namespace -->
+                <argument type="service" id="maker.namespaces_helper" />
                 <argument type="service" id="doctrine" on-invalid="ignore" />
+            </service>
+
+            <service id="maker.namespaces_helper" class="Symfony\Bundle\MakerBundle\Util\NamespacesHelper">
+                <argument type="collection" /> <!-- namespaces -->
             </service>
 
             <service id="maker.template_linter" class="Symfony\Bundle\MakerBundle\Util\TemplateLinter">
@@ -54,7 +58,7 @@
 
             <service id="maker.generator" class="Symfony\Bundle\MakerBundle\Generator">
                 <argument type="service" id="maker.file_manager" />
-                <argument /> <!-- root namespace -->
+                <argument type="service" id="maker.namespaces_helper" />
                 <argument>null</argument> <!-- PhpCompatUtil -->
                 <argument type="service" id="maker.template_component_generator" />
             </service>
@@ -82,7 +86,7 @@
             <service id="maker.template_component_generator" class="Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator">
                 <argument /> <!-- generate_final_classes -->
                 <argument /> <!-- generate_final_entities -->
-                <argument /> <!-- root_namespace -->
+                <argument type="service" id="maker.namespaces_helper" />
             </service>
         </services>
 </container>

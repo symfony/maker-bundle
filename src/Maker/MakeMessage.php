@@ -88,12 +88,12 @@ final class MakeMessage extends AbstractMaker
     {
         $messageClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Message\\'
+            $generator->getNamespacesHelper()->getMessageNamespace()
         );
 
         $handlerClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name').'Handler',
-            'MessageHandler\\',
+            $generator->getNamespacesHelper()->getMessageHandlerNamespace(),
             'Handler'
         );
 

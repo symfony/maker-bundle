@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\BrowserKit\History;
 use Symfony\Component\Console\Command\Command;
@@ -48,6 +49,10 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
         'ApiTestCase' => 'https://api-platform.com/docs/distribution/testing/',
         'PantherTestCase' => 'https://github.com/symfony/panther#testing-usage',
     ];
+
+    public function __construct(private NamespacesHelper $namespacesHelper)
+    {
+    }
 
     public static function getCommandName(): string
     {
@@ -125,7 +130,11 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
                 'Choose a class name for your test, like:',
                 ' * <fg=yellow>UtilTest</> (to create tests/UtilTest.php)',
                 ' * <fg=yellow>Service\\UtilTest</> (to create tests/Service/UtilTest.php)',
-                ' * <fg=yellow>\\App\Tests\\Service\\UtilTest</> (to create tests/Service/UtilTest.php)',
+                \sprintf(
+                    ' * <fg=yellow>\\%s\\%s\\Service\\UtilTest</> (to create tests/Service/UtilTest.php)',
+                    $this->namespacesHelper->getRootNamespace(),
+                    $this->namespacesHelper->getTestNamespace()
+                ),
             ]);
 
             $nameArgument = $command->getDefinition()->getArgument('name');
@@ -138,7 +147,7 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
     {
         $testClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Tests\\',
+            $generator->getNamespacesHelper()->getTestNamespace(),
             'Test'
         );
 

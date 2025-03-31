@@ -215,7 +215,7 @@ final class MakeRegistrationForm extends AbstractMaker
     {
         $userClassNameDetails = $generator->createClassNameDetails(
             '\\'.$this->userClass,
-            'Entity\\'
+            $generator->getNamespacesHelper()->getEntityNamespace()
         );
 
         $userDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($userClassNameDetails->getFullName());
@@ -229,7 +229,11 @@ final class MakeRegistrationForm extends AbstractMaker
         $userRepository = $userDoctrineDetails->getRepositoryClass();
 
         if (null !== $userRepository) {
-            $userRepoClassDetails = $generator->createClassNameDetails('\\'.$userRepository, 'Repository\\', 'Repository');
+            $userRepoClassDetails = $generator->createClassNameDetails(
+                '\\'.$userRepository,
+                $generator->getNamespacesHelper()->getRepositoryNamespace(),
+                'Repository'
+            );
 
             $userRepoVars = [
                 'repository_full_class_name' => $userRepoClassDetails->getFullName(),
@@ -240,7 +244,7 @@ final class MakeRegistrationForm extends AbstractMaker
 
         $verifyEmailServiceClassNameDetails = $generator->createClassNameDetails(
             'EmailVerifier',
-            'Security\\'
+            $generator->getNamespacesHelper()->getSecurityNamespace()
         );
 
         $verifyEmailVars = ['will_verify_email' => $this->willVerifyEmail];
@@ -297,7 +301,7 @@ final class MakeRegistrationForm extends AbstractMaker
         // 2) Generate the controller
         $controllerClassNameDetails = $generator->createClassNameDetails(
             'RegistrationController',
-            'Controller\\'
+            $generator->getNamespacesHelper()->getControllerNamespace()
         );
 
         $useStatements = new UseStatementGenerator([
@@ -417,7 +421,7 @@ final class MakeRegistrationForm extends AbstractMaker
         if ($this->shouldGenerateTests()) {
             $testClassDetails = $generator->createClassNameDetails(
                 'RegistrationControllerTest',
-                'Test\\'
+                $generator->getNamespacesHelper()->getTestNamespace()
             );
 
             $useStatements = new UseStatementGenerator([
@@ -549,7 +553,7 @@ final class MakeRegistrationForm extends AbstractMaker
     {
         $formClassDetails = $generator->createClassNameDetails(
             'RegistrationFormType',
-            'Form\\'
+            $generator->getNamespacesHelper()->getFormNamespace()
         );
 
         $formFields = [
