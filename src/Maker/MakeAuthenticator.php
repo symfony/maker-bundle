@@ -151,7 +151,7 @@ final class MakeAuthenticator extends AbstractMaker
         );
         $input->setArgument('authenticator-class', $io->askQuestion($questionAuthenticatorClass));
 
-        $interactiveSecurityHelper = new InteractiveSecurityHelper();
+        $interactiveSecurityHelper = new InteractiveSecurityHelper($this->generator->getNamespacesHelper());
         $command->addOption('firewall-name', null, InputOption::VALUE_OPTIONAL);
         $input->setOption('firewall-name', $interactiveSecurityHelper->guessFirewallName($io, $securityData));
 
