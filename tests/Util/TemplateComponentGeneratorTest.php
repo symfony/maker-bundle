@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Util;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\MakerBundle;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 
 /**
@@ -23,7 +24,7 @@ class TemplateComponentGeneratorTest extends TestCase
 {
     public function testRouteAttributes(): void
     {
-        $generator = new TemplateComponentGenerator(false, false, 'App');
+        $generator = new TemplateComponentGenerator(false, false, new NamespacesHelper());
 
         $expected = "    #[Route('/', name: 'app_home')]\n";
 
@@ -35,7 +36,7 @@ class TemplateComponentGeneratorTest extends TestCase
      */
     public function testRouteMethods(string $expected, array $methods): void
     {
-        $generator = new TemplateComponentGenerator(false, false, 'App');
+        $generator = new TemplateComponentGenerator(false, false, new NamespacesHelper());
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod(
             '/',
@@ -55,7 +56,7 @@ class TemplateComponentGeneratorTest extends TestCase
      */
     public function testRouteIndentation(string $expected): void
     {
-        $generator = new TemplateComponentGenerator(false, false, 'App');
+        $generator = new TemplateComponentGenerator(false, false, new NamespacesHelper());
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod(
             '/',
@@ -75,7 +76,7 @@ class TemplateComponentGeneratorTest extends TestCase
      */
     public function testRouteTrailingNewLine(string $expected): void
     {
-        $generator = new TemplateComponentGenerator(false, false, 'App');
+        $generator = new TemplateComponentGenerator(false, false, new NamespacesHelper());
 
         self::assertSame($expected, $generator->generateRouteForControllerMethod(
             '/',
@@ -96,9 +97,9 @@ class TemplateComponentGeneratorTest extends TestCase
      */
     public function testGetFinalClassDeclaration(bool $finalClass, bool $finalEntity, bool $isEntity, string $expectedResult): void
     {
-        $generator = new TemplateComponentGenerator($finalClass, $finalEntity, 'App');
+        $generator = new TemplateComponentGenerator($finalClass, $finalEntity, new NamespacesHelper());
 
-        $classData = ClassData::create(MakerBundle::class, isEntity: $isEntity);
+        $classData = ClassData::create(MakerBundle::class, rootNamespace: 'App\\', isEntity: $isEntity);
 
         $generator->configureClass($classData);
 
@@ -119,9 +120,9 @@ class TemplateComponentGeneratorTest extends TestCase
 
     public function testConfiguresClassDataWithRootNamespace(): void
     {
-        $generator = new TemplateComponentGenerator(false, false, 'MakerTest');
+        $generator = new TemplateComponentGenerator(false, false, new NamespacesHelper(['root' => 'MakerTest']));
 
-        $classData = ClassData::create(MakerBundle::class);
+        $classData = ClassData::create(MakerBundle::class, 'App\\');
 
         $generator->configureClass($classData);
 

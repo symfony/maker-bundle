@@ -27,6 +27,7 @@
 
             <service id="maker.maker.make_controller" class="Symfony\Bundle\MakerBundle\Maker\MakeController">
                 <tag name="maker.command" />
+                <argument type="service" id="maker.namespaces_helper" />
             </service>
 
             <service id="maker.maker.make_crud" class="Symfony\Bundle\MakerBundle\Maker\MakeCrud">
@@ -82,6 +83,7 @@
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.renderer.form_type_renderer" />
                 <argument type="service" id="maker.doctrine_helper" />
+                <argument type="service" id="maker.namespaces_helper" />
                 <argument type="service" id="router" on-invalid="ignore" />
                 <tag name="maker.command" />
             </service>
@@ -90,6 +92,7 @@
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.doctrine_helper" />
                 <argument type="service" id="maker.entity_class_generator" />
+                <argument type="service" id="maker.namespaces_helper" />
                 <argument type="service" id="router" on-invalid="ignore" />
                 <tag name="maker.command" />
             </service>
@@ -118,6 +121,7 @@
             </service>
 
             <service id="maker.maker.make_test" class="Symfony\Bundle\MakerBundle\Maker\MakeTest">
+                <argument type="service" id="maker.namespaces_helper" />
                 <tag name="maker.command" />
             </service>
 
@@ -157,6 +161,7 @@
                 <argument type="service" id="maker.file_manager" />
                 <argument type="service" id="maker.security_config_updater" />
                 <argument type="service" id="maker.security_controller_builder" />
+                <argument type="service" id="maker.namespaces_helper" />
                 <tag name="maker.command" />
             </service>
 

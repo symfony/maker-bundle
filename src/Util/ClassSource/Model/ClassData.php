@@ -27,8 +27,8 @@ final class ClassData
         public readonly ?string $extends,
         public readonly bool $isEntity,
         private UseStatementGenerator $useStatementGenerator,
+        private string $rootNamespace,
         private bool $isFinal = true,
-        private string $rootNamespace = 'App',
         private ?string $classSuffix = null,
     ) {
         if (str_starts_with(haystack: $this->namespace, needle: $this->rootNamespace)) {
@@ -36,8 +36,14 @@ final class ClassData
         }
     }
 
-    public static function create(string $class, ?string $suffix = null, ?string $extendsClass = null, bool $isEntity = false, array $useStatements = []): self
-    {
+    public static function create(
+        string $class,
+        string $rootNamespace,
+        ?string $suffix = null,
+        ?string $extendsClass = null,
+        bool $isEntity = false,
+        array $useStatements = [],
+    ): self {
         $className = Str::getShortClassName($class);
 
         if (null !== $suffix && !str_ends_with($className, $suffix)) {
@@ -56,6 +62,7 @@ final class ClassData
             extends: null === $extendsClass ? null : Str::getShortClassName($extendsClass),
             isEntity: $isEntity,
             useStatementGenerator: $useStatements,
+            rootNamespace: $rootNamespace,
             classSuffix: $suffix,
         );
     }

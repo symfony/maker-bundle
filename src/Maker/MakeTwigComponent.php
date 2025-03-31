@@ -30,7 +30,7 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
  */
 final class MakeTwigComponent extends AbstractMaker
 {
-    private string $namespace = 'Twig\\Components';
+    private ?string $namespace = null;
 
     public function __construct(private FileManager $fileManager)
     {
@@ -68,6 +68,8 @@ final class MakeTwigComponent extends AbstractMaker
         if ($live && !class_exists(AsLiveComponent::class)) {
             throw new \RuntimeException('You must install symfony/ux-live-component to create a live component (composer require symfony/ux-live-component)');
         }
+
+        $this->namespace ??= \sprintf('%s\\Components\\', $generator->getNamespacesHelper()->getTwigNamespace());
 
         $factory = $generator->createClassNameDetails(
             $name,

@@ -23,7 +23,7 @@ final class TemplateComponentGenerator
     public function __construct(
         private bool $generateFinalClasses,
         private bool $generateFinalEntities,
-        private string $rootNamespace,
+        private NamespacesHelper $namespacesHelper,
     ) {
     }
 
@@ -62,7 +62,7 @@ final class TemplateComponentGenerator
 
     public function configureClass(ClassData $classMetadata): ClassData
     {
-        $classMetadata->setRootNamespace($this->rootNamespace);
+        $classMetadata->setRootNamespace($this->namespacesHelper->getRootNamespace());
 
         if ($classMetadata->isEntity) {
             return $classMetadata->setIsFinal($this->generateFinalEntities);
