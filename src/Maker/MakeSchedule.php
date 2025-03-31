@@ -120,9 +120,10 @@ final class MakeSchedule extends AbstractMaker
 
         if (null !== $this->message) {
             $messageClass = \sprintf(
+                '%s\\%s\\%s',
                 $generator->getRootNamespace(),
                 $generator->getNamespacesHelper()->getMessageNamespace(),
-                '%s\\%s\\%s', $this->message
+                $this->message
             );
 
             $useStatements->addUseStatement($messageClass);
