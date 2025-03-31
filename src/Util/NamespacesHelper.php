@@ -13,12 +13,8 @@ namespace Symfony\Bundle\MakerBundle\Util;
 
 final class NamespacesHelper
 {
-    /** @var string[] */
-    private $namespaces;
-
-    public function __construct(array $namespaces = null)
+    public function __construct(private array $namespaces = [])
     {
-        $this->namespaces = $namespaces ?? [];
     }
 
     public function getCommandNamespace(): string

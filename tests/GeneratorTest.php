@@ -27,7 +27,7 @@ class GeneratorTest extends TestCase
         string $suffix,
         string $expectedFullClassName,
         string $expectedRelativeClassName,
-        array $namespaces = []
+        array $namespaces = [],
     ): void {
         $fileManager = $this->createMock(FileManager::class);
         $fileManager->expects($this->any())

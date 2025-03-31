@@ -248,7 +248,7 @@ final class MakeCrud extends AbstractMaker
         }
 
         if ($this->shouldGenerateTests()) {
-            $testClassName =\sprintf(
+            $testClassName = \sprintf(
                 '%s\%s\%s',
                 $generator->getNamespacesHelper()->getTestNamespace(),
                 $generator->getNamespacesHelper()->getControllerNamespace(),

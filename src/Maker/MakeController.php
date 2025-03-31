@@ -142,7 +142,7 @@ final class MakeController extends AbstractMaker
         }
 
         if ($this->shouldGenerateTests()) {
-            $testClassName =\sprintf(
+            $testClassName = \sprintf(
                 '%s\%s\%s',
                 $this->namespacesHelper->getTestNamespace(),
                 $this->namespacesHelper->getControllerNamespace(),

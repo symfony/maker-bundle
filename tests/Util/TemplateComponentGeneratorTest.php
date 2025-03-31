@@ -99,7 +99,7 @@ class TemplateComponentGeneratorTest extends TestCase
     {
         $generator = new TemplateComponentGenerator($finalClass, $finalEntity, new NamespacesHelper());
 
-        $classData = ClassData::create(MakerBundle::class, isEntity: $isEntity);
+        $classData = ClassData::create(MakerBundle::class, rootNamespace: 'App\\', isEntity: $isEntity);
 
         $generator->configureClass($classData);
 
@@ -122,7 +122,7 @@ class TemplateComponentGeneratorTest extends TestCase
     {
         $generator = new TemplateComponentGenerator(false, false, new NamespacesHelper(['root' => 'MakerTest']));
 
-        $classData = ClassData::create(MakerBundle::class);
+        $classData = ClassData::create(MakerBundle::class, 'App\\');
 
         $generator->configureClass($classData);
 

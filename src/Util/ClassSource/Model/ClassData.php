@@ -27,8 +27,8 @@ final class ClassData
         public readonly ?string $extends,
         public readonly bool $isEntity,
         private UseStatementGenerator $useStatementGenerator,
-        private bool $isFinal = true,
         private string $rootNamespace,
+        private bool $isFinal = true,
         private ?string $classSuffix = null,
     ) {
         if (str_starts_with(haystack: $this->namespace, needle: $this->rootNamespace)) {
