@@ -197,7 +197,7 @@ class Generator
             }
         }
 
-        if (null !== $suggestedClassName) {
+        if (null !== $suggestedClassName && class_exists($suggestedClassName)) {
             Validator::validateClassName($suggestedClassName, $validationErrorMessage);
 
             // if this is a custom class, we may be completely different than the namespace prefix
