@@ -264,7 +264,7 @@ final class DoctrineHelper
             Types::BOOLEAN => 'bool',
             Types::INTEGER, Types::SMALLINT => 'int',
             Types::FLOAT => 'float',
-            Types::DATETIME_MUTABLE, Types::DATETIMETZ_MUTABLE, Types::DATE_MUTABLE, Types::TIME_MUTABLE => '\\'.\DateTimeInterface::class,
+            Types::DATETIME_MUTABLE, Types::DATETIMETZ_MUTABLE, Types::DATE_MUTABLE, Types::TIME_MUTABLE => '\\'.\DateTime::class,
             Types::DATETIME_IMMUTABLE, Types::DATETIMETZ_IMMUTABLE, Types::DATE_IMMUTABLE, Types::TIME_IMMUTABLE => '\\'.\DateTimeImmutable::class,
             Types::DATEINTERVAL => '\\'.\DateInterval::class,
             'object' => 'object',
