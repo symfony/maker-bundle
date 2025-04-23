@@ -40,10 +40,12 @@ jobs:
             matrix:
                 php-version:
                     - '8.3'
+                    - '8.4'
                 symfony-version:
                     - '6.4.x-dev'
                     - '7.0.x-dev'
                     - '7.1.x-dev'
+                    - '7.2.x-dev'
                 dependency-versions: ['highest']
                 allow-dev-deps-in-apps: ['0']
                 include:
