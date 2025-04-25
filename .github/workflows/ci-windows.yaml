@@ -8,6 +8,10 @@ on:
     schedule:
         -   cron: '0 0 * * *'
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    cancel-in-progress: true
+
 env:
     PHPUNIT_FLAGS: "-v"
     SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
@@ -15,8 +19,6 @@ env:
     MAKER_SKIP_PANTHER_TEST: 1
     MAKER_TEST_WINDOWS: 1
     MAKER_DISABLE_FILE_LINKS: 1
-    MAKER_ALLOW_DEV_DEPS_IN_APP: 0
-    SYMFONY_VERSION: '7.0.x-dev'
 
 jobs:
     tests:
