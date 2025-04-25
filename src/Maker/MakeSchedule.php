@@ -31,6 +31,8 @@ use Symfony\Contracts\Cache\CacheInterface;
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
  *
+ * @deprecated since MakerBundle v1.63.0, use symfony/scheduler recipe instead,
+ *
  * @internal
  */
 final class MakeSchedule extends AbstractMaker
@@ -64,6 +66,8 @@ final class MakeSchedule extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
+        trigger_deprecation('symfony/maker-bundle', 'v1.63.0', '"make:schedule" is deprecated, install the symfony/scheduler recipe instead.');
+
         if (!class_exists(AsSchedule::class)) {
             $io->writeln('Running composer require symfony/scheduler');
             $process = Process::fromShellCommandline('composer require symfony/scheduler');

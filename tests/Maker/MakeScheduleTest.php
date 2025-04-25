@@ -15,6 +15,9 @@ use Symfony\Bundle\MakerBundle\Maker\MakeSchedule;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
+/**
+ * @group legacy
+ */
 class MakeScheduleTest extends MakerTestCase
 {
     protected function getMakerClass(): string
