@@ -1,3 +1,3 @@
 <div{{ attributes }}>
-    <!-- component html -->
+    <!-- component HTML -->
 </div>
