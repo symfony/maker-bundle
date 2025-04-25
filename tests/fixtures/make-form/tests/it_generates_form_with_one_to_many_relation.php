@@ -4,7 +4,7 @@ namespace App\Tests;
 
 use App\Entity\Author;
 use App\Entity\Book;
-use App\Form\AuthorType;
+use App\Form\AuthorForm;
 use Symfony\Component\Form\PreloadedExtension;
 use Symfony\Component\Form\Test\TypeTestCase;
 
@@ -16,7 +16,7 @@ class GeneratedFormTest extends TypeTestCase
             'name' => 'foo',
         ];
 
-        $form = $this->factory->create(AuthorType::class);
+        $form = $this->factory->create(AuthorForm::class);
         $form->submit($formData);
 
         $object = new Author();

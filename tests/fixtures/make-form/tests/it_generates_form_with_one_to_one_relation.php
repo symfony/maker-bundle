@@ -4,7 +4,7 @@ namespace App\Tests;
 
 use App\Entity\Librarian;
 use App\Entity\Library;
-use App\Form\LibraryType;
+use App\Form\LibraryForm;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -26,7 +26,7 @@ class GeneratedFormTest extends TypeTestCase
             'librarian' => 0,
         ];
 
-        $form = $this->factory->create(LibraryType::class);
+        $form = $this->factory->create(LibraryForm::class);
         $form->submit($formData);
 
         $object = new Library();
