@@ -21,6 +21,7 @@ use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Messenger\Attribute\AsMessage;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -86,6 +87,8 @@ final class MakeMessage extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        $chosenTransport = $input->getArgument('chosen-transport');
+
         $messageClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
             'Message\\'
@@ -97,9 +100,20 @@ final class MakeMessage extends AbstractMaker
             'Handler'
         );
 
+        $useStatements = new UseStatementGenerator([]);
+
+        /* @legacy remove when AsMessage is always available */
+        if ($chosenTransport && class_exists(AsMessage::class)) {
+            $useStatements->addUseStatement(AsMessage::class);
+        }
+
         $generator->generateClass(
             $messageClassNameDetails->getFullName(),
-            'message/Message.tpl.php'
+            'message/Message.tpl.php',
+            [
+                'use_statements' => $useStatements,
+                'transport' => class_exists(AsMessage::class) ? $chosenTransport : null,
+            ]
         );
 
         $useStatements = new UseStatementGenerator([
@@ -116,7 +130,8 @@ final class MakeMessage extends AbstractMaker
             ]
         );
 
-        if (null !== $chosenTransport = $input->getArgument('chosen-transport')) {
+        /* @legacy remove when AsMessage is always available */
+        if ($chosenTransport && !class_exists(AsMessage::class)) {
             $this->updateMessengerConfig($generator, $chosenTransport, $messageClassNameDetails->getFullName());
         }
 
