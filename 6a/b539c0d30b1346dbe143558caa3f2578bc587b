@@ -1,0 +1,7 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2025-04-25T15:30:33Z
+
+> How about bumping PHP version as well? I see the latest 8.4 isn't used at all
+
+Agreed, but maybe separate PR? And maybe we do one more release first?
