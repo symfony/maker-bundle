@@ -3,7 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\SourFood;
-use App\Form\SourFoodType;
+use App\Form\SourFoodForm;
 use Symfony\Component\Form\Test\TypeTestCase;
 
 class GeneratedFormTest extends TypeTestCase
@@ -14,7 +14,7 @@ class GeneratedFormTest extends TypeTestCase
             'title' => 'lemon',
         ];
 
-        $form = $this->factory->create(SourFoodType::class);
+        $form = $this->factory->create(SourFoodForm::class);
         $form->submit($formData);
 
         $object = new SourFood();

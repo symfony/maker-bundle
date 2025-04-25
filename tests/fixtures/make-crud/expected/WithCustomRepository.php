@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\SweetFood;
-use App\Form\SweetFoodType;
+use App\Form\SweetFoodForm;
 use App\Repository\SweetFoodRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,7 +26,7 @@ final class SweetFoodController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $sweetFood = new SweetFood();
-        $form = $this->createForm(SweetFoodType::class, $sweetFood);
+        $form = $this->createForm(SweetFoodForm::class, $sweetFood);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -53,7 +53,7 @@ final class SweetFoodController extends AbstractController
     #[Route('/{id}/edit', name: 'app_sweet_food_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, SweetFood $sweetFood, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(SweetFoodType::class, $sweetFood);
+        $form = $this->createForm(SweetFoodForm::class, $sweetFood);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

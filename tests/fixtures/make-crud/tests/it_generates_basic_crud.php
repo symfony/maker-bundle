@@ -22,7 +22,7 @@ class GeneratedCrudControllerTest extends WebTestCase
         $this->assertStringContainsString('New SweetFood', $client->getResponse()->getContent());
 
         $newForm = $crawler->selectButton('Save')->form();
-        $client->submit($newForm, ['sweet_food[title]' => 'Candy']);
+        $client->submit($newForm, ['sweet_food_form[title]' => 'Candy']);
         $this->assertTrue($client->getResponse()->isRedirect());
 
         $crawler = $client->followRedirect();
@@ -38,7 +38,7 @@ class GeneratedCrudControllerTest extends WebTestCase
         $this->assertGreaterThan(0, $crawler->filter('input[type=text]')->count());
 
         $editForm = $crawler->selectButton('Update')->form();
-        $client->submit($editForm, ['sweet_food[title]' => 'Candy edited']);
+        $client->submit($editForm, ['sweet_food_form[title]' => 'Candy edited']);
         $this->assertTrue($client->getResponse()->isRedirect());
 
         $crawler = $client->followRedirect();

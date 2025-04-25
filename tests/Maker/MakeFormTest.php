@@ -50,7 +50,7 @@ class MakeFormTest extends MakerTestCase
 
                 $runner->runMaker([
                     // Entity name
-                    'SourFoodType',
+                    'SourFoodForm',
                     'SourFood',
                 ]);
 
@@ -67,7 +67,7 @@ class MakeFormTest extends MakerTestCase
 
                 $runner->runMaker([
                     // Entity name
-                    'TaskType',
+                    'TaskForm',
                     '\\App\\Form\\Data\\TaskData',
                 ]);
 
@@ -89,7 +89,7 @@ class MakeFormTest extends MakerTestCase
 
                 $runner->runMaker([
                     // Entity name
-                    'SourFoodType',
+                    'SourFoodForm',
                     'SourFood',
                 ]);
 
@@ -111,7 +111,7 @@ class MakeFormTest extends MakerTestCase
 
                 $runner->runMaker([
                     // Entity name
-                    'BookType',
+                    'BookForm',
                     'Book',
                 ]);
 
@@ -132,7 +132,7 @@ class MakeFormTest extends MakerTestCase
 
                 $runner->runMaker([
                     // Entity name
-                    'AuthorType',
+                    'AuthorForm',
                     'Author',
                 ]);
 
@@ -153,7 +153,7 @@ class MakeFormTest extends MakerTestCase
 
                 $runner->runMaker([
                     // Entity name
-                    'BookType',
+                    'BookForm',
                     'Book',
                 ]);
 
@@ -174,7 +174,7 @@ class MakeFormTest extends MakerTestCase
 
                 $runner->runMaker([
                     // Entity name
-                    'LibraryType',
+                    'LibraryForm',
                     'Library',
                 ]);
 
@@ -195,7 +195,7 @@ class MakeFormTest extends MakerTestCase
 
                 $runner->runMaker([
                     // Entity name
-                    'FoodType',
+                    'FoodForm',
                     'Food',
                 ]);
 

@@ -39,7 +39,7 @@ class MakeCrudTest extends MakerTestCase
                 ]);
 
                 $this->assertStringContainsString('src/Controller/SweetFoodController.php', $output);
-                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodForm.php', $output);
 
                 $this->runCrudTest($runner, 'it_generates_basic_crud.php');
             }),
@@ -59,7 +59,7 @@ class MakeCrudTest extends MakerTestCase
                 ]);
 
                 $this->assertStringContainsString('src/Controller/SweetFoodAdminController.php', $output);
-                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodForm.php', $output);
 
                 $this->runCrudTest($runner, 'it_generates_crud_with_custom_controller.php');
             }),
@@ -80,7 +80,7 @@ class MakeCrudTest extends MakerTestCase
                 ]);
 
                 $this->assertStringContainsString('src/Controller/SweetFoodController.php', $output);
-                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodForm.php', $output);
                 $this->assertStringContainsString('tests/Controller/SweetFoodControllerTest.php', $output);
 
                 $this->runCrudTest($runner, 'it_generates_basic_crud.php');
@@ -107,7 +107,7 @@ class MakeCrudTest extends MakerTestCase
                 ]);
 
                 $this->assertStringContainsString('src/Controller/SweetFoodController.php', $output);
-                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodForm.php', $output);
                 $this->assertStringContainsString('tests/Controller/SweetFoodControllerTest.php', $output);
 
                 $this->runCrudTest($runner, 'it_generates_basic_crud.php');
@@ -145,7 +145,7 @@ class MakeCrudTest extends MakerTestCase
                 ]);
 
                 $this->assertStringContainsString('src/Controller/SweetFoodController.php', $output);
-                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodForm.php', $output);
 
                 $this->runCrudTest($runner, 'it_generates_crud_with_custom_root_namespace.php');
             }),
@@ -169,7 +169,7 @@ class MakeCrudTest extends MakerTestCase
                 ]);
 
                 $this->assertStringContainsString('src/Controller/SweetFoodController.php', $output);
-                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodForm.php', $output);
 
                 $this->runCrudTest($runner, 'it_generates_basic_crud.php');
                 self::assertFileEquals(
@@ -195,7 +195,7 @@ class MakeCrudTest extends MakerTestCase
                 ]);
 
                 $this->assertStringContainsString('src/Controller/SweetFoodController.php', $output);
-                $this->assertStringContainsString('src/Form/SweetFoodType.php', $output);
+                $this->assertStringContainsString('src/Form/SweetFoodForm.php', $output);
 
                 $this->runCrudTest($runner, 'it_generates_basic_crud.php');
             }),

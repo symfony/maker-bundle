@@ -140,9 +140,9 @@ final class MakeCrud extends AbstractMaker
         $iter = 0;
         do {
             $formClassDetails = $generator->createClassNameDetails(
-                $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'Type',
+                $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: ''),
                 'Form\\',
-                'Type'
+                'Form'
             );
             ++$iter;
         } while (class_exists($formClassDetails->getFullName()));

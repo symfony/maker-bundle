@@ -12,7 +12,7 @@
 namespace App\Tests;
 
 use App\Form\Data\TaskData;
-use App\Form\TaskType;
+use App\Form\TaskForm;
 use Symfony\Component\Form\Test\TypeTestCase;
 
 class GeneratedFormTest extends TypeTestCase
@@ -28,7 +28,7 @@ class GeneratedFormTest extends TypeTestCase
 
         $objectToCompare = new TaskData();
 
-        $form = $this->factory->create(TaskType::class, $objectToCompare);
+        $form = $this->factory->create(TaskForm::class, $objectToCompare);
         $form->submit($formData);
 
         $object = new TaskData();
