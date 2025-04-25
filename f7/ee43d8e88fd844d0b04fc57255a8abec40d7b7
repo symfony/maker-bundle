@@ -1,0 +1,13 @@
+---------------------------------------------------------------------------
+
+by kbond at 2025-04-25T14:35:06Z
+
+What do you think about dropping phpunit-simple and just requiring/using phpunit directly?
+
+---------------------------------------------------------------------------
+
+by weaverryan at 2025-04-25T15:42:29Z
+
+> What do you think about dropping phpunit-simple and just requiring/using phpunit directly?
+
+I'm 👍 for that
