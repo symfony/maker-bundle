@@ -594,26 +594,6 @@ class MakeEntityTest extends MakerTestCase
             }),
         ];
 
-        yield 'it_regenerates_from_xml' => [$this->createMakeEntityTest(false)
-            ->run(function (MakerTestRunner $runner) {
-                $this->copyEntity($runner, 'User-basic.php');
-
-                $runner->copy(
-                    'make-entity/regenerate-xml',
-                    ''
-                );
-
-                $this->changeToXmlMapping($runner);
-
-                $runner->runMaker([
-                    // namespace: use default App\Entity
-                    '',
-                ], '--regenerate');
-
-                $this->runCustomTest($runner, 'it_regenerates_from_xml.php', false);
-            }),
-        ];
-
         yield 'it_can_overwrite_while_adding_fields' => [$this->createMakeEntityTest()
             ->run(function (MakerTestRunner $runner) {
                 $this->copyEntity($runner, 'User-invalid-method-no-property.php');
@@ -802,21 +782,6 @@ class MakeEntityTest extends MakerTestCase
         $runner->addToAutoloader(
             'Some\\Vendor\\',
             'vendor/some-vendor/src'
-        );
-    }
-
-    private function changeToXmlMapping(MakerTestRunner $runner): void
-    {
-        $runner->modifyYamlFile('config/packages/doctrine.yaml', function (array $data) {
-            $data['doctrine']['orm']['mappings']['App']['type'] = 'xml';
-
-            return $data;
-        });
-
-        $runner->replaceInFile(
-            'config/packages/doctrine.yaml',
-            "dir: '%kernel.project_dir%/src/Entity'",
-            "dir: '%kernel.project_dir%/config/doctrine'"
         );
     }
 

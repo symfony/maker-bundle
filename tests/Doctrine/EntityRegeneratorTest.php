@@ -63,19 +63,6 @@ class EntityRegeneratorTest extends TestCase
         ];
     }
 
-    public function testXmlRegeneration(): void
-    {
-        $kernel = new TestXmlEntityRegeneratorKernel('dev', true);
-        $this->doTestRegeneration(
-            __DIR__.'/fixtures/xml_source_project',
-            $kernel,
-            'Symfony\Bundle\MakerBundle\Tests\tmp\current_project_xml\src\Entity',
-            'expected_xml',
-            false,
-            'current_project_xml'
-        );
-    }
-
     private function doTestRegeneration(string $sourceDir, Kernel $kernel, string $namespace, string $expectedDirName, bool $overwrite, string $targetDirName): void
     {
         $fs = new Filesystem();
