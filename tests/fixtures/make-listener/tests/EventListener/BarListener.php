@@ -7,7 +7,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 final class BarListener
 {
-    #[AsEventListener(event: RequestEvent::class)]
+    #[AsEventListener]
     public function onRequestEvent(RequestEvent $event): void
     {
         // ...

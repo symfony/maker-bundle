@@ -6,7 +6,7 @@ namespace <?= $namespace; ?>;
 
 final class <?= $class_name."\n" ?>
 {
-    #[AsEventListener(event: <?= $event ?>)]
+    #[AsEventListener<?php if (!$class_event): ?>(event: <?= $event ?>)<?php endif ?>]
     public function <?= $method_name ?>(<?= $event_arg ?>): void
     {
         // ...
