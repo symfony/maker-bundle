@@ -32,7 +32,6 @@ class User implements UserInterface
 
     /**
      * @see UserInterface
-     * @return list<string>
      */
     public function getRoles(): array
     {
