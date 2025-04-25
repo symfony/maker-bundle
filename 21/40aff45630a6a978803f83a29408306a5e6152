@@ -1,0 +1,7 @@
+---------------------------------------------------------------------------
+
+by weaverryan at 2025-04-25T12:49:10Z
+
+We should drop ``regenerate`: that's an antiquated flag to go from XML -> entity class. We should be 100% all-in on attribute mapping. I don't consider this a BC break as the `make:` commands can't realistically be used in automated scripts.
+
+That being said a 2.0 major is overdue
