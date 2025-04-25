@@ -84,9 +84,6 @@ jobs:
 
             - name: Install PHPUnit
               run: |
-                if [[ ${{ matrix.dependency_versions == 'lowest' }} ]]; then
-                  echo "SYMFONY_PHPUNIT_REQUIRE=nikic/php-parser:^4.18" >> $GITHUB_ENV
-                fi
                 vendor/bin/simple-phpunit install
 
             - name: PHPUnit version
