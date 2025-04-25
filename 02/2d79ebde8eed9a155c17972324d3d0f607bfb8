@@ -1,0 +1,15 @@
+---------------------------------------------------------------------------
+
+by kbond at 2025-01-14T23:32:55Z
+
+Thanks for digging into this @Curryed.
+
+What about removing the `@return` docblock and just letting the `UserInterface` dictate? I typically never override docblocks from interfaces/abstract classes (unless required) but maybe I'm in the minority?
+
+---------------------------------------------------------------------------
+
+by Curryed at 2025-01-15T08:01:56Z
+
+Sure! If that's the way you usually go for 😁
+
+I updated the it removing the `@return` :)
