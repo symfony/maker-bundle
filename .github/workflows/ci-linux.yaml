@@ -8,6 +8,10 @@ on:
     schedule:
         -   cron: '0 0 * * *'
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    cancel-in-progress: true
+
 env:
     PHPUNIT_FLAGS: "-v"
     SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
@@ -33,7 +37,6 @@ jobs:
 
         env:
             SYMFONY_VERSION: ${{ matrix.symfony-version }}
-            MAKER_ALLOW_DEV_DEPS_IN_APP: ${{ matrix.allow-dev-deps-in-apps }}
 
         strategy:
             fail-fast: false
@@ -41,20 +44,14 @@ jobs:
                 php-version:
                     - '8.3'
                 symfony-version:
-                    - '6.4.x-dev'
-                    - '7.0.x-dev'
-                    - '7.1.x-dev'
+                    - '6.4.*'
+                    - '7.2.*'
                 dependency-versions: ['highest']
-                allow-dev-deps-in-apps: ['0']
                 include:
                     # testing lowest PHP+dependencies with lowest Symfony
                     - php-version: '8.1'
                       symfony-version: '6.4.*'
                       dependency-versions: 'lowest'
-                    # testing lowest PHP+dependencies with highest Symfony
-                    - php-version: '8.1'
-                      symfony-version: '6.4.*'
-                      dependency-versions: 'highest'
 
         steps:
             - name: Checkout code
@@ -63,8 +60,9 @@ jobs:
             - name: Install PHP with extensions
               uses: shivammathur/setup-php@v2
               with:
-                  coverage: "none"
+                  coverage: none
                   php-version: ${{ matrix.php-version }}
+                  tools: flex
 
             - name: Add PHPUnit matcher
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
