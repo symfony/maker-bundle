@@ -35,17 +35,17 @@ This is not needed for contributing, but it's useful if you would like to debug 
 issue in the docs or if you want to read MakerBundles Documentation offline.
 
 ```bash
-$ cd _docs_build/
+cd _docs_build/
 
-$ composer install
+composer install
 
-$ php build.php
+php build.php
 ```
 
 After generating docs, serve them with the internal PHP server:
 
 ```bash
-$ php -S localhost:8000 -t output/
+php -S localhost:8000 -t output/
 ```
 
 Browse `http://localhost:8000` to read the docs.

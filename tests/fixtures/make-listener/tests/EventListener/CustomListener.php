@@ -7,7 +7,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 final class CustomListener
 {
-    #[AsEventListener(event: Generator::class)]
+    #[AsEventListener]
     public function onGenerator(Generator $event): void
     {
         // ...

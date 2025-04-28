@@ -51,7 +51,7 @@ final class MakeForm extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->addArgument('name', InputArgument::OPTIONAL, \sprintf('The name of the form class (e.g. <fg=yellow>%sType</>)', Str::asClassName(Str::getRandomTerm())))
+            ->addArgument('name', InputArgument::OPTIONAL, \sprintf('The name of the form class (e.g. <fg=yellow>%Form</>)', Str::asClassName(Str::getRandomTerm())))
             ->addArgument('bound-class', InputArgument::OPTIONAL, 'The name of Entity or fully qualified model class name that the new form will be bound to (empty for none)')
             ->setHelp($this->getHelpFileContents('MakeForm.txt'))
         ;
@@ -80,7 +80,7 @@ final class MakeForm extends AbstractMaker
         $formClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
             'Form\\',
-            'Type'
+            'Form'
         );
 
         $formFields = ['field_name' => null];

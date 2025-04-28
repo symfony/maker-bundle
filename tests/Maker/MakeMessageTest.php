@@ -15,6 +15,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeMessage;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestDetails;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
+use Symfony\Component\Messenger\Attribute\AsMessage;
 use Symfony\Component\Yaml\Yaml;
 
 class MakeMessageTest extends MakerTestCase
@@ -63,15 +64,25 @@ class MakeMessageTest extends MakerTestCase
 
                 $this->assertStringContainsString('Success', $output);
 
-                $messengerConfig = $runner->readYaml('config/packages/messenger.yaml');
-                $this->assertArrayHasKey('routing', $messengerConfig['framework']['messenger']);
-                $this->assertArrayHasKey('App\Message\SendWelcomeEmail', $messengerConfig['framework']['messenger']['routing']);
-                $this->assertSame(
-                    'async',
-                    $messengerConfig['framework']['messenger']['routing']['App\Message\SendWelcomeEmail']
-                );
-
                 $this->runMessageTest($runner, 'it_generates_message_with_transport.php');
+
+                $messageContents = file_get_contents($runner->getPath('src/Message/SendWelcomeEmail.php'));
+
+                if (!str_contains($messageContents, AsMessage::class)) {
+                    /* @legacy remove when AsMessage is always available */
+                    $messengerConfig = $runner->readYaml('config/packages/messenger.yaml');
+                    $this->assertArrayHasKey('routing', $messengerConfig['framework']['messenger']);
+                    $this->assertArrayHasKey('App\Message\SendWelcomeEmail', $messengerConfig['framework']['messenger']['routing']);
+                    $this->assertSame(
+                        'async',
+                        $messengerConfig['framework']['messenger']['routing']['App\Message\SendWelcomeEmail']
+                    );
+
+                    return;
+                }
+
+                $this->assertStringContainsString(AsMessage::class, $messageContents);
+                $this->assertStringContainsString("#[AsMessage('async')]", $messageContents);
             }),
         ];
 
@@ -86,10 +97,13 @@ class MakeMessageTest extends MakerTestCase
 
                 $this->assertStringContainsString('Success', $output);
 
+                $this->runMessageTest($runner, 'it_generates_message_with_transport.php');
+
                 $messengerConfig = $runner->readYaml('config/packages/messenger.yaml');
                 $this->assertArrayNotHasKey('routing', $messengerConfig['framework']['messenger']);
 
-                $this->runMessageTest($runner, 'it_generates_message_with_transport.php');
+                $messageContents = file_get_contents($runner->getPath('src/Message/SendWelcomeEmail.php'));
+                $this->assertStringNotContainsString(AsMessage::class, $messageContents);
             }),
         ];
     }

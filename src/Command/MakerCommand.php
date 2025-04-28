@@ -56,6 +56,11 @@ final class MakerCommand extends Command
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->io = new ConsoleStyle($input, $output);
+
+        if (!$input->isInteractive()) {
+            $this->io->warning(\sprintf('"%s" is not meant to be run in non-interactive mode.', $this->getName()));
+        }
+
         $this->fileManager->setIO($this->io);
 
         if ($this->checkDependencies) {

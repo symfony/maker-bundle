@@ -1,6 +1,6 @@
-branches: ["main"]
+branches: ["1.x"]
 
-maintained_branches: ["main"]
+maintained_branches: ["1.x"]
 
 doc_dir: "docs"
 

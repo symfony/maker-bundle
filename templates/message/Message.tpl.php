@@ -2,6 +2,9 @@
 
 namespace <?= $namespace; ?>;
 
+<?= $use_statements; ?>
+
+<?php if ($transport): ?>#[AsMessage('<?= $transport ?>')]<?= "\n" ?><?php endif ?>
 final class <?= $class_name."\n" ?>
 {
     /*

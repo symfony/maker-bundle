@@ -66,21 +66,10 @@ final class ClassSourceManipulator
         private bool $overwrite = false,
         private bool $useAttributesForDoctrineMapping = true,
     ) {
-        /* @legacy Support for nikic/php-parser v4 */
-        if (class_exists(PhpVersion::class)) {
-            $version = PhpVersion::fromString(\PHP_VERSION);
-            $this->lexer = new Lexer\Emulative($version);
-            $this->parser = new Parser\Php8($this->lexer, $version);
-        } else {
-            $this->lexer = new Lexer\Emulative([
-                'usedAttributes' => [
-                    'comments',
-                    'startLine', 'endLine',
-                    'startTokenPos', 'endTokenPos',
-                ],
-            ]);
-            $this->parser = new Parser\Php7($this->lexer);
-        }
+        $this->lexer = new Lexer\Emulative(
+            PhpVersion::fromString('8.1'),
+        );
+        $this->parser = new Parser\Php7($this->lexer);
 
         $this->printer = new PrettyPrinter();
 
@@ -963,12 +952,7 @@ final class ClassSourceManipulator
         $this->sourceCode = $sourceCode;
         $this->oldStmts = $this->parser->parse($sourceCode);
 
-        /* @legacy Support for nikic/php-parser v4 */
-        if (\is_callable([$this->parser, 'getTokens'])) {
-            $this->oldTokens = $this->parser->getTokens();
-        } elseif (\is_callable($this->lexer->getTokens(...))) {
-            $this->oldTokens = $this->lexer->getTokens();
-        }
+        $this->oldTokens = $this->parser->getTokens();
 
         $traverser = new NodeTraverser();
         $traverser->addVisitor(new NodeVisitor\CloningVisitor());

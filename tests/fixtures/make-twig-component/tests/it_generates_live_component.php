@@ -13,6 +13,6 @@ class GeneratedTwigComponentTest extends KernelTestCase
         $this->assertStringContainsString('<div data-controller="live"', $output);
         $this->assertStringContainsString('data-live-name-value="', $output);
         $this->assertStringContainsString('data-live-url-value=', $output);
-        $this->assertStringContainsString('<!-- component html -->', $output);
+        $this->assertStringContainsString('<!-- component HTML -->', $output);
     }
 }

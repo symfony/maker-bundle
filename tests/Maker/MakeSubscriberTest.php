@@ -39,7 +39,7 @@ class MakeSubscriberTest extends MakerTestCase
                 );
 
                 self::assertStringContainsString(
-                    'KernelEvents::REQUEST => \'onKernelRequest\'',
+                    'RequestEvent::class => \'onRequestEvent\'',
                     file_get_contents($runner->getPath('src/EventSubscriber/FooBarSubscriber.php'))
                 );
             }),

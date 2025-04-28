@@ -44,8 +44,8 @@ class MakeResetPasswordTest extends MakerTestCase
                 $generatedFiles = [
                     'src/Controller/ResetPasswordController.php',
                     'src/Entity/ResetPasswordRequest.php',
-                    'src/Form/ChangePasswordFormType.php',
-                    'src/Form/ResetPasswordRequestFormType.php',
+                    'src/Form/ChangePasswordForm.php',
+                    'src/Form/ResetPasswordRequestForm.php',
                     'src/Repository/ResetPasswordRequestRepository.php',
                     'templates/reset_password/check_email.html.twig',
                     'templates/reset_password/email.html.twig',
@@ -148,8 +148,8 @@ class MakeResetPasswordTest extends MakerTestCase
                 $generatedFiles = [
                     'src/Controller/ResetPasswordController.php',
                     'src/Entity/ResetPasswordRequest.php',
-                    'src/Form/ChangePasswordFormType.php',
-                    'src/Form/ResetPasswordRequestFormType.php',
+                    'src/Form/ChangePasswordForm.php',
+                    'src/Form/ResetPasswordRequestForm.php',
                     'src/Repository/ResetPasswordRequestRepository.php',
                     'templates/reset_password/check_email.html.twig',
                     'templates/reset_password/email.html.twig',
@@ -208,8 +208,8 @@ class MakeResetPasswordTest extends MakerTestCase
                 $generatedFiles = [
                     'src/Controller/ResetPasswordController.php',
                     'src/Entity/ResetPasswordRequest.php',
-                    'src/Form/ChangePasswordFormType.php',
-                    'src/Form/ResetPasswordRequestFormType.php',
+                    'src/Form/ChangePasswordForm.php',
+                    'src/Form/ResetPasswordRequestForm.php',
                     'src/Repository/ResetPasswordRequestRepository.php',
                     'templates/reset_password/check_email.html.twig',
                     'templates/reset_password/email.html.twig',
@@ -361,7 +361,7 @@ class MakeResetPasswordTest extends MakerTestCase
                 $this->assertStringContainsString('ORM\ManyToOne', $contentResetPasswordRequest);
 
                 // check ResetPasswordRequestFormType
-                $contentResetPasswordRequestFormType = file_get_contents($runner->getPath('/src/Form/ResetPasswordRequestFormType.php'));
+                $contentResetPasswordRequestFormType = file_get_contents($runner->getPath('/src/Form/ResetPasswordRequestForm.php'));
                 $this->assertStringContainsString('->add(\'emailAddress\', EmailType::class, [', $contentResetPasswordRequestFormType);
                 // check request.html.twig
                 $contentRequestHtml = file_get_contents($runner->getPath('templates/reset_password/request.html.twig'));
