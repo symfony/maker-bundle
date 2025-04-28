@@ -70,7 +70,9 @@ class ResetPasswordControllerTest extends WebTestCase
         self::assertStringContainsString('This link will expire in 1 hour', $crawler->html());
 
         // Test the link sent in the email is valid
-        $email = $messages[0]->toString();
+        /** @var array<TemplatedEmail> $messages */
+        $email = $messages[0]->getTextBody();
+        self::assertIsString($email);
         preg_match('#(/reset-password/reset/[a-zA-Z0-9]+)#', $email, $resetLink);
 
         $this->client->request('GET', $resetLink[1]);
