@@ -26,7 +26,6 @@ class RegistrationFormTest extends WebTestCase
         $form['registration_form[agreeTerms]'] = true;
         $client->submit($form);
 
-        dump($client->getResponse());
         $this->assertSame(302, $client->getResponse()->getStatusCode());
         $client->followRedirect();
         $this->assertSame(200, $client->getResponse()->getStatusCode());
