@@ -1,0 +1,10 @@
+The <info>%command.name%</info> command generates a new service decorator class.
+
+<info>php %command.full_name%</info>
+<info>php %command.full_name% My\Decorated\Service\Class</info>
+<info>php %command.full_name% My\Decorated\Service\Class MyServiceDecorator</info>
+<info>php %command.full_name% My\Decorated\Service\Class Service\MyServiceDecorator</info>
+<info>php %command.full_name% my_decorated.service.id MyServiceDecorator</info>
+<info>php %command.full_name% my_decorated.service.id MyServiceDecorator</info>
+
+If one argument is missing, the command will ask for it interactively.
