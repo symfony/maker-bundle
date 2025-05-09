@@ -15,6 +15,7 @@ use PhpParser\Node;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -37,7 +38,10 @@ final class UserClassBuilder
 
         $this->addPasswordImplementation($manipulator, $userClassConfig);
 
-        $this->addEraseCredentials($manipulator);
+        /* @legacy - Remove "eraseCredentials()" when Symfony 7.4 is no longer supported */
+        if (Kernel::VERSION_ID < 70300) {
+            $this->addEraseCredentials($manipulator);
+        }
     }
 
     private function addPasswordImplementation(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
