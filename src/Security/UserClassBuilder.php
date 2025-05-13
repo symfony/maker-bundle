@@ -17,6 +17,7 @@ use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Attribute\IsGrantedContext;
 
 /**
  * Adds logic to implement UserInterface to an existing User class.
@@ -37,7 +38,13 @@ final class UserClassBuilder
 
         $this->addPasswordImplementation($manipulator, $userClassConfig);
 
-        $this->addEraseCredentials($manipulator);
+        if (class_exists(IsGrantedContext::class)) {
+            $this->addSerialize($manipulator);
+        }
+
+        if (method_exists(UserInterface::class, 'eraseCredentials')) {
+            $this->addEraseCredentials($manipulator);
+        }
     }
 
     private function addPasswordImplementation(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
@@ -245,17 +252,80 @@ final class UserClassBuilder
         $builder = $manipulator->createMethodBuilder(
             'eraseCredentials',
             'void',
-            false,
-            ['@see UserInterface']
+            false
         );
+        $builder->addAttribute(new Node\Attribute(new Node\Name('\Deprecated')));
         $builder->addStmt(
             $manipulator->createMethodLevelCommentNode(
-                'If you store any temporary, sensitive data on the user, clear it here'
+                '@deprecated, to be removed when upgrading to Symfony 8'
             )
         );
+
+        $manipulator->addMethodBuilder($builder);
+    }
+
+    private function addSerialize(ClassSourceManipulator $manipulator): void
+    {
+        $builder = $manipulator->createMethodBuilder(
+            '__serialize',
+            'array',
+            false,
+            [
+                'Ensure the session doesn\'t contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.',
+            ]
+        );
+
+        // $data = (array) $this;
         $builder->addStmt(
-            $manipulator->createMethodLevelCommentNode(
-                '$this->plainPassword = null;'
+            new Node\Stmt\Expression(
+                new Node\Expr\Assign(
+                    new Node\Expr\Variable('data'),
+                    new Node\Expr\Cast\Array_(
+                        new Node\Expr\Variable('this')
+                    )
+                )
+            )
+        );
+
+        // $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
+        $builder->addStmt(
+            new Node\Stmt\Expression(
+                new Node\Expr\Assign(
+                    new Node\Expr\ArrayDimFetch(
+                        new Node\Expr\Variable('data'),
+                        new Node\Expr\BinaryOp\Concat(
+                            new Node\Expr\BinaryOp\Concat(
+                                new Node\Scalar\String_("\0", ['kind' => Node\Scalar\String_::KIND_DOUBLE_QUOTED]),
+                                new Node\Expr\ClassConstFetch(
+                                    new Node\Name('self'),
+                                    'class'
+                                )
+                            ),
+                            new Node\Scalar\String_("\0password", ['kind' => Node\Scalar\String_::KIND_DOUBLE_QUOTED]),
+                        )
+                    ),
+                    new Node\Expr\FuncCall(
+                        new Node\Name('hash'),
+                        [
+                            new Node\Arg(new Node\Scalar\String_('crc32c')),
+                            new Node\Arg(
+                                new Node\Expr\PropertyFetch(
+                                    new Node\Expr\Variable('this'),
+                                    'password'
+                                )
+                            ),
+                        ]
+                    )
+                )
+            )
+        );
+
+        $builder->addStmt(new Node\Stmt\Nop());
+
+        // return $data;
+        $builder->addStmt(
+            new Node\Stmt\Return_(
+                new Node\Expr\Variable('data')
             )
         );
 
