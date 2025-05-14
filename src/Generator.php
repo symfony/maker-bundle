@@ -181,17 +181,32 @@ class Generator
     public function createClassNameDetails(string $name, string $namespacePrefix, string $suffix = '', string $validationErrorMessage = ''): ClassNameDetails
     {
         $fullNamespacePrefix = $this->namespacePrefix.'\\'.$namespacePrefix;
+        $suggestedClassName = null;
         if ('\\' === $name[0]) {
             // class is already "absolute" - leave it alone (but strip opening \)
             $className = substr($name, 1);
         } else {
             $className = Str::asClassName($name, $suffix);
+            $suggestedClassName = rtrim($fullNamespacePrefix, '\\').'\\'.$className;
 
             try {
                 Validator::classDoesNotExist($className);
-                $className = rtrim($fullNamespacePrefix, '\\').'\\'.$className;
+                $className = $suggestedClassName;
+                $suggestedClassName = null;
             } catch (RuntimeCommandException) {
             }
+        }
+
+        if (null !== $suggestedClassName && class_exists($suggestedClassName)) {
+            Validator::validateClassName($suggestedClassName, $validationErrorMessage);
+
+            // if this is a custom class, we may be completely different than the namespace prefix
+            // the best way can do, is find the PSR4 prefix and use that
+            if (!str_starts_with($suggestedClassName, $fullNamespacePrefix)) {
+                $fullNamespacePrefix = $this->fileManager->getNamespacePrefixForClass($suggestedClassName);
+            }
+
+            return new ClassNameDetails($suggestedClassName, $fullNamespacePrefix, $suffix);
         }
 
         Validator::validateClassName($className, $validationErrorMessage);
