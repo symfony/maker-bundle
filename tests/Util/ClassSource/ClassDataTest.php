@@ -12,7 +12,9 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Util\ClassSource;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\MakerBundle;
+use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Test\MakerTestKernel;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 
@@ -142,5 +144,25 @@ class ClassDataTest extends TestCase
         yield ['Controller\MyController', 'Custom', true, false, 'Controller\MyController'];
         yield ['Controller\MyController', 'Custom', false, true, 'Custom\Controller\My'];
         yield ['Controller\MyController', 'Custom', true, true, 'Controller\My'];
+    }
+
+    /** @dataProvider withImplementsProvider */
+    public function testWithImplements(string $class, array $implements, string $expectedClassDeclaration, string $expectedUseStatements)
+    {
+        $meta = ClassData::create(class: $class, implements: $implements);
+        self::assertSame($expectedClassDeclaration, $meta->getClassDeclaration());
+        self::assertSame($expectedUseStatements, $meta->getUseStatements());
+    }
+
+    public function withImplementsProvider(): \Generator
+    {
+        yield [MakerBundle::class, [MakerInterface::class], 'final class MakerBundle implements MakerInterface', "use Symfony\Bundle\MakerBundle\MakerInterface;\n"];
+        yield [MakerBundle::class, [MakerInterface::class, InputAwareMakerInterface::class], 'final class MakerBundle implements MakerInterface, InputAwareMakerInterface', "use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;\nuse Symfony\Bundle\MakerBundle\MakerInterface;\n"];
+    }
+
+    public function testWithExtendsAndImplements()
+    {
+        $meta = ClassData::create(class: MakerBundle::class, extendsClass: MakerTestKernel::class, implements: [MakerInterface::class]);
+        self::assertSame('final class MakerBundle extends MakerTestKernel implements MakerInterface', $meta->getClassDeclaration());
     }
 }

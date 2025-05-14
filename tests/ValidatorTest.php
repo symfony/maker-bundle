@@ -116,4 +116,53 @@ class ValidatorTest extends TestCase
         $this->expectExceptionMessage(\sprintf('Entity "%s" doesn\'t exist; please enter an existing one or create a new one.', $className));
         Validator::entityExists($className, ['Full\Entity\DummyEntity']);
     }
+
+    public function testServiceExists()
+    {
+        $id = 'my_existing.service_id';
+        $ids = ['my_existing.service_id'];
+
+        $this->assertSame($id, Validator::serviceExists($id, $ids));
+    }
+
+    public function testServiceDoesNotExists()
+    {
+        $id = 'my_non_existing.service_id';
+        $ids = ['my_existing.service_id'];
+
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage('Service "my_non_existing.service_id" doesn\'t exist; please enter an existing one.');
+        Validator::serviceExists($id, $ids);
+    }
+
+    public function testEmptyAllowedInterface()
+    {
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage('Please give interfaces to check.');
+        Validator::allowedInterface('Throwable', []);
+    }
+
+    public function testNonExistingAllowedInterface()
+    {
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage('The interface "FooBar\RandomInterface" doesn\'t exist.');
+        Validator::allowedInterface('FooBar\RandomInterface', ['Throwable']);
+    }
+
+    public function testAllowedInterface()
+    {
+        $interface = 'Throwable';
+
+        $this->assertSame($interface, Validator::allowedInterface($interface, [$interface]));
+    }
+
+    public function testNotAllowedInterface()
+    {
+        $interface = 'Throwable';
+        $interfaces = ['Iterator'];
+
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage('The interface "Throwable" is not allowed.');
+        $this->assertSame($interface, Validator::allowedInterface($interface, $interfaces));
+    }
 }

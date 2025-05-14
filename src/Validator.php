@@ -255,4 +255,37 @@ final class Validator
 
         return $backedEnum;
     }
+
+    public static function serviceExists(string $id, array $ids = []): string
+    {
+        self::notBlank($id);
+
+        if (!\in_array($id, $ids)) {
+            throw new RuntimeCommandException(\sprintf('Service "%s" doesn\'t exist; please enter an existing one.', $id));
+        }
+
+        return $id;
+    }
+
+    /**
+     * @param class-string $interface
+     */
+    public static function allowedInterface(string $interface, array $interfaces): string
+    {
+        self::notBlank($interface);
+
+        if (empty($interfaces)) {
+            throw new RuntimeCommandException('Please give interfaces to check.');
+        }
+
+        if (!interface_exists($interface)) {
+            throw new RuntimeCommandException(\sprintf('The interface "%s" doesn\'t exist.', $interface));
+        }
+
+        if (!\in_array($interface, $interfaces)) {
+            throw new RuntimeCommandException(\sprintf('The interface "%s" is not allowed.', $interface));
+        }
+
+        return $interface;
+    }
 }
