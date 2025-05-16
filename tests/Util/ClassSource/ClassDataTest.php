@@ -12,7 +12,11 @@
 namespace Symfony\Bundle\MakerBundle\Tests\Util\ClassSource;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\MakerBundle\InputAwareMakerInterface;
+use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
+use Symfony\Bundle\MakerBundle\Maker\MakeWebhook;
 use Symfony\Bundle\MakerBundle\MakerBundle;
+use Symfony\Bundle\MakerBundle\MakerInterface;
 use Symfony\Bundle\MakerBundle\Test\MakerTestKernel;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 
@@ -54,6 +58,20 @@ class ClassDataTest extends TestCase
         $meta = ClassData::create(class: MakerBundle::class, extendsClass: MakerTestKernel::class);
 
         self::assertSame('final class MakerBundle extends MakerTestKernel', $meta->getClassDeclaration());
+    }
+
+    public function testGetClassDeclarationWithImplements(): void
+    {
+        $meta = ClassData::create(class: AbstractMaker::class, implements: MakerInterface::class);
+
+        self::assertSame('final class AbstractMaker implements MakerInterface', $meta->getClassDeclaration());
+    }
+
+    public function testGetClassDeclarationWithExtendsAndImplements(): void
+    {
+        $meta = ClassData::create(class: MakeWebhook::class, extendsClass: AbstractMaker::class, implements: InputAwareMakerInterface::class);
+
+        self::assertSame('final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterface', $meta->getClassDeclaration());
     }
 
     /** @dataProvider suffixDataProvider */
