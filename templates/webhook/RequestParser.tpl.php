@@ -1,10 +1,10 @@
 <?= "<?php\n" ?>
 
-namespace <?= $namespace; ?>;
+namespace <?= $class_data->getNamespace(); ?>;
 
-<?= $use_statements; ?>
+<?= $class_data->getUseStatements(); ?>
 
-final class <?= $class_name ?> extends AbstractRequestParser
+<?= $class_data->getClassDeclaration(); ?>
 {
     protected function getRequestMatcher(): RequestMatcherInterface
     {
