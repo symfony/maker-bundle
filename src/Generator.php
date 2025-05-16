@@ -264,6 +264,11 @@ class Generator
      */
     public function generateTemplate(string $targetPath, string $templateName, array $variables = [])
     {
+        $templatePath = 'templates/bundles/MakerBundle/'.$templateName;
+        if ($this->fileManager->fileExists($templatePath)) {
+            $templateName = $templatePath;
+        }
+
         $this->generateFile(
             $this->fileManager->getPathForTemplate($targetPath),
             $templateName,
