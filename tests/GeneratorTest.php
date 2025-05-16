@@ -100,5 +100,13 @@ class GeneratorTest extends TestCase
             'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
             'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
         ];
+
+        yield 'repository_fqcn' => [
+            'Repository',
+            'Repository\\',
+            'Repository',
+            'App\\Repository\\RepositoryRepository',
+            'RepositoryRepository',
+        ];
     }
 }
