@@ -32,7 +32,7 @@ trait CanGenerateTestsTrait
         $help = $command->getHelp()."\n".$testsHelp;
 
         $command
-            ->addOption(name: 'with-tests', mode: InputOption::VALUE_NONE, description: 'Generate PHPUnit Tests')
+            ->addOption(name: 'with-tests', mode: InputOption::VALUE_NEGATABLE, description: 'Generate PHPUnit Tests')
             ->setHelp($help)
         ;
 
@@ -46,11 +46,7 @@ trait CanGenerateTestsTrait
             throw new RuntimeCommandException('Whoops! "--with-tests" option does not exist. Call "addWithTestsOptions()" in the makers "configureCommand().');
         }
 
-        $this->generateTests = $input->getOption('with-tests');
-
-        if (!$this->generateTests) {
-            $this->generateTests = $io->confirm('Do you want to generate PHPUnit tests? [Experimental]', false);
-        }
+        $this->generateTests = $input->getOption('with-tests') ?? $io->confirm('Do you want to generate PHPUnit tests? [Experimental]', false);
     }
 
     public function shouldGenerateTests(): bool
