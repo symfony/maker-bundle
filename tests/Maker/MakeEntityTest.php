@@ -742,6 +742,28 @@ class MakeEntityTest extends MakerTestCase
             $this->runEntityTest($runner);
         }),
         ];
+
+        yield 'it_does_not_throw_error_with_double_slashes' => [$this->createMakeEntityTest()
+            ->run(function (MakerTestRunner $runner) {
+                $this->copyEntity($runner, 'Enum/Role-basic.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // add additional field
+                    'role',
+                    'enum',
+                    'App\\\\Entity\\\\Enum\\\\Role',
+                    '',
+                    // nullable
+                    'y',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $this->runEntityTest($runner);
+            }),
+        ];
     }
 
     /** @param array<string, mixed> $data */
