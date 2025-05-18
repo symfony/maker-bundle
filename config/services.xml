@@ -31,6 +31,8 @@
                 <argument type="service" id="event_dispatcher" />
             </service>
 
+            <service id="maker.doctrine.event_registry" class="Symfony\Bundle\MakerBundle\Doctrine\DoctrineEventRegistry" />
+
             <service id="maker.console_error_listener" class="Symfony\Bundle\MakerBundle\Event\ConsoleErrorSubscriber">
                 <tag name="kernel.event_subscriber" />
             </service>
