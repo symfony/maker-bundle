@@ -15,9 +15,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeUnitTest;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
-/**
- * @group legacy
- */
+#[\PHPUnit\Framework\Attributes\Group('legacy')]
 class MakeUnitTestTest extends MakerTestCase
 {
     protected function getMakerClass(): string

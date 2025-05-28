@@ -13,8 +13,6 @@ class User
     #[ORM\Column()]
     private ?int $id = null;
 
-    /**
-     * @ORM\Column()
-     */
+    #[ORM\Column]
     private $firstName;
 }

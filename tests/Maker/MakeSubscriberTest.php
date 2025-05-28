@@ -15,9 +15,7 @@ use Symfony\Bundle\MakerBundle\Maker\MakeSubscriber;
 use Symfony\Bundle\MakerBundle\Test\MakerTestCase;
 use Symfony\Bundle\MakerBundle\Test\MakerTestRunner;
 
-/**
- * @group legacy
- */
+#[\PHPUnit\Framework\Attributes\Group('legacy')]
 class MakeSubscriberTest extends MakerTestCase
 {
     protected function getMakerClass(): string
