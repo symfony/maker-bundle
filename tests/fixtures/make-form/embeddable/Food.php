@@ -15,9 +15,7 @@ class Food
     #[ORM\Column]
     private ?string $title = null;
 
-    /**
-     * @ORM\Embedded(class=Receipt::class)
-     */
+    #[ORM\Embedded(class: Receipt::class)]
     private $receipt;
 
     public function __construct()
