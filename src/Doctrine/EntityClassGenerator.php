@@ -44,7 +44,7 @@ final class EntityClassGenerator
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
-            'Repository\\',
+            $entityClassDetails->getNamespacePrefix().'\\'.'Repository\\',
             'Repository'
         );
 
