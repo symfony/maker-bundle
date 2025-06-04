@@ -45,7 +45,7 @@ namespace <?= $class_data->getNamespace() ?>;
 
         return $this->render('<?= $templates_path ?>/new.html.twig', [
             '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -71,7 +71,7 @@ namespace <?= $class_data->getNamespace() ?>;
 
         return $this->render('<?= $templates_path ?>/edit.html.twig', [
             '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 

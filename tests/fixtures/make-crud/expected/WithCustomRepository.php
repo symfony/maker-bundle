@@ -38,7 +38,7 @@ final class SweetFoodController extends AbstractController
 
         return $this->render('sweet_food/new.html.twig', [
             'sweet_food' => $sweetFood,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -64,7 +64,7 @@ final class SweetFoodController extends AbstractController
 
         return $this->render('sweet_food/edit.html.twig', [
             'sweet_food' => $sweetFood,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
