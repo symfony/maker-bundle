@@ -831,6 +831,33 @@ final class ClassSourceManipulator
                 }
 
                 $lastUseStmtIndex = $index;
+            } elseif ($stmt instanceof Node\Stmt\GroupUse) {
+                // cezar77: this if-case should handle group use statements
+                // TO-DO: it is repeating a lot of parts of the previous if-statement
+                // to be refactored later
+                foreach ($stmt->uses as $use) {
+                    $alias = $use->alias ? $use->alias->name : $use->name->getLast();
+
+                    $fqcn = $stmt->prefix.'\\'.$use->name;
+                    if ($class === $fqcn) {
+                        return $alias;
+                    }
+
+                    if ($alias === $shortClassName) {
+                        // we have a conflicting alias!
+                        // to be safe, use the fully-qualified class name
+                        // everywhere and do not add another use statement
+                        return '\\'.$class;
+                    }
+                }
+
+                // if $class is alphabetically before this use statement, place it before
+                // only set $targetIndex the first time you find it
+                if (null === $targetIndex && Str::areClassesAlphabetical($class, (string) $stmt->prefix)) {
+                    $targetIndex = $index;
+                }
+
+                $lastUseStmtIndex = $index;
             } elseif ($stmt instanceof Node\Stmt\Class_) {
                 if (null !== $targetIndex) {
                     // we already found where to place the use statement
