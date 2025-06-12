@@ -57,6 +57,7 @@
                 <argument /> <!-- root namespace -->
                 <argument>null</argument> <!-- PhpCompatUtil -->
                 <argument type="service" id="maker.template_component_generator" />
+                <argument /> <!-- templates_folders -->
             </service>
 
             <service id="maker.entity_class_generator" class="Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator">
