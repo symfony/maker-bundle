@@ -35,7 +35,7 @@ namespace <?= $namespace ?>;
         self::assertPageTitleContains('<?= ucfirst($entity_var_singular); ?> index');
 
         // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
+        // self::assertSame('Some text on the page', $crawler->filter('.p')->first()->text());
     }
 
     public function testNew(): void
