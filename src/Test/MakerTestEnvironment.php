@@ -145,7 +145,7 @@ final class MakerTestEnvironment
             try {
                 // let's do some magic here git is faster than copy
                 MakerTestProcess::create(
-                    '\\' === \DIRECTORY_SEPARATOR ? 'git clone %FLEX_PATH% %APP_PATH%' : 'git clone "$FLEX_PATH" "$APP_PATH"',
+                    '\\' === \DIRECTORY_SEPARATOR ? 'cp -R %FLEX_PATH% %APP_PATH%' : 'cp -R "$FLEX_PATH" "$APP_PATH"',
                     \dirname($this->flexPath),
                     [
                         'FLEX_PATH' => $this->flexPath,
@@ -283,7 +283,7 @@ final class MakerTestEnvironment
                 'replace' => '',
             ],
         ];
-        $this->processReplacements($replacements, $this->flexPath);
+        $this->processReplacements($replacements, $this->flexPath, allowNotFound: true);
         // end of temp code
 
         file_put_contents($this->flexPath.'/.gitignore', "var/cache/\n");
@@ -294,10 +294,10 @@ final class MakerTestEnvironment
         )->run();
     }
 
-    private function processReplacements(array $replacements, string $rootDir): void
+    private function processReplacements(array $replacements, string $rootDir, bool $allowNotFound = false): void
     {
         foreach ($replacements as $replacement) {
-            $this->processReplacement($rootDir, $replacement['filename'], $replacement['find'], $replacement['replace']);
+            $this->processReplacement($rootDir, $replacement['filename'], $replacement['find'], $replacement['replace'], $allowNotFound);
         }
     }
 
