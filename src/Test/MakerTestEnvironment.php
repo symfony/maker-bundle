@@ -260,7 +260,7 @@ final class MakerTestEnvironment
         }
 
         // fetch a few packages needed for testing
-        MakerTestProcess::create('composer require phpunit browser-kit symfony/css-selector --prefer-dist --no-progress --no-suggest', $this->flexPath)
+        MakerTestProcess::create('composer require phpunit/phpunit:"^9.6" phpunit-bridge browser-kit symfony/css-selector --prefer-dist --no-progress --no-suggest', $this->flexPath)
                         ->run();
 
         if ('\\' !== \DIRECTORY_SEPARATOR) {
