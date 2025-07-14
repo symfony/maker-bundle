@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Maker;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -148,7 +149,7 @@ final class MakeController extends AbstractMaker
                 'route_path' => Str::asRoutePath($this->controllerClassData->getClassName(relative: true, withoutSuffix: true)),
             ]);
 
-            if (!class_exists(WebTestCase::class)) {
+            if (!class_exists(TestCase::class)) {
                 $io->caution('You\'ll need to install the `symfony/test-pack` to execute the tests for your new controller.');
             }
         }
