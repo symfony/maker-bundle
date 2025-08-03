@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USER_IDENTIFIER', fields: ['userIdentifier'])]
+#[ORM\UniqueConstraint(name: 'USER_UNIQ_IDENTIFIER_USER_IDENTIFIER', fields: ['userIdentifier'])]
 class User implements UserInterface
 {
     #[ORM\Id]
