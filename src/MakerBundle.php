@@ -41,8 +41,8 @@ class MakerBundle extends AbstractBundle
 
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-        $container->import('../config/services.xml');
-        $container->import('../config/makers.xml');
+        $container->import('../config/services.php');
+        $container->import('../config/makers.php');
 
         $rootNamespace = trim($config['root_namespace'], '\\');
 
