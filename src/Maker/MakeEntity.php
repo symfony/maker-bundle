@@ -197,7 +197,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $input->setOption('table', $tableName);
         }
 
-
         $classExists = class_exists($entityClassDetails->getFullName());
         if (!$classExists) {
             $tableName = $input->getOption('table');
