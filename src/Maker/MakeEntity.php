@@ -208,8 +208,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 apiResource: $input->getOption('api-resource'),
                 broadcast: $broadcast,
                 useUuidIdentifier: $this->getIdType(),
-                params:
-                [
+                params: [
                     'tableName' => $tableName,
                 ]
             );
