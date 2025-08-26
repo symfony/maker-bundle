@@ -191,7 +191,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $potentialTableName = $this->doctrineHelper->getPotentialTableName($input->getArgument('name'));
 
             $tableName = $io->ask(
-                sprintf('Enter the database table name (e.g. `%s`)', $potentialTableName),
+                \sprintf('Enter the database table name (e.g. `%s`)', $potentialTableName),
                 $potentialTableName
             );
             $input->setOption('table', $tableName);
