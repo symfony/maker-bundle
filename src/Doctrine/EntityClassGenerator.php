@@ -40,7 +40,7 @@ final class EntityClassGenerator
     ) {
     }
 
-    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false, EntityIdTypeEnum $useUuidIdentifier = EntityIdTypeEnum::INT): string
+    public function generateEntityClass(ClassNameDetails $entityClassDetails, bool $apiResource, bool $withPasswordUpgrade = false, bool $generateRepositoryClass = true, bool $broadcast = false, EntityIdTypeEnum $useUuidIdentifier = EntityIdTypeEnum::INT, array $params = []): string
     {
         $repoClassDetails = $this->generator->createClassNameDetails(
             $entityClassDetails->getRelativeName(),
@@ -48,7 +48,7 @@ final class EntityClassGenerator
             'Repository'
         );
 
-        $tableName = $this->doctrineHelper->getPotentialTableName($entityClassDetails->getFullName());
+        $potentialTableName = $this->doctrineHelper->getPotentialTableName($entityClassDetails->getFullName());
 
         $useStatements = new UseStatementGenerator([
             $repoClassDetails->getFullName(),
@@ -85,8 +85,9 @@ final class EntityClassGenerator
                 'repository_class_name' => $repoClassDetails->getShortName(),
                 'api_resource' => $apiResource,
                 'broadcast' => $broadcast,
-                'should_escape_table_name' => $this->doctrineHelper->isKeyword($tableName),
-                'table_name' => $tableName,
+                'is_keyword' => $this->doctrineHelper->isKeyword($params['tableName']),
+                'table_name' => $params['tableName'],
+                'should_render_table_annotation' => $params['tableName'] != $potentialTableName,
                 'id_type' => $useUuidIdentifier,
             ]
         );
