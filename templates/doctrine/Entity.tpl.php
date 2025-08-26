@@ -10,8 +10,9 @@ namespace <?= $namespace ?>;
 <?= $use_statements; ?>
 
 #[ORM\Entity(repositoryClass: <?= $repository_class_name ?>::class)]
-<?php if ($should_escape_table_name): ?>#[ORM\Table(name: '`<?= $table_name ?>`')]
-<?php endif ?>
+<?php if ($should_render_table_annotation): ?>
+#[ORM\Table(name: '<?= $is_keyword ? '`'.$table_name.'`' : $table_name ?>')]
+<?php endif; ?>
 <?php if ($api_resource): ?>
 #[ApiResource]
 <?php endif ?>
