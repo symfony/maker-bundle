@@ -35,17 +35,15 @@ jobs:
                 ports:
                     - 1337:1337
 
-        env:
-            SYMFONY_REQUIRE: ${{ matrix.symfony-version }}
 
         strategy:
             fail-fast: false
             matrix:
                 php-version:
-                    - '8.3'
+                    - '8.4'
                 symfony-version:
                     - '6.4.*'
-                    - '7.2.*'
+                    - '7.3.*'
                 dependency-versions: ['highest']
                 include:
                     # testing lowest PHP+dependencies with lowest Symfony
@@ -69,6 +67,8 @@ jobs:
 
             - name: Composer install
               uses: "ramsey/composer-install@v3"
+              env:
+                  SYMFONY_REQUIRE: ${{ matrix.symfony-version }}
               with:
                   dependency-versions: "${{ matrix.dependency-versions }}"
 
