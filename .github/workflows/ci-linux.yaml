@@ -45,7 +45,8 @@ jobs:
                     - '8.3'
                 symfony-version:
                     - '6.4.*'
-                    - '7.2.*'
+                    - '7.3.*'
+                    - '8.0.*'
                 dependency-versions: ['highest']
                 include:
                     # testing lowest PHP+dependencies with lowest Symfony
