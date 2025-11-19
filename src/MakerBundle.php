@@ -35,6 +35,10 @@ class MakerBundle extends AbstractBundle
                 ->scalarNode('root_namespace')->defaultValue('App')->end()
                 ->booleanNode('generate_final_classes')->defaultTrue()->end()
                 ->booleanNode('generate_final_entities')->defaultFalse()->end()
+                ->arrayNode('templates_folders')
+                    ->defaultValue([])
+                    ->prototype('scalar')->end()
+                ->end()
             ->end()
         ;
     }
@@ -51,6 +55,7 @@ class MakerBundle extends AbstractBundle
                 ->arg(0, $rootNamespace)
             ->get('maker.generator')
                 ->arg(1, $rootNamespace)
+                ->arg(4, $config['templates_folders'])
             ->get('maker.doctrine_helper')
                 ->arg(0, \sprintf('%s\\Entity', $rootNamespace))
             ->get('maker.template_component_generator')

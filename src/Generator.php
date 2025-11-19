@@ -33,6 +33,7 @@ class Generator
         private string $namespacePrefix,
         ?PhpCompatUtil $phpCompatUtil = null,
         private ?TemplateComponentGenerator $templateComponentGenerator = null,
+        private array $templatesFolders = [],
     ) {
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
         $this->namespacePrefix = trim($namespacePrefix, '\\');
@@ -299,11 +300,7 @@ class Generator
 
         $templatePath = $templateName;
         if (!file_exists($templatePath)) {
-            $templatePath = \sprintf('%s/templates/%s', \dirname(__DIR__), $templateName);
-
-            if (!file_exists($templatePath)) {
-                $templatePath = $this->getTemplateFromLegacySkeletonPath($templateName);
-            }
+            $templatePath = $this->getTemplatePath($templatePath);
 
             if (!file_exists($templatePath)) {
                 throw new \Exception(\sprintf('Cannot find template "%s" in the templates/ dir.', $templateName));
@@ -314,6 +311,25 @@ class Generator
             'template' => $templatePath,
             'variables' => $variables,
         ];
+    }
+
+    private function getTemplatePath(string $templateName): string
+    {
+        foreach ($this->templatesFolders as $folder) {
+            $templatePath = \sprintf('%s/%s', $folder, $templateName);
+
+            if ($this->fileManager->fileExists($templatePath)) {
+                return $templatePath;
+            }
+        }
+
+        $templatePath = \sprintf('%s/templates/%s', \dirname(__DIR__), $templateName);
+
+        if (!file_exists($templatePath)) {
+            return $this->getTemplateFromLegacySkeletonPath($templateName);
+        }
+
+        return $templatePath;
     }
 
     /**
