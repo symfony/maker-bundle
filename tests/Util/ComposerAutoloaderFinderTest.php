@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Tests\Util;
 use Composer\Autoload\ClassLoader;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\Util\ComposerAutoloaderFinder;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 
 class ComposerAutoloaderFinderTest extends TestCase
 {
@@ -42,7 +43,7 @@ class ComposerAutoloaderFinderTest extends TestCase
     public function testGetClassLoader($psr0, $psr4)
     {
         $this->setupAutoloadFunctions($psr0, $psr4);
-        $loader = (new ComposerAutoloaderFinder(static::$rootNamespace))->getClassLoader();
+        $loader = (new ComposerAutoloaderFinder(new NamespacesHelper(['root' => static::$rootNamespace])))->getClassLoader();
 
         $this->assertInstanceOf(ClassLoader::class, $loader, 'Wrong ClassLoader found');
     }
@@ -56,7 +57,7 @@ class ComposerAutoloaderFinderTest extends TestCase
         };
 
         // throws \Exception
-        (new ComposerAutoloaderFinder(static::$rootNamespace))->getClassLoader();
+        (new ComposerAutoloaderFinder(new NamespacesHelper(['root' => static::$rootNamespace])))->getClassLoader();
     }
 
     /**

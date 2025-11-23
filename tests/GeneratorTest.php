@@ -14,20 +14,27 @@ namespace Symfony\Bundle\MakerBundle\Tests;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 
 class GeneratorTest extends TestCase
 {
     /**
      * @dataProvider getClassNameDetailsTests
      */
-    public function testCreateClassNameDetails(string $name, string $prefix, string $suffix, string $expectedFullClassName, string $expectedRelativeClassName): void
-    {
+    public function testCreateClassNameDetails(
+        string $name,
+        string $prefix,
+        string $suffix,
+        string $expectedFullClassName,
+        string $expectedRelativeClassName,
+        array $namespaces = [],
+    ): void {
         $fileManager = $this->createMock(FileManager::class);
         $fileManager->expects($this->any())
             ->method('getNamespacePrefixForClass')
             ->willReturn('Foo');
 
-        $generator = new Generator($fileManager, 'App\\');
+        $generator = new Generator($fileManager, new NamespacesHelper($namespaces));
 
         $classNameDetails = $generator->createClassNameDetails($name, $prefix, $suffix);
 
@@ -99,6 +106,24 @@ class GeneratorTest extends TestCase
             '',
             'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
             'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
+        ];
+
+        yield 'simple_custom_namespace' => [
+            'foo',
+            'Controller\\',
+            '',
+            'Custom\\Controller\\Foo',
+            'Foo',
+            ['root' => 'Custom\\'],
+        ];
+
+        yield 'multilevel_custom_namespace' => [
+            'foo',
+            'Controller\\',
+            '',
+            'Custom\\Root\\Controller\\Foo',
+            'Foo',
+            ['root' => 'Custom\\Root\\'],
         ];
     }
 }

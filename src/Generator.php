@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use Symfony\Bundle\MakerBundle\Util\TemplateComponentGenerator;
 
@@ -30,12 +31,11 @@ class Generator
 
     public function __construct(
         private FileManager $fileManager,
-        private string $namespacePrefix,
+        private NamespacesHelper $namespacesHelper,
         ?PhpCompatUtil $phpCompatUtil = null,
         private ?TemplateComponentGenerator $templateComponentGenerator = null,
     ) {
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
-        $this->namespacePrefix = trim($namespacePrefix, '\\');
 
         if (null !== $phpCompatUtil) {
             trigger_deprecation('symfony/maker-bundle', 'v1.44.0', 'Initializing Generator while providing an instance of PhpCompatUtil is deprecated.');
@@ -180,7 +180,7 @@ class Generator
      */
     public function createClassNameDetails(string $name, string $namespacePrefix, string $suffix = '', string $validationErrorMessage = ''): ClassNameDetails
     {
-        $fullNamespacePrefix = $this->namespacePrefix.'\\'.$namespacePrefix;
+        $fullNamespacePrefix = $this->namespacesHelper->getRootNamespace().'\\'.$namespacePrefix;
         if ('\\' === $name[0]) {
             // class is already "absolute" - leave it alone (but strip opening \)
             $className = substr($name, 1);
@@ -240,9 +240,14 @@ class Generator
         $this->pendingOperations = [];
     }
 
+    public function getNamespacesHelper(): NamespacesHelper
+    {
+        return $this->namespacesHelper;
+    }
+
     public function getRootNamespace(): string
     {
-        return $this->namespacePrefix;
+        return $this->namespacesHelper->getRootNamespace();
     }
 
     public function generateController(string $controllerClassName, string $controllerTemplatePath, array $parameters = []): string

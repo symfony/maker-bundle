@@ -23,11 +23,11 @@ class ComposerAutoloaderFinder
     private array $rootNamespace;
     private ?ClassLoader $classLoader = null;
 
-    public function __construct(string $rootNamespace)
+    public function __construct(NamespacesHelper $namespacesHelper)
     {
         $this->rootNamespace = [
-            'psr0' => rtrim($rootNamespace, '\\'),
-            'psr4' => rtrim($rootNamespace, '\\').'\\',
+            'psr0' => rtrim($namespacesHelper->getRootNamespace(), '\\'),
+            'psr4' => rtrim($namespacesHelper->getRootNamespace(), '\\').'\\',
         ];
     }
 

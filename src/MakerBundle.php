@@ -31,8 +31,42 @@ class MakerBundle extends AbstractBundle
     public function configure(DefinitionConfigurator $definition): void
     {
         $definition->rootNode()
+            ->beforeNormalization()
+                ->ifTrue(function ($v) { return isset($v['root_namespace']) && !isset($v['namespaces']['root']); })
+                ->then(function ($v) {
+                    $v['namespaces']['root'] = $v['root_namespace'];
+
+                    return $v;
+                })
+            ->end()
             ->children()
-                ->scalarNode('root_namespace')->defaultValue('App')->end()
+                ->scalarNode('root_namespace')
+                    ->setDeprecated('symfony/maker-bundle', '2.0', 'The "root_namespace" option is deprecated, use "namespaces.root" instead.')
+                    ->defaultNull()
+                ->end()
+                ->arrayNode('namespaces')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('root')->defaultNull()->end()
+                        ->scalarNode('command')->defaultValue('Command\\')->end()
+                        ->scalarNode('controller')->defaultValue('Controller\\')->end()
+                        ->scalarNode('entity')->defaultValue('Entity\\')->end()
+                        ->scalarNode('fixtures')->defaultValue('DataFixtures\\')->end()
+                        ->scalarNode('form')->defaultValue('Form\\')->end()
+                        ->scalarNode('listener')->defaultValue('EventListener\\')->end()
+                        ->scalarNode('message')->defaultValue('Message\\')->end()
+                        ->scalarNode('message_handler')->defaultValue('MessageHandler\\')->end()
+                        ->scalarNode('middleware')->defaultValue('Middleware\\')->end()
+                        ->scalarNode('repository')->defaultValue('Repository\\')->end()
+                        ->scalarNode('scheduler')->defaultValue('Scheduler\\')->end()
+                        ->scalarNode('security')->defaultValue('Security\\')->end()
+                        ->scalarNode('serializer')->defaultValue('Serializer\\')->end()
+                        ->scalarNode('subscriber')->defaultValue('EventSubscriber\\')->end()
+                        ->scalarNode('test')->defaultValue('Tests\\')->end()
+                        ->scalarNode('twig')->defaultValue('Twig\\')->end()
+                        ->scalarNode('validator')->defaultValue('Validator\\')->end()
+                    ->end()
+                ->end()
                 ->booleanNode('generate_final_classes')->defaultTrue()->end()
                 ->booleanNode('generate_final_entities')->defaultFalse()->end()
             ->end()
@@ -44,19 +78,12 @@ class MakerBundle extends AbstractBundle
         $container->import('../config/services.xml');
         $container->import('../config/makers.xml');
 
-        $rootNamespace = trim($config['root_namespace'], '\\');
-
         $container->services()
-            ->get('maker.autoloader_finder')
-                ->arg(0, $rootNamespace)
-            ->get('maker.generator')
-                ->arg(1, $rootNamespace)
-            ->get('maker.doctrine_helper')
-                ->arg(0, \sprintf('%s\\Entity', $rootNamespace))
+            ->get('maker.namespaces_helper')
+                ->arg(0, $config['namespaces'])
             ->get('maker.template_component_generator')
                 ->arg(0, $config['generate_final_classes'])
                 ->arg(1, $config['generate_final_entities'])
-                ->arg(2, $rootNamespace)
         ;
 
         $builder

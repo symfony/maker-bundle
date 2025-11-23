@@ -50,7 +50,8 @@ final class MakeVoter extends AbstractMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $voterClassData = ClassData::create(
-            class: \sprintf('Security\Voter\%s', $input->getArgument('name')),
+            class: \sprintf('%s\Voter\%s', $generator->getNamespacesHelper()->getSecurityNamespace(), $input->getArgument('name')),
+            rootNamespace: $generator->getRootNamespace(),
             suffix: 'Voter',
             extendsClass: Voter::class,
             useStatements: [

@@ -148,11 +148,11 @@ final class MakeWebhook extends AbstractMaker implements InputAwareMakerInterfac
     {
         $requestParserDetails = $this->generator->createClassNameDetails(
             Str::asClassName($this->name.'RequestParser'),
-            'Webhook\\'
+            $generator->getNamespacesHelper()->getWebhookNamespace()
         );
         $remoteEventConsumerDetails = $this->generator->createClassNameDetails(
             Str::asClassName($this->name.'WebhookConsumer'),
-            'RemoteEvent\\'
+            $generator->getNamespacesHelper()->getRemoteEventNamespace()
         );
 
         $this->addToYamlConfig($this->name, $requestParserDetails);

@@ -107,7 +107,7 @@ final class MakeCrud extends AbstractMaker
     {
         $entityClassDetails = $generator->createClassNameDetails(
             Validator::entityExists($input->getArgument('entity-class'), $this->doctrineHelper->getEntitiesForAutocomplete()),
-            'Entity\\'
+            $generator->getNamespacesHelper()->getEntityNamespace()
         );
 
         $entityDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($entityClassDetails->getFullName());
@@ -118,7 +118,7 @@ final class MakeCrud extends AbstractMaker
         if (null !== $entityDoctrineDetails->getRepositoryClass()) {
             $repositoryClassDetails = $generator->createClassNameDetails(
                 '\\'.$entityDoctrineDetails->getRepositoryClass(),
-                'Repository\\',
+                $generator->getNamespacesHelper()->getRepositoryNamespace(),
                 'Repository'
             );
 
@@ -133,7 +133,7 @@ final class MakeCrud extends AbstractMaker
 
         $controllerClassDetails = $generator->createClassNameDetails(
             $this->controllerClassName,
-            'Controller\\',
+            $generator->getNamespacesHelper()->getControllerNamespace(),
             'Controller'
         );
 
@@ -141,14 +141,15 @@ final class MakeCrud extends AbstractMaker
         do {
             $formClassDetails = $generator->createClassNameDetails(
                 $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'Type',
-                'Form\\',
+                $generator->getNamespacesHelper()->getFormNamespace(),
                 'Type'
             );
             ++$iter;
         } while (class_exists($formClassDetails->getFullName()));
 
         $controllerClassData = ClassData::create(
-            class: \sprintf('Controller\%s', $this->controllerClassName),
+            class: \sprintf('%s\%s', $generator->getNamespacesHelper()->getControllerNamespace(), $this->controllerClassName),
+            rootNamespace: $generator->getRootNamespace(),
             suffix: 'Controller',
             extendsClass: AbstractController::class,
             useStatements: [
@@ -247,8 +248,15 @@ final class MakeCrud extends AbstractMaker
         }
 
         if ($this->shouldGenerateTests()) {
+            $testClassName = \sprintf(
+                '%s\%s\%s',
+                $generator->getNamespacesHelper()->getTestNamespace(),
+                $generator->getNamespacesHelper()->getControllerNamespace(),
+                $entityClassDetails->getRelativeNameWithoutSuffix()
+            );
             $testClassData = ClassData::create(
-                class: \sprintf('Tests\Controller\%s', $entityClassDetails->getRelativeNameWithoutSuffix()),
+                class: $testClassName,
+                rootNamespace: $generator->getRootNamespace(),
                 suffix: 'ControllerTest',
                 extendsClass: WebTestCase::class,
                 useStatements: [

@@ -37,6 +37,7 @@ use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -91,6 +92,7 @@ final class MakeRegistrationForm extends AbstractMaker
         private FileManager $fileManager,
         private FormTypeRenderer $formTypeRenderer,
         private DoctrineHelper $doctrineHelper,
+        private NamespacesHelper $namespacesHelper,
         private ?RouterInterface $router = null,
     ) {
     }
@@ -116,7 +118,7 @@ final class MakeRegistrationForm extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        $interactiveSecurityHelper = new InteractiveSecurityHelper();
+        $interactiveSecurityHelper = new InteractiveSecurityHelper($this->namespacesHelper);
 
         if (null === $this->router) {
             throw new RuntimeCommandException('Router have been explicitly disabled in your configuration. This command needs to use the router.');
@@ -215,7 +217,7 @@ final class MakeRegistrationForm extends AbstractMaker
     {
         $userClassNameDetails = $generator->createClassNameDetails(
             '\\'.$this->userClass,
-            'Entity\\'
+            $generator->getNamespacesHelper()->getEntityNamespace()
         );
 
         $userDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($userClassNameDetails->getFullName());
@@ -229,7 +231,11 @@ final class MakeRegistrationForm extends AbstractMaker
         $userRepository = $userDoctrineDetails->getRepositoryClass();
 
         if (null !== $userRepository) {
-            $userRepoClassDetails = $generator->createClassNameDetails('\\'.$userRepository, 'Repository\\', 'Repository');
+            $userRepoClassDetails = $generator->createClassNameDetails(
+                '\\'.$userRepository,
+                $generator->getNamespacesHelper()->getRepositoryNamespace(),
+                'Repository'
+            );
 
             $userRepoVars = [
                 'repository_full_class_name' => $userRepoClassDetails->getFullName(),
@@ -240,7 +246,7 @@ final class MakeRegistrationForm extends AbstractMaker
 
         $verifyEmailServiceClassNameDetails = $generator->createClassNameDetails(
             'EmailVerifier',
-            'Security\\'
+            $generator->getNamespacesHelper()->getSecurityNamespace()
         );
 
         $verifyEmailVars = ['will_verify_email' => $this->willVerifyEmail];
@@ -297,7 +303,7 @@ final class MakeRegistrationForm extends AbstractMaker
         // 2) Generate the controller
         $controllerClassNameDetails = $generator->createClassNameDetails(
             'RegistrationController',
-            'Controller\\'
+            $generator->getNamespacesHelper()->getControllerNamespace()
         );
 
         $useStatements = new UseStatementGenerator([
@@ -417,7 +423,7 @@ final class MakeRegistrationForm extends AbstractMaker
         if ($this->shouldGenerateTests()) {
             $testClassDetails = $generator->createClassNameDetails(
                 'RegistrationControllerTest',
-                'Test\\'
+                $generator->getNamespacesHelper()->getTestNamespace()
             );
 
             $useStatements = new UseStatementGenerator([
@@ -549,7 +555,7 @@ final class MakeRegistrationForm extends AbstractMaker
     {
         $formClassDetails = $generator->createClassNameDetails(
             'RegistrationFormType',
-            'Form\\'
+            $generator->getNamespacesHelper()->getFormNamespace()
         );
 
         $formFields = [

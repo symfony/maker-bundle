@@ -34,6 +34,7 @@ use Symfony\Bundle\MakerBundle\Security\InteractiveSecurityHelper;
 use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -102,6 +103,7 @@ class MakeResetPassword extends AbstractMaker
         private FileManager $fileManager,
         private DoctrineHelper $doctrineHelper,
         private EntityClassGenerator $entityClassGenerator,
+        private NamespacesHelper $namespacesHelper,
         private ?RouterInterface $router = null,
     ) {
     }
@@ -150,7 +152,7 @@ class MakeResetPassword extends AbstractMaker
 
         $this->checkIsUsingUid($input);
 
-        $interactiveSecurityHelper = new InteractiveSecurityHelper();
+        $interactiveSecurityHelper = new InteractiveSecurityHelper($this->namespacesHelper);
 
         if (!$this->fileManager->fileExists($path = 'config/packages/security.yaml')) {
             throw new RuntimeCommandException('The file "config/packages/security.yaml" does not exist. PHP & XML configuration formats are currently not supported.');
@@ -160,12 +162,13 @@ class MakeResetPassword extends AbstractMaker
         $securityData = $manipulator->getData();
         $providersData = $securityData['security']['providers'] ?? [];
 
-        $this->userClass = $interactiveSecurityHelper->guessUserClass(
-            $io,
-            $providersData,
-            'What is the User entity that should be used with the "forgotten password" feature? (e.g. <fg=yellow>App\\Entity\\User</>)'
+        $questionText = \sprintf(
+            'What is the User entity that should be used with the "forgotten password" feature? (e.g. <fg=yellow>%s\\%s\\User</>)',
+            $this->namespacesHelper->getRootNamespace(),
+            $this->namespacesHelper->getEntityNamespace()
         );
 
+        $this->userClass = $interactiveSecurityHelper->guessUserClass($io, $providersData, $questionText);
         $this->emailPropertyName = $interactiveSecurityHelper->guessEmailField($io, $this->userClass);
         $this->emailGetterMethodName = $interactiveSecurityHelper->guessEmailGetter($io, $this->userClass, $this->emailPropertyName);
         $this->passwordSetterMethodName = $interactiveSecurityHelper->guessPasswordSetter($io, $this->userClass);
@@ -208,32 +211,32 @@ class MakeResetPassword extends AbstractMaker
     {
         $userClassNameDetails = $generator->createClassNameDetails(
             '\\'.$this->userClass,
-            'Entity\\'
+            $generator->getNamespacesHelper()->getEntityNamespace()
         );
 
         $controllerClassNameDetails = $generator->createClassNameDetails(
             'ResetPasswordController',
-            'Controller\\'
+            $generator->getNamespacesHelper()->getControllerNamespace()
         );
 
         $requestClassNameDetails = $generator->createClassNameDetails(
             'ResetPasswordRequest',
-            'Entity\\'
+            $generator->getNamespacesHelper()->getEntityNamespace()
         );
 
         $repositoryClassNameDetails = $generator->createClassNameDetails(
             'ResetPasswordRequestRepository',
-            'Repository\\'
+            $generator->getNamespacesHelper()->getRepositoryNamespace()
         );
 
         $requestFormTypeClassNameDetails = $generator->createClassNameDetails(
             'ResetPasswordRequestFormType',
-            'Form\\'
+            $generator->getNamespacesHelper()->getFormNamespace()
         );
 
         $changePasswordFormTypeClassNameDetails = $generator->createClassNameDetails(
             'ChangePasswordFormType',
-            'Form\\'
+            $generator->getNamespacesHelper()->getFormNamespace()
         );
 
         $useStatements = new UseStatementGenerator([
@@ -353,12 +356,12 @@ class MakeResetPassword extends AbstractMaker
         if ($this->shouldGenerateTests()) {
             $testClassDetails = $generator->createClassNameDetails(
                 'ResetPasswordControllerTest',
-                'Test\\',
+                $generator->getNamespacesHelper()->getTestNamespace(),
             );
 
             $userRepositoryDetails = $generator->createClassNameDetails(
                 \sprintf('%sRepository', $userClassNameDetails->getShortName()),
-                'Repository\\'
+                $generator->getNamespacesHelper()->getRepositoryNamespace()
             );
 
             $useStatements = new UseStatementGenerator([

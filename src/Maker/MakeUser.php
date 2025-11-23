@@ -130,7 +130,9 @@ final class MakeUser extends AbstractMaker
 
         $userClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            $userClassConfiguration->isEntity() ? 'Entity\\' : 'Security\\'
+            $userClassConfiguration->isEntity()
+                ? $generator->getNamespacesHelper()->getEntityNamespace()
+                : $generator->getNamespacesHelper()->getSecurityNamespace()
         );
 
         // A) Generate the User class
@@ -168,7 +170,11 @@ final class MakeUser extends AbstractMaker
 
         // C) Generate a custom user provider, if necessary
         if (!$userClassConfiguration->isEntity()) {
-            $userClassConfiguration->setUserProviderClass($generator->getRootNamespace().'\\Security\\UserProvider');
+            $userClassConfiguration->setUserProviderClass(\sprintf(
+                '%s\\%s\\UserProvider',
+                $generator->getRootNamespace(),
+                $generator->getNamespacesHelper()->getSecurityNamespace()
+            ));
 
             $useStatements = new UseStatementGenerator([
                 UnsupportedUserException::class,

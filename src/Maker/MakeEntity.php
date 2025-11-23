@@ -31,6 +31,7 @@ use Symfony\Bundle\MakerBundle\Util\ClassDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\MercureBundle\DependencyInjection\MercureExtension;
 use Symfony\Component\Console\Command\Command;
@@ -66,7 +67,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         if (null === $generator) {
             @trigger_error(\sprintf('Passing a "%s" instance as 4th argument is mandatory since version 1.5.', Generator::class), \E_USER_DEPRECATED);
-            $this->generator = new Generator($fileManager, 'App\\');
+            $this->generator = new Generator($fileManager, new NamespacesHelper());
         } else {
             $this->generator = $generator;
         }
@@ -142,7 +143,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         if (
             !$input->getOption('api-resource')
             && class_exists(ApiResource::class)
-            && !class_exists($this->generator->createClassNameDetails($entityClassName, 'Entity\\')->getFullName())
+            && !class_exists($this->generator->createClassNameDetails($entityClassName, $this->generator->getNamespacesHelper()->getEntityNamespace())->getFullName())
         ) {
             $description = $command->getDefinition()->getOption('api-resource')->getDescription();
             $question = new ConfirmationQuestion($description, false);
@@ -154,7 +155,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         if (
             !$input->getOption('broadcast')
             && class_exists(Broadcast::class)
-            && !class_exists($this->generator->createClassNameDetails($entityClassName, 'Entity\\')->getFullName())
+            && !class_exists($this->generator->createClassNameDetails($entityClassName, $this->generator->getNamespacesHelper()->getEntityNamespace())->getFullName())
         ) {
             $description = $command->getDefinition()->getOption('broadcast')->getDescription();
             $question = new ConfirmationQuestion($description, false);
@@ -183,7 +184,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $entityClassDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Entity\\'
+            $generator->getNamespacesHelper()->getEntityNamespace(),
         );
 
         $classExists = class_exists($entityClassDetails->getFullName());

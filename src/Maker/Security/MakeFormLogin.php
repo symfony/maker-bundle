@@ -29,6 +29,7 @@ use Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater;
 use Symfony\Bundle\MakerBundle\Security\SecurityControllerBuilder;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
+use Symfony\Bundle\MakerBundle\Util\NamespacesHelper;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Bundle\MakerBundle\Validator;
@@ -67,6 +68,7 @@ final class MakeFormLogin extends AbstractMaker
         private FileManager $fileManager,
         private SecurityConfigUpdater $securityConfigUpdater,
         private SecurityControllerBuilder $securityControllerBuilder,
+        private NamespacesHelper $namespacesHelper,
     ) {
     }
 
@@ -126,7 +128,7 @@ final class MakeFormLogin extends AbstractMaker
             Validator::validateClassName(...)
         );
 
-        $securityHelper = new InteractiveSecurityHelper();
+        $securityHelper = new InteractiveSecurityHelper($this->namespacesHelper);
         $this->firewallToUpdate = $securityHelper->guessFirewallName($io, $securityData);
         $this->userClass = $securityHelper->guessUserClass($io, $securityData['security']['providers']);
         $this->userNameField = $securityHelper->guessUserNameField($io, $this->userClass, $securityData['security']['providers']);
