@@ -1,0 +1,23 @@
+---------------------------------------------------------------------------
+
+by nikophil at 2025-11-03T16:23:11Z
+
+hi!
+
+is there some other work to do in order to merge this PR?
+
+the build has expired, and I cannot see what are the failures, but it seems they are not related to Sf 8
+
+---------------------------------------------------------------------------
+
+by Kocal at 2025-11-03T18:43:00Z
+
+Hey, I will rebase but AFAIK errors were not related to Symfony 8
+
+---------------------------------------------------------------------------
+
+by Kocal at 2025-11-07T21:45:57Z
+
+Finally a green CI 🤩
+
+The Symfony 8 job is failing because there is no symfony/skeleton package for Symfony 8, but it should be fine
