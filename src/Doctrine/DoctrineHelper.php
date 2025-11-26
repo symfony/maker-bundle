@@ -155,7 +155,6 @@ final class DoctrineHelper
                 if ($attributeDriver instanceof AttributeDriver) {
                     $classNames = (new \ReflectionClass(AttributeDriver::class))->getProperty('classNames');
 
-                    $classNames->setAccessible(true);
                     $classNames->setValue($attributeDriver, null);
                 }
             }

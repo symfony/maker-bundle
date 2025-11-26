@@ -75,10 +75,7 @@ class MakerTestKernel extends Kernel implements CompilerPassInterface
         return $this->testRootDir;
     }
 
-    /**
-     * @return void
-     */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         // makes all makers public to help the tests
         foreach ($container->findTaggedServiceIds(MakeCommandRegistrationPass::MAKER_TAG) as $id => $tags) {

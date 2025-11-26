@@ -4,7 +4,7 @@ namespace App\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class GeneratedTwigComponentTest extends KernelTestCase
+class GeneratedLiveComponentTest extends KernelTestCase
 {
     public function testController()
     {

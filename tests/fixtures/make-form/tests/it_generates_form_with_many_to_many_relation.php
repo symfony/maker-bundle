@@ -12,8 +12,8 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bridge\Doctrine\Form\DoctrineOrmExtension;
-use Symfony\Component\Form\PreloadedExtension;
 use Symfony\Component\Form\Test\TypeTestCase;
 
 class GeneratedFormTest extends TypeTestCase
@@ -21,6 +21,7 @@ class GeneratedFormTest extends TypeTestCase
     /**
      * @dataProvider provideFormData
      */
+    #[DataProvider('provideFormData')]
     public function testGeneratedFormWithMultipleChoices($formData, $collection)
     {
         $form = $this->factory->create(BookType::class);
@@ -40,7 +41,7 @@ class GeneratedFormTest extends TypeTestCase
         }
     }
 
-    public function provideFormData(): iterable
+    public static function provideFormData(): iterable
     {
         yield 'test_submit_with_single_choice_selected' =>
         [
@@ -52,7 +53,8 @@ class GeneratedFormTest extends TypeTestCase
                 (new Library())->setName('bar'),
             ]),
         ];
-        yield ['test_submit_with_multiple_choices_selected' =>
+        yield 'test_submit_with_multiple_choices_selected' =>
+        [
             [
                 'title' => 'foobar',
                 'libraries' => [0, 1],
@@ -62,7 +64,8 @@ class GeneratedFormTest extends TypeTestCase
                 (new Library())->setName('bar'),
             ]),
         ];
-        yield ['test_submit_with_no_choice_selected' =>
+        yield 'test_submit_with_no_choice_selected' =>
+        [
             [
                 'title' => 'foobar',
                 'libraries' => [],

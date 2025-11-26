@@ -35,7 +35,7 @@ use SymfonyDocsBuilder\DocBuilder;
             ->setImagesDir(__DIR__.'/output/_images')
             ->setImagesPublicPrefix('_images')
             ->setTheme('rtd')
-            ->diableBuildCache()
+            ->disableBuildCache()
         ;
 
         $buildConfig->setExcludedPaths(['.github/', '_build/']);

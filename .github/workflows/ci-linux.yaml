@@ -45,13 +45,23 @@ jobs:
                     - '8.3'
                 symfony-version:
                     - '6.4.*'
-                    - '7.2.*'
+                    - '7.3.*'
                 dependency-versions: ['highest']
                 include:
                     # testing lowest PHP+dependencies with lowest Symfony
                     - php-version: '8.1'
                       symfony-version: '6.4.*'
                       dependency-versions: 'lowest'
+
+                    # unreleased Symfony 7.4
+                    - php-version: '8.2'
+                      symfony-version: '^7.4.0-RC2'
+                      dependency-versions: 'highest'
+
+                    # unreleased Symfony 8.0
+                    - php-version: '8.4'
+                      symfony-version: '^8.0.0-RC2'
+                      dependency-versions: 'highest'
 
         steps:
             - name: Checkout code

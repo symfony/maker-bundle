@@ -38,7 +38,7 @@ final class UserClassBuilder
 
         $this->addPasswordImplementation($manipulator, $userClassConfig);
 
-        if (class_exists(IsGrantedContext::class)) {
+        if (class_exists(IsGrantedContext::class) && $userClassConfig->hasPassword()) {
             $this->addSerialize($manipulator);
         }
 
