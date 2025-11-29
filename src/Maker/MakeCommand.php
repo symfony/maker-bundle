@@ -129,9 +129,8 @@ final class MakeCommand extends AbstractMaker
         $description = $io->ask('Enter a short description for your command');
 
         $useStatements = new UseStatementGenerator([
-            Argument::class,
             AsCommand::class,
-            Command::class,
+            Argument::class,
             Option::class,
             SymfonyStyle::class,
         ]);
