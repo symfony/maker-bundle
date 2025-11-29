@@ -28,6 +28,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\Kernel;
 
@@ -90,6 +91,14 @@ final class MakeCommand extends AbstractMaker
         $input->getOption('invokable') ? 
             $this->generateInvokableCommand($commandName, $commandClassNameDetails, $io, $generator) : 
             $this->generateInheritanceCommand($commandName, $commandClassNameDetails, $io, $generator);
+
+        $generator->writeChanges();
+
+        $this->writeSuccessMessage($io);
+        $io->text([
+            'Next: open your new command class and customize it!',
+            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/console.html</>',
+        ]);
     }
 
     private function generateInheritanceCommand(string $commandName, ClassNameDetails $commandClassNameDetails, ConsoleStyle $io, Generator $generator): void
@@ -113,18 +122,12 @@ final class MakeCommand extends AbstractMaker
                 'set_description' => !class_exists(LazyCommand::class),
             ]
         );
-
-        $generator->writeChanges();
-
-        $this->writeSuccessMessage($io);
-        $io->text([
-            'Next: open your new command class and customize it!',
-            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/console.html</>',
-        ]);
     }
 
     private function generateInvokableCommand(string $commandName, ClassNameDetails $commandClassNameDetails, ConsoleStyle $io, Generator $generator): void
     {
+        $description = $io->ask('Enter a short description for your command');
+
         $useStatements = new UseStatementGenerator([
             Argument::class,
             AsCommand::class,
@@ -139,16 +142,9 @@ final class MakeCommand extends AbstractMaker
             [
                 'use_statements' => $useStatements,
                 'command_name' => $commandName,
+                'command_description' => $description,
             ]
         );
-
-        $generator->writeChanges();
-
-        $this->writeSuccessMessage($io);
-        $io->text([
-            'Next: open your new command class and customize it!',
-            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/console.html</>',
-        ]);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void

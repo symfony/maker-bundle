@@ -6,7 +6,7 @@ namespace <?= $namespace; ?>;
 
 #[AsCommand(
     name: '<?= $command_name; ?>',
-    description: 'Add a short description for your command',
+    description: '<?= $command_description; ?>',
 )]
 class <?= $class_name; ?>
 {
