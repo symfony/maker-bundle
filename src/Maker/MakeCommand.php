@@ -30,8 +30,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\Kernel;
-use function is_string;
-use function sprintf;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -45,7 +43,7 @@ final class MakeCommand extends AbstractMaker
             @trigger_deprecation(
                 'symfony/maker-bundle',
                 '1.55.0',
-                sprintf('Initializing MakeCommand while providing an instance of "%s" is deprecated. The $phpCompatUtil param will be removed in a future version.', PhpCompatUtil::class),
+                \sprintf('Initializing MakeCommand while providing an instance of "%s" is deprecated. The $phpCompatUtil param will be removed in a future version.', PhpCompatUtil::class),
             );
         }
     }
@@ -63,7 +61,7 @@ final class MakeCommand extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->addArgument('name', InputArgument::OPTIONAL, sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
+            ->addArgument('name', InputArgument::OPTIONAL, \sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
             ->setHelp($this->getHelpFileContents('MakeCommand.txt'));
 
         if ($this->supportsInvokableCommand()) {
@@ -73,11 +71,6 @@ final class MakeCommand extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-        if (true !== $input->getOption('invokable') && $this->supportsInvokableCommand()) {
-            $wantsInvokable = $io->confirm('Would you like this command to be inokvable?', false);
-            $input->setOption('invokable', $wantsInvokable);
-        }
-
         $commandName = trim($input->getArgument('name'));
         $commandNameHasAppPrefix = str_starts_with($commandName, 'app:');
 
@@ -85,7 +78,7 @@ final class MakeCommand extends AbstractMaker
             $commandNameHasAppPrefix ? substr($commandName, 4) : $commandName,
             'Command\\',
             'Command',
-            sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, Str::asClassName($commandName, 'Command'))
+            \sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, Str::asClassName($commandName, 'Command'))
         );
 
         $input->getOption('invokable') ?
@@ -133,8 +126,8 @@ final class MakeCommand extends AbstractMaker
         }
 
         $description = $io->ask('What is the command description?');
-        if (false === is_string($description)) {
-            $description = (string)$description;
+        if (false === \is_string($description)) {
+            $description = (string) $description;
         }
 
         $arguments = $this->askForArguments($io);
@@ -169,8 +162,9 @@ final class MakeCommand extends AbstractMaker
     }
 
     /**
-     * @param array<int, array{name: string, type: string, description: string|null, default: mixed, nullable: bool}> $arguments
+     * @param array<int, array{name: string, type: string, description: string|null, default: mixed, nullable: bool}>        $arguments
      * @param array<int, array{name: string, shortcut: string|null, type: string, description: string|null, default: mixed}> $options
+     *
      * @return array<int, array{name: string, type: string, description: string|null, default: mixed, nullable?: bool, shortcut?: string|null, param_type: string}>
      */
     private function mergeAndSortParameters(array $arguments, array $options): array
@@ -200,6 +194,7 @@ final class MakeCommand extends AbstractMaker
         return $parameters;
     }
 
+    /** @param array{default: mixed, param_type: string, nullable?: bool} $param */
     private function parameterHasDefault(array $param): bool
     {
         if ('argument' === $param['param_type']) {
@@ -216,6 +211,8 @@ final class MakeCommand extends AbstractMaker
      */
     private function askForArguments(ConsoleStyle $io): array
     {
+        $io->writeln('Now, let\'s add some arguments.');
+
         $arguments = [];
         $isFirst = true;
 
@@ -236,7 +233,7 @@ final class MakeCommand extends AbstractMaker
 
                 foreach ($arguments as $arg) {
                     if ($arg['name'] === $name) {
-                        throw new \InvalidArgumentException(sprintf('The "%s" argument already exists.', $name));
+                        throw new \InvalidArgumentException(\sprintf('The "%s" argument already exists.', $name));
                     }
                 }
 
@@ -255,41 +252,12 @@ final class MakeCommand extends AbstractMaker
                 'string'
             );
 
-            $nullable = $io->confirm('Is this argument nullable?', false);
-
-            $description = $io->ask('What is the argument description?', null);
-            if (!is_string($description) && null !== $description) {
-                $description = (string)$description;
-            }
-
-            $hasDefault = $io->confirm('Does this argument have a default value?', false);
-            $default = null;
-            if ($hasDefault) {
-                if ('bool' === $type) {
-                    $default = $io->confirm('What is the default value?', false);
-                } elseif ('int' === $type) {
-                    $default = (int)$io->ask('What is the default value?', '0');
-                } elseif ('float' === $type) {
-                    $default = (float)$io->ask('What is the default value?', '0.0');
-                } elseif ('array' === $type) {
-                    $defaultValue = $io->ask('What is the default value?', '[]');
-                    $default = '[]' === $defaultValue ? [] : $defaultValue;
-                } else {
-                    $default = $io->ask('What is the default value?', '');
-                    if (!is_string($default)) {
-                        $default = (string)$default;
-                    }
-                }
-            } elseif ($nullable) {
-                $default = null;
-            }
-
             $arguments[] = [
                 'name' => $name,
                 'type' => $type,
-                'description' => $description,
-                'default' => $default,
-                'nullable' => $nullable,
+                'description' => $this->askForParameterDescription($io),
+                'default' => $this->askForDefaults($io, $type),
+                'nullable' => $io->confirm('Is this argument nullable?', false),
             ];
         }
 
@@ -301,6 +269,8 @@ final class MakeCommand extends AbstractMaker
      */
     private function askForOptions(ConsoleStyle $io): array
     {
+        $io->writeln('Now, let\'s add some options.');
+
         $options = [];
         $isFirst = true;
 
@@ -321,7 +291,7 @@ final class MakeCommand extends AbstractMaker
 
                 foreach ($options as $opt) {
                     if ($opt['name'] === $name) {
-                        throw new \InvalidArgumentException(sprintf('The "%s" option already exists.', $name));
+                        throw new \InvalidArgumentException(\sprintf('The "%s" option already exists.', $name));
                     }
                 }
 
@@ -335,8 +305,8 @@ final class MakeCommand extends AbstractMaker
             $isFirst = false;
 
             $shortcut = $io->ask('What is the option shortcut?', null);
-            if (!is_string($shortcut) && null !== $shortcut) {
-                $shortcut = (string)$shortcut;
+            if (!\is_string($shortcut) && null !== $shortcut) {
+                $shortcut = (string) $shortcut;
             }
 
             $type = $io->choice(
@@ -345,38 +315,58 @@ final class MakeCommand extends AbstractMaker
                 'bool'
             );
 
-            $description = $io->ask('What is the option description?', null);
-            if (!is_string($description) && null !== $description) {
-                $description = (string)$description;
-            }
-
-            $default = null;
-            if ('bool' === $type) {
-                $default = $io->confirm('What is the default value?', false);
-            } elseif ('int' === $type) {
-                $default = (int)$io->ask('What is the default value?', '0');
-            } elseif ('float' === $type) {
-                $default = (float)$io->ask('What is the default value?', '0.0');
-            } elseif ('array' === $type) {
-                $defaultValue = $io->ask('What is the default value?', '[]');
-                $default = '[]' === $defaultValue ? [] : $defaultValue;
-            } else {
-                $default = $io->ask('What is the default value?', '');
-                if (!is_string($default)) {
-                    $default = (string)$default;
-                }
-            }
-
             $options[] = [
                 'name' => $name,
                 'shortcut' => $shortcut,
                 'type' => $type,
-                'description' => $description,
-                'default' => $default,
+                'description' => $this->askForParameterDescription($io),
+                'default' => $this->askForDefaults($io, $type),
             ];
         }
 
         return $options;
+    }
+
+    private function askForParameterDescription(ConsoleStyle $io): ?string
+    {
+        $description = $io->ask('What is the description?', null);
+        if (null !== $description && !\is_string($description)) {
+            $description = (string) $description;
+        }
+
+        if (false === \is_scalar($description)) {
+            $description = null;
+        }
+
+        return $description;
+    }
+
+    private function askForDefaults(ConsoleStyle $io, string $type): mixed
+    {
+        $hasDefault = $io->confirm('Does it have a default value?', false);
+
+        if (false === $hasDefault) {
+            return null;
+        }
+
+        if ('bool' === $type) {
+            return $io->confirm('What is the default value?', false);
+        } elseif ('int' === $type) {
+            return (int) $io->ask('What is the default value?', '0');
+        } elseif ('float' === $type) {
+            return (float) $io->ask('What is the default value?', '0.0');
+        } elseif ('array' === $type) {
+            $defaultValue = $io->ask('What is the default value?', '[]');
+
+            return '[]' === $defaultValue ? [] : $defaultValue;
+        } else {
+            $default = $io->ask('What is the default value?', '');
+            if (true === \is_scalar($default)) {
+                return (string) $default;
+            }
+
+            return null;
+        }
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void
