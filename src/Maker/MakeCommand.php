@@ -65,7 +65,7 @@ final class MakeCommand extends AbstractMaker
             ->setHelp($this->getHelpFileContents('MakeCommand.txt'));
 
         if ($this->supportsInvokableCommand()) {
-            $command->addOption('invokable', 'i', InputOption::VALUE_NONE, 'Use this option to create an invokable command');
+            $command->addOption('invokable', 'i', InputOption::VALUE_NEGATABLE, 'Use this option to create an invokable command', default: $this->supportsInvokableCommand());
         }
     }
 
@@ -237,7 +237,7 @@ final class MakeCommand extends AbstractMaker
                     }
                 }
 
-                return $name;
+                return Str::asLowerCamelCase(strtr($name, ['-' => ' ']));
             });
 
             if (!$name) {
@@ -295,7 +295,7 @@ final class MakeCommand extends AbstractMaker
                     }
                 }
 
-                return $name;
+                return Str::asLowerCamelCase(strtr($name, ['-' => ' ']));
             });
 
             if (!$name) {
@@ -304,23 +304,23 @@ final class MakeCommand extends AbstractMaker
 
             $isFirst = false;
 
-            $shortcut = $io->ask('What is the option shortcut?', null);
+            $shortcut = $io->ask('What is the option shortcut?');
             if (!\is_string($shortcut) && null !== $shortcut) {
                 $shortcut = (string) $shortcut;
             }
 
             $type = $io->choice(
                 'What is the option type?',
-                ['bool', 'string', 'int', 'float', 'array'],
+                ['bool', 'string', 'int', 'float'],
                 'bool'
             );
 
             $options[] = [
-                'name' => $name,
+                'name' => Str::asLowerCamelCase($name),
                 'shortcut' => $shortcut,
                 'type' => $type,
                 'description' => $this->askForParameterDescription($io),
-                'default' => $this->askForDefaults($io, $type),
+                'default' => $this->askForDefaults($io, $type, true),
             ];
         }
 
@@ -341,12 +341,14 @@ final class MakeCommand extends AbstractMaker
         return $description;
     }
 
-    private function askForDefaults(ConsoleStyle $io, string $type): mixed
+    private function askForDefaults(ConsoleStyle $io, string $type, bool $force = false): mixed
     {
-        $hasDefault = $io->confirm('Does it have a default value?', false);
+        if (false === $force) {
+            $hasDefault = $io->confirm('Does it have a default value?', false);
 
-        if (false === $hasDefault) {
-            return null;
+            if (false === $hasDefault) {
+                return null;
+            }
         }
 
         if ('bool' === $type) {
