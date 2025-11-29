@@ -16,7 +16,7 @@ namespace Symfony\Bundle\MakerBundle\Security\Model;
  *
  * @internal
  */
-final class Authenticator
+final class Authenticator implements \Stringable
 {
     public function __construct(
         public AuthenticatorType $type,
