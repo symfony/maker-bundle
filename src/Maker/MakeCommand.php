@@ -81,7 +81,7 @@ final class MakeCommand extends AbstractMaker
             \sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, Str::asClassName($commandName, 'Command'))
         );
 
-        $input->getOption('invokable') ?
+        $this->supportsInvokableCommand() && $input->getOption('invokable') ?
             $this->generateInvokableCommand($commandName, $commandClassNameDetails, $io, $generator) :
             $this->generateInheritanceCommand($commandName, $commandClassNameDetails, $io, $generator);
     }
