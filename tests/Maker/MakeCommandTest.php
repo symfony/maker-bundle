@@ -26,25 +26,24 @@ class MakeCommandTest extends MakerTestCase
 
     public function getTestDetails(): \Generator
     {
-        $supportsInvokable = Kernel::VERSION_ID >= 70300;
-
         yield 'it_makes_a_command_no_attributes' => [$this->createMakerTest()
-            ->run(function (MakerTestRunner $runner) use ($supportsInvokable) {
+            ->run(function (MakerTestRunner $runner) {
+
                 $runner->runMaker([
                     // command name
                     'app:foo',
-                ], $supportsInvokable ? '--no-invokable' : '');
+                ], $runner->getSymfonyVersion() >= 70300 ? '--no-invokable' : '');
 
                 $this->runCommandTest($runner, 'it_makes_a_command.php');
             }),
         ];
 
         yield 'it_makes_a_command_with_attributes' => [$this->createMakerTest()
-            ->run(function (MakerTestRunner $runner) use ($supportsInvokable) {
+            ->run(function (MakerTestRunner $runner) {
                 $runner->runMaker([
                     // command name
                     'app:foo',
-                ], $supportsInvokable ? '--no-invokable' : '');
+                ], $runner->getSymfonyVersion() >= 70300 ? '--no-invokable' : '');
 
                 $this->runCommandTest($runner, 'it_makes_a_command.php');
 
@@ -57,7 +56,7 @@ class MakeCommandTest extends MakerTestCase
 
         yield 'it_makes_a_command_in_custom_namespace' => [$this->createMakerTest()
             ->changeRootNamespace('Custom')
-            ->run(function (MakerTestRunner $runner) use ($supportsInvokable) {
+            ->run(function (MakerTestRunner $runner) {
                 $runner->writeFile(
                     'config/packages/dev/maker.yaml',
                     Yaml::dump(['maker' => ['root_namespace' => 'Custom']])
@@ -66,68 +65,74 @@ class MakeCommandTest extends MakerTestCase
                 $runner->runMaker([
                     // command name
                     'app:foo',
-                ], $supportsInvokable ? '--no-invokable' : '');
+                ], $runner->getSymfonyVersion() >= 70300 ? '--no-invokable' : '');
 
                 $this->runCommandTest($runner, 'it_makes_a_command_in_custom_namespace.php');
             }),
         ];
 
-        if ($supportsInvokable) {
-            yield 'it_makes_an_invokable_command_by_default' => [$this->createMakerTest()
-                ->run(function (MakerTestRunner $runner) {
-                    $runner->runMaker([
-                        // command name
-                        'app:foo',
-                        'foo',
-                        '',
-                        '',
-                    ]);
+        yield 'it_makes_an_invokable_command_by_default' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                if ($runner->getSymfonyVersion() < 70300) {
+                    $this->markTestSkipped('Symfony version does not support Invokable Commands');
+                }
 
-                    $this->runCommandTest($runner, 'it_makes_a_command.php');
+                $runner->runMaker([
+                    // command name
+                    'app:foo',
+                    'foo',
+                    '',
+                    '',
+                ]);
 
-                    $commandFileContents = file_get_contents($runner->getPath('src/Command/FooCommand.php'));
+                $this->runCommandTest($runner, 'it_makes_a_command.php');
 
-                    self::assertStringContainsString('use Symfony\Component\Console\Attribute\AsCommand;', $commandFileContents);
-                    self::assertStringContainsString('#[AsCommand(', $commandFileContents);
-                    self::assertStringNotContainsString('extends Command', $commandFileContents);
-                    self::assertStringContainsString('__invoke(', $commandFileContents);
-                }),
-            ];
+                $commandFileContents = file_get_contents($runner->getPath('src/Command/FooCommand.php'));
 
-            yield 'it_makes_an_invokable_and_configures_parameters' => [$this->createMakerTest()
-                ->run(function (MakerTestRunner $runner) {
-                    $runner->runMaker([
-                        // command name
-                        'app:foo',
-                        'foo',
-                        'bar', // Argument name
-                        0, // Argument type (string)
-                        'Adds a bar argument to your command', // Argument description
-                        'no', // Has no default value
-                        'yes', // Is nullable
-                        'baz', // Second argument, will be required
-                        1, // Second type (int)
-                        'How many bazzes do you need?', // Second argument description
-                        'no', // Second argument no default
-                        'no', // Second argument not nullable
-                        '', // Stop Arguments
-                        'dry-run', // Option name
-                        'd', // Option shortcut
-                        0, // Option type (boolean)
-                        'Perform a dry run?',
-                        'no', // Default value (false)
-                        '', // Stop option insertion
-                    ]);
+                self::assertStringContainsString('use Symfony\Component\Console\Attribute\AsCommand;', $commandFileContents);
+                self::assertStringContainsString('#[AsCommand(', $commandFileContents);
+                self::assertStringNotContainsString('extends Command', $commandFileContents);
+                self::assertStringContainsString('__invoke(', $commandFileContents);
+            }),
+        ];
 
-                    $commandFileContents = file_get_contents($runner->getPath('src/Command/FooCommand.php'));
+        yield 'it_makes_an_invokable_and_configures_parameters' => [$this->createMakerTest()
+            ->run(function (MakerTestRunner $runner) {
+                if ($runner->getSymfonyVersion() < 70300) {
+                    $this->markTestSkipped('Symfony version does not support Invokable Commands');
+                }
 
-                    self::assertStringContainsString('__invoke(', $commandFileContents);
-                    self::assertStringContainsString('#[Argument(description: \'How many bazzes do you need?\')] int $baz,', $commandFileContents);
-                    self::assertStringContainsString('#[Argument(description: \'Adds a bar argument to your command\')] ?string $bar = null', $commandFileContents);
-                    self::assertStringContainsString('#[Option(description: \'Perform a dry run?\', shortcut: \'d\')] bool $dryRun = false', $commandFileContents);
-                }),
-            ];
-        }
+                $runner->runMaker([
+                    // command name
+                    'app:foo',
+                    'foo',
+                    'bar', // Argument name
+                    0, // Argument type (string)
+                    'Adds a bar argument to your command', // Argument description
+                    'no', // Has no default value
+                    'yes', // Is nullable
+                    'baz', // Second argument, will be required
+                    1, // Second type (int)
+                    'How many bazzes do you need?', // Second argument description
+                    'no', // Second argument no default
+                    'no', // Second argument not nullable
+                    '', // Stop Arguments
+                    'dry-run', // Option name
+                    'd', // Option shortcut
+                    0, // Option type (boolean)
+                    'Perform a dry run?',
+                    'no', // Default value (false)
+                    '', // Stop option insertion
+                ]);
+
+                $commandFileContents = file_get_contents($runner->getPath('src/Command/FooCommand.php'));
+
+                self::assertStringContainsString('__invoke(', $commandFileContents);
+                self::assertStringContainsString('#[Argument(description: \'How many bazzes do you need?\')] int $baz,', $commandFileContents);
+                self::assertStringContainsString('#[Argument(description: \'Adds a bar argument to your command\')] ?string $bar = null', $commandFileContents);
+                self::assertStringContainsString('#[Option(description: \'Perform a dry run?\', shortcut: \'d\')] bool $dryRun = false', $commandFileContents);
+            }),
+        ];
     }
 
     private function runCommandTest(MakerTestRunner $runner, string $filename): void
