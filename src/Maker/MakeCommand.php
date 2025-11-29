@@ -28,9 +28,10 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\Kernel;
+use function is_string;
+use function sprintf;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -44,7 +45,7 @@ final class MakeCommand extends AbstractMaker
             @trigger_deprecation(
                 'symfony/maker-bundle',
                 '1.55.0',
-                \sprintf('Initializing MakeCommand while providing an instance of "%s" is deprecated. The $phpCompatUtil param will be removed in a future version.', PhpCompatUtil::class),
+                sprintf('Initializing MakeCommand while providing an instance of "%s" is deprecated. The $phpCompatUtil param will be removed in a future version.', PhpCompatUtil::class),
             );
         }
     }
@@ -62,9 +63,8 @@ final class MakeCommand extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
-            ->addArgument('name', InputArgument::OPTIONAL, \sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
-            ->setHelp($this->getHelpFileContents('MakeCommand.txt'))
-        ;
+            ->addArgument('name', InputArgument::OPTIONAL, sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
+            ->setHelp($this->getHelpFileContents('MakeCommand.txt'));
 
         if ($this->supportsInvokableCommand()) {
             $command->addOption('invokable', 'i', InputOption::VALUE_NONE, 'Use this option to create an invokable command');
@@ -85,20 +85,12 @@ final class MakeCommand extends AbstractMaker
             $commandNameHasAppPrefix ? substr($commandName, 4) : $commandName,
             'Command\\',
             'Command',
-            \sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, Str::asClassName($commandName, 'Command'))
+            sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, Str::asClassName($commandName, 'Command'))
         );
 
-        $input->getOption('invokable') ? 
-            $this->generateInvokableCommand($commandName, $commandClassNameDetails, $io, $generator) : 
+        $input->getOption('invokable') ?
+            $this->generateInvokableCommand($commandName, $commandClassNameDetails, $io, $generator) :
             $this->generateInheritanceCommand($commandName, $commandClassNameDetails, $io, $generator);
-
-        $generator->writeChanges();
-
-        $this->writeSuccessMessage($io);
-        $io->text([
-            'Next: open your new command class and customize it!',
-            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/console.html</>',
-        ]);
     }
 
     private function generateInheritanceCommand(string $commandName, ClassNameDetails $commandClassNameDetails, ConsoleStyle $io, Generator $generator): void
@@ -122,15 +114,36 @@ final class MakeCommand extends AbstractMaker
                 'set_description' => !class_exists(LazyCommand::class),
             ]
         );
+
+        $generator->writeChanges();
+
+        $this->writeSuccessMessage($io);
+        $io->text([
+            'Next: open your new command class and customize it!',
+            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/console.html</>',
+        ]);
     }
 
     private function generateInvokableCommand(string $commandName, ClassNameDetails $commandClassNameDetails, ConsoleStyle $io, Generator $generator): void
     {
-        $description = $io->ask('Enter a short description for your command');
+        if (class_exists($commandClassNameDetails->getFullName())) {
+            $io->error('This command already exists.');
+
+            return;
+        }
+
+        $description = $io->ask('What is the command description?');
+        if (false === is_string($description)) {
+            $description = (string)$description;
+        }
+
+        $arguments = $this->askForArguments($io);
+        $options = $this->askForOptions($io);
 
         $useStatements = new UseStatementGenerator([
             AsCommand::class,
             Argument::class,
+            Command::class,
             Option::class,
             SymfonyStyle::class,
         ]);
@@ -142,8 +155,228 @@ final class MakeCommand extends AbstractMaker
                 'use_statements' => $useStatements,
                 'command_name' => $commandName,
                 'command_description' => $description,
+                'command_parameters' => $this->mergeAndSortParameters($arguments, $options),
             ]
         );
+
+        $generator->writeChanges();
+
+        $this->writeSuccessMessage($io);
+        $io->text([
+            'Next: open your new command class and customize it!',
+            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/console.html</>',
+        ]);
+    }
+
+    /**
+     * @param array<int, array{name: string, type: string, description: string|null, default: mixed, nullable: bool}> $arguments
+     * @param array<int, array{name: string, shortcut: string|null, type: string, description: string|null, default: mixed}> $options
+     * @return array<int, array{name: string, type: string, description: string|null, default: mixed, nullable?: bool, shortcut?: string|null, param_type: string}>
+     */
+    private function mergeAndSortParameters(array $arguments, array $options): array
+    {
+        // Merge arguments and options, marking each with its type
+        $parameters = [];
+        foreach ($arguments as $arg) {
+            $parameters[] = array_merge($arg, ['param_type' => 'argument']);
+        }
+        foreach ($options as $opt) {
+            $parameters[] = array_merge($opt, ['param_type' => 'option']);
+        }
+
+        // Sort parameters: required parameters (no defaults) must come before optional ones (with defaults)
+        usort($parameters, function ($a, $b) {
+            $aHasDefault = $this->parameterHasDefault($a);
+            $bHasDefault = $this->parameterHasDefault($b);
+
+            if ($aHasDefault === $bHasDefault) {
+                return 0; // Keep original order within same group (required with required, optional with optional)
+            }
+
+            // Required (no default) comes before optional (has default)
+            return $aHasDefault ? 1 : -1;
+        });
+
+        return $parameters;
+    }
+
+    private function parameterHasDefault(array $param): bool
+    {
+        if ('argument' === $param['param_type']) {
+            // Arguments have defaults if explicitly set or if nullable
+            return null !== $param['default'] || ($param['nullable'] ?? false);
+        }
+
+        // Options always have defaults
+        return true;
+    }
+
+    /**
+     * @return array<int, array{name: string, type: string, description: string|null, default: mixed, nullable: bool}>
+     */
+    private function askForArguments(ConsoleStyle $io): array
+    {
+        $arguments = [];
+        $isFirst = true;
+
+        while (true) {
+            $io->writeln('');
+
+            if ($isFirst) {
+                $questionText = 'Argument name? (press <return> to stop adding arguments)';
+            } else {
+                $questionText = 'Add another argument? Enter the argument name (or press <return> to stop adding arguments)';
+            }
+
+            $name = $io->ask($questionText, null, function ($name) use ($arguments) {
+                // allow it to be empty
+                if (!$name) {
+                    return $name;
+                }
+
+                foreach ($arguments as $arg) {
+                    if ($arg['name'] === $name) {
+                        throw new \InvalidArgumentException(sprintf('The "%s" argument already exists.', $name));
+                    }
+                }
+
+                return $name;
+            });
+
+            if (!$name) {
+                break;
+            }
+
+            $isFirst = false;
+
+            $type = $io->choice(
+                'What is the argument type?',
+                ['string', 'int', 'float', 'bool', 'array'],
+                'string'
+            );
+
+            $nullable = $io->confirm('Is this argument nullable?', false);
+
+            $description = $io->ask('What is the argument description?', null);
+            if (!is_string($description) && null !== $description) {
+                $description = (string)$description;
+            }
+
+            $hasDefault = $io->confirm('Does this argument have a default value?', false);
+            $default = null;
+            if ($hasDefault) {
+                if ('bool' === $type) {
+                    $default = $io->confirm('What is the default value?', false);
+                } elseif ('int' === $type) {
+                    $default = (int)$io->ask('What is the default value?', '0');
+                } elseif ('float' === $type) {
+                    $default = (float)$io->ask('What is the default value?', '0.0');
+                } elseif ('array' === $type) {
+                    $defaultValue = $io->ask('What is the default value?', '[]');
+                    $default = '[]' === $defaultValue ? [] : $defaultValue;
+                } else {
+                    $default = $io->ask('What is the default value?', '');
+                    if (!is_string($default)) {
+                        $default = (string)$default;
+                    }
+                }
+            } elseif ($nullable) {
+                $default = null;
+            }
+
+            $arguments[] = [
+                'name' => $name,
+                'type' => $type,
+                'description' => $description,
+                'default' => $default,
+                'nullable' => $nullable,
+            ];
+        }
+
+        return $arguments;
+    }
+
+    /**
+     * @return array<int, array{name: string, shortcut: string|null, type: string, description: string|null, default: mixed}>
+     */
+    private function askForOptions(ConsoleStyle $io): array
+    {
+        $options = [];
+        $isFirst = true;
+
+        while (true) {
+            $io->writeln('');
+
+            if ($isFirst) {
+                $questionText = 'What is the option name?';
+            } else {
+                $questionText = 'What is the next option name?';
+            }
+
+            $name = $io->ask($questionText, null, function ($name) use ($options) {
+                // allow it to be empty
+                if (!$name) {
+                    return $name;
+                }
+
+                foreach ($options as $opt) {
+                    if ($opt['name'] === $name) {
+                        throw new \InvalidArgumentException(sprintf('The "%s" option already exists.', $name));
+                    }
+                }
+
+                return $name;
+            });
+
+            if (!$name) {
+                break;
+            }
+
+            $isFirst = false;
+
+            $shortcut = $io->ask('What is the option shortcut?', null);
+            if (!is_string($shortcut) && null !== $shortcut) {
+                $shortcut = (string)$shortcut;
+            }
+
+            $type = $io->choice(
+                'What is the option type?',
+                ['bool', 'string', 'int', 'float', 'array'],
+                'bool'
+            );
+
+            $description = $io->ask('What is the option description?', null);
+            if (!is_string($description) && null !== $description) {
+                $description = (string)$description;
+            }
+
+            $default = null;
+            if ('bool' === $type) {
+                $default = $io->confirm('What is the default value?', false);
+            } elseif ('int' === $type) {
+                $default = (int)$io->ask('What is the default value?', '0');
+            } elseif ('float' === $type) {
+                $default = (float)$io->ask('What is the default value?', '0.0');
+            } elseif ('array' === $type) {
+                $defaultValue = $io->ask('What is the default value?', '[]');
+                $default = '[]' === $defaultValue ? [] : $defaultValue;
+            } else {
+                $default = $io->ask('What is the default value?', '');
+                if (!is_string($default)) {
+                    $default = (string)$default;
+                }
+            }
+
+            $options[] = [
+                'name' => $name,
+                'shortcut' => $shortcut,
+                'type' => $type,
+                'description' => $description,
+                'default' => $default,
+            ];
+        }
+
+        return $options;
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void
@@ -153,7 +386,7 @@ final class MakeCommand extends AbstractMaker
             'console'
         );
     }
-    
+
     private function supportsInvokableCommand(): bool
     {
         return Kernel::VERSION_ID >= 70300;
