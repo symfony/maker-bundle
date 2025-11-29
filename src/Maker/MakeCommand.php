@@ -64,9 +64,7 @@ final class MakeCommand extends AbstractMaker
             ->addArgument('name', InputArgument::OPTIONAL, \sprintf('Choose a command name (e.g. <fg=yellow>app:%s</>)', Str::asCommand(Str::getRandomTerm())))
             ->setHelp($this->getHelpFileContents('MakeCommand.txt'));
 
-        if ($this->supportsInvokableCommand()) {
             $command->addOption('invokable', 'i', InputOption::VALUE_NEGATABLE, 'Use this option to create an invokable command', default: $this->supportsInvokableCommand());
-        }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
