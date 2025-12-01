@@ -141,7 +141,7 @@ final class MakeCommand extends AbstractMaker
 
         $generator->generateClass(
             $commandClassNameDetails->getFullName(),
-            'command/Command.tpl.php',
+            'command/InvokableCommand.tpl.php',
             [
                 'use_statements' => $useStatements,
                 'command_name' => $commandName,
