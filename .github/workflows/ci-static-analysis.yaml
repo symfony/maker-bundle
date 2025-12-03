@@ -13,8 +13,22 @@ env:
     SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
 
 jobs:
-    coding-standards:
-        name: "Coding Standards"
+    composer-validate:
+        name: "Validate composer.json"
+
+        runs-on: ubuntu-latest
+
+        steps:
+            -
+                name: Checkout code
+                uses: "actions/checkout@v4"
+
+            -
+                name: Validate composer.json
+                run: "composer validate --strict --no-check-lock"
+
+    php-cs-fixer:
+        name: "PHP-CS-Fixer"
 
         runs-on: ubuntu-latest
 
@@ -28,10 +42,6 @@ jobs:
                 uses: "shivammathur/setup-php@v2"
                 with:
                     php-version: 8.2
-
-            -
-                name: Validate composer.json
-                run: "composer validate --strict --no-check-lock"
 
             -
                 name: Composer install
