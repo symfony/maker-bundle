@@ -57,7 +57,7 @@ jobs:
 
             -
                 name: Run PHP-CS-Fixer
-                run: "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --dry-run --diff"
+                run: "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --dry-run --diff --show-progress=none"
 
     phpstan:
         name: PHPStan
