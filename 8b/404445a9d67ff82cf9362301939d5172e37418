@@ -1,0 +1,19 @@
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-01-09T21:23:53Z
+
+PHP-CS-Fixer is run by fabbot since https://github.com/symfony/maker-bundle/pull/1720, so the job can be removed.
+
+---------------------------------------------------------------------------
+
+by alexislefebvre at 2026-01-09T22:28:04Z
+
+We can see the progress of PHP-CS-Fixer here: https://github.com/symfony/maker-bundle/actions/runs/20864577887/job/59952421483?pr=1720
+
+(here is a screenshot in case the logs are expired)
+
+> <img width="994" height="515" alt="image" src="https://github.com/user-attachments/assets/f7433aa5-d42a-4c9c-a1cc-c4f023e0bef7" />
+
+`--show-progress none` is defined here: https://github.com/symfony-tools/fabbot/blob/f1deb7dcbfa4abe7cbf6df8f9a353d2b3def6f19/.github/workflows/fabbot.yml#L54
+
+But this parameter (and the others) is not seen on the logs, despite the fact that this should include this file: https://github.com/symfony/maker-bundle/blob/65712e3cd98556daecb8e2d34a7510d8f5c50a5d/.github/workflows/fabbot.yml#L12
