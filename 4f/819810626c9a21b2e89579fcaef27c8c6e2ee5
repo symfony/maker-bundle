@@ -1,0 +1,55 @@
+---------------------------------------------------------------------------
+
+by xabbuh at 2025-11-27T22:51:20Z
+
+Can you also update the `MakerTestEnvironment` class? You can use #1748 as a reference.
+
+---------------------------------------------------------------------------
+
+by alexislefebvre at 2025-11-27T22:54:01Z
+
+> Can you also update the `MakerTestEnvironment` class? You can use #1748 as a reference.
+
+It looks like you already did it in GH-1748, so we can close my PR and use yours instead?
+
+---------------------------------------------------------------------------
+
+by alexislefebvre at 2025-11-27T22:59:08Z
+
+It's blocked by `doctrine/doctrine-bundle` anyway, I’m preparing a PR for it.
+
+---------------------------------------------------------------------------
+
+by xabbuh at 2025-11-27T23:26:42Z
+
+> It's blocked by `doctrine/doctrine-bundle` anyway, I’m preparing a PR for it.
+
+It’s actually enough to release 3.1 (see https://github.com/doctrine/DoctrineBundle/issues/1910#issuecomment-3584865417).
+
+---------------------------------------------------------------------------
+
+by alexislefebvre at 2025-11-27T23:29:57Z
+
+> > It's blocked by `doctrine/doctrine-bundle` anyway, I’m preparing a PR for it.
+>
+> It’s actually enough to release 3.1 (see [doctrine/DoctrineBundle#1910 (comment)](https://github.com/doctrine/DoctrineBundle/issues/1910#issuecomment-3584865417)).
+
+Thanks! I saw that branch but I assumed that it was for a later release, then I had trouble with the upgrade, but it won’t be necessary. :relieved:
+
+---------------------------------------------------------------------------
+
+by alexislefebvre at 2025-11-29T11:32:29Z
+
+I couldn’t cherry-pick https://github.com/xabbuh/maker-bundle/commit/8397d1e5408ae52ae1cd2da0cccff89aa24ac5d4 from the deleted branch so I had to commit it manually.
+
+---------------------------------------------------------------------------
+
+by alexislefebvre at 2025-12-03T18:00:28Z
+
+I have no idea for fixing the failed tests.
+
+---------------------------------------------------------------------------
+
+by andrewmy at 2026-01-08T06:31:47Z
+
+https://github.com/symfony/panther/pull/678 and https://github.com/php-webdriver/php-webdriver/pull/1134 got merged and released, how about re-running highest deps?
