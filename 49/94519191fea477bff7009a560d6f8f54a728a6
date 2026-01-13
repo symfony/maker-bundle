@@ -1,0 +1,9 @@
+---------------------------------------------------------------------------
+
+by tcoch at 2026-01-13T07:18:58Z
+
+I believe it's good for now to mark tests as incomplete, for two reasons:
+- check L75 : `// Use assertions to check that the properties are properly displayed.`. Wit hthat you state that the generated tests are incomplete
+- When using the command, there's a disclaimer about this being an experimental feature. Marking test as incomplete forces the developer to check what was generated, or at least to remove theses lines.
+
+But yes, moving them at the end of the method is good for the CI!
