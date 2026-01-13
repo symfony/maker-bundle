@@ -1,0 +1,39 @@
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-01-12T10:05:13Z
+
+Good find, thanks for the fix. Could you also add a test case in [MakeCrudTest](https://github.com/symfony/maker-bundle/blob/1.x/tests/Maker/MakeCrudTest.php)?
+You probably need to remove `markTestIncomplete` for the test to run (see https://github.com/symfony/maker-bundle/pull/1774).
+
+Also, the command that uses this template is `make:crud`? You wrote `make:test` in the PR title.
+
+---------------------------------------------------------------------------
+
+by tcoch at 2026-01-12T11:57:11Z
+
+Hi @GromNaN
+
+> Could you also add a test case in [MakeCrudTest](https://github.com/symfony/maker-bundle/blob/1.x/tests/Maker/MakeCrudTest.php)?
+
+I've looked around but I can't seem to find how to test that. My idea would have been to check the generated `SweetFoodControllerTest.php` file, but I can't find a way to retrieve it / it is currently generated in a random folder :(
+Can you help me with that / point me in the right direction please ? How would you do it ?
+
+I fixed the title of the PR, and I got tests running locally.
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-01-12T12:47:10Z
+
+The test must validates that the generated functional test is passing. `$this->runCrudTest` calls `phpunit` for in a generated temporary project. You can duplicate this test case:
+https://github.com/symfony/maker-bundle/blob/88434124a5b736ff8a67cde1fccdea94ad912bc7/tests/Maker/MakeCrudTest.php#L68-L88
+
+But use a different entity class that has a property name that reproduces the bug you fixed.
+
+---------------------------------------------------------------------------
+
+by tcoch at 2026-01-12T21:09:25Z
+
+Thanks to your input @GromNaN , I managed to create a test suite that validates this PR and will prevent the issue from re-appearing.
+I also tried to make it easy to possibly validate other stuffs in the future in the new `tests/fixtures/make-crud/tests/it_generates_correct_class_methods.php` file created (like test the content of the controller form or templates).
+
+I checked locally, if you remove the feature changed in `templates/crud/test/Test.EntityManager.tpl.php` by this PR, the tests will fail.
