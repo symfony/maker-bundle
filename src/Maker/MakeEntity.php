@@ -123,8 +123,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             return;
         }
 
-        $this->checkIsUsingUid($input);
-
         $argument = $command->getDefinition()->getArgument('name');
         $question = $this->createEntityClassQuestion($argument->getDescription());
         $entityClassName ??= $io->askQuestion($question);
@@ -171,6 +169,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        $this->checkIsUsingUid($input);
         $overwrite = $input->getOption('overwrite');
 
         // the regenerate option has entirely custom behavior
