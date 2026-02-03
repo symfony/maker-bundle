@@ -544,7 +544,15 @@ class YamlSourceManipulator
         }
 
         $nextLineBreak = $this->findNextLineBreak($this->currentPosition);
-        if ('}' === trim(substr($this->contents, $this->currentPosition, $nextLineBreak - $this->currentPosition))) {
+        if (false === $nextLineBreak) {
+            $this->log('The last line, going to EOL');
+            $this->advanceToEndOfLine();
+
+            return;
+        }
+
+        $lastSymbolBeforeLineBreak = trim(substr($this->contents, $this->currentPosition, $nextLineBreak - $this->currentPosition));
+        if (\in_array($lastSymbolBeforeLineBreak, ['}', ']'], true)) {
             $this->log('The line ends with an array closing brace, going to EOL');
             $this->advanceToEndOfLine();
         }
