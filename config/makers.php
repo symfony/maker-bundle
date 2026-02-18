@@ -101,6 +101,13 @@ return static function (ContainerConfigurator $container) {
         ->args([service('maker.event_registry')])
         ->tag('maker.command');
 
+    $services->set('maker.maker.make_doctrine_listener', \Symfony\Bundle\MakerBundle\Maker\MakeDoctrineListener::class)
+        ->args([
+            service('maker.doctrine.event_registry'),
+            service('maker.doctrine_helper'),
+        ])
+        ->tag('maker.command');
+
     $services->set('maker.maker.make_message', \Symfony\Bundle\MakerBundle\Maker\MakeMessage::class)
         ->args([service('maker.file_manager')])
         ->tag('maker.command');
