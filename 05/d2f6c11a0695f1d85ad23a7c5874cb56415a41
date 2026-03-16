@@ -1,0 +1,7 @@
+---------------------------------------------------------------------------
+
+by tcoch at 2026-03-05T10:53:58Z
+
+> This feature is interesting, could you add some tests?
+
+Resolved with https://github.com/symfony/maker-bundle/pull/1785/changes/aaa64b30656cd436969e5bb313f4d08a76aac558
