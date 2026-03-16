@@ -1,0 +1,15 @@
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-02-12T12:05:27Z
+
+> Original issue mentions other types such as `date_point`, but I couldn't find them on my environment or in Dbal Types, therefore I did not add them yet. Inputs on this matter are welcomed!
+
+The `DatePointType` is part of the `DoctrineBridge`: https://github.com/symfony/symfony/blob/8.1/src/Symfony/Bridge/Doctrine/Types/DatePointType.php
+
+---------------------------------------------------------------------------
+
+by tcoch at 2026-02-12T12:07:21Z
+
+> The `DatePointType` is part of the `DoctrineBridge`: https://github.com/symfony/symfony/blob/8.1/src/Symfony/Bridge/Doctrine/Types/DatePointType.php
+
+Thanks for the clarification, I'll add all these types to this PR right now
