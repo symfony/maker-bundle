@@ -21,6 +21,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\NamespaceType;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
@@ -214,8 +215,7 @@ final class MakeRegistrationForm extends AbstractMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $userClassNameDetails = $generator->createClassNameDetails(
-            '\\'.$this->userClass,
-            'Entity\\'
+            '\\'.$this->userClass, $generator->getNamespace(NamespaceType::Entity).'\\'
         );
 
         $userDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($userClassNameDetails->getFullName());
@@ -229,7 +229,7 @@ final class MakeRegistrationForm extends AbstractMaker
         $userRepository = $userDoctrineDetails->getRepositoryClass();
 
         if (null !== $userRepository) {
-            $userRepoClassDetails = $generator->createClassNameDetails('\\'.$userRepository, 'Repository\\', 'Repository');
+            $userRepoClassDetails = $generator->createClassNameDetails('\\'.$userRepository, $generator->getNamespace(NamespaceType::Repository).'\\', 'Repository');
 
             $userRepoVars = [
                 'repository_full_class_name' => $userRepoClassDetails->getFullName(),
@@ -297,7 +297,7 @@ final class MakeRegistrationForm extends AbstractMaker
         // 2) Generate the controller
         $controllerClassNameDetails = $generator->createClassNameDetails(
             'RegistrationController',
-            'Controller\\'
+            $generator->getNamespace(NamespaceType::Controller).'\\'
         );
 
         $useStatements = new UseStatementGenerator([
@@ -549,7 +549,7 @@ final class MakeRegistrationForm extends AbstractMaker
     {
         $formClassDetails = $generator->createClassNameDetails(
             'RegistrationFormType',
-            'Form\\'
+            $generator->getNamespace(NamespaceType::Form).'\\'
         );
 
         $formFields = [

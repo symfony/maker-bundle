@@ -41,6 +41,15 @@ class MakerBundle extends AbstractBundle
                 ->end()
                 ->booleanNode('generate_final_classes')->defaultTrue()->end()
                 ->booleanNode('generate_final_entities')->defaultFalse()->end()
+                ->arrayNode('namespaces')
+                    ->useAttributeAsKey('type')
+                    ->scalarPrototype()
+                        ->validate()
+                            ->ifString()
+                            ->then(Validator::validateClassName(...))
+                        ->end()
+                    ->end()
+                ->end()
             ->end()
         ;
     }
@@ -51,14 +60,17 @@ class MakerBundle extends AbstractBundle
         $container->import('../config/makers.php');
 
         $rootNamespace = trim($config['root_namespace'], '\\');
+        $namespaces = $config['namespaces'] ?? [];
+        $entityNamespace = $namespaces['entity'] ?? 'Entity';
 
         $container->services()
             ->get('maker.autoloader_finder')
                 ->arg(0, $rootNamespace)
             ->get('maker.generator')
                 ->arg(1, $rootNamespace)
+                ->arg(4, $namespaces)
             ->get('maker.doctrine_helper')
-                ->arg(0, \sprintf('%s\\Entity', $rootNamespace))
+                ->arg(0, \sprintf('%s\\%s', $rootNamespace, $entityNamespace))
             ->get('maker.template_component_generator')
                 ->arg(0, $config['generate_final_classes'])
                 ->arg(1, $config['generate_final_entities'])

@@ -20,6 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\NamespaceType;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -107,7 +108,7 @@ final class MakeCrud extends AbstractMaker
     {
         $entityClassDetails = $generator->createClassNameDetails(
             Validator::entityExists($input->getArgument('entity-class'), $this->doctrineHelper->getEntitiesForAutocomplete()),
-            'Entity\\'
+            $generator->getNamespace(NamespaceType::Entity).'\\'
         );
 
         $entityDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($entityClassDetails->getFullName());
@@ -118,7 +119,7 @@ final class MakeCrud extends AbstractMaker
         if (null !== $entityDoctrineDetails->getRepositoryClass()) {
             $repositoryClassDetails = $generator->createClassNameDetails(
                 '\\'.$entityDoctrineDetails->getRepositoryClass(),
-                'Repository\\',
+                $generator->getNamespace(NamespaceType::Repository).'\\',
                 'Repository'
             );
 
@@ -133,7 +134,7 @@ final class MakeCrud extends AbstractMaker
 
         $controllerClassDetails = $generator->createClassNameDetails(
             $this->controllerClassName,
-            'Controller\\',
+            $generator->getNamespace(NamespaceType::Controller).'\\',
             'Controller'
         );
 
@@ -141,14 +142,14 @@ final class MakeCrud extends AbstractMaker
         do {
             $formClassDetails = $generator->createClassNameDetails(
                 $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'Type',
-                'Form\\',
+                $generator->getNamespace(NamespaceType::Form).'\\',
                 'Type'
             );
             ++$iter;
         } while (class_exists($formClassDetails->getFullName()));
 
         $controllerClassData = ClassData::create(
-            class: \sprintf('Controller\%s', $this->controllerClassName),
+            class: \sprintf('%s\%s', $generator->getNamespace(NamespaceType::Controller), $this->controllerClassName),
             suffix: 'Controller',
             extendsClass: AbstractController::class,
             useStatements: [

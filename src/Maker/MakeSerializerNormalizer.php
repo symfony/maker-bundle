@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\NamespaceType;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -74,7 +75,7 @@ final class MakeSerializerNormalizer extends AbstractMaker
 
         $entityDetails = $generator->createClassNameDetails(
             str_replace('Normalizer', '', $normalizerClassNameDetails->getShortName()),
-            'Entity\\',
+            $generator->getNamespace(NamespaceType::Entity).'\\',
         );
 
         if ($entityExists = class_exists($entityDetails->getFullName())) {

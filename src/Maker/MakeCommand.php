@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\NamespaceType;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
@@ -69,7 +70,7 @@ final class MakeCommand extends AbstractMaker
 
         $commandClassNameDetails = $generator->createClassNameDetails(
             $commandNameHasAppPrefix ? substr($commandName, 4) : $commandName,
-            'Command\\',
+            $generator->getNamespace(NamespaceType::Command).'\\',
             'Command',
             \sprintf('The "%s" command name is not valid because it would be implemented by "%s" class, which is not valid as a PHP class name (it must start with a letter or underscore, followed by any number of letters, numbers, or underscores).', $commandName, Str::asClassName($commandName, 'Command'))
         );

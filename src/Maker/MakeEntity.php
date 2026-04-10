@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\NamespaceType;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
@@ -143,7 +144,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         if (
             !$input->getOption('api-resource')
             && class_exists(ApiResource::class)
-            && !class_exists($this->generator->createClassNameDetails($entityClassName, 'Entity\\')->getFullName())
+            && !class_exists($this->generator->createClassNameDetails($entityClassName, $this->generator->getNamespace(NamespaceType::Entity).'\\')->getFullName())
         ) {
             $description = $command->getDefinition()->getOption('api-resource')->getDescription();
             $question = new ConfirmationQuestion($description, false);
@@ -155,7 +156,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         if (
             !$input->getOption('broadcast')
             && class_exists(Broadcast::class)
-            && !class_exists($this->generator->createClassNameDetails($entityClassName, 'Entity\\')->getFullName())
+            && !class_exists($this->generator->createClassNameDetails($entityClassName, $this->generator->getNamespace(NamespaceType::Entity).'\\')->getFullName())
         ) {
             $description = $command->getDefinition()->getOption('broadcast')->getDescription();
             $question = new ConfirmationQuestion($description, false);
@@ -184,7 +185,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $entityClassDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Entity\\'
+            $generator->getNamespace(NamespaceType::Entity).'\\'
         );
 
         $classExists = class_exists($entityClassDetails->getFullName());

@@ -15,6 +15,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\NamespaceType;
 
 class GeneratorTest extends TestCase
 {
@@ -102,5 +103,43 @@ class GeneratorTest extends TestCase
             'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
             'Symfony\\Bundle\\MakerBundle\\Tests\\GeneratorTest',
         ];
+    }
+
+    public function testGetNamespaceWithConfiguredValue()
+    {
+        $fileManager = $this->createMock(FileManager::class);
+        $generator = new Generator($fileManager, 'App\\', null, null, [
+            'entity' => 'Domain\\Entity',
+            'controller' => 'Application\\Controller',
+        ]);
+
+        $this->assertSame('Domain\\Entity', $generator->getNamespace(NamespaceType::Entity));
+        $this->assertSame('Application\\Controller', $generator->getNamespace(NamespaceType::Controller));
+    }
+
+    public function testGetNamespaceFallsBackToDefault()
+    {
+        $fileManager = $this->createMock(FileManager::class);
+        $generator = new Generator($fileManager, 'App\\');
+
+        $this->assertSame('Entity', $generator->getNamespace(NamespaceType::Entity));
+        $this->assertSame('Command', $generator->getNamespace(NamespaceType::Command));
+    }
+
+    public function testCreateClassNameDetailsWithConfiguredNamespace()
+    {
+        $fileManager = $this->createMock(FileManager::class);
+        $fileManager->expects($this->any())
+            ->method('getNamespacePrefixForClass')
+            ->willReturn('Foo');
+
+        $generator = new Generator($fileManager, 'App\\', null, null, [
+            'entity' => 'Domain\\Entity',
+        ]);
+
+        $entityNamespace = $generator->getNamespace(NamespaceType::Entity).'\\';
+        $classNameDetails = $generator->createClassNameDetails('User', $entityNamespace);
+
+        $this->assertSame('App\\Domain\\Entity\\User', $classNameDetails->getFullName());
     }
 }

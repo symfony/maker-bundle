@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\NamespaceType;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
@@ -330,7 +331,7 @@ final class MakeAuthenticator extends AbstractMaker
 
         $userClassNameDetails = $this->generator->createClassNameDetails(
             '\\'.$userClass,
-            'Entity\\'
+            $this->generator->getNamespace(NamespaceType::Entity).'\\'
         );
 
         $this->generator->generateClass(
@@ -354,7 +355,7 @@ final class MakeAuthenticator extends AbstractMaker
     {
         $controllerClassNameDetails = $this->generator->createClassNameDetails(
             $controllerClass,
-            'Controller\\',
+            $this->generator->getNamespace(NamespaceType::Controller).'\\',
             'Controller'
         );
 

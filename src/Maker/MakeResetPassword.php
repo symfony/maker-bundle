@@ -19,6 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\NamespaceType;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
@@ -209,32 +210,32 @@ class MakeResetPassword extends AbstractMaker
     {
         $userClassNameDetails = $generator->createClassNameDetails(
             '\\'.$this->userClass,
-            'Entity\\'
+            $generator->getNamespace(NamespaceType::Entity).'\\'
         );
 
         $controllerClassNameDetails = $generator->createClassNameDetails(
             'ResetPasswordController',
-            'Controller\\'
+            $generator->getNamespace(NamespaceType::Controller).'\\'
         );
 
         $requestClassNameDetails = $generator->createClassNameDetails(
             'ResetPasswordRequest',
-            'Entity\\'
+            $generator->getNamespace(NamespaceType::Entity).'\\'
         );
 
         $repositoryClassNameDetails = $generator->createClassNameDetails(
             'ResetPasswordRequestRepository',
-            'Repository\\'
+            $generator->getNamespace(NamespaceType::Repository).'\\'
         );
 
         $requestFormTypeClassNameDetails = $generator->createClassNameDetails(
             'ResetPasswordRequestFormType',
-            'Form\\'
+            $generator->getNamespace(NamespaceType::Form).'\\'
         );
 
         $changePasswordFormTypeClassNameDetails = $generator->createClassNameDetails(
             'ChangePasswordFormType',
-            'Form\\'
+            $generator->getNamespace(NamespaceType::Form).'\\'
         );
 
         $useStatements = new UseStatementGenerator([
@@ -359,7 +360,7 @@ class MakeResetPassword extends AbstractMaker
 
             $userRepositoryDetails = $generator->createClassNameDetails(
                 \sprintf('%sRepository', $userClassNameDetails->getShortName()),
-                'Repository\\'
+                $generator->getNamespace(NamespaceType::Repository).'\\'
             );
 
             $useStatements = new UseStatementGenerator([

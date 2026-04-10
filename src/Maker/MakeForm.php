@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\NamespaceType;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -79,7 +80,7 @@ final class MakeForm extends AbstractMaker
     {
         $formClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            'Form\\',
+            $generator->getNamespace(NamespaceType::Form).'\\',
             'Type'
         );
 
@@ -91,7 +92,7 @@ final class MakeForm extends AbstractMaker
         if (null !== $boundClass) {
             $boundClassDetails = $generator->createClassNameDetails(
                 $boundClass,
-                'Entity\\'
+                $generator->getNamespace(NamespaceType::Entity).'\\'
             );
 
             $doctrineEntityDetails = $this->entityHelper->createDoctrineDetails($boundClassDetails->getFullName());

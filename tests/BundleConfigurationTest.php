@@ -28,6 +28,7 @@ class BundleConfigurationTest extends TestCase
         $this->assertSame('App', $config['root_namespace']);
         $this->assertTrue($config['generate_final_classes']);
         $this->assertFalse($config['generate_final_entities']);
+        $this->assertSame([], $config['namespaces']);
     }
 
     public function testAllOptionsConfigured()
@@ -43,6 +44,25 @@ class BundleConfigurationTest extends TestCase
         $this->assertSame('Custom\\Name\\Space', $config['root_namespace']);
         $this->assertFalse($config['generate_final_classes']);
         $this->assertTrue($config['generate_final_entities']);
+    }
+
+    public function testCustomNamespaces()
+    {
+        $config = $this->processConfiguration([
+            'maker' => [
+                'namespaces' => [
+                    'entity' => 'Domain\\Entity',
+                    'controller' => 'Application\\Controller',
+                    'repository' => 'Infrastructure\\Repository',
+                ],
+            ],
+        ]);
+
+        $this->assertSame('Domain\\Entity', $config['namespaces']['entity']);
+        $this->assertSame('Application\\Controller', $config['namespaces']['controller']);
+        $this->assertSame('Infrastructure\\Repository', $config['namespaces']['repository']);
+        $this->assertArrayNotHasKey('command', $config['namespaces']);
+        $this->assertArrayNotHasKey('form', $config['namespaces']);
     }
 
     public function testInvalidRootNamespaceWithReservedKeyword()

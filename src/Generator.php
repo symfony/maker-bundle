@@ -27,19 +27,35 @@ class Generator
     private GeneratorTwigHelper $twigHelper;
     private array $pendingOperations = [];
     private array $generatedFiles = [];
+    private array $configuredNamespaces;
 
     public function __construct(
         private FileManager $fileManager,
         private string $namespacePrefix,
         ?PhpCompatUtil $phpCompatUtil = null,
         private ?TemplateComponentGenerator $templateComponentGenerator = null,
+        array $configuredNamespaces = [],
     ) {
         $this->twigHelper = new GeneratorTwigHelper($fileManager);
         $this->namespacePrefix = trim($namespacePrefix, '\\');
 
+        $defaults = [];
+        foreach (NamespaceType::cases() as $case) {
+            $defaults[$case->value] = $case->defaultNamespace();
+        }
+        $this->configuredNamespaces = array_merge($defaults, $configuredNamespaces);
+
         if (null !== $phpCompatUtil) {
             trigger_deprecation('symfony/maker-bundle', 'v1.44.0', 'Initializing Generator while providing an instance of PhpCompatUtil is deprecated.');
         }
+    }
+
+    /**
+     * Returns the configured namespace prefix for a given type.
+     */
+    public function getNamespace(NamespaceType $type): string
+    {
+        return $this->configuredNamespaces[$type->value];
     }
 
     /**

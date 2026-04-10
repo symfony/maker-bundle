@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
+use Symfony\Bundle\MakerBundle\NamespaceType;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
@@ -130,7 +131,7 @@ final class MakeUser extends AbstractMaker
 
         $userClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
-            $userClassConfiguration->isEntity() ? 'Entity\\' : 'Security\\'
+            $userClassConfiguration->isEntity() ? $generator->getNamespace(NamespaceType::Entity).'\\' : 'Security\\'
         );
 
         // A) Generate the User class
