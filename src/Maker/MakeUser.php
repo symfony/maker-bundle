@@ -139,7 +139,7 @@ final class MakeUser extends AbstractMaker
                 entityClassDetails: $userClassNameDetails,
                 apiResource: false, // api resource
                 withPasswordUpgrade: $userClassConfiguration->hasPassword(), // security user
-                useUuidIdentifier: $this->getIdType()
+                useUuidIdentifier: $this->getIdType($input)
             );
         } else {
             $classPath = $generator->generateClass($userClassNameDetails->getFullName(), 'Class.tpl.php');

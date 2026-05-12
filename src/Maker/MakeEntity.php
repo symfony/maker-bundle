@@ -110,6 +110,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
+        $this->checkIsUsingUid($input);
+
         if (($entityClassName = $input->getArgument('name')) && empty($this->verifyEntityName($entityClassName))) {
             return;
         }
@@ -125,8 +127,6 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
             return;
         }
-
-        $this->checkIsUsingUid($input);
 
         $argument = $command->getDefinition()->getArgument('name');
         $question = $this->createEntityClassQuestion($argument->getDescription());
@@ -211,7 +211,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 entityClassDetails: $entityClassDetails,
                 apiResource: $input->getOption('api-resource'),
                 broadcast: $broadcast,
-                useUuidIdentifier: $this->getIdType(),
+                useUuidIdentifier: $this->getIdType($input),
             );
 
             if ($broadcast) {

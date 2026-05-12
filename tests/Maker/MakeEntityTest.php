@@ -202,6 +202,39 @@ class MakeEntityTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_creates_a_new_class_with_uuid_when_name_is_passed_as_argument' => [self::createMakeEntityTest()
+            ->addExtraDependencies('symfony/uid')
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->runMaker([
+                    // add no additional fields
+                    '',
+                ], 'User --with-uuid');
+
+                self::assertFileExists($runner->getPath('src/Entity/User.php'));
+
+                $content = file_get_contents($runner->getPath('src/Entity/User.php'));
+                self::assertStringContainsString('use Symfony\Component\Uid\Uuid;', $content);
+                self::assertStringContainsString('[ORM\CustomIdGenerator(class: \'doctrine.uuid_generator\')]', $content);
+
+                self::runEntityTest($runner);
+            }),
+        ];
+
+        yield 'it_creates_a_new_class_with_uuid_under_no_interaction' => [self::createMakeEntityTest()
+            ->addExtraDependencies('symfony/uid')
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->runMaker([], '--no-interaction User --with-uuid');
+
+                self::assertFileExists($runner->getPath('src/Entity/User.php'));
+
+                $content = file_get_contents($runner->getPath('src/Entity/User.php'));
+                self::assertStringContainsString('use Symfony\Component\Uid\Uuid;', $content);
+                self::assertStringContainsString('[ORM\CustomIdGenerator(class: \'doctrine.uuid_generator\')]', $content);
+
+                self::runEntityTest($runner);
+            }),
+        ];
+
         yield 'it_creates_a_new_class_with_fields' => [self::createMakeEntityTest()
             ->run(static function (MakerTestRunner $runner) {
                 $runner->runMaker([
