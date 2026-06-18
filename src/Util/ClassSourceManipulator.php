@@ -531,12 +531,14 @@ final class ClassSourceManipulator
         $setterNodeBuilder = $this->createSetterNodeBuilder(
             $relation->getPropertyName(),
             $typeHint,
-            // make the type-hint nullable always for ManyToOne to allow the owning
-            // side to be set to null, which is needed for orphanRemoval
-            // (specifically: when you set the inverse side, the generated
-            // code will *also* set the owning side to null - so it needs to be allowed)
-            // e.g. $userAvatarPhoto->setUser(null);
-            $relation instanceof RelationOneToOne ? $relation->isNullable() : true
+            // A ManyToOne setter must stay nullable as soon as the relation maps an
+            // inverse side: the collection remove*() generated on that side sets the
+            // owning side back to null (orphanRemoval), e.g. $userAvatarPhoto->setUser(null);
+            // so null must be allowed there. A non-nullable, *unidirectional* ManyToOne
+            // has no such code path, so its setter can use a strict, non-nullable type-hint.
+            $relation instanceof RelationOneToOne
+                ? $relation->isNullable()
+                : ($relation->isNullable() || $relation->getMapInverseRelation())
         );
 
         // set the *owning* side of the relation
