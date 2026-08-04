@@ -5,6 +5,8 @@ namespace App\Entity\Friend;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
+// without an explicit name, both User entities would map to the same "user" table
+#[ORM\Table(name: 'friend_user')]
 class User
 {
     #[ORM\Id]

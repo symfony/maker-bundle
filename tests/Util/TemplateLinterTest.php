@@ -16,7 +16,7 @@ use Symfony\Bundle\MakerBundle\Util\TemplateLinter;
 use Symfony\Component\Process\Process;
 
 /**
- * Linter tests are written in `tests/Maker/TemplateLinterTest`.
+ * Functional linter tests are written in `tests/Functional/TemplateLinterTest`.
  *
  * @author Jesse Rushlow <jr@rushlow.dev>
  *

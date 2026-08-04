@@ -19,6 +19,10 @@ use Symfony\Component\Process\InputStream;
  * @author Sadicov Vladimir <sadikoff@gmail.com>
  * @author Nicolas Philippe <nikophil@gmail.com>
  *
+ * Frozen: kept for third-party bundles that test their own makers with it.
+ * MakerBundle's own functional suite uses the internal tests/Harness engine
+ * instead. Bug fixes are welcome, new features will not be added.
+ *
  * @internal
  */
 final class MakerTestEnvironment

@@ -31,5 +31,8 @@ class GeneratedEntityTest extends KernelTestCase
         $em->refresh($photo);
 
         $this->assertSame($photo->getUser(), $user);
+
+        // exercise the generated repository too
+        $this->assertCount(1, $em->getRepository(\App\Entity\UserAvatarPhoto::class)->findAll());
     }
 }

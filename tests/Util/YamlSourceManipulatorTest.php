@@ -18,7 +18,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LogLevel;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\Log\Logger;
 use Symfony\Component\Yaml\Yaml;
 

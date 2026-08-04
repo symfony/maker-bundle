@@ -1,8 +1,11 @@
 /.php-cs-fixer.cache
 /.phpunit.cache
+/.phpunit.result.cache
 /composer.lock
 /fake
 /phpunit.xml
+/tests/Harness/js/node_modules/
+/tests/Harness/js/.install.lock
 /tests/tmp/*
 /tools/*/composer.lock
 /tools/*/vendor

@@ -16,6 +16,6 @@ final class FooBar extends Constraint
         ?array $groups = null,
         mixed $payload = null,
     ) {
-        parent::__construct([], $groups, $payload);
+        parent::__construct(null, $groups, $payload);
     }
 }

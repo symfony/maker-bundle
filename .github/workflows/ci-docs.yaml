@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: "Create cache dir"
         run: mkdir .cache
@@ -30,7 +30,7 @@ jobs:
         id: extract_base_branch
 
       - name: "Cache DOCtor-RST"
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .cache
           key: ${{ runner.os }}-doctor-rst-${{ steps.extract_base_branch.outputs.branch }}

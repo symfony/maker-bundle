@@ -13,12 +13,17 @@ concurrency:
     cancel-in-progress: true
 
 env:
-    PHPUNIT_FLAGS: "-v"
     SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
+    # no mercure hub / browser driver on the Windows runners; the
+    # docker-database compose validation self-skips (no docker compose)
     MAKER_SKIP_MERCURE_TEST: 1
     MAKER_SKIP_PANTHER_TEST: 1
-    MAKER_TEST_WINDOWS: 1
     MAKER_DISABLE_FILE_LINKS: 1
+    # Windows-specific bugs live in the maker's I/O layer, which the
+    # #[WindowsSmoke] subset exercises end-to-end; the runtime behavior of
+    # generated code is OS-independent and Linux executes all of it on
+    # three Symfony versions
+    MAKER_WINDOWS_SMOKE: 1
 
 jobs:
     tests:
@@ -27,7 +32,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-versions: [8.2]
+                php-versions: ['8.2']
                 dependency-versions: ['highest']
         steps:
             # This is needed in Windows, otherwise assertions comparing fixtures and generated code will fail.
@@ -35,11 +40,7 @@ jobs:
               run: git config --global core.autocrlf input
 
             - name: Checkout
-              uses: actions/checkout@v4
-
-            - name: Setup SQLite For Entity Regen Tests
-              run: |
-                  choco install sqlite --params "/NoTools"
+              uses: actions/checkout@v6
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -47,27 +48,58 @@ jobs:
                   php-version: ${{ matrix.php-versions }}
                   extensions: pdo, pdo_sqlite
 
+            - name: Install Node (Stimulus executor toolchain)
+              uses: actions/setup-node@v5
+              with:
+                  node-version: '22'
+                  cache: npm
+                  cache-dependency-path: tests/Harness/js/package-lock.json
+
             - name: Composer Install
-              uses: "ramsey/composer-install@v3"
+              uses: "ramsey/composer-install@v4"
               with:
                   dependency-versions: "${{ matrix.dependency-versions }}"
 
-            - name: Composer install php-cs-fixer
-              uses: "ramsey/composer-install@v3"
-              with:
-                  composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
-
             - name: Composer install twigcs
-              uses: "ramsey/composer-install@v3"
+              uses: "ramsey/composer-install@v4"
               with:
                   composer-options: "--no-scripts --working-dir=tools/twigcs"
 
+            - name: Composer install paratest-legacy
+              uses: "ramsey/composer-install@v4"
+              with:
+                  composer-options: "--no-scripts --working-dir=tools/paratest-legacy"
+
             - name: Install PHPUnit
+              run: vendor/bin/simple-phpunit install
+              env:
+                  PHPUNIT_VERSION: '9.6'
+
+            - name: Compute app cache key
+              id: apps-cache-key
+              shell: bash
               run: |
-                  vendor/bin/simple-phpunit install
+                  echo "epoch=$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
+                  echo "inputs=${{ hashFiles('composer.json', 'composer.lock', 'tests/Harness/Application/**', 'tests/Harness/resources/**', 'tests/Harness/js/package-lock.json') }}" >> "$GITHUB_OUTPUT"
 
-            - name: PHPUnit Version
-              run: vendor/bin/simple-phpunit --version
+            - name: Cache generated-app skeleton + profiles
+              uses: actions/cache@v5
+              with:
+                  path: |
+                      tests/tmp/skeleton
+                      tests/tmp/profiles
+                  key: apps-v1-${{ runner.os }}-${{ runner.arch }}-php${{ matrix.php-versions }}-sflatest-${{ matrix.dependency-versions }}-${{ steps.apps-cache-key.outputs.epoch }}-${{ steps.apps-cache-key.outputs.inputs }}
+                  restore-keys: |
+                      apps-v1-${{ runner.os }}-${{ runner.arch }}-php${{ matrix.php-versions }}-sflatest-${{ matrix.dependency-versions }}-${{ steps.apps-cache-key.outputs.epoch }}-
+                      apps-v1-${{ runner.os }}-${{ runner.arch }}-php${{ matrix.php-versions }}-sflatest-${{ matrix.dependency-versions }}-
 
-            - name: Run Tests
-              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
+            - name: Build app skeleton + profiles
+              run: composer test:apps:build
+
+            - name: Run unit tests
+              run: vendor/bin/simple-phpunit --testsuite=unit
+
+            - name: Run maker tests (paratest-legacy -p 4)
+              # paratest 6's WrapperRunner is not supported on Windows, so
+              # this uses the default per-class runner
+              run: tools/paratest-legacy/vendor/bin/paratest --testsuite=makers -p 4

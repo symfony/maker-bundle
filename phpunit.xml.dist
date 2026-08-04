@@ -15,11 +15,10 @@
     <php>
         <ini name="error_reporting" value="-1" />
         <env name="TEST_DATABASE_DSN" value="sqlite:///%kernel.project_dir%/var/app.db" />
-        <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0"/>
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0&amp;ignoreFile=./tests/.deprecations-ignore"/>
         <env name="SYMFONY_PHPUNIT_VERSION" value="9.6" />
         <env name="MAKER_SKIP_MERCURE_TEST" value="false"/>
         <env name="MAKER_SKIP_PANTHER_TEST" value="false" />
-        <env name="MAKER_TEST_WINDOWS" value="false" />
 <!--    Overrides process timeout when step debugging -->
 <!--    <env name="MAKER_PROCESS_TIMEOUT" value="null" /> -->
 <!--    Dump the CLI output for a test runner process immediately after running a test -->
@@ -28,12 +27,15 @@
     </php>
 
     <testsuites>
+        <!-- functional suite: every maker executed against real generated apps
+             (tests/Harness engine; see CONTRIBUTING "The Functional Test Suite") -->
         <testsuite name="makers">
-            <directory>tests/Maker</directory>
+            <directory>tests/Functional</directory>
         </testsuite>
-        <testsuite name="utils">
+        <testsuite name="unit">
             <directory>tests</directory>
-            <exclude>tests/Maker</exclude>
+            <exclude>tests/Functional</exclude>
+            <exclude>tests/Harness</exclude>
             <exclude>tests/fixtures</exclude>
             <exclude>tests/tmp</exclude>
         </testsuite>

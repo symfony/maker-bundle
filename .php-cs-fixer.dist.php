@@ -38,6 +38,28 @@ EOF
             ],
         ],
     ))
+    ->setRuleCustomisationPolicy(new class implements PhpCsFixer\Config\RuleCustomisationPolicyInterface {
+        public function getPolicyVersionForCache(): string
+        {
+            return hash_file('xxh128', __FILE__);
+        }
+
+        public function getRuleCustomisers(): array
+        {
+            return [
+                // test methods must not declare a return type (Symfony
+                // convention, enforced by fabbot), so @Symfony:risky's
+                // void_return must not re-add ": void" under tests/
+                'void_return' => static function (SplFileInfo $file) {
+                    if (!$file instanceof Symfony\Component\Finder\SplFileInfo) {
+                        return false;
+                    }
+
+                    return !str_starts_with($file->getRelativePathname(), 'tests/');
+                },
+            ];
+        }
+    })
     ->setRiskyAllowed(true)
     ->setFinder($finder)
 ;

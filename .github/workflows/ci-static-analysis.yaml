@@ -21,7 +21,7 @@ jobs:
         steps:
             -
                 name: Checkout code
-                uses: "actions/checkout@v4"
+                uses: "actions/checkout@v6"
 
             -
                 name: Validate composer.json
@@ -34,7 +34,7 @@ jobs:
 
         steps:
             -   name: Checkout
-                uses: "actions/checkout@v4"
+                uses: "actions/checkout@v6"
 
             -   name: Install PHP
                 uses: "shivammathur/setup-php@v2"
@@ -42,17 +42,17 @@ jobs:
                     php-version: 8.2
 
             -   name: Install Composer Dependencies
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@v4"
                 with:
                     composer-options: "--no-scripts"
 
             -   name: Install PHPStan
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@v4"
                 with:
                     composer-options: "--no-scripts --working-dir=tools/phpstan"
 
             -   name: Install Optional Dependencies
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@v4"
                 with:
                     composer-options: "--no-scripts --working-dir=tools/phpstan/includes"
 

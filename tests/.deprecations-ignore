@@ -1,0 +1,10 @@
+# Deprecations the unit suite is allowed to trigger (phpunit-bridge ignoreFile,
+# see phpunit.xml.dist). One regex per line.
+#
+# The bundle SHIPS deprecated makers (make:auth, make:unit-test,
+# make:functional-test, make:subscriber). Any test that exercises the full
+# maker locator loads those classes, which triggers their own file-level
+# deprecations — that is the deprecated code working as designed, not a
+# regression. Everything else under max[self]=0 still fails the build.
+%^Since symfony/maker-bundle [^:]+: The "Symfony\\Bundle\\MakerBundle\\Maker\\[^"]+" class is deprecated%
+%^Since symfony/maker-bundle [^:]+: The "maker\.maker\.make_[a-z_]+" service is deprecated%

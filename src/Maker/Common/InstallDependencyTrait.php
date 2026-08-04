@@ -12,7 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Maker\Common;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
-use Symfony\Component\Process\Process;
+use Symfony\Bundle\MakerBundle\Util\DependencyInstaller;
 
 /**
  * @author Jesse Rushlow <jr@rushlow.dev>
@@ -23,19 +23,14 @@ trait InstallDependencyTrait
 {
     /**
      * @param string $composerPackage Fully qualified composer package to install e.g. symfony/maker-bundle
+     *
+     * @throws \Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException when composer fails
      */
     public function installDependencyIfNeeded(ConsoleStyle $io, string $expectedClassToExist, string $composerPackage): ConsoleStyle
     {
-        if (class_exists($expectedClassToExist)) {
-            return $io;
+        if (!class_exists($expectedClassToExist)) {
+            (new DependencyInstaller())->installPackage($io, $composerPackage);
         }
-
-        $io->writeln(\sprintf('Running: composer require %s', $composerPackage));
-
-        Process::fromShellCommandline(\sprintf('composer require %s', $composerPackage))->run();
-
-        $io->writeln(\sprintf('%s successfully installed!', $composerPackage));
-        $io->newLine();
 
         return $io;
     }

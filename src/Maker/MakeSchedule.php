@@ -16,12 +16,12 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Maker\Common\InstallDependencyTrait;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -37,6 +37,8 @@ use Symfony\Contracts\Cache\CacheInterface;
  */
 final class MakeSchedule extends AbstractMaker
 {
+    use InstallDependencyTrait;
+
     private string $scheduleName;
     private ?string $message = null;
     private ?string $transportName = null;
@@ -68,12 +70,7 @@ final class MakeSchedule extends AbstractMaker
     {
         trigger_deprecation('symfony/maker-bundle', 'v1.63.0', '"make:schedule" is deprecated, install the symfony/scheduler recipe instead.');
 
-        if (!class_exists(AsSchedule::class)) {
-            $io->writeln('Running composer require symfony/scheduler');
-            $process = Process::fromShellCommandline('composer require symfony/scheduler');
-            $process->run();
-            $io->writeln('Scheduler successfully installed!');
-        }
+        $this->installDependencyIfNeeded($io, AsSchedule::class, 'symfony/scheduler');
 
         // Loop over existing src/Message/* and ask which message the user would like to schedule
         $availableMessages = ['Empty Schedule'];
@@ -116,13 +113,14 @@ final class MakeSchedule extends AbstractMaker
 
         $useStatements = new UseStatementGenerator([
             AsSchedule::class,
-            RecurringMessage::class,
             Schedule::class,
             ScheduleProviderInterface::class,
             CacheInterface::class,
         ]);
 
         if (null !== $this->message) {
+            // without a message, RecurringMessage only appears in a comment
+            $useStatements->addUseStatement(RecurringMessage::class);
             $useStatements->addUseStatement('App\\Message\\'.$this->message);
         }
 

@@ -1,0 +1,9 @@
+# Installed by the MakerBundle test harness: generated forms use the
+# NotCompromisedPassword constraint, which queries the public HIBP API.
+# Deterministic tests must not depend on network state or breach-database
+# content, so the check is disabled in the apps' test env; the constraint
+# itself still renders and validates through the form layer.
+when@test:
+    framework:
+        validation:
+            not_compromised_password: false

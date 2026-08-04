@@ -20,6 +20,11 @@ use Symfony\Component\Yaml\Yaml;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
+/**
+ * Frozen: kept for third-party bundles that test their own makers with it.
+ * MakerBundle's own functional suite uses the internal tests/Harness engine
+ * instead. Bug fixes are welcome, new features will not be added.
+ */
 class MakerTestRunner
 {
     private Filesystem $filesystem;
@@ -47,10 +52,7 @@ class MakerTestRunner
         return $output;
     }
 
-    /**
-     * @return void
-     */
-    public function copy(string $source, string $destination)
+    public function copy(string $source, string $destination): void
     {
         $path = $this->environment->getFixturesPath($source);
 
@@ -104,10 +106,7 @@ class MakerTestRunner
         return $this->executedMakerProcess;
     }
 
-    /**
-     * @return void
-     */
-    public function modifyYamlFile(string $filename, \Closure $callback)
+    public function modifyYamlFile(string $filename, \Closure $callback): void
     {
         $path = $this->getPath($filename);
         $manipulator = new YamlSourceManipulator(file_get_contents($path));
@@ -121,10 +120,7 @@ class MakerTestRunner
         file_put_contents($path, $manipulator->getContents());
     }
 
-    /**
-     * @return void
-     */
-    public function runConsole(string $command, array $inputs, string $arguments = '')
+    public function runConsole(string $command, array $inputs, string $arguments = ''): void
     {
         $process = $this->environment->createInteractiveCommandProcess(
             $command,
@@ -216,7 +212,7 @@ class MakerTestRunner
             return;
         }
 
-        throw new ExpectationFailedException(\sprintf("Error while running the PHPUnit tests *in* the project: \n\n %s \n\n Command Output: %s", $internalTestProcess->getErrorOutput()."\n".$internalTestProcess->getOutput(), $this->getExecutedMakerProcess()->getErrorOutput()."\n".$this->getExecutedMakerProcess()->getOutput()));
+        throw new ExpectationFailedException(\sprintf('Error while running the PHPUnit tests *in* the project: \n\n "%s" \n\n Command Output: "%s"', $internalTestProcess->getErrorOutput()."\n".$internalTestProcess->getOutput(), $this->getExecutedMakerProcess()->getErrorOutput()."\n".$this->getExecutedMakerProcess()->getOutput()));
     }
 
     public function writeFile(string $filename, string $contents): void
@@ -225,10 +221,7 @@ class MakerTestRunner
         file_put_contents($this->getPath($filename), $contents);
     }
 
-    /**
-     * @return void
-     */
-    public function addToAutoloader(string $namespace, string $path)
+    public function addToAutoloader(string $namespace, string $path): void
     {
         $composerJson = json_decode(
             json: file_get_contents($this->getPath('composer.json')),

@@ -37,6 +37,9 @@ class GeneratedUserTest extends WebTestCase
         $em->persist($user);
         $em->flush();
 
+        // exercise the generated repository too
+        $this->assertNotNull($em->getRepository(User::class)->findOneBy(['email' => 'foo@example.com']));
+
         // login then access a protected page
         $client->request('GET', '/login?email=foo@example.com');
 

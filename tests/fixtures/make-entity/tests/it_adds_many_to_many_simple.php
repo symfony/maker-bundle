@@ -57,5 +57,8 @@ class GeneratedEntityTest extends KernelTestCase
         // we removed course3, and course2 removed us!
         $this->assertCount(1, $user->getCourses());
         $this->assertEmpty($course2->getStudents());
+
+        // exercise the generated repository too
+        $this->assertCount(3, $em->getRepository(Course::class)->findAll());
     }
 }

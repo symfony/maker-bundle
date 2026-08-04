@@ -1,0 +1,11 @@
+{
+    "name": "maker-bundle-test-harness-js",
+    "private": true,
+    "description": "Pinned toolchain used by the functional test harness to really execute generated Stimulus controllers (bundle with esbuild, register in a real Stimulus Application under jsdom).",
+    "type": "module",
+    "dependencies": {
+        "@hotwired/stimulus": "^3.2.2",
+        "esbuild": "^0.25.0",
+        "jsdom": "^26.0.0"
+    }
+}
