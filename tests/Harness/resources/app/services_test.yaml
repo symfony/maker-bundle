@@ -1,0 +1,6 @@
+# Installed by the MakerBundle test harness: decorates the Twig loader in the
+# test environment so template loads are observable (execution contract).
+services:
+    App\Tests\Harness\TwigTracerLoader:
+        decorates: 'twig.loader.native_filesystem'
+        arguments: ['@.inner']

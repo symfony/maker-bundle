@@ -59,12 +59,36 @@
         }
     },
     "scripts": {
+        "test": [
+            "@test:unit",
+            "@test:makers"
+        ],
+        "test:unit": "vendor/bin/simple-phpunit --testsuite=unit",
+        "test:makers": [
+            "Composer\\Config::disableProcessTimeout",
+            "vendor/bin/simple-phpunit --testsuite=makers"
+        ],
+        "test:makers:parallel": [
+            "Composer\\Config::disableProcessTimeout",
+            "tools/paratest/vendor/bin/paratest --testsuite=makers --runner=WrapperRunner -p 6"
+        ],
+        "test:apps:build": [
+            "Composer\\Config::disableProcessTimeout",
+            "php tests/Harness/bin/build-apps.php --all"
+        ],
+        "test:apps:validate": [
+            "Composer\\Config::disableProcessTimeout",
+            "php tests/Harness/bin/build-apps.php --validate"
+        ],
+        "test:apps:clean": "php tests/Harness/bin/build-apps.php --clean",
         "tools:upgrade": [
             "@tools:upgrade:php-cs-fixer",
             "@tools:upgrade:phpstan",
-            "@tools:upgrade:twigcs"
+            "@tools:upgrade:twigcs",
+            "@tools:upgrade:paratest"
         ],
         "tools:upgrade:php-cs-fixer": "composer upgrade -W -d tools/php-cs-fixer",
+        "tools:upgrade:paratest": "composer upgrade -W -d tools/paratest",
         "tools:upgrade:phpstan": "composer upgrade -W -d tools/phpstan",
         "tools:upgrade:twigcs": "composer upgrade -W -d tools/twigcs",
         "tools:run": [

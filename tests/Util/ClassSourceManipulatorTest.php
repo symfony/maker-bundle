@@ -731,6 +731,53 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame($expectedSource, $manipulator->getSourceCode());
     }
 
+    public function testAddUseStatementConflictingWithDeclaredClassUsesFqcn()
+    {
+        $source = <<<'EOF'
+            <?php
+
+            namespace App\Entity\Friend;
+
+            class User
+            {
+            }
+
+            EOF;
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        // importing App\Entity\User inside this file would be a compile error:
+        // the short name "User" is taken by the class declared here
+        $this->assertSame('\App\Entity\User', $manipulator->addUseStatementIfNecessary('App\Entity\User'));
+        $this->assertStringNotContainsString('use App\Entity\User;', $manipulator->getSourceCode());
+
+        // non-conflicting imports still work as before
+        $this->assertSame('Collection', $manipulator->addUseStatementIfNecessary('Doctrine\Common\Collections\Collection'));
+        $this->assertStringContainsString('use Doctrine\Common\Collections\Collection;', $manipulator->getSourceCode());
+    }
+
+    public function testAddUseStatementConflictingWithDeclaredClassKeepsExistingAlias()
+    {
+        $source = <<<'EOF'
+            <?php
+
+            namespace App\Entity\Friend;
+
+            use App\Entity\User as BaseUser;
+
+            class User
+            {
+            }
+
+            EOF;
+
+        $manipulator = new ClassSourceManipulator($source);
+
+        // the file already aliases the conflicting class: reuse the alias
+        // instead of falling back to the FQCN
+        $this->assertSame('BaseUser', $manipulator->addUseStatementIfNecessary('App\Entity\User'));
+    }
+
     public function testAddTraitInEmptyClass()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_empty.php');
@@ -875,7 +922,7 @@ class ClassSourceManipulatorTest extends TestCase
      * @requires PHP >= 8.4
      */
     #[\PHPUnit\Framework\Attributes\RequiresPhp('>= 8.4')]
-    public function testParsingPhp84PropertyHooks(): void
+    public function testParsingPhp84PropertyHooks()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_property_hooks.php');
 
@@ -890,7 +937,7 @@ class ClassSourceManipulatorTest extends TestCase
      * @requires PHP >= 8.4
      */
     #[\PHPUnit\Framework\Attributes\RequiresPhp('>= 8.4')]
-    public function testAddPropertyToClassWithPropertyHooks(): void
+    public function testAddPropertyToClassWithPropertyHooks()
     {
         $source = file_get_contents(__DIR__.'/fixtures/source/User_property_hooks.php');
 

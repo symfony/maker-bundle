@@ -14,6 +14,11 @@ namespace Symfony\Bundle\MakerBundle\Test;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\MakerInterface;
 
+/**
+ * Frozen: kept for third-party bundles that test their own makers with it.
+ * MakerBundle's own functional suite uses the internal tests/Harness engine
+ * instead. Bug fixes are welcome, new features will not be added.
+ */
 final class MakerTestDetails
 {
     private ?\Closure $runCallback = null;

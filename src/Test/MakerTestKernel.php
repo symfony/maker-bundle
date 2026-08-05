@@ -23,6 +23,11 @@ use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
+/**
+ * Frozen: kept for third-party bundles that test their own makers with it.
+ * MakerBundle's own functional suite uses the internal tests/Harness engine
+ * instead. Bug fixes are welcome, new features will not be added.
+ */
 class MakerTestKernel extends Kernel implements CompilerPassInterface
 {
     use MicroKernelTrait;
@@ -44,15 +49,15 @@ class MakerTestKernel extends Kernel implements CompilerPassInterface
         ];
     }
 
-    protected function configureRoutes(RoutingConfigurator $routes)
+    protected function configureRoutes(RoutingConfigurator $routes): void
     {
     }
 
-    protected function configureRouting(RoutingConfigurator $routes)
+    protected function configureRouting(RoutingConfigurator $routes): void
     {
     }
 
-    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
+    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader): void
     {
         $c->loadFromExtension('framework', [
             'secret' => 123,

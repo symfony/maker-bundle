@@ -17,6 +17,6 @@ namespace <?= $class_data->getNamespace(); ?>;
         ?array $groups = null,
         mixed $payload = null,
     ) {
-        parent::__construct([], $groups, $payload);
+        parent::__construct(null, $groups, $payload);
     }
 }

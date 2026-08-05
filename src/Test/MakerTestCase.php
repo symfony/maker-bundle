@@ -20,6 +20,10 @@ use Symfony\Component\Process\Process;
 
 /**
  * @method static iterable<array{0: MakerTestDetails}> getTestDetails()
+ *
+ * Frozen: kept for third-party bundles that test their own makers with it.
+ * MakerBundle's own functional suite uses the internal tests/Harness engine
+ * instead. Bug fixes are welcome, new features will not be added.
  */
 abstract class MakerTestCase extends TestCase
 {
@@ -27,11 +31,9 @@ abstract class MakerTestCase extends TestCase
 
     /**
      * @dataProvider getTestDetails
-     *
-     * @return void
      */
     #[DataProvider('getTestDetails')]
-    public function testExecute(MakerTestDetails $makerTestDetails)
+    public function testExecute(MakerTestDetails $makerTestDetails): void
     {
         $this->executeMakerCommand($makerTestDetails);
     }
@@ -53,10 +55,7 @@ abstract class MakerTestCase extends TestCase
         return new MakerTestDetails();
     }
 
-    /**
-     * @return void
-     */
-    protected function executeMakerCommand(MakerTestDetails $testDetails)
+    protected function executeMakerCommand(MakerTestDetails $testDetails): void
     {
         if (!class_exists(Process::class)) {
             throw new \LogicException('The MakerTestCase cannot be run as the Process component is not installed. Try running "compose require --dev symfony/process".');
@@ -99,11 +98,9 @@ abstract class MakerTestCase extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @deprecated since symfony/maker-bundle 1.66.0
      */
-    protected function assertContainsCount(string $needle, string $haystack, int $count)
+    protected function assertContainsCount(string $needle, string $haystack, int $count): void
     {
         trigger_deprecation('symfony/maker-bundle', '1.66.0', 'The "%s()" method is deprecated.', __METHOD__, TestCase::class);
 

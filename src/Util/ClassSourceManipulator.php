@@ -733,7 +733,7 @@ final class ClassSourceManipulator
                     )
                 );
             } else {
-                throw new \Exception('Unknown relation type');
+                throw new \Exception('Unknown relation type.');
             }
         }
 
@@ -842,6 +842,17 @@ final class ClassSourceManipulator
                 }
 
                 break;
+            }
+        }
+
+        // importing a name equal to a class-like declared in this file is a
+        // PHP compile error ("Cannot use X as Y because the name is already in
+        // use"), e.g. relating App\Entity\User to App\Entity\Friend\User:
+        // reference the FQCN instead and do not add a use statement. Checked
+        // AFTER the scan above so an existing import (or alias) still wins.
+        foreach ($namespaceNode->stmts as $stmt) {
+            if ($stmt instanceof Node\Stmt\ClassLike && null !== $stmt->name && $stmt->name->toString() === $shortClassName) {
+                return '\\'.$class;
             }
         }
 

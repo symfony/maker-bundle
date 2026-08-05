@@ -7,7 +7,8 @@ parameters:
         - src/Maker
         - tests/Command
         - tests/Docker
-        - tests/Maker
+        - tests/Functional
+        - tests/Harness
     excludePaths:
         - tests/Doctrine/fixtures
         - tests/fixtures
@@ -18,10 +19,6 @@ parameters:
         - tests/Util/yaml_fixtures
     ignoreErrors:
         -
-            message: '#Property .+phpCompatUtil is never read, only written\.#'
-            path: src/Maker/*
-
-        -
             message: '#Class Symfony\\Bundle\\MakerBundle\\Maker\\LegacyApiTestCase not found#'
             path: src/Maker/*
 
@@ -29,3 +26,20 @@ parameters:
             message: '#^Method .*Test\:\:test\w+\(.* has no return type specified\.$#'
             identifier: missingType.return
             path: tests/*
+
+        # MakerTestCase supports both the outer simple-phpunit (PHPUnit 9.6)
+        # and modern PHPUnit; which compat branch is "impossible" depends on
+        # the PHPUnit version phpstan's includes resolve, so these may or may
+        # not be reported, hence reportUnmatched: false
+        -
+            message: '#Call to function method_exists\(\) with \$this\(Symfony\\Bundle\\MakerBundle\\Tests\\Harness\\MakerTestCase\) and .(name|status). will always evaluate to true\.#'
+            path: tests/Harness/MakerTestCase.php
+            reportUnmatched: false
+        -
+            message: '#Call to an undefined method Symfony\\Bundle\\MakerBundle\\Tests\\Harness\\MakerTestCase\:\:(getName|getStatus)\(\)\.#'
+            path: tests/Harness/MakerTestCase.php
+            reportUnmatched: false
+        -
+            message: '#Access to constant STATUS_PASSED on an unknown class PHPUnit\\Runner\\BaseTestRunner\.#'
+            path: tests/Harness/MakerTestCase.php
+            reportUnmatched: false

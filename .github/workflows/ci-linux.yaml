@@ -6,6 +6,9 @@ on:
         branches:
             - '1.x'
     schedule:
+        # daily, on the default branch; the first run of each ISO week
+        # pre-builds the new cache epoch there (the epoch is part of the
+        # profile validity stamps), which PR runs then restore by key match
         -   cron: '0 0 * * *'
 
 concurrency:
@@ -13,12 +16,11 @@ concurrency:
     cancel-in-progress: true
 
 env:
-    PHPUNIT_FLAGS: "-v"
     SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
 
 jobs:
     test:
-        name: "PHP ${{ matrix.php-version }} + @${{ matrix.symfony-version }} ${{ matrix.dependency-versions }} deps"
+        name: "PHP ${{ matrix.php-version }} + @${{ matrix.symfony-version }} ${{ matrix.dependency-versions }} deps (${{ matrix.runner }})"
 
         runs-on: ubuntu-latest
 
@@ -34,9 +36,26 @@ jobs:
                         cors_origins *
                 ports:
                     - 1337:1337
+            postgres:
+                # empty image on the legs that don't opt in: GitHub skips
+                # starting the service entirely
+                image: ${{ matrix.database == 'postgres' && 'postgres:16' || '' }}
+                env:
+                    POSTGRES_USER: maker
+                    POSTGRES_PASSWORD: maker
+                    POSTGRES_DB: maker_tests
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd "pg_isready -U maker"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
 
         env:
             SYMFONY_VERSION: ${{ matrix.symfony-version }}
+            # only the leg that opts in points the harness at postgres
+            TEST_DATABASE_DSN: ${{ matrix.database == 'postgres' && 'postgresql://maker:maker@127.0.0.1:5432/maker_tests?serverVersion=16&charset=utf8' || '' }}
 
         strategy:
             fail-fast: false
@@ -48,55 +67,134 @@ jobs:
                     - '7.4.*'
                     - '^8'
                 dependency-versions: ['highest']
+                runner: ['parallel']
                 include:
-                    # testing lowest PHP+dependencies with lowest Symfony
+                    # lowest PHP + lowest bundle deps with lowest Symfony;
+                    # parallel via tools/paratest-legacy (paratest 6 +
+                    # PHPUnit 9.6), since paratest 7 needs PHP >= 8.4
                     - php-version: '8.1'
                       symfony-version: '6.4.*'
                       dependency-versions: 'lowest'
+                      runner: 'parallel-legacy'
 
-                    # testing newest PHPUnit
+                    # the makers suite under the NEWEST PHPUnit (the outer
+                    # harness must not depend on simple-phpunit 9.6), plus the
+                    # non-sqlite isolation path against a real postgres
                     - php-version: '8.5'
-                      symfony-version: '8.*'
+                      symfony-version: '^8'
                       dependency-versions: 'highest'
-                      phpunit-version: '11.5'
+                      runner: 'phpunit-latest'
+                      database: 'postgres'
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v3
+              uses: actions/checkout@v6
 
             - name: Install PHP with extensions
               uses: shivammathur/setup-php@v2
               with:
                   coverage: none
                   php-version: ${{ matrix.php-version }}
+                  extensions: pdo, pdo_sqlite, pdo_pgsql
                   tools: flex
+
+            - name: Install Node (Stimulus executor toolchain)
+              uses: actions/setup-node@v5
+              with:
+                  node-version: '22'
+                  cache: npm
+                  cache-dependency-path: tests/Harness/js/package-lock.json
+
+            - name: Verify docker compose is available
+              run: docker compose version
 
             - name: Add PHPUnit matcher
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
             - name: Composer install
-              uses: "ramsey/composer-install@v3"
+              uses: "ramsey/composer-install@v4"
               with:
                   dependency-versions: "${{ matrix.dependency-versions }}"
 
-            - name: Composer install php-cs-fixer
-              uses: "ramsey/composer-install@v3"
-              with:
-                  composer-options: "--no-scripts --working-dir=tools/php-cs-fixer"
-
             - name: Composer install twigcs
-              uses: "ramsey/composer-install@v3"
+              uses: "ramsey/composer-install@v4"
               with:
                   composer-options: "--no-scripts --working-dir=tools/twigcs"
 
+            - name: Composer install paratest
+              # paratest 7 + PHPUnit 13 require PHP >= 8.4; the 8.1 leg uses
+              # tools/paratest-legacy instead
+              if: matrix.runner != 'parallel-legacy'
+              uses: "ramsey/composer-install@v4"
+              with:
+                  composer-options: "--no-scripts --working-dir=tools/paratest"
+
+            - name: Composer install paratest-legacy
+              if: matrix.runner == 'parallel-legacy'
+              uses: "ramsey/composer-install@v4"
+              with:
+                  composer-options: "--no-scripts --working-dir=tools/paratest-legacy"
+
             - name: Install PHPUnit
+              # the bridge version is pinned by SYMFONY_PHPUNIT_VERSION in
+              # phpunit.xml.dist; newest-PHPUnit coverage comes from the
+              # phpunit-latest leg running the makers suite via tools/paratest
+              run: vendor/bin/simple-phpunit install
+
+            - name: Detect Chrome major version
+              # chromedriver is downloaded at profile build time and lives in
+              # the cached profiles; the key must roll when the runner's Chrome
+              # does, or panther fails on a version mismatch until the epoch flips
+              id: chrome
+              run: echo "version=$(google-chrome --version | grep -oE '[0-9]+' | head -1)" >> "$GITHUB_OUTPUT"
+
+            - name: Compute app cache key
+              id: apps-cache-key
+              # key inputs: resolved root lock (composer.lock is generated,
+              # not committed) + every profile build input + OS/arch/
+              # PHP/Symfony/dep-mode + ISO-week epoch. The epoch also lives
+              # inside the profile stamps, so a previous-epoch restore is
+              # rebuilt instead of being re-saved stale.
               run: |
-                vendor/bin/simple-phpunit install
-              env:
-                PHPUNIT_VERSION: ${{ matrix.phpunit-version || '9.6' }}
+                  echo "epoch=$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
+                  echo "inputs=${{ hashFiles('composer.json', 'composer.lock', 'tests/Harness/Application/**', 'tests/Harness/Process/**', 'tests/Harness/bin/**', 'tests/Harness/resources/**', 'tests/Harness/js/package-lock.json') }}" >> "$GITHUB_OUTPUT"
 
-            - name: PHPUnit version
-              run: vendor/bin/simple-phpunit --version
+            - name: Cache generated-app skeleton + profiles
+              uses: actions/cache@v5
+              with:
+                  path: |
+                      tests/tmp/skeleton
+                      tests/tmp/profiles
+                  key: apps-v1-${{ runner.os }}-${{ runner.arch }}-php${{ matrix.php-version }}-sf${{ matrix.symfony-version }}-${{ matrix.dependency-versions }}-db${{ matrix.database || 'sqlite' }}-chrome${{ steps.chrome.outputs.version }}-${{ steps.apps-cache-key.outputs.epoch }}-${{ steps.apps-cache-key.outputs.inputs }}
+                  restore-keys: |
+                      apps-v1-${{ runner.os }}-${{ runner.arch }}-php${{ matrix.php-version }}-sf${{ matrix.symfony-version }}-${{ matrix.dependency-versions }}-db${{ matrix.database || 'sqlite' }}-chrome${{ steps.chrome.outputs.version }}-${{ steps.apps-cache-key.outputs.epoch }}-
+                      apps-v1-${{ runner.os }}-${{ runner.arch }}-php${{ matrix.php-version }}-sf${{ matrix.symfony-version }}-${{ matrix.dependency-versions }}-db${{ matrix.database || 'sqlite' }}-chrome${{ steps.chrome.outputs.version }}-
 
-            - name: Run tests
-              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
+            - name: Build app skeleton + profiles
+              run: composer test:apps:build
+
+            - name: Run unit tests
+              run: vendor/bin/simple-phpunit --testsuite=unit
+
+            - name: Run maker tests (paratest-legacy -p 6)
+              if: matrix.runner == 'parallel-legacy'
+              run: tools/paratest-legacy/vendor/bin/paratest --testsuite=makers --runner=WrapperRunner -p 6
+
+            - name: Run maker tests (paratest -p 6)
+              if: matrix.runner == 'parallel'
+              run: composer test:makers:parallel
+
+            - name: Run maker tests (newest PHPUnit, paratest -p 6)
+              # paratest's WrapperRunner drives PHPUnit 13's own runner, so
+              # this still covers the newest PHPUnit; parallel workers on the
+              # shared postgres server are isolated by the per-worker
+              # dev/test dbname_suffix the doctrine profile patches in
+              if: matrix.runner == 'phpunit-latest'
+              run: tools/paratest/vendor/bin/paratest --testsuite=makers --runner=WrapperRunner -p 6
+
+            - name: Validate warm-cache behavior (no recompiles on pristine boots)
+              # guards the suite's core speed premise; pinned to the fastest
+              # leg so its ~20s stay off the workflow's critical path (the
+              # postgres leg is the slowest)
+              if: matrix.runner == 'parallel' && matrix.symfony-version == '6.4.*'
+              run: composer test:apps:validate
