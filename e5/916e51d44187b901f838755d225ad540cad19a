@@ -1,0 +1,176 @@
+---------------------------------------------------------------------------
+
+by kbond at 2026-08-03T11:40:09Z
+
+Within this new scope, if we have `make:command` generate invokable commands, would it still fallback to standard command if invokable commands aren't supported? I ask because these permutations can add up too.
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-08-03T11:44:40Z
+
+Here are the open PRs that fall **outside** the new scope (to be closed):
+
+Custom templates / paths / namespaces
+- https://github.com/symfony/maker-bundle/pull/1710 add customizable templates path
+- https://github.com/symfony/maker-bundle/pull/1672 Customize template inherited
+- https://github.com/symfony/maker-bundle/pull/562 function to change template name path
+- https://github.com/symfony/maker-bundle/pull/378 Configuration for custom namespaces
+
+Extensibility / scaffolding / pluggability
+- https://github.com/symfony/maker-bundle/pull/1085 [RFC] scaffolding system make:scaffold
+- https://github.com/symfony/maker-bundle/pull/1466 interactively install composer
+dependencies
+- https://github.com/symfony/maker-bundle/pull/436 Fluent setters bundle configuration
+option
+
+Edge-case options / personal preferences on existing makers
+- https://github.com/symfony/maker-bundle/pull/1730 make:entity specify table name
+- https://github.com/symfony/maker-bundle/pull/1635 make:entity specify table name
+(duplicate of #1730)
+- https://github.com/symfony/maker-bundle/pull/1661 make:entity unsigned integer question
+- https://github.com/symfony/maker-bundle/pull/1558 make:entity default value option
+- https://github.com/symfony/maker-bundle/pull/1119 make:entity multiple entity managers
+- https://github.com/symfony/maker-bundle/pull/1555 make:registration-form add
+hash_property_path option
+- https://github.com/symfony/maker-bundle/pull/1595 make:security:form-login no-interaction
+ option
+- https://github.com/symfony/maker-bundle/pull/1594 make:security:custom no-interaction
+option
+- https://github.com/symfony/maker-bundle/pull/544 make:crud change field name appearance
+- https://github.com/symfony/maker-bundle/pull/1527 make:reset-password handle multiple
+entities
+- https://github.com/symfony/maker-bundle/pull/798 ResetPassword API Platform support
+
+New niche makers
+- https://github.com/symfony/maker-bundle/pull/1704 make:doctrine:listener
+- https://github.com/symfony/maker-bundle/pull/1613 make:decorator
+- https://github.com/symfony/maker-bundle/pull/1574 make:event
+- https://github.com/symfony/maker-bundle/pull/1218 make:form-extension
+- https://github.com/symfony/maker-bundle/pull/303 make:dto
+- https://github.com/symfony/maker-bundle/pull/1246 make:security:json-login (WIP)
+
+Opinionated code shape changes without clear best-practice consensus
+- https://github.com/symfony/maker-bundle/pull/1637 make:webhook generate final classes
+
+Borderline (could go either way depending on whether the maintainers consider the change a
+"new recommended default" rather than an option):
+- https://github.com/symfony/maker-bundle/pull/1750 make:command invokable + interactive
+args
+- https://github.com/symfony/maker-bundle/pull/1744 make:validator --target option
+- https://github.com/symfony/maker-bundle/pull/1722 make:user UniqueConstraint class name
+
+Note: #1746 (make:command invokable by default) is in scope, it changes the default rather
+than adding an option.
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-08-03T11:50:00Z
+
+> Within this new scope, if we have `make:command` generate invokable commands, would it still fallback to standard command if invokable commands aren't supported? I ask because these permutations can add up too.
+
+I would choose to support only the latest LTS version (currently 7.4), to avoid putting too much pressure on upgrading PHP and the installed packages for newcomers, while making it easier to adopt the latest features in the generated code.
+For the `make:command` example, that means we remove the `extends Command` version of the generated code; but we can't use [Symfony 8.1 Improved Console Input](https://symfony.com/blog/new-in-symfony-8-1-improved-console-input)
+
+---------------------------------------------------------------------------
+
+by stof at 2026-08-03T12:14:05Z
+
+I agree with @GromNaN here. Changing the default code of a maker should happen only once that new code is available in LTS. And dropping support for the old LTS allows to simplify the maintenance (projects stuck on the old LTS can stick to the last release of the bundle supporting it).
+
+A new maker for a whole new feature might rely on non-LTS feature (i.e. we can add new makers for new released features even if they are not yet part of the LTS), with a check for the compatible version of dependencies.
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-08-03T12:57:51Z
+
+# MakerBundle: existing makers status vs. new scope
+
+This report reviews every maker currently shipped by MakerBundle against the new scope (target newcomers, generate best-practice code, minimal configuration, latest LTS only, no extensibility, no edge-case options).
+
+Status legend:
+
+- **in-scope** the maker fits the new scope as is, only marginal cleanup needed
+- **needs-trim** in scope but options or code branches should be reduced
+- **reconsider** may not fit the new scope; needs a decision
+- **drop-candidate** likely to be removed or moved elsewhere
+
+| Maker | Status | Rationale | Action to fit scope / drop |
+|-------|--------|-----------|---------------------------|
+| MakeCommand | in-scope | Simple template, useful for newcomers. | Switch default to invokable command (#1746). Drop the non-invokable fallback once LTS supports it. |
+| MakeController | in-scope | Core scaffold. | Keep single recommended shape. Reject options that only tune style. |
+| MakeForm | in-scope | Core scaffold. | Keep; align with current form best practices. |
+| MakeVoter | in-scope | Small and stable. | Keep as is. |
+| MakeSubscriber | in-scope | Straightforward event subscriber. | Keep as is. |
+| MakeListener | in-scope | Companion to Subscriber, event autodiscovery adds value. | Keep, verify all branches still needed. |
+| MakeMessage | in-scope | Generates message + handler, aligned with Messenger docs. | Keep. |
+| MakeMessengerMiddleware | in-scope | Tiny, correct. | Keep. |
+| MakeSchedule | in-scope | Matches current Scheduler component. | Keep. |
+| MakeWebhook | in-scope | Follows Webhook component. | Consider making generated classes final by default (see #1637) as a recommended shape, not an option. |
+| MakeTwigExtension | in-scope | Minimal. | Keep. |
+| MakeTwigComponent | in-scope | Aligned with ux-twig-component. | Keep. |
+| MakeStimulusController | in-scope | UX Stimulus scaffold, non trivial but well contained. | Keep, watch for option creep. |
+| MakeSerializerEncoder | in-scope | Minimal template. | Keep. |
+| MakeSerializerNormalizer | in-scope | Minimal template. | Keep. |
+| MakeValidator | in-scope | Minimal. | Adopt `--target` (#1744) only if we consider it a recommended default; otherwise reject. |
+| MakeUnitTest | in-scope | Minimal. | Keep. |
+| MakeFunctionalTest | needs-trim | Overlaps with MakeTest. | Merge into MakeTest or delegate to it and remove the separate command. |
+| MakeTest | needs-trim | Umbrella command that already covers unit / integration / functional. | Consolidate MakeUnitTest and MakeFunctionalTest here to reduce duplication. |
+| MakeFixtures | in-scope | Minimal, common newcomer need. | Keep. |
+| MakeDockerDatabase | reconsider | Docker Compose scaffolding is opinionated and outside the core Symfony concern. | Decide: keep as convenience for newcomers, or drop and defer to Symfony recipes and Docker Compose docs. |
+| MakeMigration | in-scope | Thin wrapper over doctrine-migrations. | Keep. |
+| MakeEntity | needs-trim | Largest and most complex maker. Combinatorial options are the root of the maintenance pain called out in the scope discussion. | Freeze the option surface. Reject new options (#1730, #1635, #1661, #1558). Consider extracting advanced relationship editing to a coding agent skill and keeping only the create/update happy path. |
+| MakeCrud | needs-trim | Second most complex, tied to MakeEntity output. | Keep the single recommended layout, reject field-appearance options (#544) and route conflict options (#922). |
+| MakeUser | in-scope | Core security setup. | Keep. Reject niche options (#1722) unless they become defaults. |
+| MakeAuthenticator | needs-trim | Large legacy command superseded by Security/MakeFormLogin and Security/MakeCustomAuthenticator. | Decide whether to deprecate in favour of the two Security/* makers, or clearly document the split. |
+| Security/MakeFormLogin | in-scope | Matches current recommended auth flow. | Keep. Reject #1595 (option to skip interaction). |
+| Security/MakeCustomAuthenticator | in-scope | Small, focused. | Keep. Reject #1594. |
+| MakeRegistrationForm | needs-trim | Very large; depends on MakeEntity + MakeUser output. | Reduce configurability. Freeze on the recommended shape from the latest LTS. Reject #1555, #1723 unless adopted as default. |
+| MakeResetPassword | needs-trim | Similar profile to MakeRegistrationForm. | Same treatment. Reject #1527 (multi entity) and #798 (API Platform). |
+
+---------------------------------------------------------------------------
+
+by javiereguiluz at 2026-08-03T13:15:40Z
+
+Jérôme, I love this proposal. I agree 100% on it. Thanks a lot for your work here and I hope others agree so we can start closing all those issues/PRs out of the scope. Thanks!
+
+---------------------------------------------------------------------------
+
+by kbond at 2026-08-03T13:33:45Z
+
+I love this!
+
+I think this new scope should have the following rules also:
+- Exclude makers that likely aren't used by beginners (ie `make:authenticator`)
+- Exclude makers that have a flex recipe that is enough (ie `make:schedule)`
+- Exclude makers that realistically are only run once (ie `make:reset-password`)
+
+Here are my opinions on the current list of makers:
+
+* `MakeSubscriber`: isn't the best practice to always use listeners now? Maybe we should drop in favor of MakeListener?
+* `MakeMessengerMiddleware`: imo this is super rare to need
+* `MakeSchedule`: flex provides a default recipe, rare to need multiple schedules
+* `MakeTwigExtension`: should upgrade to the attribute method?
+* `MakeXTest`: I believe the idea was to consolidate into the single `make:test`
+* `MakeAuthenticator`/`MakeCustomAuthenticator`: rare/advanced need
+* `MakeFormLogin`: single use
+* `MakeResetPassword`: single use
+* `MakeRegistrationForm`: single use
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-08-05T16:40:38Z
+
+Thanks for the extra rules. I would refine the target audience a bit: the bundle is for developers who are new to *a given Symfony feature*, not only for absolute Symfony beginners. From that angle, "single-use per project" is not the same as "low value": that single time is exactly when the developer is learning the feature and benefits the most from a working skeleton.
+
+Applied to the list:
+
+* Keep `make:messenger-middleware`, `make:schedule`, `make:authenticator`, `make:security:custom`, `make:form-login`, `make:reset-password`, `make:registration-form`. All of them are entry points into an advanced feature. The Flex recipe for Scheduler, for instance, only wires the config; it does not give a task handler to learn from.
+* Drop `make:subscriber` in favor of `make:listener`. Two ways to do the same thing, and `#[AsEventListener]` is the current recommended shape.
+* Migrate `make:twig-extension` to the `#[AsTwigFilter]` / `#[AsTwigFunction]` attributes rather than dropping it.
+* Consolidate `make:unit-test` and `make:functional-test` into `make:test` (already in the `needs-trim` row).
+
+So the exclusion rule I would adopt is narrower: drop makers whose output is fully covered by the Flex recipe or that duplicate another maker, but keep the ones that scaffold a working example of a feature, even if a project only runs them once.
+
+This scope is not set in stone: if a better way to scaffold projects emerges, either through richer Flex recipes or through another mechanism, we can revisit it and shift more responsibility away from MakerBundle.
+
+I updated the README scope section accordingly.
