@@ -195,6 +195,9 @@ final class Validator
     {
         self::notBlank($className);
 
+        // normalize class name
+        $className = str_replace('\\\\', '\\', $className);
+
         if (!class_exists($className)) {
             $errorMessage = $errorMessage ?: \sprintf('Class "%s" doesn\'t exist; please enter an existing full class name.', $className);
 
@@ -247,7 +250,7 @@ final class Validator
 
     public static function classIsBackedEnum($backedEnum): string
     {
-        self::classExists($backedEnum);
+        $backedEnum = self::classExists($backedEnum);
 
         if (!isset(class_implements($backedEnum)[\BackedEnum::class])) {
             throw new RuntimeCommandException(\sprintf('The class "%s" is not a valid BackedEnum.', $backedEnum));
