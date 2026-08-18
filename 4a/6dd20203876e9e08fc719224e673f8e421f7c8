@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------
+
+by Amoifr at 2026-08-18T09:34:06Z
+
+@GromNaN here is the fix for the Yaml failures you spotted on #1804, with the full diagnosis in #1806 (short version: symfony/symfony#65365 restored the expanded dump default that the fixtures had been adapted away from in March). Once this is merged, rebasing #1804 will clear them from its CI too.
+
+---------------------------------------------------------------------------
+
+by Amoifr at 2026-08-18T09:57:47Z
+
+Reverted, the CS fixer had slipped those two `: void` in while I formatted the file. The manipulator diff is back to the single `Yaml::dump()` line (plus the explanatory comment).
