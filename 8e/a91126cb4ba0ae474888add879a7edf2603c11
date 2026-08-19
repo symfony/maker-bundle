@@ -1,0 +1,59 @@
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-08-17T16:41:30Z
+
+I see many formatting changes in the failing tests, is it possible to fix them in the code generator?
+```
+7) Symfony\Bundle\MakerBundle\Tests\Maker\MakeScheduleTest::testExecute with data set "it_generates_a_schedule_select_empty" (Symfony\Bundle\MakerBundle\Test\MakerTestDetails Object (...))
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+     {\n
+         return (new Schedule())\n
+             ->add(\n
+-                // @TODO - Create a Message to schedule\n
+-                // RecurringMessage::every('1 hour', new App\Message\Message()),\n
++            // @TODO - Create a Message to schedule\n
++            // RecurringMessage::every('1 hour', new App\Message\Message()),\n
+             )\n
+             ->stateful($this->cache)\n
+         ;\n
+```
+
+---------------------------------------------------------------------------
+
+by kbond at 2026-08-17T17:15:15Z
+
+So to clarify, the php-cs-fixer was just *fluff*? The out of the box PHP-Parser generated code looks ok? I kind of figured it was like all one line with no indentation or something.
+
+```php
+public function getUser(int $id): ?User { if (!$id) { return null; } $user = $this->userRepository->find($id); if (!$user) { return null; } return $user; }
+```
+
+---------------------------------------------------------------------------
+
+by Amoifr at 2026-08-18T07:32:19Z
+
+Good call, and thanks for the failing list. The linter was doing two real jobs after all, both now moved into the generators:
+
+- Template glitches the fixer used to paper over: indented `<?php` control tags in the webhook `RequestParser` (they leaked their leading whitespace into the generated code), the schedule placeholder indent, missing blank lines in the Voter template, docblock/comment indentation and a trailing comma in the custom Authenticator.
+- One functional leftover: `make:serializer:normalizer` always added `use App\Entity\X;` even when the entity does not exist, and relied on `no_unused_imports` to clean it up. The use statement is now only added when the entity exists.
+
+@kbond so mostly fluff, with those exceptions: the raw PHP-Parser output was already properly indented (the `ClassSourceManipulator` fixtures in `tests/Util/fixtures/` never went through the fixer), what it really covered was template typos and that unused import. No one-liner methods, promise.
+
+The remaining CI red matches what already fails on the `1.x` nightlies (MakeController invoke, MakeForm relations, serializer-encoder legacy, Panther). Schedule, Voter, Webhook, Normalizer and Authenticator suites pass locally now.
+
+---------------------------------------------------------------------------
+
+by Amoifr at 2026-08-18T08:07:08Z
+
+The Yaml failures are pre-existing: the same four data sets fail on the `1.x` nightlies (e.g. run 32084125012, same job), they come from a symfony/yaml formatting change for sequences of maps. I can send a separate PR for those if you want.
+
+On keeping php-cs-fixer in the tests: I like it as a safety net against template drift, now that nothing repairs the output at runtime. Concrete shape I would propose:
+
+- keep the userland ruleset as a test fixture (basically the removed `config/php-cs-fixer.config.php`);
+- after a maker runs in a functional test, run the fixer once in dry-run over the generated files (the harness knows them), through `tools/php-cs-fixer` which CI already installs, and fail with the diff;
+- once per generated app keeps the cost to one process per test instead of one per file; going fully programmatic through the Runner API can come later if that is still too slow.
+
+Want it in this PR or as a follow-up? Happy either way.
