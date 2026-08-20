@@ -1,0 +1,33 @@
+---------------------------------------------------------------------------
+
+by seizan8 at 2025-11-27T22:38:54Z
+
+I do not understand why the tests are failing. They should be fine from what I understand.
+
+---------------------------------------------------------------------------
+
+by chalasr at 2026-01-08T20:33:45Z
+
+Noted myself to look into this asap. Thanks for the PR @seizan8!
+
+---------------------------------------------------------------------------
+
+by seizan8 at 2026-01-08T20:44:46Z
+
+This PR might be obsolete since PR [#1750 ](https://github.com/symfony/maker-bundle/pull/1750) seems to cover more features
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-08-19T16:44:39Z
+
+Rebased the branch on top of the latest `1.x`. Since `1.x` already requires Symfony 7.4 and PHP 8.2, invokable commands are always available, so `make:command` now generates an invokable command in every case. Following the decision in #1800, the generated output always follows the current best practices, so the choice between the invokable and the old structure has been dropped.
+
+Changes:
+
+- `templates/command/Command.tpl.php`: replaced by the invokable template. The command logic lives in a single `__invoke()` method with `#[Argument]` and `#[Option]` parameters. Fixed a typo on the `$enable` parameter and gave `$arg` a default value so the generated command runs out of the box.
+- `src/Maker/MakeCommand.php`: updated the use statements for the invokable template (added `Argument` and `Option`, removed `InputOption`, `OutputInterface`, `LazyCommand` and the `set_description` variable). There was no option or `interact()` method left to remove, `1.x` had already dropped them.
+- `tests/fixtures/make-command/tests/it_makes_a_command_in_custom_namespace.php`: adapted, because for an invokable command `Application::find()` returns a `Command` wrapper instead of the user class. The test now checks that the generated class exists in the `Custom` namespace directly.
+
+`MakeCommandTest` passes (3 tests, 5 assertions).
+
+Follow-up idea for later: we could let the user add arguments and options interactively during generation, the same way `make:entity` builds fields step by step, so the generated `__invoke()` signature matches the command needs from the start.
