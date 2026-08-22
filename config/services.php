@@ -12,6 +12,7 @@
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Symfony\Bundle\MakerBundle\Command\MakerCommand;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineEventRegistry;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Event\ConsoleErrorSubscriber;
@@ -51,6 +52,8 @@ return static function (ContainerConfigurator $container) {
 
     $services->set('maker.event_registry', EventRegistry::class)
         ->args([service('event_dispatcher')]);
+
+    $services->set('maker.doctrine.event_registry', DoctrineEventRegistry::class);
 
     $services->set('maker.console_error_listener', ConsoleErrorSubscriber::class)
         ->tag('kernel.event_subscriber');
