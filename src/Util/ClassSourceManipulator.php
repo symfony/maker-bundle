@@ -403,6 +403,51 @@ final class ClassSourceManipulator
         $this->addNodeAfterProperties($newPropertyNode);
     }
 
+    /**
+     * @param array<int, string> $comments
+     */
+    public function addConstant(string $name, string|int|float|bool|array $value, ?string $type = null, string $visibility = 'public', array $comments = [], bool $final = false): void
+    {
+        $constantBuilder = new Builder\ClassConst($name, $value);
+
+        match ($visibility) {
+            'protected' => $constantBuilder->makeProtected(),
+            'private' => $constantBuilder->makePrivate(),
+            default => $constantBuilder->makePublic(),
+        };
+
+        if ($final) {
+            $constantBuilder->makeFinal();
+        }
+
+        if (null !== $type) {
+            $constantBuilder->setType($type);
+        }
+
+        if ($comments) {
+            $constantBuilder->setDocComment($this->createDocBlock($comments));
+        }
+
+        $this->addNodeAmongConstants($constantBuilder->getNode());
+    }
+
+    public function constantExists(string $constantName): bool
+    {
+        foreach ($this->getClassNode()->stmts as $node) {
+            if (!$node instanceof Node\Stmt\ClassConst) {
+                continue;
+            }
+
+            foreach ($node->consts as $const) {
+                if ($const->name->toString() === $constantName) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public function addAttributeToClass(string $attributeClass, array $options): void
     {
         $this->addUseStatementIfNecessary($attributeClass);
@@ -1174,6 +1219,44 @@ final class ClassSourceManipulator
             array_unshift($classNode->stmts, $this->createBlankLineNode(self::CONTEXT_CLASS));
         }
         array_unshift($classNode->stmts, $newNode);
+        $this->updateSourceCodeFromNewStmts();
+    }
+
+    /**
+     * Adds this new constant node where a new constant should go: after the
+     * last existing constant, otherwise right before the first property,
+     * otherwise after the last trait, otherwise at the top of the class.
+     */
+    private function addNodeAmongConstants(Node\Stmt\ClassConst $newNode): void
+    {
+        $classNode = $this->getClassNode();
+
+        $lastConstIndex = null;
+        $firstPropertyIndex = null;
+        $lastTraitIndex = null;
+
+        foreach ($classNode->stmts as $index => $stmt) {
+            if ($stmt instanceof Node\Stmt\ClassConst) {
+                $lastConstIndex = $index;
+            } elseif ($stmt instanceof Node\Stmt\Property && null === $firstPropertyIndex) {
+                $firstPropertyIndex = $index;
+            } elseif ($stmt instanceof Node\Stmt\TraitUse) {
+                $lastTraitIndex = $index;
+            }
+        }
+
+        if (null !== $lastConstIndex) {
+            array_splice($classNode->stmts, $lastConstIndex + 1, 0, [$this->createBlankLineNode(self::CONTEXT_CLASS), $newNode]);
+        } elseif (null !== $firstPropertyIndex) {
+            array_splice($classNode->stmts, $firstPropertyIndex, 0, [$newNode, $this->createBlankLineNode(self::CONTEXT_CLASS)]);
+        } elseif (null !== $lastTraitIndex) {
+            array_splice($classNode->stmts, $lastTraitIndex + 1, 0, [$this->createBlankLineNode(self::CONTEXT_CLASS), $newNode]);
+        } elseif (!empty($classNode->stmts)) {
+            array_unshift($classNode->stmts, $newNode, $this->createBlankLineNode(self::CONTEXT_CLASS));
+        } else {
+            array_unshift($classNode->stmts, $newNode);
+        }
+
         $this->updateSourceCodeFromNewStmts();
     }
 

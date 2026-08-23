@@ -1,0 +1,23 @@
+The <info>%command.name%</info> command adds a constant to an existing PHP class in your <comment>src/</comment>
+directory (an entity, a service, a controller, a DTO, ...) using PHP's AST parser, so your
+existing code formatting is preserved.
+
+<info>php %command.full_name% Order STATUS_PENDING pending</info>
+
+If any of the arguments are missing, the command will ask for them interactively - with
+autocompletion for the target class.
+
+You may also provide the fully-qualified class name:
+
+<info>php %command.full_name% "App\Entity\Order" STATUS_PENDING pending</info>
+
+By default, the type of the constant is guessed from its value. You can be explicit about it
+with the <comment>--type</comment> option, which also enables writing a native type declaration on the
+constant (requires PHP 8.3+):
+
+<info>php %command.full_name% Order MAX_ITEMS_PER_ORDER 50 --type=int</info>
+
+Other options let you control the visibility, add a PHPDoc description, or mark the constant
+<comment>final</comment> (requires PHP 8.1+):
+
+<info>php %command.full_name% Order STATUS_PENDING pending --visibility=private --comment="The default order status" --final</info>

@@ -155,6 +155,21 @@ final class Validator
         return $name;
     }
 
+    public static function validateConstantName(string $name): string
+    {
+        self::notBlank($name);
+
+        if (!preg_match('/^[A-Z_][A-Z0-9_]*$/', $name)) {
+            throw new RuntimeCommandException(\sprintf('"%s" is not a valid constant name: it must be written in UPPER_SNAKE_CASE (e.g. "STATUS_PENDING") and contain only uppercase letters, numbers and underscores.', $name));
+        }
+
+        if ('CLASS' === $name) {
+            throw new RuntimeCommandException('"CLASS" is a reserved constant name and cannot be used.');
+        }
+
+        return $name;
+    }
+
     public static function validateDoctrineFieldName(string $name, ManagerRegistry $registry): string
     {
         // check reserved words

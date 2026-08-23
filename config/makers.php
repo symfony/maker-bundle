@@ -13,6 +13,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator;
 use Symfony\Bundle\MakerBundle\Maker\MakeCommand;
+use Symfony\Bundle\MakerBundle\Maker\MakeConstant;
 use Symfony\Bundle\MakerBundle\Maker\MakeController;
 use Symfony\Bundle\MakerBundle\Maker\MakeCrud;
 use Symfony\Bundle\MakerBundle\Maker\MakeDockerDatabase;
@@ -53,6 +54,13 @@ return static function (ContainerConfigurator $container) {
         ->tag('maker.command');
 
     $services->set('maker.maker.make_command', MakeCommand::class)
+        ->tag('maker.command');
+
+    $services->set('maker.maker.make_constant', MakeConstant::class)
+        ->args([
+            service('maker.file_manager'),
+            service('maker.generator'),
+        ])
         ->tag('maker.command');
 
     $services->set('maker.maker.make_twig_component', MakeTwigComponent::class)
