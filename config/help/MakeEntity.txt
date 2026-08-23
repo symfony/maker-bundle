@@ -22,3 +22,8 @@ for the properties of existing entities:
 You can also *overwrite* any existing methods:
 
 <info>php %command.full_name% --regenerate --overwrite</info>
+
+When adding a ManyToMany relationship, you'll be asked whether it needs additional
+properties (e.g. a "role" or "joinedAt" field). If so, an association entity is
+generated automatically to hold the relationship and its extra properties, instead
+of a direct ManyToMany mapping.
