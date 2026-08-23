@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityRegenerator;
 use Symfony\Bundle\MakerBundle\Doctrine\EntityRelation;
+use Symfony\Bundle\MakerBundle\Doctrine\ManyToManyAssociationRequest;
 use Symfony\Bundle\MakerBundle\Doctrine\ORMDependencyBuilder;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
@@ -28,6 +29,7 @@ use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Maker\Common\UidTrait;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassDetails;
+use Symfony\Bundle\MakerBundle\Util\ClassNameDetails;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassProperty;
 use Symfony\Bundle\MakerBundle\Util\ClassSourceManipulator;
 use Symfony\Bundle\MakerBundle\Util\CliOutputHelper;
@@ -244,69 +246,16 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 $manipulator->addEntityField($newField);
 
                 $currentFields[] = $newField->propertyName;
+            } elseif ($newField instanceof ManyToManyAssociationRequest) {
+                $currentFields[] = $this->createManyToManyAssociationEntity($newField, $manipulator, $generator, $io, $overwrite, $fileManagerOperations);
             } elseif ($newField instanceof EntityRelation) {
-                // both overridden below for OneToMany
-                $newFieldName = $newField->getOwningProperty();
-                if ($newField->isSelfReferencing()) {
-                    $otherManipulatorFilename = $entityPath;
-                    $otherManipulator = $manipulator;
-                } else {
-                    $otherManipulatorFilename = $this->getPathOfClass($newField->getInverseClass());
-                    $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
-                }
-                switch ($newField->getType()) {
-                    case EntityRelation::MANY_TO_ONE:
-                        if ($newField->getOwningClass() === $entityClassDetails->getFullName()) {
-                            // THIS class will receive the ManyToOne
-                            $manipulator->addManyToOneRelation($newField->getOwningRelation());
-
-                            if ($newField->getMapInverseRelation()) {
-                                $otherManipulator->addOneToManyRelation($newField->getInverseRelation());
-                            }
-                        } else {
-                            // the new field being added to THIS entity is the inverse
-                            $newFieldName = $newField->getInverseProperty();
-                            $otherManipulatorFilename = $this->getPathOfClass($newField->getOwningClass());
-                            $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
-
-                            // The *other* class will receive the ManyToOne
-                            $otherManipulator->addManyToOneRelation($newField->getOwningRelation());
-                            if (!$newField->getMapInverseRelation()) {
-                                throw new \Exception('Somehow a OneToMany relationship is being created, but the inverse side will not be mapped?');
-                            }
-                            $manipulator->addOneToManyRelation($newField->getInverseRelation());
-                        }
-
-                        break;
-                    case EntityRelation::MANY_TO_MANY:
-                        $manipulator->addManyToManyRelation($newField->getOwningRelation());
-                        if ($newField->getMapInverseRelation()) {
-                            $otherManipulator->addManyToManyRelation($newField->getInverseRelation());
-                        }
-
-                        break;
-                    case EntityRelation::ONE_TO_ONE:
-                        $manipulator->addOneToOneRelation($newField->getOwningRelation());
-                        if ($newField->getMapInverseRelation()) {
-                            $otherManipulator->addOneToOneRelation($newField->getInverseRelation());
-                        }
-
-                        break;
-                    default:
-                        throw new \Exception('Invalid relation type.');
-                }
-
-                // save the inverse side if it's being mapped
-                if ($newField->getMapInverseRelation()) {
-                    $fileManagerOperations[$otherManipulatorFilename] = $otherManipulator;
-                }
-                $currentFields[] = $newFieldName;
+                $currentFields[] = $this->applyEntityRelation($newField, $manipulator, $entityPath, $entityClassDetails, $io, $overwrite, $fileManagerOperations);
             } else {
                 throw new \Exception('Invalid value.');
             }
 
-            foreach ($fileManagerOperations as $path => $manipulator) {
-                $this->fileManager->dumpFile($path, $manipulator->getSourceCode());
+            foreach ($fileManagerOperations as $path => $manipulatorToDump) {
+                $this->fileManager->dumpFile($path, $manipulatorToDump->getSourceCode());
             }
         }
 
@@ -336,8 +285,186 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         ORMDependencyBuilder::buildDependencies($dependencies);
     }
 
+    /**
+     * Applies a relation field to $manipulator's entity, creating/updating the other side as needed.
+     *
+     * @param array<string, ClassSourceManipulator> $fileManagerOperations
+     *
+     * @return string the name of the property that was added to $manipulator's entity
+     */
+    private function applyEntityRelation(EntityRelation $newField, ClassSourceManipulator $manipulator, string $entityPath, ClassNameDetails $entityClassDetails, ConsoleStyle $io, bool $overwrite, array &$fileManagerOperations): string
+    {
+        // both overridden below for OneToMany
+        $newFieldName = $newField->getOwningProperty();
+        if ($newField->isSelfReferencing()) {
+            $otherManipulatorFilename = $entityPath;
+            $otherManipulator = $manipulator;
+        } else {
+            $otherManipulatorFilename = $this->getPathOfClass($newField->getInverseClass());
+            $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
+        }
+        switch ($newField->getType()) {
+            case EntityRelation::MANY_TO_ONE:
+                if ($newField->getOwningClass() === $entityClassDetails->getFullName()) {
+                    // THIS class will receive the ManyToOne
+                    $manipulator->addManyToOneRelation($newField->getOwningRelation());
+
+                    if ($newField->getMapInverseRelation()) {
+                        $otherManipulator->addOneToManyRelation($newField->getInverseRelation());
+                    }
+                } else {
+                    // the new field being added to THIS entity is the inverse
+                    $newFieldName = $newField->getInverseProperty();
+                    $otherManipulatorFilename = $this->getPathOfClass($newField->getOwningClass());
+                    $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
+
+                    // The *other* class will receive the ManyToOne
+                    $otherManipulator->addManyToOneRelation($newField->getOwningRelation());
+                    if (!$newField->getMapInverseRelation()) {
+                        throw new \Exception('Somehow a OneToMany relationship is being created, but the inverse side will not be mapped?');
+                    }
+                    $manipulator->addOneToManyRelation($newField->getInverseRelation());
+                }
+
+                break;
+            case EntityRelation::MANY_TO_MANY:
+                $manipulator->addManyToManyRelation($newField->getOwningRelation());
+                if ($newField->getMapInverseRelation()) {
+                    $otherManipulator->addManyToManyRelation($newField->getInverseRelation());
+                }
+
+                break;
+            case EntityRelation::ONE_TO_ONE:
+                $manipulator->addOneToOneRelation($newField->getOwningRelation());
+                if ($newField->getMapInverseRelation()) {
+                    $otherManipulator->addOneToOneRelation($newField->getInverseRelation());
+                }
+
+                break;
+            default:
+                throw new \Exception('Invalid relation type.');
+        }
+
+        // save the inverse side if it's being mapped
+        if ($newField->getMapInverseRelation()) {
+            $fileManagerOperations[$otherManipulatorFilename] = $otherManipulator;
+        }
+
+        return $newFieldName;
+    }
+
+    /**
+     * Turns a ManyToMany relationship into a dedicated association entity, since it needs
+     * to carry additional properties.
+     *
+     * The association entity gets a ManyToOne relation to both sides of the original
+     * relationship (with a simple auto-generated identifier and a unique constraint on
+     * the pair), and the caller is then asked for the additional properties it should hold.
+     *
+     * @param array<string, ClassSourceManipulator> $fileManagerOperations
+     *
+     * @return string the name of the property that was added to $manipulator's entity
+     */
+    private function createManyToManyAssociationEntity(ManyToManyAssociationRequest $request, ClassSourceManipulator $manipulator, Generator $generator, ConsoleStyle $io, bool $overwrite, array &$fileManagerOperations): string
+    {
+        $owningClass = $request->getOwningClass();
+        $targetClass = $request->getTargetClass();
+
+        if ($owningClass === $targetClass) {
+            throw new RuntimeCommandException('A ManyToMany relationship with additional properties between an entity and itself is not currently supported.');
+        }
+
+        $associationClassDetails = $this->generator->createClassNameDetails(
+            Str::getShortClassName($owningClass).Str::getShortClassName($targetClass),
+            'Entity\\'
+        );
+
+        $ownerPropertyName = Str::asLowerCamelCase(Str::getShortClassName($owningClass));
+        $targetPropertyName = Str::asLowerCamelCase(Str::getShortClassName($targetClass));
+        $inversePropertyName = Str::asLowerCamelCase(Str::singularCamelCaseToPluralCamelCase($associationClassDetails->getShortName()));
+
+        $associationExists = class_exists($associationClassDetails->getFullName());
+
+        $io->comment(\sprintf(
+            'A <comment>%s</comment> entity will %s to represent this relationship and hold its additional properties.',
+            $associationClassDetails->getShortName(),
+            $associationExists ? 'be used' : 'be created'
+        ));
+
+        if ($associationExists) {
+            $associationPath = $this->getPathOfClass($associationClassDetails->getFullName());
+        } else {
+            $associationPath = $this->entityClassGenerator->generateEntityClass(
+                entityClassDetails: $associationClassDetails,
+                apiResource: false,
+            );
+            $generator->writeChanges();
+        }
+
+        $associationManipulator = $this->createClassManipulator($associationPath, $io, $overwrite);
+
+        // the owning side of the original relationship gets a ManyToOne to the association entity,
+        // and the association entity gets the inverse OneToMany
+        $ownerRelation = new EntityRelation(EntityRelation::MANY_TO_ONE, $associationClassDetails->getFullName(), $owningClass);
+        $ownerRelation->setOwningProperty($ownerPropertyName);
+        $ownerRelation->setInverseProperty($inversePropertyName);
+        $ownerRelation->setIsNullable(false);
+        $ownerRelation->setOrphanRemoval(true);
+
+        $associationManipulator->addManyToOneRelation($ownerRelation->getOwningRelation());
+        $manipulator->addOneToManyRelation($ownerRelation->getInverseRelation());
+
+        // same thing for the target side of the original relationship
+        $targetRelation = new EntityRelation(EntityRelation::MANY_TO_ONE, $associationClassDetails->getFullName(), $targetClass);
+        $targetRelation->setOwningProperty($targetPropertyName);
+        $targetRelation->setInverseProperty($inversePropertyName);
+        $targetRelation->setIsNullable(false);
+        $targetRelation->setOrphanRemoval(true);
+
+        $targetPath = $this->getPathOfClass($targetClass);
+        $targetManipulator = $this->createClassManipulator($targetPath, $io, $overwrite);
+
+        $associationManipulator->addManyToOneRelation($targetRelation->getOwningRelation());
+        $targetManipulator->addOneToManyRelation($targetRelation->getInverseRelation());
+
+        // now ask for the additional properties the association entity should hold
+        $associationFields = $associationExists
+            ? $this->getPropertyNames($associationClassDetails->getFullName())
+            : [$ownerPropertyName, $targetPropertyName];
+        $isFirstAssociationField = true;
+        while (true) {
+            $associationField = $this->askForNextField($io, $associationFields, $associationClassDetails->getFullName(), $isFirstAssociationField);
+            $isFirstAssociationField = false;
+
+            if (null === $associationField) {
+                break;
+            }
+
+            if ($associationField instanceof ClassProperty) {
+                $associationManipulator->addEntityField($associationField);
+                $associationFields[] = $associationField->propertyName;
+            } elseif ($associationField instanceof EntityRelation) {
+                $associationFields[] = $this->applyEntityRelation($associationField, $associationManipulator, $associationPath, $associationClassDetails, $io, $overwrite, $fileManagerOperations);
+            } else {
+                throw new RuntimeCommandException('A ManyToMany relationship with additional properties cannot itself have another such relationship.');
+            }
+        }
+
+        if (!$associationExists) {
+            $associationManipulator->addAttributeToClass('ORM\\UniqueConstraint', [
+                'name' => Str::asSnakeCase($associationClassDetails->getShortName()).'_unique',
+                'fields' => [$ownerPropertyName, $targetPropertyName],
+            ]);
+        }
+
+        $fileManagerOperations[$associationPath] = $associationManipulator;
+        $fileManagerOperations[$targetPath] = $targetManipulator;
+
+        return $inversePropertyName;
+    }
+
     /** @param string[] $fields */
-    private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField): EntityRelation|ClassProperty|null
+    private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField): EntityRelation|ClassProperty|ManyToManyAssociationRequest|null
     {
         $io->writeln('');
 
@@ -591,7 +718,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $question;
     }
 
-    private function askRelationDetails(ConsoleStyle $io, string $generatedEntityClass, string $type, string $newFieldName): EntityRelation
+    private function askRelationDetails(ConsoleStyle $io, string $generatedEntityClass, string $type, string $newFieldName): EntityRelation|ManyToManyAssociationRequest
     {
         // ask the targetEntity
         $targetEntityClass = null;
@@ -762,6 +889,15 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
                 break;
             case EntityRelation::MANY_TO_MANY:
+                // self-referencing associations, and associations to a vendor class we
+                // cannot modify, are not offered the additional-properties workflow
+                if ($generatedEntityClass !== $targetEntityClass
+                    && !$this->isClassInVendor($targetEntityClass)
+                    && $io->confirm('Does this relationship have additional properties (e.g. a "role" or "joinedAt" field)?', false)
+                ) {
+                    return new ManyToManyAssociationRequest($generatedEntityClass, $targetEntityClass);
+                }
+
                 $relation = new EntityRelation(
                     EntityRelation::MANY_TO_MANY,
                     $generatedEntityClass,

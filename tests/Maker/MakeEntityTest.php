@@ -354,6 +354,8 @@ class MakeEntityTest extends MakerTestCase
                     'User',
                     // relation type
                     'ManyToMany',
+                    // additional properties?
+                    '',
                     // inverse side?
                     'y',
                     // field name on opposite side - use default 'courses'
@@ -387,6 +389,8 @@ class MakeEntityTest extends MakerTestCase
                     'User',
                     // relation type
                     'ManyToMany',
+                    // additional properties?
+                    '',
                     // inverse side?
                     'y',
                     // field name on opposite side - use default 'courses'
@@ -415,6 +419,8 @@ class MakeEntityTest extends MakerTestCase
                     'Friend\\User',
                     // relation type
                     'ManyToMany',
+                    // additional properties?
+                    '',
                     // inverse side?
                     'y',
                     // field name on opposite side - use default 'courses'
@@ -435,6 +441,160 @@ class MakeEntityTest extends MakerTestCase
                 self::assertStringContainsString('Each Friend\User also relates to (has) exactly one User.', $output);
 
                 // self::runCustomTest($runner, 'it_adds_many_to_many_between_same_entity_name_different_namespace.php');
+            }),
+        ];
+
+        yield 'it_adds_many_to_many_with_additional_properties' => [self::createMakeEntityTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::copyEntity($runner, 'User-basic.php');
+                self::copyEntity($runner, 'Group-basic.php');
+
+                $output = $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // field name
+                    'groups',
+                    // add a relationship field
+                    'relation',
+                    // the target entity
+                    'Group',
+                    // relation type
+                    'ManyToMany',
+                    // additional properties?
+                    'y',
+                    // [UserGroup] new property name
+                    'role',
+                    // [UserGroup] field type
+                    'string',
+                    // [UserGroup] field length (default 255)
+                    '',
+                    // [UserGroup] nullable? (default no)
+                    '',
+                    // [UserGroup] add another property? (stop)
+                    '',
+                    // finish adding fields on User
+                    '',
+                ]);
+
+                self::assertStringContainsString('src/Entity/UserGroup.php', $output);
+
+                $userGroupSource = file_get_contents($runner->getPath('src/Entity/UserGroup.php'));
+                self::assertStringContainsString('private ?int $id = null;', $userGroupSource);
+                self::assertStringContainsString('private ?User $user = null;', $userGroupSource);
+                self::assertStringContainsString('private ?Group $group = null;', $userGroupSource);
+                self::assertStringContainsString('private ?string $role = null;', $userGroupSource);
+                self::assertStringContainsString('#[ORM\UniqueConstraint(', $userGroupSource);
+
+                $userSource = file_get_contents($runner->getPath('src/Entity/User.php'));
+                self::assertStringContainsString('private Collection $userGroups;', $userSource);
+                // the direct ManyToMany mapping must not exist: the association entity replaces it
+                self::assertStringNotContainsString('ManyToMany', $userSource);
+                // unrelated, pre-existing code must be preserved
+                self::assertStringContainsString('function getFirstName()', $userSource);
+
+                $groupSource = file_get_contents($runner->getPath('src/Entity/Group.php'));
+                self::assertStringContainsString('private Collection $userGroups;', $groupSource);
+                self::assertStringNotContainsString('ManyToMany', $groupSource);
+                self::assertStringContainsString('function getName()', $groupSource);
+
+                self::runCustomTest($runner, 'it_adds_many_to_many_with_additional_properties.php');
+            }),
+        ];
+
+        yield 'it_adds_many_to_many_with_multiple_additional_properties' => [self::createMakeEntityTest(withDatabase: false)
+            ->run(static function (MakerTestRunner $runner) {
+                self::copyEntity($runner, 'User-basic.php');
+                self::copyEntity($runner, 'Group-basic.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // field name
+                    'groups',
+                    // add a relationship field
+                    'relation',
+                    // the target entity
+                    'Group',
+                    // relation type
+                    'ManyToMany',
+                    // additional properties?
+                    'y',
+                    // [UserGroup] property 1
+                    'role',
+                    'string',
+                    '',
+                    '',
+                    // [UserGroup] property 2
+                    'joinedAt',
+                    // use default datetime_immutable
+                    '',
+                    '',
+                    // [UserGroup] property 3
+                    'isActive',
+                    'boolean',
+                    '',
+                    // stop
+                    '',
+                    // finish adding fields on User
+                    '',
+                ]);
+
+                $userGroupSource = file_get_contents($runner->getPath('src/Entity/UserGroup.php'));
+                self::assertStringContainsString('private ?string $role = null;', $userGroupSource);
+                self::assertStringContainsString('private ?\DateTimeImmutable $joinedAt = null;', $userGroupSource);
+                self::assertStringContainsString('private ?bool $isActive = null;', $userGroupSource);
+            }),
+        ];
+
+        yield 'it_reuses_an_existing_association_entity' => [self::createMakeEntityTest(withDatabase: false)
+            ->run(static function (MakerTestRunner $runner) {
+                // simulates the state left behind by an earlier "User -> Group" run:
+                // User/Group don't have their inverse OneToMany side yet, but the
+                // association entity already exists, with its own "role" property
+                // and unique constraint.
+                self::copyEntity($runner, 'User-basic.php');
+                self::copyEntity($runner, 'Group-basic.php');
+                self::copyEntity($runner, 'UserGroup-basic.php');
+
+                $output = $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // field name
+                    'groups',
+                    // add a relationship field
+                    'relation',
+                    // the target entity
+                    'Group',
+                    // relation type
+                    'ManyToMany',
+                    // additional properties?
+                    'y',
+                    // [UserGroup] new property
+                    'joinedAt',
+                    // use default datetime_immutable
+                    '',
+                    '',
+                    // stop
+                    '',
+                    // finish adding fields on User
+                    '',
+                ]);
+
+                self::assertStringContainsString('A UserGroup entity will be used', $output);
+
+                $userGroupSource = file_get_contents($runner->getPath('src/Entity/UserGroup.php'));
+                // the property present from the "earlier run" must be preserved
+                self::assertStringContainsString('private ?string $role = null;', $userGroupSource);
+                // the new property must have been added
+                self::assertStringContainsString('private ?\DateTimeImmutable $joinedAt = null;', $userGroupSource);
+                // the unique constraint from the earlier run must not be duplicated
+                self::assertSame(1, substr_count($userGroupSource, '#[ORM\UniqueConstraint('));
+
+                $userSource = file_get_contents($runner->getPath('src/Entity/User.php'));
+                self::assertStringContainsString('private Collection $userGroups;', $userSource);
+
+                $groupSource = file_get_contents($runner->getPath('src/Entity/Group.php'));
+                self::assertStringContainsString('private Collection $userGroups;', $groupSource);
             }),
         ];
 
