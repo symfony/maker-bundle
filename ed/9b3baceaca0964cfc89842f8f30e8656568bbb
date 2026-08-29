@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------
+
+by wachterjohannes at 2026-08-29T18:41:51Z
+
+@GromNaN done, and I applied the same reading to my other open PRs rather than only the line you pointed at.
+
+Removed there: a comment in #1810 and #1813 explaining that parsing happens up front so a bad definition cannot leave a half-created entity behind, and a docblock in #1815 explaining why the answer moved onto the input. Both described the fix rather than the code, same as this one.
+
+Trimmed rather than removed in #1813: a comment above a branch in `generate()` had grown into six lines of archaeology about Composer's `missingClasses` cache. It is down to the two lines that say what the branch does.
+
+Kept the ones that carry something the code cannot say on its own, for example that the interactive mode settles an enum's column type only after the branch that assigns a length, so an enum never gets one. Happy to cut further if you read any of those the same way.
