@@ -40,6 +40,7 @@ use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -89,14 +90,7 @@ class MakeResetPassword extends AbstractMaker
     use CanGenerateTestsTrait;
     use UidTrait;
 
-    private string $fromEmailAddress;
-    private string $fromEmailName;
-    private string $controllerResetSuccessRedirect;
     private ?RouteObject $controllerResetSuccessRoute = null;
-    private string $userClass;
-    private string $emailPropertyName;
-    private string $emailGetterMethodName;
-    private string $passwordSetterMethodName;
 
     public function __construct(
         private FileManager $fileManager,
@@ -120,6 +114,16 @@ class MakeResetPassword extends AbstractMaker
     {
         $command
             ->setHelp($this->getHelpFileContents('MakeResetPassword.txt'))
+        ;
+
+        $command
+            ->addOption('user-class', null, InputOption::VALUE_REQUIRED, 'The User class the feature is built for (e.g. <fg=yellow>App\\Entity\\User</>)')
+            ->addOption('email-field', null, InputOption::VALUE_REQUIRED, 'The property holding the email address (e.g. <fg=yellow>email</>)')
+            ->addOption('email-getter', null, InputOption::VALUE_REQUIRED, 'The method returning the email address (e.g. <fg=yellow>getEmail</>)')
+            ->addOption('password-setter', null, InputOption::VALUE_REQUIRED, 'The method setting the hashed password (e.g. <fg=yellow>setPassword</>)')
+            ->addOption('success-redirect-route', null, InputOption::VALUE_REQUIRED, 'The route to redirect to after a successful reset (e.g. <fg=yellow>app_home</>)')
+            ->addOption('from-email-address', null, InputOption::VALUE_REQUIRED, 'The address reset confirmations are sent from (e.g. <fg=yellow>mailer@your-domain.com</>)')
+            ->addOption('from-email-name', null, InputOption::VALUE_REQUIRED, 'The name associated with that address (e.g. <fg=yellow>Acme Mail Bot</>)')
         ;
 
         $this->addWithUuidOption($command);
@@ -152,63 +156,117 @@ class MakeResetPassword extends AbstractMaker
         $this->checkIsUsingUid($input);
 
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
+        $providersData = $this->readSecurityProviders();
 
-        if (!$this->fileManager->fileExists($path = 'config/packages/security.yaml')) {
-            throw new RuntimeCommandException('The file "config/packages/security.yaml" does not exist. PHP & XML configuration formats are currently not supported.');
+        if (!$input->getOption('user-class')) {
+            $input->setOption('user-class', $interactiveSecurityHelper->guessUserClass(
+                $io,
+                $providersData,
+                'What is the User entity that should be used with the "forgotten password" feature? (e.g. <fg=yellow>App\\Entity\\User</>)'
+            ));
         }
 
-        $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents($path));
-        $securityData = $manipulator->getData();
-        $providersData = $securityData['security']['providers'] ?? [];
+        $userClass = $input->getOption('user-class');
 
-        $this->userClass = $interactiveSecurityHelper->guessUserClass(
-            $io,
-            $providersData,
-            'What is the User entity that should be used with the "forgotten password" feature? (e.g. <fg=yellow>App\\Entity\\User</>)'
-        );
+        if (!$input->getOption('email-field')) {
+            $input->setOption('email-field', $interactiveSecurityHelper->guessEmailField($io, $userClass));
+        }
 
-        $this->emailPropertyName = $interactiveSecurityHelper->guessEmailField($io, $this->userClass);
-        $this->emailGetterMethodName = $interactiveSecurityHelper->guessEmailGetter($io, $this->userClass, $this->emailPropertyName);
-        $this->passwordSetterMethodName = $interactiveSecurityHelper->guessPasswordSetter($io, $this->userClass);
+        if (!$input->getOption('email-getter')) {
+            $input->setOption('email-getter', $interactiveSecurityHelper->guessEmailGetter($io, $userClass, $input->getOption('email-field')));
+        }
 
-        $io->text(\sprintf('Implementing reset password for <info>%s</info>', $this->userClass));
+        if (!$input->getOption('password-setter')) {
+            $input->setOption('password-setter', $interactiveSecurityHelper->guessPasswordSetter($io, $userClass));
+        }
+
+        $io->text(\sprintf('Implementing reset password for <info>%s</info>', $userClass));
 
         $io->section('- ResetPasswordController -');
         $io->text('A named route is used for redirecting after a successful reset. Even a route that does not exist yet can be used here.');
 
-        $this->controllerResetSuccessRedirect = $io->ask(
-            'What route should users be redirected to after their password has been successfully reset?',
-            'app_home',
-            Validator::notBlank(...)
-        );
-
-        if ($this->router instanceof RouterInterface) {
-            $this->controllerResetSuccessRoute = $this->router->getRouteCollection()->get($this->controllerResetSuccessRedirect);
+        if (!$input->getOption('success-redirect-route')) {
+            $input->setOption('success-redirect-route', $io->ask(
+                'What route should users be redirected to after their password has been successfully reset?',
+                'app_home',
+                Validator::notBlank(...)
+            ));
         }
 
         $io->section('- Email -');
         $emailText[] = 'These are used to generate the email code. Don\'t worry, you can change them in the code later!';
         $io->text($emailText);
 
-        $this->fromEmailAddress = $io->ask(
-            'What email address will be used to send reset confirmations? e.g. mailer@your-domain.com',
-            null,
-            Validator::validateEmailAddress(...)
-        );
+        if (!$input->getOption('from-email-address')) {
+            $input->setOption('from-email-address', $io->ask(
+                'What email address will be used to send reset confirmations? e.g. mailer@your-domain.com',
+                null,
+                Validator::validateEmailAddress(...)
+            ));
+        }
 
-        $this->fromEmailName = $io->ask(
-            'What "name" should be associated with that email address? e.g. "Acme Mail Bot"',
-            null,
-            Validator::notBlank(...)
-        );
+        if (!$input->getOption('from-email-name')) {
+            $input->setOption('from-email-name', $io->ask(
+                'What "name" should be associated with that email address? e.g. "Acme Mail Bot"',
+                null,
+                Validator::notBlank(...)
+            ));
+        }
 
         $this->interactSetGenerateTests($input, $io);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    private function readSecurityProviders(): array
+    {
+        if (!$this->fileManager->fileExists($path = 'config/packages/security.yaml')) {
+            throw new RuntimeCommandException('The file "config/packages/security.yaml" does not exist. PHP & XML configuration formats are currently not supported.');
+        }
+
+        return (new YamlSourceManipulator($this->fileManager->getFileContents($path)))->getData()['security']['providers'] ?? [];
+    }
+
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        $securityHelper = new InteractiveSecurityHelper();
+        $providersData = $this->readSecurityProviders();
+
+        $userClass = $input->getOption('user-class') ?: $securityHelper->findUserClass($providersData);
+
+        if (!$userClass) {
+            throw new RuntimeCommandException('The User class cannot be guessed from "security.yaml", pass it with "--user-class".');
+        }
+
+        $emailPropertyName = $input->getOption('email-field') ?: $securityHelper->findEmailField($userClass);
+
+        if (!$emailPropertyName) {
+            throw new RuntimeCommandException(\sprintf('The email property of "%s" cannot be guessed, pass it with "--email-field".', $userClass));
+        }
+
+        $emailGetterMethodName = $input->getOption('email-getter') ?: $securityHelper->findEmailGetter($userClass, $emailPropertyName);
+
+        if (!$emailGetterMethodName) {
+            throw new RuntimeCommandException(\sprintf('"%s" has no "get%s()" method, pass the getter with "--email-getter".', $userClass, ucfirst($emailPropertyName)));
+        }
+
+        $passwordSetterMethodName = $input->getOption('password-setter') ?: $securityHelper->findPasswordSetter($userClass);
+
+        if (!$passwordSetterMethodName) {
+            throw new RuntimeCommandException(\sprintf('"%s" has no "setPassword()" method, pass the setter with "--password-setter".', $userClass));
+        }
+
+        $controllerResetSuccessRedirect = $input->getOption('success-redirect-route') ?: 'app_home';
+        $fromEmailAddress = Validator::validateEmailAddress($input->getOption('from-email-address'));
+        $fromEmailName = Validator::notBlank($input->getOption('from-email-name'));
+
+        if ($this->router instanceof RouterInterface) {
+            $this->controllerResetSuccessRoute = $this->router->getRouteCollection()->get($controllerResetSuccessRedirect);
+        }
+
         $userClassNameDetails = $generator->createClassNameDetails(
-            '\\'.$this->userClass,
+            '\\'.$userClass,
             'Entity\\'
         );
 
@@ -276,19 +334,19 @@ class MakeResetPassword extends AbstractMaker
                 'user_class_name' => $userClassNameDetails->getShortName(),
                 'request_form_type_class_name' => $requestFormTypeClassNameDetails->getShortName(),
                 'reset_form_type_class_name' => $changePasswordFormTypeClassNameDetails->getShortName(),
-                'password_setter' => $this->passwordSetterMethodName,
-                'success_redirect_route' => $this->controllerResetSuccessRedirect,
-                'from_email' => $this->fromEmailAddress,
-                'from_email_name' => $this->fromEmailName,
-                'email_getter' => $this->emailGetterMethodName,
-                'email_field' => $this->emailPropertyName,
+                'password_setter' => $passwordSetterMethodName,
+                'success_redirect_route' => $controllerResetSuccessRedirect,
+                'from_email' => $fromEmailAddress,
+                'from_email_name' => $fromEmailName,
+                'email_getter' => $emailGetterMethodName,
+                'email_field' => $emailPropertyName,
                 'problem_validate_message_or_constant' => $problemValidateMessageOrConstant,
                 'problem_handle_message_or_constant' => $problemHandleMessageOrConstant,
                 'translator_available' => $isTranslatorAvailable,
             ]
         );
 
-        $this->generateRequestEntity($generator, $requestClassNameDetails, $repositoryClassNameDetails, $userClassNameDetails);
+        $this->generateRequestEntity($generator, $requestClassNameDetails, $repositoryClassNameDetails, $userClassNameDetails, $userClass);
 
         $this->setBundleConfig($io, $generator, $repositoryClassNameDetails->getFullName());
 
@@ -305,7 +363,7 @@ class MakeResetPassword extends AbstractMaker
             'resetPassword/ResetPasswordRequestFormType.tpl.php',
             [
                 'use_statements' => $useStatements,
-                'email_field' => $this->emailPropertyName,
+                'email_field' => $emailPropertyName,
             ]
         );
 
@@ -341,7 +399,7 @@ class MakeResetPassword extends AbstractMaker
             'reset_password/request.html.twig',
             'resetPassword/twig_request.tpl.php',
             [
-                'email_field' => $this->emailPropertyName,
+                'email_field' => $emailPropertyName,
             ]
         );
 
@@ -380,7 +438,7 @@ class MakeResetPassword extends AbstractMaker
                     'user_short_name' => $userClassNameDetails->getShortName(),
                     'user_repo_short_name' => $userRepositoryDetails->getShortName(),
                     'success_route_path' => null !== $this->controllerResetSuccessRoute ? $this->controllerResetSuccessRoute->getPath() : '/',
-                    'from_email' => $this->fromEmailAddress,
+                    'from_email' => $fromEmailAddress,
                 ],
             );
 
@@ -460,7 +518,7 @@ class MakeResetPassword extends AbstractMaker
         $io->newLine();
     }
 
-    private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails, ClassNameDetails $userClassDetails): void
+    private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails, ClassNameDetails $userClassDetails, string $userClass): void
     {
         // Generate ResetPasswordRequest Entity
         $requestEntityPath = $this->entityClassGenerator->generateEntityClass(
@@ -498,7 +556,7 @@ class MakeResetPassword extends AbstractMaker
 
         $manipulator->addManyToOneRelation(new RelationManyToOne(
             propertyName: 'user',
-            targetClassName: $this->userClass,
+            targetClassName: $userClass,
             mapInverseRelation: false,
             avoidSetter: true,
             isCustomReturnTypeNullable: false,
