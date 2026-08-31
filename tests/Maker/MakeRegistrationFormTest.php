@@ -38,6 +38,112 @@ class MakeRegistrationFormTest extends MakerTestCase
 
     public static function getTestDetails(): \Generator
     {
+        yield 'it_generates_registration_form_non_interactively' => [self::createRegistrationFormTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $output = $runner->runMaker([], '--no-interaction --redirect-route=app_anonymous');
+
+                self::assertStringContainsString('Success', $output);
+
+                // the user class, the login field and the password field are all derived from
+                // security.yaml and the class itself, exactly as the prompt derives them
+                $controller = file_get_contents($runner->getPath('src/Controller/RegistrationController.php'));
+                self::assertStringContainsString('app_anonymous', $controller);
+                // the three confirmations are opt-in here, where the prompt offers yes
+                self::assertStringNotContainsString('EmailVerifier', $controller);
+                self::assertStringNotContainsString('UniqueEntity', file_get_contents($runner->getPath('src/Entity/User.php')));
+            }),
+        ];
+
+        yield 'it_generates_registration_form_non_interactively_with_verification' => [self::createRegistrationFormTest()
+            ->addExtraDependencies('symfonycasts/verify-email-bundle')
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $runner->runMaker(
+                    [],
+                    '--no-interaction --redirect-route=app_anonymous --unique-entity --verify-email'
+                    .' --from-email-address=jr@rushlow.dev --from-email-name="Jesse Rushlow"'
+                );
+
+                $controller = file_get_contents($runner->getPath('src/Controller/RegistrationController.php'));
+                self::assertStringContainsString('EmailVerifier', $controller);
+                self::assertStringContainsString('jr@rushlow.dev', $controller);
+                self::assertStringContainsString('UniqueEntity', file_get_contents($runner->getPath('src/Entity/User.php')));
+            }),
+        ];
+
+        yield 'it_rejects_missing_options_non_interactively' => [self::createRegistrationFormTest()
+            ->addExtraDependencies('symfonycasts/verify-email-bundle')
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $invalid = [
+                    '--no-interaction --verify-email --redirect-route=app_anonymous' => 'is not a valid email address',
+                    '--no-interaction --redirect-route=app_anonymous --authenticator=nope' => 'No authenticator named "nope"',
+                ];
+
+                foreach ($invalid as $arguments => $expectedError) {
+                    $output = $runner->runMaker([], $arguments, allowedToFail: true);
+
+                    self::assertStringContainsString($expectedError, $output, \sprintf('"%s" was not rejected.', $arguments));
+                    self::assertFileDoesNotExist($runner->getPath('src/Controller/RegistrationController.php'));
+                }
+            }),
+        ];
+
+        yield 'it_generates_registration_form_non_interactively_with_auto_login' => [self::createRegistrationFormTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $runner->modifyYamlFile('config/packages/security.yaml', static function (array $data) {
+                    $data['security']['firewalls']['main']['form_login'] = [];
+
+                    return $data;
+                });
+
+                $runner->runMaker([], '--no-interaction --auto-login');
+
+                $fixturePath = \dirname(__DIR__, 1).'/fixtures/make-registration-form/expected';
+
+                // --auto-login alone resolves the single configured authenticator,
+                // exactly as the prompt does when there is only one to choose from
+                self::assertFileEquals($fixturePath.'/RegistrationControllerFormLogin.php', $runner->getPath('src/Controller/RegistrationController.php'));
+            }),
+        ];
+
+        yield 'it_rejects_ambiguous_auto_login_non_interactively' => [self::createRegistrationFormTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $runner->modifyYamlFile('config/packages/security.yaml', static function (array $data) {
+                    $data['security']['firewalls']['main']['form_login'] = [];
+                    $data['security']['firewalls']['main']['custom_authenticator'] = 'App\\Security\\StubAuthenticator';
+
+                    return $data;
+                });
+
+                $output = $runner->runMaker([], '--no-interaction --auto-login', allowedToFail: true);
+
+                self::assertStringContainsString('Multiple authenticators are configured', $output);
+                self::assertFileDoesNotExist($runner->getPath('src/Controller/RegistrationController.php'));
+            }),
+        ];
+
+        yield 'it_notes_missing_authenticator_for_auto_login_non_interactively' => [self::createRegistrationFormTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $output = $runner->runMaker([], '--no-interaction --auto-login --redirect-route=app_anonymous');
+
+                // no authenticator is configured, so --auto-login has nothing to resolve;
+                // the command still succeeds, matching the interactive note rather than the prompt's error path
+                self::assertStringContainsString('No authenticators found', $output);
+                self::assertFileExists($runner->getPath('src/Controller/RegistrationController.php'));
+            }),
+        ];
+
         yield 'it_generates_registration_with_entity_and_form_login_with_no_login' => [self::createRegistrationFormTest()
             ->run(static function (MakerTestRunner $runner) {
                 self::makeUser($runner);
