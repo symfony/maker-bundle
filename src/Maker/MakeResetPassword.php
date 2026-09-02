@@ -367,6 +367,7 @@ class MakeResetPassword extends AbstractMaker
                 $userRepositoryDetails->getFullName(),
                 EntityManagerInterface::class,
                 KernelBrowser::class,
+                TemplatedEmail::class,
                 WebTestCase::class,
                 UserPasswordHasherInterface::class,
             ]);
