@@ -113,6 +113,18 @@ class MakeResetPasswordTest extends MakerTestCase
                     self::assertFileExists($runner->getPath($file));
                 }
 
+                /*
+                 * Move the reset link further to the right in the email body. The
+                 * quoted-printable encoder then wraps the line in the middle of the
+                 * token, which truncates the link when the raw message is read
+                 * instead of the text body.
+                 */
+                $runner->replaceInFile(
+                    'templates/reset_password/email.html.twig',
+                    '<a href=',
+                    'Reset your password: <a href='
+                );
+
                 $runner->writeFile(
                     'config/packages/mailer.yaml',
                     Yaml::dump(['framework' => [
