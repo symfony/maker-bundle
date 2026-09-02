@@ -1,0 +1,16 @@
+---------------------------------------------------------------------------
+
+by florentdestremau at 2026-09-02T21:18:41Z
+
+hi! any update to merge this?
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-09-02T21:56:25Z
+
+Thanks for the fix and for following up on it.
+
+I rebased your commits on `1.x` and pushed the result to this pull request branch, with two additions:
+
+* `TemplatedEmail` is now added to the use statements of the generated test, so the `@var array<TemplatedEmail>` annotation refers to an imported class.
+* The `it_generates_tests` scenario now shifts the reset link to the right in `email.html.twig` before running the generated test. The existing scenario stayed green with `toString()` because the link fit within the 76 column limit by 3 characters, so the bug was not covered. With the link shifted, the quoted-printable soft line break falls in the middle of the token: the test fails with `toString()` and passes with `getTextBody()`.
