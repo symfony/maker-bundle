@@ -28,7 +28,6 @@ use Symfony\Bundle\MakerBundle\Maker\MakeSchedule;
 use Symfony\Bundle\MakerBundle\Maker\MakeSerializerEncoder;
 use Symfony\Bundle\MakerBundle\Maker\MakeSerializerNormalizer;
 use Symfony\Bundle\MakerBundle\Maker\MakeStimulusController;
-use Symfony\Bundle\MakerBundle\Maker\MakeSubscriber;
 use Symfony\Bundle\MakerBundle\Maker\MakeTest;
 use Symfony\Bundle\MakerBundle\Maker\MakeTwigComponent;
 use Symfony\Bundle\MakerBundle\Maker\MakeTwigExtension;
@@ -140,11 +139,6 @@ return static function (ContainerConfigurator $container) {
 
     $services->set('maker.maker.make_serializer_normalizer', MakeSerializerNormalizer::class)
         ->tag('maker.command');
-
-    $services->set('maker.maker.make_subscriber', MakeSubscriber::class)
-        ->args([service('maker.event_registry')])
-        ->tag('maker.command')
-        ->deprecate('symfony/maker-bundle', '1.51', 'The "%service_id%" service is deprecated, use "maker.maker.make_listener" instead.');
 
     $services->set('maker.maker.make_twig_extension', MakeTwigExtension::class)
         ->tag('maker.command');
