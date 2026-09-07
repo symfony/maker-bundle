@@ -36,6 +36,7 @@ use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -56,12 +57,6 @@ final class MakeFormLogin extends AbstractMaker
     use CanGenerateTestsTrait;
 
     private const SECURITY_CONFIG_PATH = 'config/packages/security.yaml';
-    private YamlSourceManipulator $ysm;
-    private string $controllerName;
-    private string $firewallToUpdate;
-    private string $userClass;
-    private string $userNameField;
-    private bool $willLogout;
 
     public function __construct(
         private FileManager $fileManager,
@@ -78,6 +73,11 @@ final class MakeFormLogin extends AbstractMaker
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
+            ->addOption('controller-name', null, InputOption::VALUE_REQUIRED, 'The name of the controller class to create (e.g. <fg=yellow>SecurityController</>)')
+            ->addOption('firewall-name', null, InputOption::VALUE_REQUIRED, 'The firewall to update in <fg=yellow>security.yaml</>')
+            ->addOption('user-class', null, InputOption::VALUE_REQUIRED, 'The class of the user to authenticate (e.g. <fg=yellow>App\\Entity\\User</>)')
+            ->addOption('username-field', null, InputOption::VALUE_REQUIRED, 'The property people enter when logging in (e.g. <fg=yellow>email</>)')
+            ->addOption('logout', null, InputOption::VALUE_NONE, 'Generate a <fg=yellow>/logout</> URL')
             ->setHelp($this->getHelpFileContents('security/MakeFormLogin.txt'))
         ;
 
@@ -109,34 +109,60 @@ final class MakeFormLogin extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        if (!$this->fileManager->fileExists(self::SECURITY_CONFIG_PATH)) {
-            throw new RuntimeCommandException(\sprintf('The file "%s" does not exist. PHP & XML configuration formats are currently not supported.', self::SECURITY_CONFIG_PATH));
+        $securityData = $this->readSecurityData();
+        $providers = $securityData['security']['providers'];
+
+        if (!$input->getOption('controller-name')) {
+            $input->setOption('controller-name', $io->ask(
+                'Choose a name for the controller class (e.g. <fg=yellow>SecurityController</>)',
+                'SecurityController',
+                Validator::validateClassName(...)
+            ));
         }
-
-        $this->ysm = new YamlSourceManipulator($this->fileManager->getFileContents(self::SECURITY_CONFIG_PATH));
-        $securityData = $this->ysm->getData();
-
-        if (!isset($securityData['security']['providers']) || !$securityData['security']['providers']) {
-            throw new RuntimeCommandException('To generate a form login authentication, you must configure at least one entry under "providers" in "security.yaml".');
-        }
-
-        $this->controllerName = $io->ask(
-            'Choose a name for the controller class (e.g. <fg=yellow>SecurityController</>)',
-            'SecurityController',
-            Validator::validateClassName(...)
-        );
 
         $securityHelper = new InteractiveSecurityHelper();
-        $this->firewallToUpdate = $securityHelper->guessFirewallName($io, $securityData);
-        $this->userClass = $securityHelper->guessUserClass($io, $securityData['security']['providers']);
-        $this->userNameField = $securityHelper->guessUserNameField($io, $this->userClass, $securityData['security']['providers']);
-        $this->willLogout = $io->confirm('Do you want to generate a \'/logout\' URL?');
+
+        if (!$input->getOption('firewall-name')) {
+            $input->setOption('firewall-name', $securityHelper->guessFirewallName($io, $securityData));
+        }
+
+        if (!$input->getOption('user-class')) {
+            $input->setOption('user-class', $securityHelper->guessUserClass($io, $providers));
+        }
+
+        if (!$input->getOption('username-field')) {
+            $input->setOption('username-field', $securityHelper->guessUserNameField($io, $input->getOption('user-class'), $providers));
+        }
+
+        if (!$input->getOption('logout')) {
+            $input->setOption('logout', $io->confirm('Do you want to generate a \'/logout\' URL?'));
+        }
 
         $this->interactSetGenerateTests($input, $io);
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        $ysm = new YamlSourceManipulator($this->fileManager->getFileContents(self::SECURITY_CONFIG_PATH));
+        $securityData = $this->readSecurityData();
+        $providers = $securityData['security']['providers'];
+        $securityHelper = new InteractiveSecurityHelper();
+
+        $controllerName = $input->getOption('controller-name') ?: 'SecurityController';
+        $firewallToUpdate = $input->getOption('firewall-name') ?: $securityHelper->findFirewallName($securityData);
+        $userClass = $input->getOption('user-class') ?: $securityHelper->findUserClass($providers);
+        $willLogout = $input->getOption('logout');
+
+        if (!$userClass) {
+            throw new RuntimeCommandException('The user class cannot be guessed from "security.yaml", pass it with "--user-class".');
+        }
+
+        $userNameField = $input->getOption('username-field') ?: $securityHelper->findUserNameField($userClass, $providers);
+
+        if (!$userNameField) {
+            throw new RuntimeCommandException(\sprintf('The login field of "%s" cannot be guessed, pass it with "--username-field".', $userClass));
+        }
+
         $useStatements = new UseStatementGenerator([
             AbstractController::class,
             Response::class,
@@ -144,7 +170,7 @@ final class MakeFormLogin extends AbstractMaker
             AuthenticationUtils::class,
         ]);
 
-        $controllerNameDetails = $generator->createClassNameDetails($this->controllerName, 'Controller\\', 'Controller');
+        $controllerNameDetails = $generator->createClassNameDetails($controllerName, 'Controller\\', 'Controller');
         $templatePath = strtolower($controllerNameDetails->getRelativeNameWithoutSuffix());
 
         $controllerPath = $generator->generateController(
@@ -157,7 +183,7 @@ final class MakeFormLogin extends AbstractMaker
             ]
         );
 
-        if ($this->willLogout) {
+        if ($willLogout) {
             $manipulator = new ClassSourceManipulator($generator->getFileContentsForPendingOperation($controllerPath));
 
             $this->securityControllerBuilder->addLogoutMethod($manipulator);
@@ -169,21 +195,21 @@ final class MakeFormLogin extends AbstractMaker
             \sprintf('%s/login.html.twig', $templatePath),
             'security/formLogin/login_form.tpl.php',
             [
-                'logout_setup' => $this->willLogout,
-                'username_label' => Str::asHumanWords($this->userNameField),
-                'username_is_email' => false !== stripos($this->userNameField, 'email'),
+                'logout_setup' => $willLogout,
+                'username_label' => Str::asHumanWords($userNameField),
+                'username_is_email' => false !== stripos($userNameField, 'email'),
             ]
         );
 
-        $securityData = $this->securityConfigUpdater->updateForFormLogin($this->ysm->getContents(), $this->firewallToUpdate, 'app_login', 'app_login');
+        $securityData = $this->securityConfigUpdater->updateForFormLogin($ysm->getContents(), $firewallToUpdate, 'app_login', 'app_login');
 
-        if ($this->willLogout) {
-            $securityData = $this->securityConfigUpdater->updateForLogout($securityData, $this->firewallToUpdate);
+        if ($willLogout) {
+            $securityData = $this->securityConfigUpdater->updateForLogout($securityData, $firewallToUpdate);
         }
 
         if ($this->shouldGenerateTests($input)) {
             $userClassNameDetails = $generator->createClassNameDetails(
-                '\\'.$this->userClass,
+                '\\'.$userClass,
                 'Entity\\'
             );
 
@@ -205,7 +231,7 @@ final class MakeFormLogin extends AbstractMaker
                 templateName: 'security/formLogin/Test.LoginController.tpl.php',
                 variables: [
                     'use_statements' => $useStatements,
-                    'user_class' => $this->userClass,
+                    'user_class' => $userClass,
                     'user_short_name' => $userClassNameDetails->getShortName(),
                 ],
             );
@@ -224,5 +250,23 @@ final class MakeFormLogin extends AbstractMaker
         $io->text([
             \sprintf('Next: Review and adapt the login template: <info>%s/login.html.twig</info> to suit your needs.', $templatePath),
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function readSecurityData(): array
+    {
+        if (!$this->fileManager->fileExists(self::SECURITY_CONFIG_PATH)) {
+            throw new RuntimeCommandException(\sprintf('The file "%s" does not exist. PHP & XML configuration formats are currently not supported.', self::SECURITY_CONFIG_PATH));
+        }
+
+        $securityData = (new YamlSourceManipulator($this->fileManager->getFileContents(self::SECURITY_CONFIG_PATH)))->getData();
+
+        if (!isset($securityData['security']['providers']) || !$securityData['security']['providers']) {
+            throw new RuntimeCommandException('To generate a form login authentication, you must configure at least one entry under "providers" in "security.yaml".');
+        }
+
+        return $securityData;
     }
 }

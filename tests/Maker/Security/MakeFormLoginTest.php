@@ -54,6 +54,42 @@ class MakeFormLoginTest extends MakerTestCase
             }),
         ];
 
+        yield 'generates_form_login_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $output = $runner->runMaker([], '--no-interaction --logout');
+
+                self::assertStringContainsString('Success', $output);
+                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-form-login/expected';
+
+                // the controller name, the firewall, the user class and the login field all
+                // come out the same as when a person answers with the offered defaults
+                self::assertFileEquals($fixturePath.'/SecurityController.php', $runner->getPath('src/Controller/SecurityController.php'));
+                self::assertFileEquals($fixturePath.'/login.html.twig', $runner->getPath('templates/security/login.html.twig'));
+
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+
+                self::assertSame('app_login', $securityConfig['security']['firewalls']['main']['form_login']['login_path']);
+                self::assertSame('app_logout', $securityConfig['security']['firewalls']['main']['logout']['path']);
+            }),
+        ];
+
+        yield 'generates_form_login_non_interactively_without_logout' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                // "--logout" is opt-in here, where the prompt offers yes as its default
+                $runner->runMaker([], '--no-interaction --controller-name=LoginController');
+
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+
+                self::assertArrayNotHasKey('logout', $securityConfig['security']['firewalls']['main']);
+                self::assertFileExists($runner->getPath('src/Controller/LoginController.php'));
+                self::assertFileExists($runner->getPath('templates/login/login.html.twig'));
+            }),
+        ];
+
         yield 'generates_form_login_without_logout' => [self::buildMakerTest()
             ->run(static function (MakerTestRunner $runner) {
                 self::makeUser($runner);

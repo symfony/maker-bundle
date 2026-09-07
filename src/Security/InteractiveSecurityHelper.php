@@ -25,18 +25,11 @@ final class InteractiveSecurityHelper
 {
     public function guessFirewallName(SymfonyStyle $io, array $securityData, ?string $questionText = null): string
     {
-        $realFirewalls = array_filter(
-            $securityData['security']['firewalls'] ?? [],
-            static fn ($item) => !isset($item['security']) || true === $item['security']
-        );
-
-        if (0 === \count($realFirewalls)) {
-            return 'main';
+        if (null !== $firewallName = $this->findFirewallName($securityData)) {
+            return $firewallName;
         }
 
-        if (1 === \count($realFirewalls)) {
-            return key($realFirewalls);
-        }
+        $realFirewalls = $this->realFirewalls($securityData);
 
         return $io->choice(
             $questionText ?? 'Which firewall do you want to update?',
@@ -45,12 +38,36 @@ final class InteractiveSecurityHelper
         );
     }
 
+    /**
+     * The firewall when there is only one sensible answer, null when a person has to pick.
+     */
+    public function findFirewallName(array $securityData): ?string
+    {
+        $realFirewalls = $this->realFirewalls($securityData);
+
+        if (!$realFirewalls) {
+            return 'main';
+        }
+
+        if (1 === \count($realFirewalls)) {
+            return key($realFirewalls);
+        }
+
+        return null;
+    }
+
+    private function realFirewalls(array $securityData): array
+    {
+        return array_filter(
+            $securityData['security']['firewalls'] ?? [],
+            static fn ($item) => !isset($item['security']) || true === $item['security']
+        );
+    }
+
     public function guessUserClass(SymfonyStyle $io, array $providers, ?string $questionText = null): string
     {
-        if (1 === \count($providers) && isset(current($providers)['entity'])) {
-            $entityProvider = current($providers);
-
-            return $entityProvider['entity']['class'];
+        if (null !== $userClass = $this->findUserClass($providers)) {
+            return $userClass;
         }
 
         return $io->ask(
@@ -58,6 +75,18 @@ final class InteractiveSecurityHelper
             $this->guessUserClassDefault(),
             Validator::classIsUserInterface(...)
         );
+    }
+
+    /**
+     * The user class when a single entity provider names one, null when a person has to answer.
+     */
+    public function findUserClass(array $providers): ?string
+    {
+        if (1 === \count($providers) && isset(current($providers)['entity']['class'])) {
+            return current($providers)['entity']['class'];
+        }
+
+        return null;
     }
 
     private function guessUserClassDefault(): string
@@ -75,18 +104,8 @@ final class InteractiveSecurityHelper
 
     public function guessUserNameField(SymfonyStyle $io, string $userClass, array $providers): string
     {
-        if (1 === \count($providers) && isset(current($providers)['entity']) && isset(current($providers)['entity']['property'])) {
-            $entityProvider = current($providers);
-
-            return $entityProvider['entity']['property'];
-        }
-
-        if (property_exists($userClass, 'email') && !property_exists($userClass, 'username')) {
-            return 'email';
-        }
-
-        if (!property_exists($userClass, 'email') && property_exists($userClass, 'username')) {
-            return 'username';
+        if (null !== $userNameField = $this->findUserNameField($userClass, $providers)) {
+            return $userNameField;
         }
 
         $classProperties = [];
@@ -104,6 +123,26 @@ final class InteractiveSecurityHelper
             $classProperties,
             property_exists($userClass, 'username') ? 'username' : (property_exists($userClass, 'email') ? 'email' : null)
         );
+    }
+
+    /**
+     * The login field when the provider or the class names one, null when a person has to pick.
+     */
+    public function findUserNameField(string $userClass, array $providers): ?string
+    {
+        if (1 === \count($providers) && isset(current($providers)['entity']['property'])) {
+            return current($providers)['entity']['property'];
+        }
+
+        if (property_exists($userClass, 'email') && !property_exists($userClass, 'username')) {
+            return 'email';
+        }
+
+        if (!property_exists($userClass, 'email') && property_exists($userClass, 'username')) {
+            return 'username';
+        }
+
+        return null;
     }
 
     public function guessEmailField(SymfonyStyle $io, string $userClass): string
