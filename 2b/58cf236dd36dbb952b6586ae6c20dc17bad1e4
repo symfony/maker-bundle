@@ -1,0 +1,46 @@
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-09-03T22:10:30Z
+
+Thanks for working on this, the non-interactive fix is welcome.
+
+One thing I would change: `$inputConfig->setArgumentAsNonInteractive('name')` should not be needed here.
+
+`MakerCommand::interact()` already loops over the command arguments before calling `$this->maker->interact()`, and for every empty argument that is not marked as non-interactive it does:
+
+```php
+$value = $this->io->ask($argument->getDescription(), $argument->getDefault(), Validator::notBlank(...));
+$input->setArgument($argument->getName(), $value);
+```
+
+That is exactly what the maker now does by hand, with the same `Validator::notBlank` and a question that only differs in wording. So the default behaviour already covers this case.
+
+The "duplicated question" concern does not apply either: the generic loop runs first and fills the argument, so `$this->maker->interact()` would return early on `if ($input->getArgument('name')) { return; }`. There would only ever be one prompt.
+
+I would suggest dropping both `setArgumentAsNonInteractive('name')` and the manual `$io->ask()`, and moving the question text into the argument description. The makers that do use `setArgumentAsNonInteractive` need a specific prompt (autocompletion, domain validator, choice list), which is not the case here.
+
+The one trade-off is ordering. Today `interact()` installs `symfony/security-bundle` and checks `security.yaml` before asking. With the default behaviour the user types the class name first and gets the "security.yaml does not exist" error afterwards. That is a minor UX change and consistent with the rest of the bundle, so I think it is acceptable. `initialize()` would be the natural place for such a check, but `MakerCommand` is final and `MakerInterface` exposes no hook there, so the private method called from both paths is the right approach in the meantime.
+
+Two smaller points:
+
+1. The guard in `generate()` is indirect:
+
+```php
+if (!$this->fileManager->fileExists(self::SECURITY_CONFIG_PATH)) {
+    $this->installDependencyIfNeeded(...);
+}
+```
+
+`installDependencyIfNeeded()` already starts with `if (class_exists($expectedClassToExist)) { return $io; }`, so it is safe to call unconditionally. Calling it once in `generate()` and removing it from `interact()` would let the three-line comment about the second composer call go away.
+
+2. `throw new RuntimeCommandException('The "name" argument is required when the command runs without asking.')` is only reachable in non-interactive mode without the argument. Saying the `name` argument is required in non-interactive mode reads a bit more directly.
+
+Unrelated to this PR but relevant to the series: `MakerCommand::initialize()` prints `"%s" is not meant to be run in non-interactive mode.` as soon as the input is not interactive. If the goal is to make the makers usable without a terminal, that generic warning becomes contradictory and may deserve its own change, probably conditioned on whether the maker can actually run without prompts.
+
+---------------------------------------------------------------------------
+
+by wachterjohannes at 2026-09-07T04:35:00Z
+
+Applied both simplifications, thanks. Kept the `fileExists()` guard on `installDependencyIfNeeded()` in `generate()`: calling it unconditionally broke the interactive test, `class_exists()` misses a package installed earlier in the same process, so it reinstalls and corrupts the container cache, same bug as #1817.
+
+Agreed on the `initialize()` warning too, worth its own PR once more of the series lands.
