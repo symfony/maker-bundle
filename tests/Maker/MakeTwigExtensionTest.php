@@ -25,6 +25,7 @@ class MakeTwigExtensionTest extends MakerTestCase
     public static function getTestDetails(): \Generator
     {
         yield 'it_makes_twig_extension' => [self::buildMakerTest()
+            ->addRequiredPackageVersion('twig/twig', '>=3.21')
             ->run(static function (MakerTestRunner $runner) {
                 $runner->runMaker(
                     [
@@ -32,6 +33,11 @@ class MakeTwigExtensionTest extends MakerTestCase
                         'FooBar',
                     ]
                 );
+
+                $expectedExtensionPath = \dirname(__DIR__).'/fixtures/make-twig-extension/expected/FooBarExtension.php';
+                $generatedExtension = $runner->getPath('src/Twig/FooBarExtension.php');
+
+                self::assertSame(file_get_contents($expectedExtensionPath), file_get_contents($generatedExtension));
             }),
         ];
     }

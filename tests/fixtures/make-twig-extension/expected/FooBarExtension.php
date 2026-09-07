@@ -1,11 +1,11 @@
-<?= "<?php\n" ?>
+<?php
 
-namespace <?= $class_data->getNamespace(); ?>;
+namespace App\Twig;
 
-<?= $class_data->getUseStatements(); ?>
+use Twig\Attribute\AsTwigFilter;
+use Twig\Attribute\AsTwigFunction;
 
-<?= $class_data->getClassDeclaration() ?>
-
+final class FooBarExtension
 {
     // If your filter generates SAFE HTML, you should add the "isSafe" argument:
     // #[AsTwigFilter(name: 'filter_name', isSafe: ['html'])]

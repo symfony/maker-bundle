@@ -1,4 +1,6 @@
-The <info>%command.name%</info> command generates a new Twig extension with its runtime class.
+The <info>%command.name%</info> command generates a new Twig extension class, with
+a filter and a function declared through the <comment>#[AsTwigFilter]</comment> and
+<comment>#[AsTwigFunction]</comment> attributes.
 
 <info>php %command.full_name% AppExtension</info>
 
