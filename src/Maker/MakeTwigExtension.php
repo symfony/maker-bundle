@@ -15,14 +15,12 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
-use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
+use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Twig\Extension\AbstractExtension;
-use Twig\Extension\RuntimeExtensionInterface;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
+use Twig\Attribute\AsTwigFilter;
+use Twig\Attribute\AsTwigFunction;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -37,7 +35,7 @@ final class MakeTwigExtension extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Create a new Twig extension with its runtime class';
+        return 'Create a new Twig extension class';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
@@ -50,41 +48,18 @@ final class MakeTwigExtension extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-        $name = $input->getArgument('name');
-
-        $extensionClassNameDetails = $generator->createClassNameDetails(
-            $name,
-            'Twig\\Extension\\',
-            'Extension'
+        $extensionClassData = ClassData::create(
+            class: \sprintf('Twig\%s', $input->getArgument('name')),
+            suffix: 'Extension',
+            useStatements: [
+                AsTwigFilter::class,
+                AsTwigFunction::class,
+            ]
         );
 
-        $runtimeClassNameDetails = $generator->createClassNameDetails(
-            $name,
-            'Twig\\Runtime\\',
-            'Runtime'
-        );
-
-        $useStatements = new UseStatementGenerator([
-            AbstractExtension::class,
-            TwigFilter::class,
-            TwigFunction::class,
-            $runtimeClassNameDetails->getFullName(),
-        ]);
-
-        $runtimeUseStatements = new UseStatementGenerator([
-            RuntimeExtensionInterface::class,
-        ]);
-
-        $generator->generateClass(
-            $extensionClassNameDetails->getFullName(),
+        $generator->generateClassFromClassData(
+            $extensionClassData,
             'twig/Extension.tpl.php',
-            ['use_statements' => $useStatements, 'runtime_class_name' => $runtimeClassNameDetails->getShortName()]
-        );
-
-        $generator->generateClass(
-            $runtimeClassNameDetails->getFullName(),
-            'twig/Runtime.tpl.php',
-            ['use_statements' => $runtimeUseStatements]
         );
 
         $generator->writeChanges();
@@ -92,15 +67,15 @@ final class MakeTwigExtension extends AbstractMaker
         $this->writeSuccessMessage($io);
 
         $io->text([
-            'Next: Open your new extension class and start customizing it.',
-            'Find the documentation at <fg=yellow>http://symfony.com/doc/current/templating/twig_extension.html</>',
+            'Next: Open your new extension class and add your filters and functions.',
+            'Find the documentation at <fg=yellow>https://symfony.com/doc/current/templating/twig_extension.html</>',
         ]);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
-            AbstractExtension::class,
+            AsTwigFilter::class,
             'twig'
         );
     }
