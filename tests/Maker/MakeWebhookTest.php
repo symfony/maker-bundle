@@ -63,6 +63,32 @@ class MakeWebhookTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_makes_webhook_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], 'remote_service --no-interaction');
+
+                self::assertStringContainsString('Success', $output);
+                self::assertFileExists($runner->getPath('src/Webhook/RemoteServiceRequestParser.php'));
+                self::assertFileExists($runner->getPath('src/RemoteEvent/RemoteServiceWebhookConsumer.php'));
+
+                $webhookConfig = $runner->readYaml('config/packages/webhook.yaml');
+
+                self::assertEquals(
+                    'App\\Webhook\\RemoteServiceRequestParser',
+                    $webhookConfig['framework']['webhook']['routing']['remote_service']['service']
+                );
+            }),
+        ];
+
+        yield 'it_rejects_an_invalid_webhook_name_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '"not a name" --no-interaction', allowedToFail: true);
+
+                self::assertStringContainsString('can only have alphanumeric characters', $output);
+                self::assertFileDoesNotExist($runner->getPath('config/packages/webhook.yaml'));
+            }),
+        ];
+
         yield 'it_makes_webhook_with_prior_webhook' => [self::buildMakerTest()
             ->addExtraDependencies('symfony/webhook')
             ->run(static function (MakerTestRunner $runner) {
