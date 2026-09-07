@@ -44,5 +44,19 @@ class MakeCustomAuthenticatorTest extends MakerTestCase
                 self::assertSame(['App\Security\FixtureAuthenticator'], $mainFirewall['custom_authenticators']);
             }),
         ];
+
+        yield 'generates_custom_authenticator_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], 'FixtureAuthenticator --no-interaction');
+
+                self::assertStringContainsString('Success', $output);
+
+                $fixturePath = \dirname(__DIR__, 2).'/fixtures/security/make-custom-authenticator/expected';
+                self::assertFileEquals($fixturePath.'/FixtureAuthenticator.php', $runner->getPath('src/Security/FixtureAuthenticator.php'));
+
+                $securityConfig = $runner->readYaml('config/packages/security.yaml');
+                self::assertSame(['App\Security\FixtureAuthenticator'], $securityConfig['security']['firewalls']['main']['custom_authenticators']);
+            }),
+        ];
     }
 }
