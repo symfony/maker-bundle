@@ -54,6 +54,7 @@ return static function (ContainerConfigurator $container) {
         ->tag('maker.command');
 
     $services->set('maker.maker.make_command', MakeCommand::class)
+        ->arg('$fileManager', service('maker.file_manager'))
         ->tag('maker.command');
 
     $services->set('maker.maker.make_twig_component', MakeTwigComponent::class)
