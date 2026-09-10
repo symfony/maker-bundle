@@ -1,0 +1,31 @@
+---------------------------------------------------------------------------
+
+by Amoifr at 2026-09-10T20:17:52Z
+
+Thanks for the nudge, good call! Pushed in dd635b78: `--argument` and `--option`, repeatable, with the `name[:type]` syntax of `--field`. The type defaults to `string` for an argument and `bool` for an option, a trailing `?` makes an argument optional (the way it makes a field nullable), and passing any of them skips the questions:
+
+```
+bin/console make:command app:send-report --argument=recipient --argument=cc:array? --option=dry-run --option=retries:int
+```
+
+While at it, I closed three holes the interactive mode had: an argument after an array one, a parameter named `io`, and an argument and an option sharing a name. Each now gets a clear error instead of a generated command that fails to load.
+
+The 3 red "highest deps" jobs are unrelated: `TranslationBundle` not found in framework-bundle, same as last night's 1.x run.
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-09-10T20:34:08Z
+
+You can also add support for enum (by enum name) in input types.
+
+---------------------------------------------------------------------------
+
+by Amoifr at 2026-09-10T20:54:31Z
+
+> You can also add support for enum (by enum name) in input types.
+
+Done! The type can be the short name of a backed enum from `src/` (or its FQCN), in both modes: `--option=format:Format` gives `#[Option('Format')] ?Format $format = null`. An enum named like an import (`Option`, anyone?) is aliased, and a non-backed one gets an error, since the console needs the backing value.
+
+I implemented it in the only form that made sense to me, but I can't quite picture a case where one would need it. Could you give me an example, just out of curiosity?
+
+Thanks for all the ideas, this maker is much better for them. Though at this pace, I'm starting to fear the next review will ask for my credit card number and a kidney for a transplant. 😄
