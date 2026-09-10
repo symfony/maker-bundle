@@ -3,3 +3,22 @@ The <info>%command.name%</info> command generates a new command:
 <info>php %command.full_name% app:do-something</info>
 
 If the argument is missing, the command will ask for the command name interactively.
+
+The command then asks for the arguments and the options to declare, and generates the
+<info>__invoke()</info> method with the matching <info>#[Argument]</info> and <info>#[Option]</info> parameters.
+
+They can be passed on the command line instead of being asked for, which is what you
+want in a script or when the terminal is not interactive:
+
+<info>php %command.full_name% app:send-report --argument=recipient --argument=cc?:array --option=dry-run --option=format:Format</info>
+
+The format is <comment>name[:type]</comment>, where the type is one of <comment>string</comment>, <comment>bool</comment>, <comment>int</comment>, <comment>float</comment>,
+<comment>array</comment> or a backed enum. It defaults to <comment>string</comment> for an argument and to <comment>bool</comment> for an option.
+The name is written the way it reads on the command line: <comment>dry-run</comment> becomes <comment>$dryRun</comment>.
+
+The short name of an enum is enough as long as it is unique within <comment>src/</comment>, which saves
+escaping backslashes in your shell.
+
+An argument is required unless its name ends with <comment>?</comment>, as an optional key of a PHP array
+shape: <comment>cc?:array</comment>. Note that this differs from the interactive mode, whose default
+answer is <comment>no</comment>.
