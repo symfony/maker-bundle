@@ -173,8 +173,8 @@ final class InteractiveSecurityHelper
 
     public function guessPasswordField(SymfonyStyle $io, string $userClass): string
     {
-        if (property_exists($userClass, 'password')) {
-            return 'password';
+        if (null !== $passwordField = $this->findPasswordField($userClass)) {
+            return $passwordField;
         }
 
         $classProperties = [];
@@ -187,6 +187,14 @@ final class InteractiveSecurityHelper
             \sprintf('Which field on your <fg=yellow>%s</> class holds the encoded password?', $userClass),
             $classProperties
         );
+    }
+
+    /**
+     * The password property when the class has the obvious one, null when a person has to pick.
+     */
+    public function findPasswordField(string $userClass): ?string
+    {
+        return property_exists($userClass, 'password') ? 'password' : null;
     }
 
     public function guessPasswordSetter(SymfonyStyle $io, string $userClass): string
@@ -237,9 +245,11 @@ final class InteractiveSecurityHelper
 
     public function guessIdGetter(SymfonyStyle $io, string $userClass): string
     {
-        if (null === ($methodChoices = $this->methodNameGuesser($userClass, 'getId'))) {
-            return 'getId';
+        if (null !== $idGetter = $this->findIdGetter($userClass)) {
+            return $idGetter;
         }
+
+        $methodChoices = $this->methodNameGuesser($userClass, 'getId');
 
         return $io->choice(
             \sprintf('Which method on your <fg=yellow>%s</> class can be used to get the unique user identifier (e.g. getId())?', $userClass),
@@ -335,6 +345,14 @@ final class InteractiveSecurityHelper
         }
 
         return $authenticators;
+    }
+
+    /**
+     * The id getter when the class has the obvious one, null when a person has to pick.
+     */
+    public function findIdGetter(string $userClass): ?string
+    {
+        return null === $this->methodNameGuesser($userClass, 'getId') ? 'getId' : null;
     }
 
     private function methodNameGuesser(string $className, string $suspectedMethodName): ?array

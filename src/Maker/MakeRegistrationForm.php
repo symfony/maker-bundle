@@ -45,6 +45,7 @@ use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -74,19 +75,6 @@ final class MakeRegistrationForm extends AbstractMaker
 {
     use CanGenerateTestsTrait;
 
-    private string $userClass;
-    private string $usernameField;
-    private string $passwordField;
-    private bool $willVerifyEmail = false;
-    private bool $verifyEmailAnonymously = false;
-    private string $idGetter;
-    private string $emailGetter;
-    private string $fromEmailAddress;
-    private string $fromEmailName;
-    private ?Authenticator $autoLoginAuthenticator = null;
-    private string $redirectRouteName;
-    private bool $addUniqueEntityConstraint = false;
-
     public function __construct(
         private FileManager $fileManager,
         private FormTypeRenderer $formTypeRenderer,
@@ -111,6 +99,22 @@ final class MakeRegistrationForm extends AbstractMaker
             ->setHelp($this->getHelpFileContents('MakeRegistrationForm.txt'))
         ;
 
+        $command
+            ->addOption('user-class', null, InputOption::VALUE_REQUIRED, 'The User class to create during registration (e.g. <fg=yellow>App\\Entity\\User</>)')
+            ->addOption('username-field', null, InputOption::VALUE_REQUIRED, 'The property people enter when logging in (e.g. <fg=yellow>email</>)')
+            ->addOption('password-field', null, InputOption::VALUE_REQUIRED, 'The property holding the hashed password (e.g. <fg=yellow>password</>)')
+            ->addOption('unique-entity', null, InputOption::VALUE_NONE, 'Add a <fg=yellow>#[UniqueEntity]</> attribute to the User class')
+            ->addOption('verify-email', null, InputOption::VALUE_NONE, 'Send an email to verify the address after registration')
+            ->addOption('verify-anonymously', null, InputOption::VALUE_NONE, 'Embed the user id in the verification link, allowing verification without logging in')
+            ->addOption('id-getter', null, InputOption::VALUE_REQUIRED, 'The method returning the user identifier (e.g. <fg=yellow>getId</>)')
+            ->addOption('email-getter', null, InputOption::VALUE_REQUIRED, 'The method returning the email address (e.g. <fg=yellow>getEmail</>)')
+            ->addOption('from-email-address', null, InputOption::VALUE_REQUIRED, 'The address confirmations are sent from (e.g. <fg=yellow>mailer@your-domain.com</>)')
+            ->addOption('from-email-name', null, InputOption::VALUE_REQUIRED, 'The name associated with that address (e.g. <fg=yellow>Acme Mail Bot</>)')
+            ->addOption('auto-login', null, InputOption::VALUE_NONE, 'Authenticate the user right after registering')
+            ->addOption('authenticator', null, InputOption::VALUE_REQUIRED, 'The authenticator to log the user in with, when more than one is configured')
+            ->addOption('redirect-route', null, InputOption::VALUE_REQUIRED, 'The route to redirect to after registration, when the user is not logged in automatically')
+        ;
+
         $this->configureCommandWithTestsOption($command);
     }
 
@@ -118,6 +122,98 @@ final class MakeRegistrationForm extends AbstractMaker
     {
         $interactiveSecurityHelper = new InteractiveSecurityHelper();
 
+        $securityData = $this->readSecurityData();
+        $providersData = $securityData['security']['providers'] ?? [];
+
+        if (!$input->getOption('user-class')) {
+            $input->setOption('user-class', $interactiveSecurityHelper->guessUserClass(
+                $io,
+                $providersData,
+                'Enter the User class that you want to create during registration (e.g. <fg=yellow>App\\Entity\\User</>)'
+            ));
+        }
+
+        $userClass = $input->getOption('user-class');
+        $io->text(\sprintf('Creating a registration form for <info>%s</info>', $userClass));
+
+        if (!$input->getOption('username-field')) {
+            $input->setOption('username-field', $interactiveSecurityHelper->guessUserNameField($io, $userClass, $providersData));
+        }
+
+        if (!$input->getOption('password-field')) {
+            $input->setOption('password-field', $interactiveSecurityHelper->guessPasswordField($io, $userClass));
+        }
+
+        // see if it makes sense to add the UniqueEntity constraint
+        $userClassDetails = new ClassDetails($userClass);
+
+        if (!$input->getOption('unique-entity') && !$userClassDetails->hasAttribute(UniqueEntity::class)) {
+            $input->setOption('unique-entity', (bool) $io->confirm(\sprintf('Do you want to add a <comment>#[UniqueEntity]</comment> validation attribute to your <comment>%s</comment> class to make sure duplicate accounts aren\'t created?', Str::getShortClassName($userClass))));
+        }
+
+        if (!$input->getOption('verify-email')) {
+            $input->setOption('verify-email', (bool) $io->confirm('Do you want to send an email to verify the user\'s email address after registration?'));
+        }
+
+        if ($input->getOption('verify-email')) {
+            $this->checkComponentsExist($io);
+
+            $emailText[] = 'By default, users are required to be authenticated when they click the verification link that is emailed to them.';
+            $emailText[] = 'This prevents the user from registering on their laptop, then clicking the link on their phone, without';
+            $emailText[] = 'having to log in. To allow multi device email verification, we can embed a user id in the verification link.';
+            $io->text($emailText);
+            $io->newLine();
+
+            if (!$input->getOption('verify-anonymously')) {
+                $input->setOption('verify-anonymously', (bool) $io->confirm('Would you like to include the user id in the verification link to allow anonymous email verification?', false));
+            }
+
+            if (!$input->getOption('id-getter')) {
+                $input->setOption('id-getter', $interactiveSecurityHelper->guessIdGetter($io, $userClass));
+            }
+
+            if (!$input->getOption('email-getter')) {
+                $input->setOption('email-getter', $interactiveSecurityHelper->guessEmailGetter($io, $userClass, 'email'));
+            }
+
+            if (!$input->getOption('from-email-address')) {
+                $input->setOption('from-email-address', $io->ask(
+                    'What email address will be used to send registration confirmations? (e.g. <fg=yellow>mailer@your-domain.com</>)',
+                    null,
+                    Validator::validateEmailAddress(...)
+                ));
+            }
+
+            if (!$input->getOption('from-email-name')) {
+                $input->setOption('from-email-name', $io->ask(
+                    'What "name" should be associated with that email address? (e.g. <fg=yellow>Acme Mail Bot</>)',
+                    null,
+                    Validator::notBlank(...)
+                ));
+            }
+        }
+
+        if (!$input->getOption('auto-login') && !$input->getOption('authenticator')) {
+            $input->setOption('auto-login', (bool) $io->confirm('Do you want to automatically authenticate the user after registration?'));
+        }
+
+        if ($input->getOption('auto-login') || $input->getOption('authenticator')) {
+            $this->interactAuthenticatorQuestions($input, $io, $interactiveSecurityHelper, $securityData);
+        }
+
+        if (!$input->getOption('authenticator') && !$input->getOption('redirect-route')) {
+            $routeNames = array_keys($this->router->getRouteCollection()->all());
+            $input->setOption('redirect-route', $io->choice('What route should the user be redirected to after registration?', $routeNames));
+        }
+
+        $this->interactSetGenerateTests($input, $io);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function readSecurityData(): array
+    {
         if (null === $this->router) {
             throw new RuntimeCommandException('Router have been explicitly disabled in your configuration. This command needs to use the router.');
         }
@@ -126,95 +222,115 @@ final class MakeRegistrationForm extends AbstractMaker
             throw new RuntimeCommandException('The file "config/packages/security.yaml" does not exist. PHP & XML configuration formats are currently not supported.');
         }
 
-        $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents($path));
-        $securityData = $manipulator->getData();
-        $providersData = $securityData['security']['providers'] ?? [];
-
-        $this->userClass = $interactiveSecurityHelper->guessUserClass(
-            $io,
-            $providersData,
-            'Enter the User class that you want to create during registration (e.g. <fg=yellow>App\\Entity\\User</>)'
-        );
-        $io->text(\sprintf('Creating a registration form for <info>%s</info>', $this->userClass));
-
-        $this->usernameField = $interactiveSecurityHelper->guessUserNameField($io, $this->userClass, $providersData);
-
-        $this->passwordField = $interactiveSecurityHelper->guessPasswordField($io, $this->userClass);
-
-        // see if it makes sense to add the UniqueEntity constraint
-        $userClassDetails = new ClassDetails($this->userClass);
-
-        if (!$userClassDetails->hasAttribute(UniqueEntity::class)) {
-            $this->addUniqueEntityConstraint = (bool) $io->confirm(\sprintf('Do you want to add a <comment>#[UniqueEntity]</comment> validation attribute to your <comment>%s</comment> class to make sure duplicate accounts aren\'t created?', Str::getShortClassName($this->userClass)));
-        }
-
-        $this->willVerifyEmail = (bool) $io->confirm('Do you want to send an email to verify the user\'s email address after registration?');
-
-        if ($this->willVerifyEmail) {
-            $this->checkComponentsExist($io);
-
-            $emailText[] = 'By default, users are required to be authenticated when they click the verification link that is emailed to them.';
-            $emailText[] = 'This prevents the user from registering on their laptop, then clicking the link on their phone, without';
-            $emailText[] = 'having to log in. To allow multi device email verification, we can embed a user id in the verification link.';
-            $io->text($emailText);
-            $io->newLine();
-            $this->verifyEmailAnonymously = (bool) $io->confirm('Would you like to include the user id in the verification link to allow anonymous email verification?', false);
-
-            $this->idGetter = $interactiveSecurityHelper->guessIdGetter($io, $this->userClass);
-            $this->emailGetter = $interactiveSecurityHelper->guessEmailGetter($io, $this->userClass, 'email');
-
-            $this->fromEmailAddress = $io->ask(
-                'What email address will be used to send registration confirmations? (e.g. <fg=yellow>mailer@your-domain.com</>)',
-                null,
-                Validator::validateEmailAddress(...)
-            );
-
-            $this->fromEmailName = $io->ask(
-                'What "name" should be associated with that email address? (e.g. <fg=yellow>Acme Mail Bot</>)',
-                null,
-                Validator::notBlank(...)
-            );
-        }
-
-        if ($io->confirm('Do you want to automatically authenticate the user after registration?')) {
-            $this->interactAuthenticatorQuestions(
-                $io,
-                $interactiveSecurityHelper,
-                $securityData
-            );
-        }
-
-        if (!$this->autoLoginAuthenticator) {
-            $routeNames = array_keys($this->router->getRouteCollection()->all());
-            $this->redirectRouteName = $io->choice('What route should the user be redirected to after registration?', $routeNames);
-        }
-
-        $this->interactSetGenerateTests($input, $io);
+        return (new YamlSourceManipulator($this->fileManager->getFileContents($path)))->getData();
     }
 
     /** @param array<string, mixed> $securityData */
-    private function interactAuthenticatorQuestions(ConsoleStyle $io, InteractiveSecurityHelper $interactiveSecurityHelper, array $securityData): void
+    private function resolveAuthenticator(InputInterface $input, ConsoleStyle $io, InteractiveSecurityHelper $securityHelper, array $securityData): ?Authenticator
     {
+        $authenticators = $securityHelper->getAuthenticatorsFromConfig($securityData['security']['firewalls'] ?? []);
+
+        if ($name = $input->getOption('authenticator')) {
+            foreach ($authenticators as $authenticator) {
+                if ($name === (string) $authenticator) {
+                    return $authenticator;
+                }
+            }
+
+            throw new RuntimeCommandException(\sprintf('No authenticator named "%s" is configured. Available: "%s".', $name, implode('", "', $authenticators)));
+        }
+
+        if (!$input->getOption('auto-login')) {
+            return null;
+        }
+
+        if (!$authenticators) {
+            $io->note('No authenticators found - so your user won\'t be automatically authenticated after registering.');
+
+            return null;
+        }
+
+        if (1 === \count($authenticators)) {
+            return $authenticators[0];
+        }
+
+        throw new RuntimeCommandException(\sprintf('Multiple authenticators are configured, pass one with "--authenticator". Available: "%s".', implode('", "', $authenticators)));
+    }
+
+    /** @param array<string, mixed> $securityData */
+    private function interactAuthenticatorQuestions(InputInterface $input, ConsoleStyle $io, InteractiveSecurityHelper $interactiveSecurityHelper, array $securityData): void
+    {
+        if ($input->getOption('authenticator')) {
+            return;
+        }
+
         // get list of authenticators
         $authenticators = $interactiveSecurityHelper->getAuthenticatorsFromConfig($securityData['security']['firewalls'] ?? []);
 
-        if (empty($authenticators)) {
+        if (!$authenticators) {
             $io->note('No authenticators found - so your user won\'t be automatically authenticated after registering.');
 
             return;
         }
 
-        $this->autoLoginAuthenticator =
+        $input->setOption('authenticator', (string) (
             1 === \count($authenticators) ? $authenticators[0] : $io->choice(
                 'Which authenticator should be used to login the user?',
                 $authenticators
-            );
+            )
+        ));
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        $securityHelper = new InteractiveSecurityHelper();
+        $securityData = $this->readSecurityData();
+        $providersData = $securityData['security']['providers'] ?? [];
+
+        $userClass = $input->getOption('user-class') ?: $securityHelper->findUserClass($providersData);
+
+        if (!$userClass) {
+            throw new RuntimeCommandException('The User class cannot be guessed from "security.yaml", pass it with "--user-class".');
+        }
+
+        $usernameField = $input->getOption('username-field') ?: $securityHelper->findUserNameField($userClass, $providersData);
+
+        if (!$usernameField) {
+            throw new RuntimeCommandException(\sprintf('The login field of "%s" cannot be guessed, pass it with "--username-field".', $userClass));
+        }
+
+        $passwordField = $input->getOption('password-field') ?: $securityHelper->findPasswordField($userClass);
+
+        if (!$passwordField) {
+            throw new RuntimeCommandException(\sprintf('The password property of "%s" cannot be guessed, pass it with "--password-field".', $userClass));
+        }
+
+        $addUniqueEntityConstraint = (bool) $input->getOption('unique-entity');
+        $willVerifyEmail = (bool) $input->getOption('verify-email');
+        $verifyEmailAnonymously = (bool) $input->getOption('verify-anonymously');
+        $idGetter = $emailGetter = $fromEmailAddress = $fromEmailName = null;
+
+        if ($willVerifyEmail) {
+            $idGetter = $input->getOption('id-getter') ?: $securityHelper->findIdGetter($userClass);
+            $emailGetter = $input->getOption('email-getter') ?: $securityHelper->findEmailGetter($userClass, 'email');
+
+            if (!$idGetter) {
+                throw new RuntimeCommandException(\sprintf('"%s" has no "getId()" method, pass the getter with "--id-getter".', $userClass));
+            }
+
+            if (!$emailGetter) {
+                throw new RuntimeCommandException(\sprintf('"%s" has no "getEmail()" method, pass the getter with "--email-getter".', $userClass));
+            }
+
+            $fromEmailAddress = Validator::validateEmailAddress($input->getOption('from-email-address'));
+            $fromEmailName = Validator::notBlank($input->getOption('from-email-name'));
+        }
+
+        $autoLoginAuthenticator = $this->resolveAuthenticator($input, $io, $securityHelper, $securityData);
+        $redirectRouteName = $input->getOption('redirect-route');
+
         $userClassNameDetails = $generator->createClassNameDetails(
-            '\\'.$this->userClass,
+            '\\'.$userClass,
             'Entity\\'
         );
 
@@ -243,16 +359,16 @@ final class MakeRegistrationForm extends AbstractMaker
             'Security\\'
         );
 
-        $verifyEmailVars = ['will_verify_email' => $this->willVerifyEmail];
+        $verifyEmailVars = ['will_verify_email' => $willVerifyEmail];
 
-        if ($this->willVerifyEmail) {
+        if ($willVerifyEmail) {
             $verifyEmailVars = [
-                'will_verify_email' => $this->willVerifyEmail,
+                'will_verify_email' => $willVerifyEmail,
                 'email_verifier_class_details' => $verifyEmailServiceClassNameDetails,
-                'verify_email_anonymously' => $this->verifyEmailAnonymously,
-                'from_email' => $this->fromEmailAddress,
-                'from_email_name' => addslashes($this->fromEmailName),
-                'email_getter' => $this->emailGetter,
+                'verify_email_anonymously' => $verifyEmailAnonymously,
+                'from_email' => $fromEmailAddress,
+                'from_email_name' => addslashes($fromEmailName),
+                'email_getter' => $emailGetter,
             ];
 
             $useStatements = new UseStatementGenerator([
@@ -271,9 +387,9 @@ final class MakeRegistrationForm extends AbstractMaker
                 'verifyEmail/EmailVerifier.tpl.php',
                 array_merge([
                     'use_statements' => $useStatements,
-                    'id_getter' => $this->idGetter,
-                    'email_getter' => $this->emailGetter,
-                    'verify_email_anonymously' => $this->verifyEmailAnonymously,
+                    'id_getter' => $idGetter,
+                    'email_getter' => $emailGetter,
+                    'verify_email_anonymously' => $verifyEmailAnonymously,
                     'user_class_name' => $userClassNameDetails->getShortName(),
                 ],
                     $userRepoVars
@@ -287,7 +403,6 @@ final class MakeRegistrationForm extends AbstractMaker
         }
 
         // 1) Generate the form class
-        $usernameField = $this->usernameField;
         $formClassDetails = $this->generateFormClass(
             $userClassNameDetails,
             $generator,
@@ -311,7 +426,7 @@ final class MakeRegistrationForm extends AbstractMaker
             EntityManagerInterface::class,
         ]);
 
-        if ($this->willVerifyEmail) {
+        if ($willVerifyEmail) {
             $useStatements->addUseStatement([
                 $verifyEmailServiceClassNameDetails->getFullName(),
                 TemplatedEmail::class,
@@ -319,26 +434,26 @@ final class MakeRegistrationForm extends AbstractMaker
                 VerifyEmailExceptionInterface::class,
             ]);
 
-            if ($this->verifyEmailAnonymously) {
+            if ($verifyEmailAnonymously) {
                 $useStatements->addUseStatement($userRepoVars['repository_full_class_name']);
             }
         }
 
         $autoLoginVars = [
-            'login_after_registration' => null !== $this->autoLoginAuthenticator,
+            'login_after_registration' => null !== $autoLoginAuthenticator,
         ];
 
-        if (null !== $this->autoLoginAuthenticator) {
+        if (null !== $autoLoginAuthenticator) {
             $useStatements->addUseStatement([
                 Security::class,
             ]);
 
-            $autoLoginVars['firewall'] = $this->autoLoginAuthenticator->firewallName;
-            $autoLoginVars['authenticator'] = \sprintf('\'%s\'', $this->autoLoginAuthenticator->type->value);
+            $autoLoginVars['firewall'] = $autoLoginAuthenticator->firewallName;
+            $autoLoginVars['authenticator'] = \sprintf('\'%s\'', $autoLoginAuthenticator->type->value);
 
-            if (AuthenticatorType::CUSTOM === $this->autoLoginAuthenticator->type) {
-                $useStatements->addUseStatement($this->autoLoginAuthenticator->authenticatorClass);
-                $autoLoginVars['authenticator'] = \sprintf('%s::class', Str::getShortClassName($this->autoLoginAuthenticator->authenticatorClass));
+            if (AuthenticatorType::CUSTOM === $autoLoginAuthenticator->type) {
+                $useStatements->addUseStatement($autoLoginAuthenticator->authenticatorClass);
+                $autoLoginVars['authenticator'] = \sprintf('%s::class', Str::getShortClassName($autoLoginAuthenticator->authenticatorClass));
             }
         }
 
@@ -355,8 +470,8 @@ final class MakeRegistrationForm extends AbstractMaker
                 'route_name' => 'app_register',
                 'form_class_name' => $formClassDetails->getShortName(),
                 'user_class_name' => $userClassNameDetails->getShortName(),
-                'password_field' => $this->passwordField,
-                'redirect_route_name' => $this->redirectRouteName ?? null,
+                'password_field' => $passwordField,
+                'redirect_route_name' => $redirectRouteName ?? null,
                 'translator_available' => $isTranslatorAvailable,
             ],
                 $userRepoVars,
@@ -371,13 +486,13 @@ final class MakeRegistrationForm extends AbstractMaker
             'registration/twig_template.tpl.php',
             [
                 'username_field' => $usernameField,
-                'will_verify_email' => $this->willVerifyEmail,
+                'will_verify_email' => $willVerifyEmail,
             ]
         );
 
         // 4) Update the User class if necessary
-        if ($this->addUniqueEntityConstraint) {
-            $classDetails = new ClassDetails($this->userClass);
+        if ($addUniqueEntityConstraint) {
+            $classDetails = new ClassDetails($userClass);
             $userManipulator = new ClassSourceManipulator(
                 sourceCode: file_get_contents($classDetails->getPath())
             );
@@ -393,8 +508,8 @@ final class MakeRegistrationForm extends AbstractMaker
             $this->fileManager->dumpFile($classDetails->getPath(), $userManipulator->getSourceCode());
         }
 
-        if ($this->willVerifyEmail) {
-            $classDetails = new ClassDetails($this->userClass);
+        if ($willVerifyEmail) {
+            $classDetails = new ClassDetails($userClass);
             $userManipulator = new ClassSourceManipulator(
                 sourceCode: file_get_contents($classDetails->getPath()),
                 overwrite: false,
@@ -430,10 +545,10 @@ final class MakeRegistrationForm extends AbstractMaker
 
             $generator->generateFile(
                 targetPath: \sprintf('tests/%s.php', $testClassDetails->getShortName()),
-                templateName: $this->willVerifyEmail ? 'registration/Test.WithVerify.tpl.php' : 'registration/Test.WithoutVerify.tpl.php',
+                templateName: $willVerifyEmail ? 'registration/Test.WithVerify.tpl.php' : 'registration/Test.WithoutVerify.tpl.php',
                 variables: array_merge([
                     'use_statements' => $useStatements,
-                    'from_email' => $this->fromEmailAddress ?? null,
+                    'from_email' => $fromEmailAddress ?? null,
                 ], $userRepoVars)
             );
 
@@ -445,7 +560,7 @@ final class MakeRegistrationForm extends AbstractMaker
         $generator->writeChanges();
 
         $this->writeSuccessMessage($io);
-        $this->successMessage($io, $this->willVerifyEmail, $userClassNameDetails->getShortName());
+        $this->successMessage($io, $willVerifyEmail, $userClassNameDetails->getShortName());
     }
 
     private function successMessage(ConsoleStyle $io, bool $emailVerification, string $userClass): void
