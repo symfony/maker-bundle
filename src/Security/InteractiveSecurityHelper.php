@@ -147,8 +147,8 @@ final class InteractiveSecurityHelper
 
     public function guessEmailField(SymfonyStyle $io, string $userClass): string
     {
-        if (property_exists($userClass, 'email')) {
-            return 'email';
+        if (null !== $emailField = $this->findEmailField($userClass)) {
+            return $emailField;
         }
 
         $classProperties = [];
@@ -161,6 +161,14 @@ final class InteractiveSecurityHelper
             \sprintf('Which field on your <fg=yellow>%s</> class holds the email address?', $userClass),
             $classProperties
         );
+    }
+
+    /**
+     * The email property when the class has the obvious one, null when a person has to pick.
+     */
+    public function findEmailField(string $userClass): ?string
+    {
+        return property_exists($userClass, 'email') ? 'email' : null;
     }
 
     public function guessPasswordField(SymfonyStyle $io, string $userClass): string
@@ -183,9 +191,11 @@ final class InteractiveSecurityHelper
 
     public function guessPasswordSetter(SymfonyStyle $io, string $userClass): string
     {
-        if (null === ($methodChoices = $this->methodNameGuesser($userClass, 'setPassword'))) {
-            return 'setPassword';
+        if (null !== $passwordSetter = $this->findPasswordSetter($userClass)) {
+            return $passwordSetter;
         }
+
+        $methodChoices = $this->methodNameGuesser($userClass, 'setPassword');
 
         return $io->choice(
             \sprintf('Which method on your <fg=yellow>%s</> class can be used to set the encoded password (e.g. setPassword())?', $userClass),
@@ -193,18 +203,36 @@ final class InteractiveSecurityHelper
         );
     }
 
+    /**
+     * The password setter when the class has the obvious one, null when a person has to pick.
+     */
+    public function findPasswordSetter(string $userClass): ?string
+    {
+        return null === $this->methodNameGuesser($userClass, 'setPassword') ? 'setPassword' : null;
+    }
+
     public function guessEmailGetter(SymfonyStyle $io, string $userClass, string $emailPropertyName): string
     {
-        $supposedEmailMethodName = \sprintf('get%s', Str::asCamelCase($emailPropertyName));
-
-        if (null === ($methodChoices = $this->methodNameGuesser($userClass, $supposedEmailMethodName))) {
-            return $supposedEmailMethodName;
+        if (null !== $emailGetter = $this->findEmailGetter($userClass, $emailPropertyName)) {
+            return $emailGetter;
         }
+
+        $methodChoices = $this->methodNameGuesser($userClass, \sprintf('get%s', Str::asCamelCase($emailPropertyName)));
 
         return $io->choice(
             \sprintf('Which method on your <fg=yellow>%s</> class can be used to get the email address (e.g. getEmail())?', $userClass),
             $methodChoices
         );
+    }
+
+    /**
+     * The email getter when the class has the obvious one, null when a person has to pick.
+     */
+    public function findEmailGetter(string $userClass, string $emailPropertyName): ?string
+    {
+        $supposedEmailMethodName = \sprintf('get%s', Str::asCamelCase($emailPropertyName));
+
+        return null === $this->methodNameGuesser($userClass, $supposedEmailMethodName) ? $supposedEmailMethodName : null;
     }
 
     public function guessIdGetter(SymfonyStyle $io, string $userClass): string

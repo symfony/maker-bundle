@@ -339,6 +339,49 @@ class MakeResetPasswordTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_generates_non_interactively' => [self::buildMakerTest()
+            // @legacy - drop skipped versions when PHP 8.1 is no longer supported.
+            ->setSkippedPhpVersions(80100, 80109)
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $output = $runner->runMaker(
+                    [],
+                    '--no-interaction --from-email-address=jr@rushlow.dev --from-email-name="Jesse Rushlow"'
+                );
+
+                self::assertStringContainsString('Success', $output);
+
+                // the user class, the email field, the getter and the setter are all derived
+                // from security.yaml and the class itself, exactly as the prompt derives them
+                $controller = file_get_contents($runner->getPath('src/Controller/ResetPasswordController.php'));
+                self::assertStringContainsString('getEmail()', $controller);
+                self::assertStringContainsString('setPassword(', $controller);
+                self::assertStringContainsString('app_home', $controller);
+                self::assertStringContainsString('jr@rushlow.dev', $controller);
+            }),
+        ];
+
+        yield 'it_rejects_missing_options_non_interactively' => [self::buildMakerTest()
+            // @legacy - drop skipped versions when PHP 8.1 is no longer supported.
+            ->setSkippedPhpVersions(80100, 80109)
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $invalid = [
+                    '--no-interaction' => 'is not a valid email address',
+                    '--no-interaction --from-email-address=jr@rushlow.dev' => 'This value cannot be blank',
+                ];
+
+                foreach ($invalid as $arguments => $expectedError) {
+                    $output = $runner->runMaker([], $arguments, allowedToFail: true);
+
+                    self::assertStringContainsString($expectedError, $output, \sprintf('"%s" was not rejected.', $arguments));
+                    self::assertFileDoesNotExist($runner->getPath('src/Controller/ResetPasswordController.php'));
+                }
+            }),
+        ];
+
         yield 'it_generates_with_custom_user' => [self::buildMakerTest()
             // @legacy - drop skipped versions when PHP 8.1 is no longer supported.
             ->setSkippedPhpVersions(80100, 80109)
