@@ -3,6 +3,11 @@
 This project is part of the Symfony ecosystem and follows the
 [Symfony Contribution Guidelines](https://symfony.com/doc/current/contributing/index.html).
 
+## Non-interactive makers
+
+Every maker command must also work with `--no-interaction`. See [AGENTS.md](AGENTS.md) for
+the patterns this requires and the mistakes that break it.
+
 ## Running Tests
 
 This project uses [PHPUnit Bridge](https://phpunit.de/getting-started/phpunit-bridge.html) to run the tests.
