@@ -20,7 +20,6 @@ use Symfony\Bundle\MakerBundle\Maker\MakeDockerDatabase;
 use Symfony\Bundle\MakerBundle\Maker\MakeEntity;
 use Symfony\Bundle\MakerBundle\Maker\MakeFixtures;
 use Symfony\Bundle\MakerBundle\Maker\MakeForm;
-use Symfony\Bundle\MakerBundle\Maker\MakeFunctionalTest;
 use Symfony\Bundle\MakerBundle\Maker\MakeMessengerMiddleware;
 use Symfony\Bundle\MakerBundle\Maker\MakeRegistrationForm;
 use Symfony\Bundle\MakerBundle\Maker\MakeResetPassword;
@@ -32,7 +31,6 @@ use Symfony\Bundle\MakerBundle\Maker\MakeSubscriber;
 use Symfony\Bundle\MakerBundle\Maker\MakeTest;
 use Symfony\Bundle\MakerBundle\Maker\MakeTwigComponent;
 use Symfony\Bundle\MakerBundle\Maker\MakeTwigExtension;
-use Symfony\Bundle\MakerBundle\Maker\MakeUnitTest;
 use Symfony\Bundle\MakerBundle\Maker\MakeUser;
 use Symfony\Bundle\MakerBundle\Maker\MakeValidator;
 use Symfony\Bundle\MakerBundle\Maker\MakeVoter;
@@ -99,10 +97,6 @@ return static function (ContainerConfigurator $container) {
         ])
         ->tag('maker.command');
 
-    $services->set('maker.maker.make_functional_test', MakeFunctionalTest::class)
-        ->tag('maker.command')
-        ->deprecate('symfony/maker-bundle', '1.29', 'The "%service_id%" service is deprecated, use "maker.maker.make_test" instead.');
-
     $services->set('maker.maker.make_listener', \Symfony\Bundle\MakerBundle\Maker\MakeListener::class)
         ->args([service('maker.event_registry')])
         ->tag('maker.command');
@@ -152,10 +146,6 @@ return static function (ContainerConfigurator $container) {
 
     $services->set('maker.maker.make_test', MakeTest::class)
         ->tag('maker.command');
-
-    $services->set('maker.maker.make_unit_test', MakeUnitTest::class)
-        ->tag('maker.command')
-        ->deprecate('symfony/maker-bundle', '1.29', 'The "%service_id%" service is deprecated, use "maker.maker.make_test" instead.');
 
     $services->set('maker.maker.make_validator', MakeValidator::class)
         ->tag('maker.command');

@@ -55,15 +55,6 @@ class MakeCommandRegistrationPass implements CompilerPassInterface
             $commandDefinition->addTag('console.command', $tagAttributes);
 
             /*
-             * @deprecated remove this block when removing make:unit-test and make:functional-test
-             */
-            if (method_exists($class, 'getCommandAliases')) {
-                foreach ($class::getCommandAliases() as $alias) {
-                    $commandDefinition->addTag('console.command', ['command' => $alias, 'description' => 'Deprecated alias of "make:test"']);
-                }
-            }
-
-            /*
              * @deprecated remove this block when removing make:subscriber
              */
             if (method_exists($class, 'getCommandAlias')) {
