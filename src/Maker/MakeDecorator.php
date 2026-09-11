@@ -132,6 +132,10 @@ final class MakeDecorator extends AbstractMaker
     {
         $id = $input->getArgument('id');
 
+        if (!class_exists($id)) {
+            $id = Validator::validatePhpStringLiteral($id, \sprintf('The service id "%s" cannot contain quotes or backslashes.', $id));
+        }
+
         $classNameDetails = $generator->createClassNameDetails(
             Validator::validateClassName(Validator::classDoesNotExist($input->getArgument('decorator-class'))),
             '',

@@ -122,6 +122,10 @@ final class MakeUser extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        if (null !== ($identityPropertyName = $input->getOption('identity-property-name'))) {
+            $input->setOption('identity-property-name', Validator::validatePropertyName($identityPropertyName, \sprintf('The "--identity-property-name" value "%s" is not a valid PHP property name.', $identityPropertyName)));
+        }
+
         $userClassConfiguration = new UserClassConfiguration(
             $input->getOption('is-entity'),
             $input->getOption('identity-property-name'),

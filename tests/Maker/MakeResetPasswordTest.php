@@ -33,7 +33,6 @@ class MakeResetPasswordTest extends MakerTestCase
                 self::makeUser($runner);
 
                 $output = $runner->runMaker([
-                    'App\Entity\User',
                     'app_home',
                     'jr@rushlow.dev',
                     'SymfonyCasts',
@@ -149,7 +148,6 @@ class MakeResetPasswordTest extends MakerTestCase
                 self::makeUser($runner);
 
                 $output = $runner->runMaker([
-                    'App\Entity\User',
                     'app_home',
                     'jr@rushlow.dev',
                     'SymfonyCasts',
@@ -209,7 +207,6 @@ class MakeResetPasswordTest extends MakerTestCase
                 self::makeUser($runner);
 
                 $output = $runner->runMaker([
-                    'App\Entity\User',
                     'app_home',
                     'jr@rushlow.dev',
                     'SymfonyCasts',
@@ -270,7 +267,6 @@ class MakeResetPasswordTest extends MakerTestCase
                 self::makeUser($runner);
 
                 $output = $runner->runMaker([
-                    'App\Entity\User',
                     'app_home',
                     'victor@symfonycasts.com',
                     'SymfonyCasts',
@@ -295,7 +291,6 @@ class MakeResetPasswordTest extends MakerTestCase
                 self::makeUser($runner);
 
                 $output = $runner->runMaker([
-                    'App\Entity\User',
                     'app_home',
                     'jr@rushlow.dev',
                     'SymfonyCasts',
@@ -324,7 +319,6 @@ class MakeResetPasswordTest extends MakerTestCase
                 self::makeUser($runner);
 
                 $output = $runner->runMaker([
-                    'App\Entity\User',
                     'app_home',
                     'jr@rushlow.dev',
                     'SymfonyCasts',
