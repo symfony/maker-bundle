@@ -3,3 +3,11 @@ The <info>%command.name%</info> command generates a new validation constraint.
 <info>php %command.full_name% EnabledValidator</info>
 
 If the argument is missing, the command will ask for the constraint class name interactively.
+
+The <info>--target</info> option allows you to restrict where the constraint class can be used:
+
+  <info>php %command.full_name% EnabledValidator --target=class</info>
+  <info>php %command.full_name% EnabledValidator --target=method</info>
+  <info>php %command.full_name% EnabledValidator --target=property</info>
+
+If the option is invalid, the command will ask for the target type interactively.
