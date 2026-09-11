@@ -93,6 +93,57 @@ class MakeMessageTest extends MakerTestCase
                 self::assertStringNotContainsString(AsMessage::class, $messageContents);
             }),
         ];
+
+        yield 'it_generates_basic_message_non_interactively' => [self::createMakeMessageTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->runMaker([], 'SendWelcomeEmail --no-interaction');
+
+                self::runMessageTest($runner, 'it_generates_basic_message.php');
+            }),
+        ];
+
+        yield 'it_generates_message_with_transport_non_interactively' => [self::createMakeMessageTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::configureTransports($runner);
+
+                $output = $runner->runMaker([], 'SendWelcomeEmail --no-interaction --transport=async');
+
+                self::assertStringContainsString('Success', $output);
+
+                self::runMessageTest($runner, 'it_generates_message_with_transport.php');
+
+                $messageContents = file_get_contents($runner->getPath('src/Message/SendWelcomeEmail.php'));
+
+                self::assertStringContainsString(AsMessage::class, $messageContents);
+                self::assertStringContainsString("#[AsMessage('async')]", $messageContents);
+            }),
+        ];
+
+        yield 'it_generates_message_with_no_transport_non_interactively' => [self::createMakeMessageTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::configureTransports($runner);
+
+                $output = $runner->runMaker([], 'SendWelcomeEmail --no-interaction');
+
+                self::assertStringContainsString('Success', $output);
+
+                self::runMessageTest($runner, 'it_generates_message_with_transport.php');
+
+                $messageContents = file_get_contents($runner->getPath('src/Message/SendWelcomeEmail.php'));
+                self::assertStringNotContainsString(AsMessage::class, $messageContents);
+            }),
+        ];
+
+        yield 'it_rejects_unknown_transport_non_interactively' => [self::createMakeMessageTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::configureTransports($runner);
+
+                $output = $runner->runMaker([], 'SendWelcomeEmail --no-interaction --transport=does_not_exist', allowedToFail: true);
+
+                self::assertStringContainsString('is not configured', $output);
+                self::assertFileDoesNotExist($runner->getPath('src/Message/SendWelcomeEmail.php'));
+            }),
+        ];
     }
 
     private static function runMessageTest(MakerTestRunner $runner, string $filename): void
