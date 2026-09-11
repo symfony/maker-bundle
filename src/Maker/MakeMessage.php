@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
@@ -21,6 +22,7 @@ use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Messenger\Attribute\AsMessage;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -51,43 +53,49 @@ final class MakeMessage extends AbstractMaker
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the message class (e.g. <fg=yellow>SendEmailMessage</>)')
+            ->addOption('transport', mode: InputOption::VALUE_OPTIONAL, description: 'Which transport do you want to route your message to? Omit for none.')
             ->setHelp($this->getHelpFileContents('MakeMessage.txt'))
         ;
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        $command->addArgument('chosen-transport', InputArgument::OPTIONAL);
-
-        $messengerData = [];
-
-        try {
-            $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents('config/packages/messenger.yaml'));
-            $messengerData = $manipulator->getData();
-        } catch (\Exception) {
-        }
-
-        if (!isset($messengerData['framework']['messenger']['transports'])) {
+        if ($input->getOption('transport')) {
             return;
         }
 
-        $transports = array_keys($messengerData['framework']['messenger']['transports']);
-        array_unshift($transports, $noTransport = '[no transport]');
+        $transports = $this->findConfiguredTransports();
+
+        if (!$transports) {
+            return;
+        }
 
         $chosenTransport = $io->choice(
             'Which transport do you want to route your message to?',
-            $transports,
+            [$noTransport = '[no transport]', ...$transports],
             $noTransport
         );
 
         if ($noTransport !== $chosenTransport) {
-            $input->setArgument('chosen-transport', $chosenTransport);
+            $input->setOption('transport', $chosenTransport);
         }
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-        $chosenTransport = $input->getArgument('chosen-transport');
+        $chosenTransport = $input->getOption('transport');
+
+        if (null !== $chosenTransport) {
+            $configuredTransports = $this->findConfiguredTransports();
+
+            if (!\in_array($chosenTransport, $configuredTransports, true)) {
+                $errorMessage = $configuredTransports
+                    ? \sprintf('The transport "%s" is not configured in "config/packages/messenger.yaml". Available: "%s".', $chosenTransport, implode('", "', $configuredTransports))
+                    : \sprintf('The transport "%s" is not configured in "config/packages/messenger.yaml".', $chosenTransport);
+
+                throw new RuntimeCommandException($errorMessage);
+            }
+        }
 
         $messageClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -146,5 +154,23 @@ final class MakeMessage extends AbstractMaker
             MessageBusInterface::class,
             'messenger'
         );
+    }
+
+    /**
+     * @return string[]
+     */
+    private function findConfiguredTransports(): array
+    {
+        try {
+            $messengerData = (new YamlSourceManipulator($this->fileManager->getFileContents('config/packages/messenger.yaml')))->getData();
+        } catch (\Exception) {
+            return [];
+        }
+
+        if (!isset($messengerData['framework']['messenger']['transports'])) {
+            return [];
+        }
+
+        return array_keys($messengerData['framework']['messenger']['transports']);
     }
 }
