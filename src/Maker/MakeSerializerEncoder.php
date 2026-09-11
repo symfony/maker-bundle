@@ -16,6 +16,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -55,6 +56,10 @@ final class MakeSerializerEncoder extends AbstractMaker
             'Encoder'
         );
         $format = $input->getArgument('format');
+
+        if (null !== $format) {
+            $format = Validator::validatePhpStringLiteral($format, \sprintf('The format "%s" cannot contain quotes or backslashes.', $format));
+        }
 
         $useStatements = new UseStatementGenerator([
             DecoderInterface::class,

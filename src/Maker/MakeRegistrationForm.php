@@ -299,11 +299,15 @@ final class MakeRegistrationForm extends AbstractMaker
             throw new RuntimeCommandException(\sprintf('The login field of "%s" cannot be guessed, pass it with "--username-field".', $userClass));
         }
 
+        $usernameField = Validator::validatePropertyName($usernameField, \sprintf('The "--username-field" value "%s" is not a valid PHP property name.', $usernameField));
+
         $passwordField = $input->getOption('password-field') ?: $securityHelper->findPasswordField($userClass);
 
         if (!$passwordField) {
             throw new RuntimeCommandException(\sprintf('The password property of "%s" cannot be guessed, pass it with "--password-field".', $userClass));
         }
+
+        $passwordField = Validator::validatePropertyName($passwordField, \sprintf('The "--password-field" value "%s" is not a valid PHP property name.', $passwordField));
 
         $addUniqueEntityConstraint = (bool) $input->getOption('unique-entity');
         $willVerifyEmail = (bool) $input->getOption('verify-email');
@@ -318,9 +322,13 @@ final class MakeRegistrationForm extends AbstractMaker
                 throw new RuntimeCommandException(\sprintf('"%s" has no "getId()" method, pass the getter with "--id-getter".', $userClass));
             }
 
+            $idGetter = Validator::validatePropertyName($idGetter, \sprintf('The "--id-getter" value "%s" is not a valid PHP method name.', $idGetter));
+
             if (!$emailGetter) {
                 throw new RuntimeCommandException(\sprintf('"%s" has no "getEmail()" method, pass the getter with "--email-getter".', $userClass));
             }
+
+            $emailGetter = Validator::validatePropertyName($emailGetter, \sprintf('The "--email-getter" value "%s" is not a valid PHP method name.', $emailGetter));
 
             $fromEmailAddress = Validator::validateEmailAddress($input->getOption('from-email-address'));
             $fromEmailName = Validator::notBlank($input->getOption('from-email-name'));
@@ -328,6 +336,14 @@ final class MakeRegistrationForm extends AbstractMaker
 
         $autoLoginAuthenticator = $this->resolveAuthenticator($input, $io, $securityHelper, $securityData);
         $redirectRouteName = $input->getOption('redirect-route');
+
+        if ($redirectRouteName) {
+            $redirectRouteName = Validator::validatePhpStringLiteral($redirectRouteName, \sprintf('The "--redirect-route" value "%s" cannot contain quotes or backslashes.', $redirectRouteName));
+
+            if ($this->router instanceof RouterInterface && !\in_array($redirectRouteName, array_keys($this->router->getRouteCollection()->all()), true)) {
+                throw new RuntimeCommandException(\sprintf('The "--redirect-route" value "%s" does not match any existing route. Pass the name of an existing route.', $redirectRouteName));
+            }
+        }
 
         $userClassNameDetails = $generator->createClassNameDetails(
             '\\'.$userClass,
@@ -367,7 +383,7 @@ final class MakeRegistrationForm extends AbstractMaker
                 'email_verifier_class_details' => $verifyEmailServiceClassNameDetails,
                 'verify_email_anonymously' => $verifyEmailAnonymously,
                 'from_email' => $fromEmailAddress,
-                'from_email_name' => addslashes($fromEmailName),
+                'from_email_name' => $fromEmailName,
                 'email_getter' => $emailGetter,
             ];
 
