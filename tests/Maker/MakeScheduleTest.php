@@ -106,5 +106,65 @@ class MakeScheduleTest extends MakerTestCase
                 );
             }),
         ];
+
+        yield 'it_generates_a_schedule_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '--no-interaction');
+
+                self::assertStringContainsString('Success', $output);
+
+                self::assertFileEquals(
+                    \dirname(__DIR__).'/fixtures/make-schedule/expected/DefaultScheduleEmpty.php',
+                    $runner->getPath('src/Scheduler/MainSchedule.php')
+                );
+            }),
+        ];
+
+        yield 'it_generates_a_schedule_with_transport_name_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '--no-interaction --transport-name=dummy');
+
+                self::assertStringContainsString('Success', $output);
+
+                self::assertFileEquals(
+                    \dirname(__DIR__).'/fixtures/make-schedule/expected/DefaultScheduleWithTransportName.php',
+                    $runner->getPath('src/Scheduler/MainSchedule.php')
+                );
+            }),
+        ];
+
+        yield 'it_generates_a_schedule_with_message_non_interactively' => [self::buildMakerTest()
+            ->preRun(static function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-schedule/standard_setup',
+                    ''
+                );
+            })
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '--no-interaction --message=MessageFixture');
+
+                self::assertStringContainsString('Success', $output);
+
+                self::assertFileEquals(
+                    \dirname(__DIR__).'/fixtures/make-schedule/expected/MyScheduleWithMessage.php',
+                    $runner->getPath('src/Scheduler/MessageFixtureSchedule.php')
+                );
+            }),
+        ];
+
+        yield 'it_rejects_unknown_message_non_interactively' => [self::buildMakerTest()
+            ->preRun(static function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-schedule/standard_setup',
+                    ''
+                );
+            })
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '--no-interaction --message=DoesNotExist', allowedToFail: true);
+
+                self::assertStringContainsString('was not found', $output);
+                self::assertFileDoesNotExist($runner->getPath('src/Scheduler/DoesNotExistSchedule.php'));
+            }),
+        ];
     }
 }
