@@ -16,6 +16,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -48,8 +49,14 @@ final class MakeTwigExtension extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        $twigExtensionName = $input->getArgument('name');
+
+        if (null !== $twigExtensionName) {
+            Validator::validateClassName($twigExtensionName, \sprintf('The Twig extension name "%s" is not a valid class name.', $twigExtensionName));
+        }
+
         $extensionClassData = ClassData::create(
-            class: \sprintf('Twig\%s', $input->getArgument('name')),
+            class: \sprintf('Twig\%s', $twigExtensionName),
             suffix: 'Extension',
             useStatements: [
                 AsTwigFilter::class,
