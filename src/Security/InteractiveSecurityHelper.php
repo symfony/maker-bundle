@@ -289,7 +289,7 @@ final class InteractiveSecurityHelper
      *      pattern: ^/path
      *      form_login:
      *          login_path: app_login
-     *      custom_authenticator:
+     *      custom_authenticators:
      *          - App\Security\MyAuthenticator
      *
      * @param array<string, mixed> $firewallConfig
@@ -301,34 +301,27 @@ final class InteractiveSecurityHelper
         $authenticators = [];
 
         foreach ($firewallConfig as $potentialAuthenticator => $configData) {
-            // Check if $potentialAuthenticator is a supported authenticator or if its some other key.
+            // custom_authenticators (make:security:custom) and custom_authenticator (the
+            // deprecated make:auth) are both real keys found in the wild for the same thing.
+            if (\in_array($potentialAuthenticator, ['custom_authenticator', 'custom_authenticators'], true)) {
+                $authenticators = [...$authenticators, ...$this->getCustomAuthenticators($configData, $firewallName)];
+
+                continue;
+            }
+
             if (null === ($authenticator = AuthenticatorType::tryFrom($potentialAuthenticator))) {
                 // $potentialAuthenticator is probably something like "pattern" or "lazy", not an authenticator
                 continue;
             }
 
-            // $potentialAuthenticator is a supported authenticator. Check if it's a custom_authenticator.
-            if (AuthenticatorType::CUSTOM !== $authenticator) {
-                // We found a "built in" authenticator - "form_login", "json_login", etc...
-                $authenticators[] = new Authenticator($authenticator, $firewallName);
-
-                continue;
-            }
-
-            /*
-             * $potentialAuthenticator = custom_authenticator.
-             * $configData is either [App\MyAuthenticator] or (string) App\MyAuthenticator
-             */
-            $customAuthenticators = $this->getCustomAuthenticators($configData, $firewallName);
-
-            $authenticators = [...$authenticators, ...$customAuthenticators];
+            $authenticators[] = new Authenticator($authenticator, $firewallName);
         }
 
         return $authenticators;
     }
 
     /**
-     * @param string|array<string> $customAuthenticators A single entry from custom_authenticators or an array of authenticators
+     * @param string|array<string> $customAuthenticators A single entry from custom_authenticator(s) or an array of authenticators
      *
      * @return Authenticator[]
      */

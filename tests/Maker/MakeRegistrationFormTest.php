@@ -131,6 +131,28 @@ class MakeRegistrationFormTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_resolves_auto_login_with_plural_custom_authenticators_key_non_interactively' => [self::createRegistrationFormTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                // make:security:custom writes "custom_authenticators" (plural), not the
+                // "custom_authenticator" key the deprecated make:auth writes
+                $runner->modifyYamlFile('config/packages/security.yaml', static function (array $data) {
+                    $data['security']['firewalls']['main']['custom_authenticators'] = ['App\\Security\\StubAuthenticator'];
+
+                    return $data;
+                });
+
+                $output = $runner->runMaker([], '--no-interaction --auto-login --redirect-route=app_anonymous');
+
+                self::assertStringContainsString('Success', $output);
+
+                $fixturePath = \dirname(__DIR__, 1).'/fixtures/make-registration-form/expected';
+
+                self::assertFileEquals($fixturePath.'/RegistrationControllerCustomAuthenticator.php', $runner->getPath('src/Controller/RegistrationController.php'));
+            }),
+        ];
+
         yield 'it_notes_missing_authenticator_for_auto_login_non_interactively' => [self::createRegistrationFormTest()
             ->run(static function (MakerTestRunner $runner) {
                 self::makeUser($runner);
