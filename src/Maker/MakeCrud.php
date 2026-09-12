@@ -16,6 +16,7 @@ use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -284,7 +285,7 @@ final class MakeCrud extends AbstractMaker
                 ]
             );
 
-            if (!class_exists(WebTestCase::class)) {
+            if (!class_exists(TestCase::class)) {
                 $io->caution('You\'ll need to install the `symfony/test-pack` to execute the tests for your new controller.');
             }
         }

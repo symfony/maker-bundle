@@ -125,6 +125,33 @@ class MakeCrudTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_generates_crud_with_tests_when_phpunit_is_not_installed' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-crud/SweetFood.php',
+                    'src/Entity/SweetFood.php'
+                );
+
+                // Simulate a project without PHPUnit installed: generating tests must not crash.
+                $runner->writeFile(
+                    'remove_phpunit.php',
+                    '<?php $config = json_decode(file_get_contents("composer.json"), true); unset($config["require-dev"]["phpunit/phpunit"]); file_put_contents("composer.json", json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));',
+                );
+                $runner->runProcess('php remove_phpunit.php && composer update --no-interaction && rm remove_phpunit.php');
+
+                $output = $runner->runMaker([
+                    'SweetFood', // Entity Class Name
+                    '',          // Default Controller,
+                    'y',         // Generate Tests
+                ]);
+
+                self::assertStringContainsString('src/Controller/SweetFoodController.php', $output);
+                self::assertStringContainsString('src/Form/SweetFoodType.php', $output);
+                self::assertStringContainsString('tests/Controller/SweetFoodControllerTest.php', $output);
+                self::assertStringContainsString('symfony/test-pack', $output);
+            }),
+        ];
+
         yield 'it_generates_correct_class_methods' => [self::buildMakerTest()
             ->addExtraDependencies('symfony/test-pack')
             ->run(static function (MakerTestRunner $runner) {
