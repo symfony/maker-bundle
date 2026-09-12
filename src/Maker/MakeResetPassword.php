@@ -346,7 +346,7 @@ class MakeResetPassword extends AbstractMaker
             ]
         );
 
-        $this->generateRequestEntity($generator, $requestClassNameDetails, $repositoryClassNameDetails, $userClassNameDetails, $userClass);
+        $this->generateRequestEntity($input, $generator, $requestClassNameDetails, $repositoryClassNameDetails, $userClassNameDetails, $userClass);
 
         $this->setBundleConfig($io, $generator, $repositoryClassNameDetails->getFullName());
 
@@ -518,14 +518,14 @@ class MakeResetPassword extends AbstractMaker
         $io->newLine();
     }
 
-    private function generateRequestEntity(Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails, ClassNameDetails $userClassDetails, string $userClass): void
+    private function generateRequestEntity(InputInterface $input, Generator $generator, ClassNameDetails $requestClassNameDetails, ClassNameDetails $repositoryClassNameDetails, ClassNameDetails $userClassDetails, string $userClass): void
     {
         // Generate ResetPasswordRequest Entity
         $requestEntityPath = $this->entityClassGenerator->generateEntityClass(
             entityClassDetails: $requestClassNameDetails,
             apiResource: false,
             generateRepositoryClass: false,
-            useUuidIdentifier: $this->getIdType()
+            useUuidIdentifier: $this->getIdType($input)
         );
 
         $generator->writeChanges();

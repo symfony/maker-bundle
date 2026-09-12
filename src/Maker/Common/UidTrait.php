@@ -25,9 +25,6 @@ use Symfony\Component\Uid\Uuid;
  */
 trait UidTrait
 {
-    private bool $usesUuid = false;
-    private bool $usesUlid = false;
-
     /**
      * Call this in a maker's configure() to consistently allow entity's with UUID's.
      * This should be called after you calling "setHelp()" in the maker.
@@ -48,29 +45,37 @@ trait UidTrait
 
     /**
      * Call this as early as possible in a maker's interact().
+     *
+     * Only performs the checks to fail fast; generation reads the options from
+     * the input directly, so that they also apply under --no-interaction.
      */
     protected function checkIsUsingUid(InputInterface $input): void
     {
-        if (($this->usesUuid = $input->getOption('with-uuid')) && !class_exists(Uuid::class)) {
-            throw new RuntimeCommandException('You must install symfony/uid to use Uuid\'s as "id" (composer require symfony/uid)');
-        }
-
-        if (($this->usesUlid = $input->getOption('with-ulid')) && !class_exists(Ulid::class)) {
-            throw new RuntimeCommandException('You must install symfony/uid to use Ulid\'s as "id" (composer require symfony/uid)');
-        }
-
-        if ($this->usesUuid && $this->usesUlid) {
-            throw new RuntimeCommandException('Setting --with-uuid & --with-ulid at the same time is not allowed. Please choose only one.');
-        }
+        $this->getIdType($input);
     }
 
-    protected function getIdType(): EntityIdTypeEnum
+    protected function getIdType(InputInterface $input): EntityIdTypeEnum
     {
-        if ($this->usesUuid) {
+        $hasUuid = $input->getOption('with-uuid');
+        $hasUlid = $input->getOption('with-ulid');
+
+        if ($hasUuid && $hasUlid) {
+            throw new RuntimeCommandException('Setting --with-uuid & --with-ulid at the same time is not allowed. Please choose only one.');
+        }
+
+        if ($hasUuid) {
+            if (!class_exists(Uuid::class)) {
+                throw new RuntimeCommandException('You must install symfony/uid to use Uuid\'s as "id" (composer require symfony/uid).');
+            }
+
             return EntityIdTypeEnum::UUID;
         }
 
-        if ($this->usesUlid) {
+        if ($hasUlid) {
+            if (!class_exists(Ulid::class)) {
+                throw new RuntimeCommandException('You must install symfony/uid to use Ulid\'s as "id" (composer require symfony/uid).');
+            }
+
             return EntityIdTypeEnum::ULID;
         }
 
