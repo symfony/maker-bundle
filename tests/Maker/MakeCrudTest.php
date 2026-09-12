@@ -45,6 +45,28 @@ class MakeCrudTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_asks_again_when_entity_class_is_blank' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-crud/SweetFood.php',
+                    'src/Entity/SweetFood.php'
+                );
+
+                // a blank entity class name triggers a validation error, then re-asks the question
+                $output = $runner->runMaker([
+                    '',          // blank entity class name,
+                    'SweetFood', // entity class name
+                    '',          // default controller,
+                    'n',         // Generate Tests
+                ]);
+
+                self::assertStringContainsString('src/Controller/SweetFoodController.php', $output);
+                self::assertStringContainsString('src/Form/SweetFoodType.php', $output);
+
+                self::runCrudTest($runner, 'it_generates_basic_crud.php');
+            }),
+        ];
+
         yield 'it_generates_crud_with_custom_controller' => [self::buildMakerTest()
             ->run(static function (MakerTestRunner $runner) {
                 $runner->copy(
