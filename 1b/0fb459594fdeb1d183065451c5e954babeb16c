@@ -1,0 +1,23 @@
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-09-12T20:32:02Z
+
+Following the crash fixed in this PR, I audited every interactive question in `src/Maker` and `src/Security` for the same pattern: a blank answer returning `null`, consumed inside `interact()` (a `string`-typed helper, `Str::asClassName`, `sprintf`...) before `generate()` can validate it.
+
+**Result: `MakeCrud` was the only actual crash.** Every other question is guarded by a validator, a default value, or an explicit blank check:
+
+| Maker | Guard | Blank answer behaviour |
+| --- | --- | --- |
+| `MakeForm` bound class | `Validator::existsOrNull` | `null` accepted, unbound form |
+| `MakeEntity` entity / relation / enum | `notBlank`, `classIsBackedEnum` | question is asked again |
+| `MakeListener`, `MakeSubscriber`, `MakeWebhook` name | `notBlank` | question is asked again |
+| `MakeAuthenticator` class | `notBlank` + `classDoesNotExist` | question is asked again |
+| `MakeDecorator` id / class | `serviceExists`, `validateClassName` | question is asked again |
+| `MakeCommand` parameters | `null === $name` guard | stops adding, intended |
+| `MakeStimulusController` targets/values/classes | `?: null` / `if (!$valueName)` | stops adding, intended |
+| `MakeEntity` fields | validator allows empty | stops adding, intended |
+| `MakeWebhook` matchers | `ChoiceQuestion`, default `<skip>` | skips, intended |
+| `MakeEntity`, `MakeStimulusController` field type | default + manual `in_array` loop | default is used |
+| `MakeTest`, `MakeUser`, `MakeFormLogin`, `MakeResetPassword`, `MakeRegistrationForm` | default and/or `notBlank`, `validateClassName`, `classIsUserInterface` | default or asked again |
+
+The one question left without a guard is the transport name in `MakeSchedule`. I checked the Symfony `AsSchedule` attribute: its `name` argument is optional and defaults to `'default'`, so `#[AsSchedule]` and `#[AsSchedule('default')]` are strictly equivalent. A nullable transport name is therefore legitimate, and the current `make:schedule` behaviour is correct and left unchanged.
