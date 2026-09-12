@@ -15,6 +15,7 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Column;
+use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -552,7 +553,7 @@ final class MakeRegistrationForm extends AbstractMaker
                 ], $userRepoVars)
             );
 
-            if (!class_exists(WebTestCase::class)) {
+            if (!class_exists(TestCase::class)) {
                 $io->caution('You\'ll need to install the `symfony/test-pack` to execute the tests for your new controller.');
             }
         }
