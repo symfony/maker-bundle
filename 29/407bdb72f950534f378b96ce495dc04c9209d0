@@ -1,0 +1,20 @@
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-09-12T18:32:28Z
+
+Rebased onto 1.x
+
+The branch was rebased on the current `1.x` head and force-pushed, with no conflicts. Since the base moved a lot (56 commits), the commit that validates the fix still sits on top.
+
+### Also works under `--no-interaction`
+
+While verifying the fix, I found that `--with-uuid` and `--with-ulid` were still ignored when `make:entity` runs with `--no-interaction`. `UidTrait` kept the choice in properties set only during `interact()`, and Symfony skips `interact()` entirely in that mode.
+
+The follow-up commit `cf2d5053` makes `getIdType()` read the options directly from the input, so the flags are honoured by `make:entity`, `make:user` and `make:reset-password` in interactive and non-interactive modes alike.
+
+Regression tests covering both paths:
+
+- `it_creates_a_new_class_with_uuid_when_name_is_passed_as_argument`
+- `it_creates_a_new_class_with_uuid_under_no_interaction`
+
+Local verification: `MakeEntityTest` green except `it_makes_new_entity_with_mercure_broadcast`, which needs a local Mercure server and is unrelated. `MakeUserTest` 4/4 and `MakeResetPasswordTest` 10/10.
