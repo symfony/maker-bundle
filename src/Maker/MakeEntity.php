@@ -113,7 +113,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         $this->checkIsUsingUid($input);
 
         if (($entityClassName = $input->getArgument('name')) && empty($this->verifyEntityName($entityClassName))) {
-            return;
+            goto entityNameVerified;
         }
 
         if ($input->getOption('regenerate')) {
@@ -142,6 +142,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $input->setArgument('name', $entityClassName);
 
+        entityNameVerified:
         if (
             !$input->getOption('api-resource')
             && class_exists(ApiResource::class)
