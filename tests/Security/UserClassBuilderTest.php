@@ -23,14 +23,17 @@ class UserClassBuilderTest extends TestCase
     /**
      * @dataProvider getUserInterfaceTests
      */
-    public function testAddUserInterfaceImplementation(UserClassConfiguration $userClassConfig, string $expectedFilename)
-    {
+    public function testAddUserInterfaceImplementation(
+        UserClassConfiguration $userClassConfig,
+        string $expectedFilename,
+        string $className,
+    ): void {
         $manipulator = $this->getClassSourceManipulator($userClassConfig);
 
         $classBuilder = new UserClassBuilder();
-        $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig);
+        $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig, $className);
 
-        $expectedPath = $this->getExpectedPath($expectedFilename, null);
+        $expectedPath = $this->getExpectedPath($expectedFilename);
         $expectedSource = file_get_contents($expectedPath);
 
         if (!class_exists(IsGrantedContext::class)) {
@@ -49,36 +52,43 @@ class UserClassBuilderTest extends TestCase
         yield 'entity_with_email_as_identifier' => [
             new UserClassConfiguration(true, 'email', true),
             'UserEntityWithEmailAsIdentifier.php',
+            'User',
         ];
 
         yield 'entity_with_password' => [
             new UserClassConfiguration(true, 'userIdentifier', true),
             'UserEntityWithPassword.php',
+            'User',
         ];
 
         yield 'entity_with_user_identifier_as_identifier' => [
             new UserClassConfiguration(true, 'user_identifier', true),
             'UserEntityWithUser_IdentifierAsIdentifier.php',
+            'User',
         ];
 
         yield 'entity_without_password' => [
             new UserClassConfiguration(true, 'userIdentifier', false),
             'UserEntityWithoutPassword.php',
+            'User',
         ];
 
         yield 'model_with_email_as_identifier' => [
             new UserClassConfiguration(false, 'email', true),
             'UserModelWithEmailAsIdentifier.php',
+            'User',
         ];
 
         yield 'model_with_password' => [
             new UserClassConfiguration(false, 'userIdentifier', true),
             'UserModelWithPassword.php',
+            'User',
         ];
 
         yield 'model_without_password' => [
             new UserClassConfiguration(false, 'userIdentifier', false),
             'UserModelWithoutPassword.php',
+            'User',
         ];
     }
 
