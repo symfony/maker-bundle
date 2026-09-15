@@ -14,6 +14,7 @@ namespace Symfony\Bundle\MakerBundle\Command;
 use Symfony\Bundle\MakerBundle\ApplicationAwareMakerInterface;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\CommandRestartedException;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -24,6 +25,7 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 /**
  * Used as the Command class for the makers.
@@ -66,7 +68,15 @@ final class MakerCommand extends Command
             $this->maker->configureDependencies($dependencies, $input);
 
             if ($missingPackagesMessage = $dependencies->getMissingPackagesMessage($this->getName())) {
-                throw new RuntimeCommandException($missingPackagesMessage);
+                if (!$input->isInteractive() || !$this->confirmPackagesInstallation($dependencies)) {
+                    throw new RuntimeCommandException($missingPackagesMessage);
+                }
+
+                $this->installPackages($dependencies, $output);
+
+                // the kernel of this process was built without the new packages, and running
+                // "composer require" corrupts its container cache, so the maker cannot go on here
+                throw new CommandRestartedException($this->restart());
             }
         }
     }
@@ -108,6 +118,15 @@ final class MakerCommand extends Command
         return 0;
     }
 
+    public function run(InputInterface $input, OutputInterface $output): int
+    {
+        try {
+            return parent::run($input, $output);
+        } catch (CommandRestartedException $e) {
+            return $e->exitCode;
+        }
+    }
+
     public function setApplication(?Application $application = null): void
     {
         parent::setApplication($application);
@@ -127,5 +146,54 @@ final class MakerCommand extends Command
     public function setCheckDependencies(bool $checkDeps): void
     {
         $this->checkDependencies = $checkDeps;
+    }
+
+    private function confirmPackagesInstallation(DependencyBuilder $dependencies): bool
+    {
+        $this->io->text(\sprintf('The %s command requires the following packages:', $this->getName()));
+        $this->io->listing([...$dependencies->getMissingDependencies(), ...$dependencies->getMissingDevDependencies()]);
+
+        return $this->io->confirm('Do you want to install these packages with Composer?');
+    }
+
+    private function installPackages(DependencyBuilder $dependencies, OutputInterface $output): void
+    {
+        foreach ([[$dependencies->getMissingDependencies(), []], [$dependencies->getMissingDevDependencies(), ['--dev']]] as [$packages, $flags]) {
+            if (!$packages) {
+                continue;
+            }
+
+            $process = new Process(['composer', 'require', ...$flags, ...$packages]);
+            $process->setTimeout(null);
+
+            if (Process::isTtySupported()) {
+                $process->setTty(true);
+            }
+
+            $process->run(static function (string $type, string $buffer) use ($output): void {
+                $output->write($buffer);
+            });
+
+            if (!$process->isSuccessful()) {
+                throw new RuntimeCommandException(\sprintf('The "%s" command failed, the packages were not installed.', $process->getCommandLine()));
+            }
+        }
+    }
+
+    private function restart(): int
+    {
+        $argv = $_SERVER['argv'] ?? [];
+
+        if (!$argv || !Process::isTtySupported()) {
+            $this->io->success(\sprintf('The packages are installed, run the %s command again.', $this->getName()));
+
+            return 0;
+        }
+
+        $process = new Process([\PHP_BINARY, ...$argv]);
+        $process->setTimeout(null);
+        $process->setTty(true);
+
+        return $process->run();
     }
 }
