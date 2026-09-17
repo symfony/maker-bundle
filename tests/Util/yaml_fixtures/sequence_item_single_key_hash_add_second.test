@@ -1,0 +1,43 @@
+services:
+    app.grid.foo:
+        class: App\Grid\FooGrid
+        tags:
+            - sylius.invokable_grid:
+                  name: 'app_foo'
+                  resourceClass: 'App\Model\Foo'
+
+    app.grid.bar:
+        class: App\Grid\BarGrid
+        tags:
+            - sylius.invokable_grid:
+                  name: 'app_bar'
+                  resourceClass: 'App\Model\Bar'
+===
+$data['services']['app.grid.baz'] = [
+    'class' => 'App\Grid\BazGrid',
+    'tags' => [
+        ['sylius.invokable_grid' => [
+            'name' => 'app_baz',
+            'resourceClass' => 'App\Model\Baz',
+        ]],
+    ],
+];
+===
+services:
+    app.grid.foo:
+        class: App\Grid\FooGrid
+        tags:
+            - sylius.invokable_grid:
+                  name: 'app_foo'
+                  resourceClass: 'App\Model\Foo'
+
+    app.grid.bar:
+        class: App\Grid\BarGrid
+        tags:
+            - sylius.invokable_grid:
+                  name: 'app_bar'
+                  resourceClass: 'App\Model\Bar'
+    app.grid.baz:
+        class: App\Grid\BazGrid
+        tags:
+            - sylius.invokable_grid: { name: app_baz, resourceClass: App\Model\Baz }
