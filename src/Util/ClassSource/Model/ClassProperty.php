@@ -33,6 +33,7 @@ final class ClassProperty
         public ?int $scale = null,
         public bool $needsTypeHint = true,
         public bool $unique = false,
+        public mixed $defaultValue = null,
         public ?string $enumType = null,
     ) {
     }
@@ -79,6 +80,7 @@ final class ClassProperty
                 precision: $data->precision,
                 scale: $data->scale,
                 unique: $data->unique ?? false,
+                defaultValue: $data->defaultValue ?? null,
                 enumType: $data->enumType,
             );
         }
@@ -99,6 +101,7 @@ final class ClassProperty
             precision: $data['precision'] ?? null,
             scale: $data['scale'] ?? null,
             unique: $data['unique'] ?? false,
+            defaultValue: $data['defaultValue'] ?? null,
             enumType: $data['enumType'] ?? null,
         );
     }

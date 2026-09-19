@@ -101,7 +101,6 @@ final class ClassSourceManipulator
         $nullable = $mapping->nullable ?? false;
 
         $attributes[] = $this->buildAttributeNode(Column::class, $mapping->getAttributes(), 'ORM');
-
         $defaultValue = null;
         $commentLines = [];
 
@@ -123,6 +122,8 @@ final class ClassSourceManipulator
             $defaultValue = new Node\Expr\Array_([], ['kind' => Node\Expr\Array_::KIND_SHORT]);
         } elseif ($typeHint && '\\' === $typeHint[0] && false !== strpos($typeHint, '\\', 1)) {
             $typeHint = $this->addUseStatementIfNecessary(substr($typeHint, 1));
+        } elseif ($mapping->defaultValue) {
+            $defaultValue = $mapping->defaultValue;
         }
 
         $propertyType = $typeHint;
