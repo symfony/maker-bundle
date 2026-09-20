@@ -1,0 +1,19 @@
+The <info>%command.name%</info> command generates CI/CD configuration files for your
+Symfony application.
+
+  <info>php %command.full_name%</info>
+
+The command inspects your <comment>composer.json</comment> and <comment>.env</comment> to detect installed tools
+(PHPUnit, PHP-CS-Fixer, PHPStan, Twig CS Fixer, Doctrine, etc.) and generates an
+appropriate CI workflow.
+
+You can specify the CI platform using the <comment>--platform</comment> option:
+
+  <info>php %command.full_name% --platform=github-actions</info>
+  <info>php %command.full_name% --platform=gitlab-ci</info>
+
+For <comment>GitHub Actions</comment>:
+  - <info>.github/workflows/ci.yaml</info>: workflow with lint, test, and analysis jobs
+
+For <comment>GitLab CI/CD</comment>:
+  - <info>.gitlab-ci.yml</info>: pipeline with lint and test stages

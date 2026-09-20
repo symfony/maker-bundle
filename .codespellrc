@@ -1,0 +1,4 @@
+[codespell]
+# The make-ci JSON schema fixtures are vendored verbatim from upstream
+# schema stores; exclude them from typo checks.
+skip = */tests/fixtures/make-ci/schemas/*

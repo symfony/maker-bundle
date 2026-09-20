@@ -12,6 +12,7 @@
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator;
+use Symfony\Bundle\MakerBundle\Maker\MakeCi;
 use Symfony\Bundle\MakerBundle\Maker\MakeCommand;
 use Symfony\Bundle\MakerBundle\Maker\MakeController;
 use Symfony\Bundle\MakerBundle\Maker\MakeCrud;
@@ -51,6 +52,10 @@ return static function (ContainerConfigurator $container) {
             service('maker.doctrine_helper'),
             service('maker.security_controller_builder'),
         ])
+        ->tag('maker.command');
+
+    $services->set('maker.maker.make_ci', MakeCi::class)
+        ->args([service('maker.file_manager')])
         ->tag('maker.command');
 
     $services->set('maker.maker.make_command', MakeCommand::class)
