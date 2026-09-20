@@ -735,7 +735,7 @@ final class ClassSourceManipulator
                     )
                 );
             } else {
-                throw new \Exception('Unknown relation type');
+                throw new \Exception('Unknown relation type.');
             }
         }
 
