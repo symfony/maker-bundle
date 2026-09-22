@@ -25,6 +25,8 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\ExecutableFinder;
+use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
@@ -68,11 +70,13 @@ final class MakerCommand extends Command
             $this->maker->configureDependencies($dependencies, $input);
 
             if ($missingPackagesMessage = $dependencies->getMissingPackagesMessage($this->getName())) {
-                if (!$input->isInteractive() || !$this->confirmPackagesInstallation($dependencies)) {
+                $composer = $this->findComposer();
+
+                if (!$input->isInteractive() || null === $composer || !$this->confirmPackagesInstallation($dependencies)) {
                     throw new RuntimeCommandException($missingPackagesMessage);
                 }
 
-                $this->installPackages($dependencies, $output);
+                $this->installPackages($composer, $dependencies, $output);
 
                 // the kernel of this process was built without the new packages, and running
                 // "composer require" corrupts its container cache, so the maker cannot go on here
@@ -156,14 +160,17 @@ final class MakerCommand extends Command
         return $this->io->confirm('Do you want to install these packages with Composer?');
     }
 
-    private function installPackages(DependencyBuilder $dependencies, OutputInterface $output): void
+    /**
+     * @param list<string> $composer The command that runs Composer, as found by findComposer()
+     */
+    private function installPackages(array $composer, DependencyBuilder $dependencies, OutputInterface $output): void
     {
         foreach ([[$dependencies->getMissingDependencies(), []], [$dependencies->getMissingDevDependencies(), ['--dev']]] as [$packages, $flags]) {
             if (!$packages) {
                 continue;
             }
 
-            $process = new Process(['composer', 'require', ...$flags, ...$packages]);
+            $process = new Process([...$composer, 'require', ...$flags, ...$packages]);
             $process->setTimeout(null);
 
             if (Process::isTtySupported()) {
@@ -180,17 +187,40 @@ final class MakerCommand extends Command
         }
     }
 
+    /**
+     * The command that runs Composer, or null when there is none to find: a project may rely on a
+     * global install, or ship its own phar, and offering to install packages is pointless without.
+     *
+     * @return list<string>|null
+     */
+    private function findComposer(): ?array
+    {
+        if ($composer = (new ExecutableFinder())->find('composer')) {
+            return [$composer];
+        }
+
+        foreach (['composer.phar', 'composer'] as $file) {
+            $path = $this->fileManager->getRootDirectory().'/'.$file;
+
+            if (is_file($path)) {
+                return [(new PhpExecutableFinder())->find() ?: \PHP_BINARY, $path];
+            }
+        }
+
+        return null;
+    }
+
     private function restart(): int
     {
         $argv = $_SERVER['argv'] ?? [];
 
         if (!$argv || !Process::isTtySupported()) {
-            $this->io->success(\sprintf('The packages are installed, run the %s command again.', $this->getName()));
+            $this->io->success(\sprintf('The packages are installed, run the "%s" command again.', $this->getName()));
 
             return 0;
         }
 
-        $process = new Process([\PHP_BINARY, ...$argv]);
+        $process = new Process([(new PhpExecutableFinder())->find() ?: \PHP_BINARY, ...$argv]);
         $process->setTimeout(null);
         $process->setTty(true);
 
