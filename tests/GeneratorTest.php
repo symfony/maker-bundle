@@ -15,6 +15,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Component\Finder\Finder;
 
 class GeneratorTest extends TestCase
 {
@@ -35,6 +36,23 @@ class GeneratorTest extends TestCase
 
         $this->assertSame($expectedFullClassName, $classNameDetails->getFullName());
         $this->assertSame($expectedRelativeClassName, $classNameDetails->getRelativeName());
+    }
+
+    public function testClassOfADependencyIsPrefixedRatherThanReused(): void
+    {
+        $fileManager = $this->createMock(FileManager::class);
+        $fileManager->expects($this->any())
+            ->method('getNamespacePrefixForClass')
+            ->willReturn('Foo');
+        $fileManager->expects($this->once())
+            ->method('isPathInVendor')
+            ->willReturn(true);
+
+        $generator = new Generator($fileManager, 'App\\');
+
+        $classNameDetails = $generator->createClassNameDetails(Finder::class, 'Entity');
+
+        $this->assertSame('App\\Entity\\Symfony\\Component\\Finder\\Finder', $classNameDetails->getFullName());
     }
 
     public static function getClassNameDetailsTests(): \Generator
@@ -77,6 +95,15 @@ class GeneratorTest extends TestCase
             '',
             'App\\Entity\\User',
             'User',
+        ];
+
+        // "Directory" is a class of the PHP core, so the bare name must still be prefixed
+        yield 'bare_name_of_an_existing_class' => [
+            'Directory',
+            'Entity',
+            '',
+            'App\\Entity\\Directory',
+            'Directory',
         ];
 
         yield 'non_prefixed_fake_fqcn' => [

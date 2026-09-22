@@ -187,10 +187,11 @@ class Generator
         } else {
             $className = Str::asClassName($name, $suffix);
 
-            try {
-                Validator::classDoesNotExist($className);
+            // Only a name carrying a namespace can be the class the user means. A bare one is a
+            // short name to prefix, even when a class of the same name exists, as "Directory"
+            // and "Locale" do.
+            if (!str_contains($name, '\\') || !$this->isExistingProjectClass($className)) {
                 $className = rtrim($fullNamespacePrefix, '\\').'\\'.$className;
-            } catch (RuntimeCommandException) {
             }
         }
 
@@ -203,6 +204,21 @@ class Generator
         }
 
         return new ClassNameDetails($className, $fullNamespacePrefix, $suffix);
+    }
+
+    /**
+     * Whether the class exists and belongs to the project, as opposed to a dependency or to PHP
+     * itself: the generator writes to the file it resolves, and it has no business editing those.
+     */
+    private function isExistingProjectClass(string $className): bool
+    {
+        if (!class_exists($className)) {
+            return false;
+        }
+
+        $fileName = (new \ReflectionClass($className))->getFileName();
+
+        return false !== $fileName && !$this->fileManager->isPathInVendor($fileName);
     }
 
     public function getRootDirectory(): string
