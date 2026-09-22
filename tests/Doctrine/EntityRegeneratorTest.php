@@ -173,10 +173,14 @@ class TestEntityRegeneratorKernel extends Kernel
                     'type' => 'attribute',
                 ],
             ],
-            'controller_resolver' => [
-                'auto_mapping' => false,
-            ],
         ];
+
+        if (InstalledVersions::satisfies(new VersionParser(), 'doctrine/doctrine-bundle', '<3.1')) {
+            // Deprecated since doctrine-bundle 3.1 and only accepts false since 3.0
+            $orm['controller_resolver'] = [
+                'auto_mapping' => false,
+            ];
+        }
 
         if (InstalledVersions::satisfies(new VersionParser(), 'doctrine/doctrine-bundle', '^2.8')) {
             $orm['enable_lazy_ghost_objects'] = true;
