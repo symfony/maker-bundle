@@ -32,6 +32,9 @@ jobs:
                     MERCURE_EXTRA_DIRECTIVES: |
                         anonymous
                         cors_origins *
+                        # Mercure 1.0 wraps the JWT keys in an issuer block, so it refuses the
+                        # tokens symfony/mercure mints from a shared secret, which carry no iss.
+                        protocol_version_compatibility 8
                 ports:
                     - 1337:1337
 
