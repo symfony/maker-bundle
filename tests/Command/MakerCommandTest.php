@@ -22,7 +22,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class MakerCommandTest extends TestCase
 {
-    public function testExceptionOnMissingDependencies()
+    public function testExceptionOnMissingDependencies(): void
     {
         $this->expectException(RuntimeCommandException::class);
         // @phpstan-ignore function.alreadyNarrowedType
@@ -47,7 +47,7 @@ class MakerCommandTest extends TestCase
         $tester->execute([], ['interactive' => false]);
     }
 
-    public function testExceptionWhenTheInstallationOfMissingDependenciesIsDeclined()
+    public function testExceptionWhenTheInstallationOfMissingDependenciesIsDeclined(): void
     {
         $maker = $this->createMock(MakerInterface::class);
         $maker
@@ -83,7 +83,7 @@ class MakerCommandTest extends TestCase
         self::assertStringContainsString('Do you want to install these packages with Composer?', $display);
     }
 
-    public function testExceptionOnUnknownRootNamespace()
+    public function testExceptionOnUnknownRootNamespace(): void
     {
         $maker = $this->createMock(MakerInterface::class);
 
