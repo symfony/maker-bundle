@@ -1002,6 +1002,8 @@ class YamlSourceManipulator
      */
     private function guessNextArrayTypeAndAdvance(): string
     {
+        $startPosition = $this->currentPosition;
+
         while (true) {
             if ($this->isEOF()) {
                 throw new \LogicException('Could not determine array type.');
@@ -1021,6 +1023,20 @@ class YamlSourceManipulator
 
             if ('[' === $nextCharacter || '{' === $nextCharacter) {
                 return self::ARRAY_FORMAT_INLINE;
+            }
+
+            if (' ' !== $nextCharacter && '-' !== $nextCharacter) {
+                // A sequence item may be a one-key hash written on the dash
+                // line, with its value nested below, e.g.:
+                //     tags:
+                //         - some.tag.name:
+                //                 attribute: value
+                // That key has not been consumed yet, so rewind and let the
+                // normal per-key logic find it. Without rewinding, a later
+                // lookup could match an unrelated occurrence of the same key.
+                $this->currentPosition = $startPosition;
+
+                return self::ARRAY_FORMAT_MULTILINE;
             }
         }
     }
