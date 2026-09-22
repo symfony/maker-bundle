@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\ORM\EntityManagerInterface;
 use PhpParser\Builder\Param;
+use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Twig\AppVariable;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -442,7 +443,7 @@ class MakeResetPassword extends AbstractMaker
                 ],
             );
 
-            if (!class_exists(WebTestCase::class)) {
+            if (!class_exists(TestCase::class)) {
                 $io->caution('You\'ll need to install the `symfony/test-pack` to execute the tests for your new controller.');
             }
         }
