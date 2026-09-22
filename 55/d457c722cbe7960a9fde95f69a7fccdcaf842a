@@ -1,0 +1,9 @@
+---------------------------------------------------------------------------
+
+by Amoifr at 2026-09-21T12:39:14Z
+
+The red here is not from this change. The same five checks fail on #1837, which touches something else entirely, and the two test failures are `it_makes_new_entity_with_mercure_broadcast` and `it_makes_serializer_encoder_legacy`, neither of which goes near `createClassNameDetails()`.
+
+The Mercure one comes from the untagged `dunglas/mercure` service now running 1.0, which refuses the tokens `symfony/mercure` mints. I opened #1839 for it, with the reproduction and a one line fix.
+
+Fabbot is the `: void` patch it wants on 43 files, as noted in the description.
