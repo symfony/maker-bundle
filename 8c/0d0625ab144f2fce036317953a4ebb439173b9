@@ -1,0 +1,170 @@
+---------------------------------------------------------------------------
+
+by wachterjohannes at 2026-09-21T19:28:28Z
+
+Thanks for working on this! Two things from the `--no-interaction` series (#1810 to #1826), then some smaller finds.
+
+The answers live in properties again, set in `interact()` and read in `generate()`. That is exactly the shape we just removed from every other maker. PHP version, branch and database cannot be passed on the CLI at all. Make them options, let `interact()` only ask for what is missing, and let `generate()` read the input. That also collapses the duplicated logic in `buildProfile()`.
+
+`--no-interaction` without `--platform` silently generates GitHub Actions. The platform is a fork in the output. I would fail and name the option, or guess only from an existing `.github/` or `.gitlab-ci.yml`.
+
+Also worth a look: a rerun seems to overwrite a hand-edited CI file (`dependabot.yml` is guarded with `fileExists()`, the two CI files are not). Doctrine is only detected as `doctrine/orm`, so an unexpanded `symfony/orm-pack` gets a CI without a database, while the test pack is handled. And since no fixture has Doctrine, the database blocks of both templates are never generated in any test.
+
+On scope that is already settled. One maintenance thought though: pinned actions and CI syntax age faster than PHP templates, so in a tagged release these files start aging on day one. Something to keep in mind for how often this needs a refresh.
+
+---------------------------------------------------------------------------
+
+by seb-jean at 2026-09-22T06:05:44Z
+
+I have just created two repositories based on the [Symfony Demo](https://github.com/symfony/demo):
+- GitHub: https://github.com/seb-jean/symfony-demo-ci
+- GitLab: https://gitlab.com/sebastien.jean76/symfony-demo-ci
+
+I am encountering a different error for each of the two repositories.
+
+- GitLab: https://gitlab.com/sebastien.jean76/symfony-demo-ci/-/jobs/16644425793
+- GitHub: https://github.com/seb-jean/symfony-demo-ci/actions/runs/35693023197/job/106633850546
+
+**GitHub**
+```
+# Setup database
+
+Run php bin/console doctrine:database:create --if-not-exists
+
+In NotSupported.php line 15:
+
+  Operation "Doctrine\DBAL\Platforms\AbstractPlatform::getListDatabasesSQL" i
+  s not supported by platform.
+
+doctrine:database:create [-c|--connection CONNECTION] [--if-not-exists]
+
+Error: Process completed with exit code 1.
+```
+
+**GitLab**
+```
+[...]
+Executing script sass:build [OK]
+$ mkdir -p var/tmp
+$ TMPDIR="$CI_PROJECT_DIR/var/tmp" vendor/bin/phpstan analyse --no-progress
+Note: Using configuration file /builds/sebastien.jean76/symfony-demo-ci/phpstan.dist.neon.
+ -- ---------------------------------------------------------------------------
+     Error
+ -- ---------------------------------------------------------------------------
+     Child process error (exit code 255): Fatal error: Allowed memory size of
+     134217728 bytes exhausted (tried to allocate 20480 bytes) in
+     phar:///builds/sebastien.jean76/symfony-demo-ci/vendor/phpstan/phpstan/ph
+     pstan.phar/vendor/nikic/php-parser/lib/PhpParser/ParserAbstract.php on
+     line 417
+     Fatal error: Allowed memory size of 134217728 bytes exhausted (tried to
+     allocate 20480 bytes) in
+     phar:///builds/sebastien.jean76/symfony-demo-ci/vendor/phpstan/phpstan/ph
+     pstan.phar/src/Command/CommandHelper.php on line 119
+      while running parallel worker
+ -- ---------------------------------------------------------------------------
+ [ERROR] Found 1 error
+⚠️  Result is incomplete because of severe errors. ⚠️
+   Fix these errors first and then re-run PHPStan
+   to get all reported errors.
+Cleaning up project directory and file based variables
+00:01
+ERROR: Job failed: exit code 1
+```
+
+---------------------------------------------------------------------------
+
+by seb-jean at 2026-09-22T06:34:41Z
+
+> I have just created two repositories based on the [Symfony Demo](https://github.com/symfony/demo):
+>
+> * GitHub: https://github.com/seb-jean/symfony-demo-ci
+> * GitLab: https://gitlab.com/sebastien.jean76/symfony-demo-ci
+>
+> I am encountering a different error for each of the two repositories.
+>
+> * GitLab: https://gitlab.com/sebastien.jean76/symfony-demo-ci/-/jobs/16644425793
+> * GitHub: https://github.com/seb-jean/symfony-demo-ci/actions/runs/35693023197/job/106633850546
+>
+> **GitHub**
+>
+> ```
+> # Setup database
+>
+> Run php bin/console doctrine:database:create --if-not-exists
+>
+> In NotSupported.php line 15:
+>
+>   Operation "Doctrine\DBAL\Platforms\AbstractPlatform::getListDatabasesSQL" i
+>   s not supported by platform.
+>
+>
+> doctrine:database:create [-c|--connection CONNECTION] [--if-not-exists]
+>
+> Error: Process completed with exit code 1.
+> ```
+>
+> **GitLab**
+>
+> ```
+> [...]
+> Executing script sass:build [OK]
+> $ mkdir -p var/tmp
+> $ TMPDIR="$CI_PROJECT_DIR/var/tmp" vendor/bin/phpstan analyse --no-progress
+> Note: Using configuration file /builds/sebastien.jean76/symfony-demo-ci/phpstan.dist.neon.
+>  -- ---------------------------------------------------------------------------
+>      Error
+>  -- ---------------------------------------------------------------------------
+>      Child process error (exit code 255): Fatal error: Allowed memory size of
+>      134217728 bytes exhausted (tried to allocate 20480 bytes) in
+>      phar:///builds/sebastien.jean76/symfony-demo-ci/vendor/phpstan/phpstan/ph
+>      pstan.phar/vendor/nikic/php-parser/lib/PhpParser/ParserAbstract.php on
+>      line 417
+>      Fatal error: Allowed memory size of 134217728 bytes exhausted (tried to
+>      allocate 20480 bytes) in
+>      phar:///builds/sebastien.jean76/symfony-demo-ci/vendor/phpstan/phpstan/ph
+>      pstan.phar/src/Command/CommandHelper.php on line 119
+>       while running parallel worker
+>  -- ---------------------------------------------------------------------------
+>  [ERROR] Found 1 error
+> ⚠️  Result is incomplete because of severe errors. ⚠️
+>    Fix these errors first and then re-run PHPStan
+>    to get all reported errors.
+> Cleaning up project directory and file based variables
+> 00:01
+> ERROR: Job failed: exit code 1
+> ```
+
+Fixed
+
+---------------------------------------------------------------------------
+
+by lyrixx at 2026-09-22T07:01:12Z
+
+There is so many different way to run CI:
+
+* docker or not,
+* services hosted by the CI or not,
+* tools installed by the main composer.json, in tools/xxx/composer.json, by a a docker images
+* etc
+
+I'm pretty sure LLM are way better at creating a ci.yml than the maker bundle
+
+---------------------------------------------------------------------------
+
+by seb-jean at 2026-09-22T07:21:24Z
+
+@wachterjohannes, I made improvements based on your review.
+
+---------------------------------------------------------------------------
+
+by wachterjohannes at 2026-09-22T20:41:06Z
+
+Thanks, that was fast! The options, the platform error and the orm-pack detection all look right, and the database cases close the biggest test gap. One correction on my side: `Generator::generateFile()` already refuses existing files, so nothing was ever silently overwritten. Good that the test pins that behavior down now. From my side this is in good shape.
+
+---------------------------------------------------------------------------
+
+by wachterjohannes at 2026-09-22T20:42:53Z
+
+I'd say both are true. For anything custom an agent wins, no question. But for the boring standard skeleton I like the deterministic version: schema-validated output, pinned actions, nothing hallucinated. And they combine nicely, an agent can run `make:ci` and edit from there. That's why `--no-interaction` matters so much to me.
+
+That combination is exactly what I'm playing with in https://github.com/wachterjohannes/symfony-skills: a small skill would tell the agent to run `make:ci` with the right options instead of writing YAML from memory, and to touch the result only where the project differs from the standard. This maker would slot right in.
