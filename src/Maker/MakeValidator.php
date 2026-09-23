@@ -17,6 +17,7 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -52,8 +53,14 @@ final class MakeValidator extends AbstractMaker
     /** @return void */
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
+        $validatorName = $input->getArgument('name');
+
+        if (null !== $validatorName) {
+            Validator::validateClassName($validatorName, \sprintf('The validator name "%s" is not a valid class name.', $validatorName));
+        }
+
         $validatorClassData = ClassData::create(
-            class: \sprintf('Validator\\%s', $input->getArgument('name')),
+            class: \sprintf('Validator\\%s', $validatorName),
             suffix: 'Validator',
             extendsClass: ConstraintValidator::class,
             useStatements: [

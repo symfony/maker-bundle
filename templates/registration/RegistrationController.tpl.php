@@ -33,7 +33,7 @@ class <?= $class_name; ?> extends AbstractController
             // generate a signed url and email it to the user
             $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                 (new TemplatedEmail())
-                    ->from(new Address('<?= $from_email ?>', '<?= $from_email_name ?>'))
+                    ->from(new Address('<?= $from_email ?>', '<?= addslashes($from_email_name) ?>'))
                     ->to((string) $user-><?= $email_getter ?>())
                     ->subject('Please Confirm your Email')
                     ->htmlTemplate('registration/confirmation_email.html.twig')

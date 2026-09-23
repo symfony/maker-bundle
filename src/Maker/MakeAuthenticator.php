@@ -227,6 +227,14 @@ final class MakeAuthenticator extends AbstractMaker
         $supportRememberMe = $input->hasArgument('support-remember-me') ? $input->getArgument('support-remember-me') : false;
         $alwaysRememberMe = $input->hasArgument('always-remember-me') && self::REMEMBER_ME_TYPE_ALWAYS === $input->getArgument('always-remember-me');
 
+        if (null !== $input->getArgument('authenticator-class')) {
+            $input->setArgument('authenticator-class', Validator::validateClassName($input->getArgument('authenticator-class')));
+        }
+
+        if ($input->hasArgument('username-field') && null !== $input->getArgument('username-field')) {
+            $input->setArgument('username-field', Validator::validatePhpStringLiteral($input->getArgument('username-field'), \sprintf('The username field "%s" cannot contain quotes or backslashes.', $input->getArgument('username-field'))));
+        }
+
         $this->generateAuthenticatorClass(
             $securityData,
             $input->getArgument('authenticator-type'),

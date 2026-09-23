@@ -19,6 +19,7 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -123,6 +124,10 @@ final class MakeSchedule extends AbstractMaker
 
         $scheduleName = $input->getOption('schedule-name') ?: self::getDefaultScheduleName($message);
         $transportName = $input->getOption('transport-name') ?: null;
+
+        if (null !== $transportName) {
+            $transportName = Validator::validatePhpStringLiteral($transportName, \sprintf('The "--transport-name" value "%s" cannot contain quotes or backslashes.', $transportName));
+        }
 
         $scheduleClassDetails = $generator->createClassNameDetails(
             $scheduleName,
