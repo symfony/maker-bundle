@@ -411,6 +411,20 @@ class ClassSourceManipulatorTest extends TestCase
                 isNullable: true,
             ),
         ];
+
+        // A non-nullable, unidirectional ManyToOne has no inverse remove*()
+        // setting the owning side back to null, so its setter can be strict.
+        yield 'many_to_one_not_nullable_no_inverse' => [
+            'User_simple.php',
+            'User_simple_not_nullable_no_inverse.php',
+            new RelationManyToOne(
+                propertyName: 'category',
+                targetClassName: \App\Entity\Category::class,
+                targetPropertyName: 'foods',
+                mapInverseRelation: false,
+                isOwning: true,
+            ),
+        ];
     }
 
     /**
