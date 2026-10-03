@@ -24,7 +24,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\KernelEvents;
 
 trigger_deprecation('symfony/maker-bundle', '1.51', 'The "%s" class is deprecated, use "%s" instead.', MakeSubscriber::class, MakeListener::class);
 
@@ -92,12 +91,20 @@ final class MakeSubscriber extends AbstractMaker
             EventSubscriberInterface::class,
         ]);
 
-        // Determine if we use a KernelEvents::CONSTANT or custom even name
-        if (null !== ($eventConstant = $this->getEventConstant($event))) {
-            $useStatements->addUseStatement(KernelEvents::class);
-            $eventName = $eventConstant;
+        if (null !== $eventConstant = $this->eventRegistry->getEventConstant($event)) {
+            // Form events are dispatched by the form's own dispatcher, which is not
+            // configured with the event aliases: they must be referenced by their constant.
+            [$eventConstantClass, $eventConstantName] = $eventConstant;
+            $useStatements->addUseStatement($eventConstantClass);
+            $eventName = \sprintf('%s::%s', Str::getShortClassName($eventConstantClass), $eventConstantName);
+            $methodName = Str::asEventMethod($eventClassName ?? $event);
+        } elseif (class_exists($event) || $this->eventRegistry->isKnownEvent($event)) {
+            // Known events have a registered alias, so they can be referenced by their class.
+            $eventName = \sprintf('%s::class', $eventClassName);
+            $methodName = Str::asEventMethod($eventClassName ?? $event);
         } else {
-            $eventName = class_exists($event) ? \sprintf('%s::class', $eventClassName) : \sprintf('\'%s\'', $event);
+            $eventName = \sprintf('\'%s\'', $event);
+            $methodName = Str::asEventMethod($event);
         }
 
         if (null !== $eventFullClassName) {
@@ -111,7 +118,7 @@ final class MakeSubscriber extends AbstractMaker
                 'use_statements' => $useStatements,
                 'event' => $eventName,
                 'event_arg' => $eventClassName ? \sprintf('%s $event', $eventClassName) : '$event',
-                'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
+                'method_name' => $methodName,
             ]
         );
 
@@ -127,16 +134,5 @@ final class MakeSubscriber extends AbstractMaker
 
     public function configureDependencies(DependencyBuilder $dependencies): void
     {
-    }
-
-    private function getEventConstant(string $event): ?string
-    {
-        $constants = (new \ReflectionClass(KernelEvents::class))->getConstants();
-
-        if (false !== ($name = array_search($event, $constants, true))) {
-            return \sprintf('KernelEvents::%s', $name);
-        }
-
-        return null;
     }
 }
