@@ -93,6 +93,19 @@ class EventRegistryTest extends TestCase
         $registry = new EventRegistry($dispatcher);
         $this->assertSame(ControllerEvent::class, $registry->getEventClassName(ControllerEvent::class));
     }
+
+    public function testIsKnownEventOnlyReturnsTrueForAliasedEvents()
+    {
+        $dispatcher = $this->createMock(EventDispatcherInterface::class);
+        $dispatcher->expects($this->never())
+            ->method('getListeners');
+
+        $registry = new EventRegistry($dispatcher);
+        $this->assertTrue($registry->isKnownEvent('console.command'));
+        $this->assertTrue($registry->isKnownEvent(KernelEvents::EXCEPTION));
+        $this->assertFalse($registry->isKnownEvent('order.placed'));
+        $this->assertFalse($registry->isKnownEvent(ControllerEvent::class));
+    }
 }
 
 class DummyEvent

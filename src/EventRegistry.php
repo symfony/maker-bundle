@@ -25,6 +25,7 @@ use Symfony\Component\Workflow\WorkflowEvents;
 class EventRegistry
 {
     private static array $eventsMap = [];
+    private static array $listenerEventClasses = [];
 
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
@@ -37,6 +38,7 @@ class EventRegistry
             ...(class_exists(WorkflowEvents::class) ? WorkflowEvents::ALIASES : []),
             ...(class_exists(FormEvents::class) ? FormEvents::ALIASES : []),
         ]);
+        self::$listenerEventClasses = [];
     }
 
     /**
@@ -57,7 +59,7 @@ class EventRegistry
 
         foreach (array_keys($listeners) as $listenerKey) {
             if (!isset(self::$eventsMap[$listenerKey])) {
-                self::$eventsMap[$listenerKey] = $this->getEventClassName($listenerKey);
+                self::$listenerEventClasses[$listenerKey] = $this->getEventClassName($listenerKey);
             }
         }
 
@@ -66,6 +68,18 @@ class EventRegistry
         asort($activeEvents);
 
         return $activeEvents;
+    }
+
+    /**
+     * Tells whether the event name is a known event of a Symfony component.
+     *
+     * Unlike getEventClassName(), this does not resolve events through the
+     * registered listeners, so it only returns true for events that have a
+     * registered alias. Those events can safely be referenced by their class.
+     */
+    public function isKnownEvent(string $event): bool
+    {
+        return isset(self::$eventsMap[$event]);
     }
 
     /**
@@ -116,7 +130,7 @@ class EventRegistry
     public function listActiveEvents(array $events): array
     {
         foreach ($events as $key => $event) {
-            $events[$key] = \sprintf('%s (<fg=yellow>%s</>)', $event, self::$eventsMap[$event]);
+            $events[$key] = \sprintf('%s (<fg=yellow>%s</>)', $event, self::$eventsMap[$event] ?? self::$listenerEventClasses[$event] ?? '');
         }
 
         return $events;

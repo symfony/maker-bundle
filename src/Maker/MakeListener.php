@@ -27,7 +27,6 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -105,7 +104,7 @@ final class MakeListener extends AbstractMaker
         }
 
         $event = $input->getArgument('event');
-        if (null === $this->getEventConstant($event) && null === $this->eventRegistry->getEventClassName($event)) {
+        if (null === $this->eventRegistry->getEventClassName($event)) {
             $eventList = $this->eventRegistry->getAllActiveEvents();
             $eventFQCNList = array_filter(array_map($this->eventRegistry->getEventClassName(...), $eventList), static fn ($eventFQCN) => \is_string($eventFQCN));
             $eventIdAndFQCNList = array_unique(array_merge($eventList, $eventFQCNList));
@@ -153,7 +152,8 @@ final class MakeListener extends AbstractMaker
         $eventFullClassName = $this->eventRegistry->getEventClassName($event);
         $eventClassName = $eventFullClassName ? Str::getShortClassName($eventFullClassName) : null;
 
-        if ($this->getEventConstant($event)) {
+        // Only known events have a registered alias, so only they can be referenced by their class.
+        if (null !== $eventFullClassName && $this->eventRegistry->isKnownEvent($event)) {
             $event = $eventFullClassName;
         }
 
@@ -173,17 +173,6 @@ final class MakeListener extends AbstractMaker
     /** @return void */
     public function configureDependencies(DependencyBuilder $dependencies)
     {
-    }
-
-    private function getEventConstant(string $event): ?string
-    {
-        $constants = (new \ReflectionClass(KernelEvents::class))->getConstants();
-
-        if (false !== ($name = array_search($event, $constants, true))) {
-            return \sprintf('KernelEvents::%s', $name);
-        }
-
-        return null;
     }
 
     private function generateSubscriberClass(InputInterface $input, ConsoleStyle $io, Generator $generator, UseStatementGenerator $useStatements, string $event, string $eventName, ?string $eventClassName): void
