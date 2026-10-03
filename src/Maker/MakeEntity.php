@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Maker;
 
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -735,7 +736,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $otherManipulator = $manipulator;
         } else {
             $otherManipulatorFilename = $this->getPathOfClass($newField->getInverseClass());
-            $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
+            $otherManipulator = $fileManagerOperations[$otherManipulatorFilename] ?? $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
         }
         switch ($newField->getType()) {
             case EntityRelation::MANY_TO_ONE:
@@ -750,7 +751,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                     // the new field being added to THIS entity is the inverse
                     $newFieldName = $newField->getInverseProperty();
                     $otherManipulatorFilename = $this->getPathOfClass($newField->getOwningClass());
-                    $otherManipulator = $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
+                    $otherManipulator = $fileManagerOperations[$otherManipulatorFilename] ?? $this->createClassManipulator($otherManipulatorFilename, $io, $overwrite);
 
                     // The *other* class will receive the ManyToOne
                     $otherManipulator->addManyToOneRelation($newField->getOwningRelation());
@@ -808,7 +809,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             throw new RuntimeCommandException('A ManyToMany relationship with additional properties between an entity and itself is not currently supported.');
         }
 
-        $associationClassDetails = $this->generator->createClassNameDetails(
+        $associationClassDetails = $generator->createClassNameDetails(
             Str::getShortClassName($owningClass).Str::getShortClassName($targetClass),
             'Entity\\'
         );
@@ -836,6 +837,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         $associationManipulator = $this->createClassManipulator($associationPath, $io, $overwrite);
+        $fileManagerOperations[$associationPath] = $associationManipulator;
 
         // the owning side of the original relationship gets a ManyToOne to the association entity,
         // and the association entity gets the inverse OneToMany
@@ -857,17 +859,19 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         $targetPath = $this->getPathOfClass($targetClass);
         $targetManipulator = $this->createClassManipulator($targetPath, $io, $overwrite);
+        $fileManagerOperations[$targetPath] = $targetManipulator;
 
         $associationManipulator->addManyToOneRelation($targetRelation->getOwningRelation());
         $targetManipulator->addOneToManyRelation($targetRelation->getInverseRelation());
 
         // now ask for the additional properties the association entity should hold
-        $associationFields = $associationExists
-            ? $this->getPropertyNames($associationClassDetails->getFullName())
-            : [$ownerPropertyName, $targetPropertyName];
+        $associationFields = array_values(array_unique(array_merge(
+            $associationExists ? $this->getPropertyNames($associationClassDetails->getFullName()) : [],
+            [$ownerPropertyName, $targetPropertyName]
+        )));
         $isFirstAssociationField = true;
         while (true) {
-            $associationField = $this->askForNextField($io, $associationFields, $associationClassDetails->getFullName(), $isFirstAssociationField);
+            $associationField = $this->askForNextField($io, $associationFields, $associationClassDetails->getFullName(), $isFirstAssociationField, false);
             $isFirstAssociationField = false;
 
             if (null === $associationField) {
@@ -877,28 +881,23 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             if ($associationField instanceof ClassProperty) {
                 $associationManipulator->addEntityField($associationField);
                 $associationFields[] = $associationField->propertyName;
-            } elseif ($associationField instanceof EntityRelation) {
-                $associationFields[] = $this->applyEntityRelation($associationField, $associationManipulator, $associationPath, $associationClassDetails, $io, $overwrite, $fileManagerOperations);
             } else {
-                throw new RuntimeCommandException('A ManyToMany relationship with additional properties cannot itself have another such relationship.');
+                $associationFields[] = $this->applyEntityRelation($associationField, $associationManipulator, $associationPath, $associationClassDetails, $io, $overwrite, $fileManagerOperations);
             }
         }
 
-        if (!$associationExists) {
+        if (!$associationExists || !(new \ReflectionClass($associationClassDetails->getFullName()))->getAttributes(UniqueConstraint::class)) {
             $associationManipulator->addAttributeToClass('ORM\\UniqueConstraint', [
                 'name' => Str::asSnakeCase($associationClassDetails->getShortName()).'_unique',
                 'fields' => [$ownerPropertyName, $targetPropertyName],
             ]);
         }
 
-        $fileManagerOperations[$associationPath] = $associationManipulator;
-        $fileManagerOperations[$targetPath] = $targetManipulator;
-
         return $inversePropertyName;
     }
 
     /** @param string[] $fields */
-    private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField): EntityRelation|ClassProperty|ManyToManyAssociationRequest|null
+    private function askForNextField(ConsoleStyle $io, array $fields, string $entityClass, bool $isFirstField, bool $allowAssociationEntity = true): EntityRelation|ClassProperty|ManyToManyAssociationRequest|null
     {
         $io->writeln('');
 
@@ -955,7 +954,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         }
 
         if ('relation' === $type || \in_array($type, EntityRelation::getValidRelationTypes())) {
-            return $this->askRelationDetails($io, $entityClass, $type, $fieldName);
+            return $this->askRelationDetails($io, $entityClass, $type, $fieldName, $allowAssociationEntity);
         }
 
         // this is a normal field
@@ -1135,7 +1134,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         return $question;
     }
 
-    private function askRelationDetails(ConsoleStyle $io, string $generatedEntityClass, string $type, string $newFieldName): EntityRelation|ManyToManyAssociationRequest
+    private function askRelationDetails(ConsoleStyle $io, string $generatedEntityClass, string $type, string $newFieldName, bool $allowAssociationEntity = true): EntityRelation|ManyToManyAssociationRequest
     {
         // ask the targetEntity
         $targetEntityClass = null;
@@ -1308,7 +1307,8 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             case EntityRelation::MANY_TO_MANY:
                 // self-referencing associations, and associations to a vendor class we
                 // cannot modify, are not offered the additional-properties workflow
-                if ($generatedEntityClass !== $targetEntityClass
+                if ($allowAssociationEntity
+                    && $generatedEntityClass !== $targetEntityClass
                     && !$this->isClassInVendor($targetEntityClass)
                     && $io->confirm('Does this relationship have additional properties (e.g. a "role" or "joinedAt" field)?', false)
                 ) {

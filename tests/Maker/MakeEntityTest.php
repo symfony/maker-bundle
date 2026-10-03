@@ -675,6 +675,93 @@ class MakeEntityTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_adds_the_unique_constraint_to_an_existing_association_entity_without_one' => [self::createMakeEntityTest(withDatabase: false)
+            ->run(static function (MakerTestRunner $runner) {
+                self::copyEntity($runner, 'User-basic.php');
+                self::copyEntity($runner, 'Group-basic.php');
+                self::copyEntity($runner, 'UserGroup-no-unique.php');
+
+                $runner->runMaker([
+                    'User',
+                    'groups',
+                    'relation',
+                    'Group',
+                    'ManyToMany',
+                    // additional properties?
+                    'y',
+                    // stop adding properties on UserGroup
+                    '',
+                    // finish adding fields on User
+                    '',
+                ]);
+
+                $userGroupSource = file_get_contents($runner->getPath('src/Entity/UserGroup.php'));
+                self::assertSame(1, substr_count($userGroupSource, '#[ORM\UniqueConstraint('));
+            }),
+        ];
+
+        yield 'it_rejects_the_owner_property_name_on_an_existing_association_entity_lacking_it' => [self::createMakeEntityTest(withDatabase: false)
+            ->run(static function (MakerTestRunner $runner) {
+                self::copyEntity($runner, 'User-basic.php');
+                self::copyEntity($runner, 'Group-basic.php');
+                self::copyEntity($runner, 'UserGroup-no-user.php');
+
+                $output = $runner->runMaker([
+                    'User',
+                    'groups',
+                    'relation',
+                    'Group',
+                    'ManyToMany',
+                    // additional properties?
+                    'y',
+                    // [UserGroup] reserved by the owning side, even if not on disk yet
+                    'user',
+                    // stop adding properties on UserGroup
+                    '',
+                    // finish adding fields on User
+                    '',
+                ]);
+
+                self::assertStringContainsString('The "user" property already exists.', $output);
+            }),
+        ];
+
+        yield 'it_keeps_inverse_side_changes_made_from_the_association_entity' => [self::createMakeEntityTest(withDatabase: false)
+            ->run(static function (MakerTestRunner $runner) {
+                self::copyEntity($runner, 'User-basic.php');
+                self::copyEntity($runner, 'Group-basic.php');
+
+                $runner->runMaker([
+                    'User',
+                    'groups',
+                    'relation',
+                    'Group',
+                    'ManyToMany',
+                    // additional properties?
+                    'y',
+                    // [UserGroup] a relation whose inverse side lands on Group
+                    'invitedIn',
+                    'relation',
+                    'Group',
+                    'ManyToOne',
+                    // nullable?
+                    'y',
+                    // inverse side?
+                    'y',
+                    // field name on Group
+                    'invitations',
+                    // stop adding properties on UserGroup
+                    '',
+                    // finish adding fields on User
+                    '',
+                ]);
+
+                $groupSource = file_get_contents($runner->getPath('src/Entity/Group.php'));
+                self::assertStringContainsString('private Collection $userGroups;', $groupSource);
+                self::assertStringContainsString('private Collection $invitations;', $groupSource);
+            }),
+        ];
+
         yield 'it_adds_one_to_one_simple' => [self::createMakeEntityTest()
             ->run(static function (MakerTestRunner $runner) {
                 self::copyEntity($runner, 'User-basic.php');
