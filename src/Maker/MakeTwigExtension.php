@@ -49,19 +49,15 @@ final class MakeTwigExtension extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-        $twigExtensionName = $input->getArgument('name');
-
-        if (null !== $twigExtensionName) {
-            Validator::validateClassName($twigExtensionName, \sprintf('The Twig extension name "%s" is not a valid class name.', $twigExtensionName));
-        }
+        $extensionClass = \sprintf('Twig\%s', $input->getArgument('name'));
 
         $extensionClassData = ClassData::create(
-            class: \sprintf('Twig\%s', $twigExtensionName),
+            class: Validator::validateClassName($extensionClass, \sprintf('The Twig extension class "%s" is not a valid class name.', $extensionClass)),
             suffix: 'Extension',
             useStatements: [
                 AsTwigFilter::class,
                 AsTwigFunction::class,
-            ]
+            ],
         );
 
         $generator->generateClassFromClassData(

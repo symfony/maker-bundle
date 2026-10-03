@@ -57,7 +57,7 @@ final class MakeSerializerEncoder extends AbstractMaker
         );
         $format = $input->getArgument('format');
 
-        if (null !== $format) {
+        if ($format) {
             $format = Validator::validatePhpStringLiteral($format, \sprintf('The format "%s" cannot contain quotes or backslashes.', $format));
         }
 

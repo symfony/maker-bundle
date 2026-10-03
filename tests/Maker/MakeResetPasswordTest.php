@@ -376,6 +376,30 @@ class MakeResetPasswordTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_rejects_invalid_options_non_interactively' => [self::buildMakerTest()
+            // @legacy - drop skipped versions when PHP 8.1 is no longer supported.
+            ->setSkippedPhpVersions(80100, 80109)
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $invalid = [
+                    '--no-interaction --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --email-field="em ail"' => 'The "--email-field" value "em ail" is not a valid PHP property name.',
+                    '--no-interaction --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --email-getter="get@Email"' => 'The "--email-getter" value "get@Email" is not a valid PHP method name.',
+                    '--no-interaction --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --password-setter="set word"' => 'The "--password-setter" value "set word" is not a valid PHP method name.',
+                    '--no-interaction --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --success-redirect-route="app\'home"' => 'The "--success-redirect-route" value "app\'home" cannot contain quotes or backslashes.',
+                ];
+
+                foreach ($invalid as $arguments => $expectedError) {
+                    $output = $runner->runMaker([], $arguments, allowedToFail: true);
+
+                    // the error box wraps long messages, normalize the whitespace before comparing
+                    self::assertStringContainsString($expectedError, preg_replace('/\s+/', ' ', $output), \sprintf('"%s" was not rejected.', $arguments));
+                    self::assertFileDoesNotExist($runner->getPath('src/Controller/ResetPasswordController.php'));
+                    self::assertFileDoesNotExist($runner->getPath('src/Entity/ResetPasswordRequest.php'));
+                }
+            }),
+        ];
+
         yield 'it_generates_with_custom_user' => [self::buildMakerTest()
             // @legacy - drop skipped versions when PHP 8.1 is no longer supported.
             ->setSkippedPhpVersions(80100, 80109)

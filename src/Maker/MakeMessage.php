@@ -98,7 +98,7 @@ final class MakeMessage extends AbstractMaker
             }
         }
 
-        if (null !== $chosenTransport) {
+        if ($chosenTransport) {
             $chosenTransport = Validator::validatePhpStringLiteral($chosenTransport, \sprintf('The transport "%s" cannot contain quotes or backslashes.', $chosenTransport));
         }
 

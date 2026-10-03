@@ -104,6 +104,7 @@ class MakeRegistrationFormTest extends MakerTestCase
                     '--no-interaction --redirect-route=app_anonymous --verify-email --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --id-getter="get;Id"' => 'The "--id-getter" value "get;Id" is not a valid PHP method name',
                     '--no-interaction --redirect-route=app_anonymous --verify-email --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --email-getter="get@Email"' => 'The "--email-getter" value "get@Email" is not a valid PHP method name',
                     '--no-interaction --redirect-route=this_route_does_not_exist' => 'does not match any existing route',
+                    '--no-interaction --redirect-route="app\'anon"' => 'The "--redirect-route" value "app\'anon" cannot contain quotes or backslashes.',
                 ];
 
                 foreach ($invalid as $arguments => $expectedError) {
@@ -124,11 +125,15 @@ class MakeRegistrationFormTest extends MakerTestCase
                 $runner->runMaker(
                     [],
                     '--no-interaction --redirect-route=app_anonymous --unique-entity --verify-email'
-                    .' --from-email-address=jr@rushlow.dev --from-email-name="O\'Brien"'
+                    .' --from-email-address="o\'brien@example.com" --from-email-name="Acme \"Mail\" O\'Brien"'
                 );
 
                 $controller = file_get_contents($runner->getPath('src/Controller/RegistrationController.php'));
-                self::assertStringContainsString("->from(new Address('jr@rushlow.dev', 'O\\'Brien'))", $controller);
+                self::assertStringContainsString("->from(new Address('o\\'brien@example.com', 'Acme \"Mail\" O\\'Brien'))", $controller);
+
+                // the var_export()ed values must produce valid PHP
+                exec(\sprintf('%s -l %s', escapeshellarg(\PHP_BINARY), escapeshellarg($runner->getPath('src/Controller/RegistrationController.php'))), $lintOutput, $exitCode);
+                self::assertSame(0, $exitCode, implode(\PHP_EOL, $lintOutput));
             }),
         ];
 

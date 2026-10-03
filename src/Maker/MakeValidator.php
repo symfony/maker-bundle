@@ -53,14 +53,10 @@ final class MakeValidator extends AbstractMaker
     /** @return void */
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
-        $validatorName = $input->getArgument('name');
-
-        if (null !== $validatorName) {
-            Validator::validateClassName($validatorName, \sprintf('The validator name "%s" is not a valid class name.', $validatorName));
-        }
+        $validatorClass = \sprintf('Validator\\%s', $input->getArgument('name'));
 
         $validatorClassData = ClassData::create(
-            class: \sprintf('Validator\\%s', $validatorName),
+            class: Validator::validateClassName($validatorClass, \sprintf('The validator class "%s" is not a valid class name.', $validatorClass)),
             suffix: 'Validator',
             extendsClass: ConstraintValidator::class,
             useStatements: [
