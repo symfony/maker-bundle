@@ -1359,6 +1359,11 @@ final class ClassSourceManipulator
                         \sprintf('%s::class', $value->isSelf() ? 'self' : $value->getShortName())
                     )
                 );
+            } elseif ($value instanceof \UnitEnum) {
+                $nodeValue = new Node\Expr\ClassConstFetch(
+                    new Node\Name($this->addUseStatementIfNecessary($value::class)),
+                    $value->name
+                );
             } else {
                 throw new \Exception(\sprintf('Cannot build a node expr for value of type "%s"', \gettype($value)));
             }
