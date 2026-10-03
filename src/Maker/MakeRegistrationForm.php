@@ -341,7 +341,7 @@ final class MakeRegistrationForm extends AbstractMaker
         if ($redirectRouteName) {
             $redirectRouteName = Validator::validatePhpStringLiteral($redirectRouteName, \sprintf('The "--redirect-route" value "%s" cannot contain quotes or backslashes.', $redirectRouteName));
 
-            if ($this->router instanceof RouterInterface && !\in_array($redirectRouteName, array_keys($this->router->getRouteCollection()->all()), true)) {
+            if ($this->router instanceof RouterInterface && null === $this->router->getRouteCollection()->get($redirectRouteName)) {
                 throw new RuntimeCommandException(\sprintf('The "--redirect-route" value "%s" does not match any existing route. Pass the name of an existing route.', $redirectRouteName));
             }
         }

@@ -139,7 +139,7 @@ class <?= $class_name ?> extends AbstractController
         }
 
         $email = (new TemplatedEmail())
-            ->from(new Address('<?= $from_email ?>', '<?= addslashes($from_email_name) ?>'))
+            ->from(new Address<?= \sprintf('(%s, %s)', \var_export($from_email, true), \var_export($from_email_name, true)) ?>)
             ->to((string) $user-><?= $email_getter ?>())
             ->subject('Your password reset request')
             ->htmlTemplate('reset_password/email.html.twig')

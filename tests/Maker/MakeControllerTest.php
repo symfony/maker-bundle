@@ -259,6 +259,17 @@ class MakeControllerTest extends MakerTestCase
                 self::assertStringContainsString('templates/admin/foo_invokable.html.twig', $output);
             }),
         ];
+
+        yield 'it_rejects_invalid_controller_class_name_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '"Foo\'Bar" --no-interaction', allowedToFail: true);
+
+                self::assertStringContainsString('The controller class "Foo\'Bar" is not a valid class name.', $output);
+
+                $controllerFiles = glob($runner->getPath('src/Controller/*.php')) ?: [];
+                self::assertSame([], $controllerFiles);
+            }),
+        ];
     }
 
     private static function assertSubstrCount(string $needle, string $haystack, int $count): void

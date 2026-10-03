@@ -51,14 +51,10 @@ final class MakeVoter extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-        $voterName = $input->getArgument('name');
-
-        if (null !== $voterName) {
-            Validator::validateClassName($voterName, \sprintf('The voter name "%s" is not a valid class name.', $voterName));
-        }
+        $voterClass = \sprintf('Security\Voter\%s', $input->getArgument('name'));
 
         $voterClassData = ClassData::create(
-            class: \sprintf('Security\Voter\%s', $voterName),
+            class: Validator::validateClassName($voterClass, \sprintf('The voter class "%s" is not a valid class name.', $voterClass)),
             suffix: 'Voter',
             extendsClass: Voter::class,
             useStatements: [
@@ -66,7 +62,7 @@ final class MakeVoter extends AbstractMaker
                 Voter::class,
                 UserInterface::class,
                 Vote::class,
-            ]
+            ],
         );
 
         $generator->generateClassFromClassData(

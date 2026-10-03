@@ -166,5 +166,15 @@ class MakeScheduleTest extends MakerTestCase
                 self::assertFileDoesNotExist($runner->getPath('src/Scheduler/DoesNotExistSchedule.php'));
             }),
         ];
+
+        yield 'it_rejects_invalid_transport_name_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '--no-interaction --transport-name="bad\'name"', allowedToFail: true);
+
+                // the console wraps the message, so assert only its first line
+                self::assertStringContainsString('The "--transport-name" value "bad\'name"', $output);
+                self::assertFileDoesNotExist($runner->getPath('src/Scheduler/MainSchedule.php'));
+            }),
+        ];
     }
 }

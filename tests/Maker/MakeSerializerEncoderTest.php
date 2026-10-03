@@ -45,6 +45,15 @@ class MakeSerializerEncoderTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_rejects_invalid_format_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '--no-interaction FooBarEncoder "bad\'name"', allowedToFail: true);
+
+                self::assertStringContainsString('The format "bad\'name" cannot contain quotes or backslashes.', $output);
+                self::assertFileDoesNotExist($runner->getPath('src/Serializer/FooBarEncoder.php'));
+            }),
+        ];
+
         /* @legacy - Remove when MakerBundle no longer supports Symfony 6.4 */
         yield 'it_makes_serializer_encoder_legacy' => [self::buildMakerTest()
             ->run(static function (MakerTestRunner $runner) {
