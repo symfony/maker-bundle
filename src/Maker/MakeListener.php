@@ -48,14 +48,6 @@ final class MakeListener extends AbstractMaker
         return 'make:listener';
     }
 
-    /**
-     * @deprecated remove this method when removing make:subscriber
-     */
-    public static function getCommandAlias(): string
-    {
-        return 'make:subscriber';
-    }
-
     public static function getCommandDescription(): string
     {
         return 'Creates a new event subscriber class or a new event listener class';
@@ -74,9 +66,6 @@ final class MakeListener extends AbstractMaker
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        /* @deprecated remove the following block when removing make:subscriber */
-        $this->handleDeprecatedMakerCommands($input, $io);
-
         $io->writeln('');
 
         $name = $input->getArgument('name');
@@ -170,8 +159,7 @@ final class MakeListener extends AbstractMaker
         }
     }
 
-    /** @return void */
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
     }
 
@@ -243,22 +231,5 @@ final class MakeListener extends AbstractMaker
             'Next: Open your new listener class and start customizing it.',
             'Find the documentation at <fg=yellow>https://symfony.com/doc/current/event_dispatcher.html#creating-an-event-listener</>',
         ]);
-    }
-
-    /**
-     * @deprecated
-     */
-    private function handleDeprecatedMakerCommands(InputInterface $input, ConsoleStyle $io): void
-    {
-        $currentCommand = $input->getFirstArgument();
-        $name = $input->getArgument('name');
-
-        if ('make:subscriber' === $currentCommand) {
-            if (!str_ends_with($name, 'Subscriber')) {
-                $input->setArgument('name', $name.'Subscriber');
-            }
-
-            $io->warning('The "make:subscriber" command is deprecated, use "make:listener" instead.');
-        }
     }
 }

@@ -63,14 +63,6 @@ class MakeCommandRegistrationPass implements CompilerPassInterface
                 }
             }
 
-            /*
-             * @deprecated remove this block when removing make:subscriber
-             */
-            if (method_exists($class, 'getCommandAlias')) {
-                $alias = $class::getCommandAlias();
-                $commandDefinition->addTag('console.command', ['command' => $alias, 'description' => 'Deprecated alias of "make:listener"']);
-            }
-
             $container->setDefinition(\sprintf('maker.auto_command.%s', Str::asTwigVariable($class::getCommandName())), $commandDefinition);
         }
     }
