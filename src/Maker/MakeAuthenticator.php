@@ -86,7 +86,7 @@ final class MakeAuthenticator extends AbstractMaker
 
     public static function getCommandDescription(): string
     {
-        return 'Create a Guard authenticator of different flavors';
+        return 'Create an authenticator of different flavors';
     }
 
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
@@ -236,7 +236,7 @@ final class MakeAuthenticator extends AbstractMaker
             $supportRememberMe,
         );
 
-        // update security.yaml with guard config
+        // update security.yaml with the config of the authenticator
         $securityYamlUpdated = false;
 
         $entryPoint = $input->getOption('entry-point');
