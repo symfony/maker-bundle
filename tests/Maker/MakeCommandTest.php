@@ -194,6 +194,15 @@ class MakeCommandTest extends MakerTestCase
                 }
             }),
         ];
+
+        yield 'it_rejects_invalid_command_name_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '--no-interaction "app:fo\'o"', allowedToFail: true);
+
+                self::assertStringContainsString('The command name "app:fo\'o" cannot contain quotes or backslashes.', $output);
+                self::assertDirectoryDoesNotExist($runner->getPath('src/Command'));
+            }),
+        ];
     }
 
     private static function writeEnums(MakerTestRunner $runner): void

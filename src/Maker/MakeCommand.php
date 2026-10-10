@@ -107,6 +107,9 @@ final class MakeCommand extends AbstractMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $commandName = trim($input->getArgument('name'));
+
+        $commandName = Validator::validatePhpStringLiteral($commandName, \sprintf('The command name "%s" cannot contain quotes or backslashes.', $commandName));
+
         $commandNameHasAppPrefix = str_starts_with($commandName, 'app:');
 
         $commandClassNameDetails = $generator->createClassNameDetails(

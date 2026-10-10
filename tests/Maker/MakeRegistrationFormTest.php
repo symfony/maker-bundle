@@ -93,6 +93,50 @@ class MakeRegistrationFormTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_rejects_invalid_identifier_options_non_interactively' => [self::createRegistrationFormTest()
+            ->addExtraDependencies('symfonycasts/verify-email-bundle')
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $invalid = [
+                    '--no-interaction --redirect-route=app_anonymous --username-field="user-email"' => 'The "--username-field" value "user-email" is not a valid PHP property name',
+                    '--no-interaction --redirect-route=app_anonymous --password-field="pass word"' => 'The "--password-field" value "pass word" is not a valid PHP property name',
+                    '--no-interaction --redirect-route=app_anonymous --verify-email --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --id-getter="get;Id"' => 'The "--id-getter" value "get;Id" is not a valid PHP method name',
+                    '--no-interaction --redirect-route=app_anonymous --verify-email --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --email-getter="get@Email"' => 'The "--email-getter" value "get@Email" is not a valid PHP method name',
+                    '--no-interaction --redirect-route=this_route_does_not_exist' => 'does not match any existing route',
+                    '--no-interaction --redirect-route="app\'anon"' => 'The "--redirect-route" value "app\'anon" cannot contain quotes or backslashes.',
+                ];
+
+                foreach ($invalid as $arguments => $expectedError) {
+                    $output = $runner->runMaker([], $arguments, allowedToFail: true);
+
+                    // the error box wraps long messages, normalize the whitespace before comparing
+                    self::assertStringContainsString($expectedError, preg_replace('/\s+/', ' ', $output), \sprintf('"%s" was not rejected.', $arguments));
+                    self::assertFileDoesNotExist($runner->getPath('src/Controller/RegistrationController.php'));
+                }
+            }),
+        ];
+
+        yield 'it_escapes_from_email_name_non_interactively' => [self::createRegistrationFormTest()
+            ->addExtraDependencies('symfonycasts/verify-email-bundle')
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $runner->runMaker(
+                    [],
+                    '--no-interaction --redirect-route=app_anonymous --unique-entity --verify-email'
+                    .' --from-email-address="o\'brien@example.com" --from-email-name="Acme \"Mail\" O\'Brien"'
+                );
+
+                $controller = file_get_contents($runner->getPath('src/Controller/RegistrationController.php'));
+                self::assertStringContainsString("->from(new Address('o\\'brien@example.com', 'Acme \"Mail\" O\\'Brien'))", $controller);
+
+                // the var_export()ed values must produce valid PHP
+                exec(\sprintf('%s -l %s', escapeshellarg(\PHP_BINARY), escapeshellarg($runner->getPath('src/Controller/RegistrationController.php'))), $lintOutput, $exitCode);
+                self::assertSame(0, $exitCode, implode(\PHP_EOL, $lintOutput));
+            }),
+        ];
+
         yield 'it_generates_registration_form_non_interactively_with_auto_login' => [self::createRegistrationFormTest()
             ->run(static function (MakerTestRunner $runner) {
                 self::makeUser($runner);

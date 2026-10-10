@@ -82,5 +82,14 @@ class MakeSubscriberTest extends MakerTestCase
                 );
             }),
         ];
+
+        yield 'it_rejects_invalid_event_name_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], 'FooBar "foo\'bar" --no-interaction', allowedToFail: true);
+
+                self::assertStringContainsString('The event "foo\'bar" cannot contain quotes or backslashes.', $output);
+                self::assertFileDoesNotExist($runner->getPath('src/EventSubscriber/FooBarSubscriber.php'));
+            }),
+        ];
     }
 }

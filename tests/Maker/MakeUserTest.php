@@ -87,6 +87,25 @@ class MakeUserTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_rejects_invalid_identity_property_name_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-user/standard_setup',
+                    ''
+                );
+
+                $output = $runner->runMaker([], '--no-interaction User --identity-property-name="em ail"', allowedToFail: true);
+
+                // the error box wraps long messages, normalize the whitespace before comparing
+                self::assertStringContainsString(
+                    'The "--identity-property-name" value "em ail" is not a valid PHP property name.',
+                    preg_replace('/\s+/', ' ', $output)
+                );
+                self::assertFileDoesNotExist($runner->getPath('src/Security/User.php'));
+                self::assertFileDoesNotExist($runner->getPath('src/Entity/User.php'));
+            }),
+        ];
+
         yield 'it_generates_non_entity_no_password' => [self::buildMakerTest()
             ->addExtraDependencies('doctrine')
             ->run(static function (MakerTestRunner $runner) {

@@ -97,7 +97,7 @@ final class MakeSubscriber extends AbstractMaker
             $useStatements->addUseStatement(KernelEvents::class);
             $eventName = $eventConstant;
         } else {
-            $eventName = class_exists($event) ? \sprintf('%s::class', $eventClassName) : \sprintf('\'%s\'', $event);
+            $eventName = class_exists($event) ? \sprintf('%s::class', $eventClassName) : \sprintf('\'%s\'', Validator::validatePhpStringLiteral($event, \sprintf('The event "%s" cannot contain quotes or backslashes.', $event)));
         }
 
         if (null !== $eventFullClassName) {
