@@ -287,7 +287,7 @@ final class UserClassBuilder
             )
         );
 
-        // $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
+        // $data["\0".self::class."\0password"] = null === $this->password ? null : hash('crc32c', $this->password);
         $builder->addStmt(
             new Node\Stmt\Expression(
                 new Node\Expr\Assign(
@@ -304,17 +304,27 @@ final class UserClassBuilder
                             new Node\Scalar\String_("\0password", ['kind' => Node\Scalar\String_::KIND_DOUBLE_QUOTED]),
                         )
                     ),
-                    new Node\Expr\FuncCall(
-                        new Node\Name('hash'),
-                        [
-                            new Node\Arg(new Node\Scalar\String_('crc32c')),
-                            new Node\Arg(
-                                new Node\Expr\PropertyFetch(
-                                    new Node\Expr\Variable('this'),
-                                    'password'
-                                )
-                            ),
-                        ]
+                    new Node\Expr\Ternary(
+                        new Node\Expr\BinaryOp\Identical(
+                            new Node\Expr\ConstFetch(new Node\Name('null')),
+                            new Node\Expr\PropertyFetch(
+                                new Node\Expr\Variable('this'),
+                                'password'
+                            )
+                        ),
+                        new Node\Expr\ConstFetch(new Node\Name('null')),
+                        new Node\Expr\FuncCall(
+                            new Node\Name('hash'),
+                            [
+                                new Node\Arg(new Node\Scalar\String_('crc32c')),
+                                new Node\Arg(
+                                    new Node\Expr\PropertyFetch(
+                                        new Node\Expr\Variable('this'),
+                                        'password'
+                                    )
+                                ),
+                            ]
+                        )
                     )
                 )
             )
