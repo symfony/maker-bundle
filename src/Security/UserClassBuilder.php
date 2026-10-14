@@ -26,11 +26,11 @@ use Symfony\Component\Security\Http\Attribute\IsGrantedContext;
  */
 final class UserClassBuilder
 {
-    public function addUserInterfaceImplementation(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
+    public function addUserInterfaceImplementation(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig, string $className): void
     {
         $manipulator->addInterface(UserInterface::class);
 
-        $this->addUniqueConstraint($manipulator, $userClassConfig);
+        $this->addUniqueConstraint($manipulator, $userClassConfig, $className);
 
         $this->addGetUsername($manipulator, $userClassConfig);
 
@@ -342,7 +342,7 @@ final class UserClassBuilder
         $manipulator->addMethodBuilder($builder);
     }
 
-    private function addUniqueConstraint(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
+    private function addUniqueConstraint(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig, string $className): void
     {
         if (!$userClassConfig->isEntity()) {
             return;
@@ -351,7 +351,7 @@ final class UserClassBuilder
         $manipulator->addAttributeToClass(
             'ORM\\UniqueConstraint',
             [
-                'name' => 'UNIQ_IDENTIFIER_'.strtoupper(Str::asSnakeCase($userClassConfig->getIdentityPropertyName())),
+                'name' => strtoupper(Str::asSnakeCase($className)).'_UNIQ_IDENTIFIER_'.strtoupper(Str::asSnakeCase($userClassConfig->getIdentityPropertyName())),
                 'fields' => [$userClassConfig->getIdentityPropertyName()],
             ]
         );
