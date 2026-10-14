@@ -17,9 +17,13 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
+use Symfony\Bundle\MakerBundle\Validator\TargetEnum;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Validation;
@@ -45,8 +49,28 @@ final class MakeValidator extends AbstractMaker
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the validator class (e.g. <fg=yellow>EnabledValidator</>)')
+            ->addOption('target', null, InputOption::VALUE_REQUIRED, 'The target of the constraint class')
             ->setHelp($this->getHelpFileContents('MakeValidator.txt'))
         ;
+    }
+
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
+    {
+        $target = $input->getOption('target');
+        $supportedTargets = TargetEnum::values();
+
+        if (!$target || \in_array($target, $supportedTargets)) {
+            return;
+        }
+
+        $helper = new QuestionHelper();
+        $question = new ChoiceQuestion(
+            'Target type',
+            $supportedTargets
+        );
+
+        $target = $helper->ask($input, $io->getOutput(), $question);
+        $input->setOption('target', $target);
     }
 
     /** @return void */
@@ -77,6 +101,9 @@ final class MakeValidator extends AbstractMaker
         $generator->generateClassFromClassData(
             $constraintDataClass,
             'validator/Constraint.tpl.php',
+            [
+                'target' => $input->getOption('target'),
+            ]
         );
 
         $generator->writeChanges();
