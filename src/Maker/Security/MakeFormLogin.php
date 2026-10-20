@@ -192,13 +192,15 @@ final class MakeFormLogin extends AbstractMaker
             $generator->dumpFile($controllerPath, $manipulator->getSourceCode());
         }
 
+        $userNameIsEmail = false !== stripos($userNameField, 'email');
+
         $generator->generateTemplate(
             \sprintf('%s/login.html.twig', $templatePath),
             'security/formLogin/login_form.tpl.php',
             [
                 'logout_setup' => $willLogout,
                 'username_label' => Str::asHumanWords($userNameField),
-                'username_is_email' => false !== stripos($userNameField, 'email'),
+                'username_is_email' => $userNameIsEmail,
             ]
         );
 
@@ -234,6 +236,10 @@ final class MakeFormLogin extends AbstractMaker
                     'use_statements' => $useStatements,
                     'user_class' => $userClass,
                     'user_short_name' => $userClassNameDetails->getShortName(),
+                    'username_setter' => 'set'.Str::asCamelCase($userNameField),
+                    'username_label' => $userNameIsEmail ? 'email address' : strtolower(Str::asHumanWords($userNameField)),
+                    'username_value' => $userNameIsEmail ? 'email@example.com' : 'john_doe',
+                    'username_unknown_value' => $userNameIsEmail ? 'doesNotExist@example.com' : 'doesNotExist',
                 ],
             );
 
