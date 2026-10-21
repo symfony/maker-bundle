@@ -16,7 +16,7 @@
         "php": ">=8.2",
         "composer-runtime-api": "^2.1",
         "doctrine/inflector": "^2.0",
-        "nikic/php-parser": "^5.0",
+        "nikic/php-parser": "^5.1",
         "symfony/config": "^7.4|^8.1",
         "symfony/console": "^7.4|^8.1",
         "symfony/dependency-injection": "^7.4|^8.1",
