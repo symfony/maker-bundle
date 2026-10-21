@@ -25,7 +25,8 @@ class LoginControllerTest extends WebTestCase
         /** @var UserPasswordHasherInterface $passwordHasher */
         $passwordHasher = $container->get('security.user_password_hasher');
 
-        $user = (new <?= $user_short_name ?>())->setEmail('email@example.com');
+        $user = new <?= $user_short_name ?>();
+        $user-><?= $username_setter ?>('<?= $username_value ?>');
         $user->setPassword($passwordHasher->hashPassword($user, 'password'));
 
         $em->persist($user);
@@ -34,12 +35,12 @@ class LoginControllerTest extends WebTestCase
 
     public function testLogin(): void
     {
-        // Denied - Can't login with invalid email address.
+        // Denied - Can't login with invalid <?= $username_label ?>.
         $this->client->request('GET', '/login');
         self::assertResponseIsSuccessful();
 
         $this->client->submitForm('Sign in', [
-            '_username' => 'doesNotExist@example.com',
+            '_username' => '<?= $username_unknown_value ?>',
             '_password' => 'password',
         ]);
 
@@ -54,7 +55,7 @@ class LoginControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
 
         $this->client->submitForm('Sign in', [
-            '_username' => 'email@example.com',
+            '_username' => '<?= $username_value ?>',
             '_password' => 'bad-password',
         ]);
 
@@ -66,7 +67,7 @@ class LoginControllerTest extends WebTestCase
 
         // Success - Login with valid credentials is allowed.
         $this->client->submitForm('Sign in', [
-            '_username' => 'email@example.com',
+            '_username' => '<?= $username_value ?>',
             '_password' => 'password',
         ]);
 

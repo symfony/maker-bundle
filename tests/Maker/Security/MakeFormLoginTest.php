@@ -166,6 +166,27 @@ class MakeFormLoginTest extends MakerTestCase
                 $runner->runTests();
             }),
         ];
+
+        yield 'generates_form_login_with_test_for_a_username_identifier' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                // Make the UserPasswordHasherInterface available in the test
+                $runner->renderTemplateFile('security/make-form-login/FixtureController.php', 'src/Controller/FixtureController.php', []);
+
+                self::makeUser($runner, 'username');
+
+                $output = $runner->runMaker([], '--no-interaction --logout --with-tests');
+
+                self::assertStringContainsString('Success', $output);
+
+                $generatedTest = file_get_contents($runner->getPath('tests/LoginControllerTest.php'));
+
+                self::assertStringContainsString("\$user->setUsername('john_doe');", $generatedTest);
+                self::assertStringNotContainsString('setEmail', $generatedTest);
+
+                $runner->configureDatabase();
+                $runner->runTests();
+            }),
+        ];
     }
 
     private static function runLoginTest(MakerTestRunner $runner): void
