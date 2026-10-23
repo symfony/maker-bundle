@@ -49,6 +49,50 @@ class MakeAuthenticatorTest extends MakerTestCase
             }),
         ];
 
+        yield 'auth_rejects_invalid_authenticator_class_name' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                // the class name must be given interactively: "make:auth" only defines
+                // its arguments inside interact(), so they cannot be passed on the CLI
+                $output = $runner->runMaker([
+                    // authenticator type => empty-auth
+                    0,
+                    // class name containing an invalid character
+                    'My$Authenticator',
+                ], allowedToFail: true);
+
+                // the error box wraps long messages, normalize the whitespace before comparing
+                self::assertStringContainsString(
+                    'is not valid as a PHP class name',
+                    preg_replace('/\s+/', ' ', $output)
+                );
+                self::assertFileDoesNotExist($runner->getPath('src/Security/My$Authenticator.php'));
+                self::assertFileDoesNotExist($runner->getPath('src/Security/MyAuthenticator.php'));
+            }),
+        ];
+
+        yield 'auth_rejects_invalid_username_field' => [self::buildMakerTest()
+            ->addExtraDependencies('twig', 'symfony/form')
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner, 'userEmail', false);
+
+                $output = $runner->runMaker([
+                    // authenticator type => login-form
+                    1,
+                    // class name
+                    'AppCustomAuthenticator',
+                    // controller name
+                    'SecurityController',
+                    // user class
+                    'App\\Security\\User',
+                    // username field => a value with a quote, not one of the class properties
+                    'user"Email',
+                ], allowedToFail: true);
+
+                self::assertStringContainsString('Value "user"Email" is invalid', preg_replace('/\s+/', ' ', $output));
+                self::assertFileDoesNotExist($runner->getPath('src/Security/AppCustomAuthenticator.php'));
+            }),
+        ];
+
         yield 'auth_empty_multiple_firewalls' => [self::buildMakerTest()
             ->run(static function (MakerTestRunner $runner) {
                 $runner->modifyYamlFile('config/packages/security.yaml', static function (array $config) {

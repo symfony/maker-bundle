@@ -32,7 +32,7 @@ class MakeDecoratorTest extends MakerTestCase
                     ''
                 );
 
-                $runner->modifyYamlFile('config/services.yaml', function (array $config) {
+                $runner->modifyYamlFile('config/services.yaml', static function (array $config) {
                     $config['services']['App\\Service\\'] = [
                         'resource' => '../src/Service',
                         'public' => true,
@@ -75,6 +75,25 @@ class MakeDecoratorTest extends MakerTestCase
                 ]);
 
                 self::runFormTest($runner, 'it_generates_force_extends.php');
+            }),
+        ];
+
+        yield 'it_generates_decorator_for_an_interface_non_interactively' => [self::buildDecoratorTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '--no-interaction "App\\Service\\FooInterface" GeneratedServiceDecorator');
+
+                self::assertStringContainsString('Success', $output);
+                self::assertFileExists($runner->getPath('src/GeneratedServiceDecorator.php'));
+            }),
+        ];
+
+        yield 'it_rejects_invalid_service_id_non_interactively' => [self::buildDecoratorTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '--no-interaction "App\\Service\\Foo\'Service" GeneratedServiceDecorator', allowedToFail: true);
+
+                self::assertStringContainsString('The service id "App\\Service\\Foo\'Service" cannot contain quotes or', $output);
+                self::assertStringContainsString('backslashes.', $output);
+                self::assertFileDoesNotExist($runner->getPath('src/GeneratedServiceDecorator.php'));
             }),
         ];
     }

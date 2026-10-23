@@ -78,7 +78,7 @@ final class MakeDecorator extends AbstractMaker
 
             ($question = new Question($argument->getDescription()))
                 ->setAutocompleterValues($suggestIds = $this->helper->suggestIds())
-                ->setValidator(fn ($answer) => Validator::serviceExists($answer, $suggestIds))
+                ->setValidator(static fn ($answer) => Validator::serviceExists($answer, $suggestIds))
                 ->setMaxAttempts(3);
 
             $input->setArgument('id', $io->askQuestion($question));
@@ -121,7 +121,7 @@ final class MakeDecorator extends AbstractMaker
             $defaultClass = Str::asClassName(\sprintf('%s Decorator', $basename));
 
             ($question = new Question($argument->getDescription(), $defaultClass))
-                ->setValidator(fn ($answer) => Validator::validateClassName(Validator::classDoesNotExist($answer)))
+                ->setValidator(static fn ($answer) => Validator::validateClassName(Validator::classDoesNotExist($answer)))
                 ->setMaxAttempts(3);
 
             $input->setArgument('decorator-class', $io->askQuestion($question));
@@ -131,6 +131,10 @@ final class MakeDecorator extends AbstractMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $id = $input->getArgument('id');
+
+        if (!class_exists($id) && !interface_exists($id)) {
+            $id = Validator::validatePhpStringLiteral($id, \sprintf('The service id "%s" cannot contain quotes or backslashes.', $id));
+        }
 
         $classNameDetails = $generator->createClassNameDetails(
             Validator::validateClassName(Validator::classDoesNotExist($input->getArgument('decorator-class'))),

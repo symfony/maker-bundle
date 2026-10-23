@@ -156,6 +156,48 @@ class ValidatorTest extends TestCase
         $this->assertSame($interface, Validator::allowedInterface($interface, [$interface]));
     }
 
+    /**
+     * @dataProvider provideValidPhpStringLiteralValues
+     */
+    public function testValidatePhpStringLiteral(string $value)
+    {
+        $this->assertSame($value, Validator::validatePhpStringLiteral($value));
+    }
+
+    public static function provideValidPhpStringLiteralValues(): \Generator
+    {
+        yield ['app_route'];
+        yield ['O"Brien'];
+        yield ['日本語'];
+    }
+
+    /**
+     * @dataProvider provideInvalidPhpStringLiteralValues
+     */
+    public function testInvalidPhpStringLiteral(string $value)
+    {
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage(\sprintf('"%s" cannot be used as it contains a quote, a backslash, or a control character.', $value));
+
+        Validator::validatePhpStringLiteral($value);
+    }
+
+    public static function provideInvalidPhpStringLiteralValues(): \Generator
+    {
+        yield ["ap'p_route"];
+        yield ['app\\route'];
+        yield ["app\troute"];
+        yield ["app\route"];
+    }
+
+    public function testInvalidPhpStringLiteralWithCustomMessage()
+    {
+        $this->expectException(RuntimeCommandException::class);
+        $this->expectExceptionMessage('The value "app\\route" cannot contain quotes or backslashes.');
+
+        Validator::validatePhpStringLiteral('app\\route', 'The value "app\\route" cannot contain quotes or backslashes.');
+    }
+
     public function testNotAllowedInterface()
     {
         $interface = 'Throwable';
