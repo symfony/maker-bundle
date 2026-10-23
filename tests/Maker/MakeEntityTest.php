@@ -893,9 +893,10 @@ class MakeEntityTest extends MakerTestCase
 
                 $entity = file_get_contents($runner->getPath('src/Entity/User.php'));
 
-                self::assertStringContainsString('#[ORM\\Column(nullable: true, enumType: Role::class)]', $entity);
-                self::assertStringContainsString('private ?Role $role = null;', $entity);
-                self::assertStringContainsString('Types::SIMPLE_ARRAY', $entity);
+                // Doctrine infers the enum from the property type, so there is no "enumType"
+                self::assertStringContainsString("#[ORM\\Column(nullable: true)]\n    private ?Role \$role = null;", $entity);
+                // but it cannot infer it from an array, so the "multiple" field keeps it
+                self::assertStringContainsString('#[ORM\\Column(type: Types::SIMPLE_ARRAY, nullable: true, enumType: Role::class)]', $entity);
                 // an enum is not a string field, so it must not pick up a length
                 self::assertStringNotContainsString('length: 255', $entity);
 

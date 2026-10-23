@@ -53,7 +53,8 @@ final class ClassProperty
             $attributes['unique'] = true;
         }
 
-        if ($this->enumType) {
+        // without an explicit type, Doctrine infers the enum from the property type
+        if ($this->enumType && $this->needsTypeHint) {
             $attributes['enumType'] = $this->enumType;
         }
 

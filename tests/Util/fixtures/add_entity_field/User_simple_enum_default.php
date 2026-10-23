@@ -13,7 +13,7 @@ class User
     #[ORM\Column()]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, enumType: Status::class, options: ['default' => Status::PUBLISHED])]
+    #[ORM\Column(length: 255, options: ['default' => Status::PUBLISHED])]
     private ?Status $status = null;
 
     public function getId(): ?int
