@@ -796,13 +796,15 @@ final class ClassSourceManipulator
         $addLineBreak = false;
         $lastUseStmtIndex = null;
         foreach ($namespaceNode->stmts as $index => $stmt) {
-            if ($stmt instanceof Node\Stmt\Use_) {
-                // I believe this is an array to account for use statements with {}
+            if ($stmt instanceof Node\Stmt\Use_ || $stmt instanceof Node\Stmt\GroupUse) {
+                // the names of a grouped use statement are relative to its prefix
+                $prefix = $stmt instanceof Node\Stmt\GroupUse ? $stmt->prefix.'\\' : '';
+
                 foreach ($stmt->uses as $use) {
                     $alias = $use->alias ? $use->alias->name : $use->name->getLast();
 
                     // the use statement already exists? Don't add it again
-                    if ($class === (string) $use->name) {
+                    if ($class === $prefix.$use->name) {
                         return $alias;
                     }
 
@@ -820,7 +822,7 @@ final class ClassSourceManipulator
 
                 // if $class is alphabetically before this use statement, place it before
                 // only set $targetIndex the first time you find it
-                if (null === $targetIndex && Str::areClassesAlphabetical($class, (string) $stmt->uses[0]->name)) {
+                if (null === $targetIndex && Str::areClassesAlphabetical($class, $prefix.$stmt->uses[0]->name)) {
                     $targetIndex = $index;
                 }
 

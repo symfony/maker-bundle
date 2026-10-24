@@ -477,6 +477,16 @@ class ClassSourceManipulatorTest extends TestCase
             ),
         ];
 
+        yield 'one_to_many_no_duplicate_grouped_use' => [
+            'User_with_grouped_use_statements.php',
+            'User_with_grouped_use_statements.php',
+            new RelationOneToMany(
+                propertyName: 'avatarPhotos',
+                targetClassName: \App\Entity\UserAvatarPhoto::class,
+                targetPropertyName: 'user',
+            ),
+        ];
+
         yield 'one_to_many_orphan_removal' => [
             'User_simple.php',
             'User_simple_orphan_removal.php',
