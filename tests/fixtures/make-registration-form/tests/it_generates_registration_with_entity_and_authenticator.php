@@ -22,7 +22,7 @@ class RegistrationFormTest extends WebTestCase
         $crawler = $client->request('GET', '/register');
         $form = $crawler->selectButton('Register')->form();
         $form['registration_form[email]'] = 'ryan@symfonycasts.com';
-        $form['registration_form[plainPassword]'] = '1234yaaay';
+        $form['registration_form[plainPassword]'] = 'newStrongPassword';
         $form['registration_form[agreeTerms]'] = true;
         $client->submit($form);
 
@@ -60,7 +60,7 @@ class RegistrationFormTest extends WebTestCase
             $client->getResponse()->getContent()
         );
         $this->assertStringContainsString(
-            'Your password should be at least 6 characters',
+            'Your password should be at least 12 characters',
             $client->getResponse()->getContent()
         );
         $this->assertStringContainsString(
