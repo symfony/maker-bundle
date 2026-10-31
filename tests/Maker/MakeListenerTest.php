@@ -243,6 +243,83 @@ class MakeListenerTest extends MakerTestCase
                 );
             }),
         ];
+
+        yield 'it_makes_subscriber_for_console_event' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // subscriber name
+                        'ConsoleSubscriber',
+                        // event name
+                        'console.command',
+                    ]
+                );
+
+                self::assertFileEquals(
+                    self::EXPECTED_SUBSCRIBER_PATH.'ConsoleSubscriber.php',
+                    $runner->getPath('src/EventSubscriber/ConsoleSubscriber.php')
+                );
+            }),
+        ];
+
+        yield 'it_makes_subscriber_for_form_event' => [self::buildMakerTest()
+            ->addExtraDependencies('symfony/form')
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // subscriber name
+                        'FormSubscriber',
+                        // event name
+                        'form.post_submit',
+                    ]
+                );
+
+                self::assertFileEquals(
+                    self::EXPECTED_SUBSCRIBER_PATH.'FormSubscriber.php',
+                    $runner->getPath('src/EventSubscriber/FormSubscriber.php')
+                );
+            }),
+        ];
+
+        yield 'it_makes_listener_for_form_event' => [self::buildMakerTest()
+            ->addExtraDependencies('symfony/form')
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // listener name
+                        'FormListener',
+                        // event name
+                        'form.post_submit',
+                    ]
+                );
+
+                self::assertFileEquals(
+                    self::EXPECTED_LISTENER_PATH.'FormListener.php',
+                    $runner->getPath('src/EventListener/FormListener.php')
+                );
+            }),
+        ];
+
+        yield 'it_keeps_custom_event_name_resolved_from_listener' => [self::buildMakerTest()
+            ->preRun(static function (MakerTestRunner $runner) {
+                $runner->copy('make-listener/custom_event', '');
+            })
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->runMaker(
+                    [
+                        // subscriber name
+                        'OrderSubscriber',
+                        // event name
+                        'order.placed',
+                    ]
+                );
+
+                self::assertStringContainsString(
+                    "'order.placed' => 'onOrderPlaced'",
+                    file_get_contents($runner->getPath('src/EventSubscriber/OrderSubscriber.php'))
+                );
+            }),
+        ];
     }
 
     protected function getMakerClass(): string
