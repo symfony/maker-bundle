@@ -37,6 +37,7 @@ EOF
                 'parameters'
             ],
         ],
+        'void_return' => false,
     ))
     ->setRiskyAllowed(true)
     ->setFinder($finder)
