@@ -108,7 +108,7 @@ final class MakeCommand extends AbstractMaker
     {
         $commandName = trim($input->getArgument('name'));
 
-        $commandName = Validator::validatePhpStringLiteral($commandName, \sprintf('The command name "%s" cannot contain quotes or backslashes.', $commandName));
+        $commandName = Validator::validatePhpStringLiteral($commandName, \sprintf('The command name "%s" cannot contain quotes, backslashes, or control characters.', $commandName));
 
         $commandNameHasAppPrefix = str_starts_with($commandName, 'app:');
 

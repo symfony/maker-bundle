@@ -103,8 +103,7 @@ class MakeRegistrationFormTest extends MakerTestCase
                     '--no-interaction --redirect-route=app_anonymous --password-field="pass word"' => 'The "--password-field" value "pass word" is not a valid PHP property name',
                     '--no-interaction --redirect-route=app_anonymous --verify-email --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --id-getter="get;Id"' => 'The "--id-getter" value "get;Id" is not a valid PHP method name',
                     '--no-interaction --redirect-route=app_anonymous --verify-email --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --email-getter="get@Email"' => 'The "--email-getter" value "get@Email" is not a valid PHP method name',
-                    '--no-interaction --redirect-route=this_route_does_not_exist' => 'does not match any existing route',
-                    '--no-interaction --redirect-route="app\'anon"' => 'The "--redirect-route" value "app\'anon" cannot contain quotes or backslashes.',
+                    '--no-interaction --redirect-route="app\'anon"' => 'The "--redirect-route" value "app\'anon" cannot contain quotes, backslashes, or control characters.',
                 ];
 
                 foreach ($invalid as $arguments => $expectedError) {
@@ -114,6 +113,23 @@ class MakeRegistrationFormTest extends MakerTestCase
                     self::assertStringContainsString($expectedError, preg_replace('/\s+/', ' ', $output), \sprintf('"%s" was not rejected.', $arguments));
                     self::assertFileDoesNotExist($runner->getPath('src/Controller/RegistrationController.php'));
                 }
+            }),
+        ];
+
+        yield 'it_warns_when_the_redirect_route_does_not_exist_non_interactively' => [self::createRegistrationFormTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $output = $runner->runMaker([], '--no-interaction --redirect-route=this_route_does_not_exist');
+
+                // the warning is not a failure: the controller is generated with the given route
+                self::assertStringContainsString(
+                    'The route "this_route_does_not_exist" does not exist yet.',
+                    preg_replace('/\s+/', ' ', $output)
+                );
+
+                $controller = file_get_contents($runner->getPath('src/Controller/RegistrationController.php'));
+                self::assertStringContainsString("redirectToRoute('this_route_does_not_exist')", $controller);
             }),
         ];
 

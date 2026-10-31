@@ -386,7 +386,7 @@ class MakeResetPasswordTest extends MakerTestCase
                     '--no-interaction --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --email-field="em ail"' => 'The "--email-field" value "em ail" is not a valid PHP property name.',
                     '--no-interaction --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --email-getter="get@Email"' => 'The "--email-getter" value "get@Email" is not a valid PHP method name.',
                     '--no-interaction --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --password-setter="set word"' => 'The "--password-setter" value "set word" is not a valid PHP method name.',
-                    '--no-interaction --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --success-redirect-route="app\'home"' => 'The "--success-redirect-route" value "app\'home" cannot contain quotes or backslashes.',
+                    '--no-interaction --from-email-address=jr@rushlow.dev --from-email-name=SymfonyCasts --success-redirect-route="app\'home"' => 'The "--success-redirect-route" value "app\'home" cannot contain quotes, backslashes, or control characters.',
                 ];
 
                 foreach ($invalid as $arguments => $expectedError) {

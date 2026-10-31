@@ -187,15 +187,15 @@ class ValidatorTest extends TestCase
         yield ["ap'p_route"];
         yield ['app\\route'];
         yield ["app\troute"];
-        yield ["app\route"];
+        yield ["app\x7froute"];
     }
 
     public function testInvalidPhpStringLiteralWithCustomMessage()
     {
         $this->expectException(RuntimeCommandException::class);
-        $this->expectExceptionMessage('The value "app\\route" cannot contain quotes or backslashes.');
+        $this->expectExceptionMessage('The value "app\\route" cannot contain quotes, backslashes, or control characters.');
 
-        Validator::validatePhpStringLiteral('app\\route', 'The value "app\\route" cannot contain quotes or backslashes.');
+        Validator::validatePhpStringLiteral('app\\route', 'The value "app\\route" cannot contain quotes, backslashes, or control characters.');
     }
 
     public function testNotAllowedInterface()

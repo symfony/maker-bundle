@@ -339,10 +339,10 @@ final class MakeRegistrationForm extends AbstractMaker
         $redirectRouteName = $input->getOption('redirect-route');
 
         if ($redirectRouteName) {
-            $redirectRouteName = Validator::validatePhpStringLiteral($redirectRouteName, \sprintf('The "--redirect-route" value "%s" cannot contain quotes or backslashes.', $redirectRouteName));
+            $redirectRouteName = Validator::validatePhpStringLiteral($redirectRouteName, \sprintf('The "--redirect-route" value "%s" cannot contain quotes, backslashes, or control characters.', $redirectRouteName));
 
             if ($this->router instanceof RouterInterface && null === $this->router->getRouteCollection()->get($redirectRouteName)) {
-                throw new RuntimeCommandException(\sprintf('The "--redirect-route" value "%s" does not match any existing route. Pass the name of an existing route.', $redirectRouteName));
+                $io->warning(\sprintf('The route "%s" does not exist yet. The generated controller will redirect to it once you create it.', $redirectRouteName));
             }
         }
 

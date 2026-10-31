@@ -91,8 +91,10 @@ class MakeDecoratorTest extends MakerTestCase
             ->run(static function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([], '--no-interaction "App\\Service\\Foo\'Service" GeneratedServiceDecorator', allowedToFail: true);
 
-                self::assertStringContainsString('The service id "App\\Service\\Foo\'Service" cannot contain quotes or', $output);
-                self::assertStringContainsString('backslashes.', $output);
+                self::assertStringContainsString(
+                    'The service id "App\\Service\\Foo\'Service" cannot contain quotes, backslashes, or control characters.',
+                    preg_replace('/\s+/', ' ', $output)
+                );
                 self::assertFileDoesNotExist($runner->getPath('src/GeneratedServiceDecorator.php'));
             }),
         ];

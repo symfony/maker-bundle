@@ -126,7 +126,7 @@ final class MakeSchedule extends AbstractMaker
         $transportName = $input->getOption('transport-name') ?: null;
 
         if (null !== $transportName) {
-            $transportName = Validator::validatePhpStringLiteral($transportName, \sprintf('The "--transport-name" value "%s" cannot contain quotes or backslashes.', $transportName));
+            $transportName = Validator::validatePhpStringLiteral($transportName, \sprintf('The "--transport-name" value "%s" cannot contain quotes, backslashes, or control characters.', $transportName));
         }
 
         $scheduleClassDetails = $generator->createClassNameDetails(

@@ -199,7 +199,7 @@ class MakeCommandTest extends MakerTestCase
             ->run(static function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([], '--no-interaction "app:fo\'o"', allowedToFail: true);
 
-                self::assertStringContainsString('The command name "app:fo\'o" cannot contain quotes or backslashes.', $output);
+                self::assertStringContainsString('The command name "app:fo\'o" cannot contain quotes, backslashes, or control characters.', preg_replace('/\s+/', ' ', $output));
                 self::assertDirectoryDoesNotExist($runner->getPath('src/Command'));
             }),
         ];

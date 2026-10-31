@@ -248,7 +248,7 @@ class MakeListenerTest extends MakerTestCase
             ->run(static function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([], 'FooListener "foo\'bar" --no-interaction', allowedToFail: true);
 
-                self::assertStringContainsString('The event "foo\'bar" cannot contain quotes or backslashes.', $output);
+                self::assertStringContainsString('The event "foo\'bar" cannot contain quotes, backslashes, or control characters.', preg_replace('/\s+/', ' ', $output));
                 self::assertFileDoesNotExist($runner->getPath('src/EventListener/FooListener.php'));
             }),
         ];

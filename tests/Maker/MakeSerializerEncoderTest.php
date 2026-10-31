@@ -49,7 +49,7 @@ class MakeSerializerEncoderTest extends MakerTestCase
             ->run(static function (MakerTestRunner $runner) {
                 $output = $runner->runMaker([], '--no-interaction FooBarEncoder "bad\'name"', allowedToFail: true);
 
-                self::assertStringContainsString('The format "bad\'name" cannot contain quotes or backslashes.', $output);
+                self::assertStringContainsString('The format "bad\'name" cannot contain quotes, backslashes, or control characters.', preg_replace('/\s+/', ' ', $output));
                 self::assertFileDoesNotExist($runner->getPath('src/Serializer/FooBarEncoder.php'));
             }),
         ];

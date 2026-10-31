@@ -265,12 +265,16 @@ class MakeResetPassword extends AbstractMaker
         $passwordSetterMethodName = Validator::validatePropertyName($passwordSetterMethodName, \sprintf('The "--password-setter" value "%s" is not a valid PHP method name.', $passwordSetterMethodName));
 
         $controllerResetSuccessRedirect = $input->getOption('success-redirect-route') ?: 'app_home';
-        $controllerResetSuccessRedirect = Validator::validatePhpStringLiteral($controllerResetSuccessRedirect, \sprintf('The "--success-redirect-route" value "%s" cannot contain quotes or backslashes.', $controllerResetSuccessRedirect));
+        $controllerResetSuccessRedirect = Validator::validatePhpStringLiteral($controllerResetSuccessRedirect, \sprintf('The "--success-redirect-route" value "%s" cannot contain quotes, backslashes, or control characters.', $controllerResetSuccessRedirect));
         $fromEmailAddress = Validator::validateEmailAddress($input->getOption('from-email-address'));
         $fromEmailName = Validator::notBlank($input->getOption('from-email-name'));
 
         if ($this->router instanceof RouterInterface) {
             $this->controllerResetSuccessRoute = $this->router->getRouteCollection()->get($controllerResetSuccessRedirect);
+
+            if (null === $this->controllerResetSuccessRoute) {
+                $io->warning(\sprintf('The route "%s" does not exist yet. The generated controller will redirect to it once you create it.', $controllerResetSuccessRedirect));
+            }
         }
 
         $userClassNameDetails = $generator->createClassNameDetails(
