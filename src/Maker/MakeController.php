@@ -22,6 +22,7 @@ use Symfony\Bundle\MakerBundle\Maker\Common\CanGenerateTestsTrait;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -83,6 +84,9 @@ final class MakeController extends AbstractMaker
         $isInvokable = (bool) $input->getOption('invokable');
 
         $controllerClass = $input->getArgument('controller-class');
+
+        Validator::validateClassName($controllerClass, \sprintf('The controller class "%s" is not a valid class name.', $controllerClass));
+
         $controllerClassName = \sprintf('Controller\%s', $controllerClass);
 
         // If the class name provided is absolute, we do not assume it will live in src/Controller

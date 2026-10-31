@@ -46,5 +46,15 @@ class MakeValidatorTest extends MakerTestCase
                 self::assertSame(file_get_contents($expectedVoterPath), file_get_contents($generatedVoter));
             }),
         ];
+
+        yield 'it_rejects_invalid_validator_name_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '--no-interaction "Foo Bar"', allowedToFail: true);
+
+                self::assertStringContainsString('The validator class "Validator\Foo Bar" is not a valid class name.', $output);
+                self::assertFileDoesNotExist($runner->getPath('src/Validator/FooBarValidator.php'));
+                self::assertFileDoesNotExist($runner->getPath('src/Validator/FooBar.php'));
+            }),
+        ];
     }
 }
