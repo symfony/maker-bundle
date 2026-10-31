@@ -693,11 +693,13 @@ final class MakeRegistrationForm extends AbstractMaker
                                             message: 'Please enter a password',
                                         ),
                                         new Length(
-                                            min: 6,
+                                            min: 12,
                                             minMessage: 'Your password should be at least {{ limit }} characters',
                                             // max length allowed by Symfony for security reasons
                                             max: 4096,
                                         ),
+                                        new PasswordStrength(),
+                                        new NotCompromisedPassword(),
                                     ],
                     EOF
             ],
@@ -711,6 +713,8 @@ final class MakeRegistrationForm extends AbstractMaker
                 'Symfony\Component\Validator\Constraints\IsTrue',
                 'Symfony\Component\Validator\Constraints\Length',
                 'Symfony\Component\Validator\Constraints\NotBlank',
+                'Symfony\Component\Validator\Constraints\NotCompromisedPassword',
+                'Symfony\Component\Validator\Constraints\PasswordStrength',
             ]
         );
 

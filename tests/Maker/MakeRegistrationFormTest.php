@@ -167,6 +167,8 @@ class MakeRegistrationFormTest extends MakerTestCase
         ];
 
         yield 'it_generates_registration_with_entity_and_form_login_with_no_login' => [self::createRegistrationFormTest()
+            // needed for NotCompromisedPassword
+            ->addExtraDependencies('symfony/http-client')
             ->run(static function (MakerTestRunner $runner) {
                 self::makeUser($runner);
 
@@ -190,6 +192,8 @@ class MakeRegistrationFormTest extends MakerTestCase
         ];
 
         yield 'it_generates_registration_with_entity_and_form_login_with_security_bundle_login' => [self::createRegistrationFormTest()
+            // needed for NotCompromisedPassword
+            ->addExtraDependencies('symfony/http-client')
             ->run(static function (MakerTestRunner $runner) {
                 if (60200 > $runner->getSymfonyVersion()) {
                     self::markTestSkipped('Requires Symfony 6.2+');
@@ -224,6 +228,8 @@ class MakeRegistrationFormTest extends MakerTestCase
         ];
 
         yield 'it_generates_registration_with_entity_and_custom_authenticator' => [self::createRegistrationFormTest()
+            // needed for NotCompromisedPassword
+            ->addExtraDependencies('symfony/http-client')
             ->run(static function (MakerTestRunner $runner) {
                 self::makeUser($runner);
 
@@ -270,6 +276,8 @@ class MakeRegistrationFormTest extends MakerTestCase
         ];
 
         yield 'it_generates_registration_form_with_entity_no_login' => [self::createRegistrationFormTest()
+            // needed for NotCompromisedPassword
+            ->addExtraDependencies('symfony/http-client')
             ->run(static function (MakerTestRunner $runner) {
                 self::makeUser($runner);
 
@@ -286,6 +294,8 @@ class MakeRegistrationFormTest extends MakerTestCase
         ];
 
         yield 'it_generates_registration_form_with_verification' => [self::createRegistrationFormTest()
+            // needed for NotCompromisedPassword
+            ->addExtraDependencies('symfony/http-client')
             ->addExtraDependencies('symfonycasts/verify-email-bundle')
             // needed for internal functional test
             ->addExtraDependencies('symfony/web-profiler-bundle', 'mailer')
@@ -329,6 +339,8 @@ class MakeRegistrationFormTest extends MakerTestCase
         ];
 
         yield 'it_generates_registration_form_with_verification_and_translator' => [self::createRegistrationFormTest()
+            // needed for NotCompromisedPassword
+            ->addExtraDependencies('symfony/http-client')
             ->addExtraDependencies('symfonycasts/verify-email-bundle')
             // needed for internal functional test
             ->addExtraDependencies('symfony/web-profiler-bundle', 'mailer', 'symfony/translation')
@@ -359,6 +371,8 @@ class MakeRegistrationFormTest extends MakerTestCase
         ];
 
         yield 'it_generates_registration_form_with_tests' => [self::createRegistrationFormTest()
+            // needed for NotCompromisedPassword
+            ->addExtraDependencies('symfony/http-client')
             ->run(static function (MakerTestRunner $runner) {
                 self::makeUser($runner);
 
@@ -379,6 +393,8 @@ class MakeRegistrationFormTest extends MakerTestCase
         ];
 
         yield 'it_generates_registration_form_with_tests_using_flag' => [self::createRegistrationFormTest()
+            // needed for NotCompromisedPassword
+            ->addExtraDependencies('symfony/http-client')
             ->run(static function (MakerTestRunner $runner) {
                 self::makeUser($runner);
 
@@ -398,6 +414,8 @@ class MakeRegistrationFormTest extends MakerTestCase
         ];
 
         yield 'it_generates_registration_form_with_verification_and_with_tests' => [self::createRegistrationFormTest()
+            // needed for NotCompromisedPassword
+            ->addExtraDependencies('symfony/http-client')
             ->addExtraDependencies('symfonycasts/verify-email-bundle')
             // needed for internal functional test
             ->addExtraDependencies('symfony/web-profiler-bundle', 'mailer')

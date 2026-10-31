@@ -35,7 +35,7 @@ class RegistrationControllerTest extends WebTestCase
 
         $this->client->submitForm('Register', [
             'registration_form[email]' => 'me@example.com',
-            'registration_form[plainPassword]' => 'password',
+            'registration_form[plainPassword]' => 'newStrongPassword',
             'registration_form[agreeTerms]' => true,
         ]);
 
