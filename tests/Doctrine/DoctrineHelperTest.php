@@ -47,5 +47,25 @@ class DoctrineHelperTest extends TestCase
     {
         yield 'non_matching' => [Types::TEXT, 'string', false];
         yield 'yes_matching' => [Types::STRING, 'string', true];
+        yield 'json_is_inferred_from_array' => [Types::JSON, 'array', true];
+        yield 'jsonb_is_not_inferred_from_array' => ['jsonb', 'array', false];
+    }
+
+    /**
+     * @dataProvider getPropertyTypeForColumnTests
+     */
+    #[DataProvider('getPropertyTypeForColumnTests')]
+    public function testGetPropertyTypeForColumn(string $columnType, ?string $expectedPropertyType)
+    {
+        $this->assertSame($expectedPropertyType, DoctrineHelper::getPropertyTypeForColumn($columnType));
+    }
+
+    public static function getPropertyTypeForColumnTests(): \Generator
+    {
+        yield 'unknown_type' => ['foo', null];
+        yield 'string' => [Types::STRING, 'string'];
+        yield 'json' => [Types::JSON, 'array'];
+        yield 'jsonb' => ['jsonb', 'array'];
+        yield 'datetime_immutable' => [Types::DATETIME_IMMUTABLE, '\\DateTimeImmutable'];
     }
 }
