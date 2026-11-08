@@ -30,17 +30,22 @@ use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
 use Symfony\Bundle\MakerBundle\Validator;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\RecoverableAttribute;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
+use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
+use Symfony\Component\Security\Http\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Validator\Validation;
 
 /**
@@ -194,6 +199,7 @@ final class MakeCrud extends AbstractMaker
                 'entity_var_singular' => $entityVarSingular,
                 'entity_twig_var_singular' => $entityTwigVarSingular,
                 'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
+                'use_csrf_attribute' => self::useCsrfAttribute($controllerClassData),
             ],
                 $repositoryVars
             )
@@ -299,6 +305,39 @@ final class MakeCrud extends AbstractMaker
     private static function getDefaultControllerClass(string $entityClass): string
     {
         return Str::asClassName(\sprintf('%s Controller', $entityClass));
+    }
+
+    /**
+     * Whether the delete action declares #[IsCsrfTokenValid] instead of calling isCsrfTokenValid().
+     *
+     * The attribute is only used when the action can receive the InvalidCsrfTokenException
+     * as an argument (Symfony 8.2+), so that an invalid token keeps redirecting to the
+     * index instead of ending on an error page. The listener handling the attribute is
+     * only wired by the SecurityBundle, and its id is an Expression, which needs the
+     * ExpressionLanguage component.
+     */
+    private static function useCsrfAttribute(ClassData $controllerClassData): bool
+    {
+        if (!class_exists(SecurityBundle::class) || !class_exists(Expression::class) || !self::isCsrfTokenValidAttributeRecoverable()) {
+            return false;
+        }
+
+        $controllerClassData->addUseStatement(Expression::class);
+        $controllerClassData->addUseStatement(IsCsrfTokenValid::class);
+        $controllerClassData->addUseStatement(InvalidCsrfTokenException::class);
+
+        return true;
+    }
+
+    /**
+     * Since Symfony 8.2, #[IsCsrfTokenValid] is a #[RecoverableAttribute]: the controller
+     * can receive the InvalidCsrfTokenException as an argument instead of letting it bubble up.
+     */
+    private static function isCsrfTokenValidAttributeRecoverable(): bool
+    {
+        return class_exists(IsCsrfTokenValid::class)
+            && class_exists(RecoverableAttribute::class)
+            && [] !== (new \ReflectionClass(IsCsrfTokenValid::class))->getAttributes(RecoverableAttribute::class);
     }
 
     public function configureDependencies(DependencyBuilder $dependencies): void

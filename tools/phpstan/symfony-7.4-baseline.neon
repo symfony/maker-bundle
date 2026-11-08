@@ -1,2 +1,7 @@
 parameters:
-	ignoreErrors: []
+	ignoreErrors:
+		-
+			message: '#^Class Symfony\\Component\\Security\\Http\\Exception\\InvalidCsrfTokenException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ../../src/Maker/MakeCrud.php
