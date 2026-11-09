@@ -878,7 +878,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 'object' => [],
                 'binary' => [],
                 'blob' => [],
-                'json_b' => ['jsonb_object'],
+                'jsonb' => ['jsonb_object'],
             ],
             'date_time' => [
                 'datetime' => ['datetime_immutable'],
