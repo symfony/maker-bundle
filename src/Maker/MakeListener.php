@@ -27,7 +27,6 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -105,7 +104,7 @@ final class MakeListener extends AbstractMaker
         }
 
         $event = $input->getArgument('event');
-        if (null === $this->getEventConstant($event) && null === $this->eventRegistry->getEventClassName($event)) {
+        if (null === $this->eventRegistry->getEventClassName($event)) {
             $eventList = $this->eventRegistry->getAllActiveEvents();
             $eventFQCNList = array_filter(array_map($this->eventRegistry->getEventClassName(...), $eventList), static fn ($eventFQCN) => \is_string($eventFQCN));
             $eventIdAndFQCNList = array_unique(array_merge($eventList, $eventFQCNList));
@@ -153,20 +152,30 @@ final class MakeListener extends AbstractMaker
         $eventFullClassName = $this->eventRegistry->getEventClassName($event);
         $eventClassName = $eventFullClassName ? Str::getShortClassName($eventFullClassName) : null;
 
-        if ($this->getEventConstant($event)) {
-            $event = $eventFullClassName;
+        if (null !== $eventConstant = $this->eventRegistry->getEventConstant($event)) {
+            // Form events are dispatched by the form's own dispatcher, which is not
+            // configured with the event aliases: they must be referenced by their constant.
+            [$eventConstantClass, $eventConstantName] = $eventConstant;
+            $useStatements->addUseStatement($eventConstantClass);
+            $eventName = \sprintf('%s::%s', Str::getShortClassName($eventConstantClass), $eventConstantName);
+            $methodName = Str::asEventMethod($eventClassName ?? $event);
+        } elseif (class_exists($event) || $this->eventRegistry->isKnownEvent($event)) {
+            // Known events have a registered alias, so they can be referenced by their class.
+            $eventName = \sprintf('%s::class', $eventClassName);
+            $methodName = Str::asEventMethod($eventClassName ?? $event);
+        } else {
+            $eventName = \sprintf('\'%s\'', $event);
+            $methodName = Str::asEventMethod($event);
         }
-
-        $eventName = class_exists($event) ? \sprintf('%s::class', $eventClassName) : \sprintf('\'%s\'', $event);
 
         if (null !== $eventFullClassName) {
             $useStatements->addUseStatement($eventFullClassName);
         }
 
         if ($this->isSubscriber) {
-            $this->generateSubscriberClass($input, $io, $generator, $useStatements, $event, $eventName, $eventClassName);
+            $this->generateSubscriberClass($input, $io, $generator, $useStatements, $eventName, $eventClassName, $methodName);
         } else {
-            $this->generateListenerClass($input, $io, $generator, $useStatements, $event, $eventName, $eventClassName);
+            $this->generateListenerClass($input, $io, $generator, $useStatements, $eventName, $eventClassName, $methodName);
         }
     }
 
@@ -175,18 +184,7 @@ final class MakeListener extends AbstractMaker
     {
     }
 
-    private function getEventConstant(string $event): ?string
-    {
-        $constants = (new \ReflectionClass(KernelEvents::class))->getConstants();
-
-        if (false !== ($name = array_search($event, $constants, true))) {
-            return \sprintf('KernelEvents::%s', $name);
-        }
-
-        return null;
-    }
-
-    private function generateSubscriberClass(InputInterface $input, ConsoleStyle $io, Generator $generator, UseStatementGenerator $useStatements, string $event, string $eventName, ?string $eventClassName): void
+    private function generateSubscriberClass(InputInterface $input, ConsoleStyle $io, Generator $generator, UseStatementGenerator $useStatements, string $eventName, ?string $eventClassName, string $methodName): void
     {
         $subscriberClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -201,7 +199,7 @@ final class MakeListener extends AbstractMaker
                 'use_statements' => $useStatements,
                 'event' => $eventName,
                 'event_arg' => $eventClassName ? \sprintf('%s $event', $eventClassName) : '$event',
-                'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
+                'method_name' => $methodName,
             ]
         );
 
@@ -215,7 +213,7 @@ final class MakeListener extends AbstractMaker
         ]);
     }
 
-    private function generateListenerClass(InputInterface $input, ConsoleStyle $io, Generator $generator, UseStatementGenerator $useStatements, string $event, string $eventName, ?string $eventClassName): void
+    private function generateListenerClass(InputInterface $input, ConsoleStyle $io, Generator $generator, UseStatementGenerator $useStatements, string $eventName, ?string $eventClassName, string $methodName): void
     {
         $listenerClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -231,7 +229,7 @@ final class MakeListener extends AbstractMaker
                 'event' => $eventName,
                 'class_event' => str_ends_with($eventName, '::class'),
                 'event_arg' => $eventClassName ? \sprintf('%s $event', $eventClassName) : '$event',
-                'method_name' => class_exists($event) ? Str::asEventMethod($eventClassName) : Str::asEventMethod($event),
+                'method_name' => $methodName,
             ]
         );
 
