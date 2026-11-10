@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Util;
 
+use PhpParser\Node\Expr\BinaryOp;
 use PhpParser\Node\Stmt;
 use PhpParser\PrettyPrinter\Standard;
 
@@ -62,5 +63,19 @@ final class PrettyPrinter extends Standard
         $classMethod = str_replace('\x00', '\0', $classMethod);
 
         return $classMethod;
+    }
+
+    /**
+     * Overridden to change coding standards.
+     *
+     * Before:
+     *      'foo' . $bar
+     *
+     * After
+     *      'foo'.$bar
+     */
+    protected function pExpr_BinaryOp_Concat(BinaryOp\Concat $node, int $precedence, int $lhsPrecedence): string
+    {
+        return $this->pInfixOp(BinaryOp\Concat::class, $node->left, '.', $node->right, $precedence, $lhsPrecedence);
     }
 }

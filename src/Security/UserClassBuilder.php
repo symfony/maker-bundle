@@ -330,7 +330,7 @@ final class UserClassBuilder
             )
         );
 
-        $builder->addStmt(new Node\Stmt\Nop());
+        $builder->addStmt($manipulator->createMethodLevelBlankLine());
 
         // return $data;
         $builder->addStmt(
