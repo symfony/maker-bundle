@@ -187,6 +187,22 @@ class MakeFormLoginTest extends MakerTestCase
                 $runner->runTests();
             }),
         ];
+
+        yield 'rejects_an_invalid_username_field_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::makeUser($runner);
+
+                $output = $runner->runMaker([], '--no-interaction --username-field="user-email"', allowedToFail: true);
+
+                // the error box wraps long messages, normalize the whitespace before comparing
+                self::assertStringContainsString(
+                    'The "--username-field" value "user-email" is not a valid PHP property name.',
+                    preg_replace('/\s+/', ' ', $output)
+                );
+                self::assertFileDoesNotExist($runner->getPath('src/Controller/SecurityController.php'));
+                self::assertFileDoesNotExist($runner->getPath('templates/security/login.html.twig'));
+            }),
+        ];
     }
 
     private static function runLoginTest(MakerTestRunner $runner): void

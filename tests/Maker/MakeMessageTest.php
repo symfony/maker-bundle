@@ -73,6 +73,32 @@ class MakeMessageTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_rejects_transport_containing_a_backslash' => [self::createMakeMessageTest()
+            ->run(static function (MakerTestRunner $runner) {
+                // the transport can only be chosen interactively, from the
+                // transports configured in messenger.yaml
+                $runner->writeFile(
+                    'config/packages/messenger.yaml',
+                    <<<'EOF'
+                        framework:
+                            messenger:
+                                transports:
+                                    'bad\name': 'sync://'
+                        EOF
+                );
+
+                $output = $runner->runMaker([
+                    'SendWelcomeEmail',
+                    1, // choose the "bad\name" transport
+                ], allowedToFail: true);
+
+                // the console may wrap the message, so assert only its first line
+                self::assertStringContainsString('The transport "bad\name" cannot contain quotes', $output);
+                self::assertFileDoesNotExist($runner->getPath('src/Message/SendWelcomeEmail.php'));
+                self::assertFileDoesNotExist($runner->getPath('src/MessageHandler/SendWelcomeEmailHandler.php'));
+            }),
+        ];
+
         yield 'it_generates_message_with_no_transport' => [self::createMakeMessageTest()
             ->run(static function (MakerTestRunner $runner) {
                 self::configureTransports($runner);

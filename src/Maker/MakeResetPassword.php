@@ -246,11 +246,15 @@ class MakeResetPassword extends AbstractMaker
             throw new RuntimeCommandException(\sprintf('The email property of "%s" cannot be guessed, pass it with "--email-field".', $userClass));
         }
 
+        $emailPropertyName = Validator::validatePropertyName($emailPropertyName, \sprintf('The "--email-field" value "%s" is not a valid PHP property name.', $emailPropertyName));
+
         $emailGetterMethodName = $input->getOption('email-getter') ?: $securityHelper->findEmailGetter($userClass, $emailPropertyName);
 
         if (!$emailGetterMethodName) {
             throw new RuntimeCommandException(\sprintf('"%s" has no "get%s()" method, pass the getter with "--email-getter".', $userClass, ucfirst($emailPropertyName)));
         }
+
+        $emailGetterMethodName = Validator::validatePropertyName($emailGetterMethodName, \sprintf('The "--email-getter" value "%s" is not a valid PHP method name.', $emailGetterMethodName));
 
         $passwordSetterMethodName = $input->getOption('password-setter') ?: $securityHelper->findPasswordSetter($userClass);
 
@@ -258,12 +262,19 @@ class MakeResetPassword extends AbstractMaker
             throw new RuntimeCommandException(\sprintf('"%s" has no "setPassword()" method, pass the setter with "--password-setter".', $userClass));
         }
 
+        $passwordSetterMethodName = Validator::validatePropertyName($passwordSetterMethodName, \sprintf('The "--password-setter" value "%s" is not a valid PHP method name.', $passwordSetterMethodName));
+
         $controllerResetSuccessRedirect = $input->getOption('success-redirect-route') ?: 'app_home';
+        $controllerResetSuccessRedirect = Validator::validatePhpStringLiteral($controllerResetSuccessRedirect, \sprintf('The "--success-redirect-route" value "%s" cannot contain quotes, backslashes, or control characters.', $controllerResetSuccessRedirect));
         $fromEmailAddress = Validator::validateEmailAddress($input->getOption('from-email-address'));
         $fromEmailName = Validator::notBlank($input->getOption('from-email-name'));
 
         if ($this->router instanceof RouterInterface) {
             $this->controllerResetSuccessRoute = $this->router->getRouteCollection()->get($controllerResetSuccessRedirect);
+
+            if (null === $this->controllerResetSuccessRoute) {
+                $io->warning(\sprintf('The route "%s" does not exist yet. The generated controller will redirect to it once you create it.', $controllerResetSuccessRedirect));
+            }
         }
 
         $userClassNameDetails = $generator->createClassNameDetails(

@@ -16,6 +16,7 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
+use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -50,8 +51,10 @@ final class MakeVoter extends AbstractMaker
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
+        $voterClass = \sprintf('Security\Voter\%s', $input->getArgument('name'));
+
         $voterClassData = ClassData::create(
-            class: \sprintf('Security\Voter\%s', $input->getArgument('name')),
+            class: Validator::validateClassName($voterClass, \sprintf('The voter class "%s" is not a valid class name.', $voterClass)),
             suffix: 'Voter',
             extendsClass: Voter::class,
             useStatements: [
@@ -59,7 +62,7 @@ final class MakeVoter extends AbstractMaker
                 Voter::class,
                 UserInterface::class,
                 Vote::class,
-            ]
+            ],
         );
 
         $generator->generateClassFromClassData(

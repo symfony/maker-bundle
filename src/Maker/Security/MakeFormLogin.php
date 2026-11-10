@@ -164,6 +164,8 @@ final class MakeFormLogin extends AbstractMaker
             throw new RuntimeCommandException(\sprintf('The login field of "%s" cannot be guessed, pass it with "--username-field".', $userClass));
         }
 
+        $userNameField = Validator::validatePropertyName($userNameField, \sprintf('The "--username-field" value "%s" is not a valid PHP property name.', $userNameField));
+
         $useStatements = new UseStatementGenerator([
             AbstractController::class,
             Response::class,

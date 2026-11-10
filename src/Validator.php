@@ -145,21 +145,31 @@ final class Validator
         return $valueAsBool;
     }
 
-    public static function validatePropertyName(string $name): string
+    public static function validatePropertyName(string $name, string $errorMessage = ''): string
     {
         // check for valid PHP variable name
         if (!Str::isValidPhpVariableName($name)) {
-            throw new \InvalidArgumentException(\sprintf('"%s" is not a valid PHP property name.', $name));
+            throw new RuntimeCommandException($errorMessage ?: \sprintf('"%s" is not a valid PHP property name.', $name));
         }
 
         return $name;
+    }
+
+    public static function validatePhpStringLiteral(string $value, string $errorMessage = ''): string
+    {
+        // a quote, a backslash or a control character would break the generated code
+        if (preg_match('/[\'\\\\\x00-\x1f\x7f]/', $value)) {
+            throw new RuntimeCommandException($errorMessage ?: \sprintf('"%s" cannot be used as it contains a quote, a backslash, or a control character.', $value));
+        }
+
+        return $value;
     }
 
     public static function validateDoctrineFieldName(string $name, ManagerRegistry $registry): string
     {
         // check reserved words
         if ($registry->getConnection()->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name)) {
-            throw new \InvalidArgumentException(\sprintf('Name "%s" is a reserved word.', $name));
+            throw new RuntimeCommandException(\sprintf('Name "%s" is a reserved word.', $name));
         }
 
         self::validatePropertyName($name);

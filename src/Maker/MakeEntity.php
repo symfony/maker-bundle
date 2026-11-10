@@ -559,11 +559,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
      */
     private function claimTargetField(string $propertyName, string $targetClass, string $definition, array $currentFields, array &$claimedTargetFields): string
     {
-        try {
-            Validator::validateDoctrineFieldName($propertyName, $this->doctrineHelper->getRegistry());
-        } catch (\InvalidArgumentException $e) {
-            throw new RuntimeCommandException($e->getMessage(), previous: $e);
-        }
+        Validator::validateDoctrineFieldName($propertyName, $this->doctrineHelper->getRegistry());
 
         $taken = array_merge($currentFields, $claimedTargetFields[$targetClass] ?? []);
 
@@ -665,12 +661,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             throw new RuntimeCommandException(\sprintf('The "%s" property already exists.', $propertyName));
         }
 
-        try {
-            return Validator::validateDoctrineFieldName($propertyName, $this->doctrineHelper->getRegistry());
-        } catch (\InvalidArgumentException $e) {
-            // the interactive mode asks again, there is nobody to ask here
-            throw new RuntimeCommandException($e->getMessage(), previous: $e);
-        }
+        return Validator::validateDoctrineFieldName($propertyName, $this->doctrineHelper->getRegistry());
     }
 
     /**
@@ -791,7 +782,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                 throw new \InvalidArgumentException(\sprintf('The "%s" property already exists.', $name));
             }
 
-            return Validator::validateDoctrineFieldName($name, $this->doctrineHelper->getRegistry());
+            try {
+                return Validator::validateDoctrineFieldName($name, $this->doctrineHelper->getRegistry());
+            } catch (RuntimeCommandException $e) {
+                // QuestionHelper asks again on any exception but a RuntimeException
+                throw new \InvalidArgumentException($e->getMessage(), previous: $e);
+            }
         });
 
         if (!$fieldName) {
@@ -1047,7 +1043,12 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
                     throw new \InvalidArgumentException(\sprintf('The "%s" class already has a "%s" property.', $targetClass, $name));
                 }
 
-                return Validator::validateDoctrineFieldName($name, $this->doctrineHelper->getRegistry());
+                try {
+                    return Validator::validateDoctrineFieldName($name, $this->doctrineHelper->getRegistry());
+                } catch (RuntimeCommandException $e) {
+                    // QuestionHelper asks again on any exception but a RuntimeException
+                    throw new \InvalidArgumentException($e->getMessage(), previous: $e);
+                }
             }
         );
 

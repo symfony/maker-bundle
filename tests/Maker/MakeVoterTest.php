@@ -41,6 +41,15 @@ class MakeVoterTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_rejects_invalid_voter_name_non_interactively' => [self::buildMakerTest()
+            ->run(static function (MakerTestRunner $runner) {
+                $output = $runner->runMaker([], '--no-interaction "Foo Bar"', allowedToFail: true);
+
+                self::assertStringContainsString('The voter class "Security\Voter\Foo Bar" is not a valid class name.', $output);
+                self::assertFileDoesNotExist($runner->getPath('src/Security/Voter/FooBarVoter.php'));
+            }),
+        ];
+
         yield 'it_makes_voter_not_final' => [self::buildMakerTest()
             ->run(static function (MakerTestRunner $runner) {
                 $runner->writeFile(
