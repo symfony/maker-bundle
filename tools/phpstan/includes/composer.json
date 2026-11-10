@@ -1,23 +1,25 @@
 {
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "api-platform/core": "^4.0",
-        "doctrine/doctrine-bundle": "^2.12",
-        "doctrine/doctrine-fixtures-bundle": "^3.5",
-        "symfony/form": "^7.4|^8.1",
-        "symfony/mailer": "^7.4|^8.1",
-        "symfony/messenger": "^7.4|^8.1",
+        "doctrine/doctrine-bundle": "^2.12|^3.0",
+        "doctrine/doctrine-fixtures-bundle": "^3.5|^4.0",
+        "symfony/form": "^7.4|^8.2",
+        "symfony/mailer": "^7.4|^8.2",
+        "symfony/messenger": "^7.4|^8.2",
         "symfony/orm-pack": "^2.4",
-        "symfony/scheduler": "^7.4|^8.1",
-        "symfony/security-bundle": "^7.4|^8.1",
+        "symfony/scheduler": "^7.4|^8.2",
+        "symfony/security-bundle": "^7.4|^8.2",
         "symfony/test-pack": "^1.1",
-        "symfony/twig-bundle": "^7.4|^8.1",
+        "symfony/twig-bundle": "^7.4|^8.2",
         "symfony/ux-live-component": "^2.16",
         "symfony/ux-turbo": "^2.16",
-        "symfony/validator": "^7.4|^8.1",
+        "symfony/validator": "^7.4|^8.2",
         "symfonycasts/reset-password-bundle": "^1.21",
         "symfonycasts/verify-email-bundle": "^1.17",
         "symfony/panther": "^2.1",
-        "symfony/webhook": "^7.4|^8.1",
-        "symfony/expression-language": "^7.4|^8.1"
+        "symfony/webhook": "^7.4|^8.2",
+        "symfony/expression-language": "^7.4|^8.2"
     }
 }

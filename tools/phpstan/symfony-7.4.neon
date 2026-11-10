@@ -1,0 +1,3 @@
+includes:
+    - ../../phpstan.dist.neon
+    - symfony-7.4-baseline.neon
