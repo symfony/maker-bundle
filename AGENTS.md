@@ -1,5 +1,7 @@
 # Agents.md
 
+Read [CONTRIBUTING.md](CONTRIBUTING.md) first for the contribution rules.
+
 Every maker must also work with `--no-interaction`. `Command::run()` skips `interact()`
 entirely in that mode, so anything only set there is missing in `generate()`.
 

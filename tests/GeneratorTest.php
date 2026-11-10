@@ -15,6 +15,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
+use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
+use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
 class GeneratorTest extends TestCase
@@ -53,6 +56,52 @@ class GeneratorTest extends TestCase
         $classNameDetails = $generator->createClassNameDetails(Finder::class, 'Entity');
 
         $this->assertSame('App\\Entity\\Symfony\\Component\\Finder\\Finder', $classNameDetails->getFullName());
+    }
+
+    public function testTemplateOverrideIsUsed()
+    {
+        $rootDir = __DIR__.'/tmp/generator_template_override_'.bin2hex(random_bytes(8));
+        $fs = new Filesystem();
+        $fs->mkdir($rootDir.'/templates/bundles/MakerBundle/command');
+        $fs->dumpFile($rootDir.'/templates/bundles/MakerBundle/command/Command.tpl.php', '<?= $class_name; ?> from the override');
+
+        try {
+            $autoloaderUtil = $this->createMock(AutoloaderUtil::class);
+            $autoloaderUtil->method('getPathForFutureClass')->willReturn($rootDir.'/src/Command/FooCommand.php');
+
+            $fileManager = new FileManager($fs, $autoloaderUtil, new MakerFileLinkFormatter(null), $rootDir, 'templates');
+            $generator = new Generator($fileManager, 'App\\');
+
+            $targetPath = $generator->generateClass('App\\Command\\FooCommand', 'command/Command.tpl.php');
+
+            $this->assertSame('FooCommand from the override', $generator->getFileContentsForPendingOperation($targetPath));
+        } finally {
+            $fs->remove($rootDir);
+        }
+    }
+
+    public function testBundleTemplateReferenceIsUsed()
+    {
+        $rootDir = __DIR__.'/tmp/generator_bundle_template_'.bin2hex(random_bytes(8));
+        $bundleDir = __DIR__.'/tmp/generator_fake_bundle_'.bin2hex(random_bytes(8));
+        $fs = new Filesystem();
+        $fs->mkdir($bundleDir.'/templates/report');
+        $fs->dumpFile($bundleDir.'/templates/report/Report.tpl.php', '<?= $class_name; ?> from the bundle');
+
+        try {
+            $autoloaderUtil = $this->createMock(AutoloaderUtil::class);
+            $autoloaderUtil->method('getPathForFutureClass')->willReturn($rootDir.'/src/Report/FooReport.php');
+
+            $fileManager = new FileManager($fs, $autoloaderUtil, new MakerFileLinkFormatter(null), $rootDir, 'templates', ['AcmeBundle' => ['path' => $bundleDir]]);
+            $generator = new Generator($fileManager, 'App\\');
+
+            $targetPath = $generator->generateClass('App\\Report\\FooReport', '@AcmeBundle/report/Report.tpl.php');
+
+            $this->assertSame('FooReport from the bundle', $generator->getFileContentsForPendingOperation($targetPath));
+        } finally {
+            $fs->remove($rootDir);
+            $fs->remove($bundleDir);
+        }
     }
 
     public static function getClassNameDetailsTests(): \Generator

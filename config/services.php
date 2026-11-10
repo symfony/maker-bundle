@@ -39,6 +39,7 @@ return static function (ContainerConfigurator $container) {
             service('maker.file_link_formatter'),
             '%kernel.project_dir%',
             '%twig.default_path%',
+            '%kernel.bundles_metadata%',
         ]);
 
     $services->set('maker.autoloader_finder', ComposerAutoloaderFinder::class)
