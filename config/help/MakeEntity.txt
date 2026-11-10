@@ -57,3 +57,8 @@ support it:
 <info>php %command.full_name% BlogPost --relation=cover:OneToOne:Media,target-field=post</info>
 <info>php %command.full_name% BlogPost --relation=author:ManyToOne:User,target-field=none</info>
 <info>php %command.full_name% BlogPost --relation=comments:OneToMany:Comment,orphan-removal</info>
+
+When adding a ManyToMany relationship, you'll be asked whether it needs additional
+properties (e.g. a "role" or "joinedAt" field). If so, an association entity is
+generated automatically to hold the relationship and its extra properties, instead
+of a direct ManyToMany mapping.
