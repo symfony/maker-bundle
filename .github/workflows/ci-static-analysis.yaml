@@ -28,9 +28,25 @@ jobs:
                 run: "composer validate --strict --no-check-lock"
 
     phpstan:
-        name: PHPStan
+        name: "PHPStan (PHP ${{ matrix.php-version }} + Symfony ${{ matrix.symfony-version }})"
 
         runs-on: ubuntu-latest
+
+        env:
+            SYMFONY_REQUIRE: ${{ matrix.symfony-version }}
+
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    # the lowest supported versions of PHP and Symfony
+                    - php-version: '8.2'
+                      symfony-version: '7.4.*'
+                      phpstan-config: 'tools/phpstan/symfony-7.4.neon'
+                    # the latest Symfony version, on the lowest PHP version it supports
+                    - php-version: '8.4'
+                      symfony-version: '8.2.*'
+                      phpstan-config: 'phpstan.dist.neon'
 
         steps:
             -   name: Checkout
@@ -39,7 +55,8 @@ jobs:
             -   name: Install PHP
                 uses: "shivammathur/setup-php@v2"
                 with:
-                    php-version: 8.2
+                    php-version: ${{ matrix.php-version }}
+                    tools: flex
 
             -   name: Install Composer Dependencies
                 uses: "ramsey/composer-install@v3"
@@ -60,4 +77,4 @@ jobs:
                 run: "vendor/bin/simple-phpunit --version"
 
             -   name: Run PHPStan
-                run: "tools/phpstan/vendor/bin/phpstan analyze --memory-limit=1G --error-format=github"
+                run: "tools/phpstan/vendor/bin/phpstan analyze --configuration=${{ matrix.phpstan-config }} --memory-limit=1G --error-format=github"
