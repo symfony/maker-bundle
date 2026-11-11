@@ -349,7 +349,7 @@ class ClassSourceManipulatorTest extends TestCase
         $this->assertSame(file_get_contents(__DIR__.'/fixtures/add_entity_field/User_typed_props.php'), $manipulator->getSourceCode());
     }
 
-    public function testAddEntityFieldWithEnumDefaultValue(): void
+    public function testAddEntityFieldWithEnumDefaultValue()
     {
         require_once __DIR__.'/fixtures/enum_helper/src/Enum/Status.php';
 
