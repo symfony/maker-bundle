@@ -28,7 +28,7 @@ class UserClassBuilderTest extends TestCase
         $manipulator = $this->getClassSourceManipulator($userClassConfig);
 
         $classBuilder = new UserClassBuilder();
-        $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig);
+        $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig, $userClassConfig->isEntity() ? 'App\Entity\User' : 'App\Security\User');
 
         $expectedPath = $this->getExpectedPath($expectedFilename, null);
         $expectedSource = file_get_contents($expectedPath);
@@ -80,6 +80,29 @@ class UserClassBuilderTest extends TestCase
             new UserClassConfiguration(false, 'userIdentifier', false),
             'UserModelWithoutPassword.php',
         ];
+    }
+
+    /**
+     * @dataProvider getUniqueConstraintNameTests
+     */
+    public function testUniqueConstraintNameIsPrefixedWithUserClassName(string $userClass, string $identityPropertyName, string $expectedName)
+    {
+        $userClassConfig = new UserClassConfiguration(true, $identityPropertyName, true);
+        $manipulator = $this->getClassSourceManipulator($userClassConfig);
+
+        $classBuilder = new UserClassBuilder();
+        $classBuilder->addUserInterfaceImplementation($manipulator, $userClassConfig, $userClass);
+
+        self::assertStringContainsString(\sprintf('#[ORM\UniqueConstraint(name: \'%s\', fields: [\'%s\'])]', $expectedName, $identityPropertyName), $manipulator->getSourceCode());
+    }
+
+    public static function getUniqueConstraintNameTests(): \Generator
+    {
+        yield 'class_name_with_one_word' => ['App\Entity\Admin', 'email', 'ADMIN_UNIQ_IDENTIFIER_EMAIL'];
+
+        yield 'class_name_with_several_words' => ['App\Entity\BackOfficeUser', 'userIdentifier', 'BACK_OFFICE_USER_UNIQ_IDENTIFIER_USER_IDENTIFIER'];
+
+        yield 'class_in_sub_namespace' => ['App\Entity\BackOffice\Admin', 'username', 'ADMIN_UNIQ_IDENTIFIER_USERNAME'];
     }
 
     private function getClassSourceManipulator(UserClassConfiguration $userClassConfiguration): ClassSourceManipulator

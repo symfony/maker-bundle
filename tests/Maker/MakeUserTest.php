@@ -87,6 +87,45 @@ class MakeUserTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_generates_two_entities_with_the_same_identity_property' => [self::buildMakerTest()
+            ->addExtraDependencies('doctrine')
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-user/standard_setup',
+                    ''
+                );
+
+                $runner->runMaker([
+                    // user class name
+                    'Admin',
+                    'y', // entity
+                    'email', // identity property
+                    'y', // with password
+                ]);
+
+                $runner->runMaker([
+                    // user class name
+                    'User',
+                    'y', // entity
+                    'email', // identity property
+                    'y', // with password
+                ]);
+
+                self::assertStringContainsString(
+                    "name: 'ADMIN_UNIQ_IDENTIFIER_EMAIL'",
+                    file_get_contents($runner->getPath('src/Entity/Admin.php'))
+                );
+                self::assertStringContainsString(
+                    "name: 'USER_UNIQ_IDENTIFIER_EMAIL'",
+                    file_get_contents($runner->getPath('src/Entity/User.php'))
+                );
+
+                // creating the schema fails if both entities use the same index name, on the
+                // platforms where index names are not scoped to their table (e.g. SQLite)
+                self::runUserTest($runner, 'it_generates_entity_with_password.php');
+            }),
+        ];
+
         yield 'it_generates_non_entity_no_password' => [self::buildMakerTest()
             ->addExtraDependencies('doctrine')
             ->run(static function (MakerTestRunner $runner) {
