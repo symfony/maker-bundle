@@ -38,7 +38,7 @@ final class EntityRelation
         }
 
         if (self::ONE_TO_MANY === $type) {
-            throw new \Exception('Use ManyToOne instead of OneToMany');
+            throw new \Exception('Use ManyToOne instead of OneToMany.');
         }
 
         $this->isSelfReferencing = $owningClass === $inverseClass;
@@ -107,7 +107,7 @@ final class EntityRelation
                 isOwning: true,
                 isNullable: $this->isNullable,
             )),
-            default => throw new \InvalidArgumentException('Invalid type'),
+            default => throw new \InvalidArgumentException('Invalid type.'),
         };
     }
 
@@ -135,7 +135,7 @@ final class EntityRelation
                 isSelfReferencing: $this->isSelfReferencing,
                 isNullable: $this->isNullable,
             )),
-            default => throw new \InvalidArgumentException('Invalid type'),
+            default => throw new \InvalidArgumentException('Invalid type.'),
         };
     }
 
