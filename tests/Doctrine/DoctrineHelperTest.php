@@ -66,6 +66,7 @@ class DoctrineHelperTest extends TestCase
         yield 'string' => [Types::STRING, 'string'];
         yield 'json' => [Types::JSON, 'array'];
         yield 'jsonb' => ['jsonb', 'array'];
+        yield 'simple_array' => ['simple_array', 'array'];
         yield 'datetime_immutable' => [Types::DATETIME_IMMUTABLE, '\\DateTimeImmutable'];
     }
 }

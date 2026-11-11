@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Util\ClassSource\Model;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\FieldMapping;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 
@@ -53,8 +54,9 @@ final class ClassProperty
             $attributes['unique'] = true;
         }
 
-        // without an explicit type, Doctrine infers the enum from the property type
-        if ($this->enumType && $this->needsTypeHint) {
+        // without an explicit type, Doctrine infers the enum from the property type,
+        // which it cannot do when that property is an array of enums
+        if ($this->enumType && ($this->needsTypeHint || Types::JSON === $this->type)) {
             $attributes['enumType'] = $this->enumType;
         }
 
