@@ -13,6 +13,10 @@ class Tag
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\ManyToOne(inversedBy: 'ownedTags')]
+    #[ORM\JoinColumn(nullable: false)]
+    private User $owner;
+
     public function getId(): ?int
     {
         return $this->id;

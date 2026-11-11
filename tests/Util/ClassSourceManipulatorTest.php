@@ -312,6 +312,41 @@ class ClassSourceManipulatorTest extends TestCase
             new ClassProperty(propertyName: 'ulid', type: 'ulid'),
             'User_simple_ulid.php',
         ];
+
+        yield 'entity_add_bool' => [
+            'User_simple.php',
+            new ClassProperty(propertyName: 'isPublished', type: 'boolean'),
+            'User_simple_bool.php',
+        ];
+    }
+
+    public function testAddEntityFieldKeepsAnIdentifierNullable()
+    {
+        $manipulator = new ClassSourceManipulator(
+            sourceCode: file_get_contents(__DIR__.'/fixtures/source/User_empty.php'),
+            // the properties are only generated when the mapping lives outside of the class, e.g. in XML
+            useAttributesForDoctrineMapping: false,
+        );
+        $manipulator->addEntityField(new ClassProperty(propertyName: 'id', type: 'integer', id: true, nullable: false));
+
+        $this->assertSame(file_get_contents(__DIR__.'/fixtures/add_entity_field/User_empty_id.php'), $manipulator->getSourceCode());
+    }
+
+    public function testAddEntityFieldFollowsTheTypeOfAnExistingProperty()
+    {
+        $manipulator = new ClassSourceManipulator(file_get_contents(__DIR__.'/fixtures/source/User_typed_props.php'));
+
+        // a property that can hold null gets the accessors it always got, whatever its column
+        foreach (['nullableProp', 'unionProp', 'untypedProp'] as $propertyName) {
+            $manipulator->addEntityField(new ClassProperty(propertyName: $propertyName, type: 'string', length: 255));
+        }
+        $manipulator->addEntityField(new ClassProperty(propertyName: 'untypedArrayProp', type: 'json'));
+
+        // a property that cannot hold null gets accessors that do not deal with it, whatever its column
+        $manipulator->addEntityField(new ClassProperty(propertyName: 'notNullableProp', type: 'string', length: 255));
+        $manipulator->addEntityField(new ClassProperty(propertyName: 'notNullablePropOfNullableColumn', type: 'string', length: 255, nullable: true));
+
+        $this->assertSame(file_get_contents(__DIR__.'/fixtures/add_entity_field/User_typed_props.php'), $manipulator->getSourceCode());
     }
 
     public function testAddEntityFieldWithEnumDefaultValue(): void
@@ -422,6 +457,48 @@ class ClassSourceManipulatorTest extends TestCase
                 isNullable: true,
             ),
         ];
+
+        yield 'many_to_one_not_nullable_no_inverse' => [
+            'User_simple.php',
+            'User_simple_not_nullable_no_inverse.php',
+            new RelationManyToOne(
+                propertyName: 'category',
+                targetClassName: \App\Entity\Category::class,
+                mapInverseRelation: false,
+                isOwning: true,
+            ),
+        ];
+    }
+
+    public function testAddSingularRelationFollowsTheTypeOfAnExistingProperty()
+    {
+        $manipulator = new ClassSourceManipulator(file_get_contents(__DIR__.'/fixtures/source/User_typed_relations.php'));
+
+        // a property that can hold null gets the accessors it always got, even though its join column is not nullable
+        $manipulator->addManyToOneRelation(new RelationManyToOne(
+            propertyName: 'category',
+            targetClassName: \App\Entity\Category::class,
+            targetPropertyName: 'foods',
+            isOwning: true,
+        ));
+
+        // a property that cannot hold null gets accessors that do not deal with it, even though its join column is nullable
+        $manipulator->addManyToOneRelation(new RelationManyToOne(
+            propertyName: 'mainCategory',
+            targetClassName: \App\Entity\Category::class,
+            mapInverseRelation: false,
+            isOwning: true,
+            isNullable: true,
+        ));
+        $manipulator->addOneToOneRelation(new RelationOneToOne(
+            propertyName: 'userProfile',
+            targetClassName: \App\Entity\UserProfile::class,
+            mapInverseRelation: false,
+            isOwning: true,
+            isNullable: true,
+        ));
+
+        $this->assertSame(file_get_contents(__DIR__.'/fixtures/add_many_to_one_relation/User_typed_relations.php'), $manipulator->getSourceCode());
     }
 
     /**
@@ -462,6 +539,18 @@ class ClassSourceManipulatorTest extends TestCase
                 propertyName: 'avatarPhotos',
                 targetClassName: \App\Entity\UserAvatarPhoto::class,
                 targetPropertyName: 'user',
+                isNullable: true,
+            ),
+        ];
+
+        // the owning side cannot be set to null when an object is removed from the collection
+        yield 'one_to_many_not_nullable' => [
+            'User_simple.php',
+            'User_simple_not_nullable.php',
+            new RelationOneToMany(
+                propertyName: 'avatarPhotos',
+                targetClassName: \App\Entity\UserAvatarPhoto::class,
+                targetPropertyName: 'user',
             ),
         ];
 
@@ -474,6 +563,7 @@ class ClassSourceManipulatorTest extends TestCase
                 propertyName: 'avatarPhotos',
                 targetClassName: \App\Entity\UserAvatarPhoto::class,
                 targetPropertyName: 'user',
+                isNullable: true,
             ),
         ];
 
@@ -484,6 +574,7 @@ class ClassSourceManipulatorTest extends TestCase
                 propertyName: 'avatarPhotos',
                 targetClassName: \App\Entity\UserAvatarPhoto::class,
                 targetPropertyName: 'user',
+                isNullable: true,
             ),
         ];
 

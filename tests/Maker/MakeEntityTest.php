@@ -411,8 +411,8 @@ class MakeEntityTest extends MakerTestCase
                 self::assertStringContainsString('class UserAvatarPhoto', file_get_contents($runner->getPath('src/Entity/UserAvatarPhoto.php')));
 
                 $bar = file_get_contents($runner->getPath('src/Entity/Bar.php'));
-                self::assertStringContainsString('private ?User $author = null;', $bar);
-                self::assertStringContainsString('private ?UserAvatarPhoto $photo = null;', $bar);
+                self::assertStringContainsString('private User $author;', $bar);
+                self::assertStringContainsString('private UserAvatarPhoto $photo;', $bar);
             }),
         ];
 
@@ -867,8 +867,12 @@ class MakeEntityTest extends MakerTestCase
                 $entity = file_get_contents($runner->getPath('src/Entity/User.php'));
 
                 self::assertStringContainsString('#[ORM\Column(length: 100)]', $entity);
-                self::assertStringContainsString('private ?string $name = null;', $entity);
+                // a field that is not nullable is not nullable in PHP either
+                self::assertStringContainsString('private string $name;', $entity);
+                self::assertStringContainsString('public function getName(): string', $entity);
                 self::assertStringContainsString('#[ORM\\Column(type: Types::TEXT, nullable: true)]', $entity);
+                self::assertStringContainsString('private ?string $biography = null;', $entity);
+                self::assertStringContainsString('public function getBiography(): ?string', $entity);
                 self::assertStringContainsString('#[ORM\\Column(type: Types::DECIMAL, precision: 10, scale: 2)]', $entity);
                 // the type of "createdAt" is guessed from its name, exactly as in interactive mode
                 self::assertStringContainsString('private ?\\DateTimeImmutable $createdAt = null;', $entity);
@@ -925,19 +929,27 @@ class MakeEntityTest extends MakerTestCase
                 // without a "?" a relation is NOT NULL, which is where this differs from the
                 // interactive mode - there, nullable is the default answer
                 self::assertStringContainsString('#[ORM\\JoinColumn(nullable: false)]', $blogPost);
-                self::assertStringContainsString('private ?User $author = null;', $blogPost);
+                self::assertStringContainsString('private User $author;', $blogPost);
+                self::assertStringContainsString('public function getAuthor(): User', $blogPost);
+                self::assertStringContainsString('public function setAuthor(User $author): static', $blogPost);
                 self::assertStringContainsString('#[ORM\\ManyToMany(targetEntity: User::class, inversedBy: \'editedPosts\')]', $blogPost);
                 self::assertStringContainsString('#[ORM\\OneToMany(targetEntity: User::class, mappedBy: \'commentedPost\')]', $blogPost);
                 self::assertStringContainsString('private ?User $cover = null;', $blogPost);
+                self::assertStringContainsString('public function getCover(): ?User', $blogPost);
+                self::assertStringContainsString('public function setCover(?User $cover): static', $blogPost);
                 // a self reference resolves even though the class is generated afterwards
                 self::assertStringContainsString('#[ORM\\ManyToOne(targetEntity: self::class, inversedBy: \'children\')]', $blogPost);
                 self::assertStringContainsString('#[ORM\\OneToMany(targetEntity: self::class, mappedBy: \'parent\')]', $blogPost);
+                // removing an object from a collection sets its owning side to null when it is nullable...
+                self::assertStringContainsString('$child->setParent(null);', $blogPost);
 
                 // the property added to the other class is named after this entity by default
                 self::assertStringContainsString('#[ORM\\OneToMany(targetEntity: BlogPost::class, mappedBy: \'author\')]', $user);
                 self::assertStringContainsString('private Collection $blogPosts;', $user);
+                // ... and leaves it alone otherwise
+                self::assertStringNotContainsString('$blogPost->setAuthor(null);', $user);
                 self::assertStringContainsString('#[ORM\\ManyToMany(targetEntity: BlogPost::class, mappedBy: \'editors\')]', $user);
-                self::assertStringContainsString('private ?BlogPost $commentedPost = null;', $user);
+                self::assertStringContainsString('private BlogPost $commentedPost;', $user);
                 // a OneToOne does not map its inverse side unless asked to
                 self::assertStringNotContainsString('$cover', $user);
 

@@ -13,14 +13,14 @@ class User
     private ?int $id = null;
 
     #[ORM\Column(type: 'object')]
-    private ?object $someObject = null;
+    private object $someObject;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getSomeObject(): ?object
+    public function getSomeObject(): object
     {
         return $this->someObject;
     }

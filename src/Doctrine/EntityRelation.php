@@ -120,6 +120,7 @@ final class EntityRelation
                 targetPropertyName: $this->owningProperty,
                 isSelfReferencing: $this->isSelfReferencing,
                 orphanRemoval: $this->orphanRemoval,
+                isNullable: $this->isNullable,
             )),
             self::MANY_TO_MANY => (new RelationManyToMany(
                 propertyName: $this->inverseProperty,

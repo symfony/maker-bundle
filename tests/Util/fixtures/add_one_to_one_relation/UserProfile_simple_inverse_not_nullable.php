@@ -28,10 +28,8 @@ class UserProfile
 
     public function setUser(User $user): static
     {
-        // set the owning side of the relation if necessary
-        if ($user->getUserProfile() !== $this) {
-            $user->setUserProfile($this);
-        }
+        // set the owning side of the relation
+        $user->setUserProfile($this);
 
         $this->user = $user;
 
