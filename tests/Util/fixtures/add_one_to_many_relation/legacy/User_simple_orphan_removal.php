@@ -50,12 +50,7 @@ class User
 
     public function removeAvatarPhoto(UserAvatarPhoto $avatarPhoto): static
     {
-        if ($this->avatarPhotos->removeElement($avatarPhoto)) {
-            // set the owning side to null (unless already changed)
-            if ($avatarPhoto->getUser() === $this) {
-                $avatarPhoto->setUser(null);
-            }
-        }
+        $this->avatarPhotos->removeElement($avatarPhoto);
 
         return $this;
     }

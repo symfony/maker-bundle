@@ -21,6 +21,9 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
  */
 final class ClassProperty
 {
+    /**
+     * @param bool $nullableProperty Whether the property accepts null even though its column does not
+     */
     public function __construct(
         public string $propertyName,
         public string $type,
@@ -34,6 +37,7 @@ final class ClassProperty
         public bool $needsTypeHint = true,
         public bool $unique = false,
         public ?string $enumType = null,
+        public bool $nullableProperty = false,
     ) {
     }
 

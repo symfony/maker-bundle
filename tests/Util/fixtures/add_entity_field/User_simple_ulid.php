@@ -14,14 +14,14 @@ class User
     private ?int $id = null;
 
     #[ORM\Column(type: 'ulid')]
-    private ?Ulid $ulid = null;
+    private Ulid $ulid;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUlid(): ?Ulid
+    public function getUlid(): Ulid
     {
         return $this->ulid;
     }

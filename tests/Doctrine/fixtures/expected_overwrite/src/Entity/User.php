@@ -29,10 +29,17 @@ class User
     #[ORM\ManyToMany(targetEntity: Tag::class)]
     private Collection $tags;
 
+    /**
+     * @var Collection<int, Tag>
+     */
+    #[ORM\OneToMany(targetEntity: Tag::class, mappedBy: 'owner')]
+    private Collection $ownedTags;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
         $this->avatars = new ArrayCollection();
+        $this->ownedTags = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -117,6 +124,31 @@ class User
     public function removeTag(Tag $tag): static
     {
         $this->tags->removeElement($tag);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tag>
+     */
+    public function getOwnedTags(): Collection
+    {
+        return $this->ownedTags;
+    }
+
+    public function addOwnedTag(Tag $ownedTag): static
+    {
+        if (!$this->ownedTags->contains($ownedTag)) {
+            $this->ownedTags->add($ownedTag);
+            $ownedTag->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOwnedTag(Tag $ownedTag): static
+    {
+        $this->ownedTags->removeElement($ownedTag);
 
         return $this;
     }
