@@ -13,14 +13,14 @@ class User
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: false, options: ['comment' => 'new field'])]
-    private ?string $fooProp = null;
+    private string $fooProp;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getFooProp(): ?string
+    public function getFooProp(): string
     {
         return $this->fooProp;
     }

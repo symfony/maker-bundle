@@ -34,7 +34,10 @@ final class RelationOneToMany extends BaseCollectionRelation
         throw new \Exception('OneToMany IS the inverse side!');
     }
 
-    public static function createFromObject(OneToManyAssociationMapping|array $mapping): self
+    /**
+     * @param bool $isNullable Whether the property of the owning side accepts null
+     */
+    public static function createFromObject(OneToManyAssociationMapping|array $mapping, bool $isNullable = true): self
     {
         /* @legacy Remove conditional when ORM 2.x is no longer supported! */
         if (\is_array($mapping)) {
@@ -43,6 +46,7 @@ final class RelationOneToMany extends BaseCollectionRelation
                 targetClassName: $mapping['targetEntity'],
                 targetPropertyName: $mapping['mappedBy'],
                 orphanRemoval: $mapping['orphanRemoval'],
+                isNullable: $isNullable,
             );
         }
 
@@ -51,6 +55,7 @@ final class RelationOneToMany extends BaseCollectionRelation
             targetClassName: $mapping->targetEntity,
             targetPropertyName: $mapping->mappedBy,
             orphanRemoval: $mapping->orphanRemoval,
+            isNullable: $isNullable,
         );
     }
 }

@@ -95,9 +95,6 @@ final class ClassSourceManipulator
             }
         }
 
-        // 2) USE property type on property below, nullable
-        // 3) If default value, then NOT nullable
-
         $nullable = $mapping->nullable ?? false;
 
         $attributes[] = $this->buildAttributeNode(Column::class, $mapping->getAttributes(), 'ORM');
@@ -126,9 +123,19 @@ final class ClassSourceManipulator
         }
 
         $propertyType = $typeHint;
-        if ($propertyType && !$defaultValue && 'mixed' !== $propertyType) {
-            // all property types
-            $propertyType = '?'.$propertyType;
+        // "mixed" cannot be made nullable, and an array that is not nullable defaults to an empty one
+        $isTypeNullable = $propertyType && !$defaultValue && 'mixed' !== $propertyType;
+
+        if ($isTypeNullable) {
+            // the property is as nullable as its column, unless asked otherwise or
+            // for an identifier, which is null until the entity is persisted
+            if ($nullable || ($mapping->id ?? false) || $mapping->nullableProperty) {
+                $propertyType = '?'.$propertyType;
+            } else {
+                // a property that cannot be null has no default value:
+                // it is left uninitialized until it is set
+                $defaultValue = self::DEFAULT_VALUE_NONE;
+            }
         }
 
         $this->addProperty(
@@ -139,19 +146,15 @@ final class ClassSourceManipulator
             propertyType: $propertyType
         );
 
-        $this->addGetter(
-            $mapping->propertyName,
-            $typeHint,
-            // getter methods always have nullable return values
-            // because even though these are required in the db, they may not be set yet
-            // unless there is a default value
-            null === $defaultValue && 'mixed' !== $propertyType,
-            $commentLines
-        );
+        // a property that already exists is never overwritten, hence reading its type from
+        // the class: the accessors do not deal with null when the property cannot hold it
+        $isTypeNullable = $isTypeNullable && $this->isPropertyNullable($mapping->propertyName);
+
+        $this->addGetter($mapping->propertyName, $typeHint, $isTypeNullable, $commentLines);
 
         // don't generate setters for id fields
         if (!($mapping->id ?? false)) {
-            $this->addSetter($mapping->propertyName, $typeHint, $nullable && 'mixed' !== $propertyType);
+            $this->addSetter($mapping->propertyName, $typeHint, $nullable && $isTypeNullable);
         }
     }
 
@@ -509,19 +512,28 @@ final class ClassSourceManipulator
             $attributes[] = $this->buildAttributeNode(JoinColumn::class, ['nullable' => false], 'ORM');
         }
 
+        // the inverse side of a OneToOne is not backed by a column:
+        // nothing guarantees that there is an object on the other side
+        $isNullable = !$relation->isOwning() || $relation->isNullable();
+
         $this->addProperty(
             name: $relation->getPropertyName(),
-            defaultValue: null,
+            // a property that cannot be null has no default value:
+            // it is left uninitialized until it is set
+            defaultValue: $isNullable ? null : self::DEFAULT_VALUE_NONE,
             attributes: $attributes,
-            propertyType: '?'.$typeHint,
+            propertyType: ($isNullable ? '?' : '').$typeHint,
         );
+
+        // a property that already exists is never overwritten, hence reading its type from
+        // the class: the accessors do not deal with null when the property cannot hold it
+        $isNullable = $this->isPropertyNullable($relation->getPropertyName());
 
         $this->addGetter(
             $relation->getPropertyName(),
             $relation->getCustomReturnType() ?? $typeHint,
-            // getter methods always have nullable return values
-            // unless this has been customized explicitly
-            !$relation->getCustomReturnType() || $relation->isCustomReturnTypeNullable()
+            // unless the return type has been customized explicitly
+            $relation->getCustomReturnType() ? $relation->isCustomReturnTypeNullable() : $isNullable
         );
 
         if ($relation->shouldAvoidSetter()) {
@@ -531,12 +543,9 @@ final class ClassSourceManipulator
         $setterNodeBuilder = $this->createSetterNodeBuilder(
             $relation->getPropertyName(),
             $typeHint,
-            // make the type-hint nullable always for ManyToOne to allow the owning
-            // side to be set to null, which is needed for orphanRemoval
-            // (specifically: when you set the inverse side, the generated
-            // code will *also* set the owning side to null - so it needs to be allowed)
-            // e.g. $userAvatarPhoto->setUser(null);
-            $relation instanceof RelationOneToOne ? $relation->isNullable() : true
+            // on top of that, a OneToOne cannot be unset when its owning side is not nullable,
+            // even from its inverse side, the property of which is always nullable
+            $isNullable && (!$relation instanceof RelationOneToOne || $relation->isNullable())
         );
 
         // set the *owning* side of the relation
@@ -682,8 +691,9 @@ final class ClassSourceManipulator
             [new Node\Expr\Variable($argName)]
         );
 
-        // set the owning side of the relationship
-        if ($relation->isOwning()) {
+        // set the owning side of the relationship, unless its property cannot
+        // hold null: the object is only removed from the collection then
+        if ($relation->isOwning() || ($relation instanceof RelationOneToMany && !$relation->isNullable())) {
             // $this->avatars->removeElement($avatar);
             $removerNodeBuilder->addStmt(BuilderHelpers::normalizeStmt($removeElementCall));
         } else {
@@ -1187,29 +1197,19 @@ final class ClassSourceManipulator
     private function addNodesToSetOtherSideOfOneToOne(RelationOneToOne $relation, Builder\Method $setterNodeBuilder): void
     {
         if (!$relation->isNullable()) {
+            // the getter of the owning side cannot tell whether this is necessary:
+            // its property is not nullable, so it may not be initialized yet
             $setterNodeBuilder->addStmt($this->createSingleLineCommentNode(
-                'set the owning side of the relation if necessary',
+                'set the owning side of the relation',
                 self::CONTEXT_CLASS_METHOD
             ));
 
-            // if ($user->getUserProfile() !== $this) {
-            $ifNode = new Node\Stmt\If_(new Node\Expr\BinaryOp\NotIdentical(
-                new Node\Expr\MethodCall(
-                    new Node\Expr\Variable($relation->getPropertyName()),
-                    $relation->getTargetGetterMethodName()
-                ),
-                new Node\Expr\Variable('this')
-            ));
-
             // $user->setUserProfile($this);
-            $ifNode->stmts = [
-                new Node\Stmt\Expression(new Node\Expr\MethodCall(
-                    new Node\Expr\Variable($relation->getPropertyName()),
-                    $relation->getTargetSetterMethodName(),
-                    [new Node\Arg(new Node\Expr\Variable('this'))]
-                )),
-            ];
-            $setterNodeBuilder->addStmt($ifNode);
+            $setterNodeBuilder->addStmt(new Node\Stmt\Expression(new Node\Expr\MethodCall(
+                new Node\Expr\Variable($relation->getPropertyName()),
+                $relation->getTargetSetterMethodName(),
+                [new Node\Arg(new Node\Expr\Variable('this'))]
+            )));
             $setterNodeBuilder->addStmt($this->createBlankLineNode(self::CONTEXT_CLASS_METHOD));
 
             return;
@@ -1298,8 +1298,34 @@ final class ClassSourceManipulator
 
     private function propertyExists(string $propertyName): bool
     {
-        foreach ($this->getClassNode()->stmts as $i => $node) {
+        return null !== $this->getPropertyNode($propertyName);
+    }
+
+    private function getPropertyNode(string $propertyName): ?Node\Stmt\Property
+    {
+        foreach ($this->getClassNode()->stmts as $node) {
             if ($node instanceof Node\Stmt\Property && $node->props[0]->name->toString() === $propertyName) {
+                return $node;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Tells if the property accepts null according to the type it is declared with.
+     */
+    private function isPropertyNullable(string $propertyName): bool
+    {
+        $type = $this->getPropertyNode($propertyName)?->type;
+
+        // a property without a type accepts anything
+        if (null === $type || $type instanceof Node\NullableType) {
+            return true;
+        }
+
+        foreach ($type instanceof Node\UnionType ? $type->types : [$type] as $singleType) {
+            if ($singleType instanceof Node\Identifier && \in_array($singleType->toLowerString(), ['null', 'mixed'], true)) {
                 return true;
             }
         }

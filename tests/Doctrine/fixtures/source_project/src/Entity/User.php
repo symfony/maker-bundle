@@ -29,6 +29,12 @@ class User
     #[ORM\ManyToMany(targetEntity: Tag::class)]
     private Collection $tags;
 
+    /**
+     * @var Collection<int, Tag>
+     */
+    #[ORM\OneToMany(targetEntity: Tag::class, mappedBy: 'owner')]
+    private Collection $ownedTags;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();

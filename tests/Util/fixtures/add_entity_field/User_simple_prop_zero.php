@@ -14,14 +14,14 @@ class User
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 6, scale: 0)]
-    private ?string $decimal = null;
+    private string $decimal;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDecimal(): ?string
+    public function getDecimal(): string
     {
         return $this->decimal;
     }

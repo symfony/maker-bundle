@@ -14,14 +14,14 @@ class User
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?UserProfile $userProfile = null;
+    private UserProfile $userProfile;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUserProfile(): ?UserProfile
+    public function getUserProfile(): UserProfile
     {
         return $this->userProfile;
     }

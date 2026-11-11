@@ -14,19 +14,19 @@ class User
 
     #[ORM\ManyToOne(inversedBy: 'foods')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Category $category = null;
+    private Category $category;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCategory(): ?Category
+    public function getCategory(): Category
     {
         return $this->category;
     }
 
-    public function setCategory(?Category $category): static
+    public function setCategory(Category $category): static
     {
         $this->category = $category;
 
