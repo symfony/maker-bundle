@@ -26,11 +26,11 @@ use Symfony\Component\Security\Http\Attribute\IsGrantedContext;
  */
 final class UserClassBuilder
 {
-    public function addUserInterfaceImplementation(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
+    public function addUserInterfaceImplementation(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig, string $userClass): void
     {
         $manipulator->addInterface(UserInterface::class);
 
-        $this->addUniqueConstraint($manipulator, $userClassConfig);
+        $this->addUniqueConstraint($manipulator, $userClassConfig, $userClass);
 
         $this->addGetUsername($manipulator, $userClassConfig);
 
@@ -342,16 +342,20 @@ final class UserClassBuilder
         $manipulator->addMethodBuilder($builder);
     }
 
-    private function addUniqueConstraint(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig): void
+    private function addUniqueConstraint(ClassSourceManipulator $manipulator, UserClassConfiguration $userClassConfig, string $userClass): void
     {
         if (!$userClassConfig->isEntity()) {
             return;
         }
 
+        // on some platforms (e.g. PostgreSQL, SQLite), index names are not scoped to their table:
+        // the class name keeps them distinct when the app has several user classes
+        $name = \sprintf('%s_UNIQ_IDENTIFIER_%s', Str::asSnakeCase(Str::getShortClassName($userClass)), Str::asSnakeCase($userClassConfig->getIdentityPropertyName()));
+
         $manipulator->addAttributeToClass(
             'ORM\\UniqueConstraint',
             [
-                'name' => 'UNIQ_IDENTIFIER_'.strtoupper(Str::asSnakeCase($userClassConfig->getIdentityPropertyName())),
+                'name' => strtoupper($name),
                 'fields' => [$userClassConfig->getIdentityPropertyName()],
             ]
         );

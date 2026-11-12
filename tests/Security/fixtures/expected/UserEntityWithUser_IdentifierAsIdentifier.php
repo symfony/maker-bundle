@@ -7,7 +7,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USER_IDENTIFIER', fields: ['user_identifier'])]
+#[ORM\UniqueConstraint(name: 'USER_UNIQ_IDENTIFIER_USER_IDENTIFIER', fields: ['user_identifier'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
