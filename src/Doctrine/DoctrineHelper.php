@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
@@ -335,7 +336,36 @@ final class DoctrineHelper
         /** @var Connection $connection */
         $connection = $this->getRegistry()->getConnection();
 
-        return $connection->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name);
+        return self::isReservedKeyword($connection->getDatabasePlatform(), $name);
+    }
+
+    /**
+     * Tells whether the given name is a reserved keyword of the database platform.
+     */
+    public static function isReservedKeyword(AbstractPlatform $platform, string $name): bool
+    {
+        // DBAL 5 removes reserved keyword lists and quotes all identifiers instead.
+        // TODO: when DBAL 5 is supported, review whether generated table names still need
+        // to be escaped and whether reserved field names should still be rejected.
+        if (!method_exists($platform, 'getReservedKeywordsList')) {
+            return false;
+        }
+
+        // Reserved keyword lists are deprecated since DBAL 4.3, without a replacement yet.
+        // Swallow that specific deprecation for the duration of the call only.
+        $previousHandler = set_error_handler(static function (int $type, string $message, string $file, int $line) use (&$previousHandler) {
+            if (\E_USER_DEPRECATED === $type && str_contains($message, 'https://github.com/doctrine/dbal/pull/6607')) {
+                return true;
+            }
+
+            return null !== $previousHandler && $previousHandler($type, $message, $file, $line);
+        });
+
+        try {
+            return $platform->getReservedKeywordsList()->isKeyword($name);
+        } finally {
+            restore_error_handler();
+        }
     }
 
     /**

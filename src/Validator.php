@@ -12,6 +12,7 @@
 namespace Symfony\Bundle\MakerBundle;
 
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -158,7 +159,7 @@ final class Validator
     public static function validateDoctrineFieldName(string $name, ManagerRegistry $registry): string
     {
         // check reserved words
-        if ($registry->getConnection()->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($name)) {
+        if (DoctrineHelper::isReservedKeyword($registry->getConnection()->getDatabasePlatform(), $name)) {
             throw new \InvalidArgumentException(\sprintf('Name "%s" is a reserved word.', $name));
         }
 

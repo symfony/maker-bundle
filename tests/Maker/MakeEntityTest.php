@@ -993,6 +993,7 @@ class MakeEntityTest extends MakerTestCase
                     'body:text:100' => 'has more options than the type',
                     // reserved words and invalid property names are a clean error, not a stack trace
                     '1name' => 'is not a valid PHP property name',
+                    'order' => 'is a reserved word',
                 ];
 
                 foreach ($invalidDefinitions as $definition => $expectedError) {
