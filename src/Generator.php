@@ -46,7 +46,7 @@ class Generator
      * Generate a new file for a class from a template.
      *
      * @param string $className    The fully-qualified class name
-     * @param string $templateName Template name in Resources/skeleton to use
+     * @param string $templateName Template name in the templates/ dir to use
      * @param array  $variables    Array of variables to pass to the template
      *
      * @return string The path where the file will be created
@@ -315,43 +315,12 @@ class Generator
 
         $templatePath = $templateName;
         if (!file_exists($templatePath)) {
-            $templatePath = \sprintf('%s/templates/%s', \dirname(__DIR__), $templateName);
-
-            if (!file_exists($templatePath)) {
-                $templatePath = $this->getTemplateFromLegacySkeletonPath($templateName);
-            }
-
-            if (!file_exists($templatePath)) {
-                throw new \Exception(\sprintf('Cannot find template "%s" in the templates/ dir.', $templateName));
-            }
+            $templatePath = $this->fileManager->resolveMakerTemplatePath($templateName);
         }
 
         $this->pendingOperations[$targetPath] = [
             'template' => $templatePath,
             'variables' => $variables,
         ];
-    }
-
-    /**
-     * @legacy - Remove when public generate methods become "internal" to MakerBundle in v2
-     */
-    private function getTemplateFromLegacySkeletonPath(string $templateName): string
-    {
-        $templatePath = $templateName;
-        if (!file_exists($templatePath)) {
-            $templatePath = __DIR__.'/Resources/skeleton/'.$templateName;
-
-            if (!file_exists($templatePath)) {
-                throw new \Exception(\sprintf('Cannot find template "%s"', $templateName));
-            }
-        }
-
-        @trigger_deprecation(
-            'symfony/maker-bundle',
-            '1.62.0',
-            'Storing templates in src/Resources/skeleton is deprecated. Store MakerBundle templates in the "~/templates/" dir instead.',
-        );
-
-        return $templatePath;
     }
 }

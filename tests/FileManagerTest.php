@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Tests;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
@@ -191,6 +192,71 @@ class FileManagerTest extends TestCase
             '/home/project/templates',
             'templates/template.html.twig',
         ];
+    }
+
+    public function testResolveMakerTemplatePath()
+    {
+        $rootDir = str_replace('\\', '/', __DIR__).'/tmp/template_override_'.bin2hex(random_bytes(8));
+        $fs = new Filesystem();
+        $fs->mkdir($rootDir.'/templates/bundles/MakerBundle/command');
+
+        try {
+            $fileManager = new FileManager($fs, $this->createMock(AutoloaderUtil::class), new MakerFileLinkFormatter(null), $rootDir, 'templates');
+
+            $this->assertSame(\dirname(__DIR__).'/templates/command/Command.tpl.php', $fileManager->resolveMakerTemplatePath('command/Command.tpl.php'));
+
+            $overridePath = $rootDir.'/templates/bundles/MakerBundle/command/Command.tpl.php';
+            $fs->dumpFile($overridePath, 'override');
+
+            $this->assertSame($overridePath, $fileManager->resolveMakerTemplatePath('command/Command.tpl.php'));
+
+            $fileManagerWithoutTwig = new FileManager($fs, $this->createMock(AutoloaderUtil::class), new MakerFileLinkFormatter(null), $rootDir);
+            $this->assertSame($overridePath, $fileManagerWithoutTwig->resolveMakerTemplatePath('command/Command.tpl.php'));
+        } finally {
+            $fs->remove($rootDir);
+        }
+    }
+
+    public function testResolveBundleTemplatePath()
+    {
+        $rootDir = str_replace('\\', '/', __DIR__).'/tmp/bundle_template_override_'.bin2hex(random_bytes(8));
+        $bundleDir = str_replace('\\', '/', __DIR__).'/tmp/fake_bundle_'.bin2hex(random_bytes(8));
+        $fs = new Filesystem();
+        $fs->mkdir($rootDir.'/templates/bundles/AcmeBundle/report');
+        $fs->mkdir($bundleDir.'/templates/report');
+        $fs->dumpFile($bundleDir.'/templates/report/Report.tpl.php', 'bundle template');
+
+        try {
+            $fileManager = new FileManager($fs, $this->createMock(AutoloaderUtil::class), new MakerFileLinkFormatter(null), $rootDir, 'templates', ['AcmeBundle' => ['path' => $bundleDir]]);
+
+            $this->assertSame($bundleDir.'/templates/report/Report.tpl.php', $fileManager->resolveMakerTemplatePath('@AcmeBundle/report/Report.tpl.php'));
+
+            $overridePath = $rootDir.'/templates/bundles/AcmeBundle/report/Report.tpl.php';
+            $fs->dumpFile($overridePath, 'override');
+
+            $this->assertSame($overridePath, $fileManager->resolveMakerTemplatePath('@AcmeBundle/report/Report.tpl.php'));
+        } finally {
+            $fs->remove($rootDir);
+            $fs->remove($bundleDir);
+        }
+    }
+
+    public function testResolveUnknownBundleTemplatePath()
+    {
+        $bundleDir = str_replace('\\', '/', __DIR__).'/tmp/unknown_bundle_'.bin2hex(random_bytes(8));
+        $fs = new Filesystem();
+        $fs->mkdir($bundleDir.'/templates');
+
+        try {
+            $fileManager = new FileManager($fs, $this->createMock(AutoloaderUtil::class), new MakerFileLinkFormatter(null), __DIR__.'/tmp', 'templates', ['AcmeBundle' => ['path' => $bundleDir]]);
+
+            $this->expectException(RuntimeCommandException::class);
+            $this->expectExceptionMessage('Cannot find maker template "@AcmeBundle/report/Report.tpl.php".');
+
+            $fileManager->resolveMakerTemplatePath('@AcmeBundle/report/Report.tpl.php');
+        } finally {
+            $fs->remove($bundleDir);
+        }
     }
 
     public function testWithMakerFileLinkFormatter()

@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle;
 
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Bundle\MakerBundle\Util\AutoloaderUtil;
 use Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -32,6 +33,7 @@ class FileManager
         private MakerFileLinkFormatter $makerFileLinkFormatter,
         private string $rootDirectory,
         private ?string $twigDefaultPath = null,
+        private array $bundlesMetadata = [],
     ) {
         $this->rootDirectory = rtrim($this->realPath($this->normalizeSlashes($rootDirectory)), '/');
         $this->twigDefaultPath = $twigDefaultPath ? rtrim($this->relativizePath($twigDefaultPath), '/') : null;
@@ -165,6 +167,36 @@ class FileManager
         }
 
         return $this->twigDefaultPath.'/'.$filename;
+    }
+
+    public function resolveMakerTemplatePath(string $templateName): string
+    {
+        if (str_starts_with($templateName, '@') && str_contains($templateName, '/')) {
+            [$bundleName, $templatePath] = explode('/', substr($templateName, 1), 2);
+            $bundlePath = $this->bundlesMetadata[$bundleName]['path'] ?? null;
+        } else {
+            $bundleName = 'MakerBundle';
+            $templatePath = $templateName;
+            $bundlePath = \dirname(__DIR__);
+        }
+
+        // The application can override any bundle template in templates/bundles/<BundleName>/.
+        $appTemplatePath = $this->absolutizePath(($this->twigDefaultPath ?? 'templates').'/bundles/'.$bundleName.'/'.$templatePath);
+        if (file_exists($appTemplatePath)) {
+            return $appTemplatePath;
+        }
+
+        // Fall back to the template shipped by the bundle itself.
+        if (null !== $bundlePath) {
+            foreach (['templates', 'Resources/views'] as $directory) {
+                $bundleTemplatePath = $bundlePath.'/'.$directory.'/'.$templatePath;
+                if (file_exists($bundleTemplatePath)) {
+                    return $bundleTemplatePath;
+                }
+            }
+        }
+
+        throw new RuntimeCommandException(\sprintf('Cannot find maker template "%s".', $templateName));
     }
 
     /**
