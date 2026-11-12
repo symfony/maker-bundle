@@ -1,0 +1,13 @@
+---------------------------------------------------------------------------
+
+by kbond at 2026-11-10T23:16:43Z
+
+Could we let third-party makers opt in with `@AcmeBundle/report/Report.tpl.php`? Check `templates/bundles/AcmeBundle/report/Report.tpl.php` in the app first, then use `kernel.bundles_metadata` to find the bundle’s copy.
+
+`make:twig-component` passes absolute paths for `twig/Component.tpl.php`, `twig/LiveComponent.tpl.php`, and `twig/component_template.tpl.php`. Switching them to named references would make all three overridable.
+
+---------------------------------------------------------------------------
+
+by GromNaN at 2026-11-11T09:49:13Z
+
+Thanks @kbond for the suggestion. Named references like `@AcmeBundle/report/Report.tpl.php` now follow the same resolution as Twig bundle templates in Symfony, and they are useful for bundles that ship their own makers and templates. This is implemented in the latest commit.
