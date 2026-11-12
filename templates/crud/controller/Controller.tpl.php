@@ -76,6 +76,18 @@ namespace <?= $class_data->getNamespace() ?>;
     }
 
 <?= $generator->generateRouteForControllerMethod(sprintf('/{%s}', $entity_identifier), sprintf('%s_delete', $route_name), ['POST']) ?>
+<?php if ($use_csrf_attribute): ?>
+    #[IsCsrfTokenValid(new Expression('"delete" ~ args["<?= $entity_var_singular ?>"].get<?= ucfirst($entity_identifier) ?>()'))]
+    public function delete(<?= $entity_class_name ?> $<?= $entity_var_singular ?>, EntityManagerInterface $entityManager, ?InvalidCsrfTokenException $invalidCsrfToken = null): Response
+    {
+        if (null === $invalidCsrfToken) {
+            $entityManager->remove($<?= $entity_var_singular ?>);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
+    }
+<?php else: ?>
     public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(), $request->getPayload()->getString('_token'))) {
@@ -85,4 +97,5 @@ namespace <?= $class_data->getNamespace() ?>;
 
         return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
     }
+<?php endif ?>
 }

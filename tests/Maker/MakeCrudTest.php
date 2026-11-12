@@ -288,6 +288,64 @@ class MakeCrudTest extends MakerTestCase
             }),
         ];
 
+        yield 'it_generates_crud_with_csrf_attribute' => [self::buildMakerTest()
+            // the attribute needs the SecurityBundle, and the ExpressionLanguage for its id
+            ->addExtraDependencies('symfony/security-bundle', 'symfony/expression-language')
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-crud/SweetFood.php',
+                    'src/Entity/SweetFood.php'
+                );
+
+                $output = $runner->runMaker([], '--no-interaction SweetFood');
+
+                self::assertStringContainsString('src/Controller/SweetFoodController.php', $output);
+
+                $controller = file_get_contents($runner->getPath('src/Controller/SweetFoodController.php'));
+
+                // the attribute is only used once the controller can receive the InvalidCsrfTokenException (Symfony 8.2)
+                $attributeSource = file_get_contents($runner->getPath('vendor/symfony/security-http/Attribute/IsCsrfTokenValid.php'));
+
+                if (str_contains($attributeSource, 'RecoverableAttribute')) {
+                    self::assertStringContainsString('use Symfony\\Component\\Security\\Http\\Attribute\\IsCsrfTokenValid;', $controller);
+                    self::assertStringContainsString('use Symfony\\Component\\Security\\Http\\Exception\\InvalidCsrfTokenException;', $controller);
+                    self::assertStringContainsString(
+                        "#[IsCsrfTokenValid(new Expression('\"delete\" ~ args[\"sweetFood\"].getId()'))]\n    public function delete(SweetFood \$sweetFood, EntityManagerInterface \$entityManager, ?InvalidCsrfTokenException \$invalidCsrfToken = null)",
+                        $controller
+                    );
+                    self::assertStringContainsString('if (null === $invalidCsrfToken) {', $controller);
+                    self::assertStringNotContainsString('isCsrfTokenValid(', $controller);
+                    self::assertStringNotContainsString('$request->getPayload()', $controller);
+                } else {
+                    self::assertStringNotContainsString('IsCsrfTokenValid', $controller);
+                    self::assertStringContainsString("if (\$this->isCsrfTokenValid('delete'.\$sweetFood->getId(), \$request->getPayload()->getString('_token'))) {", $controller);
+                }
+
+                self::runCrudTest($runner, 'it_generates_crud_with_csrf_attribute.php');
+            }),
+        ];
+
+        yield 'it_generates_crud_without_csrf_attribute_when_expression_language_is_missing' => [self::buildMakerTest()
+            ->addExtraDependencies('symfony/security-bundle')
+            ->run(static function (MakerTestRunner $runner) {
+                $runner->copy(
+                    'make-crud/SweetFood.php',
+                    'src/Entity/SweetFood.php'
+                );
+
+                $output = $runner->runMaker([], '--no-interaction SweetFood');
+
+                self::assertStringContainsString('src/Controller/SweetFoodController.php', $output);
+
+                // the attribute's id is an Expression, so the action keeps checking the token itself
+                $controller = file_get_contents($runner->getPath('src/Controller/SweetFoodController.php'));
+                self::assertStringNotContainsString('IsCsrfTokenValid', $controller);
+                self::assertStringContainsString("if (\$this->isCsrfTokenValid('delete'.\$sweetFood->getId(), \$request->getPayload()->getString('_token'))) {", $controller);
+
+                self::runCrudTest($runner, 'it_generates_crud_with_csrf_attribute.php');
+            }),
+        ];
+
         yield 'it_generates_crud_with_no_base_template' => [self::buildMakerTest()
             ->run(static function (MakerTestRunner $runner) {
                 $runner->copy(
