@@ -314,7 +314,7 @@ class ClassSourceManipulatorTest extends TestCase
         ];
     }
 
-    public function testAddEntityFieldWithEnumDefaultValue(): void
+    public function testAddEntityFieldWithEnumDefaultValue()
     {
         require_once __DIR__.'/fixtures/enum_helper/src/Enum/Status.php';
 
@@ -322,6 +322,18 @@ class ClassSourceManipulatorTest extends TestCase
             file_get_contents(__DIR__.'/fixtures/source/User_simple.php'),
             new ClassProperty(propertyName: 'status', type: 'string', length: 255, options: ['default' => \App\Enum\Status::PUBLISHED], enumType: \App\Enum\Status::class),
             file_get_contents(__DIR__.'/fixtures/add_entity_field/User_simple_enum_default.php')
+        );
+    }
+
+    public function testAddEntityFieldWithMultipleEnumValues()
+    {
+        require_once __DIR__.'/fixtures/enum_helper/src/Enum/Status.php';
+
+        // Doctrine infers the "json" type from the array, but not the enum it holds
+        $this->runAddEntityFieldTests(
+            file_get_contents(__DIR__.'/fixtures/source/User_simple.php'),
+            new ClassProperty(propertyName: 'statuses', type: 'json', nullable: true, enumType: \App\Enum\Status::class),
+            file_get_contents(__DIR__.'/fixtures/add_entity_field/User_simple_enum_multiple.php')
         );
     }
 

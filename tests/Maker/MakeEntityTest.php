@@ -853,6 +853,11 @@ class MakeEntityTest extends MakerTestCase
                 '',
             ]);
 
+            $entity = file_get_contents($runner->getPath('src/Entity/User.php'));
+
+            // several enum values are stored in a "json" column, which Doctrine infers from the array
+            self::assertStringContainsString("#[ORM\\Column(nullable: true, enumType: Role::class)]\n    private ?array \$role = null;", $entity);
+
             self::runEntityTest($runner);
         }),
         ];
@@ -895,8 +900,9 @@ class MakeEntityTest extends MakerTestCase
 
                 // Doctrine infers the enum from the property type, so there is no "enumType"
                 self::assertStringContainsString("#[ORM\\Column(nullable: true)]\n    private ?Role \$role = null;", $entity);
-                // but it cannot infer it from an array, so the "multiple" field keeps it
-                self::assertStringContainsString('#[ORM\\Column(type: Types::SIMPLE_ARRAY, nullable: true, enumType: Role::class)]', $entity);
+                // but it cannot infer it from an array, so the "multiple" field keeps it; the
+                // array is enough to infer the "json" type, so there is no "type" either
+                self::assertStringContainsString("#[ORM\\Column(nullable: true, enumType: Role::class)]\n    private ?array \$otherRoles = null;", $entity);
                 // an enum is not a string field, so it must not pick up a length
                 self::assertStringNotContainsString('length: 255', $entity);
 

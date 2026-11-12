@@ -259,7 +259,7 @@ final class DoctrineHelper
     {
         $propertyType = match ($columnType) {
             Types::STRING, Types::TEXT, Types::GUID, Types::BIGINT, Types::DECIMAL => 'string',
-            'array', Types::SIMPLE_ARRAY, Types::JSON, 'jsonb' => 'array',
+            'array', 'simple_array', Types::JSON, 'jsonb' => 'array',
             Types::BOOLEAN => 'bool',
             Types::INTEGER, Types::SMALLINT => 'int',
             Types::FLOAT => 'float',

@@ -622,7 +622,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $classProperty->enumType = $this->resolveEnumClass(array_shift($parts) ?? '');
 
             if ($this->takeFlag($modifiers, 'multiple', $definition)) {
-                $classProperty->type = 'simple_array';
+                $classProperty->type = 'json';
             }
         } elseif (!\array_key_exists($type, $this->getTypesMap())) {
             throw new RuntimeCommandException(\sprintf('Invalid type "%s" for field "%s". Run the command without "--field" to see the available types.', $type, $fieldName));
@@ -848,7 +848,7 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $classProperty->enumType = $this->askEnumDetails($io);
 
             // set type according to user decision
-            $classProperty->type = $io->confirm('Can this field store multiple enum values', false) ? 'simple_array' : 'string';
+            $classProperty->type = $io->confirm('Can this field store multiple enum values', false) ? 'json' : 'string';
         }
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {
