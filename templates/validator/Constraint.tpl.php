@@ -4,7 +4,11 @@ namespace <?= $class_data->getNamespace(); ?>;
 
 <?= $class_data->getUseStatements(); ?>
 
+<?php if ('class' === $target): ?>
+#[\Attribute(\Attribute::IS_REPEATABLE)]
+<?php else: ?>
 #[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
+<?php endif; ?>
 <?= $class_data->getClassDeclaration(); ?>
 
 {
@@ -19,4 +23,11 @@ namespace <?= $class_data->getNamespace(); ?>;
     ) {
         parent::__construct([], $groups, $payload);
     }
+<?php if ('class' === $target): ?>
+
+    public function getTargets(): string
+    {
+        return self::CLASS_CONSTRAINT;
+    }
+<?php endif; ?>
 }

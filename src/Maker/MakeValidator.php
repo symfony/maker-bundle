@@ -17,9 +17,11 @@ use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Util\ClassSource\Model\ClassData;
+use Symfony\Bundle\MakerBundle\Validator\TargetEnum;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Validation;
@@ -45,8 +47,28 @@ final class MakeValidator extends AbstractMaker
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the validator class (e.g. <fg=yellow>EnabledValidator</>)')
+            ->addOption('target', null, InputOption::VALUE_REQUIRED, 'The target of the constraint class', TargetEnum::PROPERTY_TARGET->value, TargetEnum::values())
             ->setHelp($this->getHelpFileContents('MakeValidator.txt'))
         ;
+    }
+
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
+    {
+        $target = $input->getOption('target');
+        $supportedTargets = TargetEnum::values();
+
+        if (\in_array($target, $supportedTargets)) {
+            return;
+        }
+
+        $io->error(\sprintf('Invalid target "%s".', $target));
+        $selectedTarget = $io->choice(
+            'Target type',
+            $supportedTargets,
+            TargetEnum::PROPERTY_TARGET->value
+        );
+
+        $input->setOption('target', $selectedTarget);
     }
 
     /** @return void */
@@ -77,6 +99,9 @@ final class MakeValidator extends AbstractMaker
         $generator->generateClassFromClassData(
             $constraintDataClass,
             'validator/Constraint.tpl.php',
+            [
+                'target' => $input->getOption('target'),
+            ]
         );
 
         $generator->writeChanges();
