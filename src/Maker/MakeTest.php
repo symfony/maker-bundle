@@ -54,17 +54,6 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
         return 'make:test';
     }
 
-    /**
-     * @deprecated remove this method when removing make:unit-test and make:functional-test
-     *
-     * @return string[]
-     */
-    public static function getCommandAliases(): iterable
-    {
-        yield 'make:unit-test';
-        yield 'make:functional-test';
-    }
-
     public static function getCommandDescription(): string
     {
         return 'Create a new test class';
@@ -91,9 +80,6 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
-        /* @deprecated remove the following block when removing make:unit-test and make:functional-test */
-        $this->handleDeprecatedMakerCommands($input, $io);
-
         if (null !== $type = $input->getArgument('type')) {
             if (!isset(self::DESCRIPTIONS[$type])) {
                 throw new RuntimeCommandException(\sprintf('The test type must be one of "%s", "%s" given.', implode('", "', array_keys(self::DESCRIPTIONS)), $type));
@@ -205,25 +191,6 @@ final class MakeTest extends AbstractMaker implements InputAwareMakerInterface
                 );
 
                 return;
-        }
-    }
-
-    /**
-     * @deprecated
-     */
-    private function handleDeprecatedMakerCommands(InputInterface $input, ConsoleStyle $io): void
-    {
-        $currentCommand = $input->getFirstArgument();
-        switch ($currentCommand) {
-            case 'make:unit-test':
-                $input->setArgument('type', 'TestCase');
-                $io->warning('The "make:unit-test" command is deprecated, use "make:test" instead.');
-                break;
-
-            case 'make:functional-test':
-                $input->setArgument('type', trait_exists(PantherTestCaseTrait::class) ? 'WebTestCase' : 'PantherTestCase');
-                $io->warning('The "make:functional-test" command is deprecated, use "make:test" instead.');
-                break;
         }
     }
 }
