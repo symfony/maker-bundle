@@ -39,6 +39,13 @@ Append <comment>,multiple</comment> to store several values:
 
 <info>php %command.full_name% BlogPost --field=status:enum:Status --field=labels:enum:Label,multiple</info>
 
+Append <comment>,default=</comment> to give a field a default value, on its property as well as in the
+database: <comment>true</comment> or <comment>false</comment> for a boolean, the name of a case for an
+<comment>enum</comment>, and <comment>now</comment> for a date and time, which the constructor then creates.
+The value cannot contain a comma:
+
+<info>php %command.full_name% BlogPost --field=isPublished:boolean,default=false --field=status:enum:Status,default=Draft --field=createdAt,default=now</info>
+
 Relations use their own option, <comment>name:type:target</comment>, where the target is an entity
 class - its short name is enough:
 

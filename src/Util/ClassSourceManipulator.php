@@ -13,6 +13,7 @@ namespace Symfony\Bundle\MakerBundle\Util;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Schema\DefaultExpression;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Embedded;
@@ -95,10 +96,9 @@ final class ClassSourceManipulator
             }
         }
 
-        // 2) USE property type on property below, nullable
-        // 3) If default value, then NOT nullable
-
         $nullable = $mapping->nullable ?? false;
+        // PHP does not allow an object as the default value of a property: the constructor creates the date
+        $isDefaultValueADate = null !== $mapping->defaultValue && $typeHint && is_a(ltrim($typeHint, '\\'), \DateTimeInterface::class, true);
 
         $attributes[] = $this->buildAttributeNode(Column::class, $mapping->getAttributes(), 'ORM');
 
@@ -125,10 +125,19 @@ final class ClassSourceManipulator
             $typeHint = $this->addUseStatementIfNecessary(substr($typeHint, 1));
         }
 
+        if (null !== $mapping->defaultValue && !$isDefaultValueADate) {
+            $defaultValue = $this->buildNodeExprByValue($mapping->defaultValue);
+        }
+
         $propertyType = $typeHint;
-        if ($propertyType && !$defaultValue && 'mixed' !== $propertyType) {
-            // all property types
+        // a property that has a default value is only nullable when its column is
+        $isTypeNullable = $propertyType && 'mixed' !== $propertyType && ($nullable || (!$defaultValue && !$isDefaultValueADate));
+
+        if ($isTypeNullable) {
             $propertyType = '?'.$propertyType;
+        } elseif ($isDefaultValueADate) {
+            // the property is left uninitialized until the constructor sets it
+            $defaultValue = self::DEFAULT_VALUE_NONE;
         }
 
         $this->addProperty(
@@ -139,13 +148,20 @@ final class ClassSourceManipulator
             propertyType: $propertyType
         );
 
+        if ($isDefaultValueADate) {
+            $this->addStatementToConstructor(new Node\Stmt\Expression(new Node\Expr\Assign(
+                new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $mapping->propertyName),
+                new Node\Expr\New_(BuilderHelpers::normalizeName($typeHint))
+            )));
+        }
+
         $this->addGetter(
             $mapping->propertyName,
             $typeHint,
             // getter methods always have nullable return values
             // because even though these are required in the db, they may not be set yet
             // unless there is a default value
-            null === $defaultValue && 'mixed' !== $propertyType,
+            $isTypeNullable,
             $commentLines
         );
 
@@ -1366,6 +1382,9 @@ final class ClassSourceManipulator
                     new Node\Name($this->addUseStatementIfNecessary($value::class)),
                     $value->name
                 );
+            } elseif ($value instanceof DefaultExpression) {
+                // e.g. "new CurrentTimestamp()", the default value of a column that Doctrine DBAL turns into SQL
+                $nodeValue = new Node\Expr\New_(new Node\Name($this->addUseStatementIfNecessary($value::class)));
             } else {
                 throw new \Exception(\sprintf('Cannot build a node expr for value of type "%s"', \gettype($value)));
             }

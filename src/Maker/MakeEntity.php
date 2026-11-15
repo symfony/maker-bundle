@@ -12,7 +12,10 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use ApiPlatform\Metadata\ApiResource;
+use Doctrine\DBAL\Schema\DefaultExpression;
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
@@ -645,11 +648,97 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             throw new RuntimeCommandException(\sprintf('The field "%s" has more options than the type "%s" accepts.', $definition, $type));
         }
 
+        $defaultValue = $modifiers['default'] ?? null;
+        unset($modifiers['default']);
+
+        if (true === $defaultValue) {
+            throw new RuntimeCommandException(\sprintf('The "default" modifier of "%s" needs a value.', $definition));
+        }
+
+        if (null !== $defaultValue) {
+            $this->setDefaultValue($classProperty, $defaultValue);
+        }
+
         if ($modifiers) {
             throw new RuntimeCommandException(\sprintf('Unknown modifier "%s" in the field "%s".', array_key_first($modifiers), $definition));
         }
 
         return $classProperty;
+    }
+
+    /**
+     * Gives the field the value it holds until another one is set, in PHP as well as in the database.
+     */
+    private function setDefaultValue(ClassProperty $classProperty, string $value): void
+    {
+        $type = $this->getDefaultValueType($classProperty);
+
+        if (null === $type) {
+            throw new RuntimeCommandException(\sprintf('The "%s" field cannot have a default value.', $classProperty->propertyName));
+        }
+
+        [$defaultValue, $expected] = match ($type) {
+            'bool' => [['true' => true, 'false' => false][$value] ?? null, '"true" or "false"'],
+            'int' => [filter_var($value, \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE), 'an integer'],
+            'float' => [filter_var($value, \FILTER_VALIDATE_FLOAT, \FILTER_NULL_ON_FAILURE), 'a number'],
+            'numeric-string' => [is_numeric($value) ? $value : null, 'a number'],
+            // quotes allow for an empty value, or for one that starts or ends with a space
+            'string' => [preg_replace('/^(["\'])(.*)\1$/s', '$2', $value), 'a string'],
+            \DateTimeInterface::class => ['now' === $value ? $value : null, '"now", the current date and time'],
+            default => [array_column($type::cases(), null, 'name')[$value] ?? null, \sprintf('a case of "%s": "%s"', $type, implode('", "', array_column($type::cases(), 'name')))],
+        };
+
+        if (null === $defaultValue) {
+            throw new RuntimeCommandException(\sprintf('Invalid default value "%s" for the "%s" field: expected %s.', $value, $classProperty->propertyName, $expected));
+        }
+
+        $classProperty->defaultValue = $defaultValue;
+        // PHP creates the current date in the constructor of the entity, the database with an expression
+        $classProperty->options['default'] = \DateTimeInterface::class === $type ? $this->getCurrentTimestampDefault() : $defaultValue;
+    }
+
+    /**
+     * Tells what the default value of the field is made of: a scalar type, "numeric-string" for a
+     * number that is held in a string, the class of an enum, the interface of dates, or null when
+     * the field cannot have one.
+     */
+    private function getDefaultValueType(ClassProperty $classProperty): ?string
+    {
+        $propertyType = DoctrineHelper::getPropertyTypeForColumn($classProperty->type);
+
+        if (null !== $classProperty->enumType) {
+            // several cases are stored in an array, which already defaults to an empty one
+            return 'array' === $propertyType ? null : $classProperty->enumType;
+        }
+
+        if (\in_array($classProperty->type, [Types::BIGINT, Types::DECIMAL], true)) {
+            return 'numeric-string';
+        }
+
+        if (\in_array($propertyType, ['bool', 'int', 'float', 'string'], true)) {
+            return $propertyType;
+        }
+
+        // every platform can default to the current date and time, which is not
+        // the case for the current date alone, nor for the current time alone
+        if (\in_array($classProperty->type, [Types::DATETIME_MUTABLE, Types::DATETIME_IMMUTABLE, Types::DATETIMETZ_MUTABLE, Types::DATETIMETZ_IMMUTABLE, 'date_point'], true)) {
+            return \DateTimeInterface::class;
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the default value that makes the database set the current date and time itself.
+     */
+    private function getCurrentTimestampDefault(): DefaultExpression|string
+    {
+        // Doctrine DBAL 4.4 replaced the SQL expression of the platform with an object
+        if (class_exists(CurrentTimestamp::class)) {
+            return new CurrentTimestamp();
+        }
+
+        return $this->doctrineHelper->getRegistry()->getConnection()->getDatabasePlatform()->getCurrentTimestampSQL();
     }
 
     /**
@@ -853,9 +942,41 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
 
         if ($io->confirm('Can this field be null in the database (nullable)', false)) {
             $classProperty->nullable = true;
+        } else {
+            // a field that can be null needs no other default value
+            $this->askDefaultValue($io, $classProperty);
         }
 
         return $classProperty;
+    }
+
+    private function askDefaultValue(ConsoleStyle $io, ClassProperty $classProperty): void
+    {
+        $type = $this->getDefaultValueType($classProperty);
+
+        if (null === $type) {
+            return;
+        }
+
+        [$hint, $suggestions] = match ($type) {
+            'bool' => ['<comment>true</comment> or <comment>false</comment>, ', ['true', 'false']],
+            'int', 'float', 'numeric-string' => ['', null],
+            'string' => ['<comment>""</comment> for an empty string, ', null],
+            \DateTimeInterface::class => ['<comment>now</comment> for the current date and time, ', ['now']],
+            default => [\sprintf('a case of <comment>%s</comment>, ', Str::getShortClassName($type)), array_column($type::cases(), 'name')],
+        };
+
+        $question = new Question(\sprintf('Default value (%spress <return> for none)', $hint));
+        $question->setAutocompleterValues($suggestions);
+        $question->setValidator(function (?string $value) use ($classProperty) {
+            if (null !== $value) {
+                $this->setDefaultValue($classProperty, $value);
+            }
+
+            return $value;
+        });
+
+        $io->askQuestion($question);
     }
 
     private function printAvailableTypes(ConsoleStyle $io): void

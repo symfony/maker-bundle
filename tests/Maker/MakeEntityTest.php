@@ -104,6 +104,8 @@ class MakeEntityTest extends MakerTestCase
                     '',
                     // nullable
                     '',
+                    // no default value
+                    '',
                     // no more properties
                     '',
                 ]);
@@ -700,9 +702,10 @@ class MakeEntityTest extends MakerTestCase
                     // field name
                     'firstName',
                     'string',
-                    '',
                     '', // length (default 255)
                     // nullable
+                    '',
+                    // no default value
                     '',
                     // finish adding fields
                     '',
@@ -862,6 +865,110 @@ class MakeEntityTest extends MakerTestCase
         }),
         ];
 
+        yield 'it_creates_a_new_class_with_default_values' => [self::createMakeEntityTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::copyEntity($runner, 'Enum/Role-basic.php');
+
+                $output = $runner->runMaker([
+                    // entity class name
+                    'User',
+                    'isVerified',
+                    // use default boolean
+                    '',
+                    // nullable
+                    'n',
+                    // an invalid default value is asked for again
+                    'maybe',
+                    'false',
+                    'role',
+                    'enum',
+                    'App\\Entity\\Enum\\Role',
+                    // multiple
+                    'n',
+                    // nullable
+                    'n',
+                    // default value: the name of a case
+                    'USER',
+                    'createdAt',
+                    // use default datetime_immutable
+                    '',
+                    // nullable
+                    'n',
+                    // default value
+                    'now',
+                    'name',
+                    // use default string
+                    '',
+                    '', // length (default 255)
+                    // nullable
+                    'n',
+                    // no default value
+                    '',
+                    'nickname',
+                    // use default string
+                    '',
+                    '', // length (default 255)
+                    // nullable, which leaves no default value to ask for
+                    'y',
+                    // finish adding fields
+                    '',
+                ]);
+
+                self::assertStringContainsString('Invalid default value "maybe"', $output);
+
+                $entity = file_get_contents($runner->getPath('src/Entity/User.php'));
+
+                // the default value is the one of the column and of the property, which is not nullable anymore
+                self::assertStringContainsString("#[ORM\\Column(options: ['default' => false])]\n    private bool \$isVerified = false;", $entity);
+                self::assertStringContainsString('public function isVerified(): bool', $entity);
+                self::assertStringContainsString("#[ORM\\Column(options: ['default' => Role::USER])]\n    private Role \$role = Role::USER;", $entity);
+                // a date cannot be the default value of a property, so the constructor creates it
+                self::assertStringContainsString(\sprintf("#[ORM\\Column(options: ['default' => %s])]\n    private \\DateTimeImmutable \$createdAt;", self::getCurrentTimestampDefault($runner)), $entity);
+                self::assertStringContainsString('$this->createdAt = new \\DateTimeImmutable();', $entity);
+                self::assertStringContainsString("#[ORM\\Column(length: 255)]\n    private ?string \$name = null;", $entity);
+                self::assertStringContainsString("#[ORM\\Column(length: 255, nullable: true)]\n    private ?string \$nickname = null;", $entity);
+
+                self::runEntityTest($runner, ['name' => 'John']);
+            }),
+        ];
+
+        yield 'it_creates_fields_with_default_values_from_the_field_option' => [self::createMakeEntityTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::copyEntity($runner, 'Enum/Role-basic.php');
+
+                $runner->runMaker(
+                    [],
+                    '--no-interaction User'
+                    // the type of "isVerified" and of "createdAt" is guessed from their name
+                    .' --field=isVerified,default=true'
+                    .' --field=loginCount:integer,default=0'
+                    .' --field=rating:float,default=2.5'
+                    .' --field=balance:decimal:10:2,default=0.00'
+                    .' --field=locale:string:5?,default=fr'
+                    .' --field=nickname:string,default='
+                    .' --field=role:enum:Role,default=ADMIN'
+                    .' --field=createdAt,default=now'
+                );
+
+                $entity = file_get_contents($runner->getPath('src/Entity/User.php'));
+
+                self::assertStringContainsString("#[ORM\\Column(options: ['default' => true])]\n    private bool \$isVerified = true;", $entity);
+                self::assertStringContainsString("#[ORM\\Column(options: ['default' => 0])]\n    private int \$loginCount = 0;", $entity);
+                self::assertStringContainsString("#[ORM\\Column(options: ['default' => 2.5])]\n    private float \$rating = 2.5;", $entity);
+                // a decimal is a string in PHP
+                self::assertStringContainsString("#[ORM\\Column(type: Types::DECIMAL, precision: 10, scale: 2, options: ['default' => '0.00'])]\n    private string \$balance = '0.00';", $entity);
+                // a nullable field stays nullable
+                self::assertStringContainsString("#[ORM\\Column(length: 5, nullable: true, options: ['default' => 'fr'])]\n    private ?string \$locale = 'fr';", $entity);
+                self::assertStringContainsString("#[ORM\\Column(length: 255, options: ['default' => ''])]\n    private string \$nickname = '';", $entity);
+                self::assertStringContainsString("#[ORM\\Column(options: ['default' => Role::ADMIN])]\n    private Role \$role = Role::ADMIN;", $entity);
+                self::assertStringContainsString(\sprintf("#[ORM\\Column(options: ['default' => %s])]\n    private \\DateTimeImmutable \$createdAt;", self::getCurrentTimestampDefault($runner)), $entity);
+                self::assertStringContainsString('$this->createdAt = new \\DateTimeImmutable();', $entity);
+
+                // every column is NOT NULL but "locale", and the test saves a User it sets no value on
+                self::runEntityTest($runner);
+            }),
+        ];
+
         yield 'it_creates_fields_from_the_field_option' => [self::createMakeEntityTest()
             ->run(static function (MakerTestRunner $runner) {
                 $runner->runMaker(
@@ -985,6 +1092,8 @@ class MakeEntityTest extends MakerTestCase
 
         yield 'it_rejects_invalid_field_options' => [self::createMakeEntityTest()
             ->run(static function (MakerTestRunner $runner) {
+                self::copyEntity($runner, 'Enum/Role-basic.php');
+
                 $invalidDefinitions = [
                     // relations need follow-up questions, so they stay interactive-only
                     'author:ManyToOne' => 'cannot add the relation "author"',
@@ -1000,6 +1109,17 @@ class MakeEntityTest extends MakerTestCase
                     // reserved words and invalid property names are a clean error, not a stack trace
                     '1name' => 'is not a valid PHP property name',
                     'order' => 'is a reserved word',
+                    // a default value has to suit the type of its field
+                    'isActive:boolean,default' => 'needs a value',
+                    'isActive:boolean,default=maybe' => 'Invalid default value "maybe"',
+                    'age:integer,default=old' => 'Invalid default value "old"',
+                    'price:decimal:10:2,default=free' => 'Invalid default value "free"',
+                    'role:enum:Role,default=NOPE' => 'Invalid default value "NOPE"',
+                    'createdAt,default=tomorrow' => 'Invalid default value "tomorrow"',
+                    // not every platform can default to the current date alone
+                    'bornOn:date,default=now' => 'The "bornOn" field cannot have a default value.',
+                    'tags:json,default=symfony' => 'The "tags" field cannot have a default value.',
+                    'roles:enum:Role,multiple,default=ADMIN' => 'The "roles" field cannot have a default value.',
                 ];
 
                 foreach ($invalidDefinitions as $definition => $expectedError) {
@@ -1044,6 +1164,15 @@ class MakeEntityTest extends MakerTestCase
 
         $runner->updateSchema();
         $runner->runTests();
+    }
+
+    /**
+     * Returns the code of the default value that makes the database set the current date and time.
+     */
+    private static function getCurrentTimestampDefault(MakerTestRunner $runner): string
+    {
+        // Doctrine DBAL 4.4 replaced the SQL expression with an object
+        return file_exists($runner->getPath('vendor/doctrine/dbal/src/Schema/DefaultExpression/CurrentTimestamp.php')) ? 'new CurrentTimestamp()' : '\'CURRENT_TIMESTAMP\'';
     }
 
     private static function runCustomTest(MakerTestRunner $runner, string $filename, bool $withDatabase = true): void
