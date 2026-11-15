@@ -11,6 +11,8 @@
 
 namespace Symfony\Bundle\MakerBundle\Tests\Util;
 
+use Doctrine\DBAL\Schema\DefaultExpression;
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\FieldMapping;
@@ -312,6 +314,32 @@ class ClassSourceManipulatorTest extends TestCase
             new ClassProperty(propertyName: 'ulid', type: 'ulid'),
             'User_simple_ulid.php',
         ];
+
+        yield 'entity_add_default_value' => [
+            'User_simple.php',
+            new ClassProperty(propertyName: 'isSeen', type: 'boolean', options: ['default' => false], defaultValue: false),
+            'User_simple_default_value.php',
+        ];
+
+        // the property and its accessors are as nullable as the column
+        yield 'entity_add_default_value_nullable' => [
+            'User_simple.php',
+            new ClassProperty(propertyName: 'locale', type: 'string', length: 5, nullable: true, options: ['default' => 'fr'], defaultValue: 'fr'),
+            'User_simple_default_value_nullable.php',
+        ];
+
+        // a date cannot be the default value of a property, so the constructor creates it
+        yield 'entity_add_default_value_now' => [
+            'User_simple.php',
+            new ClassProperty(propertyName: 'createdAt', type: 'datetime_immutable', options: ['default' => 'CURRENT_TIMESTAMP'], defaultValue: 'now'),
+            'User_simple_default_value_now.php',
+        ];
+
+        yield 'entity_add_default_value_now_with_constructor' => [
+            'User_with_constructor.php',
+            new ClassProperty(propertyName: 'createdAt', type: 'datetime_immutable', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'], defaultValue: 'now'),
+            'User_with_constructor_default_value_now.php',
+        ];
     }
 
     public function testAddEntityFieldWithEnumDefaultValue()
@@ -322,6 +350,31 @@ class ClassSourceManipulatorTest extends TestCase
             file_get_contents(__DIR__.'/fixtures/source/User_simple.php'),
             new ClassProperty(propertyName: 'status', type: 'string', length: 255, options: ['default' => \App\Enum\Status::PUBLISHED], enumType: \App\Enum\Status::class),
             file_get_contents(__DIR__.'/fixtures/add_entity_field/User_simple_enum_default.php')
+        );
+    }
+
+    public function testAddEntityFieldWithEnumDefaultValueOnProperty()
+    {
+        require_once __DIR__.'/fixtures/enum_helper/src/Enum/Status.php';
+
+        $this->runAddEntityFieldTests(
+            file_get_contents(__DIR__.'/fixtures/source/User_simple.php'),
+            new ClassProperty(propertyName: 'status', type: 'string', options: ['default' => \App\Enum\Status::PUBLISHED], enumType: \App\Enum\Status::class, defaultValue: \App\Enum\Status::PUBLISHED),
+            file_get_contents(__DIR__.'/fixtures/add_entity_field/User_simple_enum_default_value.php')
+        );
+    }
+
+    public function testAddEntityFieldWithDefaultExpression()
+    {
+        if (!interface_exists(DefaultExpression::class)) {
+            $this->markTestSkipped('Default expressions require doctrine/dbal 4.4.');
+        }
+
+        // what "--regenerate" finds in the mapping of a column that defaults to the current date
+        $this->runAddEntityFieldTests(
+            file_get_contents(__DIR__.'/fixtures/source/User_simple.php'),
+            new ClassProperty(propertyName: 'createdAt', type: 'datetime_immutable', options: ['default' => new CurrentTimestamp()]),
+            file_get_contents(__DIR__.'/fixtures/add_entity_field/User_simple_default_expression.php')
         );
     }
 

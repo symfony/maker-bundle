@@ -22,6 +22,10 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
  */
 final class ClassProperty
 {
+    /**
+     * @param mixed $defaultValue The value the property holds until another one is set: a scalar or
+     *                            the case of an enum, or "now" for a date, which the constructor creates
+     */
     public function __construct(
         public string $propertyName,
         public string $type,
@@ -35,6 +39,7 @@ final class ClassProperty
         public bool $needsTypeHint = true,
         public bool $unique = false,
         public ?string $enumType = null,
+        public mixed $defaultValue = null,
     ) {
     }
 
