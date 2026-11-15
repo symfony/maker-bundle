@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
+use Doctrine\ORM\Mapping\AssociationMapping;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\EmbeddedClassMapping;
 use Doctrine\ORM\Mapping\MappingException;
@@ -118,7 +119,7 @@ final class EntityRegenerator
 
                 match ($mapping['type']) {
                     ClassMetadata::MANY_TO_ONE => $manipulator->addManyToOneRelation(RelationManyToOne::createFromObject($mapping)),
-                    ClassMetadata::ONE_TO_MANY => $manipulator->addOneToManyRelation(RelationOneToMany::createFromObject($mapping)),
+                    ClassMetadata::ONE_TO_MANY => $manipulator->addOneToManyRelation($this->createOneToManyRelation($mapping)),
                     ClassMetadata::MANY_TO_MANY => $manipulator->addManyToManyRelation(RelationManyToMany::createFromObject($mapping)),
                     ClassMetadata::ONE_TO_ONE => $manipulator->addOneToOneRelation(RelationOneToOne::createFromObject($mapping)),
                     default => throw new \Exception('Unknown association type.'),
@@ -181,6 +182,21 @@ final class EntityRegenerator
         );
 
         $this->generator->writeChanges();
+    }
+
+    /**
+     * The inverse side calls the setter of the property that owns the relation, which
+     * does not accept null when this property is promoted with a type that does not either.
+     */
+    private function createOneToManyRelation(AssociationMapping|array $mapping): RelationOneToMany
+    {
+        if (!property_exists($mapping['targetEntity'], $mapping['mappedBy'])) {
+            return RelationOneToMany::createFromObject($mapping);
+        }
+
+        $property = new \ReflectionProperty($mapping['targetEntity'], $mapping['mappedBy']);
+
+        return RelationOneToMany::createFromObject($mapping, $property->isPromoted(), $property->getType()?->allowsNull() ?? true);
     }
 
     private function getMappedFieldsInEntity(ClassMetadata $classMetadata): array

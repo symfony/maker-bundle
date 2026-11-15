@@ -16,6 +16,10 @@ namespace Symfony\Bundle\MakerBundle\Doctrine;
  */
 abstract class BaseRelation
 {
+    /**
+     * @param bool $isOwningSidePromoted Whether the property that owns the relation is a promoted constructor
+     *                                   parameter, be it this property or the one of the other side
+     */
     public function __construct(
         private string $propertyName,
         private string $targetClassName,
@@ -28,6 +32,7 @@ abstract class BaseRelation
         private bool $isOwning = false,
         private bool $orphanRemoval = false,
         private bool $isNullable = false,
+        private bool $isOwningSidePromoted = false,
     ) {
     }
 
@@ -84,5 +89,10 @@ abstract class BaseRelation
     public function isNullable(): bool
     {
         return $this->isNullable;
+    }
+
+    public function isOwningSidePromoted(): bool
+    {
+        return $this->isOwningSidePromoted;
     }
 }

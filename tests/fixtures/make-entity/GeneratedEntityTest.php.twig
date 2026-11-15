@@ -19,7 +19,7 @@ class GeneratedEntityTest extends KernelTestCase
         $em->createQuery('DELETE FROM App\\Entity\\User u')
             ->execute();
 
-        $user = new User();
+        $user = new User({% for argument in arguments %}'{{ argument }}'{{ loop.last ? '' : ', ' }}{% endfor %});
         {% for field, value in data %}
         $user->set{{ field|title }}('{{ value }}');
         {% endfor %}

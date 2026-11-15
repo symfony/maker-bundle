@@ -22,6 +22,9 @@ use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
  */
 final class ClassProperty
 {
+    /**
+     * @param bool $promoted Whether the property is a promoted constructor parameter
+     */
     public function __construct(
         public string $propertyName,
         public string $type,
@@ -35,6 +38,7 @@ final class ClassProperty
         public bool $needsTypeHint = true,
         public bool $unique = false,
         public ?string $enumType = null,
+        public bool $promoted = false,
     ) {
     }
 

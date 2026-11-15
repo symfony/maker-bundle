@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+class User
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column()]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 255)]
+    private string $displayName;
+
+    public function __construct(string $firstName, string $nickname = '')
+    {
+        $this->displayName = $nickname ?: $firstName;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+}

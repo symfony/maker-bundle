@@ -312,6 +312,171 @@ class ClassSourceManipulatorTest extends TestCase
             new ClassProperty(propertyName: 'ulid', type: 'ulid'),
             'User_simple_ulid.php',
         ];
+
+        yield 'entity_promoted_add' => [
+            'User_simple.php',
+            new ClassProperty(propertyName: 'fooProp', type: 'string', length: 255, nullable: false, options: ['comment' => 'new field'], promoted: true),
+            'User_simple_promoted.php',
+        ];
+
+        // a nullable field defaults to null: its parameter is optional
+        yield 'entity_promoted_add_nullable' => [
+            'User_simple.php',
+            new ClassProperty(propertyName: 'createdAt', type: 'datetime', nullable: true, promoted: true),
+            'User_simple_promoted_nullable.php',
+        ];
+
+        // and so is the one of an array, which defaults to an empty one
+        yield 'entity_promoted_add_array' => [
+            'User_simple.php',
+            new ClassProperty(propertyName: 'roles', type: 'json', promoted: true),
+            'User_simple_promoted_array.php',
+        ];
+
+        yield 'entity_promoted_add_with_comments' => [
+            'User_simple.php',
+            new ClassProperty(propertyName: 'password', type: 'string', comments: ['@var string The hashed password'], promoted: true),
+            'User_simple_promoted_comments.php',
+        ];
+    }
+
+    public function testAddEntityFieldThatIsAlreadyPromoted()
+    {
+        $manipulator = new ClassSourceManipulator(file_get_contents(__DIR__.'/fixtures/source/User_promoted_props.php'));
+
+        // the properties are not added again, and their accessors follow the types they are promoted with
+        $manipulator->addEntityField(new ClassProperty(propertyName: 'firstName', type: 'string', length: 255));
+        $manipulator->addEntityField(new ClassProperty(propertyName: 'biography', type: 'text', nullable: true));
+
+        $this->assertSame(
+            file_get_contents(__DIR__.'/fixtures/add_entity_field/User_promoted_props.php'),
+            $manipulator->getSourceCode()
+        );
+    }
+
+    /**
+     * @dataProvider getAddPromotedEntityFieldToConstructorTests
+     */
+    #[DataProvider('getAddPromotedEntityFieldToConstructorTests')]
+    public function testAddPromotedEntityFieldToConstructor(string $sourceFilename, string $propertyName, string $expectedSourceFilename, bool $nullable = false)
+    {
+        $manipulator = new ClassSourceManipulator(file_get_contents(__DIR__.'/fixtures/source/'.$sourceFilename));
+        $manipulator->addEntityField(new ClassProperty(propertyName: $propertyName, type: 'string', length: 255, nullable: $nullable ?: null, promoted: true));
+
+        $this->assertSame(
+            file_get_contents(__DIR__.'/fixtures/add_promoted_property/'.$expectedSourceFilename),
+            $manipulator->getSourceCode()
+        );
+    }
+
+    public static function getAddPromotedEntityFieldToConstructorTests(): \Generator
+    {
+        yield 'constructor_without_parameters' => [
+            'User_with_constructor.php',
+            'lastName',
+            'User_with_constructor.php',
+        ];
+
+        // the signature is split, and the parameter comes before the optional one
+        yield 'constructor_on_one_line' => [
+            'User_constructor_one_line.php',
+            'lastName',
+            'User_constructor_one_line.php',
+        ];
+
+        // the constructor cannot have two parameters of the same name
+        yield 'constructor_with_parameter_of_the_same_name' => [
+            'User_constructor_one_line.php',
+            'firstName',
+            'User_constructor_one_line_same_name.php',
+        ];
+
+        yield 'promoted_constructor' => [
+            'User_promoted_props.php',
+            'lastName',
+            'User_promoted_props.php',
+        ];
+
+        yield 'promoted_constructor_without_body' => [
+            'User_promoted_props_empty_constructor.php',
+            'lastName',
+            'User_promoted_props_empty_constructor.php',
+        ];
+
+        // the parameters stay as close to each other as they were, and the comment is kept
+        yield 'promoted_constructor_compact' => [
+            'User_promoted_props_compact.php',
+            'lastName',
+            'User_promoted_props_compact.php',
+        ];
+
+        // an optional parameter comes after the other ones
+        yield 'promoted_constructor_optional_parameter' => [
+            'User_promoted_props.php',
+            'lastName',
+            'User_promoted_props_optional.php',
+            true,
+        ];
+
+        // but before the variadic one
+        yield 'constructor_with_variadic_parameter' => [
+            'User_constructor_variadic.php',
+            'lastName',
+            'User_constructor_variadic.php',
+            true,
+        ];
+    }
+
+    public function testAddObjectsThatAreAlreadyPromoted()
+    {
+        $manipulator = new ClassSourceManipulator(file_get_contents(__DIR__.'/fixtures/source/User_promoted_objects.php'));
+
+        // the constructor is given these objects: it must not create them on top of that
+        $manipulator->addEmbeddedEntity('address', \App\Entity\Address::class);
+        $manipulator->addManyToManyRelation(new RelationManyToMany(
+            propertyName: 'recipes',
+            targetClassName: \App\Entity\Recipe::class,
+            targetPropertyName: 'foods',
+            isOwning: true,
+        ));
+
+        $this->assertSame(
+            file_get_contents(__DIR__.'/fixtures/add_promoted_property/User_promoted_objects.php'),
+            $manipulator->getSourceCode()
+        );
+    }
+
+    public function testAddSeveralPromotedProperties()
+    {
+        $manipulator = new ClassSourceManipulator(file_get_contents(__DIR__.'/fixtures/source/User_simple.php'));
+
+        $manipulator->addManyToOneRelation(new RelationManyToOne(
+            propertyName: 'category',
+            targetClassName: \App\Entity\Category::class,
+            targetPropertyName: 'foods',
+            isOwning: true,
+            isOwningSidePromoted: true,
+        ));
+        $manipulator->addManyToOneRelation(new RelationManyToOne(
+            propertyName: 'subCategory',
+            targetClassName: \App\Entity\Category::class,
+            mapInverseRelation: false,
+            isOwning: true,
+            isOwningSidePromoted: true,
+        ));
+        $manipulator->addEntityField(new ClassProperty(propertyName: 'biography', type: 'text', nullable: true, promoted: true));
+        $manipulator->addManyToManyRelation(new RelationManyToMany(
+            propertyName: 'recipes',
+            targetClassName: \App\Entity\Recipe::class,
+            targetPropertyName: 'foods',
+            isOwning: true,
+        ));
+        $manipulator->addEntityField(new ClassProperty(propertyName: 'createdAt', type: 'datetime_immutable', promoted: true));
+
+        $this->assertSame(
+            file_get_contents(__DIR__.'/fixtures/add_promoted_property/User_simple_several.php'),
+            $manipulator->getSourceCode()
+        );
     }
 
     public function testAddEntityFieldWithEnumDefaultValue()
@@ -434,6 +599,32 @@ class ClassSourceManipulatorTest extends TestCase
                 isNullable: true,
             ),
         ];
+
+        yield 'many_to_one_promoted' => [
+            'User_simple.php',
+            'User_simple_promoted.php',
+            new RelationManyToOne(
+                propertyName: 'category',
+                targetClassName: \App\Entity\Category::class,
+                targetPropertyName: 'foods',
+                isOwning: true,
+                isOwningSidePromoted: true,
+            ),
+        ];
+
+        // a nullable relation defaults to null: its parameter is optional
+        yield 'many_to_one_promoted_nullable' => [
+            'User_simple.php',
+            'User_simple_promoted_nullable.php',
+            new RelationManyToOne(
+                propertyName: 'category',
+                targetClassName: \App\Entity\Category::class,
+                targetPropertyName: 'foods',
+                isOwning: true,
+                isNullable: true,
+                isOwningSidePromoted: true,
+            ),
+        ];
     }
 
     /**
@@ -510,6 +701,32 @@ class ClassSourceManipulatorTest extends TestCase
             ),
         ];
 
+        // the owning side cannot be set to null
+        yield 'one_to_many_owning_side_promoted' => [
+            'User_simple.php',
+            'User_simple_owning_side_promoted.php',
+            new RelationOneToMany(
+                propertyName: 'avatarPhotos',
+                targetClassName: \App\Entity\UserAvatarPhoto::class,
+                targetPropertyName: 'user',
+                orphanRemoval: true,
+                isOwningSidePromoted: true,
+            ),
+        ];
+
+        // unless it is nullable
+        yield 'one_to_many_owning_side_promoted_nullable' => [
+            'User_simple.php',
+            'User_simple.php',
+            new RelationOneToMany(
+                propertyName: 'avatarPhotos',
+                targetClassName: \App\Entity\UserAvatarPhoto::class,
+                targetPropertyName: 'user',
+                isNullable: true,
+                isOwningSidePromoted: true,
+            ),
+        ];
+
         // todo test existing constructor
     }
 
@@ -568,6 +785,29 @@ class ClassSourceManipulatorTest extends TestCase
                 targetClassName: \App\Entity\Recipe::class,
                 targetPropertyName: 'foods',
                 mapInverseRelation: false,
+                isOwning: true,
+            ),
+        ];
+
+        // the collection is created by a constructor that exists, which is otherwise left alone
+        yield 'many_to_many_promoted_constructor' => [
+            'User_promoted_props.php',
+            'User_promoted_props.php',
+            new RelationManyToMany(
+                propertyName: 'recipes',
+                targetClassName: \App\Entity\Recipe::class,
+                targetPropertyName: 'foods',
+                isOwning: true,
+            ),
+        ];
+
+        yield 'many_to_many_promoted_constructor_without_body' => [
+            'User_promoted_props_empty_constructor.php',
+            'User_promoted_props_empty_constructor.php',
+            new RelationManyToMany(
+                propertyName: 'recipes',
+                targetClassName: \App\Entity\Recipe::class,
+                targetPropertyName: 'foods',
                 isOwning: true,
             ),
         ];
@@ -668,6 +908,44 @@ class ClassSourceManipulatorTest extends TestCase
                 targetClassName: \App\Entity\UserProfile::class,
                 mapInverseRelation: false,
                 isOwning: true,
+            ),
+        ];
+
+        yield 'one_to_one_promoted' => [
+            'User_simple.php',
+            'User_simple_promoted.php',
+            new RelationOneToOne(
+                propertyName: 'userProfile',
+                targetClassName: \App\Entity\UserProfile::class,
+                targetPropertyName: 'user',
+                isOwning: true,
+                isOwningSidePromoted: true,
+            ),
+        ];
+
+        // a nullable relation defaults to null: its parameter is optional
+        yield 'one_to_one_promoted_nullable' => [
+            'User_simple.php',
+            'User_simple_promoted_nullable.php',
+            new RelationOneToOne(
+                propertyName: 'userProfile',
+                targetClassName: \App\Entity\UserProfile::class,
+                targetPropertyName: 'user',
+                isOwning: true,
+                isNullable: true,
+                isOwningSidePromoted: true,
+            ),
+        ];
+
+        // only the owning side is promoted: nothing changes for the inverse one
+        yield 'one_to_one_inverse_owning_side_promoted' => [
+            'UserProfile_simple.php',
+            'UserProfile_simple_inverse_not_nullable.php',
+            new RelationOneToOne(
+                propertyName: 'user',
+                targetClassName: \App\Entity\User::class,
+                targetPropertyName: 'userProfile',
+                isOwningSidePromoted: true,
             ),
         ];
 

@@ -23,8 +23,8 @@ class GeneratedEntityTest extends KernelTestCase
         $user = new User();
         $em->persist($user);
 
-        $photo = new UserAvatarPhoto();
-        $photo->setUser($user);
+        // the relation is not nullable: the constructor asks for the user
+        $photo = new UserAvatarPhoto($user);
         $em->persist($photo);
 
         $em->flush();

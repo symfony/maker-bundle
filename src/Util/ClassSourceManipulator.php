@@ -23,6 +23,7 @@ use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use PhpParser\Builder;
 use PhpParser\BuilderHelpers;
+use PhpParser\Comment\Doc;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor;
@@ -131,27 +132,42 @@ final class ClassSourceManipulator
             $propertyType = '?'.$propertyType;
         }
 
-        $this->addProperty(
+        // the constructor asks for the value of a field, unless this value is generated;
+        // it has to be given one when the field is neither nullable nor an array
+        $isPromoted = $mapping->promoted && !($mapping->id ?? false) && $this->addPromotedProperty(
             name: $mapping->propertyName,
-            defaultValue: $defaultValue,
+            propertyType: $nullable ? $propertyType : $typeHint,
+            defaultValue: $nullable ? null : $defaultValue ?? self::DEFAULT_VALUE_NONE,
             attributes: $attributes,
-            comments: $mapping->comments,
-            propertyType: $propertyType
+            comments: $mapping->comments
         );
+
+        if (!$isPromoted) {
+            $this->addProperty(
+                name: $mapping->propertyName,
+                defaultValue: $defaultValue,
+                attributes: $attributes,
+                comments: $mapping->comments,
+                propertyType: $propertyType
+            );
+        }
+
+        // a property that already exists is never overwritten, hence reading it from the class
+        $isAlwaysSet = $this->isNonNullablePromotedProperty($mapping->propertyName);
 
         $this->addGetter(
             $mapping->propertyName,
             $typeHint,
             // getter methods always have nullable return values
             // because even though these are required in the db, they may not be set yet
-            // unless there is a default value
-            null === $defaultValue && 'mixed' !== $propertyType,
+            // unless there is a default value or the constructor sets them
+            null === $defaultValue && 'mixed' !== $propertyType && !$isAlwaysSet,
             $commentLines
         );
 
         // don't generate setters for id fields
         if (!($mapping->id ?? false)) {
-            $this->addSetter($mapping->propertyName, $typeHint, $nullable && 'mixed' !== $propertyType);
+            $this->addSetter($mapping->propertyName, $typeHint, $nullable && 'mixed' !== $propertyType && !$isAlwaysSet);
         }
     }
 
@@ -185,7 +201,8 @@ final class ClassSourceManipulator
             }
         }
 
-        if ($addEmbedded) {
+        // the constructor already sets a property that it promotes
+        if ($addEmbedded && !$this->getPromotedPropertyNode($propertyName)) {
             $this->addStatementToConstructor(
                 new Node\Stmt\Expression(new Node\Expr\Assign(
                     new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $propertyName),
@@ -509,19 +526,33 @@ final class ClassSourceManipulator
             $attributes[] = $this->buildAttributeNode(JoinColumn::class, ['nullable' => false], 'ORM');
         }
 
-        $this->addProperty(
+        // the constructor asks for the object of a relation, which
+        // it has to be given when the relation is not nullable
+        $isPromoted = $relation->isOwningSidePromoted() && $relation->isOwning() && $this->addPromotedProperty(
             name: $relation->getPropertyName(),
-            defaultValue: null,
-            attributes: $attributes,
-            propertyType: '?'.$typeHint,
+            propertyType: ($relation->isNullable() ? '?' : '').$typeHint,
+            defaultValue: $relation->isNullable() ? null : self::DEFAULT_VALUE_NONE,
+            attributes: $attributes
         );
+
+        if (!$isPromoted) {
+            $this->addProperty(
+                name: $relation->getPropertyName(),
+                defaultValue: null,
+                attributes: $attributes,
+                propertyType: '?'.$typeHint,
+            );
+        }
+
+        // a property that already exists is never overwritten, hence reading it from the class
+        $isAlwaysSet = $this->isNonNullablePromotedProperty($relation->getPropertyName());
 
         $this->addGetter(
             $relation->getPropertyName(),
             $relation->getCustomReturnType() ?? $typeHint,
-            // getter methods always have nullable return values
-            // unless this has been customized explicitly
-            !$relation->getCustomReturnType() || $relation->isCustomReturnTypeNullable()
+            // getter methods always have nullable return values, unless this
+            // has been customized explicitly or the constructor sets the property
+            $relation->getCustomReturnType() ? $relation->isCustomReturnTypeNullable() : !$isAlwaysSet
         );
 
         if ($relation->shouldAvoidSetter()) {
@@ -536,7 +567,8 @@ final class ClassSourceManipulator
             // (specifically: when you set the inverse side, the generated
             // code will *also* set the owning side to null - so it needs to be allowed)
             // e.g. $userAvatarPhoto->setUser(null);
-            $relation instanceof RelationOneToOne ? $relation->isNullable() : true
+            // unless the constructor sets the property, which cannot be unset then
+            !$isAlwaysSet && (!$relation instanceof RelationOneToOne || $relation->isNullable())
         );
 
         // set the *owning* side of the relation
@@ -607,7 +639,8 @@ final class ClassSourceManipulator
             }
         }
 
-        if ($addArrayCollection) {
+        // the constructor already sets a property that it promotes
+        if ($addArrayCollection && !$this->getPromotedPropertyNode($relation->getPropertyName())) {
             $this->addStatementToConstructor(
                 new Node\Stmt\Expression(new Node\Expr\Assign(
                     new Node\Expr\PropertyFetch(new Node\Expr\Variable('this'), $relation->getPropertyName()),
@@ -682,8 +715,9 @@ final class ClassSourceManipulator
             [new Node\Expr\Variable($argName)]
         );
 
-        // set the owning side of the relationship
-        if ($relation->isOwning()) {
+        // set the owning side of the relationship, unless it is a promoted property
+        // that cannot be unset: the object is only removed from the collection then
+        if ($relation->isOwning() || ($relation instanceof RelationOneToMany && $relation->isOwningSidePromoted() && !$relation->isNullable())) {
             // $this->avatars->removeElement($avatar);
             $removerNodeBuilder->addStmt(BuilderHelpers::normalizeStmt($removeElementCall));
         } else {
@@ -733,7 +767,7 @@ final class ClassSourceManipulator
                     )
                 );
             } else {
-                throw new \Exception('Unknown relation type');
+                throw new \Exception('Unknown relation type.');
             }
         }
 
@@ -743,27 +777,256 @@ final class ClassSourceManipulator
 
     private function addStatementToConstructor(Node\Stmt $stmt): void
     {
-        if (!$this->getConstructorNode()) {
-            $constructorNode = (new Builder\Method('__construct'))->makePublic()->getNode();
+        $constructorNode = $this->getConstructorNode() ?? $this->createConstructorNode();
 
-            // add call to parent::__construct() if there is a need to
-            try {
-                $ref = new \ReflectionClass($this->getThisFullClassName());
+        if ([] !== $constructorNode->stmts) {
+            $constructorNode->stmts[] = $stmt;
+            $this->updateSourceCodeFromNewStmts();
 
-                if ($ref->getParentClass() && $ref->getParentClass()->getConstructor()) {
-                    $constructorNode->stmts[] = new Node\Stmt\Expression(
-                        new Node\Expr\StaticCall(new Node\Name('parent'), new Node\Identifier('__construct'))
-                    );
-                }
-            } catch (\ReflectionException) {
-            }
-
-            $this->addNodeAfterProperties($constructorNode);
+            return;
         }
 
-        $constructorNode = $this->getConstructorNode();
-        $constructorNode->stmts[] = $stmt;
-        $this->updateSourceCodeFromNewStmts();
+        // PHP-Parser can only add a statement to an empty body by printing the whole method
+        // again, which loses the format of its signature: the source code is edited instead
+        [$indentation, $innerIndentation] = $this->getConstructorIndentations($constructorNode);
+        $bodyStart = $this->getConstructorPositions($constructorNode)[2] + 1;
+        $code = str_replace("\n", "\n".$innerIndentation, $this->printer->prettyPrint([$stmt]));
+
+        $this->setSourceCode(substr_replace(
+            $this->sourceCode,
+            "\n".$innerIndentation.$code."\n".$indentation,
+            $bodyStart,
+            $constructorNode->getEndFilePos() - $bodyStart
+        ));
+    }
+
+    private function createConstructorNode(): Node\Stmt\ClassMethod
+    {
+        $constructorNode = (new Builder\Method('__construct'))->makePublic()->getNode();
+
+        // add call to parent::__construct() if there is a need to
+        try {
+            $ref = new \ReflectionClass($this->getThisFullClassName());
+
+            if ($ref->getParentClass() && $ref->getParentClass()->getConstructor()) {
+                $constructorNode->stmts[] = new Node\Stmt\Expression(
+                    new Node\Expr\StaticCall(new Node\Name('parent'), new Node\Identifier('__construct'))
+                );
+            }
+        } catch (\ReflectionException) {
+        }
+
+        $this->addNodeAfterProperties($constructorNode);
+
+        return $this->getConstructorNode();
+    }
+
+    /**
+     * Adds a property as a promoted parameter of the constructor, which is created when the class has none.
+     *
+     * @param array<Node\Attribute|Node\AttributeGroup> $attributes
+     *
+     * @return bool false when the constructor cannot take the parameter
+     */
+    private function addPromotedProperty(string $name, ?string $propertyType, $defaultValue = self::DEFAULT_VALUE_NONE, array $attributes = [], array $comments = []): bool
+    {
+        if ($this->propertyExists($name)) {
+            // we never overwrite properties
+            return true;
+        }
+
+        if ($constructorNode = $this->getConstructorNode()) {
+            // an abstract constructor has no body to set the property in
+            if (null === $constructorNode->stmts) {
+                return false;
+            }
+
+            foreach ($constructorNode->params as $param) {
+                if ($param->var instanceof Node\Expr\Variable && $name === $param->var->name) {
+                    return false;
+                }
+            }
+        }
+
+        $paramBuilder = (new Builder\Param($name))->makePrivate();
+
+        if (null !== $propertyType) {
+            $paramBuilder->setType($propertyType);
+        }
+
+        if ($isOptional = self::DEFAULT_VALUE_NONE !== $defaultValue) {
+            $paramBuilder->setDefault($defaultValue);
+        }
+
+        // the comments, then each attribute, then the parameter: all on their own line
+        $lines = $comments ? explode("\n", (new Doc($this->createDocBlock($comments)))->getReformattedText()) : [];
+
+        if ($this->useAttributesForDoctrineMapping) {
+            foreach ($attributes as $attribute) {
+                $lines[] = $this->printer->prettyPrint([BuilderHelpers::normalizeAttribute($attribute)]);
+            }
+        }
+
+        $lines[] = $this->printer->prettyPrint([$paramBuilder->getNode()]);
+
+        $this->addConstructorParameter($constructorNode ?? $this->createConstructorNode(), $lines, $isOptional);
+
+        return true;
+    }
+
+    /**
+     * Adds a parameter to the constructor, the signature of which
+     * ends up with each of its parameters on their own lines.
+     *
+     * PHP-Parser can only do so by printing the whole method again, which loses
+     * the format of its body: the source code is edited instead.
+     *
+     * @param string[] $lines
+     */
+    private function addConstructorParameter(Node\Stmt\ClassMethod $constructorNode, array $lines, bool $isOptional): void
+    {
+        [$indentation, $innerIndentation] = $this->getConstructorIndentations($constructorNode);
+        [$openingParenthesis, $closingParenthesis, $openingBrace] = $this->getConstructorPositions($constructorNode);
+
+        $code = implode("\n".$innerIndentation, $lines);
+        // an empty line makes it easier to tell apart a parameter that spans several lines
+        $separator = ','.(1 < \count($lines) ? "\n\n" : "\n").$innerIndentation;
+
+        $params = $constructorNode->params;
+
+        // a required parameter cannot follow an optional one, and none can follow a variadic one
+        $index = \count($params);
+        foreach ($params as $i => $param) {
+            if ($param->variadic || (!$isOptional && null !== $param->default)) {
+                $index = $i;
+
+                break;
+            }
+        }
+
+        // where each parameter starts, and the code before, between and after the parameters
+        $starts = $gaps = [];
+        $position = $openingParenthesis + 1;
+        foreach ($params as $param) {
+            $start = $param->getStartFilePos();
+            $lineEnd = strpos(substr($this->sourceCode, $position, $start - $position), "\n");
+
+            // the comments of a parameter belong to it, unlike the one that ends the line of the previous parameter
+            foreach ($param->getComments() as $comment) {
+                if (false === $lineEnd || $position + $lineEnd < $comment->getStartFilePos()) {
+                    $start = $comment->getStartFilePos();
+
+                    break;
+                }
+            }
+
+            $starts[] = $start;
+            $gaps[] = substr($this->sourceCode, $position, $start - $position);
+            $position = $param->getEndFilePos() + 1;
+        }
+        $gaps[] = substr($this->sourceCode, $position, $closingParenthesis - $position);
+
+        // a signature that starts on the line of its parenthesis is written again,
+        // as long as there is nothing but its parameters to keep, such as a comment
+        if (!str_contains($gaps[0], "\n")
+            && '' === trim(implode('', $gaps), ", \t\r\n")
+            && '' === trim(substr($this->sourceCode, $closingParenthesis + 1, $openingBrace - $closingParenthesis - 1))
+        ) {
+            $codes = array_map(fn (Node\Param $param, int $start): string => substr($this->sourceCode, $start, $param->getEndFilePos() + 1 - $start), $params, $starts);
+            array_splice($codes, $index, 0, [$code]);
+
+            $list = '';
+            foreach ($codes as $i => $paramCode) {
+                $list .= match (true) {
+                    0 === $i => '',
+                    $i === $index, $i - 1 === $index => $separator,
+                    default => ",\n".$innerIndentation,
+                }.$paramCode;
+            }
+
+            // from the opening parenthesis to the opening brace of the body
+            $this->setSourceCode(substr_replace(
+                $this->sourceCode,
+                "(\n".$innerIndentation.$list.",\n".$indentation.') {',
+                $openingParenthesis,
+                $openingBrace + 1 - $openingParenthesis
+            ));
+
+            return;
+        }
+
+        // the signature is kept as it is otherwise, and the new parameter
+        // is as far from the other ones as they are from each other
+        $getSpace = static function (string $gap) use ($separator): string {
+            $space = substr($gap, \strlen(rtrim($gap)));
+
+            return str_contains($space, "\n") ? $space : substr($separator, 1);
+        };
+
+        if ($index < \count($params)) {
+            $this->setSourceCode(substr_replace($this->sourceCode, $code.','.$getSpace($gaps[$index]), $starts[$index], 0));
+
+            return;
+        }
+
+        // after the last parameter, and the comment that may follow it
+        $comment = rtrim(preg_replace('/^\s*,/', '', $gaps[$index]));
+        $before = match ($index) {
+            0 => $comment."\n".$innerIndentation,
+            1 => ','.$comment.substr($separator, 1),
+            default => ','.$comment.$getSpace($gaps[$index - 1]),
+        };
+
+        $this->setSourceCode(substr_replace($this->sourceCode, $before.$code.",\n".$indentation, $position, $closingParenthesis - $position));
+    }
+
+    /**
+     * Returns the positions in the source code of the parentheses around the parameters
+     * of the constructor, and the one of the opening brace of its body.
+     *
+     * @return array{int, int, int}
+     */
+    private function getConstructorPositions(Node\Stmt\ClassMethod $constructorNode): array
+    {
+        $positions = [];
+        $tokenPosition = $constructorNode->name->getEndTokenPos();
+
+        foreach (['(', ')', '{'] as $text) {
+            if (')' === $text && $params = $constructorNode->params) {
+                // a parameter may hold parentheses and braces of its own
+                $tokenPosition = $params[array_key_last($params)]->getEndTokenPos();
+            }
+
+            do {
+                $token = $this->oldTokens[++$tokenPosition] ?? throw new \LogicException(\sprintf('Could not find "%s" in the constructor.', $text));
+            } while ($text !== $token->text);
+
+            $positions[] = $token->pos;
+        }
+
+        return $positions;
+    }
+
+    /**
+     * Returns the indentation of the constructor, and the one of its parameters and statements.
+     *
+     * @return array{string, string}
+     */
+    private function getConstructorIndentations(Node\Stmt\ClassMethod $constructorNode): array
+    {
+        $getIndentation = function (Node $node): string {
+            $code = substr($this->sourceCode, 0, $node->getStartFilePos());
+
+            return substr($code, \strlen(rtrim($code, " \t")));
+        };
+
+        $indentation = $getIndentation($constructorNode);
+        $classIndentation = $getIndentation($this->getClassNode());
+
+        // what is inside the constructor is one level deeper, a level being what the constructor has more than its class
+        $level = str_starts_with($indentation, $classIndentation) ? substr($indentation, \strlen($classIndentation)) : '';
+
+        return [$indentation, $indentation.('' === $level ? '    ' : $level)];
     }
 
     /**
@@ -1304,7 +1567,45 @@ final class ClassSourceManipulator
             }
         }
 
-        return false;
+        return null !== $this->getPromotedPropertyNode($propertyName);
+    }
+
+    private function getPromotedPropertyNode(string $propertyName): ?Node\Param
+    {
+        foreach ($this->getConstructorNode()?->params ?? [] as $param) {
+            if ($param->isPromoted() && $param->var instanceof Node\Expr\Variable && $propertyName === $param->var->name) {
+                return $param;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Tells if the constructor always sets the property to something else than null:
+     * the accessors of such a property do not deal with null either.
+     */
+    private function isNonNullablePromotedProperty(string $propertyName): bool
+    {
+        $param = $this->getPromotedPropertyNode($propertyName);
+
+        // a property without a type accepts anything
+        if (null === $param?->type || $param->type instanceof Node\NullableType) {
+            return false;
+        }
+
+        // null as a default value makes a type nullable
+        if ($param->default instanceof Node\Expr\ConstFetch && 'null' === $param->default->name->toLowerString()) {
+            return false;
+        }
+
+        foreach ($param->type instanceof Node\UnionType ? $param->type->types : [$param->type] as $type) {
+            if ($type instanceof Node\Identifier && \in_array($type->toLowerString(), ['null', 'mixed'], true)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function writeNote(string $note): void
