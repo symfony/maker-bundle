@@ -104,6 +104,8 @@ class MakeEntityTest extends MakerTestCase
                     '',
                     // nullable
                     '',
+                    // no default value
+                    '',
                     // no more properties
                     '',
                 ]);
@@ -272,6 +274,8 @@ class MakeEntityTest extends MakerTestCase
                     '', // length (default 255)
                     // nullable
                     'y',
+                    // no default value
+                    '',
                     // finish adding fields
                     '',
                 ]);
@@ -704,6 +708,8 @@ class MakeEntityTest extends MakerTestCase
                     '', // length (default 255)
                     // nullable
                     '',
+                    // no default value
+                    '',
                     // finish adding fields
                     '',
                 ], '--overwrite');
@@ -806,6 +812,8 @@ class MakeEntityTest extends MakerTestCase
                     '',
                     // nullable
                     'y',
+                    // no default value
+                    '',
                     // finish adding fields
                     '',
                 ]);
