@@ -67,6 +67,8 @@ final class UserClassBuilder
                     propertyName: $userClassConfig->getIdentityPropertyName(),
                     type: 'string',
                     length: 180,
+                    // getUserIdentifier() casts it to a string, so that it can be called on a user that has none yet
+                    nullableProperty: true,
                 )
             );
         } else {
@@ -212,7 +214,8 @@ final class UserClassBuilder
         if ($userClassConfig->isEntity()) {
             // add entity property
             $manipulator->addEntityField(
-                new ClassProperty(propertyName: 'password', type: 'string', comments: [$propertyDocs])
+                // getPassword() and __serialize() both deal with a user that has no password yet
+                new ClassProperty(propertyName: 'password', type: 'string', comments: [$propertyDocs], nullableProperty: true)
             );
         } else {
             // add normal property

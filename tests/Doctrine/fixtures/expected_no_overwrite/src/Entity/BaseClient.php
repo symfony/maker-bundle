@@ -45,7 +45,7 @@ class BaseClient
         return $this;
     }
 
-    public function getMagic(): ?int
+    public function getMagic(): int
     {
         return $this->magic;
     }

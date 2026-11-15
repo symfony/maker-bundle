@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\MakerBundle\Doctrine;
 
+use Doctrine\ORM\Mapping\AssociationMapping;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\EmbeddedClassMapping;
 use Doctrine\ORM\Mapping\MappingException;
@@ -118,9 +119,9 @@ final class EntityRegenerator
 
                 match ($mapping['type']) {
                     ClassMetadata::MANY_TO_ONE => $manipulator->addManyToOneRelation(RelationManyToOne::createFromObject($mapping)),
-                    ClassMetadata::ONE_TO_MANY => $manipulator->addOneToManyRelation(RelationOneToMany::createFromObject($mapping)),
+                    ClassMetadata::ONE_TO_MANY => $manipulator->addOneToManyRelation(RelationOneToMany::createFromObject($mapping, $this->isOwningSideNullable($mapping))),
                     ClassMetadata::MANY_TO_MANY => $manipulator->addManyToManyRelation(RelationManyToMany::createFromObject($mapping)),
-                    ClassMetadata::ONE_TO_ONE => $manipulator->addOneToOneRelation(RelationOneToOne::createFromObject($mapping)),
+                    ClassMetadata::ONE_TO_ONE => $manipulator->addOneToOneRelation(RelationOneToOne::createFromObject($mapping, $this->isOwningSideNullable($mapping))),
                     default => throw new \Exception('Unknown association type.'),
                 };
             }
@@ -181,6 +182,19 @@ final class EntityRegenerator
         );
 
         $this->generator->writeChanges();
+    }
+
+    /**
+     * Tells if the property that owns the relation of an inverse side accepts null: the
+     * accessors of that property follow its type, and the inverse side calls them.
+     */
+    private function isOwningSideNullable(AssociationMapping|array $mapping): bool
+    {
+        if ($mapping['isOwningSide'] || !property_exists($mapping['targetEntity'], $mapping['mappedBy'])) {
+            return true;
+        }
+
+        return (new \ReflectionProperty($mapping['targetEntity'], $mapping['mappedBy']))->getType()?->allowsNull() ?? true;
     }
 
     private function getMappedFieldsInEntity(ClassMetadata $classMetadata): array

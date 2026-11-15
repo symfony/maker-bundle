@@ -14,14 +14,14 @@ class User
     private ?int $id = null;
 
     #[ORM\Column(length: 255, options: ['default' => Status::PUBLISHED])]
-    private ?Status $status = null;
+    private Status $status;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getStatus(): ?Status
+    public function getStatus(): Status
     {
         return $this->status;
     }
