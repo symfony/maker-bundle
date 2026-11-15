@@ -689,7 +689,10 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
         };
 
         if (null === $defaultValue) {
-            throw new RuntimeCommandException(\sprintf('Invalid default value "%s" for the "%s" field: expected %s.', $value, $classProperty->propertyName, $expected));
+            // what is expected is a sentence, not a value to put in quotes
+            $message = \sprintf('Invalid default value "%s" for the "%s" field: expected %s.', $value, $classProperty->propertyName, $expected);
+
+            throw new RuntimeCommandException($message);
         }
 
         $classProperty->defaultValue = $defaultValue;
