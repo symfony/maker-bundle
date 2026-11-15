@@ -27,6 +27,7 @@ final class EntityRelation
     private bool $isSelfReferencing = false;
     private bool $orphanRemoval = false;
     private bool $mapInverseRelation = true;
+    private bool $promoteOwningSide = false;
 
     public function __construct(
         private string $type,
@@ -38,7 +39,7 @@ final class EntityRelation
         }
 
         if (self::ONE_TO_MANY === $type) {
-            throw new \Exception('Use ManyToOne instead of OneToMany');
+            throw new \Exception('Use ManyToOne instead of OneToMany.');
         }
 
         $this->isSelfReferencing = $owningClass === $inverseClass;
@@ -68,6 +69,14 @@ final class EntityRelation
         $this->orphanRemoval = $orphanRemoval;
     }
 
+    /**
+     * Asks for the property of the owning side to be a promoted constructor parameter.
+     */
+    public function setPromoteOwningSide(bool $promoteOwningSide): void
+    {
+        $this->promoteOwningSide = $promoteOwningSide;
+    }
+
     public static function getValidRelationTypes(): array
     {
         return [
@@ -89,6 +98,7 @@ final class EntityRelation
                 mapInverseRelation: $this->mapInverseRelation,
                 isOwning: true,
                 isNullable: $this->isNullable,
+                isOwningSidePromoted: $this->isOwningSidePromoted(),
             )),
             self::MANY_TO_MANY => (new RelationManyToMany(
                 propertyName: $this->owningProperty,
@@ -106,8 +116,9 @@ final class EntityRelation
                 mapInverseRelation: $this->mapInverseRelation,
                 isOwning: true,
                 isNullable: $this->isNullable,
+                isOwningSidePromoted: $this->isOwningSidePromoted(),
             )),
-            default => throw new \InvalidArgumentException('Invalid type'),
+            default => throw new \InvalidArgumentException('Invalid type.'),
         };
     }
 
@@ -120,6 +131,8 @@ final class EntityRelation
                 targetPropertyName: $this->owningProperty,
                 isSelfReferencing: $this->isSelfReferencing,
                 orphanRemoval: $this->orphanRemoval,
+                isNullable: $this->isNullable,
+                isOwningSidePromoted: $this->isOwningSidePromoted(),
             )),
             self::MANY_TO_MANY => (new RelationManyToMany(
                 propertyName: $this->inverseProperty,
@@ -133,8 +146,9 @@ final class EntityRelation
                 targetPropertyName: $this->owningProperty,
                 isSelfReferencing: $this->isSelfReferencing,
                 isNullable: $this->isNullable,
+                isOwningSidePromoted: $this->isOwningSidePromoted(),
             )),
-            default => throw new \InvalidArgumentException('Invalid type'),
+            default => throw new \InvalidArgumentException('Invalid type.'),
         };
     }
 
@@ -185,5 +199,14 @@ final class EntityRelation
         }
 
         $this->mapInverseRelation = $mapInverseRelation;
+    }
+
+    /**
+     * Only a relation to a single object can be promoted:
+     * the constructor creates the collection of the other ones.
+     */
+    private function isOwningSidePromoted(): bool
+    {
+        return $this->promoteOwningSide && self::MANY_TO_MANY !== $this->type;
     }
 }

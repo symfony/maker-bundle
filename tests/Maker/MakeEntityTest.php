@@ -411,8 +411,8 @@ class MakeEntityTest extends MakerTestCase
                 self::assertStringContainsString('class UserAvatarPhoto', file_get_contents($runner->getPath('src/Entity/UserAvatarPhoto.php')));
 
                 $bar = file_get_contents($runner->getPath('src/Entity/Bar.php'));
-                self::assertStringContainsString('private ?User $author = null;', $bar);
-                self::assertStringContainsString('private ?UserAvatarPhoto $photo = null;', $bar);
+                self::assertStringContainsString('private User $author,', $bar);
+                self::assertStringContainsString('private UserAvatarPhoto $photo,', $bar);
             }),
         ];
 
@@ -700,10 +700,9 @@ class MakeEntityTest extends MakerTestCase
                     // field name
                     'firstName',
                     'string',
-                    '',
                     '', // length (default 255)
                     // nullable
-                    '',
+                    'y',
                     // finish adding fields
                     '',
                 ], '--overwrite');
@@ -856,7 +855,7 @@ class MakeEntityTest extends MakerTestCase
             $entity = file_get_contents($runner->getPath('src/Entity/User.php'));
 
             // several enum values are stored in a "json" column, which Doctrine infers from the array
-            self::assertStringContainsString("#[ORM\\Column(nullable: true, enumType: Role::class)]\n    private ?array \$role = null;", $entity);
+            self::assertStringContainsString("#[ORM\\Column(nullable: true, enumType: Role::class)]\n        private ?array \$role = null,", $entity);
 
             self::runEntityTest($runner);
         }),
@@ -872,15 +871,16 @@ class MakeEntityTest extends MakerTestCase
                 $entity = file_get_contents($runner->getPath('src/Entity/User.php'));
 
                 self::assertStringContainsString('#[ORM\Column(length: 100)]', $entity);
-                self::assertStringContainsString('private ?string $name = null;', $entity);
+                self::assertStringContainsString('private string $name,', $entity);
                 self::assertStringContainsString('#[ORM\\Column(type: Types::TEXT, nullable: true)]', $entity);
                 self::assertStringContainsString('#[ORM\\Column(type: Types::DECIMAL, precision: 10, scale: 2)]', $entity);
                 // the type of "createdAt" is guessed from its name, exactly as in interactive mode
-                self::assertStringContainsString('private ?\\DateTimeImmutable $createdAt = null;', $entity);
+                self::assertStringContainsString('private ?\\DateTimeImmutable $createdAt = null,', $entity);
                 // a field that is not marked nullable leaves the attribute alone
                 self::assertStringNotContainsString('nullable: false', $entity);
 
-                self::runEntityTest($runner, ['name' => 'John', 'balance' => '10.50']);
+                // the constructor asks for the fields that are not nullable
+                self::runEntityTest($runner, arguments: ['John', '10.50']);
             }),
         ];
 
@@ -899,10 +899,10 @@ class MakeEntityTest extends MakerTestCase
                 $entity = file_get_contents($runner->getPath('src/Entity/User.php'));
 
                 // Doctrine infers the enum from the property type, so there is no "enumType"
-                self::assertStringContainsString("#[ORM\\Column(nullable: true)]\n    private ?Role \$role = null;", $entity);
+                self::assertStringContainsString("#[ORM\\Column(nullable: true)]\n        private ?Role \$role = null,", $entity);
                 // but it cannot infer it from an array, so the "multiple" field keeps it; the
                 // array is enough to infer the "json" type, so there is no "type" either
-                self::assertStringContainsString("#[ORM\\Column(nullable: true, enumType: Role::class)]\n    private ?array \$otherRoles = null;", $entity);
+                self::assertStringContainsString("#[ORM\\Column(nullable: true, enumType: Role::class)]\n        private ?array \$otherRoles = null,", $entity);
                 // an enum is not a string field, so it must not pick up a length
                 self::assertStringNotContainsString('length: 255', $entity);
 
@@ -931,10 +931,10 @@ class MakeEntityTest extends MakerTestCase
                 // without a "?" a relation is NOT NULL, which is where this differs from the
                 // interactive mode - there, nullable is the default answer
                 self::assertStringContainsString('#[ORM\\JoinColumn(nullable: false)]', $blogPost);
-                self::assertStringContainsString('private ?User $author = null;', $blogPost);
+                self::assertStringContainsString('private User $author,', $blogPost);
                 self::assertStringContainsString('#[ORM\\ManyToMany(targetEntity: User::class, inversedBy: \'editedPosts\')]', $blogPost);
                 self::assertStringContainsString('#[ORM\\OneToMany(targetEntity: User::class, mappedBy: \'commentedPost\')]', $blogPost);
-                self::assertStringContainsString('private ?User $cover = null;', $blogPost);
+                self::assertStringContainsString('private ?User $cover = null,', $blogPost);
                 // a self reference resolves even though the class is generated afterwards
                 self::assertStringContainsString('#[ORM\\ManyToOne(targetEntity: self::class, inversedBy: \'children\')]', $blogPost);
                 self::assertStringContainsString('#[ORM\\OneToMany(targetEntity: self::class, mappedBy: \'parent\')]', $blogPost);
@@ -946,6 +946,115 @@ class MakeEntityTest extends MakerTestCase
                 self::assertStringContainsString('private ?BlogPost $commentedPost = null;', $user);
                 // a OneToOne does not map its inverse side unless asked to
                 self::assertStringNotContainsString('$cover', $user);
+
+                // and Doctrine accepts every mapping that came out of it
+                $runner->updateSchema();
+            }),
+        ];
+
+        yield 'it_promotes_properties_to_the_constructor' => [self::createMakeEntityTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::copyEntity($runner, 'User-basic.php');
+
+                $runner->runMaker(
+                    [],
+                    '--no-interaction UserAvatarPhoto'
+                    .' --field=caption:string:100 --field=description:text? --field=tags:json --field=takenAt'
+                    .' --relation=user:ManyToOne:User,target-field=photos,orphan-removal'
+                    .' --relation=reviewer:ManyToOne:User?,target-field=reviewedPhotos'
+                );
+
+                $photo = file_get_contents($runner->getPath('src/Entity/UserAvatarPhoto.php'));
+                $user = file_get_contents($runner->getPath('src/Entity/User.php'));
+
+                // the constructor has to be given what is not nullable, before what has a default value
+                self::assertStringContainsString(<<<'EOF'
+                        public function __construct(
+                            #[ORM\Column(length: 100)]
+                            private string $caption,
+
+                            #[ORM\Column]
+                            private \DateTimeImmutable $takenAt,
+
+                            #[ORM\ManyToOne(inversedBy: 'photos')]
+                            #[ORM\JoinColumn(nullable: false)]
+                            private User $user,
+
+                            #[ORM\Column(type: Types::TEXT, nullable: true)]
+                            private ?string $description = null,
+
+                            #[ORM\Column]
+                            private array $tags = [],
+
+                            #[ORM\ManyToOne(inversedBy: 'reviewedPhotos')]
+                            private ?User $reviewer = null,
+                        ) {
+                        }
+                    EOF, $photo);
+                self::assertStringContainsString('public function getCaption(): string', $photo);
+                self::assertStringContainsString('public function getDescription(): ?string', $photo);
+                self::assertStringContainsString('public function getUser(): User', $photo);
+                self::assertStringContainsString('public function setUser(User $user): static', $photo);
+
+                // the property that owns the relation cannot be set to null from the other side
+                self::assertStringContainsString('$photo->setUser($this);', $user);
+                self::assertStringNotContainsString('setUser(null)', $user);
+                // unless it is nullable
+                self::assertStringContainsString('$reviewedPhoto->setReviewer(null);', $user);
+
+                self::runCustomTest($runner, 'it_promotes_properties_to_the_constructor.php');
+            }),
+        ];
+
+        yield 'it_only_promotes_properties_of_the_entity_it_is_run_for' => [self::createMakeEntityTest()
+            ->run(static function (MakerTestRunner $runner) {
+                self::copyEntity($runner, 'UserAvatarPhoto-basic.php');
+
+                $runner->runMaker([
+                    // entity class name
+                    'User',
+                    // field name
+                    'photos',
+                    // add a relationship field
+                    'relation',
+                    // the target entity
+                    'UserAvatarPhoto',
+                    // relation type
+                    'OneToMany',
+                    // field name on opposite side - use default 'user'
+                    '',
+                    // nullable
+                    'n',
+                    // orphanRemoval
+                    'y',
+                    // field name
+                    'firstName',
+                    // field type
+                    'string',
+                    // default length
+                    '',
+                    // nullable
+                    'n',
+                    // finish adding fields
+                    '',
+                ]);
+
+                $user = file_get_contents($runner->getPath('src/Entity/User.php'));
+                $photo = file_get_contents($runner->getPath('src/Entity/UserAvatarPhoto.php'));
+
+                self::assertStringContainsString(<<<'EOF'
+                        public function __construct(
+                            #[ORM\Column(length: 255)]
+                            private string $firstName,
+                        ) {
+                            $this->photos = new ArrayCollection();
+                        }
+                    EOF, $user);
+
+                // the constructor of the other entity is left alone, even though it owns the relation
+                self::assertStringContainsString('private ?User $user = null;', $photo);
+                self::assertStringNotContainsString('__construct', $photo);
+                self::assertStringContainsString('$photo->setUser(null);', $user);
 
                 // and Doctrine accepts every mapping that came out of it
                 $runner->updateSchema();
@@ -1031,14 +1140,18 @@ class MakeEntityTest extends MakerTestCase
         ];
     }
 
-    /** @param array<string, mixed> $data */
-    private static function runEntityTest(MakerTestRunner $runner, array $data = []): void
+    /**
+     * @param array<string, mixed> $data
+     * @param list<string>         $arguments
+     */
+    private static function runEntityTest(MakerTestRunner $runner, array $data = [], array $arguments = []): void
     {
         $runner->renderTemplateFile(
             'make-entity/GeneratedEntityTest.php.twig',
             'tests/GeneratedEntityTest.php',
             [
                 'data' => $data,
+                'arguments' => $arguments,
             ]
         );
 

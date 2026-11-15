@@ -260,10 +260,15 @@ final class MakeEntity extends AbstractMaker implements InputAwareMakerInterface
             $fileManagerOperations[$entityPath] = $manipulator;
 
             if ($newField instanceof ClassProperty) {
+                // the constructor asks for what is not nullable
+                $newField->promoted = true;
                 $manipulator->addEntityField($newField);
 
                 $currentFields[] = $newField->propertyName;
             } elseif ($newField instanceof EntityRelation) {
+                // only the constructor of the entity this command is run for is changed
+                $newField->setPromoteOwningSide($newField->getOwningClass() === $entityClassDetails->getFullName());
+
                 // both overridden below for OneToMany
                 $newFieldName = $newField->getOwningProperty();
                 if ($newField->isSelfReferencing() || $newField->getInverseClass() === $entityClassDetails->getFullName()) {

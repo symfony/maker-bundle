@@ -4,6 +4,11 @@ The <info>%command.name%</info> command creates or updates an entity and reposit
 
 If the argument is missing, the command will ask for the entity class name interactively.
 
+A field or a relation is added as a promoted property: the constructor of the entity asks
+for its value, which is optional when it is nullable or an array. A collection is a regular
+property that the constructor creates, and so is the property that a relation adds to
+another class: only the constructor of the entity the command is run for changes.
+
 You can also mark this class as an API Platform resource. A hypermedia CRUD API will
 automatically be available for this entity class:
 

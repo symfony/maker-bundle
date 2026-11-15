@@ -25,8 +25,9 @@ class GeneratedEntityTest extends KernelTestCase
         $user->setFirstName('Ryan');
         $em->persist($user);
 
-        $profile = new UserProfile();
-        // set inverse side - will set owning
+        // the relation is not nullable: the constructor sets the owning side
+        $profile = new UserProfile($user);
+        // set inverse side
         $user->setUserProfile($profile);
         // purposely don't persist: cascade should be set
         // $em->persist($profile);
