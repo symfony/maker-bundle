@@ -32,13 +32,11 @@ final class Str
     }
 
     /**
-     * Ensures that the given string ends with the given suffix. If the string
-     * already contains the suffix, it's not added twice. It's case-insensitive
-     * (e.g. value: 'Foocommand' suffix: 'Command' -> result: 'FooCommand').
+     * Ensures that the given string ends with the given suffix.
      */
     public static function addSuffix(string $value, string $suffix): string
     {
-        return self::removeSuffix($value, $suffix).$suffix;
+        return $value.$suffix;
     }
 
     /**
