@@ -1,0 +1,13 @@
+framework:
+    messenger:
+        routing:
+            App\Messages\OldMessage: [[ transport1, transport2 ], [ transport3 ]]
+
+===
+$data['framework']['messenger']['routing']['App\Messages\NewMessage'] = 'async';
+===
+framework:
+    messenger:
+        routing:
+            App\Messages\OldMessage: [[ transport1, transport2 ], [ transport3 ]]
+            App\Messages\NewMessage: async
