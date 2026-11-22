@@ -51,7 +51,7 @@ class YamlSourceManipulator
         $this->currentData = Yaml::parse($contents);
 
         if (!\is_array($this->currentData)) {
-            throw new \InvalidArgumentException('Only YAML with a top-level array structure is supported');
+            throw new \InvalidArgumentException('Only YAML with a top-level array structure is supported.');
         }
     }
 
@@ -93,7 +93,7 @@ class YamlSourceManipulator
         $newData = $this->normalizeSequences($newData);
 
         if ($newData !== $this->currentData) {
-            throw new YamlManipulationFailedException(\sprintf('Failed updating YAML contents: the process was successful, but something was not updated. Expected new data: %s. Actual new data: %s', var_export($newData, true), var_export($this->currentData, true)));
+            throw new YamlManipulationFailedException(\sprintf('Failed updating YAML contents: the process was successful, but something was not updated. Expected new data: "%s". Actual new data: "%s"', var_export($newData, true), var_export($this->currentData, true)));
         }
     }
 
@@ -553,7 +553,7 @@ class YamlSourceManipulator
     private function advanceBeyondValue($value): void
     {
         if (\is_array($value)) {
-            throw new \LogicException('Do not pass an array to this method');
+            throw new \LogicException('Do not pass an array to this method.');
         }
 
         $this->log(\sprintf('Advancing position beyond value "%s"', $value));
@@ -691,7 +691,7 @@ class YamlSourceManipulator
             $parsedContentsData = $this->normalizeSequences($parsedContentsData);
             $newData = $this->normalizeSequences($newData);
             if ($parsedContentsData !== $newData) {
-                throw new YamlManipulationFailedException(\sprintf('Content was updated, but updated content does not match expected data. Original source: "%s", updated source: "%s", updated data: %s', $this->contents, $newContents, var_export($newData, true)));
+                throw new YamlManipulationFailedException(\sprintf('Content was updated, but updated content does not match expected data. Original source: "%s", updated source: "%s", updated data: "%s"', $this->contents, $newContents, var_export($newData, true)));
             }
         } catch (ParseException) {
             throw new YamlManipulationFailedException(\sprintf('Could not update YAML: a parse error occurred in the new content: "%s"', $newContents));
