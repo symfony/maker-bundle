@@ -93,6 +93,32 @@ class EventRegistryTest extends TestCase
         $registry = new EventRegistry($dispatcher);
         $this->assertSame(ControllerEvent::class, $registry->getEventClassName(ControllerEvent::class));
     }
+
+    public function testIsKnownEventOnlyReturnsTrueForAliasedEvents()
+    {
+        $dispatcher = $this->createMock(EventDispatcherInterface::class);
+        $dispatcher->expects($this->never())
+            ->method('getListeners');
+
+        $registry = new EventRegistry($dispatcher);
+        $this->assertTrue($registry->isKnownEvent('console.command'));
+        $this->assertTrue($registry->isKnownEvent(KernelEvents::EXCEPTION));
+        $this->assertFalse($registry->isKnownEvent('order.placed'));
+        $this->assertFalse($registry->isKnownEvent(ControllerEvent::class));
+    }
+
+    public function testGetEventConstantOnlyReturnsConstantsForEventsWithoutAliasResolution()
+    {
+        $dispatcher = $this->createMock(EventDispatcherInterface::class);
+
+        $registry = new EventRegistry($dispatcher);
+        $this->assertNull($registry->getEventConstant('console.command'));
+        $this->assertNull($registry->getEventConstant(KernelEvents::EXCEPTION));
+        $this->assertNull($registry->getEventConstant('order.placed'));
+
+        // Form events return [FormEvents::class, 'POST_SUBMIT'], they are covered by
+        // MakeListenerTest because symfony/form is not installed here.
+    }
 }
 
 class DummyEvent
